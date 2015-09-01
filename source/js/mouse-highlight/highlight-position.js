@@ -2,8 +2,8 @@
  * This is module for common positioning utilities that might need to be used across all of the different modules.
  * See more info on https://equinox.atlassian.net/wiki/display/EN/positioning+utility
  */
-define(['$', 'util/common', 'zoom/zoom', 'util/platform', 'mouse-highlight/traitcache'],
-  function ($, common, zoomMod, platform, traitcache) {
+define(['$', 'util/common', 'util/element-classifier', 'zoom/zoom', 'util/platform', 'mouse-highlight/traitcache'],
+  function ($, common, elemClassifier, zoomMod, platform, traitcache) {
 
   var MIN_RECT_SIDE = 4;
 
@@ -377,7 +377,7 @@ define(['$', 'util/common', 'zoom/zoom', 'util/platform', 'mouse-highlight/trait
       }
 
       // --- Media elements ---
-      if (common.isVisualMedia(this)) {
+      if (elemClassifier.isVisualMedia(this)) {
         // Elements with rendered content such as images and videos
         addRect(allRects, getRectMinusPadding(thisRect, style));
         return;
@@ -385,7 +385,7 @@ define(['$', 'util/common', 'zoom/zoom', 'util/platform', 'mouse-highlight/trait
 
       // --- Visible border or form controls ---
       if (common.isVisualRegion(this, style, traitcache.getStyle(this.parentNode)) ||
-        common.isFormControl(this)) {
+        elemClassifier.isFormControl(this)) {
         addRect(allRects, thisRect); // Make it all visible, including padding and border
         // Keep iterating: there may be some content outside
       }

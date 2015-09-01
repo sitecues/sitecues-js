@@ -12,8 +12,8 @@
  * Note: "Growth" is a synonym for "Expansion" -- very intuitive for Aaron but no one else!
  */
 
-define(['$', 'util/common', 'mouse-highlight/traitcache'],
-  function($, common, traitcache) {
+define(['$', 'util/common', 'util/element-classifier', 'mouse-highlight/traitcache'],
+  function($, common, elemClassifier, traitcache) {
 
     'use strict';
 
@@ -559,7 +559,7 @@ define(['$', 'util/common', 'mouse-highlight/traitcache'],
         (childJudgements.listAndMenuFactor < 0 ? childTraits.percentOfBodyWidth : childJudgements.horizontalListDescendantWidth) :
         0,
       listAndMenuFactor: !judgements.isAncestorOfCell && getListAndMenuFactor(node, traits, judgements),
-      isFormControl: common.isFormControl(node),
+      isFormControl: elemClassifier.isFormControl(node),
       // Being grouped with a single image indicates something is likely good to pick
       isGroupedWithImage: traits.visualHeightAt1x > MIN_IMAGE_GROUP_HEIGHT &&
         (index < MAX_ANCESTOR_INDEX_IMAGE_GROUP || childJudgements.isGroupedWithImage) &&
@@ -654,11 +654,11 @@ define(['$', 'util/common', 'mouse-highlight/traitcache'],
 
   // Return true if visual media or the only contents are visual media
   function isVisualMediaSubtree(container) {
-    if (common.isVisualMedia(container)) {
+    if (elemClassifier.isVisualMedia(container)) {
       return true;
     }
     var leaves = getLeafElements(container);
-    return leaves.length === 1 && common.isVisualMedia(leaves[0]);
+    return leaves.length === 1 && elemClassifier.isVisualMedia(leaves[0]);
   }
 
   function getLeafElements(node) {
@@ -763,7 +763,7 @@ define(['$', 'util/common', 'mouse-highlight/traitcache'],
   function isSectionStartContainer(node) {
     var child = node.firstElementChild;
 
-    if (child && common.isVisualMedia(child)) {
+    if (child && elemClassifier.isVisualMedia(child)) {
       child = child.nextElementSibling;  // Images are neutral, check the next thing
     }
 

@@ -72,7 +72,6 @@ define(['$', 'conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mouse-hi
   willRespondToScroll = true, // After scroll tracking is turned on, we won't respond to it until at least one normal mousemove
   isTrackingWheelEvents,
   isOnlyShift, // Is shift down by itself?
-  isBadgeReady,
   isAppropriateFocus,
   isWindowFocused = document.hasFocus(),
   isSticky,
@@ -1286,7 +1285,7 @@ define(['$', 'conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mouse-hi
   // return true if highlight visibility should be restored
   function refreshEventListeners(doForceOff) {
     // The mouse highlight is always enabled when TTS is on or zoom > MIN_ZOOM
-    var doTrackMouse = isSitecuesOn && isBadgeReady && !doForceOff;
+    var doTrackMouse = isSitecuesOn && !doForceOff;
 
     if (doTrackMouse === isTrackingMouse) {
       return isTrackingMouse;
@@ -1583,9 +1582,6 @@ define(['$', 'conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mouse-hi
 
     // Turn mouse-tracking on or off
     sitecues.on('key/only-shift', setOnlyShift);
-
-    // enable mouse highlight back once highlight box deflates or zoom finishes
-    sitecues.on('bp/did-complete', onBadgeReady);
 
     sitecues.on('sitecues/did-toggle', function(isOn) {
       isSitecuesOn = isOn;

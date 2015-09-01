@@ -4,8 +4,8 @@
  *  bounding rectangle
  *  margin, padding, overall spacing
  */
-define(['$', 'mouse-highlight/traitcache', 'mouse-highlight/highlight-position', 'zoom/zoom', 'util/common'],
-  function($, traitcache, mhpos, zoomMod, common) {
+define(['$', 'mouse-highlight/traitcache', 'mouse-highlight/highlight-position', 'zoom/zoom', 'util/element-classifier'],
+  function($, traitcache, mhpos, zoomMod, elemClassifier) {
 
     'use strict';
 
@@ -103,10 +103,10 @@ define(['$', 'mouse-highlight/traitcache', 'mouse-highlight/highlight-position',
     if (style.display === 'inline') {
       // Treat forms as inline-block across browsers (and thus are pickable).
       // If we don't do this, some browsers call them "inline" and they would not get picked
-      if (common.isFormControl(node)) {
+      if (elemClassifier.isFormControl(node)) {
         doTreatAsInlineBlock = true;
       }
-      else if (traits.childCount === 1 && common.isVisualMedia(node.firstElementChild)) {
+      else if (traits.childCount === 1 && elemClassifier.isVisualMedia(node.firstElementChild)) {
         doTreatAsInlineBlock = true;
       }
       else {
@@ -145,7 +145,7 @@ define(['$', 'mouse-highlight/traitcache', 'mouse-highlight/highlight-position',
 
   function isVisualMedia(traits, node) {
     var style = traits.style;
-    return common.isVisualMedia(node) ||
+    return elemClassifier.isVisualMedia(node) ||
       // Or if one of those <div></div> empty elements just there to show a background image
       (traits.childCount === 0 && style.backgroundImage !== 'none' &&
         (style.backgroundRepeat === 'no-repeat' || style.backgroundSize === 'cover'
