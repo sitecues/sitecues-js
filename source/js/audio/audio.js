@@ -121,6 +121,7 @@ define(['conf/user/manager', 'conf/site', '$', 'audio/speech-builder', 'util/pla
       if (!doSuppressAudioCue) {
         require(['audio/audio-cues'], function(audioCues) {
           audioCues.playSpeechCue(ttsOn);
+          sitecues.emit('speech/did-change', ttsOn);
         });
       }
     }
@@ -138,6 +139,7 @@ define(['conf/user/manager', 'conf/site', '$', 'audio/speech-builder', 'util/pla
 
     var url = getAudioKeyUrl(key);
     getAudioPlayer(function(player) {
+      isAudioPlaying = true;
       player.playAudioSrc(url);
       // Stop speech on any key down.
       addStopAudioHandlers();

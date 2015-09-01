@@ -31,8 +31,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'locale/locale'],
 
       // Use a fake zoom amount the first time sitecues loads for badge view
       // It just looks better -- making the slider look more interactive.
-      useZoom = state.get('isRealSettings') ? currZoom : BP_CONST.FAKE_ZOOM_AMOUNT,
-      percent = (useZoom - MIN_ZOOM) / ZOOM_RANGE,
+      percent = (currZoom - MIN_ZOOM) / ZOOM_RANGE,
       sliderWidth = isPanel ? BP_CONST.LARGE_SLIDER_WIDTH : BP_CONST.SMALL_SLIDER_WIDTH,
       offset = (percent * sliderWidth) + (isPanel ? panelSliderWidth : badgeSliderWidth);
 
@@ -44,10 +43,6 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'locale/locale'],
   function render(zoomLevel) {
     updateThumbPosition(zoomLevel);
     updateZoomValue(zoomLevel);
-  }
-
-  function enableRealSettings() {
-    state.set('isRealSettings', true);
   }
 
   /*
@@ -90,7 +85,6 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'locale/locale'],
   var publics = {
     updateThumbPosition: updateThumbPosition,
     render: render,
-    enableRealSettings: enableRealSettings,
     updateZoomValue: updateZoomValue
   };
 

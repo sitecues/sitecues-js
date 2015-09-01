@@ -382,27 +382,35 @@ define(['bp/model/state', 'bp/constants', 'bp/helper', 'util/platform'],
   // TODO just move this right into the SVG? Why not just have it in the markup
   function firstTimeRender() {
 
-    function setTranslateXAttribute (id) {
-      byId(id).setAttribute(TRANSFORM_STRING, TRANSLATE_STRING + badgeTransforms[id].translateX  + CLOSING_PAREN);
+    function getTranslateX(id) {
+      return badgeTransforms[id].translateX;
     }
 
-    var sliderBarId         = BP_CONST.ZOOM_SLIDER_BAR_ID,
+    function setTransform (id, value) {
+      byId(id).setAttribute(TRANSFORM_STRING, TRANSLATE_STRING + (value || getTranslateX(id)) + CLOSING_PAREN);
+    }
+
+    var SLIDER_BAR_ID       = BP_CONST.ZOOM_SLIDER_BAR_ID,
+        SLIDER_THUMB_ID     = BP_CONST.ZOOM_SLIDER_THUMB_ID,
         badgeTransforms     = BP_CONST.TRANSFORMS.BADGE,
         TRANSFORM_STRING    = 'transform',
         TRANSLATE_STRING    = 'translate(',
         SCALE_STRING        = 'scale(',
         CLOSING_PAREN       = ') ',
-        sliderBarTransforms = badgeTransforms[sliderBarId],
-        sliderBarTransform  = TRANSLATE_STRING + sliderBarTransforms.translateX + CLOSING_PAREN +
-                              SCALE_STRING     + sliderBarTransforms.scaleX + ',' + sliderBarTransforms.scaleY + CLOSING_PAREN;
+        sliderBarTransforms = badgeTransforms[SLIDER_BAR_ID],
+        sliderBarTransform  = sliderBarTransforms.translateX + CLOSING_PAREN +
+                              SCALE_STRING     + sliderBarTransforms.scaleX + ',' + sliderBarTransforms.scaleY,
+        isRealSettings      = state.get('isRealSettings'),
+        sliderThumbTranslateX = isRealSettings ? badgeTransforms[SLIDER_THUMB_ID].translateX : BP_CONST.TRANSFORMS.FAKE_BADGE_TRANSLATEX;
 
-    setTranslateXAttribute(BP_CONST.SMALL_A_ID);
-    setTranslateXAttribute(BP_CONST.LARGE_A_ID);
-    setTranslateXAttribute(BP_CONST.SPEECH_ID);
-    setTranslateXAttribute(BP_CONST.VERT_DIVIDER_ID);
 
-    byId(sliderBarId).setAttribute(TRANSFORM_STRING, sliderBarTransform);
+    setTransform(BP_CONST.SMALL_A_ID);
+    setTransform(BP_CONST.LARGE_A_ID);
+    setTransform(BP_CONST.SPEECH_ID);
+    setTransform(BP_CONST.VERT_DIVIDER_ID);
 
+    setTransform(SLIDER_BAR_ID, sliderBarTransform);
+    setTransform(SLIDER_THUMB_ID, sliderThumbTranslateX);
   }
 
   function getCurrentTransformPosition () {

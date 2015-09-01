@@ -18,8 +18,8 @@
 // bp/did-shrink   -- BP has finished shrinking
 
 define(['bp/controller/bp-controller', 'bp/model/state','bp/view/modes/badge', 'bp/view/modes/panel', 'bp/helper', 'bp/view/svg', 'bp/constants',
-  'bp/placement', 'bp/size-animation', 'util/platform', 'conf/site'],
-  function (bpController, state, badge, panel, helper, bpSVG, BP_CONST, placement, sizeAnimation, platform, site) {
+  'bp/placement', 'bp/size-animation', 'util/platform', 'conf/site', 'conf/user/manager'],
+  function (bpController, state, badge, panel, helper, bpSVG, BP_CONST, placement, sizeAnimation, platform, site, conf) {
 
   /*
    *** Public methods ***
@@ -112,9 +112,7 @@ define(['bp/controller/bp-controller', 'bp/model/state','bp/view/modes/badge', '
 
     // Use fake settings if undefined -- user never used sitecues before.
     // This will be turned off once user interacts with sitecues.
-    // TODO QQQQ
-//    state.set('isRealSettings', site.get('alwaysRealSettings') ||
-//      zoomMod.hasZoomEverBeenSet()); // TODO what about audio?
+    state.set('isRealSettings', site.get('alwaysRealSettings') || hasSitecuesEverBeenOn());
 
     // Set badge classes. Render the badge. Render slider.
     updateView(true);
@@ -124,6 +122,11 @@ define(['bp/controller/bp-controller', 'bp/model/state','bp/view/modes/badge', '
     isInitComplete = true;
 
     sitecues.on('bp/did-change', updateView);
+  }
+
+  function hasSitecuesEverBeenOn() {
+    return typeof conf.get('zoom') !== 'undefined' ||
+      typeof conf.get('ttsOn') !== 'undefined';
   }
 
   // This function augments the customers placeholder if found, otherwise creates the floating badge.

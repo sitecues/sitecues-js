@@ -32,7 +32,6 @@ define(['bp/constants', 'bp/model/state', 'bp/helper'],
       return;
     }
 
-
     if (!processKeyDownBehavior(evt)) {
       evt.preventDefault();
       return false;
@@ -47,14 +46,12 @@ define(['bp/constants', 'bp/model/state', 'bp/helper'],
     // Escape = close
     if (keyCode === BP_CONST.KEY_CODES.ESCAPE) {
       require(['bp/controller/shrink-controller'], function(shrinkController) {
-        debugger;
         shrinkController.shrinkPanel(true);
       });
       return;
     }
 
     require(['bp/controller/focus-controller'], function(focusController) {
-      debugger;
       // Tab navigation
       if (keyCode === BP_CONST.KEY_CODES.TAB) {
         state.set('isKeyboardMode', true);
@@ -160,14 +157,18 @@ define(['bp/constants', 'bp/model/state', 'bp/helper'],
 
     setPanelExpandedState();
 
-    sitecues.emit('bp/did-change');
+    didChange();
+  }
+
+  function turnOnRealSettings() {
+    state.set('isRealSettings', true);    // Always use real settings once expanded
   }
 
   function setPanelExpandedState() {
     state.set('wasMouseInPanel', false);
     state.set('transitionTo', BP_CONST.PANEL_MODE);
-    state.set('isRealSettings', true);    // Always use real settings once expanded
     state.set('featurePanelName', null);  // We're not in a feature panel
+    turnOnRealSettings();
   }
 
   function changeModeToPanel() {
@@ -235,9 +236,25 @@ define(['bp/constants', 'bp/model/state', 'bp/helper'],
     }
   }
 
+  function didChange() {
+    sitecues.emit('bp/did-change');
+  }
+
   function didZoom() {
     require(['bp/controller/slider-controller'], function (sliderController) {
+      turnOnRealSettings();
       sliderController.init();
+      didChange();
+    });
+  }
+
+  function didChangeSpeech(isOn) {
+    require(['bp/view/elements/tts-button'], function(ttsButton) {
+      // Update the TTS button view on any speech state change
+      turnOnRealSettings();
+      ttsButton.init();
+      ttsButton.updateTTSStateView(isOn);
+      didChange();
     });
   }
 
@@ -283,6 +300,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper'],
       sitecues.on('bp/will-shrink', willShrink);
       sitecues.on('bp/did-shrink', didShrink);
       sitecues.on('zoom', didZoom);
+      sitecues.on('speech/did-change', didChangeSpeech);
     }
   }
 

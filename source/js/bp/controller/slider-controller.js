@@ -115,10 +115,6 @@ define(['bp/constants', 'bp/helper', 'util/platform', 'bp/model/state', 'bp/view
     // A zoom operation has been completed
     // (We don't move the thumb here ... we do via setThumbChangeListener, because we get mid-animation changes that way)
     sitecues.on('zoom', sliderView.updateZoomValue);
-
-    // As soon as any real zooming occurs, switch to displaying the correct thumb position
-    // (The fake settings are only used for someone who has never used sitecues before)
-    sitecues.on('zoom/begin', sliderView.enableRealSettings);
   }
 
   return {

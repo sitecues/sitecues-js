@@ -60,6 +60,8 @@ define(['bp/constants', 'bp/helper', 'bp/model/state', 'locale/locale', 'conf/us
     */
   function updateTTSStateView(isEnabled) {
 
+    isSpeechEnabled = isEnabled;
+
     var ttsButton = getTTSButtonElement();
 
     endWaveAnimation(); // Don't keep animating the wave hover effect after a click
@@ -170,17 +172,11 @@ define(['bp/constants', 'bp/helper', 'bp/model/state', 'locale/locale', 'conf/us
 
     updateTTSStateView(isSpeechEnabled);
 
-    conf.get('ttsOn', function(isOn) {
-      isSpeechEnabled = isOn;
-    });
-
-    // Update the TTS button view on any speech state change
-    sitecues.on('speech/did-change', updateTTSStateView);
-
     waveAnimationStepNum = 0;
   }
 
   return {
-    init: init
+    init: init,
+    updateTTSStateView: updateTTSStateView
   };
 });
