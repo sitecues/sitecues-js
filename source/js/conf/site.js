@@ -15,19 +15,14 @@
 define([], function() {
 
   var
-    fetchedSiteConfig = {},
+    fetchedSpeechConfig,
     providedSiteConfig = sitecues.getSiteConfig(),
-    everywhereConfig = sitecues.getEverywhereConfig(),
-    isSiteConfigFetchNeeded = false;
+    everywhereConfig = sitecues.getEverywhereConfig();
 
   // Simple get that denies direct access to the root data object. Root scalar properties can not be overwritten,
   // but the contents of root object properties can be modified.
   function get(key) {
-    if (!key) {
-      return fetchSpeechConfig;
-    }
-
-    return everywhereConfig[key] || fetchedSiteConfig[key] || providedSiteConfig[key];
+    return everywhereConfig[key] || providedSiteConfig[key];
   }
 
   // Names with underscores deprecated.
@@ -36,7 +31,7 @@ define([], function() {
   // 2. sitecues.config.siteId (camelCase is the new way)
   // 3. sitecues.config.site_id (underscore in config field names is deprecated)
   function getSiteId() {
-    return everywhereConfig.siteId || providedSiteConfig.site_id;
+    return everywhereConfig.siteId || providedSiteConfig.siteId ||providedSiteConfig.site_id;
   }
 
   // The everywhereConfig will be an empty object or will
@@ -45,21 +40,21 @@ define([], function() {
     return everywhereConfig.siteId;
   }
 
-  function fetchSpeechConfig() {
+  function fetchSpeechConfig(callbackFn) {
     if (SC_LOCAL || isEverywhereConfigValid()) {
       // Cannot save to server when we have no access to it
       // Putting this condition in allows us to paste sitecues into the console
       // and test it on sites that have a content security policy
+      callbackFn(everywhereConfig);
       return;
     }
 
-    if (isSiteConfigFetchNeeded) {
-      return; // Already being fetched or we already have the info
+    if (fetchedSpeechConfig) {
+      callbackFn(fetchedSpeechConfig);
     }
 
-    isSiteConfigFetchNeeded = true;
-
     require(['$'], function($) {
+      fetchedSpeechConfig = {};
       // Trigger the initial fetch.
       $.ajax({
         // The 'provided.siteId' parameter must exist, or else core would have aborted the loading of modules.
@@ -68,24 +63,24 @@ define([], function() {
         success: function (data) {
           // Copy the fetched key/value pairs into the site configuration.
           for (var i = 0; i < data.settings.length; i++) {
-            fetchedSiteConfig[data.settings[i].key] = data.settings[i].value;
+            fetchedSpeechConfig[data.settings[i].key] = data.settings[i].value;
           }
 
-          // Add the provided configuration
-          fetchedSiteConfig = $.extend(true, fetchedSiteConfig, providedSiteConfig);
+          callbackFn(fetchedSpeechConfig);
+        },
+        error: function() {
+          SC_DEV && console.log('Error loading sitecues speech configuration.')
+          var FALLBACK_SPEECH_CONFIG = { 'ttsAudioFormats': ['ogg'] };  // Supported by all TTS engines we use
+          callbackFn(FALLBACK_SPEECH_CONFIG);
         }
       });
     });
   }
 
-  function init() {
-    sitecues.on('sitecues/did-toggle', fetchSpeechConfig);
-  }
-
   var publics = {
     get: get,
     getSiteId: getSiteId,
-    init: init
+    fetchSpeechConfig: fetchSpeechConfig
   };
   if (SC_UNIT) {
     module.exports = publics;

@@ -20,10 +20,8 @@ define(['conf/user/manager', 'audio/audio'], function(conf, audio) {
     VERBAL_CUE_SPEECH_ON_DESCRIPTIVE = 'verbalCueSpeechOnFirst',
     VERBAL_CUE_SPEECH_OFF = 'verbalCueSpeechOff',
 
-    isInitialized;
-
-  // This is the initial zoom level, we're only going to use the verbal cue if someone increases it
-  var initialZoom = conf.get('zoom');
+    // This is the initial zoom level, we're only going to use the verbal cue if someone increases it
+    initialZoom = conf.get('zoom');
 
   /**
    * Returns true if the "descriptive speech on" cue should be played.
@@ -49,10 +47,7 @@ define(['conf/user/manager', 'audio/audio'], function(conf, audio) {
   /*
    * Play speech on cue if necessary
    */
-  function playSpeechCue(isEnabled, doSuppressAudioCue) {
-    if (doSuppressAudioCue) {
-      return;
-    }
+  function playSpeechCue(isEnabled) {
 
     if (!isEnabled) {
       // *** Speech off cue ***
@@ -74,7 +69,7 @@ define(['conf/user/manager', 'audio/audio'], function(conf, audio) {
     }
   }
 
-  function onZoomChanged(zoom) {
+  function playZoomCue(zoom) {
     // If highlighting is enabled, zoom is large enough, zoom is larger
     // than we started, and we haven't already cued, then play an audio
     // cue to explain highlighting
@@ -85,26 +80,8 @@ define(['conf/user/manager', 'audio/audio'], function(conf, audio) {
     }
   }
 
-  function init() {
-
-    if (isInitialized) {
-      return;
-    }
-
-    isInitialized = true;
-
-    /*
-     * Play speech on cue if necessary
-     */
-    sitecues.on('speech/did-change', playSpeechCue);
-
-    /*
-     * Play cue describing "zoom in more" one-touch-read feature if necessary
-     */
-    sitecues.on('zoom', onZoomChanged);
-  }
-
   return {
-    init: init
+    playSpeechCue: playSpeechCue,
+    playZoomCue: playZoomCue
   };
 });

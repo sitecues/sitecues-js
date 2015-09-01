@@ -15,18 +15,13 @@ define([], function () {
 	// get configuration value
 	function get(key, callback) {
 
-		// private variables
-		var list;
-
 		// handle sync getting of value
-		if (callback === undefined) {
+		if (!callback) {
 			return storedData[key];
 		}
 
-		// create new list if needed
-		if (undefined === (list = listeners[key])) {
-			list = listeners[key] = [];
-		}
+    // private variables
+    var list = listeners[key] || [];
 
 		// push callback to listeners list
 		list.push(callback);
@@ -80,8 +75,10 @@ define([], function () {
 	}
 
 	// get/update all stored values
-	function data() {
-		// return data object if no updates
+	function data(newData) {
+    if (newData) {
+      storedData = newData;
+    }
   	return storedData;
 	}
 

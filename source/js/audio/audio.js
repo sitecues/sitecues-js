@@ -18,7 +18,8 @@ define(['conf/user/manager', 'conf/site', '$', 'audio/speech-builder', 'util/pla
     audioPlayer,
     mediaTypeForTTS,  // For TTS only, not used for pre-recorded sounds such as verbal cues
     mediaTypeForPrerecordedAudio,
-    isInitialized;
+    isInitialized,
+    isRetrievingAudioPlayer;
 
   function playHlbContent($content) {
     if (!ttsOn) {
@@ -28,7 +29,7 @@ define(['conf/user/manager', 'conf/site', '$', 'audio/speech-builder', 'util/pla
   }
 
   function playHighlight(content, doAvoidInterruptions, doSuppressEarcon) {
-    if (doAvoidInterruptions && getAudioPlayer().isBusy()) {
+    if (doAvoidInterruptions && audioPlayer && audioPlayer.isBusy()) {
       return; // Already reading the highlight
     }
     if (!content) {
@@ -51,11 +52,13 @@ define(['conf/user/manager', 'conf/site', '$', 'audio/speech-builder', 'util/pla
 
   function speakText(text, lang) {
     stopAudio();  // Stop any currently playing audio and halt keydown listener until we're playing again
-    var TTSUrl = getTTSUrl(text, lang);
-    getAudioPlayer().playAudioSrc(TTSUrl);
-    isAudioPlaying = true;
-    sitecues.emit('audio/speech-play', TTSUrl);
-    addStopAudioHandlers();
+    getAudioPlayer(function(player) {
+      var TTSUrl = getTTSUrl(text, lang);
+      player.playAudioSrc(TTSUrl);
+      isAudioPlaying = true;
+      sitecues.emit('audio/speech-play', TTSUrl);
+      addStopAudioHandlers();
+    });
   }
 
   function addStopAudioHandlers() {
@@ -78,7 +81,7 @@ define(['conf/user/manager', 'conf/site', '$', 'audio/speech-builder', 'util/pla
    */
   function stopAudio() {
     if (isAudioPlaying) {
-      getAudioPlayer().stop();
+      audioPlayer.stop();
       removeBlurHandler();
       isAudioPlaying = false;
     }
@@ -103,7 +106,7 @@ define(['conf/user/manager', 'conf/site', '$', 'audio/speech-builder', 'util/pla
    * @returns {string} url
    */
   function getTTSUrl(text, lang) {
-    var restOfUrl = 'tts/site/' + site.getSiteId() + '/tts.' + getMediaTypeForTTS() + getLanguageParameter(lang) + 't=' + encodeURIComponent(text);
+    var restOfUrl = 'tts/site/' + site.getSiteId() + '/tts.' + mediaTypeForTTS + getLanguageParameter(lang) + 't=' + encodeURIComponent(text);
     return sitecues.getApiUrl(restOfUrl);
   }
 
@@ -115,7 +118,11 @@ define(['conf/user/manager', 'conf/site', '$', 'audio/speech-builder', 'util/pla
     if (ttsOn !== isOn) {
       ttsOn = isOn;
       conf.set('ttsOn', ttsOn);
-      sitecues.emit('speech/did-change', ttsOn, doSuppressAudioCue);
+      if (!doSuppressAudioCue) {
+        require(['audio/audio-cues'], function(audioCues) {
+          audioCues.playSpeechCue(ttsOn);
+        });
+      }
     }
   }
 
@@ -130,10 +137,11 @@ define(['conf/user/manager', 'conf/site', '$', 'audio/speech-builder', 'util/pla
     stopAudio();  // Stop any currently playing audio
 
     var url = getAudioKeyUrl(key);
-    getAudioPlayer().playAudioSrc(url);
-
-    // Stop speech on any key down.
-    addStopAudioHandlers();
+    getAudioPlayer(function(player) {
+      player.playAudioSrc(url);
+      // Stop speech on any key down.
+      addStopAudioHandlers();
+    });
   }
 
   function playEarcon(earconName) {
@@ -141,30 +149,43 @@ define(['conf/user/manager', 'conf/site', '$', 'audio/speech-builder', 'util/pla
 
     var url = sitecues.resolveSitecuesUrl('../earcons/' + earconName + '.' + getMediaTypeForPrerecordedAudio());
 
-    getAudioPlayer().playAudioSrc(url);
+    getAudioPlayer(function(player) {
+      player.playAudioSrc(url);
+    });
   }
 
   // What audio format will we use?
   // At the moment, mp3, ogg and aac are sufficient for the browser/OS combinations we support.
   // For Ivona, audio formats are mp3 or ogg
   // For Lumenvox, audio formats are aac or ogg
-  function getAudioPlayer() {
-    if (!audioPlayer) {
-      if (platform.browser.isSafari) {
-        require(['audio/safari-player'], function(player) {
-          player.init();
-          audioPlayer = player;
-        });
-      }
-      else {
-        require(['audio/html5-player'], function(player) {
-          player.init();
-          audioPlayer = player;
-        });
-      }
+  function getAudioPlayer(callbackFn) {
+    function onDependencyLoaded() {
+      audioPlayer && mediaTypeForTTS && callbackFn && callbackFn(audioPlayer);
+    }
+    function onAudioPlayerLoaded(player) {
+      player.init();
+      audioPlayer = player;
+      onDependencyLoaded();
     }
 
-    return audioPlayer;
+    if (audioPlayer && mediaTypeForTTS) {
+      // Already retrieved
+      onDependencyLoaded();
+      return;
+    }
+    if (isRetrievingAudioPlayer) {
+      // Currently retrieving
+      return;
+    }
+
+    isRetrievingAudioPlayer = true;
+    if (platform.browser.isSafari) {
+      require(['audio/safari-player'], onAudioPlayerLoaded);
+    }
+    else {
+      require(['audio/html5-player'], onAudioPlayerLoaded);
+    }
+    getMediaTypeForTTS(onDependencyLoaded);
   }
 
   function getBrowserSupportedTypeFromList(listOfAvailableExtensions) {
@@ -195,13 +216,16 @@ define(['conf/user/manager', 'conf/site', '$', 'audio/speech-builder', 'util/pla
 
   // What audio format will we use for TTS?
   // Note: calling this depends on having site information, which is retrieved when TTS is turned on.
-  function getMediaTypeForTTS() {
-    if (!mediaTypeForTTS) {
-      var FALLBACK_FORMATS_IF_NO_SITE_PREFS = ['ogg'], // Supported by all TTS engines we use
-        availableFormats = site.get('ttsAudioFormats') || FALLBACK_FORMATS_IF_NO_SITE_PREFS;
-      mediaTypeForTTS = getBrowserSupportedTypeFromList(availableFormats);
+  function getMediaTypeForTTS(callbackFn) {
+    if (mediaTypeForTTS) {
+      callbackFn(mediaTypeForTTS);
     }
-    return mediaTypeForTTS;
+    function onSpeechConfigReceived(speechConfig) {
+      mediaTypeForTTS = getBrowserSupportedTypeFromList(speechConfig.ttsAudioFormats);
+      callbackFn(mediaTypeForTTS);
+    }
+
+    site.fetchSpeechConfig(onSpeechConfigReceived);
   }
 
   // What audio format will we use for prerecorded audio?
@@ -240,12 +264,7 @@ define(['conf/user/manager', 'conf/site', '$', 'audio/speech-builder', 'util/pla
      */
     sitecues.on('hlb/closed keys/non-shift-key-pressed', stopAudio);
 
-    if (conf.get('ttsOn')) {
-      ttsOn = true;
-      sitecues.emit('speech/did-change', true);
-    }
-
-    getAudioPlayer();  // Init audio player
+    ttsOn = conf.get('ttsOn');
   }
 
   var publics = {

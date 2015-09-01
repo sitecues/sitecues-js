@@ -7,7 +7,7 @@
       include : [
         '../../build-config/config.js',
         'core/sitecues',
-        'core/launch',
+        'core/run',
         '../../../node_modules/requirejs/require.js',
         'bp/bp',
         'keys/keys'
@@ -37,7 +37,25 @@
         'bp/controller/focus-controller',
         'bp/controller/shrink-controller',
         'bp/view/elements/tts-button',
-        'bp/view/elements/more-button',
+        'bp/view/elements/more-button'
+      ],
+      exclude: [
+        'locale/locale',
+        'util/platform',
+        'bp/constants',
+        'bp/model/state',
+        'bp/helper',
+        'util/jquery',
+        'util/common',
+        'util/jquery-utils',
+        'util/transform',
+        'conf/user/manager'
+      ]
+    },
+    {
+      name: 'bp-secondary',
+      create: true,
+      include: [
         'bp/view/elements/secondary/secondary-panel'
       ],
       exclude: [
@@ -48,6 +66,7 @@
         'bp/helper',
         'util/jquery',
         'util/common',
+        'util/animate',
         'util/jquery-utils',
         'util/transform',
         'conf/user/manager'
@@ -108,7 +127,7 @@
       include: [
         'theme/color-engine',
         'theme/color-choices',
-        ,'theme/img-classifier.js'
+        'theme/img-classifier.js'
       ],
       exclude: [
         'locale/locale',
@@ -131,6 +150,13 @@
         'zoom/zoom-forms.js',
         'zoom/zoom.js'
       ]
+    },
+    {
+      name: 'status',
+      create: true,
+      include: [
+        'util/status'
+      ]
     }
   ],
   onBuildRead: function(module, path, contents) {
@@ -144,6 +170,20 @@
     return contents;
   },
   onModuleBundleComplete: function (data) {
+    // Check for dupes
+    // TODO this should use require with a state module we build instead of a global
+    global.scIncludedBy = global.scIncludedBy || {};
+    var index = data.included.length;
+    while (index--) {
+      var includedItem = data.included[index];
+      if (global.scIncludedBy[includedItem]) {
+        throw new Error('The module ' + includedItem + ' was included both in ' + global.scIncludedBy[includedItem] + ' and ' + data.name + '.\n' +
+        'Modules must only be included once in order to avoid code duplication.');
+      }
+      global.scIncludedBy[includedItem] = data.name;
+    }
+
+    // Build loader config
     var includedStr = data.included.join("','");
     includedStr = includedStr.replace(/\.js/g, ''); // Remove .js
     fs.appendFileSync('target/build-config/sitecues-bundles.js', "'" + data.name + "':['" + includedStr + "'],");

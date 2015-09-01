@@ -66,7 +66,7 @@ define(['$', 'conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mouse-hi
 
   state,
 
-  isSitecuesOn,
+  isSitecuesOn = true, // We don't initialize this module until sitecues is on
   isTrackingMouse, // Are we currently tracking the mouse?
   canTrackScroll = true,  // Is scroll tracking allowable? Turned off during panning from keyboard navigation
   willRespondToScroll = true, // After scroll tracking is turned on, we won't respond to it until at least one normal mousemove
@@ -1595,6 +1595,8 @@ define(['$', 'conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mouse-hi
     conf.get('ttsOn', onSpeechChanged);
 
     testFocus(); // Set initial focus state
+
+    refreshEventListeners();
   }
 
   if (SC_DEV) {

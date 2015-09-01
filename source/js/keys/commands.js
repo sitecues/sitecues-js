@@ -37,7 +37,10 @@ define([], function() {
     'speak-highlight': function() {
       require(['audio/audio', 'mouse-highlight/mouse-highlight'], function(audio, mh) {
         audio.init();
-        audio.speakHighlight(mh.getHighlight().picked, true);
+        var highlight = mh.getHighlight();
+        if (highlight) {
+          audio.speakHighlight(highlight.picked, true);
+        }
       });
     },
     'toggle-speech':  function() {

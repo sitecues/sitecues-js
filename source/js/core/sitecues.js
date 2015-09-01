@@ -86,8 +86,9 @@ define([], function () {
   }
 
   function getStatus() {
+    var args = arguments;
     require(['util/status'], function(statusFn) {
-      statusFn();
+      statusFn.apply(this, args);
     });
   }
 
@@ -407,8 +408,8 @@ define([], function () {
     }
     else {
       initServices();
-      require(['core/launch'], function(launch) {
-        launch();
+      require(['core/run'], function(run) {
+        run();
       });
     }
   };

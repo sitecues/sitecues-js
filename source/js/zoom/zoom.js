@@ -791,6 +791,12 @@ define(['$', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common', '
     conf.set('zoom', completedZoom);
     sitecues.emit('zoom', completedZoom);
 
+    if (!isInitialLoadZoom) {
+      require(['audio/audio-cues'], function (audioCues) {
+        audioCues.playZoomCue(completedZoom);
+      });
+    }
+
     clearZoomCallbacks();
 
     if (isInitialLoadZoom) {
