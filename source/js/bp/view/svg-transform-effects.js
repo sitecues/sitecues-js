@@ -94,7 +94,8 @@ define(['bp/helper', 'bp/constants', 'util/platform', 'util/animate'],
   }
 
   function init() {
-    sitecues.on('bp/did-expand', hoversOn);
+    hoversOn(); // Current expansion
+    sitecues.on('bp/did-expand', hoversOn); // Future expansions
     sitecues.on('bp/will-shrink', hoversOff);
     sitecues.on('bp/content-loaded', refreshHovers);
     sitecues.on('bp/will-show-secondary-feature', cancelHovers);
