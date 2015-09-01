@@ -8,7 +8,7 @@ function getBundleText() {
   var bundleTextFilename = args[1],
     text = fs.readFileSync(bundleTextFilename, { encoding: 'utf8' } );  // Get the bundle config
   text = text.substring(0, text.lastIndexOf(',')); // Remove trailing comma
-  return '{' + text + '\n  }';  // Surround by object syntax
+  return '{' + text + '}';  // Surround by object syntax
 }
 
 var fs = require('fs'),

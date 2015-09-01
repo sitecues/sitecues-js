@@ -103,6 +103,7 @@ define(['../conf/user/user-id', 'conf/user/server', 'locale/locale', 'conf/user/
   }
 
   return function() {
+
     // Load and initialize the prereqs before doing anything else
     numPrereqsToComplete = 2;  // User settings (conf) and locale
 

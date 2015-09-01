@@ -146,7 +146,7 @@
   onModuleBundleComplete: function (data) {
     var includedStr = data.included.join("','");
     includedStr = includedStr.replace(/\.js/g, ''); // Remove .js
-    fs.appendFileSync('target/build-config/sitecues-bundles.js', "\n    '" + data.name + "': ['" + includedStr + "'],");
+    fs.appendFileSync('target/build-config/sitecues-bundles.js', "'" + data.name + "':['" + includedStr + "'],");
   },
   map: {
     // All modules get 'jquery-private' when they ask for '$',
