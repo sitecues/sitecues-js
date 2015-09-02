@@ -21,14 +21,16 @@ define([], function () {
 
   // Get JSONP -- cheap imitation that doesn't bother with the callback, just uses a regular request and strips out the callback text
   function getJSONP(requestObj) {
-    function getJsonText(jsonpText) {
-      return jsonpText.substring(jsonpText.indexOf('{'), jsonpText.indexOf('}') + 1);
-    }
 
-    get(requestObj, function(jsonpText) {
-      var jsonText = getJsonText(jsonpText);
-      requestObj.success(JSON.parse(jsonText));
-    });
+//    function getJsonText(jsonpText) {
+//      return jsonpText.substring(jsonpText.indexOf('{'), jsonpText.indexOf('}') + 1);
+//    }
+//
+//    get(requestObj, function(jsonpText) {
+//      var jsonText = getJsonText(jsonpText);
+//      requestObj.success(JSON.parse(jsonText));
+//    });
+    
   }
 
   function get(requestObj, successFnOverride) {
@@ -50,7 +52,7 @@ define([], function () {
       }
       else {
         var errorFn = requestObj.error;
-        errorFn && errorFn();
+        errorFn && errorFn(xhr.statusText);
       }
     };
 

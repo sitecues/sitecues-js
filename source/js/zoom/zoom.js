@@ -79,7 +79,7 @@ define(['$', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common', '
 
     MS_PER_X_ZOOM_GLIDE = 1400, // For animations, the number of milliseconds per unit of zoom (e.g. from 1x to 2x)
     MS_PER_X_ZOOM_SLIDER = 500, // For click in slider
-    ZOOM_PRECISION = 7, // Decimal places allowed
+    ZOOM_PRECISION = 3, // Decimal places allowed
     SITECUES_ZOOM_ID = 'sitecues-zoom',
     ANIMATION_END_EVENTS = 'animationend webkitAnimationEnd MSAnimationEnd',
     MIN_RECT_SIDE = 4,

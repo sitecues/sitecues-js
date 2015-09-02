@@ -1,104 +1,106 @@
 /**
  * This module is responsible for reading/persisting user configuration to/from the
  * server
+ *
+ * IMPORTANT: we only save one piece of data at a time:
+ *    // TODO old note from Brian Watson:
+ -    // UGH!!! The preferences server has a race condition that can clobber data! And ...
+ -    // Redis has no transactions (at least it is web-scale). So, THIS code must ensure
+ -    // that we don't have two simultaneous saves at the same time.
+ -    // Our config management needs work...
+ -    //
+ -    // If we try to save more than one thing in quick succession, it will get lost
  */
 define(['conf/user/manager', 'util/localstorage'], function(manager, ls) {
 
   // URLs for loading/saving data
   var
     lsByUserId,
-    params = '/' + location.hostname + '?callback=x?',
-    saveUrl = sitecues.getPrefsUrl('save') + params,
-    loadUrl = sitecues.getPrefsUrl('load') + params,
-    saveTimeoutId,   // JSONP callback called when a save call returns.
     isInitialized,
-    // TODO old note from Brian Watson:
-    // UGH!!! The preferences server has a race condition that can clobber data! And ...
-    // Redis has no transactions (at least it is web-scale). So, THIS code must ensure
-    // that we don't have two simultaneous saves at the same time.
-    // Our config management needs work...
-    isSavingData,
     // JSONP callback called when a load call returns.
-    loadTimeoutID,
-    isComplete = false;
+    timeoutId,
+    TIMEOUT_MS = 500,
+    saveFifoQueue = [];  // Data to save -- first in first out
 
+  function initJsonp(type, additionalParams, callbackFn) {
+    sitecues.jsonpCallback = callbackFn;
+    var scriptEl = document.createElement('script'),
+      // We only need one callback because we only do one at a time
+      params = '/' + location.hostname + '?callback=sitecues.jsonpCallback&' + additionalParams,
+      url = sitecues.getPrefsUrl(type) + params;
 
-  function saveCallback() {
-    saveTimeoutId && clearTimeout(saveTimeoutId);
-    isSavingData = false;
+    scriptEl.setAttribute('src', url);
+    scriptEl.id = 'sitecues-jsonp';
+    document.querySelector('head').appendChild(scriptEl);
+
+    timeoutId = setTimeout(callbackFn, TIMEOUT_MS);
+  }
+
+  function cleanupJsonp() {
+    clearTimeout(timeoutId);
+    var oldScriptEl = document.getElementById('sitecues-jsonp');
+    if (oldScriptEl) {
+      oldScriptEl.parentNode.removeChild(oldScriptEl);
+    }
+    delete sitecues.jsonpCallback;
+  }
+
+  function saveToServerCallback() {
+    cleanupJsonp();
+
+    // Get next data to save from queue, if any
+    var newData = saveFifoQueue.shift();
+    if (newData) {
+      saveDataToServer(newData.key, newData.value);
+    }
   }
 
   // Saves a key/value pair.
   function saveData(key, value) {
 
-    // Skip this try if we are in the middle of saving something.
-    if (isSavingData) {
-      setTimeout(function() {
-        saveData(key, value);
-      }, 0);
-    } else {
-      // Save the data.
-      isSavingData = true;
+    // Load the data from localStorage: User ID namespace.
+    lsByUserId = ls.getUserPreferencesById(); // String.
+    if (lsByUserId) {
+      ls.setUserPreferenceById(key, value);
+    }
 
-      // Set up the data.
-      var data = {};
-      data[key] = value;
+    saveDataToServer(key, value);
+  }
 
-      // Set a save set timeout.
-      saveTimeoutId = setTimeout(function() {
-        saveCallback();
-      }, 500);
+  function saveDataToServer(key, value) {
 
-      // Load the data from localStorage: User ID namespace.
-      lsByUserId = ls.getUserPreferencesById(); // String.
-      if (lsByUserId) {
-        ls.setUserPreferenceById(key, value);
-        saveCallback();
-      }
+    if (sitecues.jsonpCallback) {
+      // Already saving something, must wait until current save is finished
+      saveFifoQueue.push({key: key, value: value});
+      return;
+    }
 
-      if (SC_LOCAL) {
-        // Cannot save to server when we have no access to it
-        // Putting this condition in allows us to paste sitecues into the console
-        // and test it on sites that have a content security policy
-        saveCallback();
-        return;
-      }
-
-      require(['util/xhr'], function(xhr) {
-        // Save the server data.
-        xhr.getJSONP({
-          type: 'GET',
-          url: saveUrl,
-          data: data,
-          success: saveCallback,
-          error: function (e) {
-            if (SC_DEV) {
-              console.info('Unable to persist server config (' + key + '=' + value + '): ' + e.message);
-            }
-            saveCallback();
-          }
-        });
-      });
+    // Cannot save to server when we have no access to it
+    // Putting this condition in allows us to paste sitecues into the console
+    // and test it on sites that have a content security policy
+    if (!SC_LOCAL) {
+      initJsonp('save', encodeURIComponent(key) + '=' + encodeURIComponent(value), saveToServerCallback);
     }
   }
 
+  // Received via jsonp from server
+  function loadFromServerCallback(data) {
+    cleanupJsonp();
+
+    ls.setUserPreferencesById(data);
+
+    loadCallback(data);
+  }
+
   function loadCallback(data) {
-    loadTimeoutID && clearTimeout(loadTimeoutID);
     // Set the obtained config data (if any).
-    data && manager.data(data);
+    manager.data(data || {});
 
-    if (!isComplete) {
-      isComplete = true;
+    settingsComplete();
+  }
 
-      // server.initialUserDataReturned = true;
-
-      // Update the preferences server on every 'set'.
-      manager.get('*', function(key, value) {
-        saveData(key, value);
-      });
-
-      sitecues.emit('conf/did-complete');
-    }
+  function settingsComplete() {
+    sitecues.emit('conf/did-complete');
   }
 
   function init() {
@@ -107,36 +109,19 @@ define(['conf/user/manager', 'util/localstorage'], function(manager, ls) {
     }
     isInitialized = true;
 
-    // Load the data from localStorage: User ID namespace.
-    lsByUserId = null; //ls.getUserPreferencesById();
-    if (lsByUserId) {
-      loadCallback(lsByUserId);
-    } else {
-      if (SC_LOCAL) {
-        // Cannot save to server when we have no access to it
-        // Putting this condition in allows us to paste sitecues into the console
-        // and test it on sites that have a content security policy
-        ls.setUserPreferencesById({});
-        loadCallback();
-        return;
-      }
+    // Listen to every conf.set() call and persist new settings to server
+    manager.get('*', function(key, value) {
+      saveData(key, value);
+    });
 
+    // Load the data from localStorage: User ID namespace.
+    lsByUserId = ls.getUserPreferencesById();
+    if (lsByUserId || SC_LOCAL) {
+      loadCallback(lsByUserId);
+    }
+    else {
       // Load the server data.
-      require(['util/xhr'], function (xhr) {
-        xhr.getJSONP({
-          url: loadUrl,
-          success: function (data) {
-            ls.setUserPreferencesById(data);
-            loadCallback(data);
-          },
-          error: function (e) {
-            if (SC_DEV) {
-              console.warn('Unable to load server config: ' + e.message);
-            }
-            loadCallback();
-          }
-        });
-      });
+      initJsonp('load', '', loadFromServerCallback);
     }
   }
 
