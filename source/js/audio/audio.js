@@ -10,8 +10,8 @@
  * - Playing audio by key when requested by another module
  */
 
-define(['conf/user/manager', 'conf/site', '$', 'audio/speech-builder', 'util/platform', 'locale/locale'],
-  function(conf, site, $, builder, platform, locale) {
+define(['conf/user/manager', 'conf/site', '$', 'audio/speech-builder', 'util/platform', 'locale/locale', 'metrics/metrics'],
+  function(conf, site, $, builder, platform, locale, metrics) {
 
   var ttsOn = false,
     isAudioPlaying,
@@ -19,13 +19,18 @@ define(['conf/user/manager', 'conf/site', '$', 'audio/speech-builder', 'util/pla
     mediaTypeForTTS,  // For TTS only, not used for pre-recorded sounds such as verbal cues
     mediaTypeForPrerecordedAudio,
     isInitialized,
-    isRetrievingAudioPlayer;
+    isRetrievingAudioPlayer,
+    // TODO add more trigger types, e.g. shift+arrow, shift+space
+    TRIGGER_TYPES = {
+      LENS: 'space',
+      HIGHLIGHT: 'shift'
+    };
 
   function playHlbContent($content) {
     if (!ttsOn) {
       return;
     }
-    speakContent($content);
+    speakContent($content, TRIGGER_TYPES.LENS);
   }
 
   function playHighlight(content, doAvoidInterruptions, doSuppressEarcon) {
@@ -40,21 +45,34 @@ define(['conf/user/manager', 'conf/site', '$', 'audio/speech-builder', 'util/pla
     if (!doSuppressEarcon) {
       playEarcon('audio-highlight');
     }
-    speakContent(content);
+    speakContent(content, TRIGGER_TYPES.HIGHLIGHT);
   }
 
-  function speakContent($content) {
+  function speakContent($content, triggerType) {
     var text = builder.getText($content);
     if (text) {
-      speakText(text, locale.getElementLang($content[0]));
+      speakText(text, locale.getElementLang($content[0]), triggerType);
     }
   }
 
   function speakText(text, lang) {
     stopAudio();  // Stop any currently playing audio and halt keydown listener until we're playing again
     getAudioPlayer(function(player) {
-      var TTSUrl = getTTSUrl(text, lang);
-      player.playAudioSrc(TTSUrl);
+      var TTSUrl = getTTSUrl(text, lang),
+        startRequestTime = new Date();
+
+      function onSpeechComplete() {
+        var timeElapsed = new Date() - startRequestTime;
+        metrics.send('tts-requested', {
+          request_time: timeElapsed,
+          audio_format: mediaTypeForTTS,
+          char_count: text.length,
+          trigger: triggerType
+        });
+      }
+
+      player.playAudioSrc(TTSUrl, onSpeechComplete);
+
       isAudioPlaying = true;
       sitecues.emit('audio/speech-play', TTSUrl);
       addStopAudioHandlers();

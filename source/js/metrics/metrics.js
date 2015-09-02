@@ -2,8 +2,8 @@
  * Basic metrics.
  */
 // jshint -W016
-define(['metrics/util', '$', 'conf/user/manager', 'audio/audio', 'locale/locale'],
-  function(metricsUtil, $, conf, audio, locale) {
+define(['conf/user/manager', 'conf/site', 'locale/locale', 'util/platform', 'util/xhr'],
+  function(conf, site, locale, platform, xhr) {
 
   /**
    * *Session ID:* A random UUID v4 generated for this library session.
@@ -19,74 +19,49 @@ define(['metrics/util', '$', 'conf/user/manager', 'audio/audio', 'locale/locale'
    * *User language*: (OPTIONAL) the language the browser is set to, not the page language.
    */
 
-  var DEFAULT_STATE = {
-      'session_id': '',
-      'client_time_ms': '',
-      'page_url': '',
-      'zoom_level': '',
-      'tts_state': '',
-      'browser_user_agent': '',
-      'client_language': '',
-      'sc_version': sitecues.getVersion()
-  };
-
-  var metrics = this;
-
   // Taken from here(free public license): https://gist.github.com/jed/982883
   var UUIDv4 = function b(a){return a?(a^Math.random()*16>>a/4).toString(16):([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g,b); };
 
-  var data;
+  function send(name, data) {
+    if (SC_LOCAL) {
+      // Cannot save to server when we have no access to it
+      // Putting this condition in allows us to paste sitecues into the console
+      // and test it on sites that have a content security policy
+      return;
+    }
 
-  // TODO When is this called? For each new metric or just the first time?
+    var newData = JSON.parse(JSON.stringify(data || {})),
+      siteId = site.getSiteId();
+    newData.name = name;
+    newData.siteId = siteId; // TODO should it be site_id ?
+    newData.client_time_ms = +new Date();
+    newData.zoom_level = parseFloat(conf.get('zoom')) || 1;
+    newData.tts_state = + conf.get('ttsOn') || 0;
+    newData.page_url = location && location.href ? location.href : '';
+    // A random UUID v4 generated for this library session.
+    newData.session_id = UUIDv4;
+    newData.client_time_ms = +new Date();  // Epoch time in milliseconds  when the event occurred
+    newData.page_url = location.href;
+    newData.browser_user_agent = navigator && navigator.userAgent ? navigator.userAgent : '';
+    newData.client_language = locale.getFullWebsiteLang();
+
+    xhr.post({
+      url: sitecues.getApiUrl('metrics/site/' + siteId + '/notify.json'),
+      data: newData
+    });
+  }
+
+
   function init() {
-    // Default state.
-    data = $.extend({}, DEFAULT_STATE);
-
-    // Initialization.
-    var newData = {
-        // A random UUID v4 generated for this library session.
-        'session_id': UUIDv4(),
-        // Epoch time in milliseconds  when the event occurred
-        'client_time_ms': +new Date(),
-        'page_url'  : location && location.href ? location.href : '',
-        'zoom_level': conf.get('zoom') || 1,
-        'tts_state' : +audio.isSpeechEnabled(),
-        'browser_user_agent': navigator && navigator.userAgent ? navigator.userAgent : '',
-        'client_language': locale.getFullWebsiteLang()
-    };
-    metrics.update(newData);
-    sitecues.emit('metrics/ready', metrics);
+    send('page-visited', {
+      native_zoom: platform.nativeZoom,
+      is_retina  : platform.isRetina()
+    });
   }
-
-  // ============= Objects methods ======================
-  function update(data) {
-    metricsUtil.update(metrics, data, 'metrics/update');
-  }
-
-  // ============= Events Handlers ======================
-  sitecues.on('zoom', function(zoomLevel) {
-    var data = {'zoom_level': parseFloat(zoomLevel)};
-    metrics.update(data);
-  });
-
-  sitecues.on('speech/did-change', function() {
-    // + is a simple way to convert boolean to a number: true becomes 1 and false is 0.
-    var data = {'tts_state': +audio.isSpeechEnabled() };
-    update(data);
-  });
-
-  // Update the basic metrics when metrics event object created.
-  sitecues.on('metrics/panel-closed/create metrics/badge-hovered/create metrics/hlb-opened/create metrics/zoom-changed/create metrics/feedback-sent/create',
-    function() {
-      var data = {'client_time_ms': +new Date()};
-      update(data);
-  });
-
-  // Initialize.
-  init();
 
   var publics = {
-    update: update
+    init: init,
+    send: send
   };
 
   if (SC_UNIT) {

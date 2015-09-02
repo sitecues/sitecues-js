@@ -18,16 +18,10 @@ define(['$'], function ($) {
    * Play the audio src at the given url
    * @param url source of audio to play
    */
-  function playAudioSrc(url) {
+  function playAudioSrc(url, onCompleteFn) {
     var audioElement = new Audio();
-    var t = new Date();
 
-    // Metrics Start
-    audioElement.addEventListener('playing', function() {
-      sitecues.emit('audio/playing', {'data': {'request_time': new Date() - t}});
-    });
-
-    // Metrics End
+    onCompleteFn && audioElement.addEventListener('playing', onCompleteFn);
 
     audioElement.src = ''; // Clean up
     $(audioElement).one('canplay', playIt);

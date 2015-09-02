@@ -17,7 +17,7 @@ define([], function () {
   }
 
   function post(requestObj) {
-    initRequest(requestObj.data, requestObj, 'application/json');
+    initRequest(JSON.stringify(requestObj.data), requestObj, 'application/json');
   }
 
   function initRequest(postData, requestObj, optionalContentTypeOverride, successFnOverride) {
@@ -44,7 +44,8 @@ define([], function () {
     }
 
     if (contentType) {
-      xhr.setRequestHeader('Accept', contentType);
+      // If post, the content type is what we're sending, if get it's what we're receiving
+      xhr.setRequestHeader(postData ? 'Content-Type' : 'Accept', contentType);
     }
 
     postData ? xhr.send(postData) : xhr.send();

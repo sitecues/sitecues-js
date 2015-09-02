@@ -4,11 +4,9 @@
  */
 
 // Now
-// TODO use seth's more modern jshint options
-// TODO Used to use these uglify options: -m -c dead_code=true    -- Which others should we use? Can we mangle property/key names now?
-//      If we need to set complex options can do -o build.js e.g. http://requirejs.org/docs/optimization.html#basics
-//      See all build options https://github.com/jrburke/r.js/blob/master/build/example.build.js
 // TODO clean up metrics
+
+// Test
 // TODO themes
 // TODO cursor size/hue settings only -- be careful of mousehue 1.1 which means nothing
 
@@ -24,11 +22,12 @@
 //      source/js/custom-scripts/custom-scripts.js \
 //      $(custom-files) \
 // TODO file bug on requirejs needing sitecues.require when variable name used
+// TODO use seth's more modern jshint options
 
 define(['../conf/user/user-id', 'conf/user/server', 'locale/locale', 'conf/user/manager'], function (userId, userSettingsServer, locale, conf) {
   var
     numPrereqsToComplete,
-    ALWAYS_ON_FEATURES = [ 'bp/bp', 'keys/keys' ],
+    ALWAYS_ON_FEATURES = [ 'bp/bp', 'keys/keys', 'metrics/metrics' ],
     ZOOM_ON_FEATURES = [ 'hpan/hpan', 'zoom/fixed-position-fixer', 'keys/focus', 'cursor/cursor' ],
     TTS_ON_FEATURES = [ 'audio/audio' ],
     SITECUES_ON_FEATURES = [ 'mouse-highlight/mouse-highlight', 'mouse-highlight/move-keys' ],
@@ -42,6 +41,7 @@ define(['../conf/user/user-id', 'conf/user/server', 'locale/locale', 'conf/user/
 
   function initModulesByName(featureNames) {
     featureNames.forEach(function(featureName) {
+      SC_DEV && console.log('Initializing module: ' + featureName);
       sitecues.require([featureName], function(featureModule) {
         featureModule.init();
       });

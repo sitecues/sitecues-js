@@ -26,7 +26,7 @@ define([], function () {
    * Play the audio src at the given url
    * @param url source of audio to play
    */
-  function playAudioSrc(baseMediaUrl) {
+  function playAudioSrc(baseMediaUrl, onCompleteFn) {
     isCancelled = false;
 
     // Create a reusable request object
@@ -40,9 +40,7 @@ define([], function () {
         return;
       }
 
-      // Metrics Start
-      sitecues.emit('audio/playing', {'data': {'request_time': new Date() - t}});
-      // Metrics End
+      onCompleteFn && onCompleteFn();
 
       // Asynchronously decodes the audio file data contained in the ArrayBuffer.
       context.decodeAudioData(request.response, function (buffer) {

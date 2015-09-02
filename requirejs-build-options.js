@@ -11,6 +11,7 @@
         '../../../node_modules/requirejs/require.js',
         'bp/bp',
         'keys/keys',
+        'metrics/metrics',
         'util/xhr'
       ],
       create: true,
@@ -27,6 +28,7 @@
         'util/jquery-utils'
       ],
       exclude: [
+        'metrics/metrics',
         'util/element-classifier'
       ]
     },
@@ -51,6 +53,7 @@
         'util/common',
         'util/jquery-utils',
         'util/transform',
+        'metrics/metrics',
         'conf/user/manager'
       ]
     },
@@ -72,6 +75,7 @@
         'util/animate',
         'util/jquery-utils',
         'util/transform',
+        'metrics/metrics',
         'conf/user/manager'
       ]
     },
@@ -99,6 +103,7 @@
         'util/xhr',
         'util/common',
         'util/jquery-utils',
+        'metrics/metrics',
         'conf/site',
         'conf/user/manager'
       ]
@@ -120,6 +125,7 @@
         'util/common',
         'util/jquery-utils',
         'util/transform',
+        'metrics/metrics',
         'conf/site',
         'conf/user/manager'
       ]
@@ -142,6 +148,7 @@
         'util/common',
         'util/jquery-utils',
         'util/transform',
+        'metrics/metrics',
         'conf/site',
         'conf/user/manager'
       ]
@@ -164,6 +171,7 @@
         'util/jquery-utils',
         'conf/site',
         'conf/user/manager',
+        'metrics/metrics',
         'util/geo',
         'util/transform'
       ]
@@ -195,6 +203,7 @@
         'style-service/css-aggregator.js',
         'style-service/style-service.js',
         'util/transform.js',
+        'metrics/metrics',
         'zoom/zoom-forms.js',
         'zoom/zoom.js'
       ]
