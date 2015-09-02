@@ -307,6 +307,11 @@ define(['$', 'conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mouse-hi
     return true;
   }
 
+  function didToggleVisibility(isVisible) {
+    state.isVisible = isVisible;
+    sitecues.emit('mh/did-toggle-visibility', isVisible);
+  }
+
   function show() {
     // Create and position highlight overlay
     appendOverlayPathViaSVG();
@@ -323,7 +328,7 @@ define(['$', 'conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mouse-hi
     $(document).one('mouseleave', onLeaveWindow);
 
     // Update state
-    state.isVisible = true;
+    didToggleVisibility(true);
   }
 
   // Choose an appropriate background color for the highlight
@@ -1532,7 +1537,7 @@ define(['$', 'conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mouse-hi
       pickFromMouseTimer = 0;
     }
 
-    state.isVisible = false;
+    didToggleVisibility(false);
 
     if (!doRememberHighlight) {
       // Forget highlight state, unless we need to keep it around temporarily

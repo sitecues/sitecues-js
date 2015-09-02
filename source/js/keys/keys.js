@@ -303,10 +303,13 @@ define(['util/element-classifier', 'keys/commands'],
       isHighlightVisible = isVisible;
     });
 
-    sitecues.on('lens/did-toggle-visibility', function(isVisible) {
-      isLensVisible = isVisible;
+    sitecues.on('hlb/create', function() {
+      isLensVisible = true;
     });
 
+    sitecues.on('hlb/closed', function() {
+      isLensVisible = false;
+    });
     sitecues.on('sitecues/did-toggle', function(isOn) {
       isSitecuesOn = isOn;
     });
