@@ -42,7 +42,6 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'util/animate', 'util/tra
     origOutlineHeight,
     isActive = false,
     isInitialized,
-    isCssLoaded,
 
     // Oft-used functions. Putting it in a variable helps minifier, convenience, brevity
     byId = helper.byId,
@@ -465,24 +464,6 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'util/animate', 'util/tra
     });
   }
 
-  function onPanelOpen() {
-    function insertCss(name) {
-      var cssLink = document.createElement('link'),
-        cssUrl = sitecues.resolveSitecuesUrl('../css/' + name + '.css');
-      cssLink.setAttribute('rel', 'stylesheet');
-      cssLink.setAttribute('href', cssUrl);
-      document.querySelector('head').appendChild(cssLink);
-    }
-    if (!isCssLoaded) {
-      isCssLoaded = true;
-      insertCss('secondary');
-      var extendedFontCharsetName = locale.getExtendedFontCharsetName();
-      if (extendedFontCharsetName) {
-        insertCss(extendedFontCharsetName);
-      }
-    }
-  }
-
   function onPanelClose () {
 
     if (state.isSecondaryPanelRequested()) {
@@ -506,6 +487,14 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'util/animate', 'util/tra
     toggleMouseListeners(false);
   }
 
+  function insertCss(name) {
+    var cssLink = document.createElement('link'),
+      cssUrl = sitecues.resolveSitecuesUrl('../css/' + name + '.css');
+    cssLink.setAttribute('rel', 'stylesheet');
+    cssLink.setAttribute('href', cssUrl);
+    document.querySelector('head').appendChild(cssLink);
+  }
+
   function init() {
     if (!isInitialized) {
       isInitialized = true;
@@ -513,8 +502,11 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'util/animate', 'util/tra
       // Add mouse listeners once BP is ready
       resetStyles();
 
-      sitecues.on('bp/did-expand', onPanelOpen);
-
+      insertCss('secondary');
+      var extendedFontCharsetName = locale.getExtendedFontCharsetName();
+      if (extendedFontCharsetName) {
+        insertCss(extendedFontCharsetName);
+      }
       sitecues.on('bp/will-shrink', onPanelClose);
 
       aboutModule.init();
