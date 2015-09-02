@@ -768,7 +768,7 @@ define(['$', 'mouse-highlight/mouse-highlight', 'util/common', 'util/transform',
     if (isInitialized) {
       return;
     }
-    isinitialized = true;
+    isInitialized = true;
     $(window).on('keyup', function () {
       clearTimeout(repeatDelayTimer);
       isKeyStillDown = false;

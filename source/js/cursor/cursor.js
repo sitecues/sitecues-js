@@ -94,8 +94,7 @@ define(['$', 'style-service/style-service', 'conf/user/manager', 'cursor/cursor-
           SC_DEV && console.log('Loading of CUR file completed!');
           flushPendingCursorRules(url);
         },
-        error: function (jqXHR) {
-          jqXHR.abort();
+        error: function () {
           SC_DEV && console.log('[Error] Unable to fetch cursor image from server: ' + url);
         }
       });

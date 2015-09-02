@@ -36,7 +36,8 @@ define(['$', 'conf/user/manager', 'hlb/styling', 'util/common', 'util/element-cl
         inheritedZoom     = getInheritedZoom($hlb),
         leftDiff          = childBoundingRect.left > hlbBoundingRect.left ? childBoundingRect.left - hlbBoundingRect.left : 0,
         leftSum           = 0,
-        rightSum          = 0;
+        rightSum          = 0,
+        sum;
 
     $(child).parentsUntil($hlb.parent()).addBack().each(function () {
       var computedStyle = getComputedStyle(this);

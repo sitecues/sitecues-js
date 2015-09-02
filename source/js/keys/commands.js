@@ -46,7 +46,7 @@ define([], function() {
         audio.init();
         var highlight = mh.getHighlight();
         if (highlight) {
-          audio.speakHighlight(highlight.picked, true);
+          audio.playHighlight(highlight.picked, true);
         }
       });
     },

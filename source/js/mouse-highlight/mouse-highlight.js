@@ -1561,11 +1561,6 @@ define(['$', 'conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mouse-hi
     isOnlyShift = isShift;
   }
 
-  function onBadgeReady() {
-    isBadgeReady = true;
-    refreshEventListeners();
-  }
-
   // Return all of the highlight information provided in the |state| variable
   function getHighlight() {
     return state;

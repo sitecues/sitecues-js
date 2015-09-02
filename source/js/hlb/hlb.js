@@ -638,7 +638,6 @@ define([
     $foundation = undefined;
     $hlb        = undefined;
     $picked     = undefined;
-    highlight   = undefined;
 
     if (SC_DEV && loggingEnabled) {
       console.log(

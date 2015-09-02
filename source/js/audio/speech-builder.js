@@ -157,7 +157,7 @@ define(['util/element-classifier', '$'], function(elemClassifier, $) {
     var textEquiv = node.getAttribute('aria-label'),
       value;
     // alt or title on any image or visual media
-    if (common.isVisualMedia(node) || $node.is('input[type="image"]')) {
+    if (elemClassifier.isVisualMedia(node) || $node.is('input[type="image"]')) {
       textEquiv = textEquiv || node.getAttribute('alt') || node.getAttribute('title') || '';
     }
     else if ($node.is('select')) {

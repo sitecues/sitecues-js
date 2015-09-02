@@ -147,5 +147,5 @@ define(['conf/user/manager', 'util/jquery-utils', 'zoom/zoom'], function (conf, 
 
   return {
     init: init
-  }
+  };
 });

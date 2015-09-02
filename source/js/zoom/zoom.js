@@ -31,7 +31,6 @@ define(['$', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common', '
     currentTargetZoom = 1,   // Zoom we are aiming for in the current operation
     startZoomTime,           // If no current zoom operation, this is cleared (0 or undefined)
     isInitialLoadZoom = false, // Is this the initial zoom for page load? (The one based on previous user settings)
-    nativeZoom,              // Amount of native browserZoom
     hasFormsToFix,
 
     // Zoom slider change listener
@@ -1161,7 +1160,9 @@ define(['$', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common', '
       typeof body.style.willChange === 'string' && !shouldUseElementDotAnimate;
   }
 
-  function performInitialLoadZoom(targetZoom) {
+  function performInitialLoadZoom(initialZoom) {
+    var targetZoom = getSanitizedZoomValue(initialZoom);
+
     if (targetZoom === 1) {
       return;
     }

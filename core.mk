@@ -50,6 +50,9 @@ build:
 	@echo "===== STARTING: Building '$(custom-name)' library ====="
 	@echo
 
+	# Check for build errors
+	jshint source/js --exclude source/js/util/jquery.js
+
 	@mkdir -p $(build-dir)/js
 	@mkdir -p target/build-config
 	echo "sitecues.version='$(custom-version)';" > target/build-config/config.js
@@ -97,6 +100,9 @@ build:
 debug:
 	@echo "===== STARTING: Build for '$(custom-name)' library (DEBUG VER) ====="
 	@echo
+
+	# Check for build errors
+	jshint source/js --exclude source/js/util/jquery.js
 
 	@mkdir -p $(build-dir)/js
 	@mkdir -p target/build-config

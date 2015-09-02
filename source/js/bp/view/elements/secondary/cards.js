@@ -312,5 +312,5 @@ define(['bp/constants', 'bp/helper', 'locale/locale', 'bp/model/state', 'util/pl
 
   return {
     init: init
-  }
+  };
 });

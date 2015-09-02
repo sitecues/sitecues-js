@@ -33,17 +33,9 @@ define(['util/localstorage'], function(ls) {
     }
 
     SC_DEV && console.log('UserID not found in localStorage, fallback to ajax request.');
-    require(['$'], function (jquery) {
-      jquery.ajax({
-        xhrFields: {
-          withCredentials: true
-        },
-        crossDomain: true,
-        beforeSend: function (xhrObj) {
-          xhrObj.setRequestHeader('Accept', 'application/json');
-        },
+    require(['util/xhr'], function (xhr) {
+      xhr.getJSON({
         url: sitecues.getApiUrl('user/id/get.json'),
-        type: 'GET',
         success: function (data) {
           // Important MAGIC: this will also have set a cookie that ends up getting used in future requests
           // e.g. _ai2_sc_uid = 3d50a209-dc12-4bf4-9913-de5ba74f96cf
@@ -53,7 +45,7 @@ define(['util/localstorage'], function(ls) {
           ls.setUserId(data.userId);
           didComplete();
         },
-        error: function (xhr, textStatus) {
+        error: function (textStatus) {
           if (SC_DEV) {
             console.log('===== Unable to get user ID: ' + textStatus);
           }
