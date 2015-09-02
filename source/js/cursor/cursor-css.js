@@ -42,7 +42,7 @@ define(['util/platform', 'zoom/zoom', 'util/color'], function (platform, zoomMod
    * @param pixelRatio = 1 for normal, 2 for retina cursor
    */
   function getCursorCss(type, sizeRatio, doUseAjaxCursors, hue) {
-    var doUseRetinaCursors = zoomModule.isRetina() && platform.canUseRetinaCursors,
+    var doUseRetinaCursors = platform.isRetina() && platform.canUseRetinaCursors,
       pixelRatio = doUseRetinaCursors ? 2 : 1,
       cursorGeneratorFn = doUseRetinaCursors ? generateCursorStyle2x : generateCursorStyle1x;
 

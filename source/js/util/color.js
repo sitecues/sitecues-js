@@ -449,6 +449,7 @@ define([], function () {
     getPerceivedLuminance: getPerceivedLuminance,
     getContrastRatio: getContrastRatio,
     rgbToHsl: rgbToHsl,
+    hslToRgb: hslToRgb,
     getDocumentBackgroundColor: getDocumentBackgroundColor
   };
 

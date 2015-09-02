@@ -3,15 +3,15 @@
  * This event creation should wait until the user preferences are loaded, and the UI is initialized.
  * (Send it only once when the user goes to a new page)
  */
-define(['metrics/util', 'zoom/zoom'], function(metricsUtil, zoom) {
+define(['metrics/util', 'zoom/zoom', 'util/platform'], function(metricsUtil, zoom, platform) {
 
   // ============= Objects methods ======================
   var pageVisited = {
     init: function() {
       pageVisited.data = {
         'name': 'page-visited',
-        'native_zoom': zoom.getNativeZoom(),
-        'is_retina'  : zoom.isRetina()
+        'native_zoom': platform.nativeZoom,
+        'is_retina'  : platform.isRetina()
       };
     },
     update: function(data) {

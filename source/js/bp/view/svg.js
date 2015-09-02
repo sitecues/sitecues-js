@@ -218,7 +218,7 @@ define(['locale/locale', 'util/platform', 'bp/view/styles'], function(locale, pl
   // Without this fix, markup such as xlink:href="#foo" or filter="url(#foo)" will not work in Firefox
   // when the source document uses a <base> tag.
   function convertRelativeUrlsToAbsolute(text) {
-    if (hasAlteredBaseURI() && !platform.isIE9()) {
+    if (hasAlteredBaseURI() && !platform.isIE9) {
       var MATCH_URLS = /(href="|url\()(?:#)/g,
         pageUrlMinusHash = removeHash(document.location.href);
 

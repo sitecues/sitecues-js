@@ -83,21 +83,22 @@ define(['$', 'style-service/style-service', 'conf/user/manager', 'cursor/cursor-
       pendingRules: [ rule ]
     };
 
-    $.ajax({
-      url: url,
-      crossDomain: true,
-      type: 'GET',
-      timeout: 5000,
-      cache: true,
-      headers: { Accept: 'application/octet-stream'},
-      success: function () {
-        SC_DEV && console.log('Loading of CUR file completed!');
-        flushPendingCursorRules(url);
-      },
-      error: function (jqXHR) {
-        jqXHR.abort();
-        SC_DEV && console.log('[Error] Unable to fetch cursor image from server: ' + url);
-      }
+
+    // Technically we only need XDomainRequest here
+    require(['util/xhr'], function (xhr) {
+      xhr.get({
+        url: url,
+        crossDomain: true,
+        headers: { Accept: 'application/octet-stream'},
+        success: function () {
+          SC_DEV && console.log('Loading of CUR file completed!');
+          flushPendingCursorRules(url);
+        },
+        error: function (jqXHR) {
+          jqXHR.abort();
+          SC_DEV && console.log('[Error] Unable to fetch cursor image from server: ' + url);
+        }
+      });
     });
   }
 
@@ -315,16 +316,12 @@ define(['$', 'style-service/style-service', 'conf/user/manager', 'cursor/cursor-
   function onMouseSizeSetting(size) {
     userSpecifiedSize = size;
     sitecues.off('zoom', onPageZoom);
-    if (isStyleServiceReady) {
-      refreshStylesheetsIfNecessary();
-    }
+    styleService.init(refreshStylesheetsIfNecessary);
   }
 
   function onMouseHueSetting(hue) {
     userSpecifiedHue = hue;
-    if (isStyleServiceReady) {
-      refreshStylesheetsIfNecessary();
-    }
+    styleService.init(refreshStylesheetsIfNecessary);
   }
 
   function sanitizeMouseSize(size) {

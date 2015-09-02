@@ -34,7 +34,7 @@ define([], function () {
 
   function status(callback) {
 
-    require(['$', 'conf/user/manager'], function($, conf) {
+    require(['util/xhr', 'conf/user/manager'], function(xhr, conf) {
 
       var html = document.documentElement,
           confData = conf.data(),
@@ -114,9 +114,7 @@ define([], function () {
         }
       }
 
-      $.ajax({
-        type:     'GET',
-        dataType: 'json',
+      xhr.getJSON({
         cache:    false,
         url:      ajaxUrls.up,
         success: function (response) {
@@ -131,10 +129,8 @@ define([], function () {
         }
       });
 
-      $.ajax({
+      xhr.getJSON({
         type:     'GET',
-        dataType: 'json',
-        cache:    false,
         url:      ajaxUrls.ws,
         success: function (response) {
           // Set the version based on the AJAX response object

@@ -119,7 +119,7 @@ define(['$', 'style-service/user-agent-css', 'conf/site', 'style-service/media-q
   // Once a sheet is ready, mark it as complete and finalize the process if there are no pending sheet requests
   function markReady(sheet) {
     if (sheet.isFinished) {
-      return;  // Don't allow sheet to be processed twice in the case of a timeout occuring earlier
+      return;  // Don't allow sheet to be processed twice in the case of a timeout occurring earlier
     }
 
     sheet.isFinished = true;

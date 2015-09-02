@@ -10,7 +10,8 @@
         'core/run',
         '../../../node_modules/requirejs/require.js',
         'bp/bp',
-        'keys/keys'
+        'keys/keys',
+        'util/xhr'
       ],
       create: true,
       namespace: 'sitecues',
@@ -46,6 +47,7 @@
         'bp/model/state',
         'bp/helper',
         'util/jquery',
+        'util/xhr',
         'util/common',
         'util/jquery-utils',
         'util/transform',
@@ -65,6 +67,7 @@
         'bp/model/state',
         'bp/helper',
         'util/jquery',
+        'util/xhr',
         'util/common',
         'util/animate',
         'util/jquery-utils',
@@ -93,6 +96,7 @@
         'bp/model/state',
         'bp/helper',
         'util/jquery',
+        'util/xhr',
         'util/common',
         'util/jquery-utils',
         'conf/site',
@@ -112,6 +116,7 @@
         'bp/model/state',
         'bp/helper',
         'util/jquery',
+        'util/xhr',
         'util/common',
         'util/jquery-utils',
         'util/transform',
@@ -133,6 +138,7 @@
         'bp/model/state',
         'bp/helper',
         'util/jquery',
+        'util/xhr',
         'util/common',
         'util/jquery-utils',
         'util/transform',
@@ -153,6 +159,7 @@
         'bp/model/state',
         'bp/helper',
         'util/jquery',
+        'util/xhr',
         'util/common',
         'util/jquery-utils',
         'conf/site',
@@ -167,7 +174,7 @@
       include: [
         'theme/color-engine',
         'theme/color-choices',
-        'theme/img-classifier.js'
+        'theme/img-classifier'
       ],
       exclude: [
         'locale/locale',
@@ -177,6 +184,7 @@
         'bp/model/state',
         'bp/helper',
         'util/jquery',
+        'util/xhr',
         'util/common',
         'util/jquery-utils',
         'conf/site',

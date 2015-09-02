@@ -710,7 +710,7 @@ define(['bp/model/state', 'bp/constants', 'bp/helper', 'util/platform'],
         return 1;  // Don't need to play games with crisping other than in Chrome
       }
 
-      return 1.5; // TODO zoomMod.isRetina() ? 1.5 : 3;
+      return platform.isRetina() ? 1.5 : 3;
     }
 
     var isPanelRequested              = state.isPanelRequested(),

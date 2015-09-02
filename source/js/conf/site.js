@@ -53,13 +53,13 @@ define([], function() {
       callbackFn(fetchedSpeechConfig);
     }
 
-    require(['$'], function($) {
+    require(['util/xhr'], function(xhr) {
       fetchedSpeechConfig = {};
       // Trigger the initial fetch.
-      $.ajax({
+
+      xhr.getJSON({
         // The 'provided.siteId' parameter must exist, or else core would have aborted the loading of modules.
         url: sitecues.getApiUrl('2/site/' + getSiteId() + '/config'),
-        dataType: 'json',
         success: function (data) {
           // Copy the fetched key/value pairs into the site configuration.
           for (var i = 0; i < data.settings.length; i++) {
@@ -69,7 +69,7 @@ define([], function() {
           callbackFn(fetchedSpeechConfig);
         },
         error: function() {
-          SC_DEV && console.log('Error loading sitecues speech configuration.')
+          SC_DEV && console.log('Error loading sitecues speech configuration.');
           var FALLBACK_SPEECH_CONFIG = { 'ttsAudioFormats': ['ogg'] };  // Supported by all TTS engines we use
           callbackFn(FALLBACK_SPEECH_CONFIG);
         }

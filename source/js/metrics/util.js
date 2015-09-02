@@ -3,7 +3,7 @@
  * of the different metric modules.
  */
 // Define dependency modules.
-define(['conf/site', '$'], function(site, $) {
+define(['conf/site', 'util/xhr'], function(site, xhr) {
 
   var toClass = {}.toString;
 
@@ -20,28 +20,21 @@ define(['conf/site', '$'], function(site, $) {
     // Update timestamp before send.
     update(instance, {'client_time_ms': +new Date()});
 
-    var request = $.ajax({
-      xhrFields: {
-        withCredentials: true
-      },
-      crossDomain: true,
-      beforeSend: function(xhrObj){
-        xhrObj.setRequestHeader('Content-Type', 'application/json');
-        xhrObj.setRequestHeader('Accept', 'application/json');
-      },
+    xhr.post({
+// TODO are these necessary?
+//      xhrFields: {
+//        withCredentials: true
+//      },
+//      crossDomain: true,
+//      beforeSend: function(xhrObj){
+//        xhrObj.setRequestHeader('Content-Type', 'application/json');
+//        xhrObj.setRequestHeader('Accept', 'application/json');
+//      },
       url: sitecues.getApiUrl('metrics/site/' + siteId + '/notify.json'),
       type: 'POST',
-      data: instance && JSON.stringify(instance.data),
-      dataType: 'json'
+      data: instance && JSON.stringify(instance.data)
     });
 
-    request.done(function() {
-//                console.log('Request succeeded', msg);
-    });
-
-    request.fail(function() {
-//                console.log("Request failed: " + textStatus);
-    });
   }
 
   function update(instance, newData, event) {

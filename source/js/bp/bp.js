@@ -66,7 +66,7 @@ define(['bp/controller/bp-controller', 'bp/model/state','bp/view/modes/badge', '
   function getClasses(callbackFn) {
 
     var classBuilder = state.isPanelRequested() ? panel.getViewClasses() : badge.getViewClasses();
-    classBuilder += ' scp-ie9-' + platform.isIE9();
+    classBuilder += ' scp-ie9-' + platform.isIE9;
 
     getPalette(function(palette) {
       classBuilder += ' scp-palette' + palette;

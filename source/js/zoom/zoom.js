@@ -32,7 +32,6 @@ define(['$', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common', '
     startZoomTime,           // If no current zoom operation, this is cleared (0 or undefined)
     isInitialLoadZoom = false, // Is this the initial zoom for page load? (The one based on previous user settings)
     nativeZoom,              // Amount of native browserZoom
-    isRetinaDisplay,         // Is the current display a retina display?
     hasFormsToFix,
 
     // Zoom slider change listener
@@ -152,59 +151,6 @@ define(['$', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common', '
     }
   }
 
-  // Retrieve and store whether the current window is on a Retina display
-  function isRetina() {
-    if (typeof isRetinaDisplay !== 'undefined') {
-      return isRetinaDisplay;
-    }
-
-    isRetinaDisplay = false;
-
-    // Safari doesn't alter devicePixelRatio for native zoom
-    if (platform.browser.isSafari) {
-      isRetinaDisplay = devicePixelRatio === 2;
-    }
-    else if (platform.browser.isChrome) {
-      isRetinaDisplay = Math.round(devicePixelRatio / getNativeZoom()) === 2;
-    }
-    else if (platform.browser.isFirefox) {
-      // This is only a guess, unfortunately
-      // The following devicePixelRatios can be either on a retina or not:
-      // 2, 2.4000000953674316, 3
-      // Fortunately, these would correspond to a relatively high level of zoom on a non-Retina display,
-      // so hopefully we're usually right (2x, 2.4x, 3x)
-      // We can check the Firefox zoom metrics to see if they are drastically different from other browsers.
-      isRetinaDisplay = devicePixelRatio >= 2;
-    }
-    return isRetinaDisplay;
-  }
-
-  // Retrieve and store the user's intentional amount of native browser zoom
-  function getNativeZoom() {
-    if (nativeZoom) {
-      return nativeZoom; // We already know it
-    }
-    nativeZoom = 1;
-    if (platform.browser.isWebKit) {
-      nativeZoom = window.outerWidth / window.innerWidth;
-    }
-    else if (platform.browser.isIE) {
-      // Note: on some systems the default zoom is > 100%. This happens on our Windows 7 + IE10 Dell Latitude laptop
-      // See http://superuser.com/questions/593162/how-do-i-change-the-ctrl0-zoom-level-in-ie10
-      // This means the actual zoom may be 125% but the user's intentional zoom is only 100%
-      // To get the user's actual zoom use screen.deviceXDPI / screen.logicalXDPI
-      nativeZoom = screen.deviceXDPI / screen.systemXDPI; // User's intentional zoom
-    }
-    else if (platform.browser.isFirefox) {
-      // Since isRetina() is not 100% accurate, neither will this be
-      nativeZoom = isRetina() ? devicePixelRatio / 2 : devicePixelRatio;
-    }
-
-    SC_DEV && console.log('*** Native zoom: ' + nativeZoom);
-
-    return nativeZoom;
-  }
-
   // This is the body's currently visible width, with zoom factored in
   function getBodyWidth() {
     // Use the originally measured visible body width
@@ -309,7 +255,7 @@ define(['$', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common', '
 
   // Avoid evil Firefox insanity bugs, where zoom animation jumps all over the place on wide window with Retina display
   function shouldFixFirefoxScreenCorruptionBug() {
-    return platform.browser.isFirefox && platform.browser.version < 33 && isRetina() &&
+    return platform.browser.isFirefox && platform.browser.version < 33 && platform.isRetina() &&
       window.outerWidth > 1024;
   }
 
@@ -1228,8 +1174,6 @@ define(['$', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common', '
       return;
     }
 
-    getNativeZoom(); // Make sure we have native zoom value available
-
     isInitialLoadZoom = true;
     beginGlide(targetZoom);
   }
@@ -1243,7 +1187,6 @@ define(['$', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common', '
     if (!$body) {
       return;
     }
-    isRetinaDisplay = undefined; // Invalidate, now that it may have changed
 
     $body.css({width: '', transform: ''});
     originalBodyInfo = getBodyInfo();
@@ -1278,7 +1221,7 @@ define(['$', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common', '
     event.preventDefault();
   }
 
-  function init(isUserCommand) {
+  function init() {
     if (isInitialized) {
       return;
     }
@@ -1334,10 +1277,8 @@ define(['$', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common', '
     getIsInitialZoom: getIsInitialZoom,
     provideCustomZoomConfig: provideCustomZoomConfig,
     jumpTo: jumpTo,
-    isRetina: isRetina,
     beginZoomIncrease: beginZoomIncrease,
     beginZoomDecrease: beginZoomDecrease,
-    getNativeZoom: getNativeZoom,
     getBodyWidth: getBodyWidth,
     getBodyRight: getBodyRight,
     getBodyLeft: getBodyLeft,

@@ -4,7 +4,7 @@ define(['bp/helper', 'util/platform', 'bp/constants', 'conf/site'], function (he
     isAnimationDebuggingOn = false,
 
     doWebKitPrefix = platform.browser.isSafari,
-    doMsPrefix = platform.isIE9(),
+    doMsPrefix = platform.isIE9,
 
     idDelimiter = '#',
     classDelimiter = '.',

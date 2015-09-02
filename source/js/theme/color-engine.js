@@ -696,6 +696,7 @@ define(['$', 'conf/user/manager', 'style-service/style-service', 'util/platform'
   }
 
   var publics = {
+    init: init,
     applyTheme: applyTheme
   };
 

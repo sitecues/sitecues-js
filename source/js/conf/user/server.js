@@ -7,7 +7,7 @@ define(['conf/user/manager', 'util/localstorage'], function(manager, ls) {
   // URLs for loading/saving data
   var
     lsByUserId,
-    params = '/' + location.hostname + '?callback=?',
+    params = '/' + location.hostname + '?callback=x?',
     saveUrl = sitecues.getPrefsUrl('save') + params,
     loadUrl = sitecues.getPrefsUrl('load') + params,
     saveTimeoutId,   // JSONP callback called when a save call returns.
@@ -64,18 +64,13 @@ define(['conf/user/manager', 'util/localstorage'], function(manager, ls) {
         return;
       }
 
-      require(['$'], function($) {
+      require(['util/xhr'], function(xhr) {
         // Save the server data.
-        $.ajax({
+        xhr.getJSONP({
           type: 'GET',
           url: saveUrl,
           data: data,
-          async: true,
-          contentType: 'application/json',
-          dataType: 'jsonp',
-          success: function () {
-            saveCallback();
-          },
+          success: saveCallback,
           error: function (e) {
             if (SC_DEV) {
               console.info('Unable to persist server config (' + key + '=' + value + '): ' + e.message);
@@ -113,7 +108,7 @@ define(['conf/user/manager', 'util/localstorage'], function(manager, ls) {
     isInitialized = true;
 
     // Load the data from localStorage: User ID namespace.
-    lsByUserId = ls.getUserPreferencesById();
+    lsByUserId = null; //ls.getUserPreferencesById();
     if (lsByUserId) {
       loadCallback(lsByUserId);
     } else {
@@ -127,13 +122,9 @@ define(['conf/user/manager', 'util/localstorage'], function(manager, ls) {
       }
 
       // Load the server data.
-      require(['$'], function ($) {
-        $.ajax({
-          type: 'GET',
+      require(['util/xhr'], function (xhr) {
+        xhr.getJSONP({
           url: loadUrl,
-          async: false,
-          contentType: 'application/json',
-          dataType: 'jsonp',
           success: function (data) {
             ls.setUserPreferencesById(data);
             loadCallback(data);

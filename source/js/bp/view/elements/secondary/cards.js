@@ -1,8 +1,8 @@
 /**
  * Generic module for handling the cards used by tips and settings
  */
-define(['bp/constants', 'bp/helper', 'locale/locale', 'bp/model/state', 'util/platform', 'util/animate'],
-  function (BP_CONST, helper, locale, state, platform, animate) {
+define(['bp/constants', 'bp/helper', 'locale/locale', 'bp/model/state', 'util/platform', 'util/animate', 'util/xhr'],
+  function (BP_CONST, helper, locale, state, platform, animate, xhr) {
 
   var
     PANELS_WITH_CARDS = { tips: 1, settings: 1},
@@ -24,22 +24,12 @@ define(['bp/constants', 'bp/helper', 'locale/locale', 'bp/model/state', 'util/pl
     var localizedPanelName = panelName + '-' + locale.getShortWebsiteLang(),
       panelUrl = sitecues.resolveSitecuesUrl('../html/' + panelName + '/' + localizedPanelName + '.html');
 
-    var xhr = new XMLHttpRequest();
-
-    if ('withCredentials' in xhr) {
-      xhr.open('GET', panelUrl, true);
-    } else {
-      xhr = new XDomainRequest();
-      xhr.open('GET', panelUrl);
-    }
-
-    xhr.onload = function(evt) {
-      var request = evt.target || this,
-        html = addSemanticSugar(request.responseText),
-        panelElement = document.createElement('sc-cards'),
-        SUCCESS = 200;
-
-      if (request.status === SUCCESS) {
+    xhr.get({
+      url: panelUrl,
+      success: function(evt) {
+        var request = evt.target || this,
+          html = addSemanticSugar(request.responseText),
+          panelElement = document.createElement('sc-cards');
 
         panelElement.id = 'scp-' + panelName;
         panelElement.className = 'scp-if-' + panelName + ' scp-transition-opacity scp-secondary-feature';
@@ -55,10 +45,7 @@ define(['bp/constants', 'bp/helper', 'locale/locale', 'bp/model/state', 'util/pl
           sitecues.emit('bp/content-loaded');
         }
       }
-    };
-
-    xhr.url = panelUrl;
-    xhr.send();
+    });
   }
 
   function getContainer() {
@@ -88,7 +75,7 @@ define(['bp/constants', 'bp/helper', 'locale/locale', 'bp/model/state', 'util/pl
   function removeUnsupportedContent(panelElement) {
     if (platform.browser.isIE) {
       removeAllElements(panelElement.getElementsByClassName('scp-no-ie'));
-      if (platform.isIE9()) {
+      if (platform.isIE9) {
         removeAllElements(panelElement.getElementsByClassName('scp-no-ie9'));
       }
     }

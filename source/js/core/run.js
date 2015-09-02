@@ -27,11 +27,8 @@
 //      source/js/custom-scripts/custom-scripts.js \
 //      $(custom-files) \
 // TODO themes
-// TODO in keys need to get events for lens/mh visibility
 // TODO file bug on requirejs needing sitecues.require when variable name used
-// TODO what if cursor size set but no other page features set? (E.g. zoom === 1) -- we still need to init page features esp. cursor then
-// TODO need is retina info in size-animation.js
-// TODO cursor settings only -- be careful of mousehue 1.1 which means nothing
+// TODO cursor size/hue settings only -- be careful of mousehue 1.1 which means nothing
 
 define(['../conf/user/user-id', 'conf/user/server', 'locale/locale', 'conf/user/manager'], function (userId, userSettingsServer, locale, conf) {
   var
