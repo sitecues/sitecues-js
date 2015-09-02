@@ -19,19 +19,26 @@ define([], function() {
       });
     },
     'reset-sitecues': function(event) {
-      require(['conf/user/manager', 'command/reset-zoom', 'audio/audio'], function (conf, resetZoom, audio) {
-        resetZoom();
-        audio.setSpeechState(false, true);
-        if (event.shiftKey) {
-          conf.data({});
-        }
-      });
-    },
-    'reset-zoom': function() {
-      require(['zoom/zoom', 'audio/audio'], function(zoomMod, audio) {
+      require(['conf/user/manager', 'zoom/zoom', 'audio/audio'], function (conf, zoomMod, audio) {
+        // 0 by itself -> reset zoom
+        // Shift+0 -> Also reset speech
+        // Alt+Shift+0 -> Full reset for all of sitecues, including themes, cursors, cues ... everything
+        // Turn off zoom
         zoomMod.resetZoom();
-        audio.stopAudio();
-        audio.playEarcon('quit-organ');
+        if (event.shiftKey) {
+          // Turn off speech
+          audio.setSpeechState(false, true);
+          audio.stopAudio();
+          if (event.altKey) {
+            // Full reset
+            // For each key in the settings data
+            var data = conf.data();
+            Object.keys(data).forEach(function(keyName) {
+              conf.set(keyName, null);
+            });
+            audio.playEarcon('quit-organ');
+          }
+        }
       });
     },
     'speak-highlight': function() {

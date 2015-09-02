@@ -84,10 +84,7 @@ define(['util/element-classifier', 'keys/commands'],
           return canUseZoomKey(event);
         }
       },
-      'reset': function(event) {   // Alt+0 resets all of sitecues
-        return event.keyCode === NUMPAD_0 && event.altKey;
-      },
-      'zoom1x': function(event) {  // Ctrl+0, Cmd+0 or just 0 to reset zoom only
+      'reset': function(event) {  // Ctrl+0, Cmd+0 or just 0 to reset zoom only, Alt+0 to reset zoom & speech, Alt+Shift+0 to reset all
         return event.keyCode === NUMPAD_0 && (!elemClassifier.isEditable(event.target) || hasCommandModifier(event));
       },
       'speech': function(event) {
@@ -144,7 +141,6 @@ define(['util/element-classifier', 'keys/commands'],
       'minus': 'decrease-zoom',
       'plus': 'increase-zoom',
       'reset': 'reset-sitecues',
-      'zoom1x': 'reset-zoom',
       'speech': 'toggle-speech'
     },
     KEY_EVENT_DEFAULT = 'queue-key';
