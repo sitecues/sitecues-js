@@ -4,7 +4,6 @@
  */
 
 // Now
-// TODO add to make -- jshint source/js --exclude source/js/util/jquery.js
 // TODO use seth's more modern jshint options
 // TODO Used to use these uglify options: -m -c dead_code=true    -- Which others should we use? Can we mangle property/key names now?
 //      If we need to set complex options can do -o build.js e.g. http://requirejs.org/docs/optimization.html#basics

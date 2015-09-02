@@ -100,6 +100,7 @@ endif
 # If the 'list' option is 'true', set the 'lint' target as a
 # dependency of 'build'. Otherwise, print a message stating that the
 # linting is disabled.
+build_lint_dep:=.no-lint-on-build
 ifeq ($(lint), true)
 	_build_lint_dep:=lint
 else
@@ -145,7 +146,7 @@ endif
 # TARGET: build
 #	Build the compressed file and, optionally, run gjslint.
 ################################################################################
-build: clean $(_force-deps-refresh) $(_build_lint_dep)
+build: lint clean $(_force-deps-refresh)
 	@echo "Node version : $(shell node --version)"
 	@echo "npm version  : v$(shell npm --version)"
 	@for _CUSTOM_CONF_NAME in $(custom-config-names) ; do \
@@ -167,7 +168,7 @@ debug: clean $(_force-deps-refresh) $(_build_lint_dep)
 #	Package up the files into a deployable bundle, and create a manifest for local
 # file deployment.
 ################################################################################
-package: build
+package: lint build
 ifeq ($(sc_dev), true)
 	$(error Unable to package a development build)
 endif
@@ -206,14 +207,16 @@ deps-clean:
 
 ################################################################################
 # TARGET: lint
-#	Run lenienter on the JavaScript source.
+#	Run lenienter and jshint on the JavaScript source.
 #
-# ALTERNATE: Run Google Closure Linter
-#	@gjslint --nojsdoc -r source/js
+# ALTERNATE: Run manally (Google closure and jshint)
+#	gjslint --nojsdoc -r source/js
+#	jshint source/js --exclude source/js/util/jquery.js
 ################################################################################
 lint:
 	@echo "Linting started."
-	@lenient-lint --beep --error_trace --multiprocess --nojsdoc -r source/js --summary --time --unix_mode
+	jshint source/js --exclude source/js/util/jquery.js
+	lenient-lint --beep --error_trace --multiprocess --nojsdoc -r source/js --summary --time --unix_mode
 	@echo "Linting completed."
 
 ################################################################################

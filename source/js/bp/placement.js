@@ -185,7 +185,8 @@ define(['bp/view/modes/badge', 'bp/model/state', 'bp/constants', 'bp/helper', 'u
     }
 
     // Set left and top for positioning.
-    ['width', 'height'].forEach(setBPProperty);
+    setBPProperty('width');
+    setBPProperty('height');
 
     bpElement.style.top  = 0;
     bpElement.style.left = 0;
