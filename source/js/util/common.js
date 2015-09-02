@@ -217,7 +217,7 @@ define(['util/element-classifier'], function (elemClassifier) {
     measureStyle.width = ems + 'em';
     measureStyle.visibility = 'hidden';
     // Multiply by zoom because our <div> is not affected by the document's current zoom level
-    px = measureDiv[0].clientWidth;
+    px = measureDiv.clientWidth;
     document.body.removeChild(measureDiv);
     return px;
   }

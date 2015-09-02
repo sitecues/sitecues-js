@@ -4,8 +4,8 @@
  * It is also responsible for calculating and setting the appropriate height/width of the HLB so that it is
  * encapsulated within the HLB_SAFE_AREA.
  */
-define(['$', 'conf/user/manager', 'hlb/styling', 'util/common', 'hlb/safe-area'],
-  function($, conf, hlbStyling, common, hlbSafeArea) {
+define(['$', 'conf/user/manager', 'hlb/styling', 'util/common', 'util/element-classifier', 'hlb/safe-area'],
+  function($, conf, hlbStyling, common, elemClassifier, hlbSafeArea) {
 
   /////////////////////////
   // PRIVATE VARIABLES
@@ -14,7 +14,10 @@ define(['$', 'conf/user/manager', 'hlb/styling', 'util/common', 'hlb/safe-area']
   var CHAR_WIDTH_LIMIT = 50,  // Amount of characters that fits horizontally in HLB
 
       originCSS,    // The HLB element's midpoint for animation
-      translateCSS; // The HLB element's translation for final position
+      translateCSS, // The HLB element's translation for final position
+      isEditable = elemClassifier.isEditable,
+      isVisualMedia = elemClassifier.isVisualMedia,
+      isFormControl = elemClassifier.isFormControl;
 
   //////////////////////////////
   // PRIVATE FUNCTIONS
@@ -28,8 +31,7 @@ define(['$', 'conf/user/manager', 'hlb/styling', 'util/common', 'hlb/safe-area']
    */
   function getChildWidth(child, $hlb) {
 
-    var sum               = 0,
-        hlbBoundingRect   = $hlb[0].getBoundingClientRect(),
+    var hlbBoundingRect   = $hlb[0].getBoundingClientRect(),
         childBoundingRect = child.getBoundingClientRect(),
         inheritedZoom     = getInheritedZoom($hlb),
         leftDiff          = childBoundingRect.left > hlbBoundingRect.left ? childBoundingRect.left - hlbBoundingRect.left : 0,
@@ -189,7 +191,7 @@ define(['$', 'conf/user/manager', 'hlb/styling', 'util/common', 'hlb/safe-area']
 
       allowWrapping = (css.whiteSpace === 'normal' || css.whiteSpace === 'preWrap') &&
         (!hasPositioningCss(css) || isLonerElement(element)) &&
-        !common.isVisualMedia(element) && !common.isFormControl(element) && !common.isEditable(element);
+        !isVisualMedia(element) && !isFormControl(element) && !isEditable(element);
 
       // This fixed something on gwmicro, but broke other things.
       // if (css.display === 'table-cell') {
@@ -353,7 +355,7 @@ define(['$', 'conf/user/manager', 'hlb/styling', 'util/common', 'hlb/safe-area']
       });
 
       // Keep aspect ratio if HLB is an image
-      if (common.isVisualMedia($hlb[0])) {
+      if (isVisualMedia($hlb[0])) {
 
         // We need to recalculate the bounding client rect of the HLB element, because we just changed it.
         $hlb.css({
@@ -385,7 +387,7 @@ define(['$', 'conf/user/manager', 'hlb/styling', 'util/common', 'hlb/safe-area']
       });
 
       // Keep aspect ratio if HLB is an image
-      if (common.isVisualMedia($hlb[0])) {
+      if (isVisualMedia($hlb[0])) {
 
         // We need to recalculate the bounding client rect of the HLB element, because we just changed it.
         $hlb.css({

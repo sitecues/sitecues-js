@@ -10,6 +10,7 @@ define([
     'hlb/styling',
     'util/platform',
     'util/common',
+    'util/element-classifier',
     'hlb/animation',
     'util/geo'],
   function(
@@ -20,8 +21,8 @@ define([
     hlbStyling,
     platform,
     common,
+    elemClassifier,
     hlbAnimation,
-    mh,
     geo) {
 
   /////////////////////////
@@ -42,7 +43,6 @@ define([
       $hlb,            // The cloned object, based on the $foundation.
       $hlbWrapper,     // Container for both the HLB and background dimmer.
 
-      highlight,       // The object given to us by the mouse highlight module.
       initialHLBRect,  // The highlight rect, if it exists, otherwise use the $foundation bounding client rect.
       inheritedZoom,   // Amount of zoom inherited from page's scale transform.
       removeTemporaryFoundation    = false,  // Did we create our own foundation? (becomes true for lonely elements)
@@ -180,7 +180,7 @@ define([
   function onHLBReady() {
 
     // Focus input or textarea
-    if (common.isEditable($hlb[0])) {
+    if (elemClassifier.isEditable($hlb[0])) {
       $hlb.focus();
     }
 
@@ -257,7 +257,7 @@ define([
     // Turn off listeners for the old HLB. createHLB() will add new ones.
     turnOffHLBEventListeners();
 
-    createHLB(isRetargeting);
+    createHLB(highlight, isRetargeting);
   }
 
   /**
@@ -305,11 +305,11 @@ define([
    * [createHLB initializes, positions, and animates the HLB]
    * @param isRetargeting -- true if HLB is moving from one place to another, false if brand new HLB mode
    */
-  function createHLB(isRetargeting) {
+  function createHLB(highlight, isRetargeting) {
 
     // clone, style, filter, emit hlb/create,
     // prevent mousemove deflation, disable scroll wheel
-    initializeHLB();
+    initializeHLB(highlight);
 
     hlbPositioning.sizeHLB($hlb, $foundation, initialHLBRect);
 
@@ -344,7 +344,7 @@ define([
 
   function getEditableItems() {
     function isEditable(index, element) {
-      return common.isEditable(element);
+      return elemClassifier.isEditable(element);
     }
     return $foundation.find('input,textarea')
       .addBack()
@@ -357,7 +357,7 @@ define([
    * cloning child styles, filtering attributes, styles, and elements, and setting the
    * HLB with default styles and computed styles.]
    */
-  function initializeHLB() {
+  function initializeHLB(highlight) {
 
     // Create and append the HLB and DIMMER wrapper element to the DOM
     $hlbWrapper = getOrCreateHLBWrapper();
@@ -380,7 +380,7 @@ define([
     preventDeflationFromMouseout = true;
 
     // Clone, style, filter
-    cloneHLB();
+    cloneHLB(highlight);
 
     turnOnHLBEventListeners();
 
@@ -391,7 +391,7 @@ define([
   /**
    * [cloneHLB clones elements and styles from the foundation to the HLB.]
    */
-  function cloneHLB() {
+  function cloneHLB(highlight) {
 
     var hlbStyles;
 
@@ -709,7 +709,9 @@ define([
     };
   }
   var publics = {
-    getElement: getElement
+    getElement: getElement,
+    toggleHLB: toggleHLB,
+    retargetHLB: retargetHLB
   };
 
   if (SC_UNIT) {

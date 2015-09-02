@@ -4,7 +4,7 @@
  * Currently the speech dictionary resides here until we can move it to the server.
  */
 
-define(['util/common', '$'], function(common, $) {
+define(['util/element-classifier', '$'], function(elemClassifier, $) {
   var textBuffer = '',
     TEXT_NODE = 3,
     ELEMENT_NODE = 1;

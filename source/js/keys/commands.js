@@ -12,10 +12,10 @@ define([], function() {
         zoomMod.beginZoomIncrease();
       });
     },
-    'queue-key': function() {
+    'queue-key': function(event, keyName) {
       require(['mouse-highlight/move-keys'], function(moveKeys) {
         moveKeys.init();
-        moveKeys.queueKey();
+        moveKeys.queueKey(event, keyName);
       });
     },
     'reset-sitecues': function(event) {

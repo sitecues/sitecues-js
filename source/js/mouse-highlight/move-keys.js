@@ -778,7 +778,7 @@ define(['$', 'mouse-highlight/mouse-highlight', 'util/common', 'util/transform',
     sitecues.on('lens/did-toggle-visibility', function(isVisible) {
       isLensVisible = isVisible;
     });
- }
+  }
 
   var publics = {
     queueKey: queueKey,
