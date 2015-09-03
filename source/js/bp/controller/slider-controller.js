@@ -74,7 +74,7 @@ define(['bp/constants', 'bp/helper', 'util/platform', 'bp/model/state', 'bp/view
 
     require(['zoom/zoom'], function(zoomMod) {
       zoomMod.init(true);
-      isDecrease ? zoomMod.beginZoomDecrease() : zoomMod.beginZoomIncrease();
+      isDecrease ? zoomMod.beginZoomDecrease(evt) : zoomMod.beginZoomIncrease(evt);
     });
 
   }

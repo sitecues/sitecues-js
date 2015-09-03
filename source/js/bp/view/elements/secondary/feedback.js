@@ -1,4 +1,5 @@
-define(['bp/constants', 'bp/helper', 'bp/model/state', 'util/platform'], function (BP_CONST, helper, state, platform) {
+define(['bp/constants', 'bp/helper', 'bp/model/state', 'util/platform', 'metrics/metrics'],
+  function (BP_CONST, helper, state, platform, metrics) {
   var byId = helper.byId,
     isActive = false,
     isInitialized,
@@ -95,7 +96,10 @@ define(['bp/constants', 'bp/helper', 'bp/model/state', 'util/platform'], functio
 
   function onSendFeedbackClick() {
     if (isSendEnabled()) {
-      sitecues.emit('bp/do-send-feedback', getFeedbackText(), currRating);
+      metrics.send('feedback-sent', {
+        feedbackText: getFeedbackText(),
+        rating: currRating  // 0 = no rating, otherwise 1-5 stars
+      });
       toggleSendEnabled(false); // Disable feedback button after sent, so that feedback isn't accidentally clicked twice
       var bpContainer = getBPContainer();
       bpContainer.className += bpContainer.className + ' scp-feedback-sent';

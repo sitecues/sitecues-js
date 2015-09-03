@@ -1,15 +1,15 @@
 define([], function() {
   return {
-    'decrease-zoom': function() {
+    'decrease-zoom': function(event) {
       require(['zoom/zoom'], function (zoomMod) {
         zoomMod.init(true);
-        zoomMod.beginZoomDecrease();
+        zoomMod.beginZoomDecrease(event);
       });
     },
-    'increase-zoom': function() {
+    'increase-zoom': function(event) {
       require(['zoom/zoom'], function (zoomMod) {
         zoomMod.init(true);
-        zoomMod.beginZoomIncrease();
+        zoomMod.beginZoomIncrease(event);
       });
     },
     'queue-key': function(event, keyName) {

@@ -1,8 +1,8 @@
 /*
 BP Controller
  */
-define(['bp/constants', 'bp/model/state', 'bp/helper'],
-  function (BP_CONST, state, helper) {
+define(['bp/constants', 'bp/model/state', 'bp/helper', 'metrics/metrics'],
+  function (BP_CONST, state, helper, metrics) {
 
   // How long we wait before expanding BP
   var hoverDelayTimer,
@@ -68,7 +68,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper'],
           return true;
         }
         if (item.id === BP_CONST.ZOOM_SLIDER_BAR_ID) {
-          performZoomSliderCommand(keyCode);
+          performZoomSliderCommand(keyCode, evt);
         }
         else {
           if (keyCode === BP_CONST.KEY_CODES.ENTER || keyCode === BP_CONST.KEY_CODES.SPACE) {
@@ -154,6 +154,8 @@ define(['bp/constants', 'bp/model/state', 'bp/helper'],
     }
 
     sitecues.emit('bp/will-expand');
+
+    metrics.send('badge-hovered');
 
     setPanelExpandedState();
 
@@ -275,12 +277,11 @@ define(['bp/constants', 'bp/model/state', 'bp/helper'],
     return evt.altKey || evt.metaKey || evt.ctrlKey;
   }
 
-  function performZoomSliderCommand(keyCode) {
+  function performZoomSliderCommand(keyCode, evt) {
     var deltaSliderCommand = DELTA_KEYS[keyCode];
     if (deltaSliderCommand) {
       require(['zoom/zoom'], function(zoomMod) {
-        var zoomFn = deltaSliderCommand > 0 ? zoomMod.beginZoomIncrease : zoomMod.beginZoomDecrease;
-        zoomFn();
+        deltaSliderCommand > 0 ? zoomMod.beginZoomIncrease(evt) : zoomMod.beginZoomDecrease(evt);
       });
     }
   }

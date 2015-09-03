@@ -55,7 +55,7 @@ define(['conf/user/manager', 'conf/site', '$', 'audio/speech-builder', 'util/pla
     }
   }
 
-  function speakText(text, lang) {
+  function speakText(text, lang, triggerType) {
     stopAudio();  // Stop any currently playing audio and halt keydown listener until we're playing again
     getAudioPlayer(function(player) {
       var TTSUrl = getTTSUrl(text, lang),

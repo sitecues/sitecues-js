@@ -31,7 +31,6 @@ define([], function () {
 
     // Create a reusable request object
     var request = new XMLHttpRequest();
-    var t = new Date();
     request.open('GET', baseMediaUrl, true);
     request.responseType = 'arraybuffer';
     // Our asynchronous callback

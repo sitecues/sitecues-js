@@ -3,8 +3,19 @@
  * See docs at https://equinox.atlassian.net/wiki/display/EN/Smooth+Zoom
  */
 
-define(['$', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common', 'util/transform'],
-  function ($, conf, site, platform, common, transform) {
+//var DEFAULT_STATE = {
+//  'name': 'zoom-changed',
+//  'is_slider_click': 0,                // Slider in panel
+//  'is_slider_drag': 0,                 // True if the user drags the slider (as opposed to clicking in it)
+//  'is_key': 0,                         // + or - key (or with modifier)
+//  'is_browser_zoom_key_override': 0,   // User is pressing the browser's zoom key command -
+//  'is_button_press': 0,                // Small or large A in panel
+//  'is_long_glide': 0,                  // Key or A button held down to glide extra        -
+//  'from_zoom': 1                       // Old zoom value
+//};
+
+define(['$', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common', 'util/transform', 'metrics/metrics'],
+  function ($, conf, site, platform, common, transform, metrics) {
 
   // Default zoom configuration
 
@@ -122,12 +133,11 @@ define(['$', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common', '
         }
       }
     } else {
-      if (!zoomInput.isSliderDrag) {
+      if (!zoomInput.is_slider_drag) {
         // 2nd call -- cancel glide and begin continual updates
         cancelFrame(zoomAnimator);
         cancelGlideChangeTimer();
-        zoomInput.isSliderDrag = true;
-        sitecues.emit('zoom/slider-drag');
+        zoomInput.is_slider_drag = true;
         if (shouldPerformContinualUpdates) {
           zoomAnimator = requestFrame(performContinualZoomUpdates);
         }
@@ -205,7 +215,7 @@ define(['$', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common', '
 
   function finishZoomSliderOperation() {
     // ---- Slider drag ----
-    if (zoomInput.isSliderDrag) {
+    if (zoomInput.is_slider_drag) {
       cancelFrame(zoomAnimator);
       finishZoomOperation();
       return;
@@ -214,7 +224,7 @@ define(['$', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common', '
     // ---- Slider click ----
     // Is in the middle of gliding to a zoom click -- this always uses JS.
     // Let it finish -- the animation's end will cause finishZoomOperation() to be called
-    zoomInput.isSliderDragStopped = true;
+    zoomInput.is_slider_click = true;
   }
 
   // Should smooth zoom be used or step zoom?
@@ -284,7 +294,7 @@ define(['$', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common', '
     return MIN_ZOOM_PER_CLICK;
   }
 
-  function beginZoomIncrease() {
+  function beginZoomIncrease(event) {
     // Increase up to max or until zoomStopRequested()
     beginGlide(MAX, event);
   }
@@ -298,7 +308,17 @@ define(['$', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common', '
   // If we are zooming with +/- or clicking A/a
   function beginGlide(targetZoom, event) {
     if (!isZoomOperationRunning() && targetZoom !== completedZoom) {
-      var input = { event: event };
+      var input = {};
+      if (event) {
+        if (event.keyCode) {
+          // TODO should we differentiate between Enter on A/a vs +/- ?
+          input.is_key = true;
+          input.is_browser_key_override = event.ctrlKey || event.metaKey;
+        }
+        else {
+          input.is_button_press = true;
+        }
+      }
       if (!shouldSmoothZoom()) {
         beginZoomOperation(targetZoom, input);
         // Instant zoom
@@ -312,14 +332,14 @@ define(['$', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common', '
         return;
       }
 
-      input.isLongGlide = true; // Default, assume glide will not be cut off early
+      input.is_long_glide= true; // Default, assume glide will not be cut off early
       beginZoomOperation(targetZoom, input, beginGlideAnimation);  // Provide callback for when animation can actually start
       $(window).one('keyup', finishGlideIfEnough);
     }
 
     function beginGlideAnimation() {
       glideChangeTimer = setInterval(onGlideChange, GLIDE_CHANGE_INTERVAL_MS);
-      if (!zoomInput.isLongGlide) {
+      if (!zoomInput.is_long_glide) {
         // Button/key was already released, zoom only for long enough to get minimum zoom
         var delta = getMinZoomPerClick() * (completedZoom < targetZoom ? 1 : -1);
         currentTargetZoom = getSanitizedZoomValue(completedZoom + delta);
@@ -344,7 +364,7 @@ define(['$', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common', '
   }
 
   function getMsPerXZoom() {
-    return zoomInput.isSlider ? MS_PER_X_ZOOM_SLIDER : MS_PER_X_ZOOM_GLIDE;
+    return zoomInput.is_slider ? MS_PER_X_ZOOM_SLIDER : MS_PER_X_ZOOM_GLIDE;
   }
 
   // Get what the zoom value would be if we stopped the animation now
@@ -374,7 +394,7 @@ define(['$', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common', '
     if (!isGlideCurrentlyRunning()) {
       // Glide has started, but animation hasn't started yet -- we are waiting for
       // the ANIMATION_OPTIMIZATION_SETUP_DELAY period while the browser sets up for the animation.
-      zoomInput.isLongGlide = false;  // beginGlideAnimation() will see this and setup it's own timer
+      zoomInput.is_long_glide = false;  // beginGlideAnimation() will see this and setup it's own timer
       return;
     }
 
@@ -383,10 +403,7 @@ define(['$', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common', '
     var timeElapsed = getZoomOpElapsedTime(),
       timeRemaining = Math.max(0, getMinZoomPerClick() * getMsPerXZoom() - timeElapsed);
 
-    zoomInput.isLongGlide = timeRemaining === 0;
-    if (zoomInput.isLongGlide) {
-      sitecues.emit('zoom/long-glide');
-    }
+    zoomInput.is_long_glide = timeRemaining === 0;
 
     minZoomChangeTimer = setTimeout(finishGlideEarly, timeRemaining);
   }
@@ -444,7 +461,7 @@ define(['$', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common', '
 
   function zoomStopRequested() {
     if (isZoomOperationRunning()) {
-      if (zoomInput.isSlider) {
+      if (zoomInput.is_slider) {
         finishZoomSliderOperation();
       }
       else {   // "A" button or +/- keypress
@@ -505,7 +522,7 @@ define(['$', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common', '
   }
 
   function isSliderActive() {
-    return zoomInput.isSlider && !zoomInput.isSliderDragStopped;
+    return zoomInput.is_slider && !zoomInput.is_slider_click;
   }
 
   // Animate until the currentTargetZoom, used for gliding zoom changes
@@ -637,11 +654,13 @@ define(['$', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common', '
   function beginZoomOperation(targetZoom, input, animationReadyCallback) {
     // Initialize zoom input info
     zoomInput = $.extend({
-      isSlider: false,                    // Slider in panel
-      isSliderDrag: false,                // True if the user drags the slider (as opposed to clicking in it)
-      isSliderDragStopped: false,         // True if the user dragged the slider and now stopped
-      isLongGlide: false,                 // Key or A button held down to glide extra
-      event: {}
+      is_slider: false,                  // Slider in panel
+      is_slider_drag: false,             // True if the user drags the slider (as opposed to clicking in it)
+      is_slider_click: false,            // True if the user dragged the slider and now stopped
+      is_long_glide: false,              // Key or A button held down to glide extra
+      is_key: false,
+      is_button_press: false,            // Small or large A in panel
+      from_zoom: completedZoom           // Old zoom value
     }, input);
 
     // Make sure we're ready
@@ -666,7 +685,7 @@ define(['$', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common', '
         pointerEvents: 'none'
       });
 
-      sitecues.emit('zoom/begin', zoomInput.event);
+      sitecues.emit('zoom/begin');
 
       animationReadyCallback && animationReadyCallback();
     }
@@ -748,6 +767,7 @@ define(['$', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common', '
       require(['audio/audio-cues'], function (audioCues) {
         audioCues.playZoomCue(completedZoom);
       });
+      metrics.send('zoom-changed', zoomInput);
     }
 
     clearZoomCallbacks();

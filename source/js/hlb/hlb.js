@@ -12,7 +12,8 @@ define([
     'util/common',
     'util/element-classifier',
     'hlb/animation',
-    'util/geo'],
+    'util/geo',
+    'metrics/metrics'],
   function(
     $,
     conf,
@@ -23,7 +24,8 @@ define([
     common,
     elemClassifier,
     hlbAnimation,
-    geo) {
+    geo,
+    metrics) {
 
   /////////////////////////
   // PRIVATE VARIABLES
@@ -384,8 +386,10 @@ define([
 
     turnOnHLBEventListeners();
 
-    // Listeners: metrics/hlb-opened.js, speech.js
+    // Listeners: speech.js
     sitecues.emit('hlb/create', $hlb);
+
+    metrics.send('hlb-opened');
   }
 
   /**

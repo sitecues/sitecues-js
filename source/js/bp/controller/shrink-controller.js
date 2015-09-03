@@ -1,8 +1,8 @@
 /*
  Panel Controller
  */
-define(['bp/constants', 'util/common', 'bp/model/state', 'bp/helper'],
-  function (BP_CONST, common, state, helper) {
+define(['bp/constants', 'util/common', 'bp/model/state', 'bp/helper', 'metrics/metrics'],
+  function (BP_CONST, common, state, helper, metrics) {
 
   var MIN_DISTANCE = 75, // Min distance before shrink
     mouseLeaveShrinkTimer,  // How long we wait before shrinking BP from any mouseout (even only just barely outside panel)
@@ -10,7 +10,10 @@ define(['bp/constants', 'util/common', 'bp/model/state', 'bp/helper'],
     isInitialized,
     isSticky = false,
     // Feature panels are larger, need to know this so that mouseout doesn't exit accidentally after we close feature panel
-    wasInFeaturePanel = false;
+    wasInFeaturePanel = false,
+    metricsInteractionData,
+    metricsInteractionMap,
+    byId = helper.byId;
 
   function cancelMouseLeaveShrinkTimer() {
     clearTimeout(mouseLeaveShrinkTimer);
@@ -98,6 +101,8 @@ define(['bp/constants', 'util/common', 'bp/model/state', 'bp/helper'],
 
     // Finally, begin the shrinking animation.
     sitecues.emit('bp/did-change');
+
+    metrics.send('panel-closed', metricsInteractionData);
   }
 
   /*
@@ -139,17 +144,45 @@ define(['bp/constants', 'util/common', 'bp/model/state', 'bp/helper'],
     }
   }
 
+  function clearMetricsData() {
+    metricsInteractionData = {
+      slider_interacted: false,
+      large_a_clicked: false,
+      small_a_clicked: false,
+      tts_clicked: false
+    };
+  }
+
   // These listeners are temporary – only bound when the panel is open.
   // Good for performance – it prevents extra code from being run on every mouse move/click when we don't need it
   function toggleListeners(doTurnOn) {
+    var addOrRemoveFn = doTurnOn ? 'addEventListener' : 'removeEventListener';
+
+    clearMetricsData();
+
+    function itemClicked(event) {
+      var id = event.originalTarget,
+        propName = metricsInteractionMap[id];
+
+      if (propName) {
+        metricsInteractionData[propName] = true;
+      }
+    }
+
+    function addOrRemoveMetricInteraction(id) {
+      byId(id)[addOrRemoveFn]('click', itemClicked);
+    }
+
     if (isListening !== doTurnOn) {
       isListening = doTurnOn;
-      var addOrRemoveFn = doTurnOn ? 'addEventListener' : 'removeEventListener';
       // Pressing tab or shift tab when panel is open switches it to keyboard mode
       window[addOrRemoveFn]('mousedown', winMouseDown);
       window[addOrRemoveFn]('mousemove', winMouseMove);
       window[addOrRemoveFn]('blur', winBlur);
       window[addOrRemoveFn]('mouseout', winMouseLeave);
+
+      // For each interactive item, add or remove a click listener
+      Object.keys(metricsInteractionMap).forEach(addOrRemoveMetricInteraction);
     }
   }
 
@@ -177,6 +210,14 @@ define(['bp/constants', 'util/common', 'bp/model/state', 'bp/helper'],
     sitecues.on('info/did-show', shrinkPanel);
     sitecues.on('bp/will-expand', willExpand);
     sitecues.on('bp/will-shrink', willShrink);
+
+    metricsInteractionMap = {};
+    metricsInteractionMap[BP_CONST.ZOOM_SLIDER_BAR_ID] = metricsInteractionMap[BP_CONST.ZOOM_SLIDER_THUMB_ID] = 'slider_interacted';
+    metricsInteractionMap[BP_CONST.LARGE_A_ID] = 'large_a_clicked';
+    metricsInteractionMap[BP_CONST.SMALL_A_ID] = 'small_a_clicked';
+    metricsInteractionMap[BP_CONST.TTS_BUTTON] = 'tts_clicked';
+
+
     toggleListeners(true);
   }
 

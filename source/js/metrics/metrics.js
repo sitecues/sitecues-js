@@ -30,7 +30,7 @@ define(['conf/user/manager', 'conf/site', 'locale/locale', 'util/platform', 'uti
       return;
     }
 
-    var newData = JSON.parse(JSON.stringify(data || {})),
+    var newData = copyAndConvertBooleans(data),
       siteId = site.getSiteId();
     newData.name = name;
     newData.siteId = siteId; // TODO should it be site_id ?
@@ -51,6 +51,18 @@ define(['conf/user/manager', 'conf/site', 'locale/locale', 'util/platform', 'uti
     });
   }
 
+  // Copy each key/value pair into a new object
+  // If boolean, use 0 for false value and 1 for true
+  function copyAndConvertBooleans(data) {
+    var newData = {};
+    if (data) {
+      Object.keys(data).forEach(function(key) {
+        var value = data[key];
+        newData[key] = typeof value === 'boolean' ? value * 1 : value;
+      });
+    }
+    return newData;
+  }
 
   function init() {
     send('page-visited', {
