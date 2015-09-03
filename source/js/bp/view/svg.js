@@ -7,7 +7,7 @@ The purpose of some elements:
 - #scpspeechtarget adds animation styles for speech icon waves
 -
  */
-define(['locale/locale', 'util/platform', 'bp/view/styles'], function(locale, platform) {
+define(['locale/locale', 'util/platform', 'bp/view/styles', 'conf/urls'], function(locale, platform, styles, urls) {
   /*jshint multistr: true */
 
   var svg = '\
@@ -210,7 +210,7 @@ define(['locale/locale', 'util/platform', 'bp/view/styles'], function(locale, pl
     var MATCH_URLS = /(href="|url\()(\/.*)"/g;
 
     return text.replace(MATCH_URLS, function (totalMatch, attributeName, url) {
-      return attributeName + sitecues.resolveSitecuesUrl(url);
+      return attributeName + urls.resolveSitecuesUrl(url);
     });
   }
 
@@ -229,19 +229,11 @@ define(['locale/locale', 'util/platform', 'bp/view/styles'], function(locale, pl
 
     return text;
   }
-  function getSvg() {
+  return function() {
     var svgWithCorrectSitecuesUrls = convertSitecuesUrlsToAbsolute(svg),
       svgWithAllAbsoluteUrls = convertRelativeUrlsToAbsolute(svgWithCorrectSitecuesUrls),
       localizedSvg = locale.localizeStrings(svgWithAllAbsoluteUrls);
 
     return localizedSvg;
-  }
-  var publics = {
-    getSvg: getSvg
   };
-
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

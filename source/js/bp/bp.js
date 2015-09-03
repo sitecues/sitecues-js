@@ -149,7 +149,7 @@ define(['bp/controller/bp-controller', 'bp/model/state','bp/view/modes/badge', '
     // Set attributes
     helper.setAttributes(bpContainer, BP_CONST.PANEL_CONTAINER_ATTRS);
 
-    bpContainer.innerHTML = bpSVG.getSvg();
+    bpContainer.innerHTML = bpSVG();
 
     // Parent the badge appropriately
     var svgElement = getSVGElement();

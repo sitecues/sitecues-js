@@ -1,8 +1,8 @@
 /**
  * Generic module for handling the cards used by tips and settings
  */
-define(['bp/constants', 'bp/helper', 'locale/locale', 'bp/model/state', 'util/platform', 'util/animate', 'util/xhr'],
-  function (BP_CONST, helper, locale, state, platform, animate, xhr) {
+define(['bp/constants', 'bp/helper', 'locale/locale', 'bp/model/state', 'util/platform', 'util/animate', 'util/xhr', 'conf/urls'],
+  function (BP_CONST, helper, locale, state, platform, animate, xhr, urls) {
 
   var
     PANELS_WITH_CARDS = { tips: 1, settings: 1},
@@ -22,7 +22,7 @@ define(['bp/constants', 'bp/helper', 'locale/locale', 'bp/model/state', 'util/pl
 
   function loadPanelContents(panelName) {
     var localizedPanelName = panelName + '-' + locale.getShortWebsiteLang(),
-      panelUrl = sitecues.resolveSitecuesUrl('../html/' + panelName + '/' + localizedPanelName + '.html');
+      panelUrl = urls.resolveSitecuesUrl('../html/' + panelName + '/' + localizedPanelName + '.html');
 
     xhr.get({
       url: panelUrl,

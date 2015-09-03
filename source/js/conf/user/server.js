@@ -11,7 +11,7 @@
  -    //
  -    // If we try to save more than one thing in quick succession, it will get lost
  */
-define(['conf/user/manager', 'util/localstorage'], function(manager, ls) {
+define(['conf/user/manager', 'conf/urls', 'util/localstorage'], function(manager, urls, ls) {
 
   // URLs for loading/saving data
   var
@@ -27,7 +27,7 @@ define(['conf/user/manager', 'util/localstorage'], function(manager, ls) {
     var scriptEl = document.createElement('script'),
       // We only need one callback because we only do one at a time
       params = '/' + location.hostname + '?callback=sitecues.jsonpCallback&' + additionalParams,
-      url = sitecues.getPrefsUrl(type) + params;
+      url = urls.getPrefsUrl(type) + params;
 
     scriptEl.setAttribute('src', url);
     scriptEl.id = 'sitecues-jsonp';

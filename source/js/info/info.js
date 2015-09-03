@@ -1,5 +1,5 @@
-define(['$', 'conf/site', 'hlb/dimmer', 'util/platform', 'locale/locale', 'util/color'],
-  function($, site, dimmer, platform, locale, colorUtil) {
+define(['$', 'conf/site', 'conf/urls', 'hlb/dimmer', 'util/platform', 'locale/locale', 'util/color'],
+  function($, site, urls, dimmer, platform, locale, colorUtil) {
 
   var $iframe = $(),
     $closeButton = $(),
@@ -77,9 +77,9 @@ define(['$', 'conf/site', 'hlb/dimmer', 'util/platform', 'locale/locale', 'util/
 
     var
       localizedPageName = pageName + '-' + locale.getShortWebsiteLang(),
-      sitecuesJsUrl = sitecues.getLibraryUrl().raw,
+      sitecuesJsUrl = urls.getLibraryUrl().raw,
       hostUrl = window.location,
-      pageUrl = sitecues.resolveSitecuesUrl('../html/help/' + localizedPageName + '.html',
+      pageUrl = urls.resolveSitecuesUrl('../html/help/' + localizedPageName + '.html',
         {
           scUrl: sitecuesJsUrl,
           siteId: site.getSiteId(),

@@ -2,7 +2,8 @@
  * This module collects all the relevant CSS for the entire web page into one large string.
  */
 
-define(['$', 'style-service/user-agent-css', 'conf/site', 'style-service/media-queries'], function ($, UA_CSS, site, mediaQueries) {
+define(['$', 'style-service/user-agent-css', 'conf/site', 'conf/urls', 'style-service/media-queries'],
+  function ($, UA_CSS, site, urls, mediaQueries) {
 
   var numPending = 0,
     sheets = [],
@@ -133,7 +134,7 @@ define(['$', 'style-service/user-agent-css', 'conf/site', 'style-service/media-q
   }
 
   function getParsedSheetUrl(sheet) {
-    return sitecues.parseUrl(sheet.url);
+    return urls.parseUrl(sheet.url);
   }
 
   /**
@@ -179,7 +180,7 @@ define(['$', 'style-service/user-agent-css', 'conf/site', 'style-service/media-q
     return sheet.text.replace(RELATIVE_URL_REGEXP, function (totalMatch, actualUrl) {
       // totalMatch includes the prefix string  url("      - whereas actualUrl is just the url
       baseUrlObject = baseUrlObject || getParsedSheetUrl(sheet);
-      var newUrl = 'url(' + sitecues.resolveUrl(actualUrl, baseUrlObject);
+      var newUrl = 'url(' + urls.resolveUrl(actualUrl, baseUrlObject);
       return newUrl;
     });
   }
@@ -202,7 +203,7 @@ define(['$', 'style-service/user-agent-css', 'conf/site', 'style-service/media-q
       SC_DEV && mediaQuery && console.log('@import media query: ' + mediaQuery);
       if (mediaQueries.isActiveMediaQuery(mediaQuery)) {
         baseUrlObject = baseUrlObject || getParsedSheetUrl(sheet);
-        insertNewSheetBefore(sheet, sitecues.resolveUrl(actualUrl, baseUrlObject));
+        insertNewSheetBefore(sheet, urls.resolveUrl(actualUrl, baseUrlObject));
       }
       // Now remove @import line from CSS so that it does not get reprocessed
       return '';

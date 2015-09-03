@@ -1,4 +1,4 @@
-define([], function () {
+define(['conf/urls'], function (urls) {
 
   function format(object) {
 
@@ -34,7 +34,7 @@ define([], function () {
 
   function status(callback) {
 
-    require(['util/xhr', 'conf/user/manager', 'conf/urls'], function(xhr, conf, urls) {
+    require(['util/xhr', 'conf/user/manager'], function(xhr, conf) {
 
       var html = document.documentElement,
           confData = conf.data(),
@@ -52,10 +52,10 @@ define([], function () {
       info = {
         'time'            : Date.now(),
         'current_url'     : location.href,
-        'sitecues_js_url' : sitecues.getLibraryUrl().raw,
+        'sitecues_js_url' : urls.getLibraryUrl().raw,
         'user_agent'      : navigator.userAgent,
         'version'         : {
-          'sitecues_js'   : sitecues.getVersion(),
+          'sitecues_js'   : urls.getVersion(),
           'sitecues_up'   : null,
           'sitecues_ws'   : null
         }

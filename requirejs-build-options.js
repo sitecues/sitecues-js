@@ -185,6 +185,38 @@
       ]
     },
     {
+      name: 'info',
+      create: true,
+      include: [
+        'info/info'
+      ],
+      exclude: [
+        'locale/locale',
+        'util/platform',
+        'util/color',
+        'bp/constants',
+        'bp/model/state',
+        'bp/helper',
+        'util/jquery',
+        'util/xhr',
+        'util/common',
+        'util/jquery-utils',
+        'conf/urls',
+        'conf/site',
+        'conf/user/manager',
+        'style-service/user-agent-css.js',
+        'conf/site.js',
+        'style-service/media-queries.js',
+        'style-service/css-aggregator.js',
+        'style-service/style-service.js',
+        'util/transform.js',
+        'metric/metric',
+        'hlb/dimmer',
+        'zoom/zoom-forms.js',
+        'zoom/zoom.js'
+      ]
+    },
+    {
       name: 'themes',
       create: true,
       include: [
@@ -222,6 +254,9 @@
       create: true,
       include: [
         'util/status'
+      ],
+      exclude: [
+        'conf/urls'
       ]
     }
   ],

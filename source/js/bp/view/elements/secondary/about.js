@@ -1,4 +1,4 @@
-define(['bp/constants', 'bp/helper', 'util/transform'], function (BP_CONST, helper, transform) {
+define(['bp/constants', 'bp/helper', 'util/transform', 'conf/urls'], function (BP_CONST, helper, transform, urls) {
   var byId = helper.byId,
     isInitialized;
 
@@ -11,7 +11,7 @@ define(['bp/constants', 'bp/helper', 'util/transform'], function (BP_CONST, help
   }
 
   function loadImage() {
-    byId('scp-sitecues-text').setAttributeNS('http://www.w3.org/1999/xlink', 'href', sitecues.resolveSitecuesUrl('/images/sitecues-logo-text.svg'));
+    byId('scp-sitecues-text').setAttributeNS('http://www.w3.org/1999/xlink', 'href', urls.resolveSitecuesUrl('/images/sitecues-logo-text.svg'));
   }
 
   function getGeometryTargets(cssValues) {

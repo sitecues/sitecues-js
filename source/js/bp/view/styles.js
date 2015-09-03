@@ -1,6 +1,8 @@
-define(['bp/helper', 'util/platform', 'bp/constants', 'conf/site'], function (helper, platform, BP_CONST, site) {
+define(['bp/helper', 'util/platform', 'bp/constants', 'conf/site', 'conf/urls'], function (helper, platform, BP_CONST, site, urls) {
 
   var
+    resolveUrl = urls.resolveSitecuesUrl,
+
     isAnimationDebuggingOn = false,
 
     doWebKitPrefix = platform.browser.isSafari,
@@ -435,33 +437,33 @@ define(['bp/helper', 'util/platform', 'bp/constants', 'conf/site'], function (he
       /******************* Images ********************/
 
       '.scp-active #scp-demo-slider-bar': {
-        'background': 'url(' + sitecues.resolveSitecuesUrl('/images/tips/slider-bar-demo.svg') + ') 100% 100% no-repeat'
+        'background': 'url(' + resolveUrl('/images/tips/slider-bar-demo.svg') + ') 100% 100% no-repeat'
       },
 
       '.scp-active #scp-demo-slider-thumb': {
-        'background': 'url(' + sitecues.resolveSitecuesUrl('/images/tips/slider-thumb-demo.svg') + ') 100% 100% no-repeat'
+        'background': 'url(' + resolveUrl('/images/tips/slider-thumb-demo.svg') + ') 100% 100% no-repeat'
       },
 
       '#scp-speech-button-demo': {
-        'background': 'url(' + sitecues.resolveSitecuesUrl('/images/tips/speech-button-demo.svg') + ') 100% 100% no-repeat'
+        'background': 'url(' + resolveUrl('/images/tips/speech-button-demo.svg') + ') 100% 100% no-repeat'
       },
 
       '#scp-demo-mouse': {
-        'background': 'url(' + sitecues.resolveSitecuesUrl('/images/tips/cursor-demo.svg') + ') 100% 100% no-repeat'
+        'background': 'url(' + resolveUrl('/images/tips/cursor-demo.svg') + ') 100% 100% no-repeat'
       },
 
       // Full guide icon
       '#scp-guide-icon': {
-        'background-image': 'url(' + sitecues.resolveSitecuesUrl('/images/tips/full-guide-icon.png') + ')'
+        'background-image': 'url(' + resolveUrl('/images/tips/full-guide-icon.png') + ')'
       },
 
       '.scp-card-indicator': {
-        'background-image': 'url(' + sitecues.resolveSitecuesUrl('/images/card-indicator.svg') + ')'
+        'background-image': 'url(' + resolveUrl('/images/card-indicator.svg') + ')'
       },
 
       // Keyboard icon
       '#scp-kbd-icon': {
-        'background-image': 'url(' + sitecues.resolveSitecuesUrl('/images/tips/keyboard-icon.png') + ')'
+        'background-image': 'url(' + resolveUrl('/images/tips/keyboard-icon.png') + ')'
       }
     },
 
@@ -678,11 +680,10 @@ define(['bp/helper', 'util/platform', 'bp/constants', 'conf/site'], function (he
   }
 
   if (SC_DEV) {
-    sitecues.toggleSlowBPAnimations = function() {
+    sitecues.toggleSlowBPAnimations = function () {
       isAnimationDebuggingOn = !isAnimationDebuggingOn;
       document.head.removeChild(helper.byId(BP_CONST.BASE_STYLESHEET_ID));
       createStyleSheet(BP_CONST.BASE_STYLESHEET_ID, BASE_CSS);
     };
   }
-  // no publics
 });
