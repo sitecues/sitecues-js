@@ -131,7 +131,7 @@ define(['bp/constants', 'bp/helper', 'conf/user/manager', 'bp/model/state', 'met
   function fireInputRangeMetric(id, settingName, newValue) {
     var oldValue = conf.get(settingName);
     metric('slider-setting-changed', {
-      id: id,
+      id: id.split('scp-')[1] || id,  // Trim off scp- prefix
       name: settingName,
       old: oldValue,
       new: newValue

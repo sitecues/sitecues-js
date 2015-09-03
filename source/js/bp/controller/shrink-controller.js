@@ -54,22 +54,21 @@ define(['bp/constants', 'util/common', 'bp/model/state', 'bp/helper', 'metric/me
   }
 
   function fireClickMetric(evt) {
-    function getTrimmedId(id) { // Trim off scp- prefix
-      var split = id.split('scp-');
-      return split.length > 1 ? split[1] : id;
-    }
-
     var ancestor = helper.getEventTarget(evt),
       id; // default name if we don't find a metric target
     while (ancestor) {
-      id = getTrimmedId(ancestor.id);
-      if (id || ancestor === BP_CONST.BP_CONTAINER_ID) {
+      id = ancestor.id;
+      if (id || id === BP_CONST.BP_CONTAINER_ID) {
         break;
       }
       ancestor = ancestor.parentElement;
     }
 
-    metric('panel-clicked', { target: id || 'window' });
+    function getTrimmedId(id) {
+      return id.split('scp-')[1] || id;
+    }
+
+    metric('panel-clicked', { target: getTrimmedId(id) || 'window' });
   }
 
 
