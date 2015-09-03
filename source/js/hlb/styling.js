@@ -696,15 +696,15 @@ define(['$', 'util/platform', 'util/common', 'conf/user/manager'],
   function getHLBStyles($picked, $foundation) {
 
     var originalElement       = $foundation[0],
-        originalElementOffset = $foundation.offset(),
+        originalElementRect   = originalElement.getBoundingClientRect(),
         elementComputedStyle  = window.getComputedStyle(originalElement),
         backgroundStyles      = getHLBBackgroundImage($picked, elementComputedStyle),
         backgroundColor       = getHLBBackgroundColor($picked, elementComputedStyle),
         calculatedHLBStyles   = {
           'padding-left' : getHLBLeftPadding($foundation, elementComputedStyle),
           'display'      : getHLBDisplay(elementComputedStyle),
-          'left'         : originalElementOffset.left,
-          'top'          : originalElementOffset.top
+          'left'         : originalElementRect.left + window.scrollLeft,
+          'top'          : originalElementRect.top + window.scrollTop
         },
         $parent;
 
@@ -744,7 +744,6 @@ define(['$', 'util/platform', 'util/common', 'conf/user/manager'],
         calculatedHLBStyles.paddingRight  = $parent.css('paddingRight');
 
       }
-
 
       delete backgroundStyles.count;
 
