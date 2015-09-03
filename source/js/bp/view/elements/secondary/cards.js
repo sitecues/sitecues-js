@@ -26,22 +26,18 @@ define(['bp/constants', 'bp/helper', 'locale/locale', 'bp/model/state', 'util/pl
 
     xhr.get({
       url: panelUrl,
-      success: function(evt) {
-        var request = evt.target || this,
-          html = addSemanticSugar(request.responseText),
-          panelElement = document.createElement('sc-cards');
-
+      success: function(html) {
+        var panelElement = document.createElement('sc-cards');
         panelElement.id = 'scp-' + panelName;
         panelElement.className = 'scp-if-' + panelName + ' scp-transition-opacity scp-secondary-feature';
-        panelElement.innerHTML = html;
+        panelElement.innerHTML = addSemanticSugar(html);
 
         getContainer().appendChild(panelElement);
-
         removeUnsupportedContent(panelElement);
 
         toggleCardActive(panelElement.firstElementChild, true);
 
-        if (--panelsToLoad === 0) {
+        if (-- panelsToLoad === 0) {
           sitecues.emit('bp/content-loaded');
         }
       }

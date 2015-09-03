@@ -1,5 +1,5 @@
-define(['bp/constants', 'bp/helper', 'bp/model/state', 'util/platform', 'metrics/metrics'],
-  function (BP_CONST, helper, state, platform, metrics) {
+define(['bp/constants', 'bp/helper', 'bp/model/state', 'util/platform', 'metric/metric'],
+  function (BP_CONST, helper, state, platform, metric) {
   var byId = helper.byId,
     isActive = false,
     isInitialized,
@@ -96,7 +96,7 @@ define(['bp/constants', 'bp/helper', 'bp/model/state', 'util/platform', 'metrics
 
   function onSendFeedbackClick() {
     if (isSendEnabled()) {
-      metrics.send('feedback-sent', {
+      metric('feedback-sent', {
         feedbackText: getFeedbackText(),
         rating: currRating  // 0 = no rating, otherwise 1-5 stars
       });

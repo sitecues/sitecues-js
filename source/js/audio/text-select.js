@@ -13,7 +13,7 @@ define([], function () {
   function speakSelectedText() {
     var selectedText = getSelectedText();
     if (selectedText) {
-      // Listeners: metrics/hlb-opened.js, speech.js
+      // Listeners: speech.js
       sitecues.emit('speech/do-play-text', selectedText);
     }
   }

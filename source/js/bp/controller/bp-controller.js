@@ -1,8 +1,8 @@
 /*
 BP Controller
  */
-define(['bp/constants', 'bp/model/state', 'bp/helper', 'metrics/metrics'],
-  function (BP_CONST, state, helper, metrics) {
+define(['bp/constants', 'bp/model/state', 'bp/helper', 'metric/metric'],
+  function (BP_CONST, state, helper, metric) {
 
   // How long we wait before expanding BP
   var hoverDelayTimer,
@@ -155,7 +155,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'metrics/metrics'],
 
     sitecues.emit('bp/will-expand');
 
-    metrics.send('badge-hovered');
+    metric('badge-hovered');
 
     setPanelExpandedState();
 

@@ -13,7 +13,7 @@ define(['locale/locale', 'util/platform', 'bp/view/styles'], function(locale, pl
   var svg = '\
 <sc id="scp-focus-outline" role="presentation"></sc>\
 \
-<svg id="scp-svg" role="group" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1050 300" preserveAspectRatio="xMinYMin" data-sc-reversible="false">\
+<svg id="scp-svg" role="group" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1050 300" preserveAspectRatio="xMinYMin" data-sc-reversible="false" data-metric="panel">\
 <defs>\
   <g id="scp-small-A-def">\
     <path d="m37 .2l23 62h-14l-5 -14h-23l-5 14h-14l23 -62h14zm1 38l-9 -23h0l-8 23h16z"/>\

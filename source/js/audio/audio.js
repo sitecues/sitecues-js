@@ -10,8 +10,8 @@
  * - Playing audio by key when requested by another module
  */
 
-define(['conf/user/manager', 'conf/site', '$', 'audio/speech-builder', 'util/platform', 'locale/locale', 'metrics/metrics'],
-  function(conf, site, $, builder, platform, locale, metrics) {
+define(['conf/user/manager', 'conf/site', '$', 'audio/speech-builder', 'util/platform', 'locale/locale', 'metric/metric'],
+  function(conf, site, $, builder, platform, locale, metric) {
 
   var ttsOn = false,
     isAudioPlaying,
@@ -63,10 +63,10 @@ define(['conf/user/manager', 'conf/site', '$', 'audio/speech-builder', 'util/pla
 
       function onSpeechComplete() {
         var timeElapsed = new Date() - startRequestTime;
-        metrics.send('tts-requested', {
-          request_time: timeElapsed,
-          audio_format: mediaTypeForTTS,
-          char_count: text.length,
+        metric('tts-requested', {
+          requestTime: timeElapsed,
+          audioFormat: mediaTypeForTTS,
+          charCount: text.length,
           trigger: triggerType
         });
       }

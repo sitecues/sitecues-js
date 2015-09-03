@@ -1,5 +1,5 @@
-define(['util/element-classifier', 'keys/commands'],
-  function(elemClassifier, commands) {
+define(['util/element-classifier', 'keys/commands', 'metric/metric'],
+  function(elemClassifier, commands, metric) {
 
   var
     // KEY_TESTS defines keys used to bind actions to hotkeys.
@@ -210,6 +210,8 @@ define(['util/element-classifier', 'keys/commands'],
   function executeCommand(commandName, keyName) {
     // Emit event defined for key
     commands[commandName](event, keyName);
+
+    metric('key-command', { keyName: keyName });
   }
 
     // key event hook

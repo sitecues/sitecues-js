@@ -1,5 +1,5 @@
-define(['bp/constants', 'bp/helper', 'conf/user/manager', 'bp/model/state'],
-  function (BP_CONST, helper, conf, state) {
+define(['bp/constants', 'bp/helper', 'conf/user/manager', 'bp/model/state', 'metric/metric'],
+  function (BP_CONST, helper, conf, state, metric) {
 
   var byId = helper.byId,
     isActive = false,
@@ -128,14 +128,26 @@ define(['bp/constants', 'bp/helper', 'conf/user/manager', 'bp/model/state'],
     }
   }
 
+  function fireInputRangeMetric(id, settingName, newValue) {
+    var oldValue = conf.get(settingName);
+    metric('slider-setting-changed', {
+      id: id,
+      name: settingName,
+      old: oldValue,
+      new: newValue
+    });
+  }
+
   // Use native value for things like <input type="range">
   // For sliders, this occurs when user drops the thumb (lets go of mouse button)
   function onSettingsNativeInputChange(evt) {
     var target = helper.getEventTarget(evt);
     if (target) {
-      var settingName = target.getAttribute('data-setting-name');
+      var settingName = target.getAttribute('data-setting-name'),
+        newValue = + target.value;
       if (settingName) {
-        conf.set(settingName, + target.value);
+        fireInputRangeMetric(target.id, settingName, newValue);
+        conf.set(settingName, newValue);
       }
     }
   }

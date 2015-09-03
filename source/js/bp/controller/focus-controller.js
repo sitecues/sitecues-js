@@ -1,6 +1,6 @@
 /* Focus Controller */
-define(['bp/constants', 'bp/model/state', 'bp/helper'],
-  function (BP_CONST, state, helper) {
+define(['bp/constants', 'bp/model/state', 'bp/helper', 'metric/metric' ],
+  function (BP_CONST, state, helper, metric) {
 
   var savedDocumentFocus,
     focusElement,
@@ -105,6 +105,8 @@ define(['bp/constants', 'bp/model/state', 'bp/helper'],
   }
 
   function showFocus() {
+
+    metric('panel-focus-moved'); // Keyboard focus moved in the panel
 
     updateDOMFocusState();
 

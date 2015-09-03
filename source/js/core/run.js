@@ -24,10 +24,11 @@
 // TODO file bug on requirejs needing sitecues.require when variable name used
 // TODO use seth's more modern jshint options
 
-define(['../conf/user/user-id', 'conf/user/server', 'locale/locale', 'conf/user/manager'], function (userId, userSettingsServer, locale, conf) {
+define(['../conf/user/user-id', 'conf/user/server', 'locale/locale', 'conf/user/manager', 'metric/metric', 'util/platform'],
+  function (userId, userSettingsServer, locale, conf, metric, platform) {
   var
     numPrereqsToComplete,
-    ALWAYS_ON_FEATURES = [ 'bp/bp', 'keys/keys', 'metrics/metrics' ],
+    ALWAYS_ON_FEATURES = [ 'bp/bp', 'keys/keys' ],
     ZOOM_ON_FEATURES = [ 'hpan/hpan', 'zoom/fixed-position-fixer', 'keys/focus', 'cursor/cursor' ],
     TTS_ON_FEATURES = [ 'audio/audio' ],
     SITECUES_ON_FEATURES = [ 'mouse-highlight/mouse-highlight', 'mouse-highlight/move-keys' ],
@@ -69,8 +70,17 @@ define(['../conf/user/user-id', 'conf/user/server', 'locale/locale', 'conf/user/
     }
   }
 
+  function firePageLoadEvent() {
+    metric('page-visited', {
+      nativeZoom: platform.nativeZoom,
+      isRetina  : platform.isRetina()
+    });
+  }
+
   function onAllPrereqsComplete() {
     initModulesByName(ALWAYS_ON_FEATURES);
+
+    firePageLoadEvent();
 
     var initialZoom = conf.get('zoom');
     if (initialZoom) {

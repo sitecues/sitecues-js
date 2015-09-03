@@ -13,7 +13,7 @@ define([
     'util/element-classifier',
     'hlb/animation',
     'util/geo',
-    'metrics/metrics'],
+    'metric/metric'],
   function(
     $,
     conf,
@@ -25,7 +25,7 @@ define([
     elemClassifier,
     hlbAnimation,
     geo,
-    metrics) {
+    metric) {
 
   /////////////////////////
   // PRIVATE VARIABLES
@@ -187,7 +187,7 @@ define([
     }
 
     // Let the rest of the application know that the hlb is ready
-    // Listeners: hpan.js, invert.js, metrics/hlb-opened.js, mouse-highlight.js, speech.js
+    // Listeners: hpan.js, invert.js, mouse-highlight.js, speech.js
     sitecues.emit('hlb/ready', $hlb);
   }
 
@@ -389,7 +389,7 @@ define([
     // Listeners: speech.js
     sitecues.emit('hlb/create', $hlb);
 
-    metrics.send('hlb-opened');
+    metric('hlb-opened');
   }
 
   /**
