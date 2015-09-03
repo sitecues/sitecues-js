@@ -14,7 +14,7 @@ function getBundleText() {
 var fs = require('fs'),
   args = process.argv.slice(2),
   sitecuesLibraryFilename = args[0],
-  matchText = '\'__SITECUES_BUNDLES__\'',
+  matchText = '\"__SITECUES_BUNDLES__\"',
   bundleText = getBundleText(),
   text = fs.readFileSync(sitecuesLibraryFilename, { encoding: 'utf8' } ),
   newText = text.replace(matchText, bundleText);

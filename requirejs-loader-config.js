@@ -1,3 +1,12 @@
+// Provide the module loader configuration
+
+// require is unused in this file, but used by loader for runtime config
+// jshint -W098
+
+// __SITECUES_BUNDLES__ must use quotes because that's what minifier keeps,
+// and it needs to be consistent so that we can replace it with actual module structure in insert-bundle-config.js
+// jshint -W109
+
 var require = {
   // Tell loader to never search for or execute a script with a "data-main"
   // attribute, since this could have weird consequences on customer pages.
@@ -15,6 +24,6 @@ var require = {
   paths: {
     jquery: 'jquery-1.9.0'
   },
-  // This will be replaced in core.mk via a call to insert-bundle-config.js
-  bundles: '__SITECUES_BUNDLES__'
+  // This will be replaced with actual module structure in core.mk via a call to insert-bundle-config.js
+  bundles: "__SITECUES_BUNDLES__"
 };

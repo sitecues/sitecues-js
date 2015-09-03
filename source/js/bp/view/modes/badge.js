@@ -94,11 +94,14 @@ define(['bp/constants', 'bp/model/state', 'locale/locale', 'bp/helper', 'conf/us
     }
 
     adjustFixedElementsBelowToolbar();
-
+    
     return toolbarElement;
   }
 
-  // TODO Aaron hates this
+  // TODO Aaron hates this:
+  // - it doesn't work that well across sites
+  // - it's heavy in the page
+  // - it causes us to load the page-features module just because we have a toolbar
   function adjustFixedElementsBelowToolbar() {
     require(['zoom/fixed-position-fixer'], function(fixer) {
       // However, in the case of the toolbar, we must always move fixed position elements
