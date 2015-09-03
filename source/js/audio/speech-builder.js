@@ -27,7 +27,7 @@ define(['util/element-classifier', '$'], function(elemClassifier, $) {
     // Replace multiple whitespace chars with a single space so that GET request is not too large
     textBuffer = textBuffer.replace( /\s\s+/g, ' ');
     // Remove any space at beginning or end of string
-    return $.trim(textBuffer);
+    return textBuffer.trim();
   }
 
   function appendText(text) {
@@ -35,8 +35,7 @@ define(['util/element-classifier', '$'], function(elemClassifier, $) {
   }
 
   function findElement(id, isMap) {
-    var found = isMap? $('map[name="' + id.replace('#','') + '"]') : $('#' + id);
-    return found.length ? found[0] : null;
+    return document.querySelector(isMap? 'map[name="' + id.replace('#','') + '"]' : '#' + id);
   }
 
   function appendFromIdListAttribute($node, attrName) {

@@ -3,9 +3,6 @@
  *   The core module of the sitecues library.
  */
 
-// Now
-// TODO clean up metrics
-
 // Test
 // TODO themes
 // TODO cursor size/hue settings only -- be careful of mousehue 1.1 which means nothing
@@ -13,11 +10,7 @@
 // Later
 // Settings: why do we ever set a cookie? I don't think we can keep it between pages, at least not currently. So why save/get settings from server at all?
 //           Cookie is set for metrics?
-// TODO defer page-visited and possibly other metrics until user-id.js finishes getting reply (thus cookie with user id is set)
-//      user-id/did-complete
-// TODO move other weird ie9 code to ie9.js  -- check out has.js support in r.js
-// Explore official locale stuff from requirejs
-// TODO remove effects/animate from our custom build of jquery to save another 8k/3k
+// TODO remove effects/animate from our custom build of jquery to save another 8k/3k -- we could still check out zepto or sizzle + xxx
 // TODO load custom scripts
 //      source/js/custom-scripts/custom-scripts.js \
 //      $(custom-files) \

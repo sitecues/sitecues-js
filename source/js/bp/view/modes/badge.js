@@ -94,7 +94,7 @@ define(['bp/constants', 'bp/model/state', 'locale/locale', 'bp/helper', 'conf/us
     }
 
     adjustFixedElementsBelowToolbar();
-    
+
     return toolbarElement;
   }
 
