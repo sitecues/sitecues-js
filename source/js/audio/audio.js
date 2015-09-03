@@ -10,8 +10,8 @@
  * - Playing audio by key when requested by another module
  */
 
-define(['conf/user/manager', 'conf/site', '$', 'audio/speech-builder', 'util/platform', 'locale/locale', 'metric/metric'],
-  function(conf, site, $, builder, platform, locale, metric) {
+define(['conf/user/manager', 'conf/site', '$', 'audio/speech-builder', 'util/platform', 'locale/locale', 'metric/metric', 'conf/urls'],
+  function(conf, site, $, builder, platform, locale, metric, urls) {
 
   var ttsOn = false,
     isAudioPlaying,
@@ -114,7 +114,7 @@ define(['conf/user/manager', 'conf/site', '$', 'audio/speech-builder', 'util/pla
   function getAudioKeyUrl(key) {  // TODO why does an audio cue need the site id?
     var restOfUrl = 'cue/site/' + site.getSiteId() + '/' +
       key + '.' + getMediaTypeForPrerecordedAudio() + getLanguageParameter();
-    return sitecues.getApiUrl(restOfUrl);
+    return urls.getApiUrl(restOfUrl);
   }
 
   /**
@@ -125,7 +125,7 @@ define(['conf/user/manager', 'conf/site', '$', 'audio/speech-builder', 'util/pla
    */
   function getTTSUrl(text, lang) {
     var restOfUrl = 'tts/site/' + site.getSiteId() + '/tts.' + mediaTypeForTTS + getLanguageParameter(lang) + 't=' + encodeURIComponent(text);
-    return sitecues.getApiUrl(restOfUrl);
+    return urls.getApiUrl(restOfUrl);
   }
 
   /**
@@ -167,7 +167,7 @@ define(['conf/user/manager', 'conf/site', '$', 'audio/speech-builder', 'util/pla
   function playEarcon(earconName) {
     stopAudio();
 
-    var url = sitecues.resolveSitecuesUrl('../earcons/' + earconName + '.' + getMediaTypeForPrerecordedAudio());
+    var url = urls.resolveSitecuesUrl('../earcons/' + earconName + '.' + getMediaTypeForPrerecordedAudio());
 
     getAudioPlayer(function(player) {
       player.playAudioSrc(url);
@@ -240,12 +240,12 @@ define(['conf/user/manager', 'conf/site', '$', 'audio/speech-builder', 'util/pla
     if (mediaTypeForTTS) {
       callbackFn(mediaTypeForTTS);
     }
-    function onSpeechConfigReceived(speechConfig) {
-      mediaTypeForTTS = getBrowserSupportedTypeFromList(speechConfig.ttsAudioFormats);
+    function onAudioFormatsReceived(ttsAudioFormats) {
+      mediaTypeForTTS = getBrowserSupportedTypeFromList(ttsAudioFormats);
       callbackFn(mediaTypeForTTS);
     }
 
-    site.fetchSpeechConfig(onSpeechConfigReceived);
+    fetchAudioFormats(onAudioFormatsReceived);
   }
 
   // What audio format will we use for prerecorded audio?
@@ -262,6 +262,46 @@ define(['conf/user/manager', 'conf/site', '$', 'audio/speech-builder', 'util/pla
   function isSpeechEnabled() {
     // Flag indicating that this site is enabled for TTS.
     return ttsOn;
+  }
+
+  function fetchAudioFormats(callbackFn) {
+    var AUDIO_FORMATS_KEY = 'ttsAudioFormats',
+      audioFormats = site.get(AUDIO_FORMATS_KEY),
+      FALLBACK_AUDIO_FORMATS = ['ogg']; // Supported by all TTS engines we use
+    if (audioFormats) {
+      callbackFn(audioFormats);
+      return;
+    }
+
+    if (SC_LOCAL) {
+      // Cannot save to server when we have no access to it
+      // Putting this condition in allows us to paste sitecues into the console
+      // and test it on sites that have a content security policy
+      callbackFn(FALLBACK_AUDIO_FORMATS);
+      return;
+    }
+
+    require(['util/xhr'], function(xhr) {
+      xhr.getJSON({
+        // The 'provided.siteId' parameter must exist, or else core would have aborted the loading of modules.
+        url: urls.getApiUrl('2/site/' + site.getSiteId() + '/config'),
+        success: function (data) {
+          var settings = data.settings,
+            i = 0;
+          // Copy the fetched key/value pairs into the site configuration.
+          for (; i < settings.length; i++) {
+            if (settings[i].key === AUDIO_FORMATS_KEY) {
+              callbackFn(settings[i].value);
+              return;
+            }
+          }
+        },
+        error: function() {
+          SC_DEV && console.log('Error loading sitecues speech configuration.');
+          callbackFn(FALLBACK_AUDIO_FORMATS);
+        }
+      });
+    });
   }
 
   function init() {

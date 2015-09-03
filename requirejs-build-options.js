@@ -12,7 +12,8 @@
         'bp/bp',
         'keys/keys',
         'metric/metric',
-        'util/xhr'
+        'util/xhr',
+        'conf/urls'
       ],
       create: true,
       namespace: 'sitecues',
@@ -29,6 +30,7 @@
       ],
       exclude: [
         'metric/metric',
+        'conf/urls',
         'util/element-classifier'
       ]
     },
@@ -54,6 +56,7 @@
         'util/jquery-utils',
         'util/transform',
         'metric/metric',
+        'conf/urls',
         'conf/user/manager'
       ]
     },
@@ -76,6 +79,7 @@
         'util/jquery-utils',
         'util/transform',
         'metric/metric',
+        'conf/urls',
         'conf/user/manager'
       ]
     },
@@ -104,6 +108,7 @@
         'util/common',
         'util/jquery-utils',
         'metric/metric',
+        'conf/urls',
         'conf/site',
         'conf/user/manager'
       ]
@@ -126,6 +131,7 @@
         'util/jquery-utils',
         'util/transform',
         'metric/metric',
+        'conf/urls',
         'conf/site',
         'conf/user/manager'
       ]
@@ -149,6 +155,7 @@
         'util/jquery-utils',
         'util/transform',
         'metric/metric',
+        'conf/urls',
         'conf/site',
         'conf/user/manager'
       ]
@@ -172,6 +179,7 @@
         'conf/site',
         'conf/user/manager',
         'metric/metric',
+        'conf/urls',
         'util/geo',
         'util/transform'
       ]
@@ -195,6 +203,7 @@
         'util/xhr',
         'util/common',
         'util/jquery-utils',
+        'conf/urls',
         'conf/site',
         'conf/user/manager',
         'style-service/user-agent-css.js',

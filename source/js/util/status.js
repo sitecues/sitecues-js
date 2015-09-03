@@ -34,14 +34,14 @@ define([], function () {
 
   function status(callback) {
 
-    require(['util/xhr', 'conf/user/manager'], function(xhr, conf) {
+    require(['util/xhr', 'conf/user/manager', 'conf/urls'], function(xhr, conf, urls) {
 
       var html = document.documentElement,
           confData = conf.data(),
           coordinates,
           ajaxUrls = {  // Set the server URLs for retrieving the status of our services (version info, etc.)
-            up : sitecues.getPrefsUrl('status'),
-            ws : sitecues.getApiUrl('util/status')
+            up : urls.getPrefsUrl('status'),
+            ws : urls.getApiUrl('util/status')
           },
           setting,
           state,

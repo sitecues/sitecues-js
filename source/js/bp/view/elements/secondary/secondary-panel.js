@@ -30,8 +30,8 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'util/animate', 'util/tra
     'bp/view/elements/secondary/feedback',
     'bp/view/elements/secondary/about',
     'bp/view/elements/secondary/cards',
-    'locale/locale'],
-    function (BP_CONST, state, helper, animate, transform, tipsModule, settingsModule, feedbackModule, aboutModule, cardsModule, locale) {
+    'locale/font-charset'],
+    function (BP_CONST, state, helper, animate, transform, tipsModule, settingsModule, feedbackModule, aboutModule, cardsModule, fontCharset) {
 
   var BUTTON_CLICK_ANIMATION_DURATION = 800,
     ENABLED_PANEL_TRANSLATE_Y = 0,
@@ -503,7 +503,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'util/animate', 'util/tra
       resetStyles();
 
       insertCss('secondary');
-      var extendedFontCharsetName = locale.getExtendedFontCharsetName();
+      var extendedFontCharsetName = fontCharset();
       if (extendedFontCharsetName) {
         insertCss(extendedFontCharsetName);
       }

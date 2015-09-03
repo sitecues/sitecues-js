@@ -33,9 +33,9 @@ define(['util/localstorage'], function(ls) {
     }
 
     SC_DEV && console.log('UserID not found in localStorage, fallback to ajax request.');
-    require(['util/xhr'], function (xhr) {
+    require(['util/xhr', 'conf/urls'], function (xhr, urls) {
       xhr.getJSON({
-        url: sitecues.getApiUrl('user/id/get.json'),
+        url: urls.getApiUrl('user/id/get.json'),
         success: function (data) {
           // Important MAGIC: this will also have set a cookie that ends up getting used in future requests
           // e.g. _ai2_sc_uid = 3d50a209-dc12-4bf4-9913-de5ba74f96cf

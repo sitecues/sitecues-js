@@ -2,8 +2,8 @@
  * Basic metrics logger
  */
 // jshint -W016
-define(['conf/user/manager', 'conf/site', 'locale/locale', 'util/platform', 'util/xhr'],
-  function(conf, site, locale, platform, xhr) {
+define(['conf/user/manager', 'conf/site', 'locale/locale', 'util/platform', 'util/xhr', 'conf/urls'],
+  function(conf, site, locale, platform, xhr, urls) {
 
   // Taken from here(free public license): https://gist.github.com/jed/982883
   var UUIDv4 = function b(a){return a?(a^Math.random()*16>>a/4).toString(16):([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g,b); };
@@ -25,7 +25,7 @@ define(['conf/user/manager', 'conf/site', 'locale/locale', 'util/platform', 'uti
       SC_DEV && console.log('Metric: ' + JSON.stringify(allData));
 
       xhr.post({
-        url: sitecues.getApiUrl('metrics/site/' + site.getSiteId() + '/notify.json'),
+        url: urls.getApiUrl('metrics/site/' + site.getSiteId() + '/notify.json'),
         data: allData
       });
     }

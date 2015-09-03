@@ -52,7 +52,13 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'metric/metric' ],
         'about-3',
         'more-button-group'
       ]
-    };
+    },
+    DELTA_KEYS = {};
+
+  DELTA_KEYS[BP_CONST.KEY_CODES.LEFT]  = -1;
+  DELTA_KEYS[BP_CONST.KEY_CODES.UP]    = 1;
+  DELTA_KEYS[BP_CONST.KEY_CODES.RIGHT] = 1;
+  DELTA_KEYS[BP_CONST.KEY_CODES.DOWN]  = -1;
 
   function getPanelContainer() {
     return byId(BP_CONST.BP_CONTAINER_ID);
@@ -353,6 +359,63 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'metric/metric' ],
     }
   }
 
+  // If it was always HTML we could just use elem.click()
+  function simulateClick(element) {
+    var event = document.createEvent('MouseEvents');
+    // If you need clientX, clientY, etc., you can call
+    // initMouseEvent instead of initEvent
+    event.initEvent('click', true, true);
+    element.dispatchEvent(event);
+  }
+
+  function performZoomSliderCommand(keyCode, evt) {
+    var deltaSliderCommand = DELTA_KEYS[keyCode];
+    if (deltaSliderCommand) {
+      require(['zoom/zoom'], function(zoomMod) {
+        deltaSliderCommand > 0 ? zoomMod.beginZoomIncrease(evt) : zoomMod.beginZoomDecrease(evt);
+      });
+    }
+  }
+
+  // Process key down and return true if key should be allowed to perform default behavior
+  function processKey(evt) {
+    var keyCode = evt.keyCode;
+
+    // Escape = close
+    if (keyCode === BP_CONST.KEY_CODES.ESCAPE) {
+      require(['bp/controller/shrink-controller'], function(shrinkController) {
+        shrinkController.shrinkPanel(true);
+      });
+      return;
+    }
+
+    // Tab navigation
+    if (keyCode === BP_CONST.KEY_CODES.TAB) {
+      state.set('isKeyboardMode', true);
+      sitecues.emit('bp/did-change');
+      navigateInDirection(evt.shiftKey ? -1 : 1);
+    }
+
+    // Perform widget-specific command
+    // Can't use evt.target because in the case of SVG it sometimes only has fake focus (some browsers can't focus SVG elements)
+    var item = getFocusedItem();
+
+    if (item) {
+      if (item.localName === 'textarea' || item.localName === 'input') {
+        return true;
+      }
+      if (item.id === BP_CONST.ZOOM_SLIDER_BAR_ID) {
+        performZoomSliderCommand(keyCode, evt);
+      }
+      else {
+        if (keyCode === BP_CONST.KEY_CODES.ENTER || keyCode === BP_CONST.KEY_CODES.SPACE) {
+          simulateClick(item);
+        }
+      }
+      // else fall through to native processing of keystroke
+    }
+  }
+
   function init() {
     if (isInitialized) {
       return;
@@ -367,7 +430,8 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'metric/metric' ],
   var publics = {
     init: init,
     getFocusedItem: getFocusedItem,
-    navigateInDirection: navigateInDirection
+    navigateInDirection: navigateInDirection,
+    processKey: processKey
   };
 
   if (SC_UNIT) {

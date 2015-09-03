@@ -1,12 +1,6 @@
-define([], function () {
+define(['conf/site', 'conf/urls'], function (site, urls) {
    // Array's prototype
-  var arr = Array.prototype,
-
-  // Either ws.sitecues.com/ or ws.dev.sitecues.com/
-  apiDomain,
-
-  // Either up.sitecues.com/ or up.dev.sitecues.com/
-  prefsDomain;
+  var arr = Array.prototype;
 
   function safe_production_msg (text) {
     if (window.navigator.userAgent.indexOf('MSIE ') > 0) {
@@ -28,17 +22,9 @@ define([], function () {
   // we risk overwriting the methods of the live library.
   function exportPublicFields() {
     sitecues.getVersion = getVersion;
-    sitecues.getApiUrl = getApiUrl;
-    sitecues.getPrefsUrl = getPrefsUrl;
-    sitecues.getLibraryUrl = getLibraryUrl;
-    sitecues.getSiteConfig = getSiteConfig;
-    sitecues.getEverywhereConfig = getEverywhereConfig;
     sitecues.on = on;
     sitecues.off = off;
     sitecues.emit = emit;
-    sitecues.resolveSitecuesUrl = resolveSitecuesUrl;
-    sitecues.parseUrl = parseUrl;
-    sitecues.resolveUrl = resolveUrl;
     sitecues.status = getStatus;
   }
 
@@ -51,38 +37,6 @@ define([], function () {
 
   function getVersion() {
     return sitecues.version;
-  }
-
-  function isProduction() {
-    return getLibraryUrl().hostname === 'js.sitecues.com';
-  }
-
-  function initServices() {
-    var domainEnding = isProduction() ? '.sitecues.com/' : '.dev.sitecues.com/';
-    apiDomain = 'ws' + domainEnding;
-    prefsDomain = 'up' + domainEnding;
-  }
-
-  function getApiUrl(restOfUrl) {
-    return 'https://' + apiDomain + 'sitecues/api/' + restOfUrl;
-  }
-
-  function getPrefsUrl(restOfUrl) {
-    return 'https://' + prefsDomain + restOfUrl;
-  }
-
-  function getLibraryUrl() {
-    // Underscore names deprecated
-    var url = getEverywhereConfig().scriptUrl || getSiteConfig().scriptUrl || getSiteConfig().script_url;
-    return url && parseUrl(url);
-  }
-
-  function getSiteConfig() {
-    return sitecues.config || {};
-  }
-
-  function getEverywhereConfig() {
-    return sitecues.everywhereConfig || {};
   }
 
   function getStatus() {
@@ -197,129 +151,6 @@ define([], function () {
 
   //////////////////////////////////////////////////////////////////////////////////////////
   //
-  //  URL Processing
-  //
-  //////////////////////////////////////////////////////////////////////////////////////////
-
-  // Parse a URL query into key/value pairs.
-  function parseUrlQuery(queryStr) {
-    var query = {};
-    query.raw = queryStr;
-    query.parameters = {};
-
-    // Parse the query into key/value pairs.
-    var start = 0,
-      end = 0;
-
-    if (queryStr[start] === '?'){
-      start++;
-    }
-
-    while (start < queryStr.length) {
-      end = queryStr.indexOf('=', start);
-      if (end < 0) {
-        end = queryStr.length;
-      }
-
-      var key = decodeURIComponent(queryStr.substring(start, end));
-      start = end + 1;
-
-      var value = null;
-      if (start <= queryStr.length) {
-        end = queryStr.indexOf('&', start);
-        if (end < 0) {
-          end = queryStr.length;
-        }
-
-        value = decodeURIComponent(queryStr.substring(start, end));
-        start = end + 1;
-      }
-      query.parameters[key] = value;
-    }
-  }
-
-  // Parse a URL into its components.
-  function parseUrl(urlStr) {
-    if (typeof urlStr !== 'string') {
-      return;
-    }
-    // Ran across this in a Google search... loved the simplicity of the solution.
-    var url = {}, parser = document.createElement('a');
-    parser.href = urlStr;
-
-    // No one ever wants the hash on a full URL...
-    if (parser.hash) {
-      url.raw = parser.href.substring(parser.href.length - parser.hash.length);
-    } else {
-      url.raw = parser.href;
-    }
-
-    url.protocol = parser.protocol.substring(0, parser.protocol.length - 1).toLowerCase();
-    url.secure = (url.protocol === 'https');
-    url.hostname = parser.hostname;
-    url.host = parser.host;
-
-    if (parser.search) {
-      url.query = parseUrlQuery(parser.search);
-    } else {
-      url.query = null;
-    }
-    // Extract the path and file portion of the pathname.
-    var pathname = parser.pathname;
-
-    // IE < 10 versions pathname does not contains first slash whereas in other browsers it does.
-    // So let's unify pathnames. Since we need '/' anyway, just add it to pathname when needed.
-    if (pathname.indexOf('/') > 0) {
-      pathname = '/' + pathname;
-    }
-
-    var index = pathname.lastIndexOf('/') + 1;
-    url.path = pathname.substring(0, index);
-    url.file = pathname.substring(index);
-
-    return url;
-  }
-
-  // The regular expression for an absolute URL. There is a capturing group for
-  // the protocol-relative portion of the URL.
-  var ABSOLUTE_URL_REQEXP = /^[a-zA-Z0-9-]+:(\/\/.*)$/i;
-
-  // Resolve a URL as relative to a base URL.
-  function resolveUrl(urlStr, baseUrl) {
-    var absRegExpResult = ABSOLUTE_URL_REQEXP.exec(urlStr);
-    if (absRegExpResult) {
-      // We have an absolute URL, with protocol. That's a no-no, so, convert to a
-      // protocol-relative URL.
-      urlStr = absRegExpResult[1];
-    } else if (urlStr.indexOf('//') === 0) {
-      // Protocol-relative No need to modify the URL,
-      // as we will inherit the containing page's protocol.
-    } else if (urlStr.indexOf('/') === 0) {
-      // Host-relative URL.
-      urlStr = '//' + baseUrl.host + urlStr;
-    } else {
-      // A directory-relative URL.
-      urlStr = '//' + baseUrl.host + baseUrl.path + urlStr;
-    }
-
-    return urlStr;
-  }
-
-  // Resolve a URL as relative to the main script URL.
-  // Add a version parameter so that new versions of the library always get new versions of files we use, rather than cached versions.
-  function resolveSitecuesUrl(urlStr, paramsMap) {
-    var url = resolveUrl(urlStr, getLibraryUrl()) + '?version=' + sitecues.version;
-
-    function addParam(name) {
-      url += name + '=' + encodeURIComponent(paramsMap[name]) + '&';
-    }
-
-    Object.keys(paramsMap || {}).forEach(addParam);
-    return url;
-  }
-
-  //////////////////////////////////////////////////////////////////////////////////////////
-  //
   //  Basic Site Configuration
   //    This section process the basic site configuration, whose absence will
   //    prevent the library from loading.
@@ -338,7 +169,7 @@ define([], function () {
     }
 
     // Underscore parameters deprecated
-    var everywhereConfig = getEverywhereConfig();
+    var everywhereConfig = site.getEverywhereConfig();
 
     // siteId is required and must be a string
     var siteId = everywhereConfig.siteId || sitecues.config.siteId || sitecues.config.site_id;
@@ -348,7 +179,7 @@ define([], function () {
     }
 
     // Library URL must be a valid URL
-    if (!getLibraryUrl()) {
+    if (!urls.getLibraryUrl()) {
       console.error('Unable to get sitecues script url. Library can not initialize.');
       return;
     }
@@ -396,6 +227,9 @@ define([], function () {
     // As we have now 'planted our flag', export the public fields.
     exportPublicFields();
 
+    // Initialize API and services URLs
+    urls.init();
+
     // Process the basic configuration needed for library initialization.
     if (!validateConfiguration()) {
       console.error('Unable to load basic site configuration. Library can not initialize.');
@@ -407,7 +241,6 @@ define([], function () {
         ' ... email support@sitecues.com for more information.');
     }
     else {
-      initServices();
       require(['core/run'], function(run) {
         run();
       });

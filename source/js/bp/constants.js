@@ -261,5 +261,4 @@ define([], function() {
   constants.SECONDARY_PANEL_ENABLED  = 1;
 
   return constants;
-  // no publics
 });
