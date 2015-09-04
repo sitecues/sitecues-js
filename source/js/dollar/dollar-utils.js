@@ -23,10 +23,16 @@ define(['$'], function ($) {
     return $makeArray($jquery).indexOf(element) >= 0;
   }
 
+  // Convert the node list into a $ object (annoyingly Zepto doesn't just do this)
+  function $fromNodeList(nodeList) {
+    return $.zepto ? $.zepto.Z(nodeList) : $(nodeList);
+  }
+
   var publics = {
     isInSitecuesUI: isInSitecuesUI,
     $makeArray: $makeArray,
-    $is: $is
+    $is: $is,
+    $fromNodeList: $fromNodeList
   };
 
   if (SC_UNIT) {

@@ -2,8 +2,8 @@
  * This is module for common positioning utilities that might need to be used across all of the different modules.
  * See more info on https://equinox.atlassian.net/wiki/display/EN/positioning+utility
  */
-define(['$', 'util/common', 'util/element-classifier', 'zoom/zoom', 'util/platform', 'mouse-highlight/traitcache'],
-  function ($, common, elemClassifier, zoomMod, platform, traitcache) {
+define(['$', '$utils', 'util/common', 'util/element-classifier', 'zoom/zoom', 'util/platform', 'mouse-highlight/traitcache'],
+  function ($, $utils, common, elemClassifier, zoomMod, platform, traitcache) {
 
   var MIN_RECT_SIDE = 4;
 
@@ -401,7 +401,7 @@ define(['$', 'util/common', 'util/element-classifier', 'zoom/zoom', 'util/platfo
       // --- Elements with children ---
       if (this.hasChildNodes()) {
         // Use bounds of visible descendants
-        getHighlightInfoRecursive($(this.childNodes), accumulatedResults, doStretchForSprites, doIgnoreFloats);  // Recursion
+        getHighlightInfoRecursive($utils.$fromNodeList(this.childNodes), accumulatedResults, doStretchForSprites, doIgnoreFloats);  // Recursion
         return;
       }
     });

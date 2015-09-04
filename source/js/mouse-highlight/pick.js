@@ -437,7 +437,7 @@ define(['$', 'util/common', '$utils', 'conf/user/manager', 'conf/site',
         $candidate = $(candidate);
       // We don't use hidden candidates or those in headings
       // Headings are often anomalous
-      if ($candidate.closest(':header').length === 0 &&
+      if ($candidate.closest('h1,h2,h3,h4,h5,h6').length === 0 &&
         !traitcache.isHidden(candidate, true)) {
         candidates.push(candidate);
       }
@@ -672,7 +672,7 @@ define(['$', 'util/common', '$utils', 'conf/user/manager', 'conf/site',
       hasSignificantText: picked.text().length > MIN_SIGNIFICANT_TEXT_LENGTH,
       headingScore: (function() {
         // Prefer something with a heading (h1 excellent, h2 very good, h3 okay)
-        var headings = picked.find('h1,h2,:header').addBack();
+        var headings = picked.find('h1,h2,h3,h4,h5,h6').addBack();
         return (headings.filter('h1').length > 0) * 3 ||
           (headings.filter('h2').length > 0) * 2 ||
           headings.length > 0;

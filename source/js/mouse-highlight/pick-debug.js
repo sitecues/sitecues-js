@@ -4,7 +4,7 @@
 
 // This helps debug the picker. Use sitecues.togglePickerDebugging() to turn
 // on useful console log messages related to picker heuristics.
-define(['custom'], function () {
+define([], function () {
   var DEBUG_LABEL_STYLE = 'font-weight: normal; color: purple';
 
   // -------- Logging section ---------

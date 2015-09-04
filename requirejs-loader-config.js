@@ -21,7 +21,7 @@ var require = {
     // so that we can secretly return a customized value which
     // implements .noConflict() to avoid puking on customers.
     '*': {
-      '$': ('__proto__' in {}) ? 'dollar/zepto-private' : 'dollar/jquery-private',
+      '$': navigator.appVersion.indexOf('MSIE 9') < 0 ? 'dollar/zepto-private' : 'dollar/jquery-private',
       '$utils': 'dollar/dollar-utils'
     }
   },

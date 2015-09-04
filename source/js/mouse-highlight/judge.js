@@ -94,7 +94,7 @@ define(['$', 'util/common', 'util/element-classifier', 'mouse-highlight/traitcac
     GOOD_ROLES = {list:1, region:1, complementary:1, dialog:1, alert:1, alertdialog:1, gridcell:1,
     tabpanel:1, tree:1, treegrid:1, listbox:1, img:1, heading:1, rowgroup:1, row:1, toolbar:1,
     menu:1, menubar:1, group:1, form:1, navigation:1, main:1 },
-    MIN_BR_TAGS_IN_TALL_ARTICLE = 6,
+    MIN_BR_TAGS_IN_TALL_ARTICLE = 5,
     UNUSABLE_TAGS = { area:1,base:1,basefont:1,bdo:1,br:1,col:1,colgroup:1,font:1,legend:1,link:1,map:1,optgroup:1,option:1,tbody:1,tfoot:1,thead:1,hr:1 },
     UNUSABLE_ROLES= { presentation:1, separator:1 },
 
@@ -273,7 +273,7 @@ define(['$', 'util/common', 'util/element-classifier', 'mouse-highlight/traitcac
         (traits.visualHeightAt1x > TALL_ELEMENT_PIXEL_THRESHOLD &&
          childJudgements && traits !== firstNonInlineTraits &&
          // Give super tall paragraphs in an article a chance
-         node.getElementsByTagName('br') < MIN_BR_TAGS_IN_TALL_ARTICLE),
+         node.getElementsByTagName('br').length > MIN_BR_TAGS_IN_TALL_ARTICLE),
 
       // We have a concept of percentage of viewport width and height, where under or over the ideal is not good.
       // Avoid picking things that are very small or large, which are awkward in the HLB according to users.
@@ -598,27 +598,27 @@ define(['$', 'util/common', 'util/element-classifier', 'mouse-highlight/traitcac
   // This will return true even if there is something before the heading that is not grouped with <header>.
   function numElementsDividingContent(container) {
     // Find descendants which start a section
-    var dividingElements = $(container).find(SECTION_START_SELECTOR),
+    var $dividingElements = $(container).find(SECTION_START_SELECTOR),
 
       // Get the last dividing element
-      lastDividingElement = dividingElements.last();
+      $lastDividingElement = $dividingElements.last();
 
-    if (!lastDividingElement.length) {
+    if (!$lastDividingElement.length) {
       return 0;  // No dividing element
     }
 
     var
       // Get the dividing element we want to test
       // We use the last one that's not at the very end
-      testDividingElement = lastDividingElement.is(container) || $.contains(container, lastDividingElement[0]) ?
-        dividingElements.get(dividingElements.length - 1) : lastDividingElement,
+      testDividingElement = $lastDividingElement[0] === container || $.contains(container, $lastDividingElement[0]) ?
+        $dividingElements.get($dividingElements.length - 1) : $lastDividingElement,
 
       // Go up from last dividing element, to find the topmost dividing element.
       // This protects against nested dividing elements confusing us.
       parentSectionStart = $(testDividingElement).parentsUntil(container,SECTION_START_SELECTOR),
 
       // Starting point
-      currentAncestor = (parentSectionStart.length ? parentSectionStart : lastDividingElement)[0],
+      currentAncestor = (parentSectionStart.length ? parentSectionStart : $lastDividingElement)[0],
 
       // Used in while loop
       sibling,
@@ -642,7 +642,7 @@ define(['$', 'util/common', 'util/element-classifier', 'mouse-highlight/traitcac
           !isVisualMediaSubtree(sibling)) {
           // A visible non-section-start element exists before the section-start-element, which means we are divided!
           // Return the number of section start elements
-          return dividingElements.length;
+          return $dividingElements.length;
         }
         sibling = sibling.nextElementSibling;
       }
@@ -737,7 +737,7 @@ define(['$', 'util/common', 'util/element-classifier', 'mouse-highlight/traitcac
     if (traits.childCount === 0 || traits.childCount > MAX_CHILDREN_IMAGE_GROUP) {
       return false;  // If too many siblings this doesn't fit the pattern
     }
-    var images = node.getElementsByTagName('img'), // Faster than querySelectorAll()
+    var images = $(node).find('img'),
       numGoodImages = 0,
       minSide = SIGNIFICANT_IMAGE_PIXELS * traitcache.getCachedViewSize().zoom;
 
