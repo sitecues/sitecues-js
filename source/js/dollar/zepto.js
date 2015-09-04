@@ -40,11 +40,12 @@
 //},
 // to
 //each: function(callback){
-//  var $break = {}
-//  try {
-//    this.forEach(function(el, idx){ if (callback.call(el, idx, el) === false) throw $break })
-//  } catch (e) { if (e != $break) throw e }
+//  emptyArray.some.call(this, function(el, idx){
+//    return callback.call(el, idx, el) === false
+//  })
+//  return this
 //},
+// to
 
 
 // Zepto 1.1.6 (generated with Zepto Builder) - zepto event ie data fx stack - zeptojs.com/license
@@ -490,12 +491,23 @@ var Zepto = (function() {
       })
     },
     each: function(callback){
-      var $break = {}
-      try {
-        this.forEach(function(el, idx){ if (callback.call(el, idx, el) === false) throw $break })
-      } catch (e) { if (e != $break) throw e }
-      return this;
+      emptyArray.some.call(this, function(el, idx){
+        return callback.call(el, idx, el) === false
+      })
+      return this
     },
+//    each: function(callback){
+//      var numItems = this.length,
+//        index = 0,
+//        el;
+//      for (; index < numItems; index ++) {
+//        el = this[index];
+//        if (callback.call(el, index, el) === false) {
+//          break;
+//        }
+//      }
+//      return this;
+//    },
     filter: function(selector){
       if (isFunction(selector)) return this.not(this.not(selector))
       return $(filter.call(this, function(element){
