@@ -14,15 +14,16 @@ var require = {
   baseUrl: (function(scriptUrl) { return scriptUrl.substring(0, scriptUrl.lastIndexOf('/')) + '/'; })(sitecues.config.scriptUrl),
   // Make aliases to modules, for convenience.
   map: {
-    // All modules get 'jquery-private' when they ask for 'jquery',
+    // Modern browsers:
+    // All modules get 'zepto-private' when they ask for $
+    // IE9:
+    // All modules get 'jquery-private' when they ask for '$',
     // so that we can secretly return a customized value which
     // implements .noConflict() to avoid puking on customers.
     '*': {
-      '$': 'util/jquery-private'
+      '$': ('__proto__' in {}) ? 'dollar/zepto-private' : 'dollar/jquery-private',
+      '$utils': 'dollar/dollar-utils'
     }
-  },
-  paths: {
-    jquery: 'jquery-1.9.0'
   },
   // This will be replaced with actual module structure in core.mk via a call to insert-bundle-config.js
   bundles: "__SITECUES_BUNDLES__"

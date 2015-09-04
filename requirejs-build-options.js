@@ -23,15 +23,29 @@
       name: 'utils',
       create: true,
       include: [
-        'util/jquery',
-        '$',
         'util/common',
-        'util/jquery-utils'
+        'dollar/dollar-utils'
       ],
       exclude: [
         'metric/metric',
         'conf/urls',
         'util/element-classifier'
+      ]
+    },
+    {
+      name: 'lib-jquery',
+      create: true,
+      include: [
+        'dollar/jquery-private',
+        'jquery'
+      ]
+    },
+    {
+      name: 'lib-zepto',
+      create: true,
+      include: [
+        'dollar/zepto-private',
+        'dollar/zepto'
       ]
     },
     {
@@ -50,10 +64,11 @@
         'bp/constants',
         'bp/model/state',
         'bp/helper',
-        'util/jquery',
         'util/xhr',
         'util/common',
-        'util/jquery-utils',
+        'dollar/dollar-utils',
+        'dollar/zepto-private',
+        'dollar/jquery-private',
         'util/transform',
         'metric/metric',
         'conf/urls',
@@ -72,11 +87,9 @@
         'bp/constants',
         'bp/model/state',
         'bp/helper',
-        'util/jquery',
         'util/xhr',
         'util/common',
         'util/animate',
-        'util/jquery-utils',
         'util/transform',
         'metric/metric',
         'conf/urls',
@@ -103,10 +116,11 @@
         'bp/constants',
         'bp/model/state',
         'bp/helper',
-        'util/jquery',
         'util/xhr',
         'util/common',
-        'util/jquery-utils',
+        'dollar/dollar-utils',
+        'dollar/zepto-private',
+        'dollar/jquery-private',
         'metric/metric',
         'conf/urls',
         'conf/site',
@@ -125,10 +139,11 @@
         'bp/constants',
         'bp/model/state',
         'bp/helper',
-        'util/jquery',
         'util/xhr',
         'util/common',
-        'util/jquery-utils',
+        'dollar/dollar-utils',
+        'dollar/zepto-private',
+        'dollar/jquery-private',
         'util/transform',
         'metric/metric',
         'conf/urls',
@@ -149,10 +164,11 @@
         'bp/constants',
         'bp/model/state',
         'bp/helper',
-        'util/jquery',
         'util/xhr',
         'util/common',
-        'util/jquery-utils',
+        'dollar/dollar-utils',
+        'dollar/zepto-private',
+        'dollar/jquery-private',
         'util/transform',
         'metric/metric',
         'conf/urls',
@@ -172,10 +188,11 @@
         'bp/constants',
         'bp/model/state',
         'bp/helper',
-        'util/jquery',
         'util/xhr',
         'util/common',
-        'util/jquery-utils',
+        'dollar/dollar-utils',
+        'dollar/zepto-private',
+        'dollar/jquery-private',
         'conf/site',
         'conf/user/manager',
         'metric/metric',
@@ -197,10 +214,11 @@
         'bp/constants',
         'bp/model/state',
         'bp/helper',
-        'util/jquery',
         'util/xhr',
         'util/common',
-        'util/jquery-utils',
+        'dollar/dollar-utils',
+        'dollar/zepto-private',
+        'dollar/jquery-private',
         'conf/urls',
         'conf/site',
         'conf/user/manager',
@@ -231,10 +249,11 @@
         'bp/constants',
         'bp/model/state',
         'bp/helper',
-        'util/jquery',
         'util/xhr',
         'util/common',
-        'util/jquery-utils',
+        'dollar/dollar-utils',
+        'dollar/zepto-private',
+        'dollar/jquery-private',
         'conf/urls',
         'conf/site',
         'conf/user/manager',
@@ -260,6 +279,15 @@
       ]
     }
   ],
+  paths: {
+    '$': 'empty:',
+    'jquery': 'dollar/jquery'
+  },
+  map: {
+    '*': {
+      '$utils': 'dollar/dollar-utils'
+    }
+  },
   onBuildRead: function(module, path, contents) {
     if (module.indexOf('/requirejs') > 0) {
       var loaderConfig = fs.readFileSync('requirejs-loader-config.js', 'utf8');
@@ -288,17 +316,6 @@
     var includedStr = data.included.join("','");
     includedStr = includedStr.replace(/\.js/g, ''); // Remove .js
     fs.appendFileSync('target/build-config/sitecues-bundles.js', "'" + data.name + "':['" + includedStr + "'],");
-  },
-  map: {
-    // All modules get 'jquery-private' when they ask for '$',
-    // so that we can secretly return a customized value which
-    // implements .noConflict() to avoid puking on customers.
-    '*': {
-      '$': 'util/jquery-private'
-    }
-  },
-  paths: {
-    jquery: 'util/jquery'
   },
   namespace: 'sitecues',
   useStrict: true,

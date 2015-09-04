@@ -25,9 +25,9 @@
  * For more details see https://equinox.atlassian.net/wiki/display/EN/Picker+v2+Architecture
  */
 
-define(['$', 'util/common', 'util/jquery-utils', 'conf/user/manager', 'conf/site',
+define(['$', 'util/common', '$utils', 'conf/user/manager', 'conf/site',
     'mouse-highlight/traitcache', 'mouse-highlight/traits', 'mouse-highlight/judge'],
-  function($, common, jqUtils, conf, site, traitcache, traits, judge) {
+  function($, common, $utils, conf, site, traitcache, traits, judge) {
 
   var UNUSABLE_SCORE = -99999,       // A score so low there is no chance of picking the item
     MAX_ANCESTORS_TO_ANALYZE = 14,   // Maximum ancestors to climb looking for start.
@@ -131,7 +131,7 @@ define(['$', 'util/common', 'util/jquery-utils', 'conf/user/manager', 'conf/site
     }
 
     // 1. Don't pick anything in the sitecues UI
-    if (!startElement || $(startElement).is('html,body') || jqUtils.isInSitecuesUI(startElement)) {
+    if (!startElement || $(startElement).is('html,body') || $utils.isInSitecuesUI(startElement)) {
       return null;
     }
 
@@ -192,7 +192,7 @@ define(['$', 'util/common', 'util/jquery-utils', 'conf/user/manager', 'conf/site
       });
     }
 
-    return [startElement].concat($.makeArray(validAncestors));
+    return [startElement].concat($utils.$makeArray(validAncestors));
   }
 
   function getImageForMapArea(element) {

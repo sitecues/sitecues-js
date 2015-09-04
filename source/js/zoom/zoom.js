@@ -738,7 +738,7 @@ define(['$', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common', '
     if (platform.browser.isWebKit || platform.browser.isFirefox) {
       hasFormsToFix = hasFormsToFix || document.querySelector('select,body>input,button');
       if (hasFormsToFix) {
-        require('zoom/zoom-forms', function (zoomForms) {
+        require(['zoom/zoom-forms'], function (zoomForms) {
           zoomForms.applyZoomFixes(completedZoom);
         });
       }

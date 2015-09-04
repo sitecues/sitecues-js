@@ -609,7 +609,7 @@ define([
   }
 
   function isElementInsideHlb(element) {
-    return $hlb.is(element) || $.contains($hlb[0], element);
+    return $hlb[0] === element || $.contains($hlb[0], element);
   }
 
   function onClick(event) {

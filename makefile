@@ -211,11 +211,11 @@ deps-clean:
 #
 # ALTERNATE: Run manally (Google closure and jshint)
 #	gjslint --nojsdoc -r source/js
-#	jshint source/js --exclude source/js/util/jquery.js
+#	jshint source/js
 ################################################################################
 lint:
 	@echo "Linting started."
-	jshint source/js --exclude source/js/util/jquery.js
+	jshint source/js
 	lenient-lint --beep --error_trace --multiprocess --nojsdoc -r source/js --summary --time --unix_mode
 	@echo "Linting completed."
 

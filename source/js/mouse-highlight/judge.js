@@ -459,7 +459,6 @@ define(['$', 'util/common', 'util/element-classifier', 'mouse-highlight/traitcac
       }
 
       // Do almost all of the siblings have the same tag name?
-      numSiblings = $parent.children().length;
       var $parent = $(node).parent(),
         numSiblingsSameTag = $parent.children(traits.tag).length,
         numSiblingsOtherTagAllowed = Math.min(2, Math.floor(numSiblingsSameTag * 0.33));
@@ -684,11 +683,23 @@ define(['$', 'util/common', 'util/element-classifier', 'mouse-highlight/traitcac
   // Score is multiplied by LINK_LIST_FACTOR if a list of 3 or more links
   // Score is multiplied by OUT_OF_FLOW_LIST_FACTOR if an absolutely positioned list
   function getListAndMenuFactor(node, traits, judgements) {
-    var listItems = $(node).find('>li,>[role|="menuitem"]'), // Also matches menuitemradio, menuitemcheckbox
-      links = $(node).find('>li>a,>a'),
+    var listItems = $(node).children('li,[role|="menuitem"]'), // Also matches menuitemradio, menuitemcheckbox
+      links =  getLinks(node),
       numListItems = listItems.length,
       numLinks = links.length,
       isListOfLinks;
+
+    function getLinks(node) {
+      // First check for simple <a> direct children
+      var links = $(node).children('a');
+      if (links.length) {
+        return links;
+      }
+      // If none, return <li> with a single <a> element child
+      return $(node).children('li').filter(function (index, elem) {
+        elem.childElementCount === 1 && elem.firstElementChild === 'a';
+      });
+    }
 
     function isMultiLine() {
       return (parseFloat(traits.style.lineHeight * 1.5) || parseFloat(traits.style.fontSize * 2)) < traits.visualHeightAt1x;

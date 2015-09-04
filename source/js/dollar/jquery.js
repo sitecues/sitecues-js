@@ -6,19 +6,18 @@
 // - Offset
 // - Wrap
 // - AJAX
-// Note: these optional modules are described at http://www.hongkiat.com/blog/jquery-remove-modules/
 // TODO If we also remove .effects (and don't use $.animate) we can save another 8k minified / 2.5k gzipped
 
 /*!
  * jQuery JavaScript Library v2.1.1 -ajax,-ajax/jsonp,-ajax/load,-ajax/parseJSON,-ajax/parseXML,-ajax/script,-ajax/var/nonce,-ajax/var/rquery,-ajax/xhr,-manipulation/_evalUrl,-deprecated,-dimensions,-offset,-wrap
- * http://jquery.com/
+ * http://dollar.com/
  *
  * Includes Sizzle.js
  * http://sizzlejs.com/
  *
  * Copyright 2005, 2014 jQuery Foundation, Inc. and other contributors
  * Released under the MIT license
- * http://jquery.org/license
+ * http://dollar.org/license
  *
  * Date: 2014-09-28T03:15Z
  */
@@ -31,7 +30,7 @@
     // For environments that do not inherently posses a window with a document
     // (such as Node.js), expose a jQuery-making factory as module.exports
     // This accentuates the need for the creation of a real window
-    // e.g. var jQuery = require("jquery")(window);
+    // e.g. var jQuery = require("dollar")(window);
     // See ticket #14549 for more info
     module.exports = global.document ?
       factory( global, true ) :
@@ -411,7 +410,7 @@
     },
 
     // results is for internal usage only
-    makeArray: function( arr, results ) {
+    $makeArray: function( arr, results ) {
       var ret = results || [];
 
       if ( arr != null ) {
@@ -564,7 +563,7 @@
      *
      * Copyright 2013 jQuery Foundation, Inc. and other contributors
      * Released under the MIT license
-     * http://jquery.org/license
+     * http://dollar.org/license
      *
      * Date: 2014-04-18
      */
@@ -1169,7 +1168,7 @@
         // We allow this because of a bug in IE8/9 that throws an error
         // whenever `document.activeElement` is accessed on an iframe
         // So, we allow :focus to pass through QSA all the time to avoid the IE error
-        // See http://bugs.jquery.com/ticket/13378
+        // See http://bugs.dollar.com/ticket/13378
         rbuggyQSA = [];
 
         if ( (support.qsa = rnative.test( doc.querySelectorAll )) ) {
@@ -1180,7 +1179,7 @@
             // This is to test IE's treatment of not explicitly
             // setting a boolean content attribute,
             // since its presence should be enough
-            // http://bugs.jquery.com/ticket/12359
+            // http://bugs.dollar.com/ticket/12359
             div.innerHTML = "<select msallowclip=''><option selected=''></option></select>";
 
             // Support: IE8, Opera 11-12.16
@@ -1475,7 +1474,7 @@
         }
 
         // Clear input after sorting to release objects
-        // See https://github.com/jquery/sizzle/pull/225
+        // See https://github.com/dollar/sizzle/pull/225
         sortInput = null;
 
         return results;
@@ -2812,7 +2811,7 @@
         this.context = selector.context;
       }
 
-      return jQuery.makeArray( selector, this );
+      return jQuery.$makeArray( selector, this );
     };
 
 // Give the init function the jQuery prototype for later instantiation
@@ -3425,7 +3424,7 @@
 
       // Catch cases where $(document).ready() is called after the browser event has already occurred.
       // we once tried to use readyState "interactive" here, but it caused issues like the one
-      // discovered by ChrisS here: http://bugs.jquery.com/ticket/12282#comment:15
+      // discovered by ChrisS here: http://bugs.dollar.com/ticket/12282#comment:15
       if ( document.readyState === "complete" ) {
         // Handle it asynchronously to allow scripts the opportunity to delay ready
         setTimeout( jQuery.ready );
@@ -3876,7 +3875,7 @@
         // Speed up dequeue by getting out quickly if this is just a lookup
         if ( data ) {
           if ( !queue || jQuery.isArray( data ) ) {
-            queue = data_priv.access( elem, type, jQuery.makeArray(data) );
+            queue = data_priv.access( elem, type, jQuery.$makeArray(data) );
           } else {
             queue.push( data );
           }
@@ -4294,7 +4293,7 @@
       // Clone any incoming data and prepend the event, creating the handler arg list
       data = data == null ?
         [ event ] :
-        jQuery.makeArray( data, [ event ] );
+        jQuery.$makeArray( data, [ event ] );
 
       // Allow special events to draw outside the lines
       special = jQuery.event.special[ type ] || {};
@@ -6876,7 +6875,7 @@
 
 
 // Based off of the plugin by Clint Helfers, with permission.
-// http://blindsignals.com/index.php/2009/07/jquery-delay/
+// http://blindsignals.com/index.php/2009/07/dollar-delay/
   jQuery.fn.delay = function( time, type ) {
     time = jQuery.fx ? jQuery.fx.speeds[ time ] || time : time;
     type = type || "fx";
@@ -7417,7 +7416,7 @@
         set: function( elem, value ) {
           var optionSet, option,
             options = elem.options,
-            values = jQuery.makeArray( value ),
+            values = jQuery.$makeArray( value ),
             i = options.length;
 
           while ( i-- ) {
@@ -7586,7 +7585,7 @@
       return this.map(function() {
         // Can add propHook for "elements" to filter or add form elements
         var elements = jQuery.prop( this, "elements" );
-        return elements ? jQuery.makeArray( elements ) : this;
+        return elements ? jQuery.$makeArray( elements ) : this;
       })
         .filter(function() {
           var type = this.type;
@@ -7654,7 +7653,7 @@
 // Register as a named AMD module, since jQuery can be concatenated with other
 // files that may use define, but not via a proper concatenation script that
 // understands anonymous AMD modules. A named AMD is safest and most robust
-// way to register. Lowercase jquery is used because AMD module names are
+// way to register. Lowercase dollar is used because AMD module names are
 // derived from file names, and jQuery is normally delivered in a lowercase
 // file name. Do this after creating the global so that if an AMD module wants
 // to call noConflict to hide this version of jQuery, it will work.
@@ -7693,7 +7692,7 @@
   };
 
 // Expose jQuery and $ identifiers, even in
-// AMD (#7102#comment:10, https://github.com/jquery/jquery/pull/557)
+// AMD (#7102#comment:10, https://github.com/dollar/dollar/pull/557)
 // and CommonJS for browser emulators (#13566)
   if ( typeof noGlobal === strundefined ) {
     window.jQuery = window.$ = jQuery;

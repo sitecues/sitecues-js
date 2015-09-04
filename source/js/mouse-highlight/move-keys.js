@@ -1,6 +1,6 @@
-define(['$', 'mouse-highlight/mouse-highlight', 'util/common', 'util/transform',
+define(['$', '$utils', 'mouse-highlight/mouse-highlight', 'util/common', 'util/transform',
   'mouse-highlight/pick', 'zoom/zoom', 'util/geo', 'zoom/fixed-position-fixer'],
-  function($, mh, common, transform, picker, zoomMod, geo, fixedFixer) {
+  function($, $utils, mh, common, transform, picker, zoomMod, geo, fixedFixer) {
 
   var STEP_SIZE_VERT = 18,
     STEP_SIZE_HORIZ = 24,  // Different step sizes because content tends to be wider than tall (lines of text)
@@ -599,7 +599,7 @@ define(['$', 'mouse-highlight/mouse-highlight', 'util/common', 'util/transform',
       return !!target; // Nothing previously picked -- any non-null target is valid
     }
     return target &&
-      !$lastPicked.is(target) &&
+      !$utils.$is($lastPicked, target) &&
       !$.contains(target, $lastPicked[0]) &&
       !$.contains($lastPicked[0], target);
   }

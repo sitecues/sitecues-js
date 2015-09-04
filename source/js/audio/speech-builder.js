@@ -92,6 +92,10 @@ define(['util/element-classifier', '$'], function(elemClassifier, $) {
     appendText(text.trim() + ' ');
   }
 
+  function isSelectedOption(index, option) {
+    return option.selected;
+  }
+
   function appendAccessibleTextFromSubtree(node, isLabel) {
     var text = '',
       styles,
@@ -161,7 +165,7 @@ define(['util/element-classifier', '$'], function(elemClassifier, $) {
     }
     else if ($node.is('select')) {
       textEquiv = node.getAttribute('title') || '';
-      value = $node.children(':selected').text();
+      value = $node.children().filter(isSelectedOption).text();
       doWalkChildren = false; // Otherwise will read all the <option> elements
     }
 

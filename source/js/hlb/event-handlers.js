@@ -95,7 +95,7 @@ define(['$', 'util/common', 'util/platform'], function($, common, platform) {
       // Prevent any scrolling if the user is:
       //   a) Not scrolling on the HLB element directly.
       //   b) Not scrolling on a decendant of the HLB element.
-      if (!$hlb.is(event.target) && !$.contains(elem, event.target))  {
+      if ($hlb[0] !== event.target && !$.contains(elem, event.target))  {
         preventScroll(event);
       }
 

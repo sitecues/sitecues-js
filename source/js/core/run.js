@@ -10,7 +10,7 @@
 // Later
 // Settings: why do we ever set a cookie? I don't think we can keep it between pages, at least not currently. So why save/get settings from server at all?
 //           Cookie is set for metrics?
-// TODO remove effects/animate from our custom build of jquery to save another 8k/3k -- we could still check out zepto or sizzle + xxx
+// TODO remove effects/animate from our custom build of jquery/zepto to save another 8k/3k -- we could still check out zepto or sizzle + xxx
 // TODO load custom scripts
 //      source/js/custom-scripts/custom-scripts.js \
 //      $(custom-files) \

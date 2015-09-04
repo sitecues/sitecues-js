@@ -12,8 +12,21 @@ define(['$'], function ($) {
     return ! $.contains(document.body, element) || // Is not in the <body>
       $(element).closest('#sitecues-badge,#scp-bp-container').length;
   }
+
+  // Zepto doesn't have makeArray
+  function $makeArray($jquery) {
+    return [].slice.call($jquery);
+  }
+
+  // Zepto doesn't have is(element)
+  function $is($jquery, element) {
+    return $makeArray($jquery).indexOf(element) >= 0;
+  }
+
   var publics = {
-    isInSitecuesUI: isInSitecuesUI
+    isInSitecuesUI: isInSitecuesUI,
+    $makeArray: $makeArray,
+    $is: $is
   };
 
   if (SC_UNIT) {

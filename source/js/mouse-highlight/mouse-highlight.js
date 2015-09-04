@@ -1,9 +1,9 @@
 // TODO Work in Firefox + EEOC menus
 // TODO Test! Especially in IE
-define(['$', 'conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mouse-highlight/traitcache',
+define(['$', '$utils', 'conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mouse-highlight/traitcache',
     'mouse-highlight/highlight-position', 'util/common', 'util/color',
     'audio/audio', 'util/geo', 'util/element-classifier', 'util/platform'],
-  function($, conf, zoomMod, picker, traitcache, mhpos, common, colorUtil, audio, geo, elementClassifier, platform) {
+  function($, $utils, conf, zoomMod, picker, traitcache, mhpos, common, colorUtil, audio, geo, elementClassifier, platform) {
 
   var
 
@@ -82,8 +82,6 @@ define(['$', 'conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mouse-hi
   pickFromMouseTimer,
 
   cursorPos = {};
-
-  // depends on jquery, conf, mouse-highlight/pick and positioning modules
 
   function getMaxZIndex(styles) {
     var maxZIndex = 0;
@@ -522,7 +520,7 @@ define(['$', 'conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mouse-hi
     if (possibleFloat && possibleFloat !== picked[0]) {
       var pickedAncestors = picked.parents(),
         possibleFloatAncestors = $(possibleFloat).parents();
-      if (pickedAncestors.is(possibleFloat)) {
+      if ($utils.$is(pickedAncestors, possibleFloat)) {
         // TODO commenting out second part cells in boxes at
         // http://venturebeat.com/2014/10/01/after-raising-50m-reddit-forces-remote-workers-to-relocate-to-sf-or-get-fired/
         // If potential float is ancestor of picked don't use it.
@@ -530,11 +528,11 @@ define(['$', 'conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mouse-hi
         // Example: http://thebillfold.com/2014/09/need-an-action-figure-of-a-dead-loved-one-meet-jeff-staab/
         return;
       }
-      var commonAncestor = possibleFloatAncestors.is(picked) ? picked : $(possibleFloat).closest(pickedAncestors);
+      var commonAncestor = $utils.$is(possibleFloatAncestors, picked) ? picked : $(possibleFloat).closest(pickedAncestors);
       if (isDifferentZIndex(possibleFloat, picked[0], commonAncestor)) {
         return; // Don't draw highlight around an item that is going over or under the highlight
       }
-      while (!commonAncestor.is(possibleFloat) && !$(possibleFloat).is('body,html')) {
+      while (commonAncestor[0] !== possibleFloat && !$(possibleFloat).is('body,html')) {
         if (traitcache.getStyleProp(possibleFloat, 'float') !== 'none') {
           var floatRect = mhpos.getRect(possibleFloat),
             mhRect = state.fixedContentRect,
@@ -1096,7 +1094,7 @@ define(['$', 'conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mouse-hi
     // See https://bugs.webkit.org/show_bug.cgi?id=9268
     function isNativeFormControl() {
       // Return true for form controls that use a native appearance
-      return picked.is(':button,:reset,:submit,:checkbox,:radio,input[type="color"],select[size="1"],select:not([size])');
+      return picked.is('input[type="button"],input[type="reset"],input[type="submit"],button,input[type="checkbox"],input[type="radio"],input[type="color"],select[size="1"],select:not([size])');
     }
     return isNativeFormControl() || (picked.is('tr') && platform.browser.isWebKit);
   }

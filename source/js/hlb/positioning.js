@@ -174,7 +174,7 @@ define(['$', 'conf/user/manager', 'hlb/styling', 'util/common', 'util/element-cl
     function isLonerElement(element) {
       var isLoner = true;
       $(element).closest($hlb).each(function(index, elemToCheckForSiblings) {
-        isLoner = $hlb.is(elemToCheckForSiblings) || !hasSiblings(elemToCheckForSiblings);
+        isLoner = $hlb[0] === elemToCheckForSiblings || !hasSiblings(elemToCheckForSiblings);
         return isLoner;
       });
       return isLoner;
