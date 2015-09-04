@@ -8,6 +8,8 @@
 // 1. Added parentsUntil manually from https://github.com/dgmike/zepto/commit/1b99c3dfd4379f4390a87beadac9bae23e54ef2d
 // 2. Added second param to not in .filter(filterFn(index, elem))
 // 3. Changed name of andSelf to addBack to keep up with jQuery (which deprecated andSelf and make addBack the new name for it)
+// 4. Fixed each() method to be compatible with prototype (see https://github.com/madrobby/zepto/issues/710)
+// TODO how do we fix this with plugins instead of patching?
 
 // Details
 //1. Add before parents:
@@ -28,12 +30,21 @@
 // + if (!selector.call(this,idx,this)) nodes.push(this)
 // 3. Change
 // - $.fn.andSelf = function(){
-// - $.fn.addBack = function(){
-
-// Zepto 1.1.6 (generated with Zepto Builder) - zepto event ie data fx - zeptojs.com/license
-//     Zepto.js
-//     (c) 2010-2015 Thomas Fuchs
-//     Zepto.js may be freely distributed under the MIT license.
+// + $.fn.addBack = function(){
+// 4. Change
+//each: function(callback){
+//  emptyArray.every.call(this, function(el, idx){
+//    return callback.call(el, idx, el) !== false
+//  })
+//  return this
+//},
+// to
+//each: function(callback){
+//  var $break = {}
+//  try {
+//    this.forEach(function(el, idx){ if (callback.call(el, idx, el) === false) throw $break })
+//  } catch (e) { if (e != $break) throw e }
+//},
 
 
 // Zepto 1.1.6 (generated with Zepto Builder) - zepto event ie data fx stack - zeptojs.com/license
@@ -479,10 +490,11 @@ var Zepto = (function() {
       })
     },
     each: function(callback){
-      emptyArray.every.call(this, function(el, idx){
-        return callback.call(el, idx, el) !== false
-      })
-      return this
+      var $break = {}
+      try {
+        this.forEach(function(el, idx){ if (callback.call(el, idx, el) === false) throw $break })
+      } catch (e) { if (e != $break) throw e }
+      return this;
     },
     filter: function(selector){
       if (isFunction(selector)) return this.not(this.not(selector))

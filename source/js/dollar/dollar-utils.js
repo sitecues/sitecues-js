@@ -23,7 +23,7 @@ define(['$'], function ($) {
     return $makeArray($jquery).indexOf(element) >= 0;
   }
 
-  // Convert the node list into a $ object (annoyingly Zepto doesn't just do this)
+  // Zepto doesn't convert $(nodeList) into a Zepto array automatically
   function $fromNodeList(nodeList) {
     return $.zepto ? $.zepto.Z(nodeList) : $(nodeList);
   }
