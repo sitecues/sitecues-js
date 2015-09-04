@@ -9,6 +9,7 @@
 // 2. Added second param to not in .filter(filterFn(index, elem))
 // 3. Changed name of andSelf to addBack to keep up with jQuery (which deprecated andSelf and make addBack the new name for it)
 // 4. Fixed each() method to be compatible with prototype (see https://github.com/madrobby/zepto/issues/710)
+// 5. Fix to css('backgroundColor') where it returned null instead of 'rgba(0, 0, 0, 0)'
 // TODO how do we fix this with plugins instead of patching?
 
 // Details
@@ -769,7 +770,7 @@ var Zepto = (function() {
         if(!element) return
         computedStyle = getComputedStyle(element, '')
         if (typeof property == 'string')
-          return element.style[camelize(property)] || computedStyle.getPropertyValue(property)
+          return element.style[property]
         else if (isArray(property)) {
           var props = {}
           $.each(property, function(_, prop){
