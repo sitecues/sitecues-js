@@ -31,6 +31,13 @@ else
   sc-local=false
 endif
 
+# Are we making a jquery-only version?
+ifeq ($(zepto), false)
+  allow-zepto=false
+else
+  allow-zepto=true
+endif
+
 # Make a build-specific version.
 custom-version=$(version)$(custom-suffix-upper)
 
@@ -58,7 +65,7 @@ build:
 	node node_modules/.bin/r.js -o requirejs-build-options.js baseUrl=source/js optimize=uglify2 uglify2.compress.global_defs.SC_DEV=false uglify2.compress.global_defs.SC_LOCAL=$(sc-local) uglify2.compress.global_defs.SC_UNIT=false dir=$(build-dir)/js wrap.start="'use strict';"
 
 	# Insert runtime bundle configuration
-	./insert-bundle-config.js target/common/js/sitecues.js target/build-config/sitecues-bundles.js
+	./finalize-loader-config.js target/common/js/sitecues.js target/build-config/sitecues-bundles.js $(allow-zepto)
 
 	# Non-js files, such as css, images, html, audio files
 	@mkdir -p $(build-dir)/etc
@@ -101,15 +108,13 @@ debug:
 	@mkdir -p $(build-dir)/js
 	@mkdir -p target/build-config
 	echo "sitecues.version='$(custom-version)';var SC_LOCAL=$(sc-local),SC_DEV=true,SC_UNIT=false;" > target/build-config/config.js
-	echo target/build-config/config.js
-	cat target/build-config/config.js
 
 	# Require.js build
 	# TODO add 'use strict' inside each module to help throw exceptions in debug mode
 	node node_modules/.bin/r.js -o requirejs-build-options.js baseUrl=source/js optimize=none dir=$(build-dir)/js
 
 	# Insert runtime bundle configuration
-	./insert-bundle-config.js target/common/js/sitecues.js target/build-config/sitecues-bundles.js
+	./finalize-loader-config.js target/common/js/sitecues.js target/build-config/sitecues-bundles.js $(allow-zepto)
 
 	# Non-js files, such as css, images, html, audio files
 	@mkdir -p $(build-dir)/etc

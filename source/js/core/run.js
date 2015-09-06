@@ -4,6 +4,9 @@
  */
 
 // Test
+// TODO Zepto compat -- HLB
+// TODO Secondary panel drop down performance
+// TODO speech button wrong state if on at first
 // TODO themes
 // TODO cursor size/hue settings only -- be careful of mousehue 1.1 which means nothing
 

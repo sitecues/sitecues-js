@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Call thusly:
-// insert-bundle-config [sitecues-config-filename] [bundle-config-filename]
+// finalize-loader-config [sitecues-config-filename] [bundle-config-filename] [allow-zepto]
 // This inserts the runtime bundle configuration as created by the build process.
 // The bundle configuration (what's in each js file) is written in requirejs-build-options.js onModuleBundleComplete()eq
 
@@ -17,6 +17,7 @@ var fs = require('fs'),
   matchText = '\"__SITECUES_BUNDLES__\"',
   bundleText = getBundleText(),
   text = fs.readFileSync(sitecuesLibraryFilename, { encoding: 'utf8' } ),
-  newText = text.replace(matchText, bundleText);
+  newText = text.replace(matchText, bundleText)
+    .replace('sitecues.__ALLOW_ZEPTO__', args[2]);
 
 fs.writeFileSync(sitecuesLibraryFilename, newText);

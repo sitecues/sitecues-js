@@ -34,6 +34,8 @@ port=8000
 # file locations will not be checked for async module loads.
 prod=off
 
+# Whether Zepto can be used (a download size improvement over jQuery for IE >= 10, Chrome, Firefox, Safari)
+zepto=true
 
 # The build version.
 export version=$(default-version)
@@ -150,7 +152,7 @@ build: lint clean $(_force-deps-refresh)
 	@echo "Node version : $(shell node --version)"
 	@echo "npm version  : v$(shell npm --version)"
 	@for _CUSTOM_CONF_NAME in $(custom-config-names) ; do \
-		$(MAKE) --no-print-directory -f core.mk build custom-config-name=$$_CUSTOM_CONF_NAME ; \
+		$(MAKE) --no-print-directory -f core.mk build $(zepto) custom-config-name=$$_CUSTOM_CONF_NAME ; \
 	done
 
 ################################################################################
