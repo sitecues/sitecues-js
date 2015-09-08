@@ -26,24 +26,26 @@ endif
 
 # Are we making a local-only version?
 ifeq ($(sc-local), true)
-  # Build a version that doesn't use AJAX for settings, config or metrics -- can be used locally or pasted into a console
+	# Build a version that doesn't use AJAX for settings, config or metrics -- can be used locally or pasted into a console
 else
-  sc-local=false
+	sc-local=false
 endif
 
 # Are we making a jquery-only version?
 ifeq ($(zepto), false)
-  allow-zepto=false
+	allow-zepto=false
 else
-  allow-zepto=true
+	allow-zepto=true
 endif
 
 # Are we building sourcemaps?
 ifeq ($(sourcemaps), false)
-  gzip-command='gzip "{}"'
+	# gzip should replace original source file
+	gzip-command='gzip "{}"'
 else
-  gzip-command='gzip -c "{}" > "{}.gz"'
-  sourcemaps=true
+	# gzip should keep original source file
+	gzip-command='gzip -c "{}" > "{}.gz"'
+	sourcemaps=true
 endif
 
 # Make a build-specific version.
