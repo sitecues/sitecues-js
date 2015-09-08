@@ -52,6 +52,7 @@ define(['util/element-classifier', 'keys/commands', 'metric/metric'],
     isHighlightVisible,
     isLensVisible,
     isSitecuesOn,
+    lastKeyInfo,
 
     KEY_TESTS = {
       'space': function(event) {
@@ -210,6 +211,20 @@ define(['util/element-classifier', 'keys/commands', 'metric/metric'],
   function executeCommand(commandName, keyName) {
     // Emit event defined for key
     commands[commandName](event, keyName);
+
+    if (lastKeyInfo && lastKeyInfo.keyName === keyName) {
+      ++ lastKeyInfo.repeatCount;
+    }
+    else {
+      lastKeyInfo = {
+        keyName: keyName,
+        shiftKey: event.shiftKey,
+        altKey: event.altKey,
+        metaKey: event.metaKey,
+        ctrlKey: event.ctrlKey,
+        repeatCount: 0
+      };
+    }
   }
 
     // key event hook
@@ -242,7 +257,7 @@ define(['util/element-classifier', 'keys/commands', 'metric/metric'],
     notifySitecuesKeyDown(true);
     if (event.keyCode === SHIFT) {
       if (isOnlyShift()) {
-        executeCommand('speak-highlight');
+        executeCommand('speak-highlight', 'shift');
       }
     }
 
@@ -253,6 +268,16 @@ define(['util/element-classifier', 'keys/commands', 'metric/metric'],
     isAnyNonShiftKeyDown = false;
 
     emitOnlyShiftStatus();
+
+    fireLastCommandMetric();
+  }
+
+  function fireLastCommandMetric() {
+    if (lastKeyInfo) {
+      // Clear queue -- we do this here so that we don't repeat key events with key repeat presses
+      metric('key-command', lastKeyInfo );
+      lastKeyInfo = null;
+    }
   }
 
   // Track to find out whether the shift key is pressed by itself

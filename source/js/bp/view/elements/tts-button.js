@@ -1,11 +1,11 @@
 // TODO wave animation broken except in default badge
-define(['bp/constants', 'bp/helper', 'bp/model/state', 'locale/locale'],
-  function (BP_CONST, helper, state, locale) {
+define(['bp/constants', 'bp/helper', 'bp/model/state', 'locale/locale', 'conf/user/manager'],
+  function (BP_CONST, helper, state, locale, conf) {
   var
     waveAnimationTimer,
     waveAnimationStepNum,
     isInitialized,
-    isSpeechEnabled;
+    isSpeechEnabled = conf.get('ttsOn');
 
   function toggleSpeech() {
     require(['audio/audio'], function(audio) {
