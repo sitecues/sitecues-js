@@ -3,7 +3,7 @@
   removeCombined: true,
   modules: [
     {
-      name: 'sitecues-ie9',
+      name: 'sitecues',
       include : [
         '../../build-config/config.js',
         'core/core',
@@ -14,7 +14,7 @@
       insertRequire: ['core/core']
     },
     {
-      name: 'sitecues',
+      name: 'sitecues-ie9',
       include : [
         '../../build-config/config.js',
         'core/core',

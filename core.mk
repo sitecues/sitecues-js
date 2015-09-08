@@ -73,8 +73,8 @@ build:
 	node node_modules/.bin/r.js -o rjs-build-options.js baseUrl=source/js generateSourceMaps=$(sourcemaps) optimize=uglify2 uglify2.compress.global_defs.SC_DEV=false uglify2.compress.global_defs.SC_LOCAL=$(sc-local) uglify2.compress.global_defs.SC_UNIT=false dir=$(build-dir)/js wrap.start="'use strict';"
 
 	# Insert runtime bundle configuration
-	./finalize-loader-config.js target/common/js/sitecues.js target/build-config/sitecues-bundles.js $(allow-zepto)
-	./finalize-loader-config.js target/common/js/sitecues-ie9.js target/build-config/sitecues-bundles.js false
+	./finalize-loader-config.js $(build-dir)/sitecues.js target/build-config/sitecues-bundles.js $(allow-zepto)
+	./finalize-loader-config.js $(build-dir)/sitecues-ie9.js target/build-config/sitecues-bundles.js false
 
 	# Non-js files, such as css, images, html, audio files
 	@mkdir -p $(build-dir)/etc
