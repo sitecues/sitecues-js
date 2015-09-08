@@ -49,11 +49,10 @@ define(['bp/constants', 'bp/helper', 'util/platform', 'bp/model/state', 'bp/view
       // TODO Need comments what the browser differences are
       sliderLeft      = platform.browser.isWebKit ? sliderRect.left + sliderThumbRect.width / 2 : panelLeft + BP_CONST.FIREFOX_SLIDER_OFFSET,
       sliderWidth     = sliderRect.width - sliderThumbRect.width,
-      newPercent      = (evt.clientX - sliderLeft) / sliderWidth,
-      ZOOM_RANGE      = 2,
-      newValue        = (newPercent * ZOOM_RANGE) + ZOOM_RANGE;
+      newPercent      = (evt.clientX - sliderLeft) / sliderWidth;
 
     require(['zoom/zoom'], function(zoomMod) {
+      var newValue        = (newPercent * zoomMod.RANGE) + zoomMod.MIN;
       zoomMod.init(true);
       zoomMod.jumpTo(newValue);
     });
