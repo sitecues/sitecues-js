@@ -4,8 +4,8 @@
  */
 
 // Test
-// TODO secondary panel feature sizes wrong sometimes
 // TODO Zepto compat -- HLB
+// TODO secondary panel feature sizes wrong sometimes
 // TODO themes
 // TODO cursor size/hue settings only -- be careful of mousehue 1.1 which means nothing
 

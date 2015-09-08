@@ -12,6 +12,10 @@ define([], function() {
       isListeningToResizeEvents,
       isRetinaDisplay;         // Is the current display a retina display?
 
+  function isCssPropSupported(propName) {
+    return document.documentElement.style[propName] === 'string';
+  }
+
   // Determine which browser is being used
   browserStr = (agent.indexOf(' MSIE') > 0 || agent.indexOf(' Trident') > 0 || agent.indexOf(' Edge') > 0) ? 'IE':
             agent.indexOf(' Firefox/') > 0 ? 'Firefox' :
@@ -116,19 +120,8 @@ define([], function() {
     return '';
   })();
 
-  var transformProperty = isIE9 ? 'msTransform' : (browser.isWebKit ? 'webkitTransform' : 'transform');
-
-  // Windows 8 (aug 24, 2014) does not properly animate the HLB when using CSS Transitions.
-  // Very strange behavior, might be worth filing a browser bug repport.
-  // UPDATE: (sept 15, 2014) IE10 appears to regress in Win8.1, CSS transition animations for HLB not working.
-  // UPDATE: (oct  06, 2014) Firefox appears to regress when window.pageYOffset is 0.  Animation of HLB
-  //                         flies out from outside the viewport (top-left)
-  var useJqueryAnimate = (function () {
-    return browser.isIE ||
-      (browser.isSafari  && window.pageYOffset === 0) ||
-      (browser.isFirefox && window.pageYOffset === 0);
-
-  }());
+  var transformProperty = isIE9 ? 'msTransform' : ((browser.isWebKit && !isCssPropSupported('transform'))? 'webkitTransform' : 'transform');
+  var transformOriginProperty = transformProperty + 'Origin';
 
   var transitionEndEvent = browser.isWebKit ? 'webkitTransitionEnd' : 'transitionend';
 
@@ -196,7 +189,7 @@ define([], function() {
     canUseRetinaCursors: canUseRetinaCursors,
     cssPrefix: cssPrefix,
     transformProperty: transformProperty,
-    useJqueryAnimate: useJqueryAnimate,
+    transformOriginProperty: transformOriginProperty,
     transitionEndEvent: transitionEndEvent,
     nativeZoom: nativeZoom,
     isRetina: isRetina

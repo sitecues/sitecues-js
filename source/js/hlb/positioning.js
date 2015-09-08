@@ -4,8 +4,8 @@
  * It is also responsible for calculating and setting the appropriate height/width of the HLB so that it is
  * encapsulated within the HLB_SAFE_AREA.
  */
-define(['$', 'conf/user/manager', 'hlb/styling', 'util/common', 'util/element-classifier', 'hlb/safe-area'],
-  function($, conf, hlbStyling, common, elemClassifier, hlbSafeArea) {
+define(['$', 'conf/user/manager', 'hlb/styling', 'util/common', 'util/element-classifier', 'hlb/safe-area', 'util/platform'],
+  function($, conf, hlbStyling, common, elemClassifier, hlbSafeArea, platform) {
 
   /////////////////////////
   // PRIVATE VARIABLES
@@ -231,19 +231,15 @@ define(['$', 'conf/user/manager', 'hlb/styling', 'util/common', 'util/element-cl
   }
 
   /**
-   * [midPointDiff computes the distance between the midpoints of 2 elements]
-   * @param  {[jQuery element]} $rectOne [jQuery element]
-   * @param  {[jQuery element]} $rectTwo [jQuery element]
+   * [midPointDiff computes the distance between the midpoints of 2 rects]
    * @return {[object]}         [x and y difference between the 2 midpoints]
    */
-  function midPointDiff($rectOne, $rectTwo) {
+  function midPointDiff(rect1, rect2) {
 
-    var br1 = $rectOne instanceof $ ? $rectOne[0].getBoundingClientRect() : $rectOne,
-        br2 = $rectTwo instanceof $ ? $rectTwo[0].getBoundingClientRect() : $rectTwo,
-        br1x = br1.left + br1.width / 2,
-        br1y = br1.top + br1.height / 2,
-        br2x = br2.left + br2.width / 2,
-        br2y = br2.top + br2.height / 2;
+    var br1x = rect1.left + rect1.width / 2,
+        br1y = rect1.top + rect1.height / 2,
+        br2x = rect2.left + rect2.width / 2,
+        br2y = rect2.top + rect2.height / 2;
 
     return {
       'x': br1x - br2x,
@@ -659,7 +655,7 @@ define(['$', 'conf/user/manager', 'hlb/styling', 'util/common', 'util/element-cl
         expandedHeightOffset = (HLBBoundingBoxAfterZoom.height - HLBBoundingBox.height) / 2,
 
         // The difference between the mid points of the hlb element and the original
-        offset = midPointDiff($hlb, initialHLBRect);
+        offset = midPointDiff($hlb[0].getBoundingClientRect(), initialHLBRect);
 
     // Update the dimensions for the HLB which is used for constraint calculations.
     // The offset of the original element and cloned element midpoints are used for positioning.
@@ -688,18 +684,12 @@ define(['$', 'conf/user/manager', 'hlb/styling', 'util/common', 'util/element-cl
                 ((-offset.y / inheritedZoom) + HLBBoundingBox.height / 2 / inheritedZoom) + 'px';
 
     // Position the HLB without it being scaled (so we can animate the scale).
-    var startAnimationZoom = conf.get('zoom') / inheritedZoom;
+    var startAnimationZoom = conf.get('zoom') / inheritedZoom,
+      hlbStyle = $hlb[0];
 
-    $hlb.css({
-      'transform'              : 'scale(' + startAnimationZoom + ') ' + translateCSS,
-      'transform-origin'       : originCSS,
-      'webkit-transform-origin': originCSS
-    });
-
-    // Legal sizes == '-' (smaller), null (default), '+' (larger)
-    conf.def('lensSize', function(size) {
-      return size === '-' || size === '+' ? size : null;
-    });
+    hlbStyle[platform.transformProperty] = 'scale(' + startAnimationZoom + ') ' + translateCSS;
+    hlbStyle[platform.transformOriginProperty] = originCSS;
+    hlbStyle.willChange = 'transform';
   }
 
   var publics = {

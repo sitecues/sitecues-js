@@ -16,7 +16,13 @@ define(['$', 'conf/user/manager', 'util/common', 'util/platform'], function($, c
 
       isOldIE = platform.browser.isIE && platform.browser.version < 11,
 
-      documentElement = document.documentElement;
+      documentElement = document.documentElement,
+
+      requestFrameFn = window.requestAnimationFrame ||
+        window.msRequestAnimationFrame ||
+        function (fn) {
+          return setTimeout(fn, 16);
+        };
 
   //////////////////////////////
   // PUBLIC FUNCTIONS
@@ -48,9 +54,29 @@ define(['$', 'conf/user/manager', 'util/common', 'util/platform'], function($, c
       .attr('id', DIMMER_ID)
       .css({
         zIndex: DIMMER_Z_INDEX,
-        opacity: DIMMER_MIN_OPACITY
-      })
-      .animate({ opacity : DIMMER_MAX_OPACITY }, inflationSpeed);
+        willChange: 'opacity'
+      });
+
+      animateOpacity($dimmerElement[0], DIMMER_MIN_OPACITY, DIMMER_MAX_OPACITY, inflationSpeed);
+  }
+
+  function animateOpacity(dimmerElement, startOpacity, endOpacity, speed, onCompleteFn) {
+    function nextFrame() {
+      var timeElapsed = new Date() - startTime,
+        percentComplete = timeElapsed > speed ? 1 : timeElapsed / speed,
+        currentOpacity = startOpacity + (endOpacity - startOpacity) * percentComplete;
+
+      dimmerElement.style.opacity = currentOpacity;
+      if (percentComplete < 1) {
+        requestFrameFn(nextFrame);
+      }
+      else if (onCompleteFn) {
+        onCompleteFn();
+      }
+    }
+
+    var startTime = new Date();
+    nextFrame();
   }
 
   /**
@@ -59,8 +85,8 @@ define(['$', 'conf/user/manager', 'util/common', 'util/platform'], function($, c
    */
   function undimBackgroundContent(deflationSpeed) {
 
-    $(getDimmerElement())
-      .animate({ opacity : DIMMER_MIN_OPACITY}, deflationSpeed, onDimmerClosed);
+    animateOpacity(getDimmerElement(), DIMMER_MAX_OPACITY, DIMMER_MIN_OPACITY, deflationSpeed, onDimmerClosed);
+
   }
 
   /**
@@ -118,8 +144,7 @@ define(['$', 'conf/user/manager', 'util/common', 'util/platform'], function($, c
 
   var publics = {
     dimBackgroundContent: dimBackgroundContent,
-    undimBackgroundContent: undimBackgroundContent,
-    getDimmerElement: getDimmerElement
+    undimBackgroundContent: undimBackgroundContent
   };
 
   if (SC_UNIT) {

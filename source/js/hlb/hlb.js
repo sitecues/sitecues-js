@@ -711,6 +711,12 @@ define([
       return loggingEnabled;
     };
   }
+
+  // Legal sizes == '-' (smaller), null (default), '+' (larger)
+  conf.def('lensSize', function(size) {
+    return size === '-' || size === '+' ? size : null;
+  });
+
   var publics = {
     getElement: getElement,
     toggleHLB: toggleHLB,
