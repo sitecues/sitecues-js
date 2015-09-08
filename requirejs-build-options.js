@@ -1,6 +1,6 @@
 ({
-  generateSourceMaps: true,
   preserveLicenseComments: false,
+  removeCombined: true,
   modules: [
     {
       name: 'sitecues',
@@ -128,55 +128,6 @@
       ]
     },
     {
-      name: 'zoom-forms',
-      create: true,
-      include: [
-        'zoom/zoom-forms'
-      ],
-      exclude: [
-        'locale/locale',
-        'util/platform',
-        'bp/constants',
-        'bp/model/state',
-        'bp/helper',
-        'util/xhr',
-        'util/common',
-        'dollar/dollar-utils',
-        'dollar/zepto-private',
-        'dollar/jquery-private',
-        'util/transform',
-        'metric/metric',
-        'conf/urls',
-        'conf/site',
-        'conf/user/manager'
-      ]
-    },
-    {
-      name: 'audio-cues',
-      create: true,
-      include: [
-        'audio/audio-cues'
-      ],
-      exclude: [
-        'audio/audio',
-        'locale/locale',
-        'util/platform',
-        'bp/constants',
-        'bp/model/state',
-        'bp/helper',
-        'util/xhr',
-        'util/common',
-        'dollar/dollar-utils',
-        'dollar/zepto-private',
-        'dollar/jquery-private',
-        'util/transform',
-        'metric/metric',
-        'conf/urls',
-        'conf/site',
-        'conf/user/manager'
-      ]
-    },
-    {
       name: 'hlb',
       create: true,
       include: [
@@ -199,39 +150,6 @@
         'conf/urls',
         'util/geo',
         'util/transform'
-      ]
-    },
-    {
-      name: 'info',
-      create: true,
-      include: [
-        'info/info'
-      ],
-      exclude: [
-        'locale/locale',
-        'util/platform',
-        'util/color',
-        'bp/constants',
-        'bp/model/state',
-        'bp/helper',
-        'util/xhr',
-        'util/common',
-        'dollar/dollar-utils',
-        'dollar/zepto-private',
-        'dollar/jquery-private',
-        'conf/urls',
-        'conf/site',
-        'conf/user/manager',
-        'style-service/user-agent-css.js',
-        'conf/site.js',
-        'style-service/media-queries.js',
-        'style-service/css-aggregator.js',
-        'style-service/style-service.js',
-        'util/transform.js',
-        'metric/metric',
-        'hlb/dimmer',
-        'zoom/zoom-forms.js',
-        'zoom/zoom.js'
       ]
     },
     {
@@ -266,16 +184,6 @@
         'metric/metric',
         'zoom/zoom-forms.js',
         'zoom/zoom.js'
-      ]
-    },
-    {
-      name: 'status',
-      create: true,
-      include: [
-        'util/status'
-      ],
-      exclude: [
-        'conf/urls'
       ]
     }
   ],

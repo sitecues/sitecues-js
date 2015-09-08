@@ -38,6 +38,14 @@ else
   allow-zepto=true
 endif
 
+# Are we building sourcemaps?
+ifeq ($(sourcemaps), false)
+  gzip-command='gzip "{}"'
+else
+  gzip-command='gzip -c "{}" > "{}.gz"'
+  sourcemaps=true
+endif
+
 # Make a build-specific version.
 custom-version=$(version)$(custom-suffix-upper)
 
@@ -62,7 +70,7 @@ build:
 	echo "sitecues.version='$(custom-version)';" > target/build-config/config.js
 
 	# Require.js build
-	node node_modules/.bin/r.js -o requirejs-build-options.js baseUrl=source/js optimize=uglify2 uglify2.compress.global_defs.SC_DEV=false uglify2.compress.global_defs.SC_LOCAL=$(sc-local) uglify2.compress.global_defs.SC_UNIT=false dir=$(build-dir)/js wrap.start="'use strict';"
+	node node_modules/.bin/r.js -o requirejs-build-options.js baseUrl=source/js generateSourceMaps=$(sourcemaps) optimize=uglify2 uglify2.compress.global_defs.SC_DEV=false uglify2.compress.global_defs.SC_LOCAL=$(sc-local) uglify2.compress.global_defs.SC_UNIT=false dir=$(build-dir)/js wrap.start="'use strict';"
 
 	# Insert runtime bundle configuration
 	./finalize-loader-config.js target/common/js/sitecues.js target/build-config/sitecues-bundles.js $(allow-zepto)
@@ -73,24 +81,22 @@ build:
 	@echo
 
 	@echo "===== GZIP: Creating compressed (gzipped) JavaScript files."
-	@echo
-	@(cd $(build-dir)/js ; for FILE in *.js ; do \
-		gzip -c $$FILE > $$FILE.gz ; \
-	done)
+	echo $(gzip-command)
+	@cd $(build-dir)/js ; find . -type f -name '*.js' ! -name "*.map" ! -name "*.src.js" -exec sh -c $(gzip-command) \;
 
   # Show file sizes but not for foo.src.bar -- those are built by r.js for sourcemaps
-	@echo **** File sizes ******************************************
+	@echo "**** File sizes ******************************************"
 	@echo
-	@echo ---- sitecues core zipped --------------------------------
+	@echo "---- sitecues core zipped --------------------------------"
 	@./show-file-sizes.sh $(build-dir)/js "sitecues.js.gz"
-	@echo ----- additional bundles zipped --------------------------
-	@./show-file-sizes.sh $(build-dir)/js "*.js.gz" | grep -vE "\.src\.|sitecues\.js"
+	@echo "----- additional bundles zipped --------------------------"
+	@./show-file-sizes.sh $(build-dir)/js "*.js.gz"
 # Uncomment if you want to see raw file sources before zipping
 #	@echo
-#	@echo ---- sitecues core source --------------------------------
+#	@echo "---- sitecues core source --------------------------------"
 #	@./show-file-sizes.sh $(build-dir)/js "sitecues.js"
-#	@echo ---- additional bundles source ---------------------------
-#	@./show-file-sizes.sh $(build-dir)/js "*.js" | grep -vE "\.src\.|sitecues\.js"
+#	@echo "---- additional bundles source ---------------------------"
+#	@./show-file-sizes.sh $(build-dir)/js "*.js"
 
 	@echo
 	@echo "===== COMPLETE: Building '$(custom-name)' library"
@@ -111,7 +117,7 @@ debug:
 
 	# Require.js build
 	# TODO add 'use strict' inside each module to help throw exceptions in debug mode
-	node node_modules/.bin/r.js -o requirejs-build-options.js baseUrl=source/js optimize=none dir=$(build-dir)/js
+	node node_modules/.bin/r.js -o requirejs-build-options.js baseUrl=source/js generateSourceMaps=$(sourcemaps) optimize=none dir=$(build-dir)/js
 
 	# Insert runtime bundle configuration
 	./finalize-loader-config.js target/common/js/sitecues.js target/build-config/sitecues-bundles.js $(allow-zepto)
@@ -121,11 +127,11 @@ debug:
 	@(for F in `ls -d source/* | grep -Ev '^source/js$$'` ; do cp -r $$F $(build-dir)/etc ; done)
 	@echo
 
-	@echo **** File sizes ******************************************
-	@echo ---- sitecues core source --------------------------------
+	@echo "**** File sizes ******************************************"
+	@echo "---- sitecues core source --------------------------------"
 	@./show-file-sizes.sh $(build-dir)/js "sitecues.js"
-	@echo ---- additional bundles source ---------------------------
-	@./show-file-sizes.sh $(build-dir)/js "*.js" | grep -vE "\.src\.|sitecues\.js"
+	@echo "---- additional bundles source ---------------------------"
+	@./show-file-sizes.sh $(build-dir)/js "*.js"
 
 #	@echo
 #	@echo "===== COMPLETE: Building '$(custom-name)' library (DEBUG VER) ====="
@@ -140,21 +146,12 @@ package:
 	@echo "===== STARTING: Packaging '$(custom-name)' library"
 	rm -rf $(package-dir)
 	mkdir -p $(package-dir)
-	mkdir -p $(package-dir)/locale-data
 	echo $(custom-version) > $(package-dir)/VERSION.TXT
 	echo "SC_BUILD_NAME=$(custom-name)" > $(package-dir)/BUILD.TXT
 	echo "SC_BUILD_SUFFIX=$(custom-suffix)" >> $(package-dir)/BUILD.TXT
 
-	# Shallow copy of $(build-dir) and $(build-dir)/locale-data
-	cp $(build-dir)/js/*.js $(package-dir)
-	cp $(build-dir)/js/locale-data/??.js $(package-dir)/locale-data
-
-  # TODO sourcemaps on production -- need to get them from target-build source?
-	# cp $(build-dir)/js/*.map $(package-dir)
-	# Make dir for Source-Maps
-	# mkdir -p $(package-dir)/source/
-	# Copy files for Source-Maps
-	# cp -R source/js $(package-dir)/source/
+	# Deep copy of $(build-dir)
+	cp -R $(build-dir)/js/* $(package-dir)
 
   # Copy all the resources
 	cp -R $(build-dir)/etc/* $(package-dir)

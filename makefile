@@ -37,6 +37,9 @@ prod=off
 # Whether Zepto can be used (a download size improvement over jQuery for IE >= 10, Chrome, Firefox, Safari)
 zepto=true
 
+# Whether sourcemaps should be build
+sourcemaps=true
+
 # The build version.
 export version=$(default-version)
 
@@ -152,7 +155,7 @@ build: lint clean $(_force-deps-refresh)
 	@echo "Node version : $(shell node --version)"
 	@echo "npm version  : v$(shell npm --version)"
 	@for _CUSTOM_CONF_NAME in $(custom-config-names) ; do \
-		$(MAKE) --no-print-directory -f core.mk build $(zepto) custom-config-name=$$_CUSTOM_CONF_NAME ; \
+		$(MAKE) --no-print-directory -f core.mk build custom-config-name=$$_CUSTOM_CONF_NAME ; \
 	done
 
 ################################################################################
@@ -170,11 +173,14 @@ debug: clean $(_force-deps-refresh) $(_build_lint_dep)
 #	Package up the files into a deployable bundle, and create a manifest for local
 # file deployment.
 ################################################################################
-package: lint build
+package: lint clean
 ifeq ($(sc_dev), true)
 	$(error Unable to package a development build)
 endif
+	@echo "Node version : $(shell node --version)"
+	@echo "npm version  : v$(shell npm --version)"
 	@for _CUSTOM_CONF_NAME in $(custom-config-names) ; do \
+		$(MAKE) --no-print-directory -f core.mk build custom-config-name=$$_CUSTOM_CONF_NAME sourcemaps=false ; \
 		$(MAKE) --no-print-directory -f core.mk package custom-config-name=$$_CUSTOM_CONF_NAME ; \
 	done
 
