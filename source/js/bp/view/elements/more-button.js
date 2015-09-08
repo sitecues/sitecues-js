@@ -50,6 +50,10 @@ define(['bp/constants', 'bp/helper', 'util/animate', 'bp/view/svg-transform-effe
     btnContainer.style.opacity = 1;
   }
 
+  function preloadSecondaryPanel() {
+    require(['bp/view/elements/secondary/secondary-panel'], function() {});
+  }
+
   function showMoreButton (useInstantTransition) {
 
     byId(BP_CONST.BOTTOM_MOUSETARGET_ID).removeEventListener('mousemove', showMoreButtonSlowly);
@@ -72,6 +76,8 @@ define(['bp/constants', 'bp/helper', 'util/animate', 'bp/view/svg-transform-effe
 
     // Once we show the button, always show it.
     doAlwaysShowButton = true;
+
+    preloadSecondaryPanel();
   }
 
   function showMoreButtonSlowly() {
@@ -131,6 +137,7 @@ define(['bp/constants', 'bp/helper', 'util/animate', 'bp/view/svg-transform-effe
     if (isInitialized) {
       return;
     }
+
     isInitialized = true;
 
     // Add mouse listeners once BP is ready

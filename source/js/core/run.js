@@ -4,10 +4,7 @@
  */
 
 // Test
-// TODO Secondary panel drop down performance
-// TODO speech button wrong state if on at first
 // TODO secondary panel feature sizes wrong sometimes
-// TODO holding down plus key jerky
 // TODO Zepto compat -- HLB
 // TODO themes
 // TODO cursor size/hue settings only -- be careful of mousehue 1.1 which means nothing
