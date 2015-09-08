@@ -70,10 +70,11 @@ build:
 	echo "sitecues.version='$(custom-version)';" > target/build-config/config.js
 
 	# Require.js build
-	node node_modules/.bin/r.js -o requirejs-build-options.js baseUrl=source/js generateSourceMaps=$(sourcemaps) optimize=uglify2 uglify2.compress.global_defs.SC_DEV=false uglify2.compress.global_defs.SC_LOCAL=$(sc-local) uglify2.compress.global_defs.SC_UNIT=false dir=$(build-dir)/js wrap.start="'use strict';"
+	node node_modules/.bin/r.js -o rjs-build-options.js baseUrl=source/js generateSourceMaps=$(sourcemaps) optimize=uglify2 uglify2.compress.global_defs.SC_DEV=false uglify2.compress.global_defs.SC_LOCAL=$(sc-local) uglify2.compress.global_defs.SC_UNIT=false dir=$(build-dir)/js wrap.start="'use strict';"
 
 	# Insert runtime bundle configuration
 	./finalize-loader-config.js target/common/js/sitecues.js target/build-config/sitecues-bundles.js $(allow-zepto)
+	./finalize-loader-config.js target/common/js/sitecues-ie9.js target/build-config/sitecues-bundles.js false
 
 	# Non-js files, such as css, images, html, audio files
 	@mkdir -p $(build-dir)/etc
@@ -88,9 +89,9 @@ build:
 	@echo "**** File sizes ******************************************"
 	@echo
 	@echo "---- sitecues core zipped --------------------------------"
-	@./show-file-sizes.sh $(build-dir)/js "sitecues.js.gz"
+	@./show-file-sizes.sh $(build-dir)/js "sitecues*.js.gz"
 	@echo "----- additional bundles zipped --------------------------"
-	@./show-file-sizes.sh $(build-dir)/js "*.js.gz"
+	@./show-file-sizes.sh $(build-dir)/js "*.js.gz" | grep -v "sitecues"
 # Uncomment if you want to see raw file sources before zipping
 #	@echo
 #	@echo "---- sitecues core source --------------------------------"
@@ -117,10 +118,11 @@ debug:
 
 	# Require.js build
 	# TODO add 'use strict' inside each module to help throw exceptions in debug mode
-	node node_modules/.bin/r.js -o requirejs-build-options.js baseUrl=source/js generateSourceMaps=$(sourcemaps) optimize=none dir=$(build-dir)/js
+	node node_modules/.bin/r.js -o rjs-build-options.js baseUrl=source/js generateSourceMaps=$(sourcemaps) optimize=none dir=$(build-dir)/js
 
 	# Insert runtime bundle configuration
 	./finalize-loader-config.js target/common/js/sitecues.js target/build-config/sitecues-bundles.js $(allow-zepto)
+	./finalize-loader-config.js target/common/js/sitecues-ie9.js target/build-config/sitecues-bundles.js false
 
 	# Non-js files, such as css, images, html, audio files
 	@mkdir -p $(build-dir)/etc
@@ -129,9 +131,9 @@ debug:
 
 	@echo "**** File sizes ******************************************"
 	@echo "---- sitecues core source --------------------------------"
-	@./show-file-sizes.sh $(build-dir)/js "sitecues.js"
+	@./show-file-sizes.sh $(build-dir)/js "sitecues*.js"
 	@echo "---- additional bundles source ---------------------------"
-	@./show-file-sizes.sh $(build-dir)/js "*.js"
+	@./show-file-sizes.sh $(build-dir)/js "*.js" | grep -v "sitecues"
 
 #	@echo
 #	@echo "===== COMPLETE: Building '$(custom-name)' library (DEBUG VER) ====="

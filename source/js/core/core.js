@@ -1,4 +1,4 @@
-define(['conf/site', 'conf/urls'], function (site, urls) {
+define(['conf/site', 'conf/urls', 'core/run'], function (site, urls, run) {
    // Array's prototype
   var arr = Array.prototype;
 
@@ -241,9 +241,7 @@ define(['conf/site', 'conf/urls'], function (site, urls) {
         ' ... email support@sitecues.com for more information.');
     }
     else {
-      require(['core/run'], function(run) {
-        run();
-      });
+      run();
     }
   };
 

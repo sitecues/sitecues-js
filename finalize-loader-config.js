@@ -2,7 +2,7 @@
 // Call thusly:
 // finalize-loader-config [sitecues-config-filename] [bundle-config-filename] [allow-zepto]
 // This inserts the runtime bundle configuration as created by the build process.
-// The bundle configuration (what's in each js file) is written in requirejs-build-options.js onModuleBundleComplete()eq
+// The bundle configuration (what's in each js file) is written in rjs-build-options.js onModuleBundleComplete()eq
 
 function getBundleText() {
   var bundleTextFilename = args[1],

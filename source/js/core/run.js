@@ -20,11 +20,10 @@
 // TODO file bug on requirejs needing sitecues.require when variable name used
 // TODO use seth's more modern jshint options
 
-define(['../conf/user/user-id', 'conf/user/server', 'locale/locale', 'conf/user/manager', 'metric/metric', 'util/platform'],
-  function (userId, userSettingsServer, locale, conf, metric, platform) {
+define(['../conf/user/user-id', 'conf/user/server', 'locale/locale', 'conf/user/manager', 'metric/metric', 'util/platform', 'bp/bp', 'keys/keys' ],
+  function (userId, userSettingsServer, locale, conf, metric, platform, bp, keys) {
   var
     numPrereqsToComplete,
-    ALWAYS_ON_FEATURES = [ 'bp/bp', 'keys/keys' ],
     ZOOM_ON_FEATURES = [ 'hpan/hpan', 'zoom/fixed-position-fixer', 'keys/focus', 'cursor/cursor' ],
     TTS_ON_FEATURES = [ 'audio/audio' ],
     SITECUES_ON_FEATURES = [ 'mouse-highlight/mouse-highlight', 'mouse-highlight/move-keys' ],
@@ -73,8 +72,13 @@ define(['../conf/user/user-id', 'conf/user/server', 'locale/locale', 'conf/user/
     });
   }
 
+  function initAlwaysOnFeatures() {
+    bp.init();
+    keys.init();
+  }
+
   function onAllPrereqsComplete() {
-    initModulesByName(ALWAYS_ON_FEATURES);
+    initAlwaysOnFeatures();
 
     firePageLoadEvent();
 

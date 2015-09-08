@@ -1,5 +1,5 @@
 // This module includes functionality used in user identification.
-define(['util/localstorage'], function(ls) {
+define(['util/localstorage', 'util/xhr', 'conf/urls'], function(ls, xhr, urls) {
 
   var isInitialized;
 
@@ -33,24 +33,22 @@ define(['util/localstorage'], function(ls) {
     }
 
     SC_DEV && console.log('UserID not found in localStorage, fallback to ajax request.');
-    require(['util/xhr', 'conf/urls'], function (xhr, urls) {
-      xhr.getJSON({
-        url: urls.getApiUrl('user/id/get.json'),
-        success: function (data) {
-          // Important MAGIC: this will also have set a cookie that ends up getting used in future requests
-          // e.g. _ai2_sc_uid = 3d50a209-dc12-4bf4-9913-de5ba74f96cf
-          // That's why nothing ever needs to check the user ID directly except for this module!!!
-          userId = data.userId;
-          ls.clearSitecuesLs();
-          ls.setUserId(data.userId);
-          didComplete();
-        },
-        error: function (textStatus) {
-          if (SC_DEV) {
-            console.log('===== Unable to get user ID: ' + textStatus);
-          }
+    xhr.getJSON({
+      url: urls.getApiUrl('user/id/get.json'),
+      success: function (data) {
+        // Important MAGIC: this will also have set a cookie that ends up getting used in future requests
+        // e.g. _ai2_sc_uid = 3d50a209-dc12-4bf4-9913-de5ba74f96cf
+        // That's why nothing ever needs to check the user ID directly except for this module!!!
+        userId = data.userId;
+        ls.clearSitecuesLs();
+        ls.setUserId(data.userId);
+        didComplete();
+      },
+      error: function (textStatus) {
+        if (SC_DEV) {
+          console.log('===== Unable to get user ID: ' + textStatus);
         }
-      });
+      }
     });
   }
 

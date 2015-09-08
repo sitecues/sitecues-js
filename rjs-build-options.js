@@ -3,21 +3,26 @@
   removeCombined: true,
   modules: [
     {
-      name: 'sitecues',
+      name: 'sitecues-ie9',
       include : [
         '../../build-config/config.js',
-        'core/sitecues',
-        'core/run',
-        '../../../node_modules/requirejs/require.js',
-        'bp/bp',
-        'keys/keys',
-        'metric/metric',
-        'util/xhr',
-        'conf/urls'
+        'core/core',
+        '../../../node_modules/alameda/alameda.js'
       ],
       create: true,
       namespace: 'sitecues',
-      insertRequire: ['../../build-config/config.js', 'core/sitecues']
+      insertRequire: ['core/core']
+    },
+    {
+      name: 'sitecues',
+      include : [
+        '../../build-config/config.js',
+        'core/core',
+        '../../../node_modules/requirejs/require.js'
+      ],
+      create: true,
+      namespace: 'sitecues',
+      insertRequire: ['core/core']
     },
     {
       name: 'utils',
@@ -197,8 +202,8 @@
     }
   },
   onBuildRead: function(module, path, contents) {
-    if (module.indexOf('/requirejs') > 0) {
-      var loaderConfig = fs.readFileSync('requirejs-loader-config.js', 'utf8');
+    if (module.indexOf('/requirejs') > 0 || module.indexOf('/alameda') > 0) {
+      var loaderConfig = fs.readFileSync('module-loader-config.js', 'utf8');
       // Prepend our runtime configuration to the loader itself,
       // so that we can use options like "skipDataMain" in it.
       return loaderConfig + contents;
@@ -210,14 +215,16 @@
     // Check for dupes
     // TODO this should use require with a state module we build instead of a global
     global.scIncludedBy = global.scIncludedBy || {};
-    var index = data.included.length;
-    while (index--) {
-      var includedItem = data.included[index];
-      if (global.scIncludedBy[includedItem]) {
-        throw new Error('The module ' + includedItem + ' was included both in ' + global.scIncludedBy[includedItem] + ' and ' + data.name + '.\n' +
-        'Modules must only be included once in order to avoid code duplication.');
+    if (data.name.indexOf('sitecues-ie9') < 0) { // Don't check sitecues-ie9 -- it's almost the same as sitecues, on purpose (different loader)
+      var index = data.included.length;
+      while (index--) {
+        var includedItem = data.included[index];
+        if (global.scIncludedBy[includedItem]) {
+          throw new Error('The module ' + includedItem + ' was included both in ' + global.scIncludedBy[includedItem] + ' and ' + data.name + '.\n' +
+            'Modules must only be included once in order to avoid code duplication.');
+        }
+        global.scIncludedBy[includedItem] = data.name;
       }
-      global.scIncludedBy[includedItem] = data.name;
     }
 
     // Build loader config
