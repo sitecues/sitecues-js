@@ -279,10 +279,6 @@ define(['$', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common', '
     return parseFloat(value.toFixed(ZOOM_PRECISION));
   }
 
-  function getMinZoomPerClick() {
-    return MIN_ZOOM_PER_CLICK;
-  }
-
   function beginZoomIncrease(event) {
     // Increase up to max or until zoomStopRequested()
     beginGlide(MAX, event);
@@ -313,7 +309,7 @@ define(['$', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common', '
         // Instant zoom
         if (event) {
           // When no animations and key/button pressed -- just be clunky and zoom a bit closer to the target
-          var delta = getMinZoomPerClick() * (completedZoom < targetZoom ? 1 : -1);
+          var delta = MIN_ZOOM_PER_CLICK * (completedZoom < targetZoom ? 1 : -1);
           currentTargetZoom = getSanitizedZoomValue(completedZoom + delta);
         }
         performInstantZoomOperation();
@@ -321,7 +317,7 @@ define(['$', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common', '
         return;
       }
 
-      input.is_long_glide= true; // Default, assume glide will not be cut off early
+      input.isLongGlide = true; // Default, assume glide will not be cut off early
       beginZoomOperation(targetZoom, input, beginGlideAnimation);  // Provide callback for when animation can actually start
       $(window).one('keyup', finishGlideIfEnough);
     }
@@ -330,9 +326,9 @@ define(['$', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common', '
       glideChangeTimer = setInterval(onGlideChange, GLIDE_CHANGE_INTERVAL_MS);
       if (!zoomInput.isLongGlide) {
         // Button/key was already released, zoom only for long enough to get minimum zoom
-        var delta = getMinZoomPerClick() * (completedZoom < targetZoom ? 1 : -1);
+        var delta = MIN_ZOOM_PER_CLICK * (completedZoom < targetZoom ? 1 : -1);
         currentTargetZoom = getSanitizedZoomValue(completedZoom + delta);
-        minZoomChangeTimer = setTimeout(finishZoomOperation, getMinZoomPerClick() * getMsPerXZoom());
+        minZoomChangeTimer = setTimeout(finishZoomOperation, MIN_ZOOM_PER_CLICK * getMsPerXZoom());
       }
 
 
@@ -377,7 +373,7 @@ define(['$', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common', '
     return Date.now() - startZoomTime;
   }
 
-  // When an A button or +/- key is pressed, we always glide at least getMinZoomPerClick().
+  // When an A button or +/- key is pressed, we always glide at least MIN_ZOOM_PER_CLICK.
   // This provides a consistent amount of zoom change for discrete presses.
   function finishGlideIfEnough() {
     if (!isGlideCurrentlyRunning()) {
@@ -387,10 +383,10 @@ define(['$', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common', '
       return;
     }
 
-    // If getMinZoomPerClick() has not been reached, we set a timer to finish the zoom
-    // based on how much time would be needed to achieve getMinZoomPerClick()
+    // If MIN_ZOOM_PER_CLICK has not been reached, we set a timer to finish the zoom
+    // based on how much time would be needed to achieve MIN_ZOOM_PER_CLICK
     var timeElapsed = getZoomOpElapsedTime(),
-      timeRemaining = Math.max(0, getMinZoomPerClick() * getMsPerXZoom() - timeElapsed);
+      timeRemaining = Math.max(0, MIN_ZOOM_PER_CLICK * getMsPerXZoom() - timeElapsed);
 
     zoomInput.isLongGlide = timeRemaining === 0;
 

@@ -210,8 +210,6 @@ define(['util/element-classifier', 'keys/commands', 'metric/metric'],
   function executeCommand(commandName, keyName) {
     // Emit event defined for key
     commands[commandName](event, keyName);
-
-    metric('key-command', { keyName: keyName });
   }
 
     // key event hook
