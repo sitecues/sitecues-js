@@ -173,7 +173,7 @@ debug: clean $(_force-deps-refresh) $(_build_lint_dep)
 #	Package up the files into a deployable bundle, and create a manifest for local
 # file deployment.
 ################################################################################
-package: lint clean
+package: lint clean $(_force-deps-refresh)
 ifeq ($(sc_dev), true)
 	$(error Unable to package a development build)
 endif
