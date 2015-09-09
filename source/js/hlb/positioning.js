@@ -689,7 +689,6 @@ define(['$', 'conf/user/manager', 'hlb/styling', 'util/common', 'util/element-cl
 
     hlbStyle[platform.transformProperty] = 'scale(' + startAnimationZoom + ') ' + translateCSS;
     hlbStyle[platform.transformOriginProperty] = originCSS;
-    hlbStyle.willChange = 'transform';
   }
 
   var publics = {

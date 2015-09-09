@@ -775,8 +775,12 @@ define(['$', '$utils', 'mouse-highlight/mouse-highlight', 'util/common', 'util/t
       isKeyRepeating = false;
     });
 
-    sitecues.on('lens/did-toggle-visibility', function(isVisible) {
-      isLensVisible = isVisible;
+    sitecues.on('hlb/create', function() {
+      isLensVisible = true;
+    });
+
+    sitecues.on('hlb/closed', function() {
+      isLensVisible = false;
     });
   }
 

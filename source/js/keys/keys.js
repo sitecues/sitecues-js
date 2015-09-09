@@ -331,6 +331,7 @@ define(['util/element-classifier', 'keys/commands', 'metric/metric'],
     sitecues.on('hlb/closed', function() {
       isLensVisible = false;
     });
+
     sitecues.on('sitecues/did-toggle', function(isOn) {
       isSitecuesOn = isOn;
     });

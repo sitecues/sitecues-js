@@ -706,6 +706,10 @@ define(['$', 'util/platform', 'util/common', 'conf/user/manager'],
           'left'         : originalElementRect.left + window.scrollLeft,
           'top'          : originalElementRect.top + window.scrollTop
         },
+        animationOptimizationStyles = {
+          willChange: 'transform',
+          backfaceVisibilitty: 'hidden'
+        },
         $parent;
 
     // If the background color is the same as the text color, use default text and background colors
@@ -752,7 +756,8 @@ define(['$', 'util/platform', 'util/common', 'conf/user/manager'],
     return $.extend({},
       defaultHLBStyles,
       calculatedHLBStyles,
-      backgroundStyles
+      backgroundStyles,
+      animationOptimizationStyles
     );
 
   }
