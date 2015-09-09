@@ -4,7 +4,7 @@
  * It is also responsible for calculating and setting the appropriate height/width of the HLB so that it is
  * encapsulated within the HLB_SAFE_AREA.
  */
-define(['$', 'conf/user/manager', 'hlb/styling', 'util/common', 'util/element-classifier', 'hlb/safe-area', 'util/platform'],
+define(['$', 'core/conf/user/manager', 'hlb/styling', 'util/common', 'util/element-classifier', 'hlb/safe-area', 'util/platform'],
   function($, conf, hlbStyling, common, elemClassifier, hlbSafeArea, platform) {
 
   /////////////////////////

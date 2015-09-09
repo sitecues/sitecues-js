@@ -17,8 +17,8 @@
 // bp/will-shrink  -- BP is about to shrink
 // bp/did-shrink   -- BP has finished shrinking
 
-define(['bp/controller/bp-controller', 'bp/model/state','bp/view/modes/badge', 'bp/view/modes/panel', 'bp/helper', 'bp/view/svg', 'bp/constants',
-  'bp/placement', 'bp/size-animation', 'util/platform', 'conf/site', 'conf/user/manager'],
+define(['bp/controller/bp-controller', 'bp/model/state','bp/view/badge', 'bp/view/panel', 'bp/helper', 'bp/view/svg', 'bp/constants',
+  'bp/view/placement', 'bp/view/size-animation', 'util/platform', 'core/conf/site', 'core/conf/user/manager'],
   function (bpController, state, badge, panel, helper, bpSVG, BP_CONST, placement, sizeAnimation, platform, site, conf) {
 
   /*
@@ -121,7 +121,7 @@ define(['bp/controller/bp-controller', 'bp/model/state','bp/view/modes/badge', '
 
     // Turn on TTS button if the setting is on
     if (conf.get('ttsOn')) {
-      require(['bp/view/elements/tts-button'], function (ttsButton) {
+      require(['bp-expanded/view/tts-button'], function (ttsButton) {
         ttsButton.init();
       });
     }

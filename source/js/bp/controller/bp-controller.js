@@ -6,19 +6,18 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'metric/metric'],
 
   // How long we wait before expanding BP
   var hoverDelayTimer,
-    hasEverExpanded,
     isInitialized,
     // We ignore the first mouse move when a window becomes active, otherwise badge opens
     // if the mouse happens to be over the badge/toolbar
     doIgnoreNextMouseMove = true,
-    focusControl;
+    focusController;
 
   function processKeyDown(evt) {
     if (isModifiedKey(evt) || !state.isPanel()) {
       return;
     }
 
-    if (focusControl && !focusControl.processKey(evt)) {
+    if (focusController && !focusController.processKey(evt)) {
       evt.preventDefault();
       return false;
     }
@@ -167,21 +166,10 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'metric/metric'],
   }
 
   function didExpand() {
-    if (!hasEverExpanded) {
-      hasEverExpanded = true;
-      require(['bp/controller/slider-controller', 'bp/controller/shrink-controller', 'bp/controller/focus-controller',
-          'bp/view/elements/tts-button', 'bp/view/elements/more-button', 'cursor/cursor'],
-        function (sliderController, shrinkController, focusController, ttsButton, moreButton, cursor) {
-        sliderController.init();
-        shrinkController.init();
-        focusController.init();
-        ttsButton.init();
-        moreButton.init();
-        cursor.init();
-
-        focusControl = focusController;
-      });
-    }
+    require(['bp-expanded/bp-expanded'], function (bpExpanded) {
+      bpExpanded.init();
+      focusController = bpExpanded.getFocusController();
+    });
   }
 
   function didChange() {
@@ -197,7 +185,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'metric/metric'],
   }
 
   function didChangeSpeech(isOn) {
-    require(['bp/view/elements/tts-button'], function(ttsButton) {
+    require(['bp-expanded/view/tts-button'], function(ttsButton) {
       // Update the TTS button view on any speech state change
       turnOnRealSettings();
       ttsButton.init();

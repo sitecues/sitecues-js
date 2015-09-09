@@ -4,7 +4,7 @@
  */
 define([
     '$',
-    'conf/user/manager',
+    'core/conf/user/manager',
     'hlb/event-handlers',
     'hlb/positioning',
     'hlb/styling',

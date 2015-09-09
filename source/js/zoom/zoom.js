@@ -3,7 +3,7 @@
  * See docs at https://equinox.atlassian.net/wiki/display/EN/Smooth+Zoom
  */
 
-define(['$', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common', 'util/transform', 'metric/metric'],
+define(['$', 'core/conf/user/manager', 'core/conf/site', 'util/platform', 'util/common', 'util/transform', 'metric/metric'],
   function ($, conf, site, platform, common, transform, metric) {
 
   // Default zoom configuration

@@ -1,5 +1,5 @@
 // focus enhancement (make focus easier to see)
-define(['$', 'conf/user/manager'], function($, conf) {
+define(['$', 'core/conf/user/manager'], function($, conf) {
 
   var MIN_ZOOM = 1.4,   // minimum zoom at which focus enhancement appears
     FOCUS_RING_COLOR = 'rgba(82,168,236,.8)',    // color of focus enhancement

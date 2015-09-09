@@ -3,7 +3,7 @@
  * Not to be confused with earcons, which are just sounds.
  */
 
-define(['conf/user/manager', 'audio/audio'], function(conf, audio) {
+define(['core/conf/user/manager', 'audio/audio'], function(conf, audio) {
   
   // The high zoom threshold for the zoom-based verbal cue
   var HIGH_ZOOM_THRESHOLD = 1.6,

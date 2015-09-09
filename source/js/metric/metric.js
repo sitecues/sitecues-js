@@ -2,7 +2,7 @@
  * Basic metrics logger
  */
 // jshint -W016
-define(['conf/user/manager', 'conf/site', 'locale/locale', 'util/platform', 'util/xhr', 'conf/urls'],
+define(['core/conf/user/manager', 'core/conf/site', 'locale/locale', 'util/platform', 'util/xhr', 'core/conf/urls'],
   function(conf, site, locale, platform, xhr, urls) {
 
   // Taken from here(free public license): https://gist.github.com/jed/982883

@@ -6,14 +6,14 @@
 //Perkins wants faster access to colors – 3 levels deep is too much
 //
 
-define(['bp/constants', 'bp/model/state', 'bp/helper', 'util/animate', 'util/transform',
+define(['bp/constants', 'bp/model/state', 'bp/helper', 'bp-expanded/view/svg-animate', 'util/transform',
     'bp-secondary/tips',
     'bp-secondary/settings',
     'bp-secondary/feedback',
     'bp-secondary/about',
     'bp-secondary/cards',
     'locale/font-charset',
-    'conf/urls'],
+    'core/conf/urls'],
     function (BP_CONST, state, helper, animate, transform, tipsModule, settingsModule, feedbackModule, aboutModule, cardsModule, fontCharset, urls) {
 
   var BUTTON_CLICK_ANIMATION_DURATION = 800,

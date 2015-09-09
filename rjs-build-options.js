@@ -33,7 +33,7 @@
       ],
       exclude: [
         'metric/metric',
-        'conf/urls',
+        'core/conf/urls',
         'util/element-classifier'
       ]
     },
@@ -57,11 +57,7 @@
       name: 'bp-expanded',
       create: true,
       include: [
-        'bp/controller/slider-controller',
-        'bp/controller/focus-controller',
-        'bp/controller/shrink-controller',
-        'bp/view/elements/tts-button',
-        'bp/view/elements/more-button'
+        'bp-expanded/bp-expanded'
       ],
       exclude: [
         'locale/locale',
@@ -76,8 +72,8 @@
         'dollar/jquery-private',
         'util/transform',
         'metric/metric',
-        'conf/urls',
-        'conf/user/manager'
+        'core/conf/urls',
+        'core/conf/user/manager'
       ]
     },
     {
@@ -94,11 +90,11 @@
         'bp/helper',
         'util/xhr',
         'util/common',
-        'util/animate',
+        'bp-expanded/view/svg-animate',
         'util/transform',
         'metric/metric',
-        'conf/urls',
-        'conf/user/manager'
+        'core/conf/urls',
+        'core/conf/user/manager'
       ]
     },
     {  // We could split into audio and zoom features
@@ -127,9 +123,9 @@
         'dollar/zepto-private',
         'dollar/jquery-private',
         'metric/metric',
-        'conf/urls',
-        'conf/site',
-        'conf/user/manager'
+        'core/conf/urls',
+        'core/conf/site',
+        'core/conf/user/manager'
       ]
     },
     {
@@ -149,10 +145,10 @@
         'dollar/dollar-utils',
         'dollar/zepto-private',
         'dollar/jquery-private',
-        'conf/site',
-        'conf/user/manager',
+        'core/conf/site',
+        'core/conf/user/manager',
         'metric/metric',
-        'conf/urls',
+        'core/conf/urls',
         'util/geo',
         'util/transform'
       ]
@@ -177,11 +173,11 @@
         'dollar/dollar-utils',
         'dollar/zepto-private',
         'dollar/jquery-private',
-        'conf/urls',
-        'conf/site',
-        'conf/user/manager',
+        'core/conf/urls',
+        'core/conf/site',
+        'core/conf/user/manager',
         'style-service/user-agent-css.js',
-        'conf/site.js',
+        'core/conf/site.js',
         'style-service/media-queries.js',
         'style-service/css-aggregator.js',
         'style-service/style-service.js',

@@ -3,7 +3,7 @@
  * Currently this module implements data-hover="[transform attributes]"
  */
 
-define(['bp/helper', 'bp/constants', 'util/platform', 'util/animate'],
+define(['bp/helper', 'bp/constants', 'util/platform', 'bp-expanded/view/svg-animate'],
   function(helper, BP_CONST, platform, animate) {
 
 'use strict';

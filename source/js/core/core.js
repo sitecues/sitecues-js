@@ -1,4 +1,4 @@
-define(['conf/site', 'conf/urls', 'core/run'], function (site, urls, run) {
+define(['core/conf/site', 'core/conf/urls', 'core/run'], function (site, urls, run) {
    // Array's prototype
   var arr = Array.prototype;
 

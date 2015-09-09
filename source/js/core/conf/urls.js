@@ -1,4 +1,4 @@
-define(['conf/site'], function(site) {
+define(['core/conf/site'], function(site) {
 
   var apiDomain,  // Either ws.sitecues.com/ or ws.dev.sitecues.com/
     prefsDomain;  // Either up.sitecues.com/ or up.dev.sitecues.com/

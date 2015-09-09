@@ -1,4 +1,4 @@
-define(['conf/urls'], function (urls) {
+define(['core/conf/urls'], function (urls) {
 
   function format(object) {
 
@@ -34,7 +34,7 @@ define(['conf/urls'], function (urls) {
 
   function status(callback) {
 
-    require(['util/xhr', 'conf/user/manager'], function(xhr, conf) {
+    require(['util/xhr', 'core/conf/user/manager'], function(xhr, conf) {
 
       var html = document.documentElement,
           confData = conf.data(),

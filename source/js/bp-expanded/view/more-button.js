@@ -4,7 +4,7 @@
  *  keyboard commands.
  */
 
-define(['bp/constants', 'bp/helper', 'util/animate', 'bp/view/svg-transform-effects'],
+define(['bp/constants', 'bp/helper', 'bp-expanded/view/svg-animate', 'bp-expanded/view/svg-transform-effects'],
   function (BP_CONST, helper, animate, transformEffects) {
 
   var BUTTON_ENTER_ANIMATION_DURATION = 800, // Milliseconds
