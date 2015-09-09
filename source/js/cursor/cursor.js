@@ -367,7 +367,7 @@ define(['$', 'style-service/style-service', 'conf/user/manager', 'cursor/cursor-
     }
 
     constructBPCursorStylesheet();
-    autoSize = getAutoSize(conf.get('zoom'));
+    autoSize = getAutoSize(conf.get('zoom') || 1);
     refreshStylesheetsIfNecessary();
   }
 
