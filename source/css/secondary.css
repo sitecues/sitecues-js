@@ -158,7 +158,7 @@ sc-button-big {
 .scp-arrow {
   fill: #447AC4;
 }
-.scp-arrow[aria-disabled] {
+.scp-arrow[aria-disabled]>g {
   pointer-events: none;
   visibility: hidden;
   opacity: 0;
@@ -245,7 +245,7 @@ sc-card > * {
 }
 #scp-demo-page-contents {
   transition: transform 2.2s linear;
-  transform-origin: 0% 0%;
+  transform-origin: 0 0;
 }
 #scp-demo-para {
   position: relative;
@@ -473,7 +473,7 @@ sc-button[data-setting-name="themeName"][data-setting-value="dark"] {
   opacity: 1;
 }
 [data-type="hue"] {
-  background-image: linear-gradient(to right, #f66 0%, #ff6 15%, #6f6 30%, #6ff 45%, #66f 60%, #f6f 75%, #f66 90%, #fff 92%, #fff 100%) !important;
+  background-image: linear-gradient(to right, #f66 0, #ff6 15%, #6f6 30%, #6ff 45%, #66f 60%, #f6f 75%, #f66 90%, #fff 92%, #fff 100%) !important;
 }
 [data-type="hue"]::-webkit-slider-thumb {
   background: transparent !important;

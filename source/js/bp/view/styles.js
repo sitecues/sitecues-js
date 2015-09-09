@@ -158,8 +158,9 @@ define(['bp/helper', 'util/platform', 'bp/constants', 'conf/site', 'conf/urls'],
        - Not used for CSS: aria-activedescendant (focused item ID), aria-valuenow, aria-valuemin, aria-valuemax, aria-label, aria-labelledby
        */
 
-      '#scp-bp-container *': {
-        'box-sizing': 'content-box !important'
+      '#scp-bp-container,#scp-bp-container input,#scp-bp-container textarea': {
+        // We used to do #scp-bp-container *, but this could be dangerously slow
+        'box-sizing': 'content-box !important'  // In case the web page overrode it for anything
       },
 
     /***************** Loading/badge  ****************/
@@ -180,15 +181,15 @@ define(['bp/helper', 'util/platform', 'bp/constants', 'conf/site', 'conf/urls'],
       '#scp-bp-container': {
         'position': 'fixed',
         'z-index': '9999999',
-        'user-select': 'none',
+        'transition': 'opacity 1.5s',
+        'transform-origin': '0 0',
+        'text-align': 'left', // To prevent style pollution found on http://codecanyon.net/
+//          'will-change': 'transform',   // Removing helps Chrome not get blurry on sitecues.com after zoom
+        'outline': 0, // don't show default dotted focus outline
         '-webkit-user-select': 'none',
         '-moz-user-select': 'none',
         '-ms-user-select': 'none',
-        'transition': 'opacity 1.5s',
-        'transform-origin': '0% 0%',
-        'text-align': 'left', // To prevent style pollution found on http://codecanyon.net/
-//          'will-change': 'transform',   // Removing helps Chrome not get blurry on sitecues.com after zoom
-        'outline': 0 // don't show default dotted focus outline
+        'user-select': 'none'
       },
 
       '#scp-svg': {
@@ -272,7 +273,6 @@ define(['bp/helper', 'util/platform', 'bp/constants', 'conf/site', 'conf/urls'],
       'body.sitecues-reverse-theme [data-sc-reversible="true"],body.sitecues-reverse-theme svg:not([data-sc-reversible="false"])': {
         'filter': 'invert(100%)',
         '-webkit-filter': 'invert(100%)',
-        '-moz-filter': 'invert(100%)',
         '-ms-filter': 'invert(100%)'
       },
 
@@ -405,7 +405,7 @@ define(['bp/helper', 'util/platform', 'bp/constants', 'conf/site', 'conf/urls'],
       },
 
       // The feedback text area has its own focus ring so that it can show behind the feedback button :/ !
-      '[data-own-focus-ring][data-show-focus]': {
+      '#scp-feedback-input-rect': {   // Using id selector which is faster than [data-own-focus-ring][data-show-focus]
         'stroke': 'rgba(82,168,236,.8)',
         'stroke-width': '6px',
         'filter': 'url(#scp-focusblur)',
