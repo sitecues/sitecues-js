@@ -6,24 +6,6 @@
 //Perkins wants faster access to colors – 3 levels deep is too much
 //
 
-// UX testing
-// IE
-// - feedback page issues
-// -- no caret visible in IE9
-// -- stars not activating via enter key in IE9
-// -- Sliders ugly in IE10
-// -- Performance bad in IE10 with nytimes.com
-// Beta testing
-// Applause testing
-// Provisional patents  -- who can help? Jeff? Ai2?
-// Accessibility
-//
-// Later
-// Localization
-// About: Get it now
-//
-
-
 define(['bp/constants', 'bp/model/state', 'bp/helper', 'util/animate', 'util/transform',
     'bp/view/elements/secondary/tips',
     'bp/view/elements/secondary/settings',

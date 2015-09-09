@@ -3,18 +3,30 @@
  *   The core module of the sitecues library.
  */
 
-// Test
+// TODO Localize
+// IE
+// - feedback page issues
+// -- no caret visible in IE9
+// -- stars not activating via enter key in IE9
+// -- Sliders ugly in IE10
+// -- Performance bad in IE10 with nytimes.com
+// Accessibility
+// Cross-browser testing
 // TODO themes
 // TODO cursor size/hue settings only -- be careful of mousehue 1.1 which means nothing
+// UX testing
+// Beta testing
+// Applause testing
+// Provisional patents  -- who can help? Jeff? Ai2?
+//
+// Later
+// About: Get it now
+//
+
 
 // Later
 // Settings: why do we ever set a cookie? I don't think we can keep it between pages, at least not currently. So why save/get settings from server at all?
 //           Cookie is set for metrics?
-// TODO load custom scripts
-//      source/js/custom-scripts/custom-scripts.js \
-//      $(custom-files) \
-// TODO file bug on requirejs needing sitecues.require when variable name used
-// TODO use seth's more modern jshint options
 
 define(['../conf/user/user-id', 'conf/user/server', 'locale/locale', 'conf/user/manager', 'metric/metric', 'util/platform', 'bp/bp', 'keys/keys' ],
   function (userId, userSettingsServer, locale, conf, metric, platform, bp, keys) {
