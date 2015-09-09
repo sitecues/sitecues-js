@@ -5,7 +5,8 @@ define(['bp/constants', 'bp/helper', 'bp/model/state', 'locale/locale', 'conf/us
     waveAnimationTimer,
     waveAnimationStepNum,
     isInitialized,
-    isSpeechEnabled = conf.get('ttsOn');
+    isSpeechEnabled = conf.get('ttsOn'),
+    isListeningToEvents;
 
   function toggleSpeech() {
     require(['audio/audio'], function(audio) {
@@ -140,6 +141,27 @@ define(['bp/constants', 'bp/helper', 'bp/model/state', 'locale/locale', 'conf/us
     getTTSButtonElement().setAttribute('class', doEnable ? 'scp-dim-waves' : '');
   }
 
+  function toggleListeners(isOn) {
+    if (isOn === isListeningToEvents) {
+      return;
+    }
+    isListeningToEvents = isOn;
+
+    var fn = isOn ? 'addEventListener' : 'removeEventListener',
+      mouseTarget1 = getTTSButtonElement(),
+      mouseTarget2 = helper.byId(BP_CONST.SPEECH_LABEL_ID);
+
+    // Do not use click listeners when the panel is shrunk because it confused the Window-Eyes browse mode
+    // (when Enter key was pressed on badge, it toggled speech)
+    mouseTarget1[fn]('click', toggleSpeech);
+    mouseTarget2[fn]('click', toggleSpeech);
+
+    mouseTarget1[fn]('mouseover', beginHoverEffects);
+    mouseTarget1[fn]('mouseout', endHoverEffects);
+    mouseTarget1[fn]('mouseover', beginHoverEffects);
+    mouseTarget1[fn]('mouseout', endHoverEffects);
+  }
+
   /*
    Set up speech toggle.
     */
@@ -151,24 +173,10 @@ define(['bp/constants', 'bp/helper', 'bp/model/state', 'locale/locale', 'conf/us
 
     isInitialized = true;
 
-    var mouseTarget1 = getTTSButtonElement(),
-      mouseTarget2 = helper.byId(BP_CONST.SPEECH_LABEL_ID);
+    toggleListeners(true);
 
-    // todo: move this to ttsController
-    sitecues.on('bp/will-expand', function() {
-      // Do not use this listener when the panel is shrunk because it confused the Window-Eyes browse mode
-      // (when Enter key was pressed on badge, it toggled speech)
-      mouseTarget1.addEventListener('click', toggleSpeech);
-      mouseTarget2.addEventListener('click', toggleSpeech);
-    });
-
-    sitecues.on('bp/will-shrink', function() {
-      mouseTarget1.removeEventListener('click', toggleSpeech);
-      mouseTarget2.removeEventListener('click', toggleSpeech);
-    });
-
-    mouseTarget1.addEventListener('mouseover', beginHoverEffects);
-    mouseTarget1.addEventListener('mouseout', endHoverEffects);
+    sitecues.on('bp/did-expand', function() { toggleListeners(true); });
+    sitecues.on('bp/will-shrink', function() { toggleListeners(false); });
 
     updateTTSStateView(isSpeechEnabled);
 
