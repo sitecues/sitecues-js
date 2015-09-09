@@ -3,7 +3,7 @@
  * This file exposes an API for creating javascript animations.
  */
 
-define(['util/transform', 'util/platform'], function (transform, platform) {
+define(['util/transform', 'core/platform'], function (transform, platform) {
 
   var requestFrameFn = window.requestAnimationFrame   ||
                        window.msRequestAnimationFrame ||

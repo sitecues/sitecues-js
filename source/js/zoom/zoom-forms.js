@@ -2,7 +2,7 @@
  * Post-zoom hacks to make form controls render correctly
  */
 
-define(['$', 'core/conf/user/manager', 'util/platform'], function ($, conf, platform) {
+define(['$', 'core/conf/user/manager', 'core/platform'], function ($, conf, platform) {
 
     var DEFAULT_COMBOBOX_ZOOM_CSS = {
         outlineOffset: '2px',  // Make sure focus outline goes outside

@@ -1,4 +1,4 @@
-define(['bp/helper', 'util/platform', 'bp/constants', 'core/conf/site', 'core/conf/urls'], function (helper, platform, BP_CONST, site, urls) {
+define(['bp/helper', 'core/platform', 'bp/constants', 'core/conf/site', 'core/conf/urls'], function (helper, platform, BP_CONST, site, urls) {
 
   var
     resolveUrl = urls.resolveSitecuesUrl,

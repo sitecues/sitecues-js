@@ -30,7 +30,7 @@
 // Settings: why do we ever set a cookie? I don't think we can keep it between pages, at least not currently. So why save/get settings from server at all?
 //           Cookie is set for metrics?
 
-define(['core/conf/user/user-id', 'core/conf/user/server', 'locale/locale', 'core/conf/user/manager', 'metric/metric', 'util/platform', 'bp/bp', 'keys/keys' ],
+define(['core/conf/user/user-id', 'core/conf/user/server', 'locale/locale', 'core/conf/user/manager', 'metric/metric', 'core/platform', 'bp/bp', 'keys/keys' ],
   function (userId, userSettingsServer, locale, conf, metric, platform, bp, keys) {
   var
     numPrereqsToComplete,

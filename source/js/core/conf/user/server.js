@@ -11,7 +11,7 @@
  -    //
  -    // If we try to save more than one thing in quick succession, it will get lost
  */
-define(['core/conf/user/manager', 'core/conf/urls', 'util/localstorage'], function(manager, urls, ls) {
+define(['core/conf/user/manager', 'core/conf/urls', 'core/conf/user/localstorage'], function(manager, urls, ls) {
 
   // URLs for loading/saving data
   var

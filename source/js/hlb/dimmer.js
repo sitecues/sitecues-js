@@ -1,7 +1,7 @@
 /**
  * BackgroundDimmer can dim all content in the page behind a given z-index.
  */
-define(['$', 'core/conf/user/manager', 'util/common', 'util/platform'], function($, conf, common, platform) {
+define(['$', 'core/conf/user/manager', 'util/common', 'core/platform'], function($, conf, common, platform) {
 
   //////////////////////////////
   // PRIVATE VARIABLES

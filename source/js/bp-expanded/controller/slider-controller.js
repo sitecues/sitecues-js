@@ -1,7 +1,7 @@
 /*
  Slider Controller
  */
-define(['bp/constants', 'bp/helper', 'util/platform', 'bp/model/state', 'bp-expanded/view/slider'],
+define(['bp/constants', 'bp/helper', 'core/platform', 'bp/model/state', 'bp-expanded/view/slider'],
   function (BP_CONST, helper, platform, state, sliderView) {
 
   var isListeningToWindowMouseEvents,

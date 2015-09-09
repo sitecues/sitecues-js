@@ -18,7 +18,7 @@
 // bp/did-shrink   -- BP has finished shrinking
 
 define(['bp/controller/bp-controller', 'bp/model/state','bp/view/badge', 'bp/view/panel', 'bp/helper', 'bp/view/svg', 'bp/constants',
-  'bp/view/placement', 'bp/view/size-animation', 'util/platform', 'core/conf/site', 'core/conf/user/manager'],
+  'bp/view/placement', 'bp/view/size-animation', 'core/platform', 'core/conf/site', 'core/conf/user/manager'],
   function (bpController, state, badge, panel, helper, bpSVG, BP_CONST, placement, sizeAnimation, platform, site, conf) {
 
   /*

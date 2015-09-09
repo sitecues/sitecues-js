@@ -6,7 +6,7 @@
  * values we would ever care about when dealing with transform styles.
  */
 
-define([ 'util/platform' ], function(platform) {
+define([ 'core/platform' ], function(platform) {
 
   // Skips past non-numeric characters and get the next number as type 'number'
   // It will include a negative sign and decimal point if it exists in the string

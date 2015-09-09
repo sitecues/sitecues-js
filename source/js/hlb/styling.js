@@ -3,7 +3,7 @@
 //   sets background, sets default styles, computes some styles,
 //   and cloned child styles from the original element to the HLB.
 //  */
-define(['$', 'util/platform', 'util/common', 'core/conf/user/manager'],
+define(['$', 'core/platform', 'util/common', 'core/conf/user/manager'],
   function ($, platform, common, conf) {
 
   ///////////////////////////

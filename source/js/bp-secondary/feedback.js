@@ -1,4 +1,4 @@
-define(['bp/constants', 'bp/helper', 'bp/model/state', 'util/platform', 'metric/metric'],
+define(['bp/constants', 'bp/helper', 'bp/model/state', 'core/platform', 'metric/metric'],
   function (BP_CONST, helper, state, platform, metric) {
   var byId = helper.byId,
     isActive = false,

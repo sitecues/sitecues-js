@@ -3,7 +3,7 @@
  * for the current zoom and scroll position in the window.
  * It is used as little as possible because it runs code on scroll events, which can slow down scrolling significantly.
  */
-define(['$', 'zoom/zoom', 'util/platform', 'style-service/style-service', 'dollar/dollar-utils'],
+define(['$', 'zoom/zoom', 'core/platform', 'style-service/style-service', 'dollar/dollar-utils'],
   function ($, zoomMod, platform, styleService, jqUtils) {
 
     var isOn = false,

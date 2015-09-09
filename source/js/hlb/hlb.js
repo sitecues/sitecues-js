@@ -8,7 +8,7 @@ define([
     'hlb/event-handlers',
     'hlb/positioning',
     'hlb/styling',
-    'util/platform',
+    'core/platform',
     'util/common',
     'util/element-classifier',
     'hlb/animation',

@@ -177,7 +177,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'metric/metric'],
   }
 
   function didZoom() {
-    require(['bp/controller/slider-controller'], function (sliderController) {
+    require(['bp-expanded/controller/slider-controller'], function (sliderController) {
       turnOnRealSettings();
       sliderController.init();
       didChange();

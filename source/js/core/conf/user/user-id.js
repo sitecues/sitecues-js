@@ -1,5 +1,5 @@
 // This module includes functionality used in user identification.
-define(['util/localstorage', 'util/xhr', 'core/conf/urls'], function(ls, xhr, urls) {
+define(['core/conf/user/localstorage', 'util/xhr', 'core/conf/urls'], function(ls, xhr, urls) {
 
   var isInitialized;
 

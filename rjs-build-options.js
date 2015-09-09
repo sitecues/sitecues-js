@@ -61,7 +61,7 @@
       ],
       exclude: [
         'locale/locale',
-        'util/platform',
+        'core/platform',
         'bp/constants',
         'bp/model/state',
         'bp/helper',
@@ -84,7 +84,7 @@
       ],
       exclude: [
         'locale/locale',
-        'util/platform',
+        'core/platform',
         'bp/constants',
         'bp/model/state',
         'bp/helper',
@@ -113,7 +113,7 @@
       ],
       exclude: [
         'locale/locale',
-        'util/platform',
+        'core/platform',
         'bp/constants',
         'bp/model/state',
         'bp/helper',
@@ -136,7 +136,7 @@
       ],
       exclude: [
         'locale/locale',
-        'util/platform',
+        'core/platform',
         'bp/constants',
         'bp/model/state',
         'bp/helper',
@@ -163,7 +163,7 @@
       ],
       exclude: [
         'locale/locale',
-        'util/platform',
+        'core/platform',
         'util/color',
         'bp/constants',
         'bp/model/state',
