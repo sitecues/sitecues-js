@@ -15,7 +15,9 @@ all: clean build debug
 # Command line options.
 ################################################################################
 
-targets=common $(shell cd custom-config && ls *.mk | sed 's%.mk%%g')
+targets=common
+# Restore if we get custom builds again
+#targets=common $(shell cd custom-config && ls *.mk | sed 's%.mk%%g')
 custom-config-names:=$(shell echo "$(targets)" | sed 's%,% %g')
 
 # If true, clean and update the Node.js package dependencies.
