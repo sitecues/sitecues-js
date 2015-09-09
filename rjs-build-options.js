@@ -228,9 +228,16 @@
     }
 
     // Build loader config
-    var includedStr = data.included.join("','");
+    var includedStr = data.included.join("','"),
+      excludeModernBrowsers = data.name === 'sitecues-ie9',
+      excludeIE9 = data.name === 'sitecues';
     includedStr = includedStr.replace(/\.js/g, ''); // Remove .js
-    fs.appendFileSync('target/build-config/sitecues-bundles.js', "'" + data.name + "':['" + includedStr + "'],");
+    if (!excludeModernBrowsers) {  // Bundle config of modern browsers doesn't incldue sitecues-ie9.js bundle
+      fs.appendFileSync('target/build-config/sitecues-bundles.js', "'" + data.name + "':['" + includedStr + "'],");
+    }
+    if (!excludeIE9) {   // Bundle config of ie9 doesn't incldue sitecues.js bundle
+      fs.appendFileSync('target/build-config/sitecues-bundles-ie9.js', "'" + data.name + "':['" + includedStr + "'],");
+    }
   },
   namespace: 'sitecues',
   useStrict: true,

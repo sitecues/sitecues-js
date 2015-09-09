@@ -76,7 +76,7 @@ build:
 
 	# Insert runtime bundle configuration
 	./finalize-loader-config.js $(build-dir)/js/sitecues.js target/build-config/sitecues-bundles.js $(allow-zepto)
-	./finalize-loader-config.js $(build-dir)/js/sitecues-ie9.js target/build-config/sitecues-bundles.js false
+	./finalize-loader-config.js $(build-dir)/js/sitecues-ie9.js target/build-config/sitecues-bundles-ie9.js false
 
 	# Non-js files, such as css, images, html, audio files
 	@mkdir -p $(build-dir)/etc
@@ -124,7 +124,7 @@ debug:
 
 	# Insert runtime bundle configuration
 	./finalize-loader-config.js $(build-dir)/js/sitecues.js target/build-config/sitecues-bundles.js $(allow-zepto)
-	./finalize-loader-config.js $(build-dir)/js/sitecues-ie9.js target/build-config/sitecues-bundles.js false
+	./finalize-loader-config.js $(build-dir)/js/sitecues-ie9.js target/build-config/sitecues-bundles-ie9.js false
 
 	# Non-js files, such as css, images, html, audio files
 	@mkdir -p $(build-dir)/etc
