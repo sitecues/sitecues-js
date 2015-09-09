@@ -24,7 +24,7 @@ define(['../conf/user/user-id', 'conf/user/server', 'locale/locale', 'conf/user/
   var
     numPrereqsToComplete,
     ZOOM_ON_FEATURES = [ 'hpan/hpan', 'zoom/fixed-position-fixer', 'keys/focus', 'cursor/cursor' ],
-    TTS_ON_FEATURES = [ 'audio/audio', 'bp/view/elements/tts-button' ],
+    TTS_ON_FEATURES = [ 'audio/audio' ],
     SITECUES_ON_FEATURES = [ 'mouse-highlight/mouse-highlight', 'mouse-highlight/move-keys' ],
     THEME_ON_FEATURES = [ 'theme/color-engine' ],
     MOUSE_ON_FEATURES = ['cursor/cursor'],

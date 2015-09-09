@@ -119,6 +119,13 @@ define(['bp/controller/bp-controller', 'bp/model/state','bp/view/modes/badge', '
 
     bpController.init();
 
+    // Turn on TTS button if the setting is on
+    if (conf.get('ttsOn')) {
+      require(['bp/view/elements/tts-button'], function (ttsButton) {
+        ttsButton.init();
+      });
+    }
+
     isInitComplete = true;
 
     sitecues.on('bp/did-change', updateView);
