@@ -30,12 +30,12 @@
 // Settings: why do we ever set a cookie? I don't think we can keep it between pages, at least not currently. So why save/get settings from server at all?
 //           Cookie is set for metrics?
 
-define(['core/conf/user/user-id', 'core/conf/user/server', 'locale/locale', 'core/conf/user/manager', 'metric/metric', 'core/platform', 'bp/bp', 'keys/keys' ],
+define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/conf/user/manager', 'core/metric', 'core/platform', 'bp/bp', 'core/keys/keys' ],
   function (userId, userSettingsServer, locale, conf, metric, platform, bp, keys) {
   var
     numPrereqsToComplete,
-    ZOOM_ON_FEATURES = [ 'hpan/hpan', 'zoom/fixed-position-fixer', 'keys/focus', 'cursor/cursor' ],
-    TTS_ON_FEATURES = [ 'audio/audio' ],
+    ZOOM_ON_FEATURES = [ 'hpan/hpan', 'zoom/fixed-position-fixer', 'enhance/focus', 'cursor/cursor' ],
+    TTS_ON_FEATURES = [ 'audio/audio', 'audio/text-select' ],
     SITECUES_ON_FEATURES = [ 'mouse-highlight/mouse-highlight', 'mouse-highlight/move-keys' ],
     THEME_ON_FEATURES = [ 'theme/color-engine' ],
     MOUSE_ON_FEATURES = ['cursor/cursor'],

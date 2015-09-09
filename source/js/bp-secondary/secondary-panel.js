@@ -12,7 +12,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'bp-expanded/view/svg-ani
     'bp-secondary/feedback',
     'bp-secondary/about',
     'bp-secondary/cards',
-    'locale/font-charset',
+    'bp-secondary/font-charset',
     'core/conf/urls'],
     function (BP_CONST, state, helper, animate, transform, tipsModule, settingsModule, feedbackModule, aboutModule, cardsModule, fontCharset, urls) {
 
@@ -376,8 +376,6 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'bp-expanded/view/svg-ani
     animateButtonMenuDrop(willEnable);
 
     toggleMouseListeners(willEnable);
-
-    sitecues.on('bp/will-toggle-secondary-panel', toggleSecondaryPanel);
   }
 
   /**

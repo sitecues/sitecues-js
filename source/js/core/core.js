@@ -41,7 +41,7 @@ define(['core/conf/site', 'core/conf/urls', 'core/run'], function (site, urls, r
 
   function getStatus() {
     var args = arguments;
-    require(['util/status'], function(statusFn) {
+    require(['status/status'], function(statusFn) {
       statusFn.apply(this, args);
     });
   }

@@ -26,16 +26,11 @@ define([], function() {
         // Turn off zoom
         zoomMod.resetZoom();
         if (event.shiftKey) {
-          // Turn off speech
-          audio.setSpeechState(false, true);
-          audio.stopAudio();
           if (event.altKey) {
-            // Full reset
-            // For each key in the settings data
-            var data = conf.data();
-            Object.keys(data).forEach(function(keyName) {
-              conf.set(keyName, null);
-            });
+            // Turn off speech
+            audio.setSpeechState(false, true);
+            audio.stopAudio();
+
             server.reset();
             audio.playEarcon('quit-organ');
           }

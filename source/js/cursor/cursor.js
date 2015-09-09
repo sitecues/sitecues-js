@@ -85,7 +85,7 @@ define(['$', 'style-service/style-service', 'core/conf/user/manager', 'cursor/cu
 
 
     // Technically we only need XDomainRequest here
-    require(['util/xhr'], function (xhr) {
+    require(['core/util/xhr'], function (xhr) {
       xhr.get({
         url: url,
         crossDomain: true,

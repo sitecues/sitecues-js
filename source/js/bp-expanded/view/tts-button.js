@@ -1,5 +1,5 @@
 // TODO wave animation broken except in default badge
-define(['bp/constants', 'bp/helper', 'bp/model/state', 'locale/locale', 'core/conf/user/manager'],
+define(['bp/constants', 'bp/helper', 'bp/model/state', 'core/locale', 'core/conf/user/manager'],
   function (BP_CONST, helper, state, locale, conf) {
   var
     waveAnimationTimer,

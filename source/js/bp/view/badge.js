@@ -48,7 +48,7 @@
 //     * Add keyboard accessibility and ARIA
 // * Add to docs: accessibility explanation, palettes, etc.
 
-define(['bp/constants', 'bp/model/state', 'locale/locale', 'bp/helper', 'core/conf/user/manager', 'core/conf/site'],
+define(['bp/constants', 'bp/model/state', 'core/locale', 'bp/helper', 'core/conf/user/manager', 'core/conf/site'],
   function(BP_CONST, state, locale, helper, conf, site) {
 
   /*

@@ -1,7 +1,7 @@
 /**
  * Generic module for handling the cards used by tips and settings
  */
-define(['bp/constants', 'bp/helper', 'locale/locale', 'bp/model/state', 'core/platform', 'bp-expanded/view/svg-animate', 'util/xhr', 'core/conf/urls'],
+define(['bp/constants', 'bp/helper', 'core/locale', 'bp/model/state', 'core/platform', 'bp-expanded/view/svg-animate', 'core/util/xhr', 'core/conf/urls'],
   function (BP_CONST, helper, locale, state, platform, animate, xhr, urls) {
 
   var

@@ -9,7 +9,7 @@
 // The thumb position only changes based on the thumb change callback!!
 // Effectively this means the zoom module needs is in control of the thumb position.
 
-define(['bp/constants', 'bp/model/state', 'bp/helper', 'locale/locale'],
+define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/locale'],
   function (BP_CONST, state, helper, locale) {
 
   /*

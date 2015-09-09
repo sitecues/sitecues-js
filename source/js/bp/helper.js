@@ -52,7 +52,7 @@ define(['core/platform', 'bp/constants'], function(platform, BP_CONST) {
    *** Setters ***
    */
 
-  // Leave this method here rather than take it out to 'util/common' to avoid extra modules deps.
+  // Leave this method here rather than take it out to 'util / common' to avoid extra modules deps.
   // In the end, we only want to load badge on the page w/o any other modules.
   function setAttributes(element, attrs) {
     for (var attrName in attrs) {

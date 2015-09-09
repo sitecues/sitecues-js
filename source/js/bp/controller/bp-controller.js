@@ -1,7 +1,7 @@
 /*
 BP Controller
  */
-define(['bp/constants', 'bp/model/state', 'bp/helper', 'metric/metric'],
+define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
   function (BP_CONST, state, helper, metric) {
 
   // How long we wait before expanding BP

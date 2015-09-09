@@ -1,8 +1,8 @@
 /*
  Panel Controller
  */
-define(['bp/constants', 'util/common', 'bp/model/state', 'bp/helper', 'metric/metric'],
-  function (BP_CONST, common, state, helper, metric) {
+define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
+  function (BP_CONST, state, helper, metric) {
 
   var MIN_DISTANCE = 75, // Min distance before shrink
     mouseLeaveShrinkTimer,  // How long we wait before shrinking BP from any mouseout (even only just barely outside panel)
@@ -17,7 +17,16 @@ define(['bp/constants', 'util/common', 'bp/model/state', 'bp/helper', 'metric/me
     mouseLeaveShrinkTimer = 0;
   }
 
-  // Don't close panel too quickly when the mouse leaves the window, because the panel
+  // Return truthy value if a button is pressed on a mouse event.
+  // There are three properties for mouse buttons, and they all work differently -- both
+  // in terms of browsers and on mousemove events in particular.
+  // DANGER! Does not work in IE9 -- always returns falsey value.
+  // If we need it in IE9 we'll need to globally track mousedown and mouseup events.
+  function isButtonDown(mouseEvent) {
+    return (typeof mouseEvent.buttons === 'undefined' ? mouseEvent.which : mouseEvent.buttons);
+  }
+
+    // Don't close panel too quickly when the mouse leaves the window, because the panel
   // may be near the window's edge and users with shaky hands may accidentally move mouse outside the window.
   // We don't know anything about the mouse other than the fact that it left the window
   function winMouseLeave(evt) {
@@ -28,7 +37,7 @@ define(['bp/constants', 'util/common', 'bp/model/state', 'bp/helper', 'metric/me
 
   function winMouseMove(evt) {
 
-    if (common.isButtonDown(evt)) {
+    if (isButtonDown(evt)) {
       return; // Slider in use or text selection, etc.
     }
 

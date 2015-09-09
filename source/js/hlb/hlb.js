@@ -9,11 +9,10 @@ define([
     'hlb/positioning',
     'hlb/styling',
     'core/platform',
-    'util/common',
-    'util/element-classifier',
+    'core/util/element-classifier',
     'hlb/animation',
     'util/geo',
-    'metric/metric'],
+    'core/metric'],
   function(
     $,
     conf,
@@ -21,7 +20,6 @@ define([
     hlbPositioning,
     hlbStyling,
     platform,
-    common,
     elemClassifier,
     hlbAnimation,
     geo,
@@ -108,6 +106,15 @@ define([
     mapForm($hlb, $foundation);
   }
 
+  // Return truthy value if a button is pressed on a mouse event.
+  // There are three properties for mouse buttons, and they all work differently -- both
+  // in terms of browsers and on mousemove events in particular.
+  // DANGER! Does not work in IE9 -- always returns falsey value.
+  // If we need it in IE9 we'll need to globally track mousedown and mouseup events.
+  function isButtonDown(mouseEvent) {
+    return (typeof mouseEvent.buttons === 'undefined' ? mouseEvent.which : mouseEvent.buttons);
+  }
+
   /**
    * [onTargetChange is enabled when the HLB is READY.
    * Deflates the HLB if allowed.]
@@ -118,7 +125,7 @@ define([
     var newTarget   = event.target,
         mouseX      = event.clientX,
         mouseY      = event.clientY,
-        isMouseDown = common.isButtonDown(event),
+        isMouseDown = isButtonDown(event),
         HLBBoundingBox;
 
     // The mouse has never been within the HLB bounds or

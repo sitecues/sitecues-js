@@ -1,4 +1,4 @@
-define(['util/element-classifier', 'keys/commands', 'metric/metric'],
+define(['core/util/element-classifier', 'core/keys/commands', 'core/metric'],
   function(elemClassifier, commands, metric) {
 
   var

@@ -10,7 +10,7 @@
  * - Playing audio by key when requested by another module
  */
 
-define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder', 'core/platform', 'locale/locale', 'metric/metric', 'core/conf/urls'],
+define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder', 'core/platform', 'core/locale', 'core/metric', 'core/conf/urls'],
   function(conf, site, $, builder, platform, locale, metric, urls) {
 
   var ttsOn = false,
@@ -281,7 +281,7 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
       return;
     }
 
-    require(['util/xhr'], function(xhr) {
+    require(['core/util/xhr'], function(xhr) {
       xhr.getJSON({
         // The 'provided.siteId' parameter must exist, or else core would have aborted the loading of modules.
         url: urls.getApiUrl('2/site/' + site.getSiteId() + '/config'),

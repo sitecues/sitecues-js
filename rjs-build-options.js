@@ -25,19 +25,6 @@
       insertRequire: ['core/core']
     },
     {
-      name: 'utils',
-      create: true,
-      include: [
-        'util/common',
-        'dollar/dollar-utils'
-      ],
-      exclude: [
-        'metric/metric',
-        'core/conf/urls',
-        'util/element-classifier'
-      ]
-    },
-    {
       name: 'lib-jquery',
       create: true,
       include: [
@@ -60,18 +47,18 @@
         'bp-expanded/bp-expanded'
       ],
       exclude: [
-        'locale/locale',
+        'core/locale',
         'core/platform',
         'bp/constants',
         'bp/model/state',
         'bp/helper',
-        'util/xhr',
+        'core/util/xhr',
         'util/common',
         'dollar/dollar-utils',
         'dollar/zepto-private',
         'dollar/jquery-private',
         'util/transform',
-        'metric/metric',
+        'core/metric',
         'core/conf/urls',
         'core/conf/user/manager'
       ]
@@ -83,49 +70,50 @@
         'bp-secondary/secondary-panel'
       ],
       exclude: [
-        'locale/locale',
+        'core/locale',
         'core/platform',
         'bp/constants',
         'bp/model/state',
         'bp/helper',
-        'util/xhr',
+        'core/util/xhr',
         'util/common',
         'bp-expanded/view/svg-animate',
         'util/transform',
-        'metric/metric',
+        'core/metric',
         'core/conf/urls',
         'core/conf/user/manager'
       ]
     },
     {  // We could split into audio and zoom features
-      name: 'page-features',
+      name: 'enhance',
       create: true,
       include: [
         'mouse-highlight/mouse-highlight',
         'util/transform',
+        'util/common',
+        'dollar/dollar-utils',
         'audio/audio',
         'mouse-highlight/move-keys',
         'zoom/zoom',
         'hpan/hpan',
         'zoom/fixed-position-fixer',
-        'keys/focus',
+        'enhance/focus',
         'cursor/cursor'
       ],
       exclude: [
-        'locale/locale',
+        'core/locale',
         'core/platform',
         'bp/constants',
         'bp/model/state',
         'bp/helper',
-        'util/xhr',
-        'util/common',
-        'dollar/dollar-utils',
+        'core/util/xhr',
         'dollar/zepto-private',
         'dollar/jquery-private',
-        'metric/metric',
+        'core/metric',
         'core/conf/urls',
         'core/conf/site',
-        'core/conf/user/manager'
+        'core/conf/user/manager',
+        'core/util/element-classifier'
       ]
     },
     {
@@ -135,19 +123,19 @@
         'hlb/hlb'
       ],
       exclude: [
-        'locale/locale',
+        'core/locale',
         'core/platform',
         'bp/constants',
         'bp/model/state',
         'bp/helper',
-        'util/xhr',
+        'core/util/xhr',
         'util/common',
         'dollar/dollar-utils',
         'dollar/zepto-private',
         'dollar/jquery-private',
         'core/conf/site',
         'core/conf/user/manager',
-        'metric/metric',
+        'core/metric',
         'core/conf/urls',
         'util/geo',
         'util/transform'
@@ -162,13 +150,13 @@
         'theme/img-classifier'
       ],
       exclude: [
-        'locale/locale',
+        'core/locale',
         'core/platform',
         'util/color',
         'bp/constants',
         'bp/model/state',
         'bp/helper',
-        'util/xhr',
+        'core/util/xhr',
         'util/common',
         'dollar/dollar-utils',
         'dollar/zepto-private',
@@ -182,7 +170,7 @@
         'style-service/css-aggregator.js',
         'style-service/style-service.js',
         'util/transform.js',
-        'metric/metric',
+        'core/metric',
         'zoom/zoom-forms.js',
         'zoom/zoom.js'
       ]

@@ -37,7 +37,7 @@ define(['bp/constants', 'bp/helper', 'util/transform', 'core/conf/urls'], functi
   function init() {
     if (!isInitialized) {
       isInitialized = true;
-      sitecues.on('bp/will-toggle-secondary-panel', loadImage);
+      loadImage();
     }
   }
 
