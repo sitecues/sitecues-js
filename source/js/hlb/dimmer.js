@@ -16,8 +16,6 @@ define(['$', 'conf/user/manager', 'util/common', 'util/platform'], function($, c
 
       isOldIE = platform.browser.isIE && platform.browser.version < 11,
 
-      documentElement = document.documentElement,
-
       requestFrameFn = window.requestAnimationFrame ||
         window.msRequestAnimationFrame ||
         function (fn) {
@@ -40,6 +38,7 @@ define(['$', 'conf/user/manager', 'util/common', 'util/platform'], function($, c
     }
 
     var multiplySize = isOldIE ? 2 : 1, // Fixes bug with white line in the middle of the outline
+      documentElement = document.documentElement,
       width = Math.max(documentElement.scrollWidth, window.innerWidth),
       height = Math.max(documentElement.scrollHeight, window.innerHeight),
       rect = {
@@ -116,6 +115,7 @@ define(['$', 'conf/user/manager', 'util/common', 'util/platform'], function($, c
   function drawRect(absRect, color, optionalParent) {
     var useCss = {
         position: 'absolute',
+        outlineOffset: '-1px',  // Fill in extra space in middle of outline
         outlineColor: color,
         outlineStyle: 'solid'
       },
@@ -124,12 +124,12 @@ define(['$', 'conf/user/manager', 'util/common', 'util/platform'], function($, c
     if (absRect.width > absRect.height) {   // Wider than tall: draw horizontal line
       useOutlineWidth = absRect.height / 2;
       useCss.width = absRect.width - 2 * useOutlineWidth + 'px';
-      useCss.height = 0;
+      useCss.height = 1;
     }
     else {   // Taller than wide: draw vertical line
       useOutlineWidth = absRect.width / 2;
       useCss.height = absRect.height - 2 * useOutlineWidth + 'px';
-      useCss.width = 0;
+      useCss.width = 1;
     }
 
     useCss.left = (absRect.left + useOutlineWidth) + 'px';

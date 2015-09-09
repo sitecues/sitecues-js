@@ -83,6 +83,11 @@ define(['conf/user/manager', 'conf/urls', 'util/localstorage'], function(manager
     }
   }
 
+  // Reset all settings as if it is a new user
+  function reset() {
+    ls.clearSitecuesLs();
+  }
+
   // Received via jsonp from server
   function loadFromServerCallback(data) {
     cleanupJsonp();
@@ -93,6 +98,9 @@ define(['conf/user/manager', 'conf/urls', 'util/localstorage'], function(manager
   }
 
   function loadCallback(data) {
+    if (typeof data === 'string') {
+      data = JSON.parse(data);
+    }
     // Set the obtained config data (if any).
     manager.data(data || {});
 
@@ -126,6 +134,7 @@ define(['conf/user/manager', 'conf/urls', 'util/localstorage'], function(manager
   }
 
   return {
-    init: init
+    init: init,
+    reset: reset
   };
 });

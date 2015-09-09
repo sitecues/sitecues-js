@@ -19,7 +19,7 @@ define([], function() {
       });
     },
     'reset-sitecues': function(event) {
-      require(['conf/user/manager', 'zoom/zoom', 'audio/audio'], function (conf, zoomMod, audio) {
+      require(['conf/user/manager', 'conf/user/server', 'zoom/zoom', 'audio/audio'], function (conf, server, zoomMod, audio) {
         // 0 by itself -> reset zoom
         // Shift+0 -> Also reset speech
         // Alt+Shift+0 -> Full reset for all of sitecues, including themes, cursors, cues ... everything
@@ -36,6 +36,7 @@ define([], function() {
             Object.keys(data).forEach(function(keyName) {
               conf.set(keyName, null);
             });
+            server.reset();
             audio.playEarcon('quit-organ');
           }
         }

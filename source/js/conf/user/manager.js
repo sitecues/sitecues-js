@@ -26,7 +26,7 @@ define([], function () {
     // push callback to listeners list
     listeners[key].push(callback);
 
-    if (key in storedData) {
+    if (storedData.hasOwnProperty(key)) {
       // call back if there is value for key
       callback(storedData[key]);
     }
