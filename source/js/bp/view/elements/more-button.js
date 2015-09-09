@@ -19,7 +19,7 @@ define(['bp/constants', 'bp/helper', 'util/animate', 'bp/view/svg-transform-effe
       isInitialized;
 
   function onMouseClick () {
-    require(['bp/view/elements/secondary/secondary-panel'], function(secondary) {
+    require(['bp-secondary/secondary-panel'], function(secondary) {
       // Show or hide the secondary panel.
       secondary.toggleSecondaryPanel();
     });
@@ -51,7 +51,7 @@ define(['bp/constants', 'bp/helper', 'util/animate', 'bp/view/svg-transform-effe
   }
 
   function preloadSecondaryPanel() {
-    require(['bp/view/elements/secondary/secondary-panel'], function() {});
+    require(['bp-secondary/secondary-panel'], function() {});
   }
 
   function showMoreButton (useInstantTransition) {

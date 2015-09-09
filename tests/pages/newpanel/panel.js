@@ -1,6 +1,6 @@
 // TODO
 // * Visuals:
-//     * Better close panel animation from secondary panel (try Seth's ideas)
+//     * Better close panel animation from bp-secondary panel (try Seth's ideas)
 //     * JavaScript panel height increase for feature panels is slow.
 //       Use browser-based animation rather than JS value increments. Easing, smoothness would be nice.
 //     * Can we make animations even faster by rotating 1 degree

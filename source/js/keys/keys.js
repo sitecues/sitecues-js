@@ -205,10 +205,10 @@ define(['util/element-classifier', 'keys/commands', 'metric/metric'],
       event.stopImmediatePropagation();
     }
 
-    executeCommand(commandName, keyName);
+    executeCommand(event, commandName, keyName);
   }
 
-  function executeCommand(commandName, keyName) {
+  function executeCommand(event, commandName, keyName) {
     // Emit event defined for key
     commands[commandName](event, keyName);
 
@@ -257,7 +257,7 @@ define(['util/element-classifier', 'keys/commands', 'metric/metric'],
     notifySitecuesKeyDown(true);
     if (event.keyCode === SHIFT) {
       if (isOnlyShift()) {
-        executeCommand('speak-highlight', 'shift');
+        executeCommand(event, 'speak-highlight', 'shift');
       }
     }
 

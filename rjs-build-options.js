@@ -84,7 +84,7 @@
       name: 'bp-secondary',
       create: true,
       include: [
-        'bp/view/elements/secondary/secondary-panel'
+        'bp-secondary/secondary-panel'
       ],
       exclude: [
         'locale/locale',

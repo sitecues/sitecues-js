@@ -7,11 +7,11 @@
 //
 
 define(['bp/constants', 'bp/model/state', 'bp/helper', 'util/animate', 'util/transform',
-    'bp/view/elements/secondary/tips',
-    'bp/view/elements/secondary/settings',
-    'bp/view/elements/secondary/feedback',
-    'bp/view/elements/secondary/about',
-    'bp/view/elements/secondary/cards',
+    'bp-secondary/tips',
+    'bp-secondary/settings',
+    'bp-secondary/feedback',
+    'bp-secondary/about',
+    'bp-secondary/cards',
     'locale/font-charset',
     'conf/urls'],
     function (BP_CONST, state, helper, animate, transform, tipsModule, settingsModule, feedbackModule, aboutModule, cardsModule, fontCharset, urls) {

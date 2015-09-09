@@ -708,7 +708,7 @@ define(['$', 'util/platform', 'util/common', 'conf/user/manager'],
         },
         animationOptimizationStyles = {
           willChange: 'transform',
-          backfaceVisibilitty: 'hidden'
+          backfaceVisibility: 'hidden'
         },
         $parent;
 
@@ -749,9 +749,9 @@ define(['$', 'util/platform', 'util/common', 'conf/user/manager'],
 
       }
 
-      delete backgroundStyles.count;
-
     }
+
+    delete backgroundStyles.count;
 
     return $.extend({},
       defaultHLBStyles,
