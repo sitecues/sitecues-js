@@ -226,7 +226,7 @@ deps-clean:
 lint:
 	@echo "Linting started."
 	node_modules/grunt-contrib-jshint/node_modules/jshint/bin/jshint source/js
-	lenient-lint --beep --error_trace --multiprocess --nojsdoc -r source/js --summary --time --unix_mode
+	# lenient-lint --beep --error_trace --multiprocess --nojsdoc -r source/js --summary --time --unix_mode
 	@echo "Linting completed."
 
 ################################################################################
