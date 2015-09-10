@@ -11,7 +11,9 @@ var require = {
   // Tell loader to never search for or execute a script with a "data-main"
   // attribute, since this could have weird consequences on customer pages.
   skipDataMain : true,
-  baseUrl: (function(scriptUrl) { return scriptUrl.substring(0, scriptUrl.lastIndexOf('/')) + '/'; })(sitecues.everywhereConfig ? sitecues.everywhereConfig.scriptUrl : sitecues.config.scriptUrl),
+  baseUrl: (function(config) {
+    var scriptUrl = config.scriptUrl || config.script_url;
+    return scriptUrl.substring(0, scriptUrl.lastIndexOf('/')) + '/'; })(sitecues.everywhereConfig || sitecues.config),
   // Make aliases to modules, for convenience.
   map: {
     // Modern browsers:
