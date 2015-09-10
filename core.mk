@@ -155,7 +155,7 @@ package:
 	echo "SC_BUILD_SUFFIX=$(custom-suffix)" >> $(package-dir)/BUILD.TXT
 
 	# Deep copy of $(build-dir)
-	cp -R $(build-dir)/js/* $(package-dir)
+	cp -R $(build-dir)/js/* $(package-dir)/js
 
   # Copy all the resources
 	cp -R $(build-dir)/etc/* $(package-dir)
