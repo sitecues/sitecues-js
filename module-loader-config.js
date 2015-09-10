@@ -12,7 +12,7 @@ var require = {
   // attribute, since this could have weird consequences on customer pages.
   skipDataMain : true,
   baseUrl: (function(config) {
-    var scriptUrl = config.scriptUrl || config.script_url;
+    var scriptUrl = config.scriptUrl || config.script_url; // Old load script sometimes used underscore names, which is deprecated but still supported
     return scriptUrl.substring(0, scriptUrl.lastIndexOf('/')) + '/'; })(sitecues.everywhereConfig || sitecues.config),
   // Make aliases to modules, for convenience.
   map: {
