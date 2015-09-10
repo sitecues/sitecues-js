@@ -150,6 +150,7 @@ package:
 	@echo "===== STARTING: Packaging '$(custom-name)' library"
 	rm -rf $(package-dir)
 	mkdir -p $(package-dir)
+	mkdir -p $(package-dir)/js
 	echo $(custom-version) > $(package-dir)/VERSION.TXT
 	echo "SC_BUILD_NAME=$(custom-name)" > $(package-dir)/BUILD.TXT
 	echo "SC_BUILD_SUFFIX=$(custom-suffix)" >> $(package-dir)/BUILD.TXT
