@@ -81,6 +81,7 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'util/
     ZOOM_PRECISION = 3, // Decimal places allowed
     SITECUES_ZOOM_ID = 'sitecues-zoom',
     ANIMATION_END_EVENTS = 'animationend webkitAnimationEnd MSAnimationEnd',
+    ANIMATION_PREFIX = getAnimationVendorPrefix(),
     TRANSFORM_PROP_CSS = platform.transformPropertyCss,
     MIN_RECT_SIDE = 4,
     ANIMATION_OPTIMIZATION_SETUP_DELAY = 20,   // Provide extra time to set up compositor layer if a key is pressed
@@ -474,7 +475,7 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'util/
     }
     $body
       .css(getZoomCss(currentTargetZoom))
-      .css(getAnimationVendorPrefix() + 'animation', '');
+      .css(ANIMATION_PREFIX + 'animation', '');
     finishZoomOperation();
   }
 
@@ -538,12 +539,11 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'util/
   // * Keypress (+/-) or A button press, which zoom until the button is let up
   function performKeyFramesZoomOperation() {
     var zoomSpeedMs = Math.abs(currentTargetZoom - completedZoom) * getMsPerXZoom(),
-      animationCss = {},
-      vendorPrefix = getAnimationVendorPrefix();
+      animationCss = {};
 
-    animationCss[vendorPrefix + 'animation'] = getAnimationName(currentTargetZoom)  + ' ' + zoomSpeedMs + 'ms linear';
-    animationCss[vendorPrefix + 'animation-play-state'] = 'running';
-    animationCss[vendorPrefix + 'fill-mode'] = 'forwards';
+    animationCss[ANIMATION_PREFIX + 'animation'] = getAnimationName(currentTargetZoom)  + ' ' + zoomSpeedMs + 'ms linear';
+    animationCss[ANIMATION_PREFIX + 'animation-play-state'] = 'running';
+    animationCss[ANIMATION_PREFIX + 'fill-mode'] = 'forwards';
 
     // Apply the new CSS
     $body.css(animationCss);
