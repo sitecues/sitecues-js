@@ -14,6 +14,7 @@
   },
   "bin": "binary/web.js",
   "dependencies": {
+    "alameda": "^0.2.0",
     "bg-runner": "https://s3.amazonaws.com/npm.sitecues.com/bg-runner-0.0.2.tgz",
     "blanket": "1.1.6",
     "chai": "1.10.0",
