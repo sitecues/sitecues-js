@@ -155,8 +155,10 @@ package:
 	echo "SC_BUILD_NAME=$(custom-name)" > $(package-dir)/BUILD.TXT
 	echo "SC_BUILD_SUFFIX=$(custom-suffix)" >> $(package-dir)/BUILD.TXT
 
-	# Deep copy of $(build-dir)
+  # Deep copy of $(build-dir)/js/  (only .js files)
+  # Easiest way is to copy everything, then remove the useless files (.gz, .map, .src.js, etc.)
 	cp -R $(build-dir)/js/* $(package-dir)/js
+	find $(package-dir)/js -type f ! -name '*.js' -delete
 
   # Copy all the resources
 	cp -R $(build-dir)/etc/* $(package-dir)
