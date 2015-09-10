@@ -15,7 +15,6 @@ define(['core/conf/user/localstorage', 'core/util/xhr', 'core/conf/urls'], funct
     isInitialized = true;
 
     var userId = ls.getUserId();
-    console.log(userId);
 
     if (userId) {
       didComplete();
