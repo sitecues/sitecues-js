@@ -4,9 +4,7 @@
  */
 
 // TODO Localize
-//Fix unit tests
-//Get it to run from server
-//Firefox
+//Firefox -- BP animation slow
 //Safari - zoom is broken
 // IE
 // - feedback page issues
@@ -26,6 +24,7 @@
 // Provisional patents  -- who can help? Jeff? Ai2?
 //
 // Later
+//Fix unit tests
 // About: Get it now
 //
 
