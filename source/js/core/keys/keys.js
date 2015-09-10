@@ -139,12 +139,12 @@ define(['core/util/element-classifier', 'core/keys/commands', 'core/metric'],
     },
     // define keys map used to bind actions to hotkeys
     KEY_EVENT_MAP = {
-      'minus': 'decrease-zoom',
-      'plus': 'increase-zoom',
-      'reset': 'reset-sitecues',
-      'speech': 'toggle-speech'
+      'minus': 'decreaseZoom',
+      'plus': 'increaseZoom',
+      'reset': 'resetSitecues',
+      'speech': 'toggleSpeech'
     },
-    KEY_EVENT_DEFAULT = 'queue-key';
+    KEY_EVENT_DEFAULT = 'queueKey';
 
   function canMoveHighlight(event) {
     return !hasCommandModifier(event) &&    // Plain or shifted keystroke
@@ -257,7 +257,7 @@ define(['core/util/element-classifier', 'core/keys/commands', 'core/metric'],
     notifySitecuesKeyDown(true);
     if (event.keyCode === SHIFT) {
       if (isOnlyShift()) {
-        executeCommand(event, 'speak-highlight', 'shift');
+        executeCommand(event, 'speakHighlight', 'shift');
       }
     }
 

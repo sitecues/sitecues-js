@@ -174,6 +174,12 @@
         'zoom/zoom-forms.js',
         'zoom/zoom.js'
       ]
+    },
+    {
+      name: 'audio/text-select',
+      include: [
+        'audio/text-select'
+      ]
     }
   ],
   paths: {

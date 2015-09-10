@@ -1278,7 +1278,10 @@ define(['$', '$utils', 'core/conf/user/manager', 'zoom/zoom', 'mouse-highlight/p
 
     if (event.shiftKey && isOnlyShift) {
       // When shift held down, emit command to speak the newly highlighted text
-      sitecues.emit('mh/do-speak', picked);
+      require(['audio/audio'], function(audio) {
+        audio.init();
+        audio.speakContent(picked);
+      });
     }
 
     updateView();

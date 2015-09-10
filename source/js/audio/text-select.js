@@ -14,7 +14,10 @@ define([], function () {
     var selectedText = getSelectedText();
     if (selectedText) {
       // Listeners: speech.js
-      sitecues.emit('speech/do-play-text', selectedText);
+      require(['audio/audio'], function(audio) {
+        audio.init();
+        audio.speakText(selectedText, null, 'selection');
+      });
     }
   }
 
@@ -50,6 +53,7 @@ define([], function () {
   }
 
   function init() {
+    refresh(true);  // We only get init'd if TTS is turned on, so assume it's on
     sitecues.on('speech/did-change', refresh);
   }
 

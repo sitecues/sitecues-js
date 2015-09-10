@@ -295,7 +295,9 @@ define(['$', '$utils', 'mouse-highlight/mouse-highlight', 'util/common', 'util/t
   }
 
   function speakHighlight() {
-    sitecues.emit('mh/do-speak', getHighlight().picked);
+    require(['core/keys/commands'], function(commands) {
+      commands.speakHighlight();
+    });
   }
 
   function succeed(doAllowRepeat, doSpeakText) {

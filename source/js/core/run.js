@@ -4,7 +4,8 @@
  */
 
 // TODO Localize
-//Do we need to gzip stuff at all?
+//Accessibility - set aria-hidden on children when badge closed
+//Shift into speech
 //Firefox -- BP animation slow
 // IE
 // - feedback page issues

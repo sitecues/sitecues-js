@@ -26,14 +26,14 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
       HIGHLIGHT: 'shift'
     };
 
-  function playHlbContent($content) {
+  function onHlbOpened(hlbContent) {
     if (!ttsOn) {
       return;
     }
-    speakContent($content, TRIGGER_TYPES.LENS);
+    speakContentImpl(hlbContent, TRIGGER_TYPES.LENS);
   }
 
-  function playHighlight(content, doAvoidInterruptions, doSuppressEarcon) {
+  function speakContent(content, doAvoidInterruptions, doSuppressEarcon) {
     if (doAvoidInterruptions && audioPlayer && audioPlayer.isBusy()) {
       return; // Already reading the highlight
     }
@@ -45,16 +45,17 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
     if (!doSuppressEarcon) {
       playEarcon('audio-highlight');
     }
-    speakContent(content, TRIGGER_TYPES.HIGHLIGHT);
+    speakContentImpl(content, TRIGGER_TYPES.HIGHLIGHT);
   }
 
-  function speakContent($content, triggerType) {
+  function speakContentImpl($content, triggerType) {
     var text = builder.getText($content);
     if (text) {
       speakText(text, locale.getElementLang($content[0]), triggerType);
     }
   }
 
+  // text and triggerType are optional
   function speakText(text, lang, triggerType) {
     stopAudio();  // Stop any currently playing audio and halt keydown listener until we're playing again
     getAudioPlayer(function(player) {
@@ -316,7 +317,7 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
      * A highlight box has been requested.  This will create the player
      * if necessary, but will not play anything.
      */
-    sitecues.on('hlb/create', playHlbContent);
+    sitecues.on('hlb/create', onHlbOpened);
 
     /*
      * A highlight box was closed.  Stop/abort/dispose of the player
@@ -333,9 +334,10 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
     toggleSpeech: toggleSpeech,
     isSpeechEnabled: isSpeechEnabled,
     playAudioByKey: playAudioByKey,
-    playHighlight: playHighlight,
+    speakContent: speakContent,
+    speakText: speakText,
     playEarcon: playEarcon,
-    playHlbContent: playHlbContent,
+    playHlbContent: onHlbOpened,
     getTTSUrl: getTTSUrl,
     init: init
   };
