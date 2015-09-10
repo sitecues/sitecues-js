@@ -273,23 +273,23 @@ test-smoke:
 #	Run the unit tests.
 ################################################################################
 test-unit:
-	@echo "TEST RUN ID: $(test-run-id)"
-	@cd ./tests/unit ; ../../node_modules/mocha/bin/mocha $(testunit-mocha-options)
+	#@echo "TEST RUN ID: $(test-run-id)"
+	#@cd ./tests/unit ; ../../node_modules/mocha/bin/mocha $(testunit-mocha-options)
 
 ################################################################################
 # TARGET: nyan-test
 #	Run unit test with nyan-cat because awesome
 ################################################################################
 nyan-unit:
-	@echo "TEST RUN ID: $(test-run-id)"
-	@cd ./tests/unit ; ../../node_modules/mocha/bin/mocha -R nyan
+	#@echo "TEST RUN ID: $(test-run-id)"
+	#@cd ./tests/unit ; ../../node_modules/mocha/bin/mocha -R nyan
 
 ################################################################################
 # TARGET: dot-unit
 ################################################################################
 dot-unit:
-	@echo "TEST RUN ID: $(test-run-id)"
-	@cd ./tests/unit ; ../../node_modules/mocha/bin/mocha -R dot
+	#@echo "TEST RUN ID: $(test-run-id)"
+	#@cd ./tests/unit ; ../../node_modules/mocha/bin/mocha -R dot
 
 
 ################################################################################
@@ -297,10 +297,10 @@ dot-unit:
 #	Get test coverage output using blanket and mocha for node
 ################################################################################
 test-coverage:
-	@echo "TEST RUN ID: $(test-run-id)"
-	@mkdir -p ./report
-	@cd ./tests/unit ; ../../node_modules/mocha/bin/mocha -r blanket -R html-cov > ../../report/unit-test-coverage.html
-	@echo Coverage report generated in: ./report/unit-test-coverage.html
+	#@echo "TEST RUN ID: $(test-run-id)"
+	#@mkdir -p ./report
+	#@cd ./tests/unit ; ../../node_modules/mocha/bin/mocha -r blanket -R html-cov > ../../report/unit-test-coverage.html
+	#@echo Coverage report generated in: ./report/unit-test-coverage.html
 
 ################################################################################
 # TARGET: stop-all-services

@@ -6,6 +6,8 @@
 // TODO Localize
 //Fix unit tests
 //Get it to run from server
+//Firefox
+//Safari - zoom is broken
 // IE
 // - feedback page issues
 // -- no caret visible in IE9
