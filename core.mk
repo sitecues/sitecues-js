@@ -137,11 +137,11 @@ debug:
 	@echo "---- additional bundles source ---------------------------"
 	@./show-file-sizes.sh $(build-dir)/js "*.js" | grep -v "sitecues"
 
-#	@echo
-#	@echo "===== COMPLETE: Building '$(custom-name)' library (DEBUG VER) ====="
-#	@echo
-#	@echo "===== VERSION: $(custom-version)"
-#	@echo
+	@echo
+	@echo "===== COMPLETE: Building '$(custom-name)' library (DEBUG VER) ====="
+	@echo
+	@echo "===== VERSION: $(custom-version)"
+	@echo
 
 ################################################################################
 # TARGET: package

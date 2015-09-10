@@ -6,7 +6,6 @@
 // TODO Localize
 //Do we need to gzip stuff at all?
 //Firefox -- BP animation slow
-//Safari - zoom is broken
 // IE
 // - feedback page issues
 // -- no caret visible in IE9

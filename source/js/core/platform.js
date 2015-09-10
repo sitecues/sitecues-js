@@ -193,7 +193,8 @@ define([], function() {
     transformOriginProperty: transformOriginProperty,
     transitionEndEvent: transitionEndEvent,
     nativeZoom: nativeZoom,
-    isRetina: isRetina
+    isRetina: isRetina,
+    isCssPropSupported: isCssPropSupported
   };
 
   if (SC_UNIT) {

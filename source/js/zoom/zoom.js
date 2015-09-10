@@ -81,6 +81,7 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'util/
     ZOOM_PRECISION = 3, // Decimal places allowed
     SITECUES_ZOOM_ID = 'sitecues-zoom',
     ANIMATION_END_EVENTS = 'animationend webkitAnimationEnd MSAnimationEnd',
+    TRANSFORM_PROP_CSS = platform.transformPropertyCss,
     MIN_RECT_SIDE = 4,
     ANIMATION_OPTIMIZATION_SETUP_DELAY = 20,   // Provide extra time to set up compositor layer if a key is pressed
     CLEAR_ANIMATION_OPTIMIZATION_DELAY = 7000,  // After zoom, clear the will-change property if no new zoom occurs within this amount of time
@@ -460,6 +461,10 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'util/
     return getSanitizedZoomValue(transform.getComputedScale(body));
   }
 
+  function getAnimationVendorPrefix() {
+    return platform.isCssPropSupported('animation') ? '' : platform.cssPrefix;
+  }
+
   function onGlideStopped() {
     if (elementDotAnimatePlayer) {
       // If we don't do this, then setting CSS directly on body no longer works
@@ -469,7 +474,7 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'util/
     }
     $body
       .css(getZoomCss(currentTargetZoom))
-      .css('animation', '');
+      .css(getAnimationVendorPrefix() + 'animation', '');
     finishZoomOperation();
   }
 
@@ -533,11 +538,12 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'util/
   // * Keypress (+/-) or A button press, which zoom until the button is let up
   function performKeyFramesZoomOperation() {
     var zoomSpeedMs = Math.abs(currentTargetZoom - completedZoom) * getMsPerXZoom(),
-      animationCss = {
-        animation: getAnimationName(currentTargetZoom)  + ' ' + zoomSpeedMs + 'ms linear',
-        animationPlayState: 'running',
-        animationFillMode: 'forwards'
-      };
+      animationCss = {},
+      vendorPrefix = getAnimationVendorPrefix();
+
+    animationCss[vendorPrefix + 'animation'] = getAnimationName(currentTargetZoom)  + ' ' + zoomSpeedMs + 'ms linear';
+    animationCss[vendorPrefix + 'animation-play-state'] = 'running';
+    animationCss[vendorPrefix + 'fill-mode'] = 'forwards';
 
     // Apply the new CSS
     $body.css(animationCss);
@@ -620,13 +626,12 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'util/
       keyFramesCssProperty = platform.browser.isWebKit ? '@-webkit-keyframes ' : '@keyframes ',
       keyFramesCss = animationName + ' {\n',
       keyFrames = getAnimationKeyFrames(targetZoom, isInitialLoadZoom, true),
-      cssPrefix = platform.cssPrefix.slice().replace('-moz-', ''),
       numSteps = keyFrames.length - 1,
       step = 0;
 
     for (; step <= numSteps; ++step) {
       var keyFrame = keyFrames[step],
-        zoomCssString = cssPrefix + 'transform: ' + keyFrame.transform + (keyFrame.width ? '; width: ' + keyFrame.width : '');
+        zoomCssString = TRANSFORM_PROP_CSS + ': ' + keyFrame[TRANSFORM_PROP_CSS] + (keyFrame.width ? '; width: ' + keyFrame.width : '');
 
       keyFramesCss += Math.round(10000 * keyFrame.timePercent) / 100 + '% { ' + zoomCssString + ' }\n';
     }
@@ -783,7 +788,7 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'util/
     }
     if (shouldUseWillChangeOptimization) { // Is will-change supported?
       // This is a CSS property that aids performance of animations
-      $body.css('willChange', platform.transformPropertyCss);
+      $body.css('willChange', TRANSFORM_PROP_CSS);
     }
   }
 
@@ -939,7 +944,7 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'util/
     var transform = 'scale(' + targetZoom.toFixed(ZOOM_PRECISION) + ') ' + getFormattedTranslateX(targetZoom),
       css = {};
 
-    css[platform.transformPropertyCss] = transform;
+    css[TRANSFORM_PROP_CSS] = transform;
     if (shouldRestrictWidth()) {
       css.width = getRestrictedWidth(targetZoom);
     }
