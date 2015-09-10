@@ -79,11 +79,26 @@ build:
 	./finalize-loader-config.js $(build-dir)/js/sitecues.js target/build-config/sitecues-bundles.js $(allow-zepto)
 	./finalize-loader-config.js $(build-dir)/js/sitecues-ie9.js target/build-config/sitecues-bundles-ie9.js false
 
-	# Non-js files, such as css, images, html, audio files
+	# Copy non-js files, such as css, images, html, audio files
 	@mkdir -p $(build-dir)/etc
 	@(for F in `ls -d source/* | grep -Ev '^source/js$$'` ; do cp -r $$F $(build-dir)/etc ; done)
 	@echo
 
+	@echo "---- sitecues core source --------------------------------"
+	@./show-file-sizes.sh $(build-dir)/js "sitecues.js"
+	@echo "---- additional bundles source ---------------------------"
+	@./show-file-sizes.sh $(build-dir)/js "*.js" | grep -v ".src.js"
+
+	@echo
+	@echo "===== COMPLETE: Building '$(custom-name)' library"
+	@echo
+	@echo "===== VERSION: $(custom-version)"
+	@echo
+
+################################################################################
+# TARGET: checksize
+################################################################################
+checksize:
 	@echo "===== GZIP: Creating compressed (gzipped) JavaScript files."
 	@cd $(build-dir)/js ; find . -type f -name '*.js' ! -name "*.map" ! -name "*.src.js" -exec sh -c $(gzip-command) \;
 
@@ -94,18 +109,6 @@ build:
 	@./show-file-sizes.sh $(build-dir)/js "sitecues*.js.gz"
 	@echo "----- additional bundles zipped --------------------------"
 	@./show-file-sizes.sh $(build-dir)/js "*.js.gz" | grep -v "sitecues"
-# Uncomment if you want to see raw file sources before zipping
-#	@echo
-#	@echo "---- sitecues core source --------------------------------"
-#	@./show-file-sizes.sh $(build-dir)/js "sitecues.js"
-#	@echo "---- additional bundles source ---------------------------"
-#	@./show-file-sizes.sh $(build-dir)/js "*.js"
-
-	@echo
-	@echo "===== COMPLETE: Building '$(custom-name)' library"
-	@echo
-	@echo "===== VERSION: $(custom-version)"
-	@echo
 
 ################################################################################
 # TARGET: debug

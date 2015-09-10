@@ -161,6 +161,17 @@ build: lint clean $(_force-deps-refresh)
 	done
 
 ################################################################################
+# TARGET: checksize
+#	Build the compressed file and, optionally, run gjslint.
+################################################################################
+checksize: lint clean $(_force-deps-refresh)
+	@echo "Node version : $(shell node --version)"
+	@echo "npm version  : v$(shell npm --version)"
+	@for _CUSTOM_CONF_NAME in $(custom-config-names) ; do \
+		$(MAKE) --no-print-directory -f core.mk build checksize sourcemaps=false custom-config-name=$$_CUSTOM_CONF_NAME ; \
+	done
+
+################################################################################
 # TARGET: debug
 #	Build the debug version
 ################################################################################
