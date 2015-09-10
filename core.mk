@@ -39,14 +39,15 @@ else
 endif
 
 # Are we building sourcemaps?
-ifeq ($(sourcemaps), false)
-	# gzip should replace original source file
-	gzip-command='gzip "{}"'
-else
-	# gzip should keep original source file
-	gzip-command='gzip -c "{}" > "{}.gz"'
+ifneq ($(sourcemaps), false)
 	sourcemaps=true
 endif
+
+# Keep original source
+gzip-command='gzip -c "{}" > "{}.gz"'
+# The command if we don't want to keep the original:
+# gzip-command='gzip "{}"'
+
 
 # Make a build-specific version.
 custom-version=$(version)$(custom-suffix-upper)
@@ -84,7 +85,6 @@ build:
 	@echo
 
 	@echo "===== GZIP: Creating compressed (gzipped) JavaScript files."
-	echo $(gzip-command)
 	@cd $(build-dir)/js ; find . -type f -name '*.js' ! -name "*.map" ! -name "*.src.js" -exec sh -c $(gzip-command) \;
 
   # Show file sizes but not for foo.src.bar -- those are built by r.js for sourcemaps
