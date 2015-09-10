@@ -4,6 +4,8 @@
  */
 
 // TODO Localize
+//Fix unit tests
+//Get it to run from server
 // IE
 // - feedback page issues
 // -- no caret visible in IE9
