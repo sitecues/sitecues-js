@@ -6,7 +6,8 @@ define(['$', 'core/conf/user/manager', 'core/platform'], function ($, conf, plat
 
     var DEFAULT_COMBOBOX_ZOOM_CSS = {
         outlineOffset: '2px',  // Make sure focus outline goes outside
-        transformOrigin: '0% 0%'
+        transformOrigin: '0 0',
+        '-webkit-transform-origin': '0 0'
       },
       getComboboxFixesFn = (function() {
         // The purpose of these functions is best described here: http://i.imgur.com/CgrMo.gif
@@ -31,7 +32,7 @@ define(['$', 'core/conf/user/manager', 'core/platform'], function ($, conf, plat
       if (platform.browser.isChrome) {
         // In WebKit, buttons are weird
         // http://i.imgur.com/CgrMo.gif
-        $('body>input,button').css('transform', 'scale3d(1,1,1)');
+        $('body>input,button').css(platform.transformPropertyCss, 'scale3d(1,1,1)');
       }
 
       // **** Comboboxes (<select>) ****
@@ -58,7 +59,7 @@ define(['$', 'core/conf/user/manager', 'core/platform'], function ($, conf, plat
         var origSize = $combobox.data('sc-sizing'),
           fixes = getComboboxFixesFn(desiredRect, origSize, completedZoom);
         $combobox
-          .css('transform', undoTransformScale)
+          .css(platform.transformPropertyCss, undoTransformScale)
           .css(DEFAULT_COMBOBOX_ZOOM_CSS)
           .css(fixes.css)
           .children().css(fixes.childCss || {});

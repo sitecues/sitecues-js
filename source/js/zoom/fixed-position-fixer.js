@@ -123,9 +123,6 @@ define(['$', 'zoom/zoom', 'core/platform', 'style-service/style-service', 'dolla
     }
 
     /**
-     * Listens for events emitted by the cursor module, which indicates that new CSS has
-     * been added to the <style id='sitecues-css'></style>.  This is necessary to get any
-     * fixed positioned elements that are not used on a page when sitecues first loads.
      * Basically, it gets any styles that declare position:fixed so we can later filter for
      * any elements that are dynamically fixed.
      * @return {[type]} [description]
@@ -135,8 +132,8 @@ define(['$', 'zoom/zoom', 'core/platform', 'style-service/style-service', 'dolla
         var selector = getFixedPositionSelector();
         if (selector) {
           $(selector).css({
-            willChange: 'transform',
-            transformOrigin: '0% 0%'
+            willChange: platform.transformProperty,
+            transformOrigin: '0 0'
           });
           lazyTurnOn();
         }

@@ -707,7 +707,7 @@ define(['$', 'core/platform', 'util/common', 'core/conf/user/manager'],
           'top'          : originalElementRect.top + window.scrollTop
         },
         animationOptimizationStyles = {
-          willChange: 'transform',
+          willChange: platform.transformPropertyCss,
           backfaceVisibility: 'hidden'
         },
         $parent;

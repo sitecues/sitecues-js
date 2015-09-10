@@ -783,15 +783,13 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'util/
     }
     if (shouldUseWillChangeOptimization) { // Is will-change supported?
       // This is a CSS property that aids performance of animations
-      $body.css('willChange', 'transform');
+      $body.css('willChange', platform.transformPropertyCss);
     }
   }
 
   function clearAnimationOptimizations() {
     if (!isZoomOperationRunning()) {
-      $body.css({
-        willChange: ''
-      });
+      $body.css('willChange', '');
       clearTimeout(clearAnimationOptimizationTimer);
       clearAnimationOptimizationTimer = null;
     }
@@ -914,18 +912,13 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'util/
   }
 
   // Add useful zoom fixes to the body's @style
-  function getZoomBodyCSSFixes() {
-    var css = {
-      // Allow the content to be horizontally centered, unless it would go
-      // offscreen to the left, in which case start zooming the content from the left-side of the window
-      transformOrigin: shouldRestrictWidth() ? '0% 0%' : '50% 0%'
-    };
-
+  function fixZoomBodyCss() {
+    // Allow the content to be horizontally centered, unless it would go
+    // offscreen to the left, in which case start zooming the content from the left-side of the window
+    body.style[platform.transformOriginProperty] = shouldRestrictWidth() ? '0 0' : '50% 0';
     if (shouldOptimizeLegibility) {
-      css.textRendering = 'optimizeLegibility';
+      body.style.textRendering = 'optimizeLegibility';
     }
-
-    return css;
   }
 
   // Replace current zoom stylesheet or insert a new one with the
@@ -944,9 +937,9 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'util/
   // Get a CSS object for the targetZoom level
   function getZoomCss(targetZoom) {
     var transform = 'scale(' + targetZoom.toFixed(ZOOM_PRECISION) + ') ' + getFormattedTranslateX(targetZoom),
-      css = {
-        transform: transform
-      };
+      css = {};
+
+    css[platform.transformPropertyCss] = transform;
     if (shouldRestrictWidth()) {
       css.width = getRestrictedWidth(targetZoom);
     }
@@ -1272,7 +1265,7 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'util/
 
     $(window).resize(onResize);
 
-    $body.css(getZoomBodyCSSFixes()); // Get it read as soon as zoom might be used
+    fixZoomBodyCss(); // Get it read as soon as zoom might be used
   }
 
   var publics = {

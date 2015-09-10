@@ -13,7 +13,7 @@ define([], function() {
       isRetinaDisplay;         // Is the current display a retina display?
 
   function isCssPropSupported(propName) {
-    return document.documentElement.style[propName] === 'string';
+    return typeof document.documentElement.style[propName] === 'string';
   }
 
   // Determine which browser is being used
@@ -120,9 +120,9 @@ define([], function() {
     return '';
   })();
 
-  var transformProperty = isIE9 ? 'msTransform' : ((browser.isWebKit && !isCssPropSupported('transform'))? 'webkitTransform' : 'transform');
+  var transformPropertyCss =  isIE9 ? '-ms-transform' : ((browser.isWebKit && !isCssPropSupported('transform'))? '-webkit-transform' : 'transform');
+  var transformProperty = transformPropertyCss.replace('-t', 'T').replace('-', '');
   var transformOriginProperty = transformProperty + 'Origin';
-
   var transitionEndEvent = browser.isWebKit ? 'webkitTransitionEnd' : 'transitionend';
 
   // Retrieve and store the user's intentional amount of native browser zoom
@@ -189,6 +189,7 @@ define([], function() {
     canUseRetinaCursors: canUseRetinaCursors,
     cssPrefix: cssPrefix,
     transformProperty: transformProperty,
+    transformPropertyCss: transformPropertyCss,
     transformOriginProperty: transformOriginProperty,
     transitionEndEvent: transitionEndEvent,
     nativeZoom: nativeZoom,
