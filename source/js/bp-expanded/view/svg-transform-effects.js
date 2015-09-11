@@ -8,10 +8,11 @@ define(['bp/helper', 'bp/constants', 'core/platform', 'bp-expanded/view/svg-anim
 
 'use strict';
 
-  var isActivePanel,
+  var isActivePanel = false,
     byId = helper.byId,
     HOVER_ANIMATION_MS = 500,
-    hoverElems,
+    savedHoverElems = [],
+    uniqueId = 0,
     origTransforms = [],
     animations = [];
 
@@ -53,30 +54,42 @@ define(['bp/helper', 'bp/constants', 'core/platform', 'bp-expanded/view/svg-anim
       return;  // Nothing to do
     }
 
+    storeAllHoverElements();
+
     isActivePanel = willBeActive;
-    hoverElems = getContainer().querySelectorAll('[data-hover]');
 
     var addOrRemoveFn = isActivePanel ? 'addEventListener' : 'removeEventListener',
-      index = hoverElems.length,
-      currElem;
+      index = savedHoverElems.length;
 
     function addOrRemoveHovers(elem) {
-      elem.setAttribute('data-id', index);
       elem[addOrRemoveFn]('mouseenter', onMouseOver);
       elem[addOrRemoveFn]('mouseleave', onMouseOut);
     }
 
+    while (index--) {
+      addOrRemoveHovers(savedHoverElems[index]);
+    }
+  }
+
+  function storeAllHoverElements() {
+    var allHoverElems = getContainer().querySelectorAll('[data-hover]'),
+      index = allHoverElems.length,
+      elem;
     while (index --) {
-      currElem = hoverElems[index];
-      origTransforms[index] = currElem.getAttribute('transform');
-      addOrRemoveHovers(currElem);
+      elem = allHoverElems[index];
+      if (savedHoverElems.indexOf(elem) < 0) {  // If not already saved
+        savedHoverElems[uniqueId] = elem;
+        elem.setAttribute('data-id', uniqueId);
+        origTransforms[uniqueId] = elem.getAttribute('transform');
+        ++ uniqueId;
+      }
     }
   }
 
   function cancelHovers() {
-    var index = hoverElems.length;
+    var index = savedHoverElems.length;
     while (index --) {
-      toggleHover(hoverElems[index], false);
+      toggleHover(savedHoverElems[index], false);
     }
   }
 
@@ -90,12 +103,12 @@ define(['bp/helper', 'bp/constants', 'core/platform', 'bp-expanded/view/svg-anim
 
   function refreshHovers() {  // Ensure listeners are added for new content
     hoversOff();
-    hoverElems = null;
+    storeAllHoverElements();
     hoversOn();
   }
 
   function init() {
-    hoversOn(); // Current expansion
+    refreshHovers(); // Current expansion
     sitecues.on('bp/did-expand', hoversOn); // Future expansions
     sitecues.on('bp/will-shrink', hoversOff);
     sitecues.on('bp/content-loaded', refreshHovers);
