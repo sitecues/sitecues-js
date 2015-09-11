@@ -371,8 +371,6 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'bp-expanded/view/svg-ani
 
     SC_DEV && console.log('Transitioning secondary panel to mode: ' + state.get('secondaryPanelTransitionTo'));
 
-    sitecues.emit('bp/did-change');
-
     animateButtonMenuDrop(willEnable);
 
     toggleMouseListeners(willEnable);
