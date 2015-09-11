@@ -3,7 +3,7 @@
  *   The core module of the sitecues library.
  */
 
-//Badge on customer pages opening in the wrong place
+// Close secondary panel -- animation is too fast
 //Firefox -- BP animation slow
 // IE
 // - feedback page issues
