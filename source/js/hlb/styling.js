@@ -325,8 +325,6 @@ define(['$', 'core/platform', 'util/common', 'core/conf/user/manager'],
 
     var newBackgroundColor;
 
-    debugger;
-
     if (isTransparent(elementComputedStyle.backgroundColor)) {
 
       if ($picked.is('img')) {

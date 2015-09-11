@@ -30,3 +30,4 @@ var require = {
   // This will be replaced with actual module structure in core.mk via a call to finalize-loader-config.js
   bundles: "__SITECUES_BUNDLES__"
 };
+

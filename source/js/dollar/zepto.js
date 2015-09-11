@@ -770,11 +770,11 @@ var Zepto = (function() {
         if(!element) return
         computedStyle = getComputedStyle(element, '')
         if (typeof property == 'string')
-          return element.style[property]
+          return computedStyle[property]
         else if (isArray(property)) {
           var props = {}
           $.each(property, function(_, prop){
-            props[prop] = (element.style[camelize(prop)] || computedStyle.getPropertyValue(prop))
+            props[prop] = computedStyle[property]
           })
           return props
         }
