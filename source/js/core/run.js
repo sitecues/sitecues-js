@@ -3,7 +3,6 @@
  *   The core module of the sitecues library.
  */
 
-// TODO Localize
 //Badge on customer pages opening in the wrong place
 //Firefox -- BP animation slow
 // IE
@@ -14,8 +13,9 @@
 // -- Performance bad in IE10 with nytimes.com
 // Slow CSS in styles.js: [data-sc-reversible]
 // Slow CSS in styles.js: #scp-bp-container *
-// Accessibility
+// Accessibility testing
 // Cross-browser testing
+// TODO Localize
 // TODO themes
 // TODO cursor size/hue settings only -- be careful of mousehue 1.1 which means nothing
 // UX testing

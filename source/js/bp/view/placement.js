@@ -57,7 +57,7 @@ define(['bp/view/badge', 'bp/model/state', 'bp/constants', 'bp/helper', 'core/pl
       bpElement,
       svgElement,
       ratioOfSVGToVisibleBadgeSize,
-      zoomAppliedToBadge = 1,
+      currentZoom = 1,
       isInitialized,
 
       // The width/height of the <SVG>
@@ -138,17 +138,20 @@ define(['bp/view/badge', 'bp/model/state', 'bp/constants', 'bp/helper', 'core/pl
   function repositionBPOverBadge() {
 
     function getPadding(property) {
-      return parseFloat(badgeComputedStyle['padding' + property]) * zoomAppliedToBadge;
+      return parseFloat(badgeComputedStyle['padding' + property]) * appliedZoom;
     }
 
 
     // Used for setting the bpContainer left, top, width, and height
     function setBPProperty(prop) {
-      bpElement.style[prop] = (badgeRect[prop] / zoomAppliedToBadge) + 'px';
+      bpElement.style[prop] = (badgeRect[prop] / appliedZoom) + 'px';
     }
 
     // Current badge rectangle in screen coordinates
     var newBadgeRect   = helper.getRect(badgeElement),
+
+        // Get the amount of zoom being applied to the badge
+        appliedZoom = getAppliedBPZoom(),
 
         // Adjust for padding
         badgeComputedStyle = window.getComputedStyle(badgeElement),
@@ -190,7 +193,7 @@ define(['bp/view/badge', 'bp/model/state', 'bp/constants', 'bp/helper', 'core/pl
 
     bpElement.style.top  = 0;
     bpElement.style.left = 0;
-    bpElement.style[platform.transformProperty] = 'translate(' + badgeRect.left / zoomAppliedToBadge+ 'px,' + badgeRect.top / zoomAppliedToBadge + 'px)';
+    bpElement.style[platform.transformProperty] = 'translate(' + badgeRect.left / appliedZoom + 'px,' + badgeRect.top / appliedZoom + 'px)';
   }
 
   // This makes the collapsed svg large enough so that even with
@@ -199,7 +202,7 @@ define(['bp/view/badge', 'bp/model/state', 'bp/constants', 'bp/helper', 'core/pl
   function fitSVGtoBadgeRect() {
 
     var svgStyle  = svgElement.style,
-        svgWidth  = badgeRect.width * getSVGScale(badgeRect) / zoomAppliedToBadge,
+        svgWidth  = badgeRect.width * getSVGScale(badgeRect) / getAppliedBPZoom(),
         svgHeight = svgWidth / svgAspectRatio;
 
     svgStyle.width  = svgWidth  + 'px';
@@ -254,10 +257,15 @@ define(['bp/view/badge', 'bp/model/state', 'bp/constants', 'bp/helper', 'core/pl
   }
 
   function onZoomChange(zoomLevel) {
-    zoomAppliedToBadge = zoomLevel;
+    currentZoom = zoomLevel;
   }
 
-  /**
+  function getAppliedBPZoom() {
+    var isBPInBody  = state.get('isPageBadge') && currentBPParent === BADGE_PARENT;
+    return isBPInBody ? currentZoom : 1;
+  }
+
+    /**
    * [init initializes the placement of the bpElement, svgElement, and badgeElement]
    * @param  {[DOM element]} badge       [Either placeholder or badge we create with ID 'sitecues-badge']
    * @param  {[DOM element]} bpContainer [SVG container <div> with ID 'scp-bp-container']
