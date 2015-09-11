@@ -267,9 +267,9 @@ define(['$', 'core/platform', 'util/common', 'core/conf/user/manager'],
   function getNonEmptyBackgroundImage ($picked, ancestorCount) {
 
     var backgroundStyles = {},
-        parents = $picked.parents();
+        $parents = $picked.parents();
 
-    parents.each(function (count) {
+    $parents.each(function (count) {
       if (count > ancestorCount) {
         return false;
       }

@@ -81,7 +81,6 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'util/
     ZOOM_PRECISION = 3, // Decimal places allowed
     SITECUES_ZOOM_ID = 'sitecues-zoom',
     ANIMATION_END_EVENTS = 'animationend webkitAnimationEnd MSAnimationEnd',
-    ANIMATION_PREFIX = getAnimationVendorPrefix(),
     TRANSFORM_PROP_CSS = platform.transformPropertyCss,
     MIN_RECT_SIDE = 4,
     ANIMATION_OPTIMIZATION_SETUP_DELAY = 20,   // Provide extra time to set up compositor layer if a key is pressed
@@ -462,10 +461,6 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'util/
     return getSanitizedZoomValue(transform.getComputedScale(body));
   }
 
-  function getAnimationVendorPrefix() {
-    return platform.isCssPropSupported('animation') ? '' : platform.cssPrefix;
-  }
-
   function onGlideStopped() {
     if (elementDotAnimatePlayer) {
       // If we don't do this, then setting CSS directly on body no longer works
@@ -475,7 +470,7 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'util/
     }
     $body
       .css(getZoomCss(currentTargetZoom))
-      .css(ANIMATION_PREFIX + 'animation', '');
+      .css('animation', '');
     finishZoomOperation();
   }
 
@@ -539,11 +534,12 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'util/
   // * Keypress (+/-) or A button press, which zoom until the button is let up
   function performKeyFramesZoomOperation() {
     var zoomSpeedMs = Math.abs(currentTargetZoom - completedZoom) * getMsPerXZoom(),
-      animationCss = {};
+      animationCss = {
+        animation: getAnimationName(currentTargetZoom)  + ' ' + zoomSpeedMs + 'ms linear',
+        animationPlayState: 'running',
+        fillMode: 'forwards'
+      };
 
-    animationCss[ANIMATION_PREFIX + 'animation'] = getAnimationName(currentTargetZoom)  + ' ' + zoomSpeedMs + 'ms linear';
-    animationCss[ANIMATION_PREFIX + 'animation-play-state'] = 'running';
-    animationCss[ANIMATION_PREFIX + 'fill-mode'] = 'forwards';
 
     // Apply the new CSS
     $body.css(animationCss);

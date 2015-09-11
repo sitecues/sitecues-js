@@ -10,6 +10,8 @@
 // 4. Fixed each() method to be compatible with prototype (see https://github.com/madrobby/zepto/issues/710)
 // 5. Fix to css('backgroundColor') where it returned null instead of 'rgba(0, 0, 0, 0)'
 // 6. Remove line window.$ === undefined && (window.$ = Zepto)
+// 7. Fix to $(NodeList) so that it creates an appropriate collection
+// 8. Find the rest by looking at git log :P
 // TODO how do we fix this with plugins instead of patching?
 
 // Details
@@ -47,6 +49,10 @@
 //  return this
 //},
 // to
+// 7. Change in init method:
+// -      if (isArray(selector)) dom = compact(selector)
+// +      if (isArray(selector) || selector instanceof NodeList) dom = compact(selector)
+
 
 
 // Zepto 1.1.6 (generated with Zepto Builder) - zepto event data stack - zeptojs.com/license
@@ -84,6 +90,8 @@ var Zepto = (function() {
     zepto = {},
     camelize, uniq,
     tempParent = document.createElement('div'),
+    emptyStyle = document.createElement( "div" ).style,
+    cssPrefixes = [ "Webkit", "Moz", "ms" ],
     propMap = {
       'tabindex': 'tabIndex',
       'readonly': 'readOnly',
@@ -103,6 +111,19 @@ var Zepto = (function() {
 
   zepto.matches = function(element, selector) {
     if (!selector || !element || element.nodeType !== 1) return false
+    if (isObject(selector)) {   // AL: $(something).is(arrayOrCollection) was not implemented in Zepto
+      if (likeArray(selector)) {
+        for (var i = 0; i < selector.length; i++) {
+          if (element === selector[i]) {
+            return true;
+          }
+        }
+        return false;
+      }
+      else {
+        return element === selector;   // AL: $(something).is(someElement) was not implemented in Zepto
+      }
+    }
     var matchesSelector = element.webkitMatchesSelector || element.mozMatchesSelector ||
       element.oMatchesSelector || element.matchesSelector
     if (matchesSelector) return matchesSelector.call(element, selector)
@@ -160,6 +181,24 @@ var Zepto = (function() {
       elementDisplay[nodeName] = display
     }
     return elementDisplay[nodeName]
+  }
+
+  function vendorPropName(name) {    // AL: this is not in Zepto -- borrowed from jQuery implementation
+    // Shortcut for names that are not vendor prefixed
+    if ( name in emptyStyle ) {
+      return name;
+    }
+
+    // Check for vendor prefixed names
+    var capName = name[ 0 ].toUpperCase() + name.slice( 1 ),
+      i = cssPrefixes.length;
+
+    while ( i-- ) {
+      name = cssPrefixes[ i ] + capName;
+      if ( name in emptyStyle ) {
+        return name;
+      }
+    }
   }
 
   function children(element) {
@@ -250,7 +289,7 @@ var Zepto = (function() {
     else if (zepto.isZ(selector)) return selector
     else {
       // normalize array if an array of nodes is given
-      if (isArray(selector)) dom = compact(selector)
+      if (isArray(selector) || selector instanceof NodeList) dom = compact(selector)
       // Wrap DOM nodes.
       else if (isObject(selector))
         dom = [selector], selector = null
@@ -432,6 +471,10 @@ var Zepto = (function() {
     return filter.call(elements, callback)
   }
 
+  $.makeArray = function(obj) {    // AL: Zepto doesn't have $.makeArray
+    return [].slice.call(obj);
+  }
+
   if (window.JSON) $.parseJSON = JSON.parse
 
   // Populate the class2type map
@@ -519,7 +562,12 @@ var Zepto = (function() {
       return $(uniq(this.concat($(selector,context))))
     },
     is: function(selector){
-      return this.length > 0 && zepto.matches(this[0], selector)
+      for (var i = 0; i < this.length; i++) {     // AL: Zepto doesn't check each element in the array like JQuery does
+        if (zepto.matches(this[i], selector)) {
+          return true;
+        }
+      }
+      return false;
     },
     not: function(selector){
       var nodes=[]
@@ -765,36 +813,43 @@ var Zepto = (function() {
       }
     },
     css: function(property, value){
+    // AL: heavily modifed as the Zepto version doesn't support vendor property names, doesn't use computed style when
+    // it should, and sometimes dasherizes when it doesn't need to for modern browsers
       if (arguments.length < 2) {
         var computedStyle, element = this[0]
         if(!element) return
         computedStyle = getComputedStyle(element, '')
         if (typeof property == 'string')
-          return computedStyle[property]
+          return computedStyle[vendorPropName(property)]
         else if (isArray(property)) {
           var props = {}
           $.each(property, function(_, prop){
-            props[prop] = computedStyle[property]
+            props[prop] = computedStyle[vendorPropName(property)]
           })
           return props
         }
       }
 
-      var css = ''
-      if (type(property) == 'string') {
+      function applyValue(collection, property, value) {
+        var vendorName = vendorPropName(property),
+          valueWithPx;
         if (!value && value !== 0)
-          this.each(function(){ this.style.removeProperty(dasherize(property)) })
-        else
-          css = dasherize(property) + ":" + maybeAddPx(property, value)
-      } else {
-        for (key in property)
-          if (!property[key] && property[key] !== 0)
-            this.each(function(){ this.style.removeProperty(dasherize(key)) })
-          else
-            css += dasherize(key) + ':' + maybeAddPx(key, property[key]) + ';'
+          collection.each(function(){ this.style.removeProperty(vendorName) })
+        else {
+          var valueWithPx = maybeAddPx(property, value)
+          collection.each(function () {
+            this.style[vendorName] = valueWithPx
+          });
+        }
       }
 
-      return this.each(function(){ this.style.cssText += ';' + css })
+      if (type(property) == 'string') {
+        applyValue(this, property, value)
+      } else {
+        for (key in property)
+          applyValue(this, key, property[key]);
+      }
+      return this
     },
     index: function(element){
       return element ? this.indexOf($(element)[0]) : this.parent().children().indexOf(this[0])

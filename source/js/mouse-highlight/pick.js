@@ -192,7 +192,7 @@ define(['$', 'util/common', '$utils', 'core/conf/user/manager', 'core/conf/site'
       });
     }
 
-    return [startElement].concat($utils.$makeArray(validAncestors));
+    return [startElement].concat($.makeArray(validAncestors));
   }
 
   function getImageForMapArea(element) {

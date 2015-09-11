@@ -13,26 +13,8 @@ define(['$'], function ($) {
       $(element).closest('#sitecues-badge,#scp-bp-container').length;
   }
 
-  // Zepto doesn't have makeArray
-  function $makeArray($jquery) {
-    return [].slice.call($jquery);
-  }
-
-  // Zepto doesn't have is(element)
-  function $is($jquery, element) {
-    return $makeArray($jquery).indexOf(element) >= 0;
-  }
-
-  // Zepto doesn't convert $(nodeList) into a Zepto array automatically
-  function $fromNodeList(nodeList) {
-    return $.zepto ? $.zepto.Z(nodeList) : $(nodeList);
-  }
-
   var publics = {
-    isInSitecuesUI: isInSitecuesUI,
-    $makeArray: $makeArray,
-    $is: $is,
-    $fromNodeList: $fromNodeList
+    isInSitecuesUI: isInSitecuesUI
   };
 
   if (SC_UNIT) {
