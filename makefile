@@ -4,12 +4,12 @@
 
 ################################################################################
 # DEFAULT TARGET: all
-# 	(To keep this target as the defaulty target, this target must be
+# 	(To keep this target as the default target, this target must be
 #	 declared before all other targets).
-# 	Clean the target direcetory, update Node.js dependecies, and build the
+# 	Clean the target directory, update Node.js dependencies, and build the
 #	JavaScript library.
 ################################################################################
-all: clean build debug
+all: debug
 
 ################################################################################
 # Command line options.
@@ -27,7 +27,7 @@ clean-deps=false
 https=off
 
 # Whether or not to lint the codebase before the build.
-lint=false
+lint=true
 
 # Node.js express test server HTTP port.
 port=8000
@@ -107,11 +107,12 @@ endif
 # If the 'list' option is 'true', set the 'lint' target as a
 # dependency of 'build'. Otherwise, print a message stating that the
 # linting is disabled.
-build_lint_dep:=.no-lint-on-build
 ifeq ($(lint), true)
 	_build_lint_dep:=lint
+	_build_lint_debug_dep:=lint-debug
 else
 	_build_lint_dep:=.no-lint-on-build
+	_build_lint_debug_dep:=.no-lint-on-build
 endif
 
 ################################################################################
@@ -151,9 +152,9 @@ endif
 
 ################################################################################
 # TARGET: build
-#	Build the compressed file and, optionally, run gjslint.
+#	Build the minified version
 ################################################################################
-build: lint clean $(_force-deps-refresh)
+build: clean $(_force-deps-refresh) $(_build_lint_dep)
 	@echo "Node version : $(shell node --version)"
 	@echo "npm version  : v$(shell npm --version)"
 	@for _CUSTOM_CONF_NAME in $(custom-config-names) ; do \
@@ -162,9 +163,9 @@ build: lint clean $(_force-deps-refresh)
 
 ################################################################################
 # TARGET: checksize
-#	Build the compressed file and, optionally, run gjslint.
+#	Build the compressed version and show sizes
 ################################################################################
-checksize: lint clean $(_force-deps-refresh)
+checksize: clean $(_force-deps-refresh) $(_build_lint_debug_dep)
 	@echo "Node version : $(shell node --version)"
 	@echo "npm version  : v$(shell npm --version)"
 	@for _CUSTOM_CONF_NAME in $(custom-config-names) ; do \
@@ -175,7 +176,7 @@ checksize: lint clean $(_force-deps-refresh)
 # TARGET: debug
 #	Build the debug version
 ################################################################################
-debug: clean $(_force-deps-refresh) $(_build_lint_dep)
+debug: clean $(_force-deps-refresh) $(_build_lint_debug_dep)
 	@echo
 	@for _CUSTOM_CONF_NAME in $(custom-config-names) ; do \
 		$(MAKE) --no-print-directory -f core.mk debug custom-config-name=$$_CUSTOM_CONF_NAME ; \
@@ -186,7 +187,7 @@ debug: clean $(_force-deps-refresh) $(_build_lint_dep)
 #	Package up the files into a deployable bundle, and create a manifest for local
 # file deployment.
 ################################################################################
-package: lint clean $(_force-deps-refresh)
+package: clean $(_force-deps-refresh)
 ifeq ($(sc_dev), true)
 	$(error Unable to package a development build)
 endif
@@ -238,6 +239,15 @@ lint:
 	@echo "Linting started."
 	node_modules/grunt-contrib-jshint/node_modules/jshint/bin/jshint source/js
 	# lenient-lint --beep --error_trace --multiprocess --nojsdoc -r source/js --summary --time --unix_mode
+	@echo "Linting completed."
+
+################################################################################
+# TARGET: lint-debug
+#	Run jshint on the JavaScript source but allow debugger
+################################################################################
+lint-debug:
+	@echo "Linting started."
+	node_modules/grunt-contrib-jshint/node_modules/jshint/bin/jshint --config .jshintrc-debug source/js
 	@echo "Linting completed."
 
 ################################################################################

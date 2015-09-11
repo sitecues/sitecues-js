@@ -30,13 +30,13 @@ define(['$', 'core/platform', 'util/common', 'core/conf/user/manager'],
       BACKGROUND_IMAGE_ANCESTOR_TRAVERSAL_COUNT = 0,
 
       // Default background color for HLB, if HLB is NOT an image.
-      HLB_DEFAULT_BACKGROUND_COLOR = '#ffffff',
+      HLB_DEFAULT_BACKGROUND_COLOR = '#fff',
 
       // Default text color for HLB
-      HLB_DEFAULT_TEXT_COLOR = '#000000',
+      HLB_DEFAULT_TEXT_COLOR = '#000',
 
       // Default background color for HLB, if HLB is an image.
-      HLB_IMAGE_DEFAULT_BACKGROUND_COLOR = '#000000',
+      HLB_IMAGE_DEFAULT_BACKGROUND_COLOR = '#000',
 
       // Remove these styles from the HLB, but NOT its children.
       HLBCSSBlacklist = [
@@ -324,6 +324,8 @@ define(['$', 'core/platform', 'util/common', 'core/conf/user/manager'],
   function getHLBBackgroundColor ($picked, elementComputedStyle) {
 
     var newBackgroundColor;
+
+    debugger;
 
     if (isTransparent(elementComputedStyle.backgroundColor)) {
 
