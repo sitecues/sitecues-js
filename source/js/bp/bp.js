@@ -28,7 +28,8 @@ define(['bp/controller/bp-controller', 'bp/model/state','bp/view/badge', 'bp/vie
   // The htmlContainer has all of the SVG inside of it, and can take keyboard focus
   var bpContainer,
       isInitComplete,
-      isInitBegun;
+      isInitBegun,
+      byId = helper.byId;
 
   /**
    *** Start point ***
@@ -45,7 +46,7 @@ define(['bp/controller/bp-controller', 'bp/model/state','bp/view/badge', 'bp/vie
     getClasses(function(classes) {
 
       // If we are expanding or contracting, aria-expanded is true (enables CSS)
-      helper.byId(BP_CONST.BADGE_ID).setAttribute('aria-expanded', state.isPanelRequested());
+      updateAria(state.isPanelRequested());
 
       // 2. Suppress animations if necessary
       // This is done for the first view change
@@ -59,6 +60,15 @@ define(['bp/controller/bp-controller', 'bp/model/state','bp/view/badge', 'bp/vie
 
       sizeAnimation.init(isFirstTime);
     });
+  }
+
+  // Update accessibility attributes
+  function updateAria(isPanel) {
+    // Let the user know that the button is expandable
+    getBadgeElement().setAttribute('aria-expanded',isPanel);
+
+    // Hide the inner contents of the button when it's just a button
+    getBpContainerElement().setAttribute('aria-hidden', !isPanel);
   }
 
   // 1. Badge- or panel- specific view classes
@@ -81,7 +91,7 @@ define(['bp/controller/bp-controller', 'bp/model/state','bp/view/badge', 'bp/vie
     }
     else if (state.get('isAdaptivePalette')) {
       require(['util/color'], function(colorUtil) {
-        var badgeElement = helper.byId(BP_CONST.BADGE_ID);
+        var badgeElement = getBadgeElement();
         callbackFn(BP_CONST.PALETTE_NAME_MAP[colorUtil.isOnDarkBackground(badgeElement) ? 'reverse-blue' : 'normal']);
       });
     }
@@ -94,6 +104,14 @@ define(['bp/controller/bp-controller', 'bp/model/state','bp/view/badge', 'bp/vie
   function getSVGElement() {
     // Don't use helper.byId() because the element isn't inserted in DOM yet.
     return bpContainer.querySelector('#' + BP_CONST.SVG_ID);
+  }
+
+  function getBadgeElement() {
+    return byId(BP_CONST.BADGE_ID);
+  }
+
+  function getBpContainerElement() {
+    return byId(BP_CONST.BP_CONTAINER_ID);
   }
 
   /**
@@ -217,7 +235,7 @@ define(['bp/controller/bp-controller', 'bp/model/state','bp/view/badge', 'bp/vie
     }
 
     // Page may still be loading -- check if the badge is available
-    var earlyBadgeElement = helper.byId(BP_CONST.BADGE_ID);
+    var earlyBadgeElement = getBadgeElement();
 
     if (earlyBadgeElement && isDocumentReadyForBP(earlyBadgeElement)) {
 
