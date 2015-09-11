@@ -4,7 +4,7 @@
  */
 
 // TODO Localize
-//Accessibility - set aria-hidden on children when badge closed
+//Badge on customer pages opening in the wrong place
 //Firefox -- BP animation slow
 // IE
 // - feedback page issues
@@ -85,16 +85,8 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
     });
   }
 
-  function initAlwaysOnFeatures() {
-    bp.init();
-    keys.init();
-  }
-
   function onAllPrereqsComplete() {
-    initAlwaysOnFeatures();
-
-    firePageLoadEvent();
-
+    // Initialize other features after bp
     var initialZoom = conf.get('zoom');
     if (initialZoom) {
       require(['zoom/zoom'], function (zoomMod) {
@@ -102,6 +94,10 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
         zoomMod.performInitialLoadZoom(initialZoom);
       });
     }
+
+    keys.init();
+
+    firePageLoadEvent();
 
     sitecues.on('zoom', onZoomChange);
 
@@ -127,7 +123,7 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
 
   function onPrereqComplete() {
     if (--numPrereqsToComplete === 0) {
-      onAllPrereqsComplete();
+      bp.init(onAllPrereqsComplete);
     }
   }
 

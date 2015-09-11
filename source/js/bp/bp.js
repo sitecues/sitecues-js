@@ -28,8 +28,8 @@ define(['bp/controller/bp-controller', 'bp/model/state','bp/view/badge', 'bp/vie
   // The htmlContainer has all of the SVG inside of it, and can take keyboard focus
   var bpContainer,
       isInitComplete,
-      isInitBegun,
-      byId = helper.byId;
+      byId = helper.byId,
+      pendingCompletionCallbackFn;
 
   /**
    *** Start point ***
@@ -147,6 +147,8 @@ define(['bp/controller/bp-controller', 'bp/model/state','bp/view/badge', 'bp/vie
     isInitComplete = true;
 
     sitecues.on('bp/did-change', updateView);
+
+    pendingCompletionCallbackFn();
   }
 
   function hasSitecuesEverBeenOn() {
@@ -221,13 +223,9 @@ define(['bp/controller/bp-controller', 'bp/model/state','bp/view/badge', 'bp/vie
     }
   }
 
-  function init() {
+  function init(bpCompleteCallbackFn) {
 
-    if (isInitBegun) {
-      return;
-    }
-
-    isInitBegun = true;
+    pendingCompletionCallbackFn = bpCompleteCallbackFn;
 
     if (site.get('uiMode') === 'toolbar') {
       setTimeout(initBPFeature, 0);
