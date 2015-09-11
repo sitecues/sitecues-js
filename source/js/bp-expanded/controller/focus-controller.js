@@ -383,7 +383,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
 
     // Escape = close
     if (keyCode === BP_CONST.KEY_CODES.ESCAPE) {
-      require(['bp/controller/shrink-controller'], function(shrinkController) {
+      require(['bp-expanded/controller/shrink-controller'], function(shrinkController) {
         shrinkController.shrinkPanel(true);
       });
       return;

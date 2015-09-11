@@ -21,6 +21,7 @@ define(['bp/helper', 'bp/constants', 'core/platform', 'bp-expanded/view/svg-anim
 
   function toggleHover(target, isActiveHover) {
 
+
     if (target.getAttribute('aria-disabled') === 'true') {
       return;
     }
