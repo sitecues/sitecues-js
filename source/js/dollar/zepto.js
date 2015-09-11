@@ -834,7 +834,7 @@ var Zepto = (function() {
         var vendorName = vendorPropName(property),
           valueWithPx;
         if (!value && value !== 0)
-          collection.each(function(){ this.style.removeProperty(vendorName) })
+          collection.each(function(){ this.style.removeProperty(dasherize(vendorName)) })
         else {
           valueWithPx = maybeAddPx(property, value)
           collection.each(function () {
