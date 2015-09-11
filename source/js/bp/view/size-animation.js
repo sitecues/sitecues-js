@@ -253,9 +253,13 @@ define(['bp/model/state', 'bp/constants', 'bp/helper', 'core/platform'],
     return viewBoxRect.width / viewBoxRect.height;
   }
 
+  function getAppliedBadgeZoom() {
+    return state.get('isPageBadge') ? currentZoom : 1;
+  }
+
   function getTargetBadgeSize() {
     if (!targetBadgeWidth || !state.get('isToolbarBadge')) {
-      targetBadgeWidth = getTargetBadgeWidth(currentZoom);
+      targetBadgeWidth = getTargetBadgeWidth(getAppliedBadgeZoom());
     }
     return {
       width: targetBadgeWidth,
@@ -283,7 +287,7 @@ define(['bp/model/state', 'bp/constants', 'bp/helper', 'core/platform'],
         badgeElement        = getBadgeElement(),
         badgeComputedStyles = window.getComputedStyle(badgeElement),
         badgeRect           = getRect(badgeElement),
-        completedZoom       = currentZoom, // TODO Was zoomMod.getCompletedZoom(), -- good now?
+        completedZoom       = currentZoom,
         paddingTop          = parseFloat(badgeComputedStyles.paddingTop),
         paddingLeft         = parseFloat(badgeComputedStyles.paddingLeft),
         top,
@@ -529,39 +533,6 @@ define(['bp/model/state', 'bp/constants', 'bp/helper', 'core/platform'],
 
   }
 
-  function init(isFirstTime) {
-
-    if (isFirstTime) {
-      firstTimeRender();
-
-      sitecues.on('bp/will-expand bp/will-shrink', cancelAnimation);
-
-      sitecues.on('zoom/begin', function () {
-        animationStartTime = 0;
-      });
-
-      if (state.get('isPageBadge')) {
-        sitecues.on('zoom', onZoomChange);
-      }
-
-      return;
-    }
-
-    if (currentlyTransitioningTo === state.get('transitionTo')) {
-      // Already where we've been requested to be
-      // This prevents us from starting a new animation of the same kind when we've already started one
-      return;
-    }
-
-    if (state.isExpanding() || state.isShrinking()) {
-
-      // There is room to animate, not already at the size limit of where we're transitioning to
-      performAnimation();
-    }
-
-    currentlyTransitioningTo = state.get('transitionTo');
-  }
-
   //  https://equinox.atlassian.net/wiki/display/EN/BP2%3A+Implementation+Details
   function getTargetScale (endingSizeToStartingSizeRatio, crispFactor) {
 
@@ -783,6 +754,37 @@ define(['bp/model/state', 'bp/constants', 'bp/helper', 'core/platform'],
 
   function onZoomChange(zoomLevel) {
     currentZoom = zoomLevel;
+  }
+
+  function init(isFirstTime) {
+
+    if (isFirstTime) {
+      firstTimeRender();
+
+      sitecues.on('bp/will-expand bp/will-shrink', cancelAnimation);
+
+      sitecues.on('zoom/begin', function () {
+        animationStartTime = 0;
+      });
+
+      sitecues.on('zoom', onZoomChange);
+
+      return;
+    }
+
+    if (currentlyTransitioningTo === state.get('transitionTo')) {
+      // Already where we've been requested to be
+      // This prevents us from starting a new animation of the same kind when we've already started one
+      return;
+    }
+
+    if (state.isExpanding() || state.isShrinking()) {
+
+      // There is room to animate, not already at the size limit of where we're transitioning to
+      performAnimation();
+    }
+
+    currentlyTransitioningTo = state.get('transitionTo');
   }
 
 
