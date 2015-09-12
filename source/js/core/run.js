@@ -3,7 +3,6 @@
  *   The core module of the sitecues library.
  */
 
-//Chrome - HLB positioning wrong with zoom (only in old Chrome, fine in Canary?)
 //Firefox -- BP animation slow
 // IE
 // - feedback page issues
