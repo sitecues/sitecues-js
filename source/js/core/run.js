@@ -3,7 +3,6 @@
  *   The core module of the sitecues library.
  */
 
-// Close secondary panel -- animation is too fast
 //Firefox -- BP animation slow
 // IE
 // - feedback page issues
