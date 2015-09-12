@@ -685,7 +685,7 @@ define(['$', 'core/conf/user/manager', 'hlb/styling', 'util/common', 'core/util/
 
     // Position the HLB without it being scaled (so we can animate the scale).
     var startAnimationZoom = conf.get('zoom') / inheritedZoom,
-      hlbStyle = $hlb[0];
+      hlbStyle = $hlb[0].style;
 
     hlbStyle[platform.transformProperty] = 'scale(' + startAnimationZoom + ') ' + translateCSS;
     hlbStyle[platform.transformOriginProperty] = originCSS;

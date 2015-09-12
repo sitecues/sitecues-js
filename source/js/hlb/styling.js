@@ -47,18 +47,22 @@ define(['$', 'core/platform', 'util/common', 'core/conf/user/manager'],
         'right',
         'bottom',
         'transform',
-        'webkitTransform',
-        'mozTransform',
+        '-webkit-transform',
+        '-moz-transform',
+        '-ms-transform',
+        '-webkit-transform-origin',
+        '-moz-transform-origin',
+        '-ms-transform-origin',
         'transition',
-        'webkitTransition',
+        '-webkit-transition',
         'width',
         'height',
-        'webkitTextFillColor',
+        '-webkit-text-fill-color',
         'min-height',
         'min-width',
         'max-height',
         'max-width',
-        'msScrollLimitYMax' // Necessary to scroll the HLB in IE
+        '-ms-scroll-limit-y-max' // Necessary to scroll the HLB in IE
       ],
 
       // What child elements of the HLB do we want to remove after a clone.
@@ -157,7 +161,7 @@ define(['$', 'core/platform', 'util/common', 'core/conf/user/manager'],
    */
   function filterStyles ($hlb) {
     for (var i = 0; i < HLBCSSBlacklist.length; i += 1) {
-      $hlb[0].style[HLBCSSBlacklist[i]] = '';
+      $hlb[0].style.removeProperty([HLBCSSBlacklist[i]]);
     }
   }
 
