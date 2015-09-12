@@ -28,7 +28,7 @@ define(['bp/bp', 'bp/constants', 'bp/model/state'], function(bp, BP_CONST, state
     // *** scp-want-panel ***
     // Sets larger panel sizes on everything.
     // It can take time to take effect because of the animation properties.
-    classBuilder += ' ' + BP_CONST.WANT_PANEL + (state.isSecondaryPanelRequested() ? ' ' + BP_CONST.MORE_ID : ' ' + BP_CONST.MAIN_ID);
+    classBuilder += ' ' + BP_CONST.WANT_PANEL + (state.isSecondaryPanelRequested() ? ' scp-want-secondary' : ' ' + BP_CONST.MAIN_ID);
 
     if (state.get('isKeyboardMode')) {
       // *** scp-keyboard ***
@@ -52,7 +52,7 @@ define(['bp/bp', 'bp/constants', 'bp/model/state'], function(bp, BP_CONST, state
   function getSecondaryPanelClasses() {
     var panelName = state.getSecondaryPanelName(),
       className =' scp-panel-' + panelName;
-    if (state.isSecondaryPanelRequested()) {
+    if (state.get('isSecondaryPanel')) {
       className += ' scp-is-secondary';
     }
     if (state.get('isSecondaryExpanding')) {

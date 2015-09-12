@@ -431,7 +431,7 @@ define(['bp/helper', 'core/platform', 'bp/constants', 'core/conf/site', 'core/co
         'display': 'none'
       },
 
-      '.scp-secondary #scp-secondary': {
+      '.scp-want-secondary #scp-secondary, .scp-is-secondary #scp-secondary': {
         'display': 'block'
       },
 

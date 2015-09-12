@@ -79,6 +79,10 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'bp-expanded/view/svg-ani
     state.set('secondaryPanelName', featureName || 'button-menu');
     state.set('isSecondaryExpanding', isSecondaryExpanding);
     state.set('wasMouseInPanel', false); // When panel shrinks mouse needs to go back inside of it before mouseout closes again
+    fireBpChanged();
+  }
+
+  function fireBpChanged() {
     sitecues.emit('bp/did-change');
   }
 
@@ -127,10 +131,11 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'bp-expanded/view/svg-ani
   }
 
   // Create an animation and store it in runningAnimations so we can cancel it if need be
-  function createAnimation(duration, onTickFn) {
+  function createAnimation(duration, onTickFn, onFinishFn) {
     var options = {
-        'duration': duration,
-        'onTick': onTickFn
+        duration: duration,
+        onTick: onTickFn,
+        onFinish: onFinishFn
       };
 
     var newAnimation = animate.animateViaCallbacks(options);
@@ -162,9 +167,14 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'bp-expanded/view/svg-ani
       updateMoreButton(origOutlineHeight, moreBtnRotation);
     }
 
+    function onFinish() {
+      state.set('isSecondaryPanel', willEnable);
+      fireBpChanged();
+    }
+
     cancelAllAnimations();
 
-    createAnimation(BUTTON_CLICK_ANIMATION_DURATION, onButtonMenuDropTick);
+    createAnimation(BUTTON_CLICK_ANIMATION_DURATION, onButtonMenuDropTick, onFinish);
 
   }
 
@@ -304,7 +314,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'bp-expanded/view/svg-ani
     function fadeInTextContentWhenLargeEnough() {
       setTimeout(function () {
         state.set('isSecondaryExpanding', false);
-        sitecues.emit('bp/did-change');
+        fireBpChanged();
       }, heightAnimationDelay + heightAnimationDuration * 0.7);
     }
 
