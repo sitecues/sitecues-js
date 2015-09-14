@@ -13,7 +13,7 @@ define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 
       willChange: platform.transformPropertyCss,
       backgroundColor: '#fff',
       borderRadius: '8px',
-      transition: 'opacity 9s, transform 1s',
+      transition: 'opacity .9s, transform 1s',
       opacity: 0,
       zIndex: 2147483645
     },
