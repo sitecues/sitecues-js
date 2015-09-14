@@ -406,7 +406,7 @@ define(['bp/helper', 'core/platform', 'bp/constants', 'core/conf/site', 'core/co
       },
 
       // The feedback text area has its own focus ring so that it can show behind the feedback button :/ !
-      '#scp-feedback-input-rect': {   // Using id selector which is faster than [data-own-focus-ring][data-show-focus]
+      '#scp-feedback-input-rect[data-show-focus]': {   // Using id selector which is faster than [data-own-focus-ring][data-show-focus]
         'stroke': 'rgba(82,168,236,.8)',
         'stroke-width': '6px',
         'filter': 'url(#scp-focusblur)',

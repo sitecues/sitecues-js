@@ -3,7 +3,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
   function (BP_CONST, state, helper, metric) {
 
   var savedDocumentFocus,
-    focusElement,
+    tabbedElement,
     isInitialized,
     isListeningToClicks,
     byId = helper.byId,
@@ -67,14 +67,14 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
   // Clear the visual focus rectangle and current focus state
   function clearPanelFocus() {
 
-    if (focusElement) {
-      focusElement.removeAttribute('data-show-focus');
-      focusElement.removeAttribute('tabindex');
+    if (tabbedElement) {
+      tabbedElement.removeAttribute('data-show-focus');
+      tabbedElement.removeAttribute('tabindex');
     }
 
     hideFocus();
 
-    focusElement = null;
+    tabbedElement = null;
 
     getPanelContainer().removeAttribute('aria-activedescendant');
 
@@ -91,19 +91,19 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
   }
 
   function updateDOMFocusState() {
-    if (!focusElement) {
+    if (!tabbedElement) {
       return;
     }
     var panelContainer = getPanelContainer();
-    panelContainer.setAttribute('aria-activedescendant', focusElement.id);
-    focusElement.setAttribute('focusable', true);
-    focusElement.setAttribute('tabindex', 0);
+    panelContainer.setAttribute('aria-activedescendant', tabbedElement.id);
+    tabbedElement.setAttribute('focusable', true);
+    tabbedElement.setAttribute('tabindex', 0);
 
     try {
       // Allow real focus if item/browser allows it:
       // - In Firefox, for now this will only work on HTML elements
       // - In other browsers, anything with focusable/tabindex can be focused
-      focusElement.focus();
+      tabbedElement.focus();
     }
     catch (ex) {
       panelContainer.focus();
@@ -116,13 +116,13 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
 
     updateDOMFocusState();
 
-    if (!focusElement || !state.get('isKeyboardMode')) {
+    if (!tabbedElement || !state.get('isKeyboardMode')) {
       // No focus to show or not in keyboard mode
       hideFocus();
     }
     else {
       // Show focus
-      if (focusElement.id === BP_CONST.MORE_BUTTON_GROUP_ID) {
+      if (tabbedElement.id === BP_CONST.MORE_BUTTON_GROUP_ID) {
         sitecues.emit('bp/did-focus-more-button');
       }
 
@@ -151,8 +151,6 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
    */
   function beginKeyboardFocus() {
 
-    listenToClicks();
-
     // Save the last focus so that we can restore it when panel closes
     savedDocumentFocus = document.activeElement;
 
@@ -167,8 +165,9 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
       //badgeElement.setAttribute('aria-expanded', 'true');
 
       // Turn keyboard mode on for the panel, and start focus on the first item
-      state.set('isKeyboardMode', true);
-      focusElement = getElementForFocusIndex(0);
+      tabbedElement = getElementForFocusIndex(0);
+      turnOnKeyboardMode();
+      showFocus();
     }
 
     // Take the focus whether or not we're in focus mode,
@@ -191,14 +190,22 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
     }
   }
 
+  function turnOnKeyboardMode() {
+    state.set('isKeyboardMode', true);
+    listenToClicks();
+    sitecues.emit('bp/did-change');
+  }
+
   function getFocusedItem() {
-    return focusElement;
+    // User has tabbed: we're in keyboard, mode, so the focused item is tabbedElement.
+    // User has NOT tabbed: the focused item is where they last clicked -- document.activeElement
+    return tabbedElement || document.activeElement;
   }
 
   function getElementToShowFocusOn() {
-    if (focusElement) {
-      var focusForwarder = focusElement.getAttribute('data-visible-focus-on');
-      return focusForwarder ? byId(focusForwarder) : focusElement;
+    if (tabbedElement) {
+      var focusForwarder = tabbedElement.getAttribute('data-visible-focus-on');
+      return focusForwarder ? byId(focusForwarder) : tabbedElement;
     }
   }
 
@@ -207,7 +214,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
     // @data-show-focus = focus to be shown on this element
     // @data-own-focus-ring = element will show it's own focus ring
 
-    var showFocusOn = getElementToShowFocusOn(focusElement);
+    var showFocusOn = getElementToShowFocusOn(tabbedElement);
 
     showFocusOn.setAttribute('data-show-focus', '');
     if (!showFocusOn.hasAttribute('data-own-focus-ring')) {
@@ -269,7 +276,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
     hideFocus();
 
     var tabbable = getTabbableItems(),
-      focusIndex = getFocusIndexForElement(focusElement),
+      focusIndex = getFocusIndexForElement(getFocusedItem()),
       isFirstTimeInCard = tabbable[focusIndex] !== '$',
       numItems = tabbable.length,
       nextItem;
@@ -277,7 +284,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
     while (true) {
       nextItem = null;
       if (tabbable[focusIndex] === '$') {
-        nextItem = navigateInCard(direction, isFirstTimeInCard, focusElement);
+        nextItem = navigateInCard(direction, isFirstTimeInCard, tabbedElement);
       }
       if (!nextItem) {
         focusIndex = focusIndex + direction;
@@ -292,7 +299,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
         nextItem = getElementForFocusIndex(focusIndex);
       }
 
-      focusElement = nextItem;
+      tabbedElement = nextItem;
 
       // Skip disabled items such as the prev arrow which is turned off at first
       if (isFocusable(nextItem)) {
@@ -342,13 +349,13 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
         target = byId(ariaControls);
       }
       if (getFocusIndexForElement(target) >= 0) {
-        focusElement = target;
+        tabbedElement = target;
         break;
       }
       target = target.parentElement;
     }
 
-    if (focusElement) {
+    if (tabbedElement) {
       showFocus();
     }
     else {
@@ -392,9 +399,9 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
 
     // Tab navigation
     if (keyCode === BP_CONST.KEY_CODES.TAB) {
-      state.set('isKeyboardMode', true);
-      sitecues.emit('bp/did-change');
+      turnOnKeyboardMode();
       navigateInDirection(evt.shiftKey ? -1 : 1);
+      return;
     }
 
     // Perform widget-specific command
@@ -423,6 +430,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
     }
     isInitialized = true;
     sitecues.on('bp/will-toggle-feature bp/did-activate-link bp/do-send-feedback', hideFocus);
+    beginKeyboardFocus(); // First time badge expands
     sitecues.on('bp/will-expand', beginKeyboardFocus);
     sitecues.on('bp/will-shrink', restoreDocumentFocus);
     sitecues.on('bp/did-expand', showFocus);
