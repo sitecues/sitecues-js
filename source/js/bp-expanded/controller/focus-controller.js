@@ -186,7 +186,8 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
     if ((!savedDocumentFocus || savedDocumentFocus === document.body) && 'blur' in document.activeElement) {
       document.activeElement.blur();
     } else {
-      savedDocumentFocus.focus();
+      var focusable = savedDocumentFocus || ('focus' in document ? document : document.body);
+      focusable.focus();
     }
   }
 
