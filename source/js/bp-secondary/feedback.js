@@ -3,6 +3,7 @@ define(['bp/constants', 'bp/helper', 'bp/model/state', 'core/platform', 'core/me
   var byId = helper.byId,
     isActive = false,
     isInitialized,
+    isAutoSized,
     currRating = 0;  // Zero = no rating defined
 
   function getFeedbackArea() {
@@ -45,6 +46,11 @@ define(['bp/constants', 'bp/helper', 'bp/model/state', 'core/platform', 'core/me
       getFeedbackArea()[addOrRemoveFn]('keyup', enableSendIfText);
       getRating()[addOrRemoveFn]('click', onRatingClick);
       getFeedbackSend()[addOrRemoveFn]('click', onSendFeedbackClick);
+
+      if (willBeActive && !isAutoSized) {
+        autoSizeTextarea();
+        isAutoSized = true;
+      }
     }
 
     isActive = willBeActive;
@@ -115,7 +121,6 @@ define(['bp/constants', 'bp/helper', 'bp/model/state', 'core/platform', 'core/me
   function init() {
     if (!isInitialized) {
       isInitialized = true;
-      autoSizeTextarea();
       sitecues.on('bp/did-change', onPanelUpdate);
     }
   }
