@@ -34,7 +34,7 @@ define(['bp/constants', 'bp/helper', 'bp/model/state', 'core/platform', 'core/me
     feedbackTextareaStyle.height = feedbackInputRect.height + 'px';
     // Hide scrollbar in IE
     if (platform.browser.isIE) {
-      feedbackTextareaStyle.clip = 'rect(0,' + (feedbackInputRect.width - 20) + 'px,' + feedbackTextareaStyle.height + ',0)';
+      //feedbackTextareaStyle.clip = 'rect(0,' + (feedbackInputRect.width - 20) + 'px,' + feedbackTextareaStyle.height + ',0)';
     }
   }
 
