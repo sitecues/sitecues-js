@@ -8,7 +8,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
     mouseLeaveShrinkTimer,  // How long we wait before shrinking BP from any mouseout (even only just barely outside panel)
     isListening,
     isInitialized,
-    isSticky = true,  // Temporary
+    isSticky = false,
     // Feature panels are larger, need to know this so that mouseout doesn't exit accidentally after we close feature panel
     wasInFeaturePanel = false;
 
@@ -49,7 +49,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
     }
 
     if (isMouseOutsidePanel(evt, MIN_DISTANCE)) {
-      if (/* SC_DEV && */ isSticky) {
+      if (SC_DEV && isSticky) {
         return;
       }
       if (state.get('wasMouseInPanel')) {
@@ -82,7 +82,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
 
 
   function winMouseDown(evt) {
-    if (/* SC_DEV && */ isSticky) {
+    if (SC_DEV && isSticky) {
       return;
     }
     // Once mouse used, no longer need this protection against accidental closure
@@ -96,7 +96,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
   }
 
   function winBlur() {
-    if (/* SC_DEV && */ isSticky) {
+    if (SC_DEV && isSticky) {
       return;
     }
     shrinkPanel(true);
@@ -194,7 +194,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
     toggleListeners(false);
   }
 
-  if (SC_DEV || true) {
+  if (SC_DEV) {
     sitecues.toggleStickyPanel = function () {
       isSticky = !isSticky;
       return isSticky;
