@@ -203,49 +203,43 @@ define(['core/conf/site', 'core/conf/urls', 'core/run'], function (site, urls, r
   //
   //////////////////////////////////////////////////////////////////////////////////////////
 
-  var initialize = function () {
+  // If the sitecues global object does not exist, then there is no basic site configuration
 
-    // If the sitecues global object does not exist, then there is no basic site configuration
+  // Set the internal reference.
+  sitecues = window.sitecues;
 
-    // Set the internal reference.
-    sitecues = window.sitecues;
+  if (!sitecues || typeof sitecues !== 'object') {
+    safe_production_msg('The base ' + window.sitecues + ' namespace was not found. The sitecues library will not load.');
+    return;
+  }
 
-    if (!sitecues || typeof sitecues !== 'object') {
-      safe_production_msg('The base ' + window.sitecues + ' namespace was not found. The sitecues library will not load.');
-      return;
-    }
+  // See if another sitecues library has 'planted it's flag' on this page.
+  if (sitecues.exists) {
+    console.error('The sitecues library already exists on this page.');
+    return;
+  }
 
-    // See if another sitecues library has 'planted it's flag' on this page.
-    if (sitecues.exists) {
-      console.error('The sitecues library already exists on this page.');
-      return;
-    }
+  // 'Plant our flag' on this page.
+  sitecues.exists = true;
 
-    // 'Plant our flag' on this page.
-    sitecues.exists = true;
+  // As we have now 'planted our flag', export the public fields.
+  exportPublicFields();
 
-    // As we have now 'planted our flag', export the public fields.
-    exportPublicFields();
+  // Initialize API and services URLs
+  urls.init();
 
-    // Initialize API and services URLs
-    urls.init();
-
-    // Process the basic configuration needed for library initialization.
-    if (!validateConfiguration()) {
-      console.error('Unable to load basic site configuration. Library can not initialize.');
-    } else if (window !== window.top && !sitecues.config.iframe) {
-      // Stop sitecues from initializing if:
-      // 1) sitecues is running in an IFRAME
-      // 2) sitecues.config.iframe = falsey
-      safe_production_msg('Developer note (sitecues): the following iframe attempted to load sitecues, which does not currently support iframes: '+window.location +
-        ' ... email support@sitecues.com for more information.');
-    }
-    else {
-      run();
-    }
-  };
-
-  // Trigger initialization.
-  initialize();
+  // Process the basic configuration needed for library initialization.
+  if (!validateConfiguration()) {
+    console.error('Unable to load basic site configuration. Library can not initialize.');
+  } else if (window !== window.top && !sitecues.config.iframe) {
+    // Stop sitecues from initializing if:
+    // 1) sitecues is running in an IFRAME
+    // 2) sitecues.config.iframe = falsey
+    safe_production_msg('Developer note (sitecues): the following iframe attempted to load sitecues, which does not currently support iframes: '+window.location +
+      ' ... email support@sitecues.com for more information.');
+  }
+  else {
+    run();
+  }
 });
 
