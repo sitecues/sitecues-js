@@ -235,9 +235,6 @@
     compress: {
       dead_code: true
     },
-    mangle: false,
-    output: {
-      beautify: true
-    }
+    mangle: true
   }
 })
