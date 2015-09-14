@@ -3,7 +3,7 @@
   removeCombined: true,
   modules: [
     {
-      name: 'sitecues',
+      name: 'sitecues-alameda',
       include : [
         '../../build-config/config.js',
         'core/core',
@@ -14,7 +14,7 @@
       insertRequire: ['core/core']
     },
     {
-      name: 'sitecues-ie9',
+      name: 'sitecues',
       include : [
         '../../build-config/config.js',
         'core/core',
@@ -205,7 +205,7 @@
     // Check for dupes
     // TODO this should use require with a state module we build instead of a global
     global.scIncludedBy = global.scIncludedBy || {};
-    if (data.name.indexOf('sitecues-ie9') < 0) { // Don't check sitecues-ie9 -- it's almost the same as sitecues, on purpose (different loader)
+    if (data.name.indexOf('sitecues-alameda') < 0) { // Don't check sitecues-alameda -- it's almost the same as sitecues, on purpose (different loader)
       var index = data.included.length;
       while (index--) {
         var includedItem = data.included[index];
@@ -219,14 +219,14 @@
 
     // Build loader config
     var includedStr = data.included.join("','"),
-      excludeModernBrowsers = data.name === 'sitecues-ie9',
-      excludeIE9 = data.name === 'sitecues';
+      excludeModernBrowsers = data.name === 'sitecues',
+      excludeIE9 = data.name === 'sitecues-alameda';
     includedStr = includedStr.replace(/\.js/g, ''); // Remove .js
     if (!excludeModernBrowsers) {  // Bundle config of modern browsers doesn't incldue sitecues-ie9.js bundle
-      fs.appendFileSync('target/build-config/sitecues-bundles.js', "'" + data.name + "':['" + includedStr + "'],");
+      fs.appendFileSync('target/build-config/sitecues-bundles-alameda.js', "'" + data.name + "':['" + includedStr + "'],");
     }
     if (!excludeIE9) {   // Bundle config of ie9 doesn't incldue sitecues.js bundle
-      fs.appendFileSync('target/build-config/sitecues-bundles-ie9.js', "'" + data.name + "':['" + includedStr + "'],");
+      fs.appendFileSync('target/build-config/sitecues-bundles.js', "'" + data.name + "':['" + includedStr + "'],");
     }
   },
   namespace: 'sitecues',
