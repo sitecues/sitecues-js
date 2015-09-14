@@ -49,7 +49,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
     }
 
     if (isMouseOutsidePanel(evt, MIN_DISTANCE)) {
-      if (SC_DEV && isSticky) {
+      if (/* SC_DEV && */ isSticky) {
         return;
       }
       if (state.get('wasMouseInPanel')) {
@@ -82,7 +82,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
 
 
   function winMouseDown(evt) {
-    if (SC_DEV && isSticky) {
+    if (/* SC_DEV && */ isSticky) {
       return;
     }
     // Once mouse used, no longer need this protection against accidental closure
@@ -96,7 +96,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
   }
 
   function winBlur() {
-    if (SC_DEV && isSticky) {
+    if (/* SC_DEV && */ isSticky) {
       return;
     }
     shrinkPanel(true);
