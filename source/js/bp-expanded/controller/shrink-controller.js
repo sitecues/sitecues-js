@@ -8,7 +8,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
     mouseLeaveShrinkTimer,  // How long we wait before shrinking BP from any mouseout (even only just barely outside panel)
     isListening,
     isInitialized,
-    isSticky = false,
+    isSticky = true,  // Temporary
     // Feature panels are larger, need to know this so that mouseout doesn't exit accidentally after we close feature panel
     wasInFeaturePanel = false;
 
@@ -194,7 +194,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
     toggleListeners(false);
   }
 
-  if (SC_DEV) {
+  if (SC_DEV || true) {
     sitecues.toggleStickyPanel = function () {
       isSticky = !isSticky;
       return isSticky;
