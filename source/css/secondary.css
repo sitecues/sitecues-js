@@ -195,11 +195,6 @@ sc-button-big {
   visibility: visible;
   opacity: 1;
 }
-.scp-secondary-expanding .scp-secondary-feature {
-  pointer-events: none;
-  visibility: hidden;
-  opacity: 0;
-}
 .scp-want-badge .scp-secondary-feature {
   display: none !important;
 }
@@ -228,9 +223,14 @@ sc-card {
 sc-card > * {
   pointer-events: all;
 }
-.scp-panel-tips .scp-if-tips > .scp-active, .scp-panel-settings .scp-if-settings > .scp-active {
+.scp-panel-tips:not(.scp-secondary-expanding) .scp-if-tips > .scp-active, .scp-panel-settings:not(.scp-secondary-expanding) .scp-if-settings > .scp-active {
   visibility: visible;
   opacity: 1;
+}
+.scp-secondary-expanding .scp-secondary-feature {
+  pointer-events: none;
+  visibility: hidden;
+  opacity: 0;
 }
 #scp-demo-page {
   position: absolute;
