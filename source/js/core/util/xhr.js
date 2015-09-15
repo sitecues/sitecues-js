@@ -25,8 +25,19 @@ define([], function () {
       type = postData ? 'POST' : 'GET',
       contentType = optionalContentTypeOverride || requestObj.contentType;
 
+    if ('withCredentials' in xhr) {
+      xhr.open(type, requestObj.url, true);
+      if (contentType) {
+        // If post, the content type is what we're sending, if get it's what we're receiving
+        xhr.setRequestHeader(postData ? 'Content-Type' : 'Accept', contentType); // Can be set on XHR but not XDomainRequest
+      }
+    } else {
+      xhr = new XDomainRequest();
+      xhr.open(type, requestObj.url);
+    }
+
     xhr.onload = function() {
-      if (xhr.status === 200) {
+      if (!xhr.status || xhr.status === 200) {
         var successFn = successFnOverride || requestObj.success;
         successFn && successFn(xhr.responseText);
       }
@@ -36,18 +47,7 @@ define([], function () {
       }
     };
 
-    if ('withCredentials' in xhr) {
-      xhr.open(type, requestObj.url, true);
-    } else {
-      xhr = new XDomainRequest();
-      xhr.open(type, requestObj.url);
-    }
-
-    if (contentType) {
-      // If post, the content type is what we're sending, if get it's what we're receiving
-      xhr.setRequestHeader(postData ? 'Content-Type' : 'Accept', contentType);
-    }
-
+    // Send it!
     postData ? xhr.send(postData) : xhr.send();
   }
 

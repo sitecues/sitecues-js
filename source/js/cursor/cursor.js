@@ -83,8 +83,6 @@ define(['$', 'style-service/style-service', 'core/conf/user/manager', 'cursor/cu
       pendingRules: [ rule ]
     };
 
-
-    // Technically we only need XDomainRequest here
     require(['core/util/xhr'], function (xhr) {
       xhr.get({
         url: url,
