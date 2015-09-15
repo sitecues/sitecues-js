@@ -3,10 +3,11 @@
  *   The core module of the sitecues library.
  */
 
+// Different loaders? almond, define, amdlite, tinyamd, *Curl*
+// For IE9 build try amdclean?
 //Firefox -- BP animation slow
 // IE
 // - feedback page issues
-// -- no caret visible in IE9
 // -- stars not activating via enter key in IE9
 // -- Sliders ugly in IE10
 // -- Performance bad in IE10 with nytimes.com
