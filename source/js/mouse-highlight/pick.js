@@ -25,7 +25,7 @@
  * For more details see https://equinox.atlassian.net/wiki/display/EN/Picker+v2+Architecture
  */
 
-define(['$', 'util/common', '$utils', 'core/conf/user/manager', 'core/conf/site',
+define(['$', 'util/common', 'dollar/dollar-utils', 'core/conf/user/manager', 'core/conf/site',
     'mouse-highlight/traitcache', 'mouse-highlight/traits', 'mouse-highlight/judge'],
   function($, common, $utils, conf, site, traitcache, traits, judge) {
 

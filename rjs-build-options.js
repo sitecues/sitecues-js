@@ -3,7 +3,7 @@
   removeCombined: true,
   modules: [
     {
-      name: 'sitecues-alameda',
+      name: 'sitecues',
       include : [
         '../../build-config/config.js',
         'core/core',
@@ -13,25 +13,26 @@
       namespace: 'sitecues',
       insertRequire: ['core/core']
     },
-    {
-      name: 'sitecues',
-      include : [
-        '../../build-config/config.js',
-        'core/core',
-        '../../../node_modules/requirejs/require.js'
-      ],
-      create: true,
-      namespace: 'sitecues',
-      insertRequire: ['core/core']
-    },
-    {
-      name: 'lib-jquery',
-      create: true,
-      include: [
-        'dollar/jquery-private',
-        'jquery'
-      ]
-    },
+// -- For now, No special Alameda or jQuery stuff for IE9 --
+//    {
+//      name: 'sitecues-ie9',
+//      include : [
+//        '../../build-config/config.js',
+//        'core/core',
+//        '../../../node_modules/requirejs/require.js'
+//      ],
+//      create: true,
+//      namespace: 'sitecues',
+//      insertRequire: ['core/core']
+//    },
+//    {
+//      name: 'lib-jquery',
+//      create: true,
+//      include: [
+//        'dollar/jquery-private',
+//        'jquery'
+//      ]
+//    },
     {
       name: 'lib-zepto',
       create: true,
@@ -186,11 +187,6 @@
     '$': 'empty:',
     'jquery': 'dollar/jquery'
   },
-  map: {
-    '*': {
-      '$utils': 'dollar/dollar-utils'
-    }
-  },
   onBuildRead: function(module, path, contents) {
     if (module.indexOf('/requirejs') > 0 || module.indexOf('/alameda') > 0) {
       var loaderConfig = fs.readFileSync('module-loader-config.js', 'utf8');
@@ -205,7 +201,7 @@
     // Check for dupes
     // TODO this should use require with a state module we build instead of a global
     global.scIncludedBy = global.scIncludedBy || {};
-    if (data.name.indexOf('sitecues-alameda') < 0) { // Don't check sitecues-alameda -- it's almost the same as sitecues, on purpose (different loader)
+    if (data.name.indexOf('sitecues-ie9') < 0) { // Don't check sitecues-ie9 -- it's almost the same as sitecues, on purpose (different loader)
       var index = data.included.length;
       while (index--) {
         var includedItem = data.included[index];
@@ -219,14 +215,14 @@
 
     // Build loader config
     var includedStr = data.included.join("','"),
-      excludeModernBrowsers = data.name === 'sitecues',
-      excludeIE9 = data.name === 'sitecues-alameda';
+      excludeModernBrowsers = data.name === 'sitecues-ie9',
+      excludeIE9 = data.name === 'sitecues';
     includedStr = includedStr.replace(/\.js/g, ''); // Remove .js
     if (!excludeModernBrowsers) {  // Bundle config of modern browsers doesn't incldue sitecues-ie9.js bundle
-      fs.appendFileSync('target/build-config/sitecues-bundles-alameda.js', "'" + data.name + "':['" + includedStr + "'],");
+      fs.appendFileSync('target/build-config/sitecues-bundles.js', "'" + data.name + "':['" + includedStr + "'],");
     }
     if (!excludeIE9) {   // Bundle config of ie9 doesn't incldue sitecues.js bundle
-      fs.appendFileSync('target/build-config/sitecues-bundles.js', "'" + data.name + "':['" + includedStr + "'],");
+      fs.appendFileSync('target/build-config/sitecues-bundles-ie9.js', "'" + data.name + "':['" + includedStr + "'],");
     }
   },
   namespace: 'sitecues',
