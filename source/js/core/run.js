@@ -33,27 +33,49 @@
 // Settings: why do we ever set a cookie? I don't think we can keep it between pages, at least not currently. So why save/get settings from server at all?
 //           Cookie is set for metrics?
 
+
 define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/conf/user/manager', 'core/metric', 'core/platform', 'bp/bp', 'core/keys/keys' ],
   function (userId, userSettingsServer, locale, conf, metric, platform, bp, keys) {
   var
     numPrereqsToComplete,
-    ZOOM_ON_FEATURES = [ 'hpan/hpan', 'zoom/fixed-position-fixer', 'enhance/focus', 'cursor/cursor' ],
-    TTS_ON_FEATURES = [ 'audio/audio', 'audio/text-select' ],
-    SITECUES_ON_FEATURES = [ 'mouse-highlight/mouse-highlight', 'mouse-highlight/move-keys' ],
-    THEME_ON_FEATURES = [ 'theme/color-engine' ],
-    MOUSE_ON_FEATURES = ['cursor/cursor'],
     isZoomInitialized,
     isSpeechInitialized,
     isZoomOn,
     isSpeechOn,
     isSitecuesOn = false;
 
-  function initModulesByName(featureNames) {
-    featureNames.forEach(function(featureName) {
-      SC_DEV && console.log('Initializing module: ' + featureName);
-      sitecues.require([featureName], function(featureModule) {
-        featureModule.init();
-      });
+  function initZoom() {
+    require([ 'hpan/hpan', 'zoom/fixed-position-fixer', 'enhance/focus', 'cursor/cursor' ], function(hpan, fixer, focus, cursor) {
+      hpan.init();
+      fixer.init();
+      focus.init();
+      cursor.init();
+    });
+  }
+
+  function initSpeech() {
+    require([ 'audio/audio', 'audio/text-select' ], function(audio, textSelect) {
+      audio.init();
+      textSelect.init();
+    });
+  }
+
+  function initSitecuesOn() {
+    require([ 'mouse-highlight/mouse-highlight', 'mouse-highlight/move-keys' ], function(highlight, moveKeys) {
+      highlight.init();
+      moveKeys.init();
+    });
+  }
+
+  function initThemes() {
+    require([ 'theme/color-engine' ], function(themes) {
+      themes.init();
+    });
+  }
+
+  function initMouse() {
+    require(['cursor/cursor'], function(cursor) {
+      cursor.init();
     });
   }
 
@@ -65,7 +87,7 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
       sitecues.emit('sitecues/did-toggle', isSitecuesOn);
     }
     if (isOn && !isZoomInitialized && !isSpeechInitialized) {
-      initModulesByName(SITECUES_ON_FEATURES);
+      initSitecuesOn();
     }
   }
 
@@ -73,7 +95,7 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
     isZoomOn = zoomLevel > 1;
     onFeatureSettingChanged();
     if (isZoomOn && !isZoomInitialized) {
-      initModulesByName(ZOOM_ON_FEATURES);
+      initZoom();
       isZoomInitialized = true;
     }
   }
@@ -105,18 +127,18 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
       isSpeechOn = isOn;
       onFeatureSettingChanged();
       if (isOn && !isSpeechInitialized) {
-        initModulesByName(TTS_ON_FEATURES);
+        initSpeech();
         isSpeechInitialized = true;
       }
     });
     conf.get('themeName', function(themeName) {
       if (themeName) {
-        initModulesByName(THEME_ON_FEATURES);
+        initThemes();
       }
     });
     conf.get('mouseSize mouseHue', function(value) {
       if (value) {
-        initModulesByName(MOUSE_ON_FEATURES);
+        initMouse();
       }
     });
   }

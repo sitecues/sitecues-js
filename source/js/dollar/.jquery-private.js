@@ -1,5 +1,5 @@
 // Ensure that we do not conflict with the jQuery in the page
-// TODO use the jQuery in the page if it has everything we need
+// TODO we used to use this for IE9, but looks like we can probably remove ... ?
 define(['jquery'], function (jq) {
 
   $ = jq.noConflict(true);

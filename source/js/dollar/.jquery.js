@@ -1,3 +1,4 @@
+// TODO we used to use this for IE9, but looks like we can probably remove ... ?
 // Custom build of jQuery 2.1.1 from http://projects.jga.me/jquery-builder/
 // jQuery 2.1.1 is compatible with IE9+
 // Removes the following:

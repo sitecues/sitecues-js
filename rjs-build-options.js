@@ -1,6 +1,15 @@
 ({
   preserveLicenseComments: false,
   removeCombined: true,
+  fileExclusionRegExp: /jquery/,
+  namespace: 'sitecues',
+  useStrict: true,
+  uglify2: {
+    compress: {
+      dead_code: true
+    },
+    mangle: true
+  },
   modules: [
     {
       name: 'sitecues',
@@ -10,7 +19,6 @@
         '../../../node_modules/alameda/alameda.js'
       ],
       create: true,
-      namespace: 'sitecues',
       insertRequire: ['core/core']
     },
 // -- For now, No special Alameda or jQuery stuff for IE9 --
@@ -33,14 +41,14 @@
 //        'jquery'
 //      ]
 //    },
-    {
-      name: 'lib-zepto',
-      create: true,
-      include: [
-        'dollar/zepto-private',
-        'dollar/zepto'
-      ]
-    },
+//    {
+//      name: 'lib-zepto',
+//      create: true,
+//      include: [
+//        'dollar/zepto-private',
+//        'dollar/zepto'
+//      ]
+//    },
     {
       name: 'bp-expanded',
       create: true,
@@ -57,7 +65,6 @@
         'util/common',
         'dollar/dollar-utils',
         'dollar/zepto-private',
-        'dollar/jquery-private',
         'util/transform',
         'core/metric',
         'core/conf/urls',
@@ -93,6 +100,8 @@
         'util/transform',
         'util/common',
         'dollar/dollar-utils',
+        'dollar/zepto-private',
+        'dollar/zepto',
         'audio/audio',
         'mouse-highlight/move-keys',
         'zoom/zoom',
@@ -108,8 +117,6 @@
         'bp/model/state',
         'bp/helper',
         'core/util/xhr',
-        'dollar/zepto-private',
-        'dollar/jquery-private',
         'core/metric',
         'core/conf/urls',
         'core/conf/site',
@@ -133,7 +140,6 @@
         'util/common',
         'dollar/dollar-utils',
         'dollar/zepto-private',
-        'dollar/jquery-private',
         'core/conf/site',
         'core/conf/user/manager',
         'core/metric',
@@ -161,7 +167,6 @@
         'util/common',
         'dollar/dollar-utils',
         'dollar/zepto-private',
-        'dollar/jquery-private',
         'core/conf/urls',
         'core/conf/site',
         'core/conf/user/manager',
@@ -224,13 +229,5 @@
     if (!excludeIE9) {   // Bundle config of ie9 doesn't incldue sitecues.js bundle
       fs.appendFileSync('target/build-config/sitecues-bundles-ie9.js', "'" + data.name + "':['" + includedStr + "'],");
     }
-  },
-  namespace: 'sitecues',
-  useStrict: true,
-  uglify2: {
-    compress: {
-      dead_code: true
-    },
-    mangle: true
   }
 })

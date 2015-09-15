@@ -117,8 +117,8 @@ define([], function() {
 
   function init() {
     // On load fetch the translations only once
-    // TODO Had to put the 'sitecues.' prefix because the requirejs auto namespacing didn't work with our variable language module
-    sitecues.require([ langModuleName ], function(langEntries) {
+    // Hack: run is only included so that the first argument is a string, otherwise r.js optimizer won't namespace the require  call
+    require([ 'core/run', langModuleName ], function(run, langEntries) {
       translations = langEntries;
       sitecues.emit('locale/did-complete');
     });
