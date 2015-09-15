@@ -16,16 +16,15 @@ var require = {
     return scriptUrl.substring(0, scriptUrl.lastIndexOf('/')) + '/'; })(sitecues.everywhereConfig || sitecues.config),
   // Make aliases to modules, for convenience.
   map: {
-    // Modern browsers:
-    // All modules get 'zepto-private' when they ask for $
-    // IE9:
-    // All modules get 'jquery-private' when they ask for '$',
-    // so that we can secretly return a customized value which
-    // implements .noConflict() to avoid puking on customers.
+    // All modules get 'zepto' when they ask for $
     '*': {
-      '$': 'dollar/zepto-private'
+      '$': 'dollar/zepto'
       // If we need to switch between Zepto and jQuery, do this:
-      //'$': (!sitecues.config.preventZepto && sitecues.__ALLOW_ZEPTO__ && navigator.appVersion.indexOf('MSIE 9') < 0) ? 'dollar/zepto-private' : 'dollar/jquery-private'
+      // IE9:
+      // All modules get 'jquery-private' when they ask for '$',
+      // so that we can secretly return a customized value which
+      // implements .noConflict() to avoid puking on customers.
+      //'$': (!sitecues.config.preventZepto && sitecues.__ALLOW_ZEPTO__ && navigator.appVersion.indexOf('MSIE 9') < 0) ? 'dollar/zepto' : 'dollar/jquery-private'
     }
   },
   // This will be replaced with actual module structure in core.mk via a call to finalize-loader-config.js

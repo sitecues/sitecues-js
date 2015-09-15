@@ -64,7 +64,7 @@
         'core/util/xhr',
         'util/common',
         'dollar/dollar-utils',
-        'dollar/zepto-private',
+        'dollar/zepto',
         'util/transform',
         'core/metric',
         'core/conf/urls',
@@ -100,7 +100,6 @@
         'util/transform',
         'util/common',
         'dollar/dollar-utils',
-        'dollar/zepto-private',
         'dollar/zepto',
         'audio/audio',
         'mouse-highlight/move-keys',
@@ -139,7 +138,7 @@
         'core/util/xhr',
         'util/common',
         'dollar/dollar-utils',
-        'dollar/zepto-private',
+        'dollar/zepto',
         'core/conf/site',
         'core/conf/user/manager',
         'core/metric',
@@ -166,7 +165,7 @@
         'core/util/xhr',
         'util/common',
         'dollar/dollar-utils',
-        'dollar/zepto-private',
+        'dollar/zepto',
         'core/conf/urls',
         'core/conf/site',
         'core/conf/user/manager',
@@ -188,9 +187,14 @@
       ]
     }
   ],
+  map: {
+    '*': {
+      '$': 'dollar/zepto'
+    }
+  },
   paths: {
-    '$': 'empty:',
-    'jquery': 'dollar/jquery'
+//    '$': 'empty:',
+//    'jquery': 'dollar/jquery'
   },
   onBuildRead: function(module, path, contents) {
     if (module.indexOf('/requirejs') > 0 || module.indexOf('/alameda') > 0) {

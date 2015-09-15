@@ -264,7 +264,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
   function isFocusable(elem) {
     return elem &&
       elem.getAttribute('aria-disabled') !== 'true' &&
-      parseFloat(getComputedStyle(elem).opacity) > 0;
+      parseFloat(getComputedStyle(elem).opacity) > .1;
   }
 
   function navigateInDirection(direction) {
