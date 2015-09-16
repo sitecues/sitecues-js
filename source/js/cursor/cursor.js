@@ -312,7 +312,6 @@ define(['$', 'style-service/style-service', 'core/conf/user/manager', 'cursor/cu
 
   function onMouseSizeSetting(size) {
     userSpecifiedSize = size;
-    sitecues.off('zoom', onPageZoom);
     styleService.init(refreshStylesheetsIfNecessary);
   }
 

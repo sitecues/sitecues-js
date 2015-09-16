@@ -58,24 +58,6 @@ define([], function() {
     return websiteLang;
   }
 
-  // Get language that applies to element (optional param)
-  // Fallback on document and then browser default language
-  function getElementLang(element) {
-    while (element) {
-      var lang = element.getAttribute('lang') || element.getAttribute('xml:lang');
-      if (lang) {
-        return lang;
-      }
-      element = element.parentElement;
-    }
-
-    return getFullWebsiteLang();
-  }
-
-  function getDocumentLang() {
-    return getElementLang(document.body);
-  }
-
   /**
    * Represents browser language.
    * @returns String Example: 'en_US'
@@ -128,8 +110,6 @@ define([], function() {
   var publics = {
     getShortWebsiteLang: getShortWebsiteLang,
     getFullWebsiteLang: getFullWebsiteLang,
-    getElementLang: getElementLang,
-    getDocumentLang: getDocumentLang,
     getBrowserLangStringName: getBrowserLangStringName,
     translate: translate,
     localizeStrings: localizeStrings,

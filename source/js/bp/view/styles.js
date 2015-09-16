@@ -587,7 +587,18 @@ define(['bp/helper', 'core/platform', 'bp/constants', 'core/conf/site', 'core/co
     return typeof palette === 'object';
   }
 
-  function provideCustomPalette (palette) {
+  // This is used on leadingage.org, for example this works to create a green badge:
+//    sitecues.config.palette = {
+//      'badge': {
+//        'A': '#739600',
+//        'sliderThumb': '#739600',
+//        'wave1On':'#9db54c',
+//        'wave2On':'#739600',
+//        'wave3On':'#506900'
+//      }
+//    };
+
+    function provideCustomPalette (palette) {
     var panelOnly         = 'panel',
         badgeOnly         = 'badge',
         both              = 'both',

@@ -51,7 +51,7 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
   function speakContentImpl($content, triggerType) {
     var text = builder.getText($content);
     if (text) {
-      speakText(text, locale.getElementLang($content[0]), triggerType);
+      speakText(text, getElementLang($content[0]), triggerType);
     }
   }
 
@@ -106,10 +106,28 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
     }
   }
 
+  // Get language that applies to element (optional param)
+  // Fallback on document and then browser default language
+  function getElementLang(element) {
+    while (element) {
+      var lang = element.getAttribute('lang') || element.getAttribute('xml:lang');
+      if (lang) {
+        return lang;
+      }
+      element = element.parentElement;
+    }
+
+    return locale.getFullWebsiteLang();
+  }
+
+  function getDocumentLang() {
+    return getElementLang(document.body);
+  }
+
   // Puts in delimiters on both sides of the parameter -- ? before and & after
   // lang is an optional parameter. If it doesn't exist, the document language will be used.
   function getLanguageParameter(lang) {
-    return '?l=' + (lang || locale.getDocumentLang()) + '&';
+    return '?l=' + (lang || getDocumentLang()) + '&';
   }
 
   function getAudioKeyUrl(key) {  // TODO why does an audio cue need the site id?

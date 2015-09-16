@@ -6,6 +6,7 @@ define(['core/conf/user/manager', 'dollar/dollar-utils', 'zoom/zoom'], function 
     MAX_EDGE_PORTION = .25,
     SPEED_FACTOR = 4,
     MAX_SPEED = 100,
+    isListeningToResize,
     xLastPos;
 
   // get dependencies
@@ -137,8 +138,8 @@ define(['core/conf/user/manager', 'dollar/dollar-utils', 'zoom/zoom'], function 
 
     // react on any zoom change
     sitecues.on('zoom', function (value) {
-      sitecues.off('resize', refresh);
-      if (value > 1) {
+      if (value > 1 && !isListeningToResize) {
+        isListeningToResize = true;
         sitecues.on('resize', refresh);
       }
       refresh();
