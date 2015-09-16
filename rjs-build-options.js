@@ -16,7 +16,7 @@
       include : [
         '../../build-config/config.js',
         'core/core',
-        '../../../node_modules/alameda/alameda.js'
+        'core/alameda.js'
       ],
       create: true,
       insertRequire: ['core/core']
