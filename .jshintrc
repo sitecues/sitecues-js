@@ -1,24 +1,36 @@
 {
-  
-  // sitecues JSHint Config
 
+  // Configuration for JSHint. These settings are used to ensure code quality during the build process.
+
+  // TODO: MAYBE add...
+  //  - es3
+  //  - freeze
+  //  - futurehostile (docs are wrong, set to false, under relaxing)
+  //  - notypeof (false, under relaxing)
+  //  - elision (false, under relaxing)
+  //  - withstmt (false, under relaxing)
+  //  - nocomma (true, under enforcing)
+  //  - nonbsp (true, under enforcing)
+  //  - singleGroups (true, under enforcing)
+
+  // TODO: Remove options marked as deprecated or unnecessary.
+
+  // TODO: MAYBE "shadow" : "outer" to cause more complaints?
+
+  // Maximum number of rule violations to report before giving up.
   "maxerr"        : 100,
+  // DEPRECATED. The tab width expected for code blocks to be nested by.
   "indent"        : 2,
-  "laxbreak"      : false,
-  "laxcomma"      : true,
+  // REMOVED.
   "nomen"         : true,
+  // REMOVED.
   "onevar"        : false,
-  "undef"         : true,
-  "camelcase"     : false,     // true: Identifiers must be in camelCase
-  "plusplus"      : false,    // true: Prohibit use of `++` & `--`
-  "quotmark"      : "single", // Quotation mark consistency
-  "unused"        : true,     // true: Require all defined variables be used
-  "strict"        : false,    // true: Requires all functions run in ES5 Strict Mode
-  "immed"         : true,     // true: Require immediate invocations to be wrapped in parens e.g. `(function () { } ());`
+  // DEPRECATED. Whether to demand that all IIFEs be wrapped in parens, to make their behavior more intuitive e.g. `(function () { } ());`
+  "immed"         : true,
 
+  // UNNECESSARY. `predef` predated `globals` and is merely a less flexible version of the same API that assumes false/read-only
   // Define Global Variables Here   -- copy to both predef and globals sections
   // because predef section was not working in WebStorm
-  
   "predef": [
     "XMLHttpRequest",
     "XDomainRequest",
@@ -41,17 +53,21 @@
     "devicePixelRatio"
   ],
 
-  // Globals -- copy to both predef and globals sections
-  // because predef section was not working in WebStorm
-
+  // List of variables to assume are already defined. Set to `true` to tolerate assigments to those variables.
   "globals": {
+    // UNNECESSARY. Use `browser` option.
     "XMLHttpRequest": true,
+    // UNNECESSARY. Use `browser` option.
     "XDomainRequest": true,
+    // UNNECESSARY. Use `browser` option.
     "ActiveXObject": true,
     "sitecues": true,
     "sitecuesEverywhere": true,
+    // UNNECESSARY ?? We shouldn't be mixing Node.js and browser code, generally.
     "module": true,
+    // UNNECESSARY. Use `browser` option.
     "CSSPrimitiveValue": true,
+    // UNNECESSARY. Use `browser` option.
     "CSSStyleDeclaration": true,
     "escape": true,
     "console": true,
@@ -63,54 +79,109 @@
     "require": true,
     "define": true,
     "webkitAudioContext": true,
+    // UNNECESSARY. Use `browser` option.
     "devicePixelRatio": true
   },
 
-  // Enforcing
+  // Enforcing - Rules that cause the linter to complain more.
 
-  "bitwise"       : true,     // true: Prohibit bitwise operators (&, |, ^, etc.)
-  "curly"         : true,     // true: Require {} for every new block or scope
-  "eqeqeq"        : true,     // true: Require triple equals (===) for comparison
-  "forin"         : true,     // true: Require filtering for..in loops with obj.hasOwnProperty()
-  "latedef"       : false,    // true: Require variables/functions to be defined before being used
-  "newcap"        : false,    // true: Require capitalization of all constructor functions e.g. `new F()`
-  "noarg"         : true,     // true: Prohibit use of `arguments.caller` and `arguments.callee`
-  "noempty"       : false,    // false: Allow use of empty blocks
-  "nonew"         : true,     // true: Prohibit use of constructors for side-effects (without assignment)
-  "trailing"      : false,    // true: Prohibit trailing whitespaces
-  "maxparams"     : false,    // {int} Max number of formal params allowed per function
-  "maxdepth"      : false,    // {int} Max depth of nested blocks (within functions)
-  "maxstatements" : false,    // {int} Max number statements per function
-  "maxcomplexity" : false,    // {int} Max cyclomatic complexity per function
-  "maxlen"        : false,    // {int} Max number of characters per line
-  
+  // Whether to prohibit bitwise operators (&, |, ^, etc.), which are frequently typos.
+  "bitwise"       : true,
+  // DEPRECATED. Whether to demand that identifiers be camelCase, to follow widely held conventions.
+  "camelcase"     : false,
+  // Whether to demand {} for every new block or scope, because explicit is good.
+  "curly"         : true,
+  // Whether to demand triple equals (===) and disallow double equals, because type coercion is not user friendly.
+  "eqeqeq"        : true,
+  // Whether to demand filtering for..in loops with obj.hasOwnProperty() to avoid the prototype chain.
+  "forin"         : true,
+  // Whether to demand that variables are defined above where they are first used.
+  "latedef"       : false,
+  // Maximum cyclomatic complexity per function. Helps discourage overly complex code.
+  "maxcomplexity" : false,
+  // Maximum depth of nested blocks (within functions). Helps discourage overly complex code.
+  "maxdepth"      : false,
+  // DEPRECATED. Maximum number of characters per line. Helps readability.
+  "maxlen"        : false,
+  // Maximum number of formal params allowed per function. Helps discourage overly complex code.
+  "maxparams"     : false,
+  // Maximum number of statements allowed per function. Helps discourage overly complex code.
+  "maxstatements" : false,
+  // DEPRECATED. Whether to demand that all constructor functions be capitalized e.g. `new Foo()`
+  "newcap"        : false,
+  // Whether to prohibit use of `arguments.caller` and `arguments.callee`, which is not in modern JS anymore.
+  "noarg"         : true,
+  // DEPRECATED. Whether to prohibit use of empty blocks, which is almost never intentional.
+  "noempty"       : false,
+  // Whether to prohibit use of constructors for side-effects (without assignment).
+  "nonew"         : true,
+  // Whether to prohibit use of `++` & `--`, which are usually not well understood outside of basic loops.
+  "plusplus"      : false,
+  // DEPRECATED. Which type of quotation mark to demand, for consistency.
+  "quotmark"      : "single",
+  // Whether to demand that all functions are run in ES5 Strict Mode
+  "strict"        : false,
+  // REMOVED. Whether to prohibit trailing whitespaces.
+  "trailing"      : false,
+  // Whether to prohibit usage of variables that are never defined.
+  "undef"         : true,
+  // Whether to demand that all variables that are defined do eventually get used.
+  "unused"        : true,
 
-  // Relax Standards by setting these to true
 
-  "asi"           : false,     // true: Tolerate Automatic Semicolon Insertion (no semicolons)
-  "boss"          : false,     // true: Tolerate assignments where comparisons would be expected
-  "debug"         : false,     // true: Allow debugger statements e.g. browser breakpoints.
-  "eqnull"        : false,     // true: Tolerate use of `== null`
-  "es5"           : false,     // true: Allow ES5 syntax (ex: getters and setters)
-  "esnext"        : false,     // true: Allow ES.next (ES6) syntax (ex: `const`)
-  "moz"           : false,     // true: Allow Mozilla specific syntax (extends and overrides esnext features)
-  "evil"          : false,     // true: Tolerate use of `eval` and `new Function()`
-  "expr"          : false,     // true: Tolerate `ExpressionStatement` as Programs
-  "funcscope"     : false,     // true: Tolerate defining variables inside control statements
-  "globalstrict"  : false,      // true: Allow global use strict (also enables strict)
-  "iterator"      : false,     // true: Tolerate using the `__iterator__` property
-  "lastsemic"     : false,     // true: Tolerate omitting a semicolon for the last statement of a 1-line block
-  "loopfunc"      : false,     // true: Tolerate functions being defined in loops
-  "multistr"      : false,     // true: Tolerate multi-line strings
-  "proto"         : false,     // true: Tolerate using the `__proto__` property
-  "scripturl"     : false,     // true: Tolerate script-targeted URLs
-  "smarttabs"     : false,     // true: Tolerate mixed tabs/spaces when used for alignment
-  "shadow"        : false,     // true: Allows re-define variables later in code e.g. `var x=1; x=2;`
-  "sub"           : false,     // true: Tolerate using `[]` notation when it can still be expressed in dot notation
-  "supernew"      : false,     // true: Tolerate `new function () { ... };` and `new Object;`
-  "validthis"     : false,     // true: Tolerate using this in a non-constructor function
+  // Relaxing - Rules that cause the linter to chill out and complain less.
 
-  
+  // Whether to tolerate Automatic Semicolon Insertion (no semicolons), even though the rules are hard to remember.
+  "asi"           : false,
+  // Whether to tolerate assignments where comparisons would be expected.
+  "boss"          : false,
+  // Whether to tolerate debugger statements e.g. browser breakpoints, even though they are not fit for production.
+  "debug"         : false,
+  // Whether to tolerate use of `== null`, even though it does type coercion.
+  "eqnull"        : false,
+  // Whether to tolerate use of ES5 syntax, like getters and setters, even though old browsers don't support it.
+  "es5"           : false,
+  // Whether to tolerate use of ES6 syntax, like `const`, event though old browsers don't support it.
+  "esnext"        : false,
+  // Whether to tolerate use of `eval` and `new Function()`, even though they can lead to security problems.
+  "evil"          : false,
+  // Whether to tolerate seemingly useless expressions, even though they are usually typos.
+  "expr"          : false,
+  // Whether to tolerate defining variables (with `var`) inside of blocks, even though that is not their scope.
+  "funcscope"     : false,
+  // Whether to tolerate global use strict (also enables strict), even though nested code might not conform.
+  "globalstrict"  : false,
+  // Whether to tolerate use of the `__iterator__` property.
+  "iterator"      : false,
+  // Whether to tolerate omitting a semicolon for the last statement of a one-line block.
+  "lastsemic"     : false,
+  // DEPRECATED. Whether to tolerate possibly unsafe line breakings.
+  "laxbreak"      : false,
+  // DEPRECATED. Whether to tolerate comma-first coding style (in variable lists, for example).
+  "laxcomma"      : true,
+  // Whether to tolerate functions being defined in loops, even though it usually doesn't behave as first expected.
+  "loopfunc"      : false,
+  // Whether to tolerate Mozilla specific syntax (extends and overrides esnext features)
+  "moz"           : false,
+  // DEPRECATED. Whether to tolerate multi-line strings.
+  "multistr"      : false,
+  // Whether to tolerate using the `__proto__` property, even though it is non-standard and may hurt performance.
+  "proto"         : false,
+  // Whether to tolerate script-targeted URLs.
+  "scripturl"     : false,
+  // REMOVED. Whether to tolerate mixed tabs/spaces when used for alignment
+  "smarttabs"     : false,
+  // Whether to tolerate re-defining variables, which is often a mistake. e.g. `var x=1; x=2;`
+  // TODO: MAYBE: "shadow" : "outer" to cause more complaints?
+  "shadow"        : false,
+  // DEPRECATED. Whether to tolerate using bracket notation `[]` when it can still be expressed in dot notation.
+  "sub"           : false,
+  // Whether to tolerate `new function () { ... };` and `new Object;`, even though it probably doesn't do what you want.
+  "supernew"      : false,
+  // Whether to tolerate using `this` in a non-constructor function, where it typically points to the global object.
+  "validthis"     : false,
+
+
   // Environments
 
   "browser"       : true,     // Web Browser (window, document, etc)
@@ -131,10 +202,12 @@
 
   // JS Lint Warnings
 
+  // Whether to tolerate calling parseInt() without supplying the radix, even though it can lead to bugs.
   "-W065": true,      // Refer to http://jslinterrors.com/missing-radix-parameter/
+  // Whether to tolerate decimal numbers like `var x = .543` without a leading zero, even though it could be a typo and is less readable.
   "-W008": true,      // Leading 0 before decimal point
+  // UNNECESSARY. This is merely an alias to the `expr` option.
   "-W030": false,     // Allows stuff like: SC_DEV && console.log('foo') rather than if (SC_DEV) { console.log('foo'); }
+  // UNNECESSARY. ?? I think this is merely an alias to the `laxbreak` option.
   "-W014": false      // Allows && or || to start a line, which can help make more readable code when there are numerous conditions
-
-
-  }
+}
