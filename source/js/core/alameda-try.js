@@ -1,7 +1,6 @@
-// Custom version of Alameda, created by running sitecues through Nightly WebKit and looking for grayed out lines of
+// Custom version of Alameda, created by running sitecues through Nightly WebKit and looking for grayed out lines of 
 // code, which aren't run. Most of these lines were removed unless they looked important for error handling.
 // Also ran it through jshint at the end to clean it up more.
-// Note: removes a lot of prim library as we're not using promises -- perhaps controversial as we may use promises in the future. Can add it back.
 
 /**
  * alameda 0.2.0 Copyright (c) 2011-2014, The Dojo Foundation All Rights Reserved.
@@ -11,16 +10,23 @@
 //Going sloppy to avoid 'use strict' string cost, but strict practices should
 //be followed.
 /*jslint sloppy: true, nomen: true, regexp: true */
-/*global setTimeout, process, document, navigator, setImmediate */
+/*global document, navigator, setImmediate, process */
 /* jshint -W109 */
 
 var requirejs, require, define;
 (function (global, undef) {
+
     var prim, topReq,
         bootstrapConfig = requirejs || require,
         hasOwn = Object.prototype.hasOwnProperty,
         contexts = {},
-        queue = [];
+        queue = [],
+        commentRegExp = /(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg,
+        cjsRequireRegExp = /[^.]\s*require\s*\(\s*["']([^'"\s]+)["']\s*\)/g;
+
+    if (typeof requirejs === 'function') {
+        return;
+    }
 
     function hasProp(obj, prop) {
         return hasOwn.call(obj, prop);
@@ -76,11 +82,10 @@ var requirejs, require, define;
      * Changes from baseline prim
      * - removed UMD registration
      */
-    (function () {
+    (function() {
         'use strict';
 
-        var waitingId, nextTick,
-            waiting = [];
+        var nextTick, waiting = [], waitingId;
 
         function callWaiting() {
             waitingId = 0;
@@ -100,11 +105,6 @@ var requirejs, require, define;
 
         function syncTick(fn) {
             fn();
-        }
-
-        function isFunObj(x) {
-            var type = typeof x;
-            return type === 'object' || type === 'function';
         }
 
         //Use setImmediate.bind() because attaching it (or setTimeout directly
@@ -150,8 +150,7 @@ var requirejs, require, define;
                 fail = [];
 
             function makeFulfill() {
-                var f,
-                    called = false;
+                var f, called = false;
 
                 function fulfill(v, prop, listeners) {
                     if (called) {
@@ -160,11 +159,8 @@ var requirejs, require, define;
                     called = true;
 
                     try {
-                        var then = v && v.then;
-                        if (!isFunObj(v) || typeof then !== 'function') {
-                            p[prop] = v;
-                            notify(listeners, v);
-                        }
+                        p[prop] = v;
+                        notify(listeners, v);
                     } catch (e) {
                         called = false;
                         f.reject(e);
@@ -222,12 +218,12 @@ var requirejs, require, define;
             return promise;
         };
 
-        prim.nextTick = nextTick;
+      prim.nextTick = nextTick;
     }());
-    //END prim
+//END prim
 
     function newContext(contextName) {
-        var req, main, makeMap, callDep, checkingLater, load, context,
+        var req, main, makeMap, callDep, handlers, checkingLater, load, context,
             defined = {},
             waiting = {},
             config = {
@@ -248,7 +244,7 @@ var requirejs, require, define;
             calledDefine = {},
             loadCount = 0,
             startTime = (new Date()).getTime(),
-            errCount = 0,
+            trackedErrors = {},
             urlFetched = {},
             bundlesMap = {};
 
@@ -307,6 +303,9 @@ var requirejs, require, define;
                     if (anonId) {
                         queue[i].unshift(anonId);
                         anonId = undef;
+                    } else {
+                        //Not our anon module, stop.
+                        break;
                     }
                 }
                 args = queue.shift();
@@ -354,7 +353,8 @@ var requirejs, require, define;
                 typeof navigator !== 'undefined';
 
             req.nameToUrl = function (moduleName, ext, skipExt) {
-                var syms, url, bundleId;
+                var paths, syms, i, parentModule, url,
+                    parentPath, bundleId;
 
                 bundleId = getOwn(bundlesMap, moduleName);
 
@@ -363,7 +363,17 @@ var requirejs, require, define;
                 }
 
                 //A module that needs to be converted to a path.
+                paths = config.paths;
+
                 syms = moduleName.split('/');
+                //For each module name segment, see if there is a path
+                //registered for it. Start with most specific name
+                //and work up from it.
+                for (i = syms.length; i > 0; i -= 1) {
+                    parentModule = syms.slice(0, i).join('/');
+
+                    parentPath = getOwn(paths, parentModule);
+                }
 
                 //Join the path parts together, then figure out if baseUrl is needed.
                 url = syms.join('/');
@@ -387,28 +397,11 @@ var requirejs, require, define;
             d.resolve(value);
         }
 
-      function reject(d, err) {
-        d.finished = true;
-        d.rejected = true;
-        d.reject(err);
-      }
-
-      function defineModule(d) {
+        function defineModule(d) {
             var name = d.map.id,
                 ret = d.factory.apply(defined[name], d.values);
 
-            if (name) {
-                // Favor return value over exports. If node/cjs in play,
-                // then will not have a return value anyway. Favor
-                // module.exports assignment over exports object.
-                if (ret === undef) {
-                    if (d.cjsModule) {
-                        ret = d.cjsModule.exports;
-                    } else if (d.usingExports) {
-                        ret = defined[name];
-                    }
-                }
-            } else {
+            if (!name) {
                 //Remove the require deferred from the list to
                 //make cycle searching faster. Do not need to track
                 //it anymore either.
@@ -420,6 +413,7 @@ var requirejs, require, define;
         //This method is attached to every module deferred,
         //so the "this" in here is the module deferred object.
         function depFinished(val, i) {
+          /* jshint validthis: true */
             if (!this.rejected && !this.depDefined[i]) {
                 this.depDefined[i] = true;
                 this.depCount += 1;
@@ -459,15 +453,8 @@ var requirejs, require, define;
             return d;
         }
 
-        function makeErrback(d, name) {
-            return function (err) {
-                if (!d.rejected) {
-                    if (!err.dynaId) {
-                        err.dynaId = 'id' + (errCount += 1);
-                        err.requireModules = [name];
-                    }
-                    reject(d, err);
-                }
+        function makeErrback() {
+            return function () {
             };
         }
 
@@ -505,21 +492,9 @@ var requirejs, require, define;
                     }, false);
                     script.addEventListener('error', function () {
                         loadCount -= 1;
-                        var err,
-                            pathConfig = getOwn(config.paths, id),
-                            d = getOwn(deferreds, id);
-                        if (pathConfig && Array.isArray(pathConfig) && pathConfig.length > 1) {
-                            script.parentNode.removeChild(script);
-                            //Pop off the first array value, since it failed, and
-                            //retry
-                            pathConfig.shift();
-                            d.map = makeMap(id);
-                            load(d.map);
-                        } else {
-                            err = new Error('Load failed: ' + id + ': ' + script.src);
-                            err.requireModules = [id];
-                            getDefer(id).reject(err);
-                        }
+                        var err =  Error('Load failed: ' + id + ': ' + script.src);
+                        err.requireModules = [id];
+                        getDefer(id).reject(err);
                     }, false);
 
                     script.src = url;
@@ -535,12 +510,23 @@ var requirejs, require, define;
                 args = waiting[name];
                 delete waiting[name];
                 main.apply(undef, args);
-            } else if (!hasProp(deferreds, name)) {
-                load(map);
             }
 
             return getDefer(name).promise;
         };
+
+        //Turns a plugin!resource to [plugin, resource]
+        //with the plugin being undefined if the name
+        //did not have a plugin prefix.
+        function splitPrefix(name) {
+            var prefix,
+                index = name ? name.indexOf('!') : -1;
+            if (index > -1) {
+                prefix = name.substring(0, index);
+                name = name.substring(index + 1, name.length);
+            }
+            return [prefix, name];
+        }
 
         /**
          * Makes a name map, normalizing the name, and using a plugin
@@ -548,29 +534,46 @@ var requirejs, require, define;
          * too, as an optimization.
          */
         makeMap = function (name, relName, applyMap) {
-            var url, result,
+            if (typeof name !== 'string') {
+                return name;
+            }
+
+            var url, parts, prefix, result,
                 cacheKey = name + ' & ' + (relName || '') + ' & ' + !!applyMap;
+
+            parts = splitPrefix(name);
+            prefix = '';
+            name = parts[1];
 
             if (hasProp(mapCache, cacheKey)) {
                 return mapCache[cacheKey];
             }
 
             name = normalize(name, relName, applyMap);
+            parts = splitPrefix(name);
+            name = parts[1];
 
-            //Normalize according
             url = req.nameToUrl(name);
 
             //Using ridiculous property names for space reasons
             result = {
-                id: name, // fullName
+                id: name, //fullName
                 n: name,
-                pr: '',
+                pr: prefix,
                 url: url
             };
 
-            mapCache[cacheKey] = result;
+            if (!prefix) {
+                mapCache[cacheKey] = result;
+            }
 
             return result;
+        };
+
+        handlers = {
+            require: function () { },
+            exports: function () { },
+            module: function () { }
         };
 
         function breakCycle(d, traced, processed) {
@@ -580,7 +583,7 @@ var requirejs, require, define;
             if (!d.finished && d.deps) {
                 d.deps.forEach(function (depMap) {
                     var depId = depMap.id,
-                        dep = getDefer(depId);
+                        dep = !hasProp(handlers, depId) && getDefer(depId);
 
                     //Only force things that have not completed
                     //being defined, so still in the registry,
@@ -603,6 +606,12 @@ var requirejs, require, define;
         }
 
         function check(d) {
+            var err,
+                notFinished = [],
+                waitInterval = config.waitSeconds * 1000,
+                //It is possible to disable the wait interval by using waitSeconds of 0.
+                expired = waitInterval && (startTime + waitInterval) < (new Date()).getTime();
+
             if (loadCount === 0) {
                 //If passed in a deferred, it is for a specific require call.
                 //Could be a sync case that needs resolution right away.
@@ -619,7 +628,20 @@ var requirejs, require, define;
                 }
             }
 
-            if (loadCount || requireDeferreds.length) {
+            //If still waiting on loads, and the waiting load is something
+            //other than a plugin resource, or there are still outstanding
+            //scripts, then just try back later.
+            if (expired) {
+                //If wait time expired, throw error of unloaded modules.
+                eachProp(deferreds, function (d) {
+                    if (!d.finished) {
+                        notFinished.push(d.map.id);
+                    }
+                });
+                err = new Error('Timeout for modules: ' + notFinished);
+                err.requireModules = notFinished;
+                req.onError(err);
+            } else if (loadCount || requireDeferreds.length) {
                 //Something is still waiting to load. Wait for it, but only
                 //if a later check is not already scheduled.
                 if (!checkingLater) {
@@ -632,6 +654,16 @@ var requirejs, require, define;
             }
         }
 
+        //Used to break out of the promise try/catch chains.
+        function delayedError(e) {
+            prim.nextTick(function () {
+                if (!e.dynaId || !trackedErrors[e.dynaId]) {
+                    trackedErrors[e.dynaId] = true;
+                    req.onError(e);
+                }
+            });
+        }
+
         main = function (name, deps, factory, errback, relName) {
             //Only allow main calling once per module.
             if (name && hasProp(calledDefine, name)) {
@@ -641,13 +673,43 @@ var requirejs, require, define;
 
             var d = getDefer(name);
 
-            d.promise.catch(errback);
+            //This module may not have dependencies
+            if (deps && !Array.isArray(deps)) {
+                //deps is not an array, so probably means
+                //an object literal or factory function for
+                //the value. Adjust args.
+                factory = deps;
+                deps = [];
+            }
+
+            d.promise.catch(errback || delayedError);
 
             //Use name if no relName
             relName = relName || name;
 
             //Call the factory to define the module, if necessary.
             if (typeof factory === 'function') {
+
+                if (!deps.length && factory.length) {
+                    //Remove comments from the callback string,
+                    //look for require calls, and pull them into the dependencies,
+                    //but only if there are function args.
+                    factory
+                        .toString()
+                        .replace(commentRegExp, '')
+                        .replace(cjsRequireRegExp, function (match, dep) {
+                            deps.push(dep);
+                        });
+
+                    //May be a CommonJS thing even without require calls, but still
+                    //could use exports, and module. Avoid doing exports and module
+                    //work though if it just needs require.
+                    //REQUIRES the function to expect the CommonJS variables in the
+                    //order listed below.
+                    deps = (factory.length === 1 ?
+                            ['require'] :
+                            ['require', 'exports', 'module']).concat(deps);
+                }
 
                 //Save info for use later.
                 d.factory = factory;
@@ -657,8 +719,23 @@ var requirejs, require, define;
                 deps.forEach(function (depName, i) {
                     var depMap;
                     deps[i] = depMap = makeMap(depName, relName, true);
+                    depName = depMap.id;
 
-                  waitForDep(depMap, relName, d, i);
+                    //Fast path CommonJS standard dependencies.
+                    if (depName === "require") {
+                        d.values[i] = handlers.require(name);
+                    } else if (depName === "exports") {
+                        //CommonJS module spec 1.1
+                        d.values[i] = handlers.exports(name);
+                        d.usingExports = true;
+                    } else if (depName === "module") {
+                        //CommonJS module spec 1.1
+                        d.values[i] = d.cjsModule = handlers.module(name);
+                    } else if (depName === undefined) {
+                        d.values[i] = undefined;
+                    } else {
+                        waitForDep(depMap, relName, d, i);
+                    }
                 });
                 d.depending = false;
 
@@ -667,6 +744,10 @@ var requirejs, require, define;
                 if (d.depCount === d.depMax) {
                     defineModule(d);
                 }
+            } else if (name) {
+                //May just be an object definition for the module. Only
+                //worry about defining if have a module name.
+                resolve(name, d, factory);
             }
 
             startTime = (new Date()).getTime();
@@ -742,6 +823,17 @@ var requirejs, require, define;
     if (typeof require !== 'function') {
         require = topReq;
     }
+
+    /**
+     * Executes the text. Normally just uses eval, but can be modified
+     * to use a better, environment-specific call. Only used for transpiling
+     * loader plugins, not for plain JS modules.
+     * @param {String} text the text to execute/evaluate.
+     */
+    topReq.exec = function (text) {
+        /*jslint evil: true */
+        return eval(text);
+    };
 
     topReq.contexts = contexts;
 
