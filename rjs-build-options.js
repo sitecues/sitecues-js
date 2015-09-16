@@ -83,6 +83,7 @@
         'bp/constants',
         'bp/model/state',
         'bp/helper',
+        'bp/view/markup-finalizer',
         'core/util/xhr',
         'util/common',
         'bp-expanded/view/svg-animate',

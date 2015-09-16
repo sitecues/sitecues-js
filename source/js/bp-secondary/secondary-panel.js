@@ -6,7 +6,12 @@
 //Perkins wants faster access to colors – 3 levels deep is too much
 //
 
-define(['bp/constants', 'bp/model/state', 'bp/helper', 'bp-expanded/view/svg-animate', 'util/transform',
+define(['bp/constants',
+    'bp/model/state',
+    'bp/helper',
+    'bp-expanded/view/svg-animate',
+    'util/transform',
+    'bp-secondary/markup-secondary',
     'bp-secondary/tips',
     'bp-secondary/settings',
     'bp-secondary/feedback',
@@ -14,7 +19,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'bp-expanded/view/svg-ani
     'bp-secondary/cards',
     'bp-secondary/font-charset',
     'core/conf/urls'],
-    function (BP_CONST, state, helper, animate, transform, tipsModule, settingsModule, feedbackModule, aboutModule, cardsModule, fontCharset, urls) {
+    function (BP_CONST, state, helper, animate, transform, markup, tipsModule, settingsModule, feedbackModule, aboutModule, cardsModule, fontCharset, urls) {
 
   var BUTTON_CLICK_ANIMATION_DURATION = 800,
     ENABLED_PANEL_TRANSLATE_Y = 0,
@@ -488,6 +493,9 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'bp-expanded/view/svg-ani
   function init() {
     if (!isInitialized) {
       isInitialized = true;
+
+      // Insert the markup for the secondary panel
+      markup.init();
 
       // Add mouse listeners once BP is ready
       resetStyles();
