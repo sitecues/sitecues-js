@@ -110,7 +110,7 @@ define(['core/conf/site', 'core/conf/urls', 'core/run'], function (site, urls, r
   // same arguments as `trigger` is, apart from the event name.
   function emit(events) {
     /* jshint validthis: true */
-    var event, node, calls, tail, args, all, rest;
+    var event, node, calls, tail, args, rest;
     if (!(calls = this._events)) {
         return this;
     }

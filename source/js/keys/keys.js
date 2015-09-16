@@ -1,4 +1,4 @@
-define(['core/util/element-classifier', 'core/keys/commands', 'core/metric'],
+define(['keys/element-classifier', 'keys/commands', 'core/metric'],
   function(elemClassifier, commands, metric) {
 
   var
@@ -53,6 +53,7 @@ define(['core/util/element-classifier', 'core/keys/commands', 'core/metric'],
     isLensVisible,
     isSitecuesOn,
     lastKeyInfo,
+    isInitialized,
 
     KEY_TESTS = {
       'space': function(event) {
@@ -309,7 +310,13 @@ define(['core/util/element-classifier', 'core/keys/commands', 'core/metric'],
     sitecues.emit('keys/sitecues-key-down', isFollowMouseEnabled);
   }
 
-  function init() {
+  function init(keyEvent) {
+    if (isInitialized) {
+      return;
+    }
+
+    isInitialized = true;
+
     // bind key hook to window
     // 3rd param changes event order: false == bubbling; true = capturing.
     // We use capturing because we want to get the key before anything else does --
@@ -335,6 +342,10 @@ define(['core/util/element-classifier', 'core/keys/commands', 'core/metric'],
     sitecues.on('sitecues/did-toggle', function(isOn) {
       isSitecuesOn = isOn;
     });
+
+    if (keyEvent) {
+      onKeyDown(keyEvent);
+    }
   }
 
   return {
