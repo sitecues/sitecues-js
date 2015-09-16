@@ -205,19 +205,6 @@ define([], function() {
   // TODO is this still needed? It's fixed in Firefox
   constants.FIREFOX_SLIDER_OFFSET = 83; // Hardcoded because of https://bugzilla.mozilla.org/show_bug.cgi?id=479058
 
-  constants.KEY_CODES = {
-    'TAB'   : 9,
-    'ENTER' : 13,
-    'ESCAPE': 27,
-    'SPACE' : 32,
-    'HOME'  : 36,
-    'END'   : 35,
-    'LEFT'  : 37,
-    'UP'    : 38,
-    'RIGHT' : 39,
-    'DOWN'  : 40
-  };
-
   // TODO compute this ratio
   // It's used to set the slider thumb properly
   constants.LARGE_SLIDER_WIDTH = 256;

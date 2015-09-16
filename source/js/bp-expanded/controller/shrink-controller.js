@@ -194,6 +194,10 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
     toggleListeners(false);
   }
 
+  function didShrink() {
+    state.set('isShrinkingFromKeyboard', false);
+  }
+
   if (SC_DEV) {
     sitecues.toggleStickyPanel = function () {
       isSticky = !isSticky;
@@ -210,6 +214,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
     sitecues.on('info/did-show', shrinkPanel);
     sitecues.on('bp/will-expand', willExpand);
     sitecues.on('bp/will-shrink', willShrink);
+    sitecues.on('bp/did-shrink', didShrink);
 
     toggleListeners(true);
   }

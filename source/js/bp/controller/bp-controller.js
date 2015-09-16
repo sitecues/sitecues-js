@@ -9,19 +9,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
     isInitialized,
     // We ignore the first mouse move when a window becomes active, otherwise badge opens
     // if the mouse happens to be over the badge/toolbar
-    doIgnoreNextMouseMove = true,
-    focusController;
-
-  function processKeyDown(evt) {
-    if (isModifiedKey(evt) || !state.isPanel()) {
-      return;
-    }
-
-    if (focusController && !focusController.processKey(evt)) {
-      evt.preventDefault();
-      return false;
-    }
-  }
+    doIgnoreNextMouseMove = true;
 
   function isInActiveToolbarArea(evt, badgeRect) {
     var middleOfBadge = badgeRect.left + badgeRect.width / 2,
@@ -118,7 +106,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
 
   function changeModeToPanel() {
     cancelHoverDelayTimer();
-    if (!state.get('isShrinkingFromKeyboard')) {
+    if (!state.get('isShrinkingFromKeyboard')) { // Don't re-expand while trying to close via Escape key
       expandPanel();
     }
   }
@@ -147,8 +135,9 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
   }
 
   function processBadgeActivationKeys(evt) {
+    var ENTER = 13, SPACE = 32;
     if (state.isBadge() &&
-      (evt.keyCode === BP_CONST.KEY_CODES.ENTER || evt.keyCode === BP_CONST.KEY_CODES.SPACE)) {
+      (evt.keyCode === ENTER || evt.keyCode === SPACE)) {
 
       evt.preventDefault();
       changeModeToPanel();
@@ -161,14 +150,12 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
   }
 
   function willExpand() {
-    window.addEventListener('keydown', processKeyDown, true);
     window.addEventListener('wheel', preventScroll);
   }
 
   function didExpand() {
     require(['bp-expanded/bp-expanded'], function (bpExpanded) {
       bpExpanded.init();
-      focusController = bpExpanded.getFocusController();
     });
   }
 
@@ -195,21 +182,12 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
   }
 
   function willShrink() {
-    window.removeEventListener('keydown', processKeyDown, true);
     window.removeEventListener('wheel', preventScroll);
-  }
-
-  function didShrink() {
-      state.set('isShrinkingFromKeyboard', false);
   }
 
   /*
    Private functions.
    */
-
-  function isModifiedKey(evt) {
-    return evt.altKey || evt.metaKey || evt.ctrlKey;
-  }
 
   function init() {
     if (!isInitialized) {
@@ -224,7 +202,6 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
       sitecues.on('bp/will-expand', willExpand);
       sitecues.on('bp/did-expand', didExpand);
       sitecues.on('bp/will-shrink', willShrink);
-      sitecues.on('bp/did-shrink', didShrink);
       sitecues.on('zoom', didZoom);
       sitecues.on('speech/did-change', didChangeSpeech);
     }
