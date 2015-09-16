@@ -35,6 +35,12 @@ define(['bp/controller/bp-controller', 'bp/model/state','bp/view/badge', 'bp/vie
    *** Start point ***
    */
 
+  // Allow animations just before panel expands
+  function enableAnimations() {
+    // todo: take out the class to const
+    getSVGElement().setAttribute('class', 'scp-animate');
+  }
+
   function updateView(isFirstTime) {
 
     getClasses(function(classes) {
@@ -46,6 +52,9 @@ define(['bp/controller/bp-controller', 'bp/model/state','bp/view/badge', 'bp/vie
       // This is done for the first view change
       // TODO: Replace with JS animations, this is just setting a class for
       //       opacity and fill transitions...
+      if (!isFirstTime) {
+        enableAnimations();
+      }
 
       bpContainer.setAttribute('class', classes);
 
