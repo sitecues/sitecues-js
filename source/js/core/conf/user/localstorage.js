@@ -59,7 +59,7 @@ define([], function() {
    * Clear "sitecues" key value which is the outer namespace.
    * @returns {DOMString}
    */
-  function clearSitecuesLs() {
+  function clear() {
     isSupported() && window.localStorage.removeItem('sitecues');
   }
 
@@ -97,7 +97,7 @@ define([], function() {
    * @param {Object} data
    * @returns {void}
    */
-  function setUserPreferencesById(userPrefData) {
+  function setPrefs(userPrefData) {
     if (isSupported()) {
       var sitecuesLs = JSON.parse(getSitecuesLs());
       sitecuesLs[getUserId()] = userPrefData || '{}';
@@ -115,9 +115,9 @@ define([], function() {
    * @param {String} value
    * @returns {void}
    */
-  function setUserPreferenceById(key, value) {
+  function setPref(key, value) {
     if (isSupported()) {
-      var userPrefData = getUserPreferencesById();
+      var userPrefData = getPrefs();
       var sitecuesLs = JSON.parse(getSitecuesLs());
       // Update value.
       userPrefData[key] = value;
@@ -132,7 +132,7 @@ define([], function() {
    * Get LocalStorage data | siteues:userID namespace.
    * @returns {DOMString}
    */
-  function getUserPreferencesById() {
+  function getPrefs() {
     if (isSupported()) {
       var sitecuesLs = JSON.parse(getSitecuesLs());
       return sitecuesLs[getUserId()];
@@ -140,12 +140,12 @@ define([], function() {
   }
 
   var publics = {
-    clearSitecuesLs: clearSitecuesLs,
+    clear: clear,
     getUserId: getUserId,
     setUserId: setUserId,
-    setUserPreferencesById: setUserPreferencesById,
-    setUserPreferenceById: setUserPreferenceById,
-    getUserPreferencesById: getUserPreferencesById
+    setPrefs: setPrefs,
+    setPref: setPref,
+    getPrefs: getPrefs
   };
   if (SC_UNIT) {
     module.exports = publics;

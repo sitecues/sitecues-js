@@ -25,7 +25,7 @@ define(['core/conf/user/localstorage', 'core/util/xhr', 'core/conf/urls'], funct
       // Cannot save to server when we have no access to it
       // Putting this condition in allows us to paste sitecues into the console
       // and test it on sites that have a content security policy
-      ls.clearSitecuesLs();
+      ls.clear();
       ls.setUserId('localuser');
       SC_DEV && console.log('Use localuser because we have no access to it.');
       didComplete();
@@ -40,7 +40,7 @@ define(['core/conf/user/localstorage', 'core/util/xhr', 'core/conf/urls'], funct
         // e.g. _ai2_sc_uid = 3d50a209-dc12-4bf4-9913-de5ba74f96cf
         // That's why nothing ever needs to check the user ID directly except for this module!!!
         userId = data.userId;
-        ls.clearSitecuesLs();
+        ls.clear();
         ls.setUserId(data.userId);
         didComplete();
       },

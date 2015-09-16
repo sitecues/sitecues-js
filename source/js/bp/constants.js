@@ -223,9 +223,6 @@ define([], function() {
   // (This whitespace exists for a reason -- it turns into the top border when the panel opens)
   constants.BADGE_VERTICAL_OFFSET = 2;
 
-  constants.BASE_STYLESHEET_ID    = 'sitecues-badge-panel-base-css';
-  constants.PALETTE_STYLESHEET_ID = 'sitecues-badge-panel-palette-css';
-
   // Map legal full palette names to short names, used to create a class e.g. .scp-palette-rb
   constants.PALETTE_NAME_MAP = {
     'normal': '-n',

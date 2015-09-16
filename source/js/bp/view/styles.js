@@ -13,6 +13,9 @@ define(['bp/helper', 'core/platform', 'bp/constants', 'core/conf/site', 'core/co
     classDelimiter = '.',
     hover = ':hover',
 
+    BASE_SHEET_ID    = 'sitecues-bp-css',
+    PALETTE_SHEET_ID = 'sitecues-bp-palette-css',
+
     WANT_BADGE = classDelimiter + BP_CONST.WANT_BADGE,
     WANT_PANEL = classDelimiter + BP_CONST.WANT_PANEL,
 
@@ -423,19 +426,6 @@ define(['bp/helper', 'core/platform', 'bp/constants', 'core/conf/site', 'core/co
         'clip': 'auto !important'
       },
 
-      /******************* Secondary content *********************/
-      '.scp-secondary-feature': {
-        'display': 'none'
-      },
-
-      '#scp-secondary': {
-        'display': 'none'
-      },
-
-      '.scp-want-secondary #scp-secondary, .scp-is-secondary #scp-secondary': {
-        'display': 'block'
-      },
-
       /******************* Images ********************/
 
       '.scp-active #scp-demo-slider-bar': {
@@ -600,7 +590,7 @@ define(['bp/helper', 'core/platform', 'bp/constants', 'core/conf/site', 'core/co
         badgeOnly         = 'badge',
         both              = 'both',
         customCSS         = {},
-        paletteStylesheet = document.getElementById(BP_CONST.PALETTE_STYLESHEET_ID);
+        paletteStylesheet = document.getElementById(BP_CONST.PALETTE_SHEET_ID);
 
     for (var prop in palette) {
 
@@ -680,8 +670,8 @@ define(['bp/helper', 'core/platform', 'bp/constants', 'core/conf/site', 'core/co
     document.head.appendChild(sheet);
   }
 
-  createStyleSheet(BP_CONST.BASE_STYLESHEET_ID, BASE_CSS);
-  createStyleSheet(BP_CONST.PALETTE_STYLESHEET_ID, PALETTE_CSS);
+  createStyleSheet(BASE_SHEET_ID, BASE_CSS);
+  createStyleSheet(PALETTE_SHEET_ID, PALETTE_CSS);
 
   if (site.get('uiMode') !== 'toolbar') {
     // TODO Tony how does this work? We need docs
@@ -695,8 +685,8 @@ define(['bp/helper', 'core/platform', 'bp/constants', 'core/conf/site', 'core/co
   if (SC_DEV) {
     sitecues.toggleSlowBPAnimations = function () {
       isAnimationDebuggingOn = !isAnimationDebuggingOn;
-      document.head.removeChild(helper.byId(BP_CONST.BASE_STYLESHEET_ID));
-      createStyleSheet(BP_CONST.BASE_STYLESHEET_ID, BASE_CSS);
+      document.head.removeChild(helper.byId(BASE_SHEET_ID));
+      createStyleSheet(BASE_SHEET_ID, BASE_CSS);
     };
   }
 });
