@@ -632,7 +632,7 @@ define(['$', 'util/common', 'dollar/dollar-utils', 'core/conf/user/manager', 'co
       candidate,
       rect,
       style,
-      zoom = conf.get('zoom');
+      zoom = conf.get('zoom') || 1;
     for (; index < candidates.length; index ++) {
       candidate = candidates[index];
       if (lastPicked && $.contains(candidate, lastPicked)) {

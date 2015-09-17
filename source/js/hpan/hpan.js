@@ -103,7 +103,7 @@ define(['core/conf/user/manager', 'dollar/dollar-utils', 'zoom/zoom'], function 
   }
 
   function getZoom() {
-    return conf.get('zoom');
+    return conf.get('zoom') || 1;
   }
 
   function refresh() {

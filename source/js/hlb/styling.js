@@ -476,7 +476,7 @@ define(['$', 'core/platform', 'util/common', 'core/conf/user/manager'],
         childTopPadding         = parseFloat($child.css('paddingTop')),
         childBottomPadding      = parseFloat($child.css('paddingBottom')),
         paddingStyles           = {},
-        zoom                    = conf.get('zoom');
+        zoom                    = conf.get('zoom') || 1;
 
     if ((childBoundingClientRect.left < initialHLBRect.left && childLeftPadding > 0)) {
       paddingStyles.paddingLeft = childLeftPadding - (initialHLBRect.left - childBoundingClientRect.left) / zoom;

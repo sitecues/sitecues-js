@@ -378,7 +378,7 @@ define([
       }
 
       $hlbWrapper.appendTo('body');
-      inheritedZoom = conf.get('zoom');  // Zoom inherited from page
+      inheritedZoom = conf.get('zoom') || 1;  // Zoom inherited from page
 
     } else {
       $hlbWrapper.insertAfter('body');
