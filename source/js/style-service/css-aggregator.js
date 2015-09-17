@@ -84,7 +84,7 @@ define(['$', 'style-service/user-agent-css', 'core/conf/site', 'core/conf/urls',
           chromeRequest.onload(responseEvent);
         }
         else {
-          SC_DEV && console.log('Error loading CSS: ' + chromeRequest.url);
+          if (SC_DEV) { console.log('Error loading CSS: ' + chromeRequest.url); }
           chromeRequest.onerror(responseEvent);
         }
       });
@@ -200,7 +200,9 @@ define(['$', 'style-service/user-agent-css', 'core/conf/site', 'core/conf/urls',
     return sheet.text.replace(IMPORT_REGEXP, function(totalMatch, actualUrl, mediaQuery) {
       // Insert sheet for retrieval before this sheet, so that the order of precedence is preserved
       mediaQuery = mediaQuery.split(';')[0];
-      SC_DEV && mediaQuery && console.log('@import media query: ' + mediaQuery);
+      if (SC_DEV && mediaQuery) {
+        console.log('@import media query: ' + mediaQuery);
+      }
       if (mediaQueries.isActiveMediaQuery(mediaQuery)) {
         baseUrlObject = baseUrlObject || getParsedSheetUrl(sheet);
         insertNewSheetBefore(sheet, urls.resolveUrl(actualUrl, baseUrlObject));

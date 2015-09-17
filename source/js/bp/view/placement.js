@@ -83,7 +83,7 @@ define(['bp/view/badge', 'bp/model/state', 'bp/constants', 'bp/helper', 'core/pl
 
     badgeElement.appendChild(bpElement);
 
-    SC_DEV && console.log('BP reparented as badge child');
+    if (SC_DEV) { console.log('BP reparented as badge child'); }
 
     currentBPParent = BADGE_PARENT;
 
@@ -102,7 +102,7 @@ define(['bp/view/badge', 'bp/model/state', 'bp/constants', 'bp/helper', 'core/pl
     // Case 3. Insert outside body (as a child of <html>)
     documentElement.insertBefore(bpElement, documentElement.childNodes[0]);
 
-    SC_DEV && console.log('BP reparented as <html> child');
+    if (SC_DEV) { console.log('BP reparented as <html> child'); }
 
     currentBPParent = HTML_PARENT;
 

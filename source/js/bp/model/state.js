@@ -36,7 +36,7 @@ define([], function() {
     if (data.hasOwnProperty(propName)) {
       return data[propName];
     }
-    SC_DEV && console.log('ERROR: Cannot get property with name ' + propName + '.');
+    if (SC_DEV) { console.log('ERROR: Cannot get property with name ' + propName + '.'); }
   }
 
   /**
@@ -48,7 +48,7 @@ define([], function() {
     if (data.hasOwnProperty(propName)) {
       data[propName] = propValue;
     } else {
-      SC_DEV && console.log('ERROR: Cannot set property with name ' + propName + '.');
+      if (SC_DEV) { console.log('ERROR: Cannot set property with name ' + propName + '.'); }
     }
   }
 

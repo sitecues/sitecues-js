@@ -297,12 +297,16 @@ define(['$', 'util/common', 'dollar/dollar-utils', 'core/conf/user/manager', 'co
 
       if (secondBestIndex < 0) {
         var scores = scoreObjs.map(getNumericScore);
-        SC_DEV && isVoteDebuggingOn && console.log('--> break no other competitors: ' + JSON.stringify(scores));
+        if (SC_DEV && isVoteDebuggingOn) {
+          console.log('--> break no other competitors: ' + JSON.stringify(scores));
+        }
         break;  // Only one valid candidate
       }
 
-      SC_DEV && isVoteDebuggingOn && console.log('1st = %d (score=%d) %O', bestIndex, scoreObjs[bestIndex].score, candidates[bestIndex]);
-      SC_DEV && isVoteDebuggingOn && console.log('2nd = %d (score=%d) %O', secondBestIndex, scoreObjs[secondBestIndex].score, candidates[secondBestIndex]);
+      if (SC_DEV && isVoteDebuggingOn) {
+        console.log('1st = %d (score=%d) %O', bestIndex, scoreObjs[bestIndex].score, candidates[bestIndex]);
+        console.log('2nd = %d (score=%d) %O', secondBestIndex, scoreObjs[secondBestIndex].score, candidates[secondBestIndex]);
+      }
 
       // 3. Choose between first and second best candidate
       ++ extraWork;
@@ -313,15 +317,22 @@ define(['$', 'util/common', 'dollar/dollar-utils', 'core/conf/user/manager', 'co
         leafIndex = 0,
         votesForTop = (topIndex === bestIndex) ? 1 : -1;
 
-      SC_DEV && isVoteDebuggingOn && console.log('Starting vote: ' + votesForTop);
+      if (SC_DEV && isVoteDebuggingOn) {
+        console.log('Starting vote: ' + votesForTop);
+      }
       for (; leafIndex < leaves.length; leafIndex++) {
         var candidatesForVote = getCandidates(leaves[leafIndex]),
           scoresForVote = getScores(candidatesForVote),
           leafVoteIndex = getCandidateWithHighestScore(scoresForVote),
           isVoteForTop = candidatesForVote[leafVoteIndex] === topElement;
-        SC_DEV && isVoteDebuggingOn && console.log('Vote for top ? %s ---> %o voted for %O', isVoteForTop,
+        if (SC_DEV && isVoteDebuggingOn) {
+          console.log(
+            'Vote for top ? %s ---> %o voted for %O',
+            isVoteForTop,
             leaves[leafIndex].firstChild || leaves[leafIndex],
-          candidatesForVote[leafVoteIndex]);
+            candidatesForVote[leafVoteIndex]
+          );
+        }
         votesForTop += isVoteForTop ? 1 : -1;
       }
 

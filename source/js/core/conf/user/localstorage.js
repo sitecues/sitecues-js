@@ -29,7 +29,7 @@ define([], function() {
       storage.removeItem(testKey);
       return true;
     } catch (error) {
-      SC_DEV && console.log('Local Storage is not supported or cannot be used.');
+      if (SC_DEV) { console.log('Local Storage is not supported or cannot be used.'); }
       return false;
     }
   }
@@ -104,7 +104,7 @@ define([], function() {
 
       // Set the initial data under userId namespace.
       setSitecuesLs(sitecuesLs);
-      SC_DEV && console.log('Setting the data in LocalStorage: ' + JSON.stringify(sitecuesLs));
+      if (SC_DEV) { console.log('Setting the data in LocalStorage: ' + JSON.stringify(sitecuesLs)); }
     }
   }
 
@@ -124,7 +124,7 @@ define([], function() {
       sitecuesLs[getUserId()] = userPrefData;
       // Save in LocalStorage.
       setSitecuesLs(sitecuesLs);
-      //SC_DEV && console.log('Updating the data in LocalStorage: ' + JSON.stringify(sitecuesLs));
+      //if (SC_DEV) { console.log('Updating the data in LocalStorage: ' + JSON.stringify(sitecuesLs)); }
     }
   }
 

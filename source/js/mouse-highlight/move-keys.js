@@ -25,7 +25,7 @@ define(['$', 'mouse-highlight/mouse-highlight', 'util/common', 'util/transform',
     repeatDelayTimer,
     MAX_PIXELS_TO_PAN = 999,
     HEADING_TAGS = { h1:1,h2:1,h3:1,h4:1,h5:1,h6:1 },
-    DO_SHOW_DEBUG_POINTS = SC_DEV && false,
+    DO_SHOW_DEBUG_POINTS = false,
     MH_EXTRA_WIDTH = 10, // Amount to account for padding/border of mouse highlight
     isShowingDebugPoints = false,
     hlbElement,
@@ -268,7 +268,7 @@ define(['$', 'mouse-highlight/mouse-highlight', 'util/common', 'util/transform',
         moveByTagName(HEADING_TAGS, shiftKey);
         break;
       default:
-        SC_DEV && console.log('Illegal command');
+        if (SC_DEV) { console.log('Illegal command'); }
     }
   }
 
@@ -282,14 +282,14 @@ define(['$', 'mouse-highlight/mouse-highlight', 'util/common', 'util/transform',
   }
 
   function fail() {
-    SC_DEV && console.log('Fail');
+    if (SC_DEV) { console.log('Fail'); }
     navQueue = [];  // Don't keep trying
     mh.setScrollTracking(true);
 
     fixedFixer.setAllowMouseEvents(true);
 
     if (hlbElement) {
-      SC_DEV && console.log('Close HLB');
+      if (SC_DEV) { console.log('Close HLB'); }
       toggleHLB(); // Nothing found .. close HLB and enable highlight on last known item
     }
   }
@@ -301,7 +301,7 @@ define(['$', 'mouse-highlight/mouse-highlight', 'util/common', 'util/transform',
   }
 
   function succeed(doAllowRepeat, doSpeakText) {
-    SC_DEV && console.log('Succeed');
+    if (SC_DEV) { console.log('Succeed'); }
 
     fixedFixer.setAllowMouseEvents(true);
 
@@ -311,7 +311,7 @@ define(['$', 'mouse-highlight/mouse-highlight', 'util/common', 'util/transform',
 
     if (isLensVisible) {
       // Open new HLB
-      SC_DEV && console.log('Retarget HLB');
+      if (SC_DEV) { console.log('Retarget HLB'); }
       retargetHLB();
     }
     else if (doAllowRepeat && isKeyStillDown && lastMoveCommand) {

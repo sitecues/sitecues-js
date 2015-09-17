@@ -27,12 +27,12 @@ define(['core/conf/user/localstorage', 'core/util/xhr', 'core/conf/urls'], funct
       // and test it on sites that have a content security policy
       ls.clear();
       ls.setUserId('localuser');
-      SC_DEV && console.log('Use localuser because we have no access to it.');
+      if (SC_DEV) { console.log('Use localuser because we have no access to it.'); }
       didComplete();
       return;
     }
 
-    SC_DEV && console.log('UserID not found in localStorage, fallback to ajax request.');
+    if (SC_DEV) { console.log('UserID not found in localStorage, fallback to ajax request.'); }
     xhr.getJSON({
       url: urls.getApiUrl('user/id/get.json'),
       success: function (data) {

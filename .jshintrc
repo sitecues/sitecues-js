@@ -160,7 +160,5 @@
   // Whether to tolerate calling parseInt() without supplying the radix, even though it can lead to bugs.
   "-W065": true,      // Refer to http://jslinterrors.com/missing-radix-parameter/
   // Whether to tolerate decimal numbers like `var x = .543` without a leading zero, even though it could be a typo and is less readable.
-  "-W008": true,      // Leading 0 before decimal point
-  // UNNECESSARY. This is merely an alias to the `expr` option.
-  "-W030": false      // Allows stuff like: SC_DEV && console.log('foo') rather than if (SC_DEV) { console.log('foo'); }
+  "-W008": true      // Leading 0 before decimal point
 }

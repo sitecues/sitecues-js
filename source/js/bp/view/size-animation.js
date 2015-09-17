@@ -335,7 +335,7 @@ define(['bp/model/state', 'bp/constants', 'bp/helper', 'core/platform'],
         currentRect = outlineRects[rect];
         if (!isRectOutsideViewport(currentRect)) {
           resultRect = currentRect;
-          SC_DEV && console.log('Panel position using origin: ' + rect);
+          if (SC_DEV) { console.log('Panel position using origin: ' + rect); }
           break;
         }
       }
@@ -343,7 +343,7 @@ define(['bp/model/state', 'bp/constants', 'bp/helper', 'core/platform'],
 
     // Must animate into the viewport.
     if (!resultRect) {
-      SC_DEV && console.log('Panel position forced into viewport.');
+      if (SC_DEV) { console.log('Panel position forced into viewport.'); }
       resultRect = moveRectIntoViewport(outlineRects.topLeft);
     }
 

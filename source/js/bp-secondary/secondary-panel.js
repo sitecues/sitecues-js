@@ -382,7 +382,7 @@ define(['bp/constants',
     state.set('secondaryPanelTransitionTo', willEnable ? ENABLED : DISABLED);
     updateGlobalState();
 
-    SC_DEV && console.log('Transitioning secondary panel to mode: ' + state.get('secondaryPanelTransitionTo'));
+    if (SC_DEV) { console.log('Transitioning secondary panel to mode: ' + state.get('secondaryPanelTransitionTo')); }
 
     animateButtonMenuDrop(willEnable);
 

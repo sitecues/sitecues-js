@@ -43,7 +43,7 @@ define(['$', 'style-service/style-service', 'core/conf/user/manager', 'cursor/cu
     try {
       rule.style.setProperty('cursor', cursorValueURL, 'important');
     } catch (e) {
-      SC_DEV && console.log('Catch setting cursor property: %o', e);
+      if (SC_DEV) { console.log('Catch setting cursor property: %o', e); }
     }
   }
 
@@ -89,11 +89,11 @@ define(['$', 'style-service/style-service', 'core/conf/user/manager', 'cursor/cu
         crossDomain: true,
         headers: { Accept: 'application/octet-stream'},
         success: function () {
-          SC_DEV && console.log('Loading of CUR file completed!');
+          if (SC_DEV) { console.log('Loading of CUR file completed!'); }
           flushPendingCursorRules(url);
         },
         error: function () {
-          SC_DEV && console.log('[Error] Unable to fetch cursor image from server: ' + url);
+          if (SC_DEV) { console.log('[Error] Unable to fetch cursor image from server: ' + url); }
         }
       });
     });

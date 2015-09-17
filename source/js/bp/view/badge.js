@@ -194,7 +194,7 @@ define(['bp/constants', 'bp/model/state', 'core/locale', 'bp/helper', 'core/conf
     if (newBgColor !== lastBgColor) {
       lastBgColor = newBgColor;
       sitecues.emit('bp/did-change');
-      SC_DEV && console.log('Updating adaptive badge palette');
+      if (SC_DEV) { console.log('Updating adaptive badge palette'); }
     }
   }
 

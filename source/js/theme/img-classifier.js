@@ -48,7 +48,7 @@ define(['$', 'zoom/zoom', 'util/color', 'core/conf/site'], function($, zoomMod, 
       imageData = ctx.getImageData(0, 0, width, height).data;
     }
     catch (ex) {
-      SC_DEV && isDebuggingOn && console.log('Could not get image data for %s: %s', img.src, ex);
+      if (SC_DEV) { isDebuggingOn && console.log('Could not get image data for %s: %s', img.src, ex); }
     }
     img.crossOrigin = oldCrossOrigin;
     return imageData;
@@ -110,8 +110,10 @@ define(['$', 'zoom/zoom', 'util/color', 'core/conf/site'], function($, zoomMod, 
         ++ numDifferentGrayscaleVals;
       }
     }
-    SC_DEV && isDebuggingOn && console.log('Histogram: %o', grayscaleHistogram);
-    SC_DEV && isDebuggingOn && console.log('numDiff = ' + numDifferentGrayscaleVals + ' numMulti = ' + numMultiUseGrayscaleVals);
+    if (SC_DEV && isDebuggingOn) {
+      console.log('Histogram: %o', grayscaleHistogram);
+      console.log('numDiff = ' + numDifferentGrayscaleVals + ' numMulti = ' + numMultiUseGrayscaleVals);
+    }
 
     return {
       hasTransparentPixels: hasTransparentPixels,
@@ -287,11 +289,19 @@ define(['$', 'zoom/zoom', 'util/color', 'core/conf/site'], function($, zoomMod, 
 
     finalScore += pixelInfoScore;
 
-    SC_DEV && isDebuggingOn && $(img).attr('score',
-      sizeScore + ' (size) + ' +
-      (elementTypeScore ? elementTypeScore + ' (button) + ' : '' ) +
-      extensionScore + ' (ext) + ' +
-      pixelInfoScore + ' (pixels) = ' + finalScore);
+    if (SC_DEV && isDebuggingOn) {
+      $(img).attr(
+        'score',
+        sizeScore + ' (size) + ' +
+        (
+          elementTypeScore                    ?
+            elementTypeScore + ' (button) + ' :
+            ''
+        ) +
+        extensionScore + ' (ext) + ' +
+        pixelInfoScore + ' (pixels) = ' + finalScore
+      );
+    }
 
     return finalScore > 0;
   }

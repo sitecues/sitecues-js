@@ -235,7 +235,7 @@ define(['$', 'util/color'], function ($, colorUtil) {
 //        newHue = yowza / NUM_COLORS;
 //        contrastRatio = colorUtil.getContrastRatio(hslToRgb(newHue, 1, 0.5), BLACK);
 //        if (contrastRatio > MIN_CONTRAST_RATIO) {
-//          SC_DEV && console.log('--> ' + yowza + ' ' + newHue + ' ' + contrastRatio + ':1');
+//          if (SC_DEV) { console.log('--> ' + yowza + ' ' + newHue + ' ' + contrastRatio + ':1'); }
 //          break;
 //        }
 //        if (yowza === oldYowza) {

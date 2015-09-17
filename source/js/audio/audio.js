@@ -316,7 +316,7 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
           }
         },
         error: function() {
-          SC_DEV && console.log('Error loading sitecues speech configuration.');
+          if (SC_DEV) { console.log('Error loading sitecues speech configuration.'); }
           callbackFn(FALLBACK_AUDIO_FORMATS);
         }
       });

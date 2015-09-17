@@ -339,15 +339,15 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'util/
 
 
       if (shouldUseElementDotAnimate) {
-        SC_DEV && console.log('Begin element.animate zoom');
+        if (SC_DEV) { console.log('Begin element.animate zoom'); }
         performElementDotAnimateZoomOperation();
       }
       else if (shouldUseKeyFramesAnimation()) {
-        SC_DEV && console.log('Begin keyframes zoom');
+        if (SC_DEV) { console.log('Begin keyframes zoom'); }
         performKeyFramesZoomOperation();
       }
       else {
-        SC_DEV && console.log('Begin JS zoom');
+        if (SC_DEV) { console.log('Begin JS zoom'); }
         performJsAnimateZoomOperation();
       }
 

@@ -113,11 +113,11 @@ define(['$', 'style-service/css-aggregator', 'style-service/media-queries'], fun
           //      we won't have those rules anymore. Do we reanalyze at that point?
           var media = getMediaTypeFromCssText(rule);
           if (mediaQueries.isActiveMediaQuery(media)) {
-            SC_DEV && console.log('@media matched: ' + media);
+            if (SC_DEV) { console.log('@media matched: ' + media); }
             addMatchingRules(rule);    // Recursive
           }
           else {
-            SC_DEV && console.log('@media DID NOT match: ' + media);
+            if (SC_DEV) { console.log('@media DID NOT match: ' + media); }
           }
         }
       }
@@ -148,14 +148,14 @@ define(['$', 'style-service/css-aggregator', 'style-service/media-queries'], fun
         numSheets = document.styleSheets.length;
       for (; i < numSheets; i++) {
         if (document.styleSheets[i].ownerNode.id === id) {
-          SC_DEV && console.log('Found stylesheet %s after try#%d', id, tries);
+          if (SC_DEV) { console.log('Found stylesheet %s after try#%d', id, tries); }
           callback(document.styleSheets[i]);
           return;
         }
       }
 
       if (++ tries <= MAX_TRIES) {
-        SC_DEV && console.log('Could not find stylesheet ' + id);
+        if (SC_DEV) { console.log('Could not find stylesheet ' + id); }
         setTimeout(getStyleSheet, TRY_INTERVAL_MS);
       }
     }

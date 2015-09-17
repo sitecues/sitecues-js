@@ -887,7 +887,7 @@ define(['$', 'core/conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mou
       ancestorStyle = state.styles[index];
       if (ancestorStyle.position !== 'static' && ancestorStyle.position !== 'relative' &&
         hasVerticalOverflow()) {
-        SC_DEV && console.log('Highlight overlay container - absolute/fixed: %o', ancestor);
+        if (SC_DEV) { console.log('Highlight overlay container - absolute/fixed: %o', ancestor); }
         return ancestor;
       }
       // Don't tie to horizontal scroll -- these tend to not scrolled via
@@ -899,14 +899,14 @@ define(['$', 'core/conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mou
 //          var scrollWidth = ancestor.scrollWidth - EXTRA_PADDING_PIXELS;
 //          // Either this container scrolls directly or is positioned within a smaller parent
 //          if (scrollWidth > ancestor.offsetWidth || scrollWidth > ancestor.parentElement.offsetWidth) {
-//            SC_DEV && console.log('Highlight overlay container - h-scroll: %o', ancestor);
+//            if (SC_DEV) { console.log('Highlight overlay container - h-scroll: %o', ancestor); }
 //            return ancestor;
 //          }
 //        }
       if (ancestorStyle.overflowY !== 'visible') {  // use if vertically scrollable
         // Either this container scrolls directly or is positioned within a smaller parent
         if (hasVerticalOverflow()) {
-          SC_DEV && console.log('Highlight overlay container - v-scroll: %o', ancestor);
+          if (SC_DEV) { console.log('Highlight overlay container - v-scroll: %o', ancestor); }
           return ancestor;
         }
       }
@@ -1138,7 +1138,9 @@ define(['$', 'core/conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mou
     correctRect(state.cutoutRects.botLeft);
     correctRect(state.cutoutRects.botRight);
 
-    SC_DEV && isHighlightRectDebuggingOn && updateDebugRect();
+    if (SC_DEV && isHighlightRectDebuggingOn) {
+      updateDebugRect();
+    }
   }
 
   function addMouseWheelListener() {
@@ -1239,7 +1241,9 @@ define(['$', 'core/conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mou
       }
 
       if (isExistingHighlightRelevant()) {
-        SC_DEV && isHighlightRectDebuggingOn && updateDebugRect();
+        if (SC_DEV && isHighlightRectDebuggingOn) {
+          updateDebugRect();
+        }
         return; // No highlighting || highlight is already good -- nothing to do
       }
       // Highlight was inappropriate -- cursor wasn't in it
@@ -1250,7 +1254,9 @@ define(['$', 'core/conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mou
       // In case doesn't move after fast velocity, check in a moment and update highlight if no movement
       pickFromMouseTimer = 0;
       pickFromMouse(event);
-      SC_DEV && isHighlightRectDebuggingOn && updateDebugRect();
+      if (SC_DEV && isHighlightRectDebuggingOn) {
+        updateDebugRect();
+      }
     }, wasScrollEvent ? SCROLL_STOP_MS : MOUSE_STOP_MS);
   }
 

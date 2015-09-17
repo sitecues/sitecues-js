@@ -22,7 +22,7 @@ define(['core/conf/user/manager', 'core/conf/site', 'core/locale', 'core/platfor
         client_language: locale.getFullWebsiteLang()
       };
 
-      SC_DEV && console.log('Metric: ' + JSON.stringify(allData));
+      if (SC_DEV) { console.log('Metric: ' + JSON.stringify(allData)); }
 
       xhr.post({
         url: urls.getApiUrl('metrics/site/' + site.getSiteId() + '/notify.json'),

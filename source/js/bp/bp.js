@@ -237,7 +237,7 @@ define(['bp/controller/bp-controller', 'bp/model/state','bp/view/badge', 'bp/vie
 
     if (earlyBadgeElement && isDocumentReadyForBP(earlyBadgeElement)) {
 
-      SC_DEV && console.log('Document ready to initialize BP.');
+      if (SC_DEV) { console.log('Document ready to initialize BP.'); }
 
       setTimeout(initBPFeature, 0);
 
@@ -245,7 +245,7 @@ define(['bp/controller/bp-controller', 'bp/model/state','bp/view/badge', 'bp/vie
 
       if (isBadgeAnImage(earlyBadgeElement) && !earlyBadgeElement.complete) {
 
-        SC_DEV && console.log('Initialize BP when <img> loads.');
+        if (SC_DEV) { console.log('Initialize BP when <img> loads.'); }
 
         // Loading of badge image is enough -- once it's ready we can initialize
         // because we now have the desired dimensions of the badge
@@ -255,7 +255,7 @@ define(['bp/controller/bp-controller', 'bp/model/state','bp/view/badge', 'bp/vie
         // will also listen for document complete events and make  sure we are initialized then
       }
 
-      SC_DEV && console.log('Initialize BP when document.readyState === complete.');
+      if (SC_DEV) { console.log('Initialize BP when document.readyState === complete.'); }
 
       initBPWhenDocumentComplete();
     }
