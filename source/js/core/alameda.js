@@ -8,14 +8,16 @@
  * Available via the MIT or new BSD license.
  * see: http://github.com/requirejs/alameda for details
  */
-//Going sloppy to avoid 'use strict' string cost, but strict practices should
-//be followed.
-/*jslint sloppy: true, nomen: true, regexp: true */
-/*global setTimeout, process, document, navigator, setImmediate */
-/* jshint -W109 */
+
+// Our linting config lets the library assume define and require are global constants, since the
+// build system is responsible for privately namespacing them. Here, we must undo that to avoid
+// erroneous re-definition errors.
+
+/* globals -define, -require */
 
 var requirejs, require, define;
 (function (global, undef) {
+    /* globals setImmediate:false, process:false */
     var prim, topReq,
         bootstrapConfig = requirejs || require,
         hasOwn = Object.prototype.hasOwnProperty,
@@ -757,3 +759,4 @@ var requirejs, require, define;
         topReq.config(bootstrapConfig);
     }
 }(this));
+/* globals define:false, require:false */

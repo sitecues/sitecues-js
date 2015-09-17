@@ -30,6 +30,9 @@
     "SC_LOCAL": true,
     "SC_VERSION": true,
 
+    // TODO: We should not be using escape(), it is non-standard and deprecated.
+    "escape": false,
+
     "console": false,
 
     // AMD
