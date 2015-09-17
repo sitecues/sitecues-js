@@ -105,6 +105,8 @@ htmlSecondary =
   }
 
   function insertSvg(insertionId, markup) {
+    // Unfortunately innertHTML, outerHTML, insertAdjacentHTML do not work for <svg> in Safari (or probably IE)
+    // We have to create the elements in the SVG namespace and then insert it
     var where = helper.byId(insertionId),
       finalMarkup = finalizer(markup),
       temp = document.createElementNS('http://www.w3.org/1999/xhtml', 'div');
