@@ -51,7 +51,7 @@ define(['keys/element-classifier', 'keys/commands', 'core/metric'],
     isAnyNonShiftKeyDown,
     isHighlightVisible,
     isLensVisible,
-    isSitecuesOn,
+    isSitecuesOn = true,  // Init called when sitecues turned on for the first time
     lastKeyInfo,
     isInitialized,
 
