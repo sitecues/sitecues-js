@@ -9,7 +9,7 @@ define([
     'hlb/positioning',
     'hlb/styling',
     'core/platform',
-    'core/util/element-classifier',
+    'keys//element-classifier',
     'hlb/animation',
     'util/geo',
     'core/metric'],

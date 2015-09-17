@@ -295,7 +295,7 @@ define(['$', 'mouse-highlight/mouse-highlight', 'util/common', 'util/transform',
   }
 
   function speakHighlight() {
-    require(['core/keys/commands'], function(commands) {
+    require(['keys/commands'], function(commands) {
       commands.speakHighlight();
     });
   }

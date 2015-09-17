@@ -1,7 +1,7 @@
 /**
  * This is module for common utilities that might need to be used across all of the different modules.
  */
-define(['core/util/element-classifier'], function (elemClassifier) {
+define(['keys/element-classifier'], function (elemClassifier) {
 
   /*
    * Check if two Javascript objects are equal.

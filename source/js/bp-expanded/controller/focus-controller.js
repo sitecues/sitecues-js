@@ -7,6 +7,15 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
     isInitialized,
     isListeningToClicks,
     byId = helper.byId,
+    TAB   = 9,
+    ENTER = 13,
+    ESCAPE= 27,
+    SPACE = 32,
+    LEFT  = 37,
+    UP    = 38,
+    RIGHT = 39,
+    DOWN  = 40,
+
     TABBABLE = {
       'main': [
         'zoom-slider-bar',
@@ -55,10 +64,10 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
     },
     DELTA_KEYS = {};
 
-  DELTA_KEYS[BP_CONST.KEY_CODES.LEFT]  = -1;
-  DELTA_KEYS[BP_CONST.KEY_CODES.UP]    = 1;
-  DELTA_KEYS[BP_CONST.KEY_CODES.RIGHT] = 1;
-  DELTA_KEYS[BP_CONST.KEY_CODES.DOWN]  = -1;
+  DELTA_KEYS[LEFT]  = -1;
+  DELTA_KEYS[UP]    = 1;
+  DELTA_KEYS[RIGHT] = 1;
+  DELTA_KEYS[DOWN]  = -1;
 
   function getPanelContainer() {
     return byId(BP_CONST.BP_CONTAINER_ID);
@@ -149,7 +158,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
    - The "more button" is shown immediately rather than on a timer, so that the tabbing cycle doesn't suddenly change in the middle of tabbing
    We also save the last focus so that we can restore it when the panel closes.
    */
-  function beginKeyboardFocus() {
+  function beginKeyHandling() {
 
     // Save the last focus so that we can restore it when panel closes
     savedDocumentFocus = document.activeElement;
@@ -173,9 +182,11 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
     // Take the focus whether or not we're in focus mode,
     // in case the user presses tab or Escape to turn on keyboard mode after expansion
     getPanelContainer().focus();
+
+    window.addEventListener('keydown', processKeyDown, true);
   }
 
-  function restoreDocumentFocus() {
+  function endKeyHandling() {
     // If the BP_CONTAINER has focus AND the document.body was the previous
     // focused element, blur the BP_CONTAINER focus.
     //
@@ -188,6 +199,8 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
       var focusable = savedDocumentFocus || ('focus' in document ? document : document.body);
       focusable.focus();
     }
+
+    window.removeEventListener('keydown', processKeyDown, true);
   }
 
   function turnOnKeyboardMode() {
@@ -391,7 +404,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
     var keyCode = evt.keyCode;
 
     // Escape = close
-    if (keyCode === BP_CONST.KEY_CODES.ESCAPE) {
+    if (keyCode === ESCAPE) {
       require(['bp-expanded/controller/shrink-controller'], function(shrinkController) {
         shrinkController.shrinkPanel(true);
       });
@@ -399,7 +412,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
     }
 
     // Tab navigation
-    if (keyCode === BP_CONST.KEY_CODES.TAB) {
+    if (keyCode === TAB) {
       turnOnKeyboardMode();
       navigateInDirection(evt.shiftKey ? -1 : 1);
       return;
@@ -417,11 +430,26 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
         performZoomSliderCommand(keyCode, evt);
       }
       else {
-        if (keyCode === BP_CONST.KEY_CODES.ENTER || keyCode === BP_CONST.KEY_CODES.SPACE) {
+        if (keyCode === ENTER || keyCode === SPACE) {
           simulateClick(item);
         }
       }
       // else fall through to native processing of keystroke
+    }
+  }
+
+  function isModifiedKey(evt) {
+    return evt.altKey || evt.metaKey || evt.ctrlKey;
+  }
+
+  function processKeyDown(evt) {
+    if (isModifiedKey(evt) || !state.isPanel()) {
+      return;
+    }
+
+    if (!processKey(evt)) {
+      evt.preventDefault();
+      return false;
     }
   }
 
@@ -431,10 +459,11 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
     }
     isInitialized = true;
     sitecues.on('bp/will-toggle-feature bp/did-activate-link bp/do-send-feedback', hideFocus);
-    beginKeyboardFocus(); // First time badge expands
-    sitecues.on('bp/will-expand', beginKeyboardFocus);
-    sitecues.on('bp/will-shrink', restoreDocumentFocus);
+    beginKeyHandling(); // First time badge expands
+    sitecues.on('bp/will-expand', beginKeyHandling);
+    sitecues.on('bp/will-shrink', endKeyHandling);
     sitecues.on('bp/did-expand', showFocus);
+
   }
 
   var publics = {

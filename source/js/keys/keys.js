@@ -1,4 +1,4 @@
-define(['core/util/element-classifier', 'core/keys/commands', 'core/metric'],
+define(['keys/element-classifier', 'keys/commands', 'core/metric'],
   function(elemClassifier, commands, metric) {
 
   var
@@ -51,8 +51,9 @@ define(['core/util/element-classifier', 'core/keys/commands', 'core/metric'],
     isAnyNonShiftKeyDown,
     isHighlightVisible,
     isLensVisible,
-    isSitecuesOn,
+    isSitecuesOn = true,  // Init called when sitecues turned on for the first time
     lastKeyInfo,
+    isInitialized,
 
     KEY_TESTS = {
       'space': function(event) {
@@ -200,10 +201,7 @@ define(['core/util/element-classifier', 'core/keys/commands', 'core/metric'],
     // Spacebar is probably the most likely, but as we start handling other keys such
     // as arrows, we need to be careful. We could either decide which keys that we consume
     // need stopImmediatePropagation, or just do it always to be safe.
-    // TODO put this back for all keys -- after we decide how metrics will learn about keys
-    if (event.keyCode === 32 || event.keyCode === 27) {
-      event.stopImmediatePropagation();
-    }
+    event.stopImmediatePropagation();
 
     executeCommand(event, commandName, keyName);
   }
@@ -236,6 +234,11 @@ define(['core/util/element-classifier', 'core/keys/commands', 'core/metric'],
     if (event.defaultPrevented) {
       return; // Another script already used this key and set this flag like a good citizen
     }
+
+    processKey(event);
+  }
+
+  function processKey(event) {
 
     // iterate over key map
     for (var key in KEY_TESTS) {
@@ -309,7 +312,13 @@ define(['core/util/element-classifier', 'core/keys/commands', 'core/metric'],
     sitecues.emit('keys/sitecues-key-down', isFollowMouseEnabled);
   }
 
-  function init() {
+  function init(keyEvent) {
+    if (isInitialized) {
+      return;
+    }
+
+    isInitialized = true;
+
     // bind key hook to window
     // 3rd param changes event order: false == bubbling; true = capturing.
     // We use capturing because we want to get the key before anything else does --
@@ -335,6 +344,10 @@ define(['core/util/element-classifier', 'core/keys/commands', 'core/metric'],
     sitecues.on('sitecues/did-toggle', function(isOn) {
       isSitecuesOn = isOn;
     });
+
+    if (keyEvent) {
+      processKey(keyEvent);
+    }
   }
 
   return {

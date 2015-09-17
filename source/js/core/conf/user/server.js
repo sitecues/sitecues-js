@@ -59,9 +59,9 @@ define(['core/conf/user/manager', 'core/conf/urls', 'core/conf/user/localstorage
   function saveData(key, value) {
 
     // Load the data from localStorage: User ID namespace.
-    lsByUserId = ls.getUserPreferencesById(); // String.
+    lsByUserId = ls.getPrefs(); // String.
     if (lsByUserId) {
-      ls.setUserPreferenceById(key, value);
+      ls.setPref(key, value);
     }
 
     saveDataToServer(key, value);
@@ -85,14 +85,14 @@ define(['core/conf/user/manager', 'core/conf/urls', 'core/conf/user/localstorage
 
   // Reset all settings as if it is a new user
   function reset() {
-    ls.clearSitecuesLs();
+    ls.clear();
   }
 
   // Received via jsonp from server
   function loadFromServerCallback(data) {
     cleanupJsonp();
 
-    ls.setUserPreferencesById(data);
+    ls.setPrefs(data);
 
     loadCallback(data);
   }
@@ -123,7 +123,7 @@ define(['core/conf/user/manager', 'core/conf/urls', 'core/conf/user/localstorage
     });
 
     // Load the data from localStorage: User ID namespace.
-    lsByUserId = ls.getUserPreferencesById();
+    lsByUserId = ls.getPrefs();
     if (lsByUserId || SC_LOCAL) {
       loadCallback(lsByUserId);
     }

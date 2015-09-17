@@ -34,17 +34,22 @@
 //           Cookie is set for metrics?
 
 
-define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/conf/user/manager', 'core/metric', 'core/platform', 'bp/bp', 'core/keys/keys' ],
-  function (userId, userSettingsServer, locale, conf, metric, platform, bp, keys) {
+define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/conf/user/manager', 'core/metric', 'core/platform', 'bp/bp'],
+  function (userId, userSettingsServer, locale, conf, metric, platform, bp) {
   var
     numPrereqsToComplete,
     isZoomInitialized,
     isSpeechInitialized,
     isZoomOn,
     isSpeechOn,
-    isSitecuesOn = false;
+    isSitecuesOn = false,
+    EQUALS   = 187,
+    NUMPAD_ADD = 107,
+    PLUS_ALTERNATE_1 = 61,
+    PLUS_ALTERNATE_2 = 43,
+    QUOTE = 222;
 
-  function initZoom() {
+    function initZoom() {
     require([ 'hpan/hpan', 'zoom/fixed-position-fixer', 'enhance/focus', 'cursor/cursor' ], function(hpan, fixer, focus, cursor) {
       hpan.init();
       fixer.init();
@@ -61,8 +66,9 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
   }
 
   function initSitecuesOn() {
-    require([ 'mouse-highlight/mouse-highlight', 'mouse-highlight/move-keys' ], function(highlight, moveKeys) {
+    require([ 'mouse-highlight/mouse-highlight', 'keys/keys', 'mouse-highlight/move-keys' ], function(highlight, keys, moveKeys) {
       highlight.init();
+      keys.init();
       moveKeys.init();
     });
   }
@@ -108,21 +114,21 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
   }
 
   function onAllPrereqsComplete() {
+    firePageLoadEvent();
+
     // Initialize other features after bp
     var initialZoom = conf.get('zoom');
-    if (initialZoom) {
+    if (initialZoom > 1) {
       require(['zoom/zoom'], function (zoomMod) {
         zoomMod.init();
         zoomMod.performInitialLoadZoom(initialZoom);
       });
     }
 
-    keys.init();
-
-    firePageLoadEvent();
-
+    // Init zoom if turned on
     sitecues.on('zoom', onZoomChange);
 
+    // Init speech if turned on
     conf.get('ttsOn', function(isOn) {
       isSpeechOn = isOn;
       onFeatureSettingChanged();
@@ -131,16 +137,39 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
         isSpeechInitialized = true;
       }
     });
+
+    // Init themes if turned on
     conf.get('themeName', function(themeName) {
       if (themeName) {
         initThemes();
       }
     });
+
+    // Init mouse settings if turned on
     conf.get('mouseSize mouseHue', function(value) {
       if (value) {
         initMouse();
       }
     });
+
+    // Init keys module if sitecues was off but key is pressed that might turn it on
+    // E.g. + or ' is pressed
+    if ((initialZoom > 1) === false && !isSpeechOn) {
+      window.addEventListener('keydown', function (event) {
+        var keyCode = event.keyCode;
+        if (keyCode === EQUALS || keyCode === NUMPAD_ADD ||
+          keyCode === PLUS_ALTERNATE_1 || keyCode === PLUS_ALTERNATE_2 || keyCode === QUOTE) {
+          if (event.ctrlKey || event.metaKey || event.altKey) {
+            // Don't allow default behavior of modified key, e.g. native zoom
+            event.preventDefault();
+            event.stopImmediatePropagation();
+          }
+          require(['keys/keys'], function (keys) {
+            keys.init(event);
+          });
+        }
+      });
+    }
   }
 
   function onPrereqComplete() {

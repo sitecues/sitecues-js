@@ -56,7 +56,7 @@ define(['bp/bp', 'bp/constants', 'bp/model/state'], function(bp, BP_CONST, state
       className += ' scp-is-secondary';
     }
     if (state.get('isSecondaryExpanding')) {
-      className += ' scp-secondary-expanding';  // Growing in visual height
+      className  += ' scp-secondary-expanding';  // Growing in visual height
     }
 
     return className;

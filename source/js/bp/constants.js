@@ -205,19 +205,6 @@ define([], function() {
   // TODO is this still needed? It's fixed in Firefox
   constants.FIREFOX_SLIDER_OFFSET = 83; // Hardcoded because of https://bugzilla.mozilla.org/show_bug.cgi?id=479058
 
-  constants.KEY_CODES = {
-    'TAB'   : 9,
-    'ENTER' : 13,
-    'ESCAPE': 27,
-    'SPACE' : 32,
-    'HOME'  : 36,
-    'END'   : 35,
-    'LEFT'  : 37,
-    'UP'    : 38,
-    'RIGHT' : 39,
-    'DOWN'  : 40
-  };
-
   // TODO compute this ratio
   // It's used to set the slider thumb properly
   constants.LARGE_SLIDER_WIDTH = 256;
@@ -235,9 +222,6 @@ define([], function() {
   // Amount of pixels of whitespace at the top of the badge
   // (This whitespace exists for a reason -- it turns into the top border when the panel opens)
   constants.BADGE_VERTICAL_OFFSET = 2;
-
-  constants.BASE_STYLESHEET_ID    = 'sitecues-badge-panel-base-css';
-  constants.PALETTE_STYLESHEET_ID = 'sitecues-badge-panel-palette-css';
 
   // Map legal full palette names to short names, used to create a class e.g. .scp-palette-rb
   constants.PALETTE_NAME_MAP = {

@@ -6,6 +6,7 @@ define(['core/conf/user/manager', 'dollar/dollar-utils', 'zoom/zoom'], function 
     MAX_EDGE_PORTION = .25,
     SPEED_FACTOR = 4,
     MAX_SPEED = 100,
+    isListeningToResize,
     xLastPos;
 
   // get dependencies
@@ -93,10 +94,22 @@ define(['core/conf/user/manager', 'dollar/dollar-utils', 'zoom/zoom'], function 
     return movementX;
   }
 
+  function onZoomChange(zoomLevel) {
+    if (zoomLevel> 1 && !isListeningToResize) {
+      isListeningToResize = true;
+      sitecues.on('resize', refresh);
+    }
+    refresh();
+  }
+
+  function getZoom() {
+    return conf.get('zoom');
+  }
+
   function refresh() {
 
     // Turn on if zoom is > 1 and content overflows window more than a tiny amount
-    var zoom = conf.get('zoom'),
+    var zoom = getZoom(),
       doTurnOn = zoom > 1 && zoomMod.getBodyRight() / window.innerWidth > 1.02 && !isHlbOn && !isPanelOpen;
 
     if (doTurnOn !== isOn) {
@@ -136,13 +149,8 @@ define(['core/conf/user/manager', 'dollar/dollar-utils', 'zoom/zoom'], function 
     });
 
     // react on any zoom change
-    sitecues.on('zoom', function (value) {
-      sitecues.off('resize', refresh);
-      if (value > 1) {
-        sitecues.on('resize', refresh);
-      }
-      refresh();
-    });
+    sitecues.on('zoom', onZoomChange);
+    onZoomChange(getZoom());
   }
 
   return {

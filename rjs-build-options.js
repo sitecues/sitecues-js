@@ -16,7 +16,7 @@
       include : [
         '../../build-config/config.js',
         'core/core',
-        '../../../node_modules/alameda/alameda.js'
+        'core/alameda.js'
       ],
       create: true,
       insertRequire: ['core/core']
@@ -83,6 +83,7 @@
         'bp/constants',
         'bp/model/state',
         'bp/helper',
+        'bp/view/markup-finalizer',
         'core/util/xhr',
         'util/common',
         'bp-expanded/view/svg-animate',
@@ -90,6 +91,18 @@
         'core/metric',
         'core/conf/urls',
         'core/conf/user/manager'
+      ]
+    },
+    {  // We could split into audio and zoom features
+      name: 'keys',
+      create: true,
+      include: [
+        'keys/keys',
+        'keys/commands',
+        'keys/element-classifier'
+      ],
+      exclude: [
+        'core/metric'
       ]
     },
     {  // We could split into audio and zoom features
@@ -120,7 +133,7 @@
         'core/conf/urls',
         'core/conf/site',
         'core/conf/user/manager',
-        'core/util/element-classifier'
+        'keys/element-classifier'
       ]
     },
     {
@@ -143,6 +156,7 @@
         'core/conf/user/manager',
         'core/metric',
         'core/conf/urls',
+        'keys/element-classifier',
         'util/geo',
         'util/transform'
       ]
