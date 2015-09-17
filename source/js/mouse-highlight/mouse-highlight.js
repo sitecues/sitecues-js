@@ -1586,6 +1586,7 @@ define(['$', 'core/conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mou
 
     sitecues.on('sitecues/did-toggle', function(isOn) {
       isSitecuesOn = isOn;
+      refreshEventListeners();
     });
 
     // Darken highlight appearance when speech is enabled
