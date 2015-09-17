@@ -80,16 +80,15 @@ define(['$', 'util/common', 'core/platform'], function($, common, platform) {
       */
 
       // Get the dimensions
-      var elem             = $hlb[0]       // The HLB Element
-        , scrollHeight     = elem.scrollHeight    // The total height of the scrollable area
-        , scrollTop        = elem.scrollTop       // Pixel height of invisible area above element (what has been scrolled)
-        , clientHeight     = elem.clientHeight    // The height of the element in the window
-        , scrollBottom     = scrollHeight-scrollTop-clientHeight // The pixels height invisible area below element (what is left to scroll)
-        , scrollingDown    = deltaY > 0           // If the user is scrolling downwards
-        , scrollingUp      = deltaY < 0           // If the user is scrolling upwards
-        , scrolledToBottom = scrollBottom <= 1    // There are now more invisible pixels below the element
-        , scrolledToTop    = elem.scrollTop <= 1  // There are now more invisible pixels above the element
-        ;
+      var elem             = $hlb[0],       // The HLB Element
+          scrollHeight     = elem.scrollHeight,    // The total height of the scrollable area
+          scrollTop        = elem.scrollTop,       // Pixel height of invisible area above element (what has been scrolled)
+          clientHeight     = elem.clientHeight,    // The height of the element in the window
+          scrollBottom     = scrollHeight-scrollTop-clientHeight, // The pixels height invisible area below element (what is left to scroll)
+          scrollingDown    = deltaY > 0,           // If the user is scrolling downwards
+          scrollingUp      = deltaY < 0,           // If the user is scrolling upwards
+          scrolledToBottom = scrollBottom <= 1,    // There are now more invisible pixels below the element
+          scrolledToTop    = elem.scrollTop <= 1;  // There are now more invisible pixels above the element
 
 
       // Prevent any scrolling if the user is:

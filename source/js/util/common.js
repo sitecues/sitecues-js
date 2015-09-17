@@ -121,9 +121,9 @@ define(['core/util/element-classifier'], function (elemClassifier) {
    * @param e Event Object
    */
   function wheelUp(e) {
-    var evt = e || window.event
-    , delta = evt.originalEvent.detail < 0 || evt.originalEvent.wheelDelta > 0 ? 1 : -1
-    ;
+    var evt = e || window.event,
+        delta = evt.originalEvent.detail < 0 || evt.originalEvent.wheelDelta > 0 ? 1 : -1;
+
     return delta > 0;
   }
 

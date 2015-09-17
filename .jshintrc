@@ -30,6 +30,8 @@
     "SC_LOCAL": true,
     "SC_VERSION": true,
 
+    "console": false,
+
     // AMD
     "require": false,
     "define": false,

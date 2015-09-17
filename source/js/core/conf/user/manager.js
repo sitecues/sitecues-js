@@ -7,10 +7,9 @@ define([], function () {
   'use strict';
 
   // private variables
-  var storedData      = {}
-    , handlers  = {}
-    , listeners = {}
-    ;
+  var storedData = {},
+      handlers  = {},
+      listeners = {};
 
   // get configuration value
   function get(key, callback) {

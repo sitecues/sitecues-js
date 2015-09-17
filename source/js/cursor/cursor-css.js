@@ -66,7 +66,7 @@ define(['core/platform', 'zoom/zoom', 'util/color', 'core/conf/urls'], function 
         middle = CURSOR_SVG[platform.os.is]['_' + type].replace(/HUE/g, hueString),
       cursorSvg = prefix + middle + POSTFIX;
 
-
+    // TODO: escape() is deprecated, replace with custom helper
     return 'data:image/svg+xml,' + escape( cursorSvg );
   }
 
