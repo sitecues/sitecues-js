@@ -1151,12 +1151,12 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'util/
     shouldUseElementDotAnimate = platform.browser.isChrome && body.animate;
 
     // Not necessary to use CSS will-change with element.animate()
-    // TODO is putting this on the <body> too much? We saw the following message in Firefox's console:
+    // Putting this on the <body> is too much. We saw the following message in Firefox's console:
     // Will-change memory consumption is too high. Surface area covers 2065500 pixels, budget is the document
     // surface area multiplied by 3 (450720 pixels). All occurrences of will-change in the document are
     // ignored when over budget.
-    shouldUseWillChangeOptimization = false;
-      //typeof body.style.willChange === 'string' && !shouldUseElementDotAnimate;
+//    shouldUseWillChangeOptimization =
+//      typeof body.style.willChange === 'string' && !shouldUseElementDotAnimate;
   }
 
   function performInitialLoadZoom(initialZoom) {
