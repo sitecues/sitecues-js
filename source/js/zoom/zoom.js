@@ -1155,8 +1155,8 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'util/
     // Will-change memory consumption is too high. Surface area covers 2065500 pixels, budget is the document
     // surface area multiplied by 3 (450720 pixels). All occurrences of will-change in the document are
     // ignored when over budget.
-    shouldUseWillChangeOptimization =
-      typeof body.style.willChange === 'string' && !shouldUseElementDotAnimate;
+    shouldUseWillChangeOptimization = false;
+      //typeof body.style.willChange === 'string' && !shouldUseElementDotAnimate;
   }
 
   function performInitialLoadZoom(initialZoom) {

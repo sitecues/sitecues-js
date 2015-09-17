@@ -9,7 +9,7 @@
 // IE
 // - feedback page issues
 // -- stars not activating via enter key in IE9
-// -- Sliders ugly in IE10
+// -- Sliders ugly in IE
 // -- Performance bad in IE10 with nytimes.com
 // Slow CSS in styles.js: [data-sc-reversible]
 // Slow CSS in styles.js: #scp-bp-container *

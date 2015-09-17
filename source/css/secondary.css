@@ -638,3 +638,7 @@ sc-button[data-setting-current="true"] {
   top: 99px;
   text-align: center;
 }
+
+#scp-button-menu > * {
+  will-change: transform;
+}
