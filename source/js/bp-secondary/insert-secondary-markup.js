@@ -109,9 +109,15 @@ htmlSecondary =
     // We have to create the elements in the SVG namespace and then insert it
     var where = helper.byId(insertionId),
       finalMarkup = finalizer(markup),
-      temp = document.createElementNS('http://www.w3.org/1999/xhtml', 'div');
-    temp.innerHTML= '<svg xmlns="http://www.w3.org/2000/svg">' + finalMarkup + '</svg>';
-    where.parentNode.replaceChild(temp.firstChild.firstChild, where);
+      divElement = document.createElementNS('http://www.w3.org/1999/xhtml', 'div'),
+      svgElement,
+      svgContentToInsert;
+
+    // Use HTML element so that we can use innerHTML property
+    divElement.innerHTML= '<svg xmlns="http://www.w3.org/2000/svg">' + finalMarkup + '</svg>';
+    svgElement = divElement.firstChild; // This is the <svg> element
+    svgContentToInsert = svgElement.firstChild;  // This is the actual content we want
+    where.parentNode.replaceChild(svgContentToInsert, where);
   }
 
   function init() {
