@@ -21,7 +21,7 @@ define(['core/conf/user/manager', 'audio/audio'], function(conf, audio) {
     VERBAL_CUE_SPEECH_OFF = 'verbalCueSpeechOff',
 
     // This is the initial zoom level, we're only going to use the verbal cue if someone increases it
-    initialZoom = conf.get('zoom');
+    initialZoom = conf.get('zoom') || 1;
 
   /**
    * Returns true if the "descriptive speech on" cue should be played.

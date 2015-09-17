@@ -404,7 +404,7 @@ define(['$', 'core/conf/user/manager', 'hlb/styling', 'util/common', 'keys/eleme
    */
   function initializeSize($hlb, initialHLBRect) {
 
-    var zoom   = conf.get('zoom'),
+    var zoom   = getPageZoom(),
         width  = (initialHLBRect.width  / zoom) + 'px',
         height = (initialHLBRect.height / zoom) + 'px';
 
@@ -552,7 +552,7 @@ define(['$', 'core/conf/user/manager', 'hlb/styling', 'util/common', 'keys/eleme
         }
 
         $hlb.css({
-         'width' : initialHLBRect.width / conf.get('zoom') - extraLeft
+         'width' : initialHLBRect.width / getPageZoom()  - extraLeft
         });
 
         fixOverflowWidth($hlb);
@@ -603,15 +603,19 @@ define(['$', 'core/conf/user/manager', 'hlb/styling', 'util/common', 'keys/eleme
     return getHlbZoom() *getStartingScale($hlb);
   }
 
+  function getPageZoom() {
+    return conf.get('zoom') || 1;
+  }
+
   // HLB transform scale necessary to show HLB at same size as original highlighted content.
   function getStartingScale($hlb) {
-    return $hlb.closest(document.body).length ? 1 : conf.get('zoom');
+    return $hlb.closest(document.body).length ? 1 : getPageZoom();
   }
 
   // Transform scale that affects HLB (was inherited from page zoom)
   // If the HLB is outside the body, this will be 1 (since the page zoom is on <body>)
   function getInheritedZoom($hlb) {
-    return $hlb.closest(document.body).length ? conf.get('zoom') : 1;
+    return $hlb.closest(document.body).length ? getPageZoom() : 1;
   }
 
   function sizeHLB($hlb, $originalElement, initialHLBRect) {
@@ -684,7 +688,7 @@ define(['$', 'core/conf/user/manager', 'hlb/styling', 'util/common', 'keys/eleme
                 ((-offset.y / inheritedZoom) + HLBBoundingBox.height / 2 / inheritedZoom) + 'px';
 
     // Position the HLB without it being scaled (so we can animate the scale).
-    var startAnimationZoom = conf.get('zoom') / inheritedZoom,
+    var startAnimationZoom = getPageZoom() / inheritedZoom,
       hlbStyle = $hlb[0].style;
 
     hlbStyle[platform.transformProperty] = 'scale(' + startAnimationZoom + ') ' + translateCSS;
