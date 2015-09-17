@@ -98,17 +98,33 @@ htmlSecondary =
   </sc-p>\
 </sc>';
 
-  function insertMarkup(insertionId, markup) {
-    var where = helper.byId(insertionId);
-    where.outerHTML = finalizer(markup);
-    helper.invalidateId(insertionId); // Now a different node
+  function insertHtml(insertionId, markup) {
+    var where = helper.byId(insertionId),
+      finalMarkup = finalizer(markup);
+    where.outerHTML = finalMarkup;
+  }
+
+  function insertSvg(insertionId, markup) {
+    // Unfortunately innertHTML, outerHTML, insertAdjacentHTML do not work for <svg> in Safari (or probably IE)
+    // We have to create the elements in the SVG namespace and then insert it
+    var where = helper.byId(insertionId),
+      finalMarkup = finalizer(markup),
+      divElement = document.createElementNS('http://www.w3.org/1999/xhtml', 'div'),
+      svgElement,
+      svgContentToInsert;
+
+    // Use HTML element so that we can use innerHTML property
+    divElement.innerHTML= '<svg xmlns="http://www.w3.org/2000/svg">' + finalMarkup + '</svg>';
+    svgElement = divElement.firstChild; // This is the <svg> element
+    svgContentToInsert = svgElement.firstChild;  // This is the actual content we want
+    where.parentNode.replaceChild(svgContentToInsert, where);
   }
 
   function init() {
     if (!isInitialized) {
       isInitialized = true;
-      insertMarkup('scp-secondary', svgSecondary);
-      insertMarkup('scp-html-secondary', htmlSecondary);
+      insertHtml('scp-html-secondary-anchor', htmlSecondary);
+      insertSvg('scp-secondary-anchor', svgSecondary, true);
     }
   }
 

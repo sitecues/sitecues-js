@@ -589,12 +589,15 @@ define(['$', 'core/conf/user/manager', 'hlb/styling', 'util/common', 'keys/eleme
   }
 
   function getHlbZoom() {
-    var lensSizeSetting = conf.get('lensSize');
-    switch (lensSizeSetting) {
-      case '-': return 1.2;
-      case '+': return 2;
-      default: return 1.5;
-    }
+    return 1.5;
+
+//  TODO should we remove permanently or do we want to keep this?
+//    var lensSizeSetting = conf.get('lensSize');
+//    switch (lensSizeSetting) {
+//      case '-': return 1.2;
+//      case '+': return 2;
+//      default: return 1.5;
+//    }
   }
 
   // HLB transform scale necessary to provide the HLBExtraZoom size increase.

@@ -230,7 +230,7 @@ define(['bp/constants', 'bp/helper', 'core/locale', 'bp/model/state', 'core/plat
     }
 
     // Set indicator
-    indicator.style.backgroundPositionX = (-442 + left + chosenItemRect.width / 2) + 'px';
+    indicator.style.backgroundPosition = (-442 + left + chosenItemRect.width / 2) + 'px 0';
     chosenItem.setAttribute('aria-selected', 'true');
   }
 

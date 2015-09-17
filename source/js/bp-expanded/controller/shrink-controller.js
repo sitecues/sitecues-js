@@ -120,6 +120,8 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
     state.set('transitionTo', BP_CONST.BADGE_MODE);
     state.set('featurePanelName', '');
     state.set('isShrinkingFromKeyboard', isFromKeyboard);
+    state.set('isSecondaryPanel', false);
+    state.set('secondaryPanelTransitionTo', 0);
 
     // If the secondary panel is active, deactivate it.
     if (state.isSecondaryPanelRequested()) {
