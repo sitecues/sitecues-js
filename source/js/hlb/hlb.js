@@ -719,11 +719,12 @@ define([
     };
   }
 
-  // Legal sizes == '-' (smaller), null (default), '+' (larger)
-  conf.def('lensSize', function(size) {
-    return size === '-' || size === '+' ? size : null;
-  });
-
+//  TODO should we remove permanently or do we want to keep this?
+//  // Legal sizes == '-' (smaller), null (default), '+' (larger)
+//  conf.def('lensSize', function(size) {
+//    return size === '-' || size === '+' ? size : null;
+//  });
+//
   var publics = {
     getElement: getElement,
     toggleHLB: toggleHLB,

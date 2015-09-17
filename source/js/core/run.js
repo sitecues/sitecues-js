@@ -3,8 +3,6 @@
  *   The core module of the sitecues library.
  */
 
-// Different loaders? almond, define, amdlite, tinyamd, *Curl*
-// For IE9 build try amdclean?
 //Firefox -- BP animation slow
 // IE
 // - feedback page issues
@@ -15,7 +13,7 @@
 // Slow CSS in styles.js: #scp-bp-container *
 // Accessibility testing
 // Cross-browser testing
-// TODO Localize
+// TODO Localize, Anton Neuber (aneuber@aisquared.com), Jarek (Jaroslaw Urbansk) [jurbanski@harpo.com.pl]
 // TODO themes
 // TODO cursor size/hue settings only -- be careful of mousehue 1.1 which means nothing
 // UX testing
