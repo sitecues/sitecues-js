@@ -19,39 +19,6 @@
 
   // Maximum number of rule violations to report before giving up.
   "maxerr"        : 100,
-  // DEPRECATED. The tab width expected for code blocks to be nested by.
-  "indent"        : 2,
-  // REMOVED.
-  "nomen"         : true,
-  // REMOVED.
-  "onevar"        : false,
-  // DEPRECATED. Whether to demand that all IIFEs be wrapped in parens, to make their behavior more intuitive e.g. `(function () { } ());`
-  "immed"         : true,
-
-  // UNNECESSARY. `predef` predated `globals` and is merely a less flexible version of the same API that assumes false/read-only
-  // Define Global Variables Here   -- copy to both predef and globals sections
-  // because predef section was not working in WebStorm
-  "predef": [
-    "XMLHttpRequest",
-    "XDomainRequest",
-    "ActiveXObject",
-    "sitecues",
-    "sitecuesEverywhere",
-    "module",
-    "CSSPrimitiveValue",
-    "CSSStyleDeclaration",
-    "escape",
-    "console",
-    "SC_DEV",
-    "SC_UNIT",
-    "SC_LOCAL",
-    "SC_VERSION",
-    "$",
-    "require",
-    "define",
-    "webkitAudioContext",
-    "devicePixelRatio"
-  ],
 
   // List of variables to assume are already defined. Set to `true` to tolerate assigments to those variables.
   "globals": {
@@ -87,8 +54,6 @@
 
   // Whether to prohibit bitwise operators (&, |, ^, etc.), which are frequently typos.
   "bitwise"       : true,
-  // DEPRECATED. Whether to demand that identifiers be camelCase, to follow widely held conventions.
-  "camelcase"     : false,
   // Whether to demand {} for every new block or scope, because explicit is good.
   "curly"         : true,
   // Whether to demand triple equals (===) and disallow double equals, because type coercion is not user friendly.
@@ -101,28 +66,18 @@
   "maxcomplexity" : false,
   // Maximum depth of nested blocks (within functions). Helps discourage overly complex code.
   "maxdepth"      : false,
-  // DEPRECATED. Maximum number of characters per line. Helps readability.
-  "maxlen"        : false,
   // Maximum number of formal params allowed per function. Helps discourage overly complex code.
   "maxparams"     : false,
   // Maximum number of statements allowed per function. Helps discourage overly complex code.
   "maxstatements" : false,
-  // DEPRECATED. Whether to demand that all constructor functions be capitalized e.g. `new Foo()`
-  "newcap"        : false,
   // Whether to prohibit use of `arguments.caller` and `arguments.callee`, which is not in modern JS anymore.
   "noarg"         : true,
-  // DEPRECATED. Whether to prohibit use of empty blocks, which is almost never intentional.
-  "noempty"       : false,
   // Whether to prohibit use of constructors for side-effects (without assignment).
   "nonew"         : true,
   // Whether to prohibit use of `++` & `--`, which are usually not well understood outside of basic loops.
   "plusplus"      : false,
-  // DEPRECATED. Which type of quotation mark to demand, for consistency.
-  "quotmark"      : "single",
   // Whether to demand that all functions are run in ES5 Strict Mode
   "strict"        : false,
-  // REMOVED. Whether to prohibit trailing whitespaces.
-  "trailing"      : false,
   // Whether to prohibit usage of variables that are never defined.
   "undef"         : true,
   // Whether to demand that all variables that are defined do eventually get used.
@@ -155,27 +110,17 @@
   "iterator"      : false,
   // Whether to tolerate omitting a semicolon for the last statement of a one-line block.
   "lastsemic"     : false,
-  // DEPRECATED. Whether to tolerate possibly unsafe line breakings.
-  "laxbreak"      : false,
-  // DEPRECATED. Whether to tolerate comma-first coding style (in variable lists, for example).
-  "laxcomma"      : true,
   // Whether to tolerate functions being defined in loops, even though it usually doesn't behave as first expected.
   "loopfunc"      : false,
   // Whether to tolerate Mozilla specific syntax (extends and overrides esnext features)
   "moz"           : false,
-  // DEPRECATED. Whether to tolerate multi-line strings.
-  "multistr"      : false,
   // Whether to tolerate using the `__proto__` property, even though it is non-standard and may hurt performance.
   "proto"         : false,
   // Whether to tolerate script-targeted URLs.
   "scripturl"     : false,
-  // REMOVED. Whether to tolerate mixed tabs/spaces when used for alignment
-  "smarttabs"     : false,
   // Whether to tolerate re-defining variables, which is often a mistake. e.g. `var x=1; x=2;`
   // TODO: MAYBE: "shadow" : "outer" to cause more complaints?
   "shadow"        : false,
-  // DEPRECATED. Whether to tolerate using bracket notation `[]` when it can still be expressed in dot notation.
-  "sub"           : false,
   // Whether to tolerate `new function () { ... };` and `new Object;`, even though it probably doesn't do what you want.
   "supernew"      : false,
   // Whether to tolerate using `this` in a non-constructor function, where it typically points to the global object.
