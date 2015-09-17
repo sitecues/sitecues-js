@@ -192,8 +192,7 @@ define(['bp/helper', 'core/platform', 'bp/constants', 'core/conf/site', 'core/co
         'outline': 0, // don't show default dotted focus outline
         '-webkit-user-select': 'none',
         '-moz-user-select': 'none',
-        '-ms-user-select': 'none',
-        'user-select': 'none'
+        '-ms-user-select': 'none'
       },
 
       '#scp-svg': {

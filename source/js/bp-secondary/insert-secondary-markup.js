@@ -111,7 +111,7 @@ htmlSecondary =
       finalMarkup = finalizer(markup),
       temp = document.createElementNS('http://www.w3.org/1999/xhtml', 'div');
     temp.innerHTML= '<svg xmlns="http://www.w3.org/2000/svg">' + finalMarkup + '</svg>';
-    where.parentNode.replaceChild(temp.firstChild, where);
+    where.parentNode.replaceChild(temp.firstChild.firstChild, where);
   }
 
   function init() {
