@@ -22,32 +22,26 @@
 
   // List of variables to assume are already defined. Set to `true` to tolerate assigments to those variables.
   "globals": {
-    // UNNECESSARY. Use `browser` option.
-    "XMLHttpRequest": true,
-    // UNNECESSARY. Use `browser` option.
-    "XDomainRequest": true,
-    // UNNECESSARY. Use `browser` option.
-    "ActiveXObject": true,
+    // sitecues specific
     "sitecues": true,
     "sitecuesEverywhere": true,
-    // UNNECESSARY ?? We shouldn't be mixing Node.js and browser code, generally.
-    "module": true,
-    // UNNECESSARY. Use `browser` option.
-    "CSSPrimitiveValue": true,
-    // UNNECESSARY. Use `browser` option.
-    "CSSStyleDeclaration": true,
-    "escape": true,
-    "console": true,
     "SC_DEV": true,
     "SC_UNIT": true,
     "SC_LOCAL": true,
     "SC_VERSION": true,
-    "$": true,
-    "require": true,
-    "define": true,
-    "webkitAudioContext": true,
-    // UNNECESSARY. Use `browser` option.
-    "devicePixelRatio": true
+
+    // AMD
+    "require": false,
+    "define": false,
+
+    // UNNECESSARY ?? We shouldn't be mixing Node.js and browser code, generally.
+    "module": false,
+
+    // TODO: Submit patch to JSHint to include these in `browser` vars:
+    "webkitAudioContext": false,
+    "CSSPrimitiveValue": false,
+    "CSSStyleDeclaration": false,
+    "devicePixelRatio": false
   },
 
   // Enforcing - Rules that cause the linter to complain more.
