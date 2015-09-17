@@ -79,7 +79,7 @@ define(['bp/view/markup-finalizer'], function(finalizer) {
     <rect opacity="0" x="0" y="195" width="808" height="64"/>\
   </g>\
 </g>\
-<g id="scp-secondary"/>\
+<g id="scp-secondary-anchor"/>\
 <use id="scp-outline" xlink:href="#scp-outline-def" class="scp-panel-only" fill="none" opacity="0"/>\
 <g id="scp-more-button-container" transform="translate(400,198)">\
   <g id="scp-more-button-group" data-hover="scale(1.2)" class="scp-hand-cursor" role="button" aria-label="{{more_features}}">\
@@ -90,8 +90,7 @@ define(['bp/view/markup-finalizer'], function(finalizer) {
 <rect id="scp-mouseover-target" x="0" y="0" width="700" height="160" opacity="0"/>\
 </svg>\
 \
-<sc id="scp-html-secondary"/>\
-<sc style="display:none"></sc>'; // Hack to make sure innerHTML doesn't remove any important last element
+<sc id="scp-html-secondary-anchor" style="display:none"></sc>'; // Hack to make sure innerHTML doesn't remove any important last element
 
   return function() {
     return finalizer(svg);

@@ -11,7 +11,7 @@ define(['bp/constants',
     'bp/helper',
     'bp-expanded/view/svg-animate',
     'util/transform',
-    'bp-secondary/markup-secondary',
+    'bp-secondary/insert-secondary-markup',
     'bp-secondary/tips',
     'bp-secondary/settings',
     'bp-secondary/feedback',
@@ -366,8 +366,6 @@ define(['bp/constants',
    */
   function toggleSecondaryPanel(feature) {
 
-    init();
-
     var featurePanelName = feature || getFeaturePanelName();
     if (featurePanelName) {
       toggleSecondaryFeature(featurePanelName);
@@ -516,6 +514,7 @@ define(['bp/constants',
   }
 
   var publics = {
+    init: init,
     toggleSecondaryPanel: toggleSecondaryPanel
   };
 

@@ -18,11 +18,18 @@ define(['bp/constants', 'bp/helper', 'bp-expanded/view/svg-animate', 'bp-expande
       currentTranslate = moreButtonContainer.getAttribute('transform'),
       isInitialized;
 
-  function onMouseClick () {
+  function getSecondaryPanel(doToggle) {
     require(['bp-secondary/secondary-panel'], function(secondary) {
       // Show or hide the secondary panel.
-      secondary.toggleSecondaryPanel();
+      secondary.init();
+      if (doToggle) {
+        secondary.toggleSecondaryPanel();
+      }
     });
+  }
+
+  function onMouseClick () {
+    getSecondaryPanel(true);
   }
 
   function addMouseListeners () {
@@ -50,10 +57,6 @@ define(['bp/constants', 'bp/helper', 'bp-expanded/view/svg-animate', 'bp-expande
     btnContainer.style.opacity = 1;
   }
 
-  function preloadSecondaryPanel() {
-    require(['bp-secondary/secondary-panel'], function() {});
-  }
-
   function showMoreButton (useInstantTransition) {
 
     byId(BP_CONST.BOTTOM_MOUSETARGET_ID).removeEventListener('mousemove', showMoreButtonSlowly);
@@ -77,7 +80,7 @@ define(['bp/constants', 'bp/helper', 'bp-expanded/view/svg-animate', 'bp-expande
     // Once we show the button, always show it.
     doAlwaysShowButton = true;
 
-    preloadSecondaryPanel();
+    getSecondaryPanel(); // Preload
   }
 
   function showMoreButtonSlowly() {

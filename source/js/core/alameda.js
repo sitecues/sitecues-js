@@ -503,24 +503,25 @@ var requirejs, require, define;
                         loadCount -= 1;
                         takeQueue(id);
                     }, false);
-                    script.addEventListener('error', function () {
-                        loadCount -= 1;
-                        var err,
-                            pathConfig = getOwn(config.paths, id),
-                            d = getOwn(deferreds, id);
-                        if (pathConfig && Array.isArray(pathConfig) && pathConfig.length > 1) {
-                            script.parentNode.removeChild(script);
-                            //Pop off the first array value, since it failed, and
-                            //retry
-                            pathConfig.shift();
-                            d.map = makeMap(id);
-                            load(d.map);
-                        } else {
-                            err = new Error('Load failed: ' + id + ': ' + script.src);
-                            err.requireModules = [id];
-                            getDefer(id).reject(err);
-                        }
-                    }, false);
+// Removed this because it caused the console to not display error stacks, which we need for debugging
+//                    script.addEventListener('error', function () {
+//                        loadCount -= 1;
+//                        var err,
+//                            pathConfig = getOwn(config.paths, id),
+//                            d = getOwn(deferreds, id);
+//                        if (pathConfig && Array.isArray(pathConfig) && pathConfig.length > 1) {
+//                            script.parentNode.removeChild(script);
+//                            //Pop off the first array value, since it failed, and
+//                            //retry
+//                            pathConfig.shift();
+//                            d.map = makeMap(id);
+//                            load(d.map);
+//                        } else {
+//                            err = new Error('Load failed: ' + id + ': ' + script.src);
+//                            err.requireModules = [id];
+//                            getDefer(id).reject(err);
+//                        }
+//                    }, false);
 
                     script.src = url;
 

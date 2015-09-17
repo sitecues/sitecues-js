@@ -98,17 +98,25 @@ htmlSecondary =
   </sc-p>\
 </sc>';
 
-  function insertMarkup(insertionId, markup) {
-    var where = helper.byId(insertionId);
-    where.outerHTML = finalizer(markup);
-    helper.invalidateId(insertionId); // Now a different node
+  function insertHtml(insertionId, markup) {
+    var where = helper.byId(insertionId),
+      finalMarkup = finalizer(markup);
+    where.outerHTML = finalMarkup;
+  }
+
+  function insertSvg(insertionId, markup) {
+    var where = helper.byId(insertionId),
+      finalMarkup = finalizer(markup),
+      temp = document.createElementNS('http://www.w3.org/1999/xhtml', 'div');
+    temp.innerHTML= '<svg xmlns="http://www.w3.org/2000/svg">' + finalMarkup + '</svg>';
+    where.parentNode.replaceChild(temp.firstChild, where);
   }
 
   function init() {
     if (!isInitialized) {
       isInitialized = true;
-      insertMarkup('scp-secondary', svgSecondary);
-      insertMarkup('scp-html-secondary', htmlSecondary);
+      insertHtml('scp-html-secondary-anchor', htmlSecondary);
+      insertSvg('scp-secondary-anchor', svgSecondary, true);
     }
   }
 
