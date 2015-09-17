@@ -159,6 +159,11 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
         var keyCode = event.keyCode;
         if (keyCode === EQUALS || keyCode === NUMPAD_ADD ||
           keyCode === PLUS_ALTERNATE_1 || keyCode === PLUS_ALTERNATE_2 || keyCode === QUOTE) {
+          if (event.ctrlKey || event.metaKey || event.altKey) {
+            // Don't allow default behavior of modified key, e.g. native zoom
+            event.preventDefault();
+            event.stopImmediatePropagation();
+          }
           require(['keys/keys'], function (keys) {
             keys.init(event);
           });

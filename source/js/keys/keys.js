@@ -201,10 +201,7 @@ define(['keys/element-classifier', 'keys/commands', 'core/metric'],
     // Spacebar is probably the most likely, but as we start handling other keys such
     // as arrows, we need to be careful. We could either decide which keys that we consume
     // need stopImmediatePropagation, or just do it always to be safe.
-    // TODO put this back for all keys -- after we decide how metrics will learn about keys
-    if (event.keyCode === 32 || event.keyCode === 27) {
-      event.stopImmediatePropagation();
-    }
+    event.stopImmediatePropagation();
 
     executeCommand(event, commandName, keyName);
   }
@@ -237,6 +234,11 @@ define(['keys/element-classifier', 'keys/commands', 'core/metric'],
     if (event.defaultPrevented) {
       return; // Another script already used this key and set this flag like a good citizen
     }
+
+    processKey(event);
+  }
+
+  function processKey(event) {
 
     // iterate over key map
     for (var key in KEY_TESTS) {
@@ -344,7 +346,7 @@ define(['keys/element-classifier', 'keys/commands', 'core/metric'],
     });
 
     if (keyEvent) {
-      onKeyDown(keyEvent);
+      processKey(keyEvent);
     }
   }
 
