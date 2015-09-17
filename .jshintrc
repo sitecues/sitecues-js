@@ -5,17 +5,14 @@
   // TODO: MAYBE add...
   //  - es3
   //  - freeze
-  //  - futurehostile (docs are wrong, set to false, under relaxing)
-  //  - notypeof (false, under relaxing)
-  //  - elision (false, under relaxing)
-  //  - withstmt (false, under relaxing)
-  //  - nocomma (true, under enforcing)
-  //  - nonbsp (true, under enforcing)
-  //  - singleGroups (true, under enforcing)
 
   // TODO: Remove options marked as deprecated or unnecessary.
 
   // TODO: MAYBE "shadow" : "outer" to cause more complaints?
+
+  // TODO: Alphabetize everything.
+
+  // TODO: Activate as many enforcing options as possible, deactivate relaxing options.
 
   // Maximum number of rule violations to report before giving up.
   "maxerr"        : 100,
@@ -71,10 +68,16 @@
   "maxstatements" : false,
   // Whether to prohibit use of `arguments.caller` and `arguments.callee`, which is not in modern JS anymore.
   "noarg"         : true,
+  // Whether to prohibit use of the comma operator, which usually obfuscates code.
+  "nocomma"       : true,
+  // Whether to prohibit use of non-breaking spaces within code, which can break pages with certain character encodings.
+  "nonbsp"        : true,
   // Whether to prohibit use of constructors for side-effects (without assignment).
   "nonew"         : true,
   // Whether to prohibit use of `++` & `--`, which are usually not well understood outside of basic loops.
   "plusplus"      : false,
+  // Whether to prohibit use of `()` grouping where it is not necessary, which can obfuscate when it is really needed.
+  "singleGroups"  : false,
   // Whether to demand that all functions are run in ES5 Strict Mode
   "strict"        : false,
   // Whether to prohibit usage of variables that are never defined.
@@ -91,6 +94,8 @@
   "boss"          : false,
   // Whether to tolerate debugger statements e.g. browser breakpoints, even though they are not fit for production.
   "debug"         : false,
+  // Whether to tolerate initializing an array with empty elements, even though some code may not expect it.
+  "elision"       : false,
   // Whether to tolerate use of `== null`, even though it does type coercion.
   "eqnull"        : false,
   // Whether to tolerate use of ES5 syntax, like getters and setters, even though old browsers don't support it.
@@ -103,6 +108,8 @@
   "expr"          : false,
   // Whether to tolerate defining variables (with `var`) inside of blocks, even though that is not their scope.
   "funcscope"     : false,
+  // Whether to tolerate use of identifiers that are reserved in upcoming language versions.
+  "futurehostile" : false,
   // Whether to tolerate global use strict (also enables strict), even though nested code might not conform.
   "globalstrict"  : false,
   // Whether to tolerate use of the `__iterator__` property.
@@ -113,17 +120,21 @@
   "loopfunc"      : false,
   // Whether to tolerate Mozilla specific syntax (extends and overrides esnext features)
   "moz"           : false,
+  // Whether to tolerate use of invalid return values from the `typeof` operator.
+  "notypeof"      : false,
   // Whether to tolerate using the `__proto__` property, even though it is non-standard and may hurt performance.
   "proto"         : false,
   // Whether to tolerate script-targeted URLs.
   "scripturl"     : false,
   // Whether to tolerate re-defining variables, which is often a mistake. e.g. `var x=1; x=2;`
   // TODO: MAYBE: "shadow" : "outer" to cause more complaints?
-  "shadow"        : false,
+  "shadow"        : "false",
   // Whether to tolerate `new function () { ... };` and `new Object;`, even though it probably doesn't do what you want.
   "supernew"      : false,
   // Whether to tolerate using `this` in a non-constructor function, where it typically points to the global object.
   "validthis"     : false,
+  // Whether to tolerate use of the `with` statement, even though it causes potentially confusing behavior.
+  "withstmt"      : false,
 
 
   // Environments
@@ -151,7 +162,5 @@
   // Whether to tolerate decimal numbers like `var x = .543` without a leading zero, even though it could be a typo and is less readable.
   "-W008": true,      // Leading 0 before decimal point
   // UNNECESSARY. This is merely an alias to the `expr` option.
-  "-W030": false,     // Allows stuff like: SC_DEV && console.log('foo') rather than if (SC_DEV) { console.log('foo'); }
-  // UNNECESSARY. ?? I think this is merely an alias to the `laxbreak` option.
-  "-W014": false      // Allows && or || to start a line, which can help make more readable code when there are numerous conditions
+  "-W030": false      // Allows stuff like: SC_DEV && console.log('foo') rather than if (SC_DEV) { console.log('foo'); }
 }

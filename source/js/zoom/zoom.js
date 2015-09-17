@@ -234,22 +234,27 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'util/
   // Shift-key: Script-based
   // Ctrl-key: CSS-based
   function shouldUseKeyFramesAnimation() {
-    return shouldSmoothZoom()
-      // IE9 just can't do CSS animate
-      && (!platform.browser.isIE || platform.browser.version > 9)
+
+    // Only IE10 and up can do CSS animate.
+    var isOldIE = platform.browser.isIE && platform.browser.version < 10,
+        isSafari = platform.browser.isSafari,
+        restrictingWidthInSafari = isSafari && shouldRestrictWidth();
+
+    return shouldSmoothZoom()   &&
+      !isOldIE                  &&
       // Safari is herky jerky if animating the width and using key frames
       // TODO fix initial load zoom with jsZoom -- not doing anything
-      && (!platform.browser.isSafari || !shouldRestrictWidth())
+      !restrictingWidthInSafari &&
       // Chrome will use element.animate();
-      && !shouldUseElementDotAnimate;
+      !shouldUseElementDotAnimate;
   }
 
   // Should we wait for browser to create compositor layer?
   function shouldPrepareAnimations() {
     // In case zoom module isn't initialized yet, safely provide 'body' in local scope.
-    return shouldUseWillChangeOptimization
-      && body.style.willChange === '' // Animation property not set yet: give browser time to set up compositor layer
-      && !shouldRestrictWidth();
+    return shouldUseWillChangeOptimization &&
+      body.style.willChange === ''         && // Animation property not set yet: give browser time to set up compositor layer
+      !shouldRestrictWidth();
   }
 
   // Avoid evil Firefox insanity bugs, where zoom animation jumps all over the place on wide window with Retina display

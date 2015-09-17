@@ -112,7 +112,7 @@ define([
   // DANGER! Does not work in IE9 -- always returns falsey value.
   // If we need it in IE9 we'll need to globally track mousedown and mouseup events.
   function isButtonDown(mouseEvent) {
-    return (typeof mouseEvent.buttons === 'undefined' ? mouseEvent.which : mouseEvent.buttons);
+    return typeof mouseEvent.buttons === 'undefined' ? mouseEvent.which : mouseEvent.buttons;
   }
 
   /**

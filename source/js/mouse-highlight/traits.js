@@ -147,10 +147,16 @@ define(['$', 'mouse-highlight/traitcache', 'mouse-highlight/highlight-position',
     var style = traits.style;
     return elemClassifier.isVisualMedia(node) ||
       // Or if one of those <div></div> empty elements just there to show a background image
-      (traits.childCount === 0 && style.backgroundImage !== 'none' &&
-        (style.backgroundRepeat === 'no-repeat' || style.backgroundSize === 'cover'
-          || style.backgroundSize === 'contain') &&
-        $(node).is(':empty'));
+      (
+        traits.childCount === 0          &&
+        style.backgroundImage !== 'none' &&
+        (
+          style.backgroundRepeat === 'no-repeat' ||
+          style.backgroundSize === 'cover'       ||
+          style.backgroundSize === 'contain'
+        )                                &&
+        $(node).is(':empty')
+      );
   }
 
     var publics = {
