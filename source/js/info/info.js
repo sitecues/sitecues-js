@@ -69,6 +69,17 @@ define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 
     removeCloseButton();
   }
 
+  function onload(event) {
+    // Try to focus iframe
+    setTimeout(function() {
+      var iframe = event.target;
+      try {
+        iframe.contentWindow.focus();
+      }
+      catch (ex) {}
+    }, 0);
+  }
+
   function showModal(pageName, anchor) {
 
     if (isModalOpen) {
@@ -93,6 +104,7 @@ define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 
       .attr('src', pageUrl + anchor)
       .css(INITIAL_CSS)
       .css('border', getBorderCss())
+      .one('load', onload)
       .appendTo('html');
 
     $(window)
