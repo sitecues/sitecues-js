@@ -1,5 +1,11 @@
 {
+
+  // sitecues JSHint Config for debug scenarios
+
+  // Inherit options from our production config.
   "extends": ".jshintrc",
+  // Allow variables to go unused, so we can comment things out quickly for testing.
   "unused": false,
+  // Allow `debugger`, which should never happen in production.
   "debug": true
 }
