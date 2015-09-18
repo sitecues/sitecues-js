@@ -2,12 +2,6 @@
 
   // Configuration for JSHint. These settings are used to ensure code quality during the build process.
 
-  // TODO: Remove options marked as deprecated or unnecessary.
-
-  // TODO: MAYBE "shadow" : "outer" to cause more complaints?
-
-  // TODO: Activate as many enforcing options as possible, deactivate relaxing options.
-
   // Maximum number of rule violations to report before giving up.
   "maxerr"        : 100,
 
@@ -57,15 +51,15 @@
   // Whether to prohibit modifying the prototype of native objects.
   "freeze"        : true,
   // Whether to demand that variables are defined above where they are first used.
-  "latedef"       : true,
+  "latedef"       : "nofunc",
   // Maximum cyclomatic complexity per function. Helps discourage overly complex code.
-  "maxcomplexity" : false,
+  "maxcomplexity" : 15,
   // Maximum depth of nested blocks (within functions). Helps discourage overly complex code.
-  "maxdepth"      : false,
+  "maxdepth"      : 7,
   // Maximum number of formal params allowed per function. Helps discourage overly complex code.
-  "maxparams"     : false,
+  "maxparams"     : 13,
   // Maximum number of statements allowed per function. Helps discourage overly complex code.
-  "maxstatements" : false,
+  "maxstatements" : 125,
   // Whether to prohibit use of `arguments.caller` and `arguments.callee`, which is not in modern JS anymore.
   "noarg"         : true,
   // Whether to prohibit use of the comma operator, which usually obfuscates code.
@@ -126,7 +120,7 @@
   "scripturl"     : false,
   // Whether to tolerate re-defining variables, which is often a mistake. e.g. `var x=1; x=2;`
   // TODO: MAYBE: "shadow" : "outer" to cause more complaints?
-  "shadow"        : "false",
+  "shadow"        : false,
   // Whether to tolerate `new function () { ... };` and `new Object;`, even though it probably doesn't do what you want.
   "supernew"      : false,
   // Whether to tolerate using `this` in a non-constructor function, where it typically points to the global object.
@@ -151,6 +145,7 @@
   "wsh"           : false,    // Windows Scripting Host
   "yui"           : false,    // Yahoo User Interface
 
+  // TODO: Remove this if there are no objections.
   // Whether to tolerate decimal numbers like `var x = .543` without a leading zero, even though it could be a typo and is less readable.
   "-W008": true      // Leading 0 before decimal point
 }
