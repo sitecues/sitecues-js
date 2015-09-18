@@ -2,46 +2,54 @@
  * Custom.js - Please make sure this remains the first script after core.js in the build process
  * This is used for custom builds on a per-website/customer basis. See custom-scripts/
  */
-sitecues.def('custom', function (custom, callback) {
+require([], function() {
   
-  'use strict';
-
   var customIndex = 0;
 
-  custom.registry = {};
+  var registry = {};
+
+  var custom = this;
   
-  custom.register = function (moduleName, script) {
+  function register(moduleName, script) {
 
     // Create a object for the module you want to customize if it does not exist
     if (!custom.registry[moduleName]) {
-      custom.registry[moduleName] = {};
+     registry[moduleName] = {};
     }
 
-    var registryEntry = custom.registry[moduleName][customIndex] = {};
+    var registryEntry = registry[moduleName][customIndex] = {};
 
     customIndex++;
 
     registryEntry.module = moduleName;
     registryEntry.func = script;
 
-  };
+  }
 
   // Checks if there are fixes for a module,and executes their fix functions with the module's scope
-  custom.check = function (moduleName) {
-    // The scope of 'this' with the custom.check function is the module being passed via call()
-    // from the callback in core.js's _def function
+  function check(moduleName) {
+    // The scope of 'this' with thecheck function is the module being passed via call()
+    // from the callback in sitecues.js's _def function
 
-    var module = custom.registry[moduleName];
+    var module = registry[moduleName];
 
     if (module) {
       for (var customIndex in module) {
-        module[customIndex].func.call(this);
+        if (module.hasOwnProperty(customIndex)) {
+          module[customIndex].func.call(custom);
+        }
       }
     }
 
+  }
+
+  var publics = {
+    register: register,
+    check: check
   };
 
-  // Done.
-  callback();
-
+  if (SC_UNIT) {
+    module.exports = publics;
+  }
+  return publics;
 });

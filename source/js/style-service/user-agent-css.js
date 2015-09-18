@@ -3,7 +3,7 @@
  * They have been gleaned from some of the *.css files at:
  * http://mxr.mozilla.org/mozilla-central/source/layout/style
  */
-sitecues.def('ua-css', function (UA_CSS, callback) {
+define([], function() {
 
 'use strict';
 /*jshint multistr: true */
@@ -12,7 +12,7 @@ sitecues.def('ua-css', function (UA_CSS, callback) {
 // button { color:ButtonText; border-color:ButtonFace; background-color:ButtonFace; }
 // input:disabled, select:disabled {color:GrayText; background-color:ThreeDFace; }
 
-UA_CSS.text =
+var text =
 'html{\n\
   cursor:default;\n\
 }\n\
@@ -58,5 +58,5 @@ img[usemap], object[usemap] {\n\
   color:#551a8b;\n\
 }';
 
-callback();
+return text;
 });

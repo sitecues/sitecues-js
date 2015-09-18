@@ -1,0 +1,79 @@
+<sc-card id="scp-zoom-card">
+  <sc-center>
+    <sc-h2 id="scp-use-slider-heading">
+      [[Use the zoom slider]]
+    </sc-h2>
+    <sc-p>
+      <sc-span id="scp-demo-slider">
+        <sc-span id="scp-demo-slider-bar"></sc-span>
+        <sc-span id="scp-demo-slider-thumb"></sc-span>
+      </sc-span>
+    </sc-p>
+  </sc-center>
+</sc-card>
+
+<sc-card id="scp-zoom-keys-card" data-advanced>
+  <sc-center>
+    <sc-p>[[Hold keys longer to zoom more.]]</sc-p>
+    <sc-h2>
+      <sc-span aria-label="[[Press the - or + key to zoom the page]]">
+        <sc-kbd id="scp-demo-zoom-minus">&#65293;</sc-kbd>
+        &nbsp;/&nbsp;
+        <sc-kbd id="scp-demo-zoom-plus">+</sc-kbd>
+      </sc-span>
+    </sc-h2>
+  </sc-center>
+</sc-card>
+
+<sc-card id="scp-highlight-card">
+  <sc-h2>[[The highlighter selects areas to read.]]</sc-h2>
+  <sc-p>[[1. Choose something to focus on.]]</sc-p>
+  <sc-p>[[2. Move your mouse to highlight it.]]</sc-p>
+</sc-card>
+
+<sc-card id="scp-lens-card">
+  <sc-h2>[[The lens magnifies.]]</sc-h2>
+  <sc-p>[[1. Highlight something interesting]]</sc-p>
+  <sc-p>[[2. Press ]]<sc-kbd class="scp-space" id="scp-demo-lens-spacebar">[[spacebar]]</sc-kbd></sc-p>
+</sc-card>
+
+<sc-card id="scp-speech-card">
+  <sc-h2>[[The speech feature reads text aloud.]]</sc-h2>
+  <sc-p>[[1. Click the speech button]] &nbsp; <sc-span id="scp-speech-button-demo"></sc-span></sc-p>
+  <sc-p>[[2. Highlight]] &amp; [[press]] <sc-kbd class="scp-space" id="scp-demo-speech-spacebar">[[spacebar]]</sc-kbd></sc-p>
+</sc-card>
+
+<sc-card id="scp-full-guide-card">
+  <sc-h2 class="scp-icon-menuitem">
+    <sc-button id="scp-guide-icon" data-target="#"></sc-button>
+    <sc-link data-target="#">[[Full guide]]</sc-link><br/>
+    <sc-span>[[Practice sitecues]]</sc-span>
+  </sc-h2>
+  <sc-h2 class="scp-icon-menuitem">
+    <sc-button id="scp-kbd-icon" data-target="##keyboard"></sc-button>
+    <sc-link data-target="##keyboard">[[Keyboard help]]</sc-link><br/>
+    <sc-span>[[Jump straight there]]</sc-span>
+  </sc-h2>
+</sc-card>
+
+<!-- Header -->
+<sc-h1 class="scp-card-header">Tips</sc-h1>
+
+<sc class="scp-card-chooser">
+  <sc-link data-target="scp-zoom-card">[[Zoom]]</sc-link>
+  <sc-link data-target="scp-highlight-card">[[Highlight]]</sc-link>
+  <sc-link data-target="scp-lens-card">[[Lens]]</sc-link>
+  <sc-link data-target="scp-speech-card">[[Speech]]</sc-link>
+  <sc-link data-target="scp-full-guide-card">[[More]]</sc-link>
+</sc>
+
+<sc class="scp-card-indicator"></sc>
+
+<!-- Fake demo page -->
+<sc id="scp-demo-page">
+  <sc id="scp-demo-page-contents">
+    <sc-p><sc-span id="scp-demo-para">[[Welcome!]]</sc-span></sc-p>
+    <sc-span id="scp-demo-mouse"></sc-span>
+    <sc-p>[[sitecues reads the web.]]</sc-p>
+  </sc>
+</sc>

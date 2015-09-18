@@ -1,28 +1,26 @@
 /**
  * Service that converts color strings into an rgba object { r: number, g: number, b: number, a: number }
  */
-sitecues.def('util/color', function (colorUtil, callback) {
-
-  'use strict';
+define([], function () {
 
   var TRANSPARENT = 'rgba(0, 0, 0, 0)',
     MIN_LUMINOSITY_LIGHT_TONE = 0.62;
 
-  colorUtil.isDarkColor = function(colorValue, optionalThreshold) {
+  function isDarkColor(colorValue, optionalThreshold) {
 
-    var rgba = colorUtil.getRgba(colorValue);
+    var rgba = getRgba(colorValue);
 
-    return colorUtil.getPerceivedLuminance(rgba) < (optionalThreshold || MIN_LUMINOSITY_LIGHT_TONE);
-  };
+    return getPerceivedLuminance(rgba) < (optionalThreshold || MIN_LUMINOSITY_LIGHT_TONE);
+  }
 
-  colorUtil.isOnDarkBackground = function(current, optionalThreshold) {
+  function isOnDarkBackground(current, optionalThreshold) {
     var currentBackgroundColor,
       origElement = current,
       currentRect,
       origRect;
 
     while (current) {
-      currentBackgroundColor = colorUtil.getRgba(window.getComputedStyle(current).backgroundColor);
+      currentBackgroundColor = getRgba(window.getComputedStyle(current).backgroundColor);
 
       // Only care about non-transparent backgrounds
       if (currentBackgroundColor.a > 0.5) {
@@ -30,7 +28,7 @@ sitecues.def('util/color', function (colorUtil, callback) {
         currentRect = current.getBoundingClientRect();
         if (currentRect.right > origRect.left && currentRect.left < origRect.right &&
           currentRect.bottom > origRect.top && currentRect.top < origRect.bottom) {
-          return colorUtil.isDarkColor(currentBackgroundColor, optionalThreshold);
+          return isDarkColor(currentBackgroundColor, optionalThreshold);
         }
       }
 
@@ -67,15 +65,15 @@ sitecues.def('util/color', function (colorUtil, callback) {
     return rgb;
   }
 
-  colorUtil.getColorString = function(rgba) {
+  function getColorString(rgba) {
     function isAlphaRelevant(alpha) {
       return (alpha >= 0 && alpha < 1);  // false if undefined
     }
     var rgb = Math.round(rgba.r) + ',' + Math.round(rgba.g) +',' + Math.round(rgba.b);
     return isAlphaRelevant(rgba.a)? 'rgba(' + rgb + ',' +rgba.a + ')' : 'rgb(' + rgb + ')';
-  };
+  }
 
-  colorUtil.getRgbaIfLegalColor = function(color) {
+  function getRgbaIfLegalColor(color) {
     if (!color) {
       return;
     }
@@ -104,15 +102,15 @@ sitecues.def('util/color', function (colorUtil, callback) {
       b: parseInt(match[3] || 0),
       a: parseFloat(match[4] || 1)
     };
-  };
+  }
 
   /**
    * Ensure that an rgba object is returned. Will use TRANSPARENT if necessary.
    * @param color
    */
-  colorUtil.getRgba = function(color) {
-    return colorUtil.getRgbaIfLegalColor(color) || { r: 0, g: 0, b: 0, a: 0};
-  };
+  function getRgba(color) {
+    return getRgbaIfLegalColor(color) || { r: 0, g: 0, b: 0, a: 0};
+  }
 
 //  colorUtil.COLOR_NAMES_MAP = {
 //    // System color names -- currently based on OS X colors
@@ -300,7 +298,7 @@ sitecues.def('util/color', function (colorUtil, callback) {
    * @param   Number  l       The lightness
    * @return  Object          The RGB representation
    */
-  colorUtil.hslToRgb = function(h, s, l) {
+  function hslToRgb(h, s, l) {
     var r, g, b;
 
     if (!s) {
@@ -337,19 +335,19 @@ sitecues.def('util/color', function (colorUtil, callback) {
       g: Math.round(g * 255),
       b: Math.round(b * 255)
     };
-  };
+  }
 
   // From http://www.w3.org/TR/2006/WD-WCAG20-20060427/complete.html#luminosity-contrastdef
-  colorUtil.getLuminanceFromColorName = function(colorName) {
-    return colorUtil.getPerceivedLuminance(colorUtil.getRgba(colorName));
-  };
+  function getLuminanceFromColorName(colorName) {
+    return getPerceivedLuminance(getRgba(colorName));
+  }
 
   // Perceived luminance must apply inverse gamma correction (the ^2.2)
   // See https://en.wikipedia.org/wiki/Luma_(video)
   //     https://en.wikipedia.org/wiki/Luminous_intensity
   //     https://en.wikipedia.org/wiki/Gamma_correction
   //     http://stackoverflow.com/questions/596216/formula-to-determine-brightness-of-rgb-color
-  colorUtil.getPerceivedLuminance = function(rgb) {
+  function getPerceivedLuminance(rgb) {
     var gammaReversed =
         0.299 * getValue('r') +
         0.587 * getValue('g') +
@@ -361,23 +359,23 @@ sitecues.def('util/color', function (colorUtil, callback) {
     }
 
     return Math.sqrt(gammaReversed);
-  };
+  }
 
   // Trades accuracy for performance
-  colorUtil.getFastLuminance = function(rgb) {
+  function getFastLuminance(rgb) {
     var DIVISOR = 2550; // 255 * (2 + 7 + 1)
     return (rgb.r*2 + rgb.g*7 + rgb.b) / DIVISOR;
-  };
+  }
 
-  colorUtil.getContrastRatio = function(color1, color2) {
-    var L1 = colorUtil.getLuminanceFromColorName(color1),
-      L2 = colorUtil.getLuminanceFromColorName(color2);
+  function getContrastRatio(color1, color2) {
+    var L1 = getLuminanceFromColorName(color1),
+      L2 = getLuminanceFromColorName(color2);
     var ratio = (L1 + 0.05) / (L2 + 0.05);
     if (ratio >= 1) {
       return ratio;
     }
     return (L2 + 0.05) / (L1 + 0.05);
-  };
+  }
 
   /**
    * Converts an RGB color value to HSL. Conversion formula
@@ -390,8 +388,8 @@ sitecues.def('util/color', function (colorUtil, callback) {
    * @param   Number  b       The blue color value
    * @return  Object          The HSL representation
    */
-  colorUtil.rgbToHsl = function(r, g, b) {
-    r /= 255, g /= 255, b /= 255;
+  function rgbToHsl(r, g, b) {
+    r /= 255; g /= 255; b /= 255;
     var max = Math.max(r, g, b), min = Math.min(r, g, b);
     var h, s, l = (max + min) / 2;
 
@@ -419,26 +417,45 @@ sitecues.def('util/color', function (colorUtil, callback) {
       s: s,
       l: l
     };
-  };
-
-  // Get the current background color
-  colorUtil.getDocumentBackgroundColor = function() {
-    var
-      color = getComputedStyle(document.documentElement).backgroundColor,
-      rgba = colorUtil.getRgba(color),
-      WHITE = {r: 255, g: 255, b: 255};
-    return rgba.a > 0 ? rgba : WHITE;
-  };
-
-  if (SC_DEV) {
-    sitecues.getRgba = colorUtil.getRgba;
-    sitecues.rgbToHsl = colorUtil.rgbToHsl;
-    sitecues.hslToRgb = colorUtil.hslToRgb;
-    sitecues.getLuminanceFromColorName = colorUtil.getLuminanceFromColorName;
-    sitecues.getPerceivedLuminance = colorUtil.getPerceivedLuminance;
-    sitecues.getContrastRatio = colorUtil.getContrastRatio;
-    sitecues.getColorString = colorUtil.getColorString;
   }
 
-  callback();
+  // Get the current background color
+  function getDocumentBackgroundColor() {
+    var
+      color = getComputedStyle(document.documentElement).backgroundColor,
+      rgba = getRgba(color),
+      WHITE = {r: 255, g: 255, b: 255};
+    return rgba.a > 0 ? rgba : WHITE;
+  }
+
+  if (SC_DEV) {
+    sitecues.getRgba = getRgba;
+    sitecues.rgbToHsl = rgbToHsl;
+    sitecues.hslToRgb = hslToRgb;
+    sitecues.getLuminanceFromColorName = getLuminanceFromColorName;
+    sitecues.getPerceivedLuminance = getPerceivedLuminance;
+    sitecues.getContrastRatio = getContrastRatio;
+    sitecues.getColorString = getColorString;
+  }
+
+  var publics = {
+    isDarkColor: isDarkColor,
+    isOnDarkBackground: isOnDarkBackground,
+    getColorString: getColorString,
+    getRgbaIfLegalColor: getRgbaIfLegalColor,
+    getRgba: getRgba,
+    getLuminanceFromColorName: getLuminanceFromColorName,
+    getFastLuminance: getFastLuminance,
+    getPerceivedLuminance: getPerceivedLuminance,
+    getContrastRatio: getContrastRatio,
+    rgbToHsl: rgbToHsl,
+    hslToRgb: hslToRgb,
+    getDocumentBackgroundColor: getDocumentBackgroundColor
+  };
+
+  if (SC_UNIT) {
+    module.exports = publics;
+  }
+
+  return publics;
 });

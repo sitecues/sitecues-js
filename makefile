@@ -4,18 +4,20 @@
 
 ################################################################################
 # DEFAULT TARGET: all
-# 	(To keep this target as the defaulty target, this target must be
+# 	(To keep this target as the default target, this target must be
 #	 declared before all other targets).
-# 	Clean the target direcetory, update Node.js dependecies, and build the
+# 	Clean the target directory, update Node.js dependencies, and build the
 #	JavaScript library.
 ################################################################################
-all: clean build debug
+all: debug
 
 ################################################################################
 # Command line options.
 ################################################################################
 
-targets=common $(shell cd custom-config && ls *.mk | sed 's%.mk%%g')
+targets=common
+# Restore if we get custom builds again
+#targets=common $(shell cd custom-config && ls *.mk | sed 's%.mk%%g')
 custom-config-names:=$(shell echo "$(targets)" | sed 's%,% %g')
 
 # If true, clean and update the Node.js package dependencies.
@@ -25,7 +27,7 @@ clean-deps=false
 https=off
 
 # Whether or not to lint the codebase before the build.
-lint=false
+lint=true
 
 # Node.js express test server HTTP port.
 port=8000
@@ -34,6 +36,11 @@ port=8000
 # file locations will not be checked for async module loads.
 prod=off
 
+# Whether Zepto can be used (a download size improvement over jQuery for IE >= 10, Chrome, Firefox, Safari)
+zepto=true
+
+# Whether sourcemaps should be build
+sourcemaps=true
 
 # The build version.
 export version=$(default-version)
@@ -102,8 +109,10 @@ endif
 # linting is disabled.
 ifeq ($(lint), true)
 	_build_lint_dep:=lint
+	_build_lint_debug_dep:=lint-debug
 else
 	_build_lint_dep:=.no-lint-on-build
+	_build_lint_debug_dep:=.no-lint-on-build
 endif
 
 ################################################################################
@@ -143,9 +152,9 @@ endif
 
 ################################################################################
 # TARGET: build
-#	Build the compressed file and, optionally, run gjslint.
+#	Build the minified version
 ################################################################################
-build: $(_force-deps-refresh) $(_build_lint_dep)
+build: clean $(_force-deps-refresh) $(_build_lint_dep)
 	@echo "Node version : $(shell node --version)"
 	@echo "npm version  : v$(shell npm --version)"
 	@for _CUSTOM_CONF_NAME in $(custom-config-names) ; do \
@@ -153,10 +162,21 @@ build: $(_force-deps-refresh) $(_build_lint_dep)
 	done
 
 ################################################################################
+# TARGET: checksize
+#	Build the compressed version and show sizes
+################################################################################
+checksize: clean $(_force-deps-refresh) $(_build_lint_debug_dep)
+	@echo "Node version : $(shell node --version)"
+	@echo "npm version  : v$(shell npm --version)"
+	@for _CUSTOM_CONF_NAME in $(custom-config-names) ; do \
+		$(MAKE) --no-print-directory -f core.mk build checksize sourcemaps=false custom-config-name=$$_CUSTOM_CONF_NAME ; \
+	done
+
+################################################################################
 # TARGET: debug
 #	Build the debug version
 ################################################################################
-debug: $(_force-deps-refresh) $(_build_lint_dep)
+debug: clean $(_force-deps-refresh) $(_build_lint_debug_dep)
 	@echo
 	@for _CUSTOM_CONF_NAME in $(custom-config-names) ; do \
 		$(MAKE) --no-print-directory -f core.mk debug custom-config-name=$$_CUSTOM_CONF_NAME ; \
@@ -167,11 +187,14 @@ debug: $(_force-deps-refresh) $(_build_lint_dep)
 #	Package up the files into a deployable bundle, and create a manifest for local
 # file deployment.
 ################################################################################
-package: build
+package: clean $(_force-deps-refresh)
 ifeq ($(sc_dev), true)
 	$(error Unable to package a development build)
 endif
+	@echo "Node version : $(shell node --version)"
+	@echo "npm version  : v$(shell npm --version)"
 	@for _CUSTOM_CONF_NAME in $(custom-config-names) ; do \
+		$(MAKE) --no-print-directory -f core.mk build custom-config-name=$$_CUSTOM_CONF_NAME sourcemaps=false ; \
 		$(MAKE) --no-print-directory -f core.mk package custom-config-name=$$_CUSTOM_CONF_NAME ; \
 	done
 
@@ -206,14 +229,25 @@ deps-clean:
 
 ################################################################################
 # TARGET: lint
-#	Run lenienter on the JavaScript source.
+#	Run lenienter and jshint on the JavaScript source.
 #
-# ALTERNATE: Run Google Closure Linter
-#	@gjslint --nojsdoc -r source/js
+# ALTERNATE: Run manally (Google closure and jshint)
+#	gjslint --nojsdoc -r source/js
+#	jshint source/js
 ################################################################################
 lint:
 	@echo "Linting started."
-	@lenient-lint --beep --error_trace --multiprocess --nojsdoc -r source/js --summary --time --unix_mode
+	node_modules/grunt-contrib-jshint/node_modules/jshint/bin/jshint source/js
+	# lenient-lint --beep --error_trace --multiprocess --nojsdoc -r source/js --summary --time --unix_mode
+	@echo "Linting completed."
+
+################################################################################
+# TARGET: lint-debug
+#	Run jshint on the JavaScript source but allow debugger
+################################################################################
+lint-debug:
+	@echo "Linting started."
+	node_modules/grunt-contrib-jshint/node_modules/jshint/bin/jshint --config .jshintrc-debug source/js
 	@echo "Linting completed."
 
 ################################################################################
@@ -260,23 +294,23 @@ test-smoke:
 #	Run the unit tests.
 ################################################################################
 test-unit:
-	@echo "TEST RUN ID: $(test-run-id)"
-	@cd ./tests/unit ; ../../node_modules/mocha/bin/mocha $(testunit-mocha-options)
+	#@echo "TEST RUN ID: $(test-run-id)"
+	#@cd ./tests/unit ; ../../node_modules/mocha/bin/mocha $(testunit-mocha-options)
 
 ################################################################################
 # TARGET: nyan-test
 #	Run unit test with nyan-cat because awesome
 ################################################################################
 nyan-unit:
-	@echo "TEST RUN ID: $(test-run-id)"
-	@cd ./tests/unit ; ../../node_modules/mocha/bin/mocha -R nyan
+	#@echo "TEST RUN ID: $(test-run-id)"
+	#@cd ./tests/unit ; ../../node_modules/mocha/bin/mocha -R nyan
 
 ################################################################################
 # TARGET: dot-unit
 ################################################################################
 dot-unit:
-	@echo "TEST RUN ID: $(test-run-id)"
-	@cd ./tests/unit ; ../../node_modules/mocha/bin/mocha -R dot
+	#@echo "TEST RUN ID: $(test-run-id)"
+	#@cd ./tests/unit ; ../../node_modules/mocha/bin/mocha -R dot
 
 
 ################################################################################
@@ -284,10 +318,10 @@ dot-unit:
 #	Get test coverage output using blanket and mocha for node
 ################################################################################
 test-coverage:
-	@echo "TEST RUN ID: $(test-run-id)"
-	@mkdir -p ./report
-	@cd ./tests/unit ; ../../node_modules/mocha/bin/mocha -r blanket -R html-cov > ../../report/unit-test-coverage.html
-	@echo Coverage report generated in: ./report/unit-test-coverage.html
+	#@echo "TEST RUN ID: $(test-run-id)"
+	#@mkdir -p ./report
+	#@cd ./tests/unit ; ../../node_modules/mocha/bin/mocha -r blanket -R html-cov > ../../report/unit-test-coverage.html
+	#@echo Coverage report generated in: ./report/unit-test-coverage.html
 
 ################################################################################
 # TARGET: stop-all-services
@@ -312,7 +346,7 @@ stop-all-services: stop-testsite
 ################################################################################
 # TARGET: local -- allows sitecues to be used locally or pasted into a console
 ################################################################################
-local: $(_force-deps-refresh) $(_build_lint_dep)
+local: clean $(_force-deps-refresh) $(_build_lint_dep)
 	@echo
 	@for _CUSTOM_CONF_NAME in $(custom-config-names) ; do \
 		$(MAKE) --no-print-directory -f core.mk debug sc-local=true custom-config-name=$$_CUSTOM_CONF_NAME ; \

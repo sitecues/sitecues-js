@@ -1,0 +1,48 @@
+<sc-card id="scp-theme-settings">
+  <sc-p class="scp-color-theme-group">
+    <sc-button data-setting-name="themeName">
+      [[None]]
+    </sc-button>
+    <sc-button data-setting-name="themeName" data-setting-value="blueReduction">
+      [[Warm]]
+    </sc-button>
+    <sc-button data-setting-name="themeName" data-setting-value="increaseContrast">
+      [[Bold]]
+    </sc-button>
+    <sc-button data-setting-name="themeName" data-setting-value="dark">
+      [[Dark]]
+    </sc-button>
+  </sc-p>
+  <sc-p class="scp-range-group" id="scp-theme-power-group">
+    <input type="range" id="scp-theme-power" min=".01" max="1" step =".01" data-setting-name="themePower" aria-labelledby="scp-theme-power-label"/>
+    <sc-span id="scp-theme-power-label">[[intensity]]</sc-span>
+  </sc-p>
+  <sc-p  class="scp-range-group" id="scp-theme-text-hue-group">
+    <input type="range" id="scp-theme-text-hue" data-type="hue" min=".01" max="1.1" step =".01" data-setting-name="themeTextHue" aria-labelledby="scp-theme-text-hue-label"/><br/>
+    <sc-span id="scp-theme-text-hue-label">[[text color]]</sc-span>
+  </sc-p>
+</sc-card>
+
+<sc-card id="scp-mouse-settings" class="scp-no-ie9">
+  <sc id="scp-mouse-settings-group">
+    <sc-p class="scp-range-group" data-show="true">
+      <input type="range" id="scp-mouse-size" min="1" max="3.5" step =".01" data-setting-name="mouseSize" aria-labelledby="scp-mouse-size-label"/><br/>
+      <sc-span id="scp-mouse-size-label">[[size]]</sc-span>
+    </sc-p>
+    <sc-p class="scp-range-group scp-no-ie" data-show="true">
+      <input type="range" id="scp-mouse-hue" data-type="hue" min=".01" max="1.1" step =".01" data-setting-name="mouseHue" aria-labelledby="scp-mouse-hue-label"/><br/>
+      <sc-span id="scp-mouse-hue-label">[[color]]</sc-span>
+    </sc-p>
+  </sc>
+</sc-card>
+
+<!-- Header -->
+<sc-h1 class="scp-card-header">[[Settings]]</sc-h1>
+
+<sc class="scp-card-chooser">
+  <sc-link data-target="scp-theme-settings">[[Colors]]</sc-link>
+  <sc-link data-target="scp-mouse-settings">[[Mouse]]</sc-link>
+</sc>
+
+<sc class="scp-card-indicator"></sc>
+

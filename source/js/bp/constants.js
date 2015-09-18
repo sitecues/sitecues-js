@@ -1,6 +1,6 @@
-sitecues.def('bp/constants', function (constants, callback) {
+define([], function() {
 
-  'use strict';
+  var constants = {};
 
   // TODO don't repeat this in styles.js
 
@@ -134,6 +134,7 @@ sitecues.def('bp/constants', function (constants, callback) {
 
   constants.TRANSFORMS.PANEL[constants.ZOOM_SLIDER_THUMB_ID] = {translateX:44};
   constants.TRANSFORMS.BADGE[constants.ZOOM_SLIDER_THUMB_ID] = {translateX:8};
+  constants.TRANSFORMS.FAKE_BADGE_TRANSLATEX = 116;
 
   constants.TRANSFORMS.PANEL[constants.ZOOM_SLIDER_BAR_ID] = {
     translateX: 27,
@@ -204,19 +205,6 @@ sitecues.def('bp/constants', function (constants, callback) {
   // TODO is this still needed? It's fixed in Firefox
   constants.FIREFOX_SLIDER_OFFSET = 83; // Hardcoded because of https://bugzilla.mozilla.org/show_bug.cgi?id=479058
 
-  constants.KEY_CODES = {
-    'TAB'   : 9,
-    'ENTER' : 13,
-    'ESCAPE': 27,
-    'SPACE' : 32,
-    'HOME'  : 36,
-    'END'   : 35,
-    'LEFT'  : 37,
-    'UP'    : 38,
-    'RIGHT' : 39,
-    'DOWN'  : 40
-  };
-
   // TODO compute this ratio
   // It's used to set the slider thumb properly
   constants.LARGE_SLIDER_WIDTH = 256;
@@ -235,9 +223,6 @@ sitecues.def('bp/constants', function (constants, callback) {
   // (This whitespace exists for a reason -- it turns into the top border when the panel opens)
   constants.BADGE_VERTICAL_OFFSET = 2;
 
-  constants.BASE_STYLESHEET_ID    = 'sitecues-badge-panel-base-css';
-  constants.PALETTE_STYLESHEET_ID = 'sitecues-badge-panel-palette-css';
-
   // Map legal full palette names to short names, used to create a class e.g. .scp-palette-rb
   constants.PALETTE_NAME_MAP = {
     'normal': '-n',
@@ -248,9 +233,9 @@ sitecues.def('bp/constants', function (constants, callback) {
 
   // Wave animation (on hover over TTS button)
   constants.ANIMATE_WAVES_OPACITY = [
-    [.2,.4,.6,.8,.8,.6,.4,.2,.2,.2,.2,.4,.6,.8,.8,.6,.4,.2,.2,.2],  // Wave 1
-    [.2,.2,.4,.6,.8,.8,.6,.4,.2,.2,.2,.2,.4,.6,.8,.8,.6,.4,.2,.4],  // Wave 2
-    [.2,.2,.2,.4,.6,.8,.8,.6,.4,.2,.2,.2,.2,.4,.6,.8,.8,.6,.4,.6]   // Wave 3
+    [0.2, 0.4, 0.6, 0.8, 0.8, 0.6, 0.4, 0.2, 0.2, 0.2, 0.2, 0.4, 0.6, 0.8, 0.8, 0.6, 0.4, 0.2, 0.2, 0.2],  // Wave 1
+    [0.2, 0.2, 0.4, 0.6, 0.8, 0.8, 0.6, 0.4, 0.2, 0.2, 0.2, 0.2, 0.4, 0.6, 0.8, 0.8, 0.6, 0.4, 0.2, 0.4],  // Wave 2
+    [0.2, 0.2, 0.2, 0.4, 0.6, 0.8, 0.8, 0.6, 0.4, 0.2, 0.2, 0.2, 0.2, 0.4, 0.6, 0.8, 0.8, 0.6, 0.4, 0.6]   // Wave 3
   ];
   constants.ANIMATE_WAVES_STEP_DURATION = 100;
 
@@ -259,8 +244,5 @@ sitecues.def('bp/constants', function (constants, callback) {
   constants.SECONDARY_PANEL_DISABLED = 0;
   constants.SECONDARY_PANEL_ENABLED  = 1;
 
-  // Unless callback() is queued, the module is not registered in global constants.modules{}
-  // See: https://fecru.ai2.at/cru/EQJS-39#c187
-  //      https://equinox.atlassian.net/browse/EQ-355
-  callback();
+  return constants;
 });

@@ -1,10 +1,9 @@
 // TODO we can save a lot of bytes by setting these directly on the state object (instead of inside .data)
-sitecues.def('bp/model/state', function (state, callback) {
-  'use strict';
-
+define([], function() {
   var data = {
     currentMode             : 0,     // 0 - 1, 0 is badge, 1 is panel, anything in between means its currently transitioning
     transitionTo            : 0,     // 0 - 1, 0 is badge, 1 is panel, it cannot be anything in between (doesnt seem to make sense to transition to anything other than the badge or panel state)
+    isSecondaryPanel        : false,  // Are we currently in the secondary panel
     secondaryPanelTransitionTo: 0,
     isRealSettings          : false, // Are we currently showing the actual settings or fake settings?
     secondaryPanelName      : 'button-menu', // 'button-menu', 'tips', 'settings', 'feedback', 'about'
@@ -33,68 +32,83 @@ sitecues.def('bp/model/state', function (state, callback) {
    * @param propName String
    * @returns {*}
    */
-  state.get = function(propName) {
+  function get(propName) {
     if (data.hasOwnProperty(propName)) {
       return data[propName];
     }
-    SC_DEV && console.log('ERROR: Cannot get property with name ' + propName + '.');
-  };
+    if (SC_DEV) { console.log('ERROR: Cannot get property with name ' + propName + '.'); }
+  }
 
   /**
    * Set state model value specified by the property name given
    * @param propName String
    * @param propValue String or Number
    */
-  state.set = function(propName, propValue) {
+  function set(propName, propValue) {
     if (data.hasOwnProperty(propName)) {
       data[propName] = propValue;
     } else {
-      SC_DEV && console.log('ERROR: Cannot set property with name ' + propName + '.');
+      if (SC_DEV) { console.log('ERROR: Cannot set property with name ' + propName + '.'); }
     }
-  };
+  }
 
   /*
   Some of the most popular getters are listed below.
    */
-  state.isPanel = function() {
+  function isPanel() {
     return data.currentMode === 1;
-  };
+  }
 
-  state.isBadge = function() {
+  function isBadge() {
     return data.currentMode === 0;
-  };
+  }
 
-  state.isPanelRequested = function() {
+  function isPanelRequested() {
     return data.transitionTo === 1;
-  };
+  }
 
-  state.isExpanding = function () {
+  function isExpanding() {
     return data.transitionTo === 1 && data.currentMode !== 1;
-  };
+  }
 
-  state.isSecondaryPanelRequested = function() {
+  function isSecondaryPanelRequested() {
     return data.secondaryPanelTransitionTo === 1;
-  };
+  }
 
-  state.isShrinking = function() {
+  function isShrinking() {
     return data.transitionTo === 0 && data.currentMode !== 0;
-  };
+  }
 
   /**
    * Returns 'button-menu' or name of secondary panel
    * @returns {string}
    */
-  state.getSecondaryPanelName = function () {
+  function getSecondaryPanelName() {
     return data.secondaryPanelName;
-  };
+  }
 
-  state.getPanelName = function () {
-    if (state.isPanel() && state.isSecondaryPanelRequested()) {
+  function getPanelName() {
+    if (isPanel() && isSecondaryPanelRequested()) {
       return data.secondaryPanelName;
     }
     return 'main';
+  }
+
+  var publics = {
+    get: get,
+    set: set,
+    isPanel: isPanel,
+    isBadge: isBadge,
+    isPanelRequested: isPanelRequested,
+    isExpanding: isExpanding,
+    isSecondaryPanelRequested: isSecondaryPanelRequested,
+    isShrinking: isShrinking,
+    getSecondaryPanelName: getSecondaryPanelName,
+    getPanelName: getPanelName
   };
 
-  callback();
-
+  if (SC_UNIT) {
+    module.exports = publics;
+  }
+  return publics;
 });

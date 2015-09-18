@@ -4,17 +4,14 @@
    * Description : This file fixes picker for rotating slider on calstate home page.
    */
 
-sitecues.def(function (module, callback, log) {
-  sitecues.use('custom', function (custom) {
+define(['custom'], function (custom) {
 
-    custom.register('mouse-highlight/pick', function (event) {
-      
-      this.provideCustomSelectors({
-        prefer: '#slider'
-      });
+  custom.register('mouse-highlight/pick', function () {
 
+    this.provideCustomSelectors({
+      prefer: '#slider'
     });
 
-    callback();
   });
+  // no publics
 });

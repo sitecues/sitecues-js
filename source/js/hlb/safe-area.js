@@ -1,72 +1,61 @@
-sitecues.def('hlb/safe-area', function(safeArea, callback) {
-
-    'use strict';
-
-    /////////////////////////
-    // PRIVATE VARIABLES
-    ////////////////////////
-
-    var documentElement = document.documentElement;
-
-
+define([], function() {
 
   /////////////////////////
-    // PUBLIC PROPERTIES
-    ////////////////////////
+  // PRIVATE VARIABLES
+  ////////////////////////
 
-    // Default fraction of viewport hypotenuse that will define the safe area
-    safeArea.HLB_SAFE_AREA = 0.05;
+  /////////////////////////
+  // PUBLIC PROPERTIES
+  ////////////////////////
 
-    /////////////////////////
-    // PRIVATE FUNCTIONS
-    ////////////////////////
+  // Default fraction of viewport hypotenuse that will define the safe area
+  var HLB_SAFE_AREA = 0.05;
 
-    /**
-     * [getUnsafePixels returns the amount of pixels from the
-     * edge of the viewport that defines the safe zone]
-     * @return {number} [pixels]
-     */
-    function getUnsafePixels() {
+  /////////////////////////
+  // PRIVATE FUNCTIONS
+  ////////////////////////
 
-        var hypotenuse = Math.hypot ?
-                Math.hypot(  // modern browsers (not IE)
-                    innerHeight,
-                    innerWidth
-                )
-                : Math.sqrt(  // fallback for IE
-                    Math.pow(innerHeight, 2) +
-                    Math.pow(innerWidth, 2)
-                );
+  /**
+   * [getUnsafePixels returns the amount of pixels from the
+   * edge of the viewport that defines the safe zone]
+   * @return {number} [pixels]
+   */
+  function getUnsafePixels() {
 
-        return hypotenuse * safeArea.HLB_SAFE_AREA;
+    var hypotenuse = Math.sqrt(
+      Math.pow(window.innerHeight, 2) +
+      Math.pow(window.innerWidth, 2)
+    );
 
-    }
+    return hypotenuse * HLB_SAFE_AREA;
 
-    /////////////////////////
-    // PUBLIC METHODS
-    ////////////////////////
+  }
 
-    // Returns a rectangle the represents the area in which the HLB is allowed to occupy
-    safeArea.getSafeZoneBoundingBox = function() {
+  /////////////////////////
+  // PUBLIC METHODS
+  ////////////////////////
 
-        var unsafePixels = getUnsafePixels();
+  // Returns a rectangle the represents the area in which the HLB is allowed to occupy
+  function getSafeZoneBoundingBox() {
 
-        return {
-            'left'   : unsafePixels,
-            'top'    : unsafePixels,
-            'width'  : innerWidth - unsafePixels * 2,
-            'height' : innerHeight - unsafePixels * 2,
-            'right'  : innerWidth - unsafePixels,
-            'bottom' : innerHeight - unsafePixels
-        };
+    var unsafePixels = getUnsafePixels();
 
+    return {
+      'left'   : unsafePixels,
+      'top'    : unsafePixels,
+      'width'  : window.innerWidth - unsafePixels * 2,
+      'height' : window.innerHeight - unsafePixels * 2,
+      'right'  : window.innerWidth - unsafePixels,
+      'bottom' : window.innerHeight - unsafePixels
     };
+  }
 
-    if (SC_UNIT) {
-        exports.getSafeZoneBoundingBox = safeArea.getSafeZoneBoundingBox;
-        exports.documentElement = documentElement;
-    }
+  var publics = {
+    getSafeZoneBoundingBox: getSafeZoneBoundingBox
+  };
 
-    callback();
-
+  if (SC_UNIT) {
+    module.exports = publics;
+  }
+  return publics;
 });

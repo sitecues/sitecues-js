@@ -1,11 +1,10 @@
 /**
  * This is the module for handling helping sitecues handle media queries.
  */
-sitecues.def('media-queries', function (mediaQueries, callback) {
+define([], function () {
 
-  'use strict';
-  
-  mediaQueries.isActiveMediaQuery = function(mediaQuery) {
+
+  function isActiveMediaQuery(mediaQuery) {
 
     if (!mediaQuery) {
       return true; // No media query, so everything matches
@@ -20,7 +19,13 @@ sitecues.def('media-queries', function (mediaQueries, callback) {
      * IE9: does not support window.matchMedia
      */
     return mediaQuery !== 'print';  // The most realistic value that we need to ignore
-  };
+  }
 
-  callback();
+  var publics = {
+    isActiveMediaQuery: isActiveMediaQuery
+  };
+  if (SC_UNIT) {
+    module.exports = publics;
+  }
+  return publics;
 });

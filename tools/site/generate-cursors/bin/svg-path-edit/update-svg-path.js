@@ -120,8 +120,8 @@
       curSelPathElem  = null,   // The currently selected/focused path element
       curSelSegCmd    = 0,      // The currently selected/focused path-segment (command)
       numPaths        = 0,      // Number of paths in the SVG
-      numSegsInPath   = 0,      // Number of commands/segments in the selected path
-      pathCommandList = [],     // An Array of segment commands in the current selected path
+      numSegsInPath   = 0,      // Number of command/segments in the selected path
+      pathCommandList = [],     // An Array of segment command in the current selected path
       nudgeAmt      = 0.1;    // The amount/speed which points and controls-points are moved per key event
 
 

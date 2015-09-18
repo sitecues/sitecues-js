@@ -6,27 +6,30 @@
  * NOTE: currently we are not using/building this
  */
 
-sitecues.def('labs', function (labs, callback) {
+define(['core/conf/user/manager', '$'], function(conf, $) {
   
-  'use strict';
-  
-  sitecues.use('conf', 'jquery', function(conf, $) {
 
-    var labSettings = $.extend({}, conf.get('labs'));
 
-    labs.isEnabled = function(labName) {
-      return labSettings[labName];
-    };
+  var labSettings = $.extend({}, conf.get('labs'));
 
-    sitecues.on('labs/get', function(labInfo) {
-      $.extend(labInfo, labSettings);
-    });
+  function isEnabled(labName) {
+    return labSettings[labName];
+  }
 
-    sitecues.on('labs/set', function(labInfo) {
-      labSettings = $.extend({}, labInfo);
-      conf.set('labs', labSettings);
-    });
-
-    callback();
+  sitecues.on('labs/get', function(labInfo) {
+    $.extend(labInfo, labSettings);
   });
+
+  sitecues.on('labs/set', function(labInfo) {
+    labSettings = $.extend({}, labInfo);
+    conf.set('labs', labSettings);
+  });
+  var publics = {
+    isEnabled: isEnabled
+  };
+
+  if (SC_UNIT) {
+    module.exports = publics;
+  }
+  return publics;
 });

@@ -1,16 +1,4 @@
-<sc-card>
-  <sc-h1>Adjust</sc-h1>
-  <sc-h2>Get more out of sitecues:</sc-h2>
-  <sc-menu>
-    <sc-menuitem data-target="scp-theme-settings" class="scp-no-ie9">Color Theme</sc-menuitem>
-    <sc-menuitem data-target="scp-mouse-settings">Mouse</sc-menuitem>
-    <sc-menuitem data-target="scp-lens-settings">Magnification</sc-menuitem>
-  </sc-menu>
-</sc-card>
-
-
 <sc-card id="scp-theme-settings">
-  <sc-h1>Color Theme</sc-h1>
   <sc-p class="scp-color-theme-group">
     <sc-button data-setting-name="themeName">
       None
@@ -36,10 +24,9 @@
 </sc-card>
 
 <sc-card id="scp-mouse-settings" class="scp-no-ie9">
-  <sc-h1>Mouse</sc-h1>
   <sc id="scp-mouse-settings-group">
     <sc-p class="scp-range-group" data-show="true">
-      <input type="range" id="scp-mouse-size" min="1" max="4" step =".01" data-setting-name="mouseSize" aria-labelledby="scp-mouse-size-label"/><br/>
+      <input type="range" id="scp-mouse-size" min="1" max="3.5" step =".01" data-setting-name="mouseSize" aria-labelledby="scp-mouse-size-label"/><br/>
       <sc-span id="scp-mouse-size-label">size</sc-span>
     </sc-p>
     <sc-p class="scp-range-group scp-no-ie" data-show="true">
@@ -49,27 +36,13 @@
   </sc>
 </sc-card>
 
-<sc-card id="scp-lens-settings">
-  <sc-h1>Magnification</sc-h1>
-  <sc-p>How much should the lens magnify highlighted content?</sc-p>
-  <sc-p class="scp-lens-size-group">
-    <sc-span id="scp-lens-small">
-      <sc-button data-setting-name="lensSize" data-setting-value="-">
-        1.2x
-      </sc-button>
-    </sc-span>
-    <sc-span id="scp-lens-medium">
-      <sc-button data-setting-name="lensSize">
-        1.5x
-      </sc-button>
-    </sc-span>
-    <sc-span id="scp-lens-large">
-      <sc-button data-setting-name="lensSize" data-setting-value="+">
-        2x
-      </sc-button>
-    </sc-span>
-    <br/><br/>
-    <sc-p>Hint: to use the lens, press <sc-kbd class="scp-space">spacebar</sc-kbd> over highlighted areas.</sc-p>
-  </sc-p>
-</sc-card>
+<!-- Header -->
+<sc-h1 class="scp-card-header">Settings</sc-h1>
+
+<sc class="scp-card-chooser">
+  <sc-link data-target="scp-theme-settings">Colors</sc-link>
+  <sc-link data-target="scp-mouse-settings">Mouse</sc-link>
+</sc>
+
+<sc class="scp-card-indicator"></sc>
 

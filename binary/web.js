@@ -139,7 +139,7 @@ app.all(/\/html\/|\/images\/cursors\//, function(req, res, next) {
     }
 
     buildData.searchPath.push({
-      pathRoot : pathJoin(projectRoot, 'target', buildName, 'compile')
+      pathRoot : pathJoin(projectRoot, 'target', buildName)
     });
 
     buildData.searchPath.push({
@@ -358,7 +358,7 @@ if (!prodMode) {
 }
 
 // The common assets,
-app.use(express.static(pathJoin(projectRoot, 'target', 'common', 'compile')));
+app.use(express.static(pathJoin(projectRoot, 'target', 'common')));
 app.use(express.static(pathJoin(projectRoot, 'target', 'common', 'etc')));
 
 

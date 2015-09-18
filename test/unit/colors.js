@@ -2,7 +2,7 @@ define(
     [
         'intern!tdd',
         'intern/chai!assert',
-        'target/common/compile/js/sitecues'
+        'target/common/js/sitecues'
     ],
     function (tdd, assert) {
         with (tdd) {

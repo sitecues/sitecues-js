@@ -1,6 +1,3 @@
-.DS_Store
-node_modules
-npm-debug.log
 target
 tmp
 var
@@ -9,32 +6,37 @@ sitecues-load-script.js
 *.ipr
 *.iws
 .pip
-.vagrant
-.idea
 
+# Dependencies.
+# =============
+# These are compiled per-environment, by each developer.
+node_modules
+
+# Build system output.
+# ====================
+# Unit test coverage, etc.
+report
+
+# Operating system shenanigans.
+# =============================
+.DS_Store
+
+# Development tool metadata.
+# ==========================
+*.log
+.idea
+.vagrant
+nbproject
+# Used by Gource to visualize changes in the Git repo. over time.
+fetchavatars.pl
 
 # User-local environment template.
 # ================================
 # This file is sourced during testing. It contains logins for cloud services and is considered private.
 config/.env
 
-# Fetch Avatars is used in Gource.
-# ================================
-# Gource is used to visualize the changes in the Git repo. over time.
-fetchavatars.pl
-
-# None of Howard's jokes should make it into the production code under any circumstances!
-# =======================================================================================
-# Howards jokes include, but are not limited to: Wowwerd dot j.s. dot com . dot net . dot org . dot wordpress slash startup dot schwab.
-howards-jokes.js.
-
 # Generated cursor output files make it into the repo.
 # ====================================================
 # The cursor_output directory should be ignored to save space in the repo.
 # Cursors that should be in the IE version should be copied to the source/images/cursors directory.
 tools/site/generate-cursors/cursor_output/
-/nbproject/private/
-
-# Stops auto-generated reports from being commited, such as unit-test-coverage.
-# =============================================================================
-report

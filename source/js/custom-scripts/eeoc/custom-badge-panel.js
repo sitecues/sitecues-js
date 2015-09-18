@@ -5,22 +5,17 @@
  * Description : Custom color palette for badge and panel
  *
 */
-sitecues.def(function (module, callback) {
-  'use strict';
-  sitecues.use('custom', function (custom) {
-
-    custom.register('bp/view/styles', function () {
-      this.provideCustomPalette({
-        'A': 'red',
-        'panel': {
-          'largeA': 'yellow'
-        },
-        'badge': {
-          'wave1Off': 'green'
-        }
-      });
+define(['custom'], function (custom) {
+  custom.register('bp/view/styles', function () {
+    this.provideCustomPalette({
+      'A': 'red',
+      'panel': {
+        'largeA': 'yellow'
+      },
+      'badge': {
+        'wave1Off': 'green'
+      }
     });
-
-    callback();
   });
+  // no publics
 });
