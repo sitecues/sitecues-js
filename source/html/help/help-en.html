@@ -167,9 +167,17 @@
 <p>To quit sitecues, either turn off both zoom and speech, or press <kbd>Alt+0</kbd>.</p>
 </body>
 <script>
-    try {
+    function focusIt() {
+      try {
+        window.focus();
+      } catch (ex) {}
+
+      try {
         document.body.focus();
-    } catch(ex) {};
+      } catch (ex) {}
+    }
+
+    setTimeout(focusIt, 0);
 
     function isPinchZoomSupported() {
       return navigator.userAgent.indexOf('Chrome') > 0 && navigator.platform.toLowerCase().indexOf('mac') >= 0;

@@ -10,16 +10,16 @@ define([], function() {
     zoom_in: 'Grösser',
     zoom_out: 'Kleiner',
     // - Secondary
-    more_features: 'Mehr Möglichkeiten',   /* new */
-    previous: 'Voriges',             /* new */
-    next: 'Nöchstes',                     /* new */
+    more_features: 'Mehr Möglichkeiten',
+    previous: 'Voriges',
+    next: 'Nöchstes',
     // - Feedback
-    rating: 'Bewertung',                 /* new */
-    rating_1: '1 Stern',               /* new */
-    rating_2: '2 Stern',              /* new */
-    rating_3: '3 Stern',              /* new */
-    rating_4: '4 Stern',              /* new */
-    rating_5: '5 Stern',              /* new */
+    rating: 'Bewertung',
+    rating_1: '1 Stern',
+    rating_2: '2 Stern',
+    rating_3: '3 Stern',
+    rating_4: '4 Stern',
+    rating_5: '5 Stern',
 
     // Visible labels
     // - Main
@@ -30,15 +30,15 @@ define([], function() {
     on: 'Ein',
     off: 'Aus',
     // - Secondary
-    tips: 'Tipps',                     /* new */
-    settings: 'Einstellungen',             /* new */
-    rate_us: 'Bewerten Sie uns',               /* new */
-    about: 'Über',                   /* new */
+    tips: 'Tipps',
+    settings: 'Einstellungen',
+    rate_us: 'Bewerten Sie uns',
+    about: 'Über',
     // - Feedback
-    send: 'Senden',                     /* new */
-    tell_us_something: 'Teilen Sie uns etwas mit ...',      /* new */
-    thank_you: 'Danke',                          /* new */
+    send: 'Senden',
+    tell_us_something: 'Teilen Sie uns etwas mit ...',
+    thank_you: 'Danke',
     // - About
-    zoom_and_speech: 'Vergrösserung und Sprache'               /* new */
+    zoom_and_speech: 'Vergrösserung und Sprache'
   };
 });
