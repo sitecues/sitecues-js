@@ -406,7 +406,7 @@ define(['$', 'mouse-highlight/mouse-highlight', 'util/common', 'util/transform',
         spreadEnd = constrained(distance * SPREAD_SLOPE, minSpread, MAX_SPREAD),
         // These are to enable the cross-hatch pattern that allows fewer points to be more effective
         toggleExtraY = 0,
-        spreadStart = isHorizMovement ? (SPREAD_STEP_SIZE * ((numberOfDotRowsChecked % 2) ? .7 : 1.2)) : SPREAD_STEP_SIZE;
+        spreadStart = isHorizMovement ? (SPREAD_STEP_SIZE * ((numberOfDotRowsChecked % 2) ? 0.7 : 1.2)) : SPREAD_STEP_SIZE;
 
       // Each iteration of this loop will test another dot on the current row of dots
       // spread out from the red center dot

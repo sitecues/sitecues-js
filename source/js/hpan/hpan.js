@@ -2,8 +2,8 @@ define(['core/conf/user/manager', 'dollar/dollar-utils', 'zoom/zoom'], function 
   var isOn = false,
     isHlbOn = false,
     isPanelOpen = false,
-    MIN_EDGE_PORTION = .1,
-    MAX_EDGE_PORTION = .25,
+    MIN_EDGE_PORTION = 0.1,
+    MAX_EDGE_PORTION = 0.25,
     SPEED_FACTOR = 4,
     MAX_SPEED = 100,
     isListeningToResize,
@@ -31,7 +31,7 @@ define(['core/conf/user/manager', 'dollar/dollar-utils', 'zoom/zoom'], function 
       ratioContentToWindowWidth = bodyRight / winWidth,
 
       // Amount of edge to use for panning
-      edgePortion = Math.max(Math.min((ratioContentToWindowWidth / 2 - .55), MAX_EDGE_PORTION), MIN_EDGE_PORTION),
+      edgePortion = Math.max(Math.min((ratioContentToWindowWidth / 2 - 0.55), MAX_EDGE_PORTION), MIN_EDGE_PORTION),
       edgeSize = winWidth * edgePortion,
 
       // Get direction to pan, or return if mouse too near center of screen to cause panning
@@ -57,7 +57,7 @@ define(['core/conf/user/manager', 'dollar/dollar-utils', 'zoom/zoom'], function 
       // Factor in how much more content there is than can fit in the window
       // Factor in how far into the panning zone we are, so it accelerates as we get toward edge
       // (sort of a magic formula developed through tinkering, which seems to work nicely)
-      extraMovement = Math.max(.5, (ratioContentToWindowWidth - .3) * SPEED_FACTOR * (percentageIntoPanningZone + .5)),
+      extraMovement = Math.max(0.5, (ratioContentToWindowWidth - 0.3) * SPEED_FACTOR * (percentageIntoPanningZone + 0.5)),
 
       // How far can we move until we reach the right edge of the visible content
       maxMovementUntilRightEdge = bodyRight - winWidth - window.pageXOffset,

@@ -88,7 +88,7 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'util/
     REPAINT_FOR_CRISP_TEXT_DELAY = 100,          // This is conjured out of thin air. Just seems to work.
     CRISPING_ATTRIBUTE = 'data-sc-crisp',
     UNPINCH_END_DELAY = 150,
-    UNPINCH_POWER = .015; // How much the unpinch delta affects zoom
+    UNPINCH_POWER = 0.015; // How much the unpinch delta affects zoom
 
   // ------------------------ PUBLIC -----------------------------
 

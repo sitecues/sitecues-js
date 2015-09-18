@@ -210,7 +210,7 @@ define(['$', 'util/color'], function ($, colorUtil) {
     }
 
     var lightnessDiff = Math.abs(newLightness - hsl.l),
-      MIN_SIGNIFICANT_LIGHTNESS_DIFF = .01,
+      MIN_SIGNIFICANT_LIGHTNESS_DIFF = 0.01,
       isSignificantChange = lightnessDiff > MIN_SIGNIFICANT_LIGHTNESS_DIFF || newAlpha !== rgba.a,
       returnVal = isSignificantChange ? $.extend({a: newAlpha}, hslToRgb(hsl.h, hsl.s, newLightness)) : rgba;
 
@@ -336,7 +336,7 @@ define(['$', 'util/color'], function ($, colorUtil) {
       return getReducedIntensity(rgba, intensity - 0.15);
     }
 
-    var mixInRatio = /*rgba.b * 0.001 */ .2 * (1 - intensity),
+    var mixInRatio = /*rgba.b * 0.001 */ 0.2 * (1 - intensity),
       mixInRgba = hslToRgb(0.15, 1, 0.5);
 
     return mixRgbaColors(rgba, mixInRgba, mixInRatio);

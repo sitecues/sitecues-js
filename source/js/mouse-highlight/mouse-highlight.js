@@ -215,7 +215,7 @@ define(['$', 'core/conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mou
 
   function getHighlightBorderWidth() {
     var viz = getHighlightVisibilityFactor(),
-        borderWidth = viz + .33 + (state.hasDarkBackgroundColor ? EXTRA_DARK_BG_BORDER_WIDTH : 0);
+        borderWidth = viz + 0.33 + (state.hasDarkBackgroundColor ? EXTRA_DARK_BG_BORDER_WIDTH : 0);
     return Math.max(1, borderWidth) * state.zoom;
   }
 

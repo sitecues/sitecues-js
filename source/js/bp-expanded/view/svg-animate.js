@@ -19,8 +19,8 @@ define(['util/transform', 'core/platform'], function (transform, platform) {
       // https://gist.github.com/gre/1650294
       animationFunctions = {
         linear: function (t) { return t; },
-        easeOutCubic: function (t) { return (--t)*t*t+1; },
-        sinusoidal: function(t) { return -.5 * (Math.cos(Math.PI * t ) - 1); }
+        easeOutCubic: function (t) { return (--t) * t * t + 1; },
+        sinusoidal: function(t) { return -0.5 * (Math.cos(Math.PI * t ) - 1); }
       },
 
       defaultAnimation = 'easeOutCubic';

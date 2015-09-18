@@ -369,7 +369,7 @@ define(['bp/helper', 'core/platform', 'bp/constants', 'core/conf/site', 'core/co
       },
 
       '.scp-ie9-true .scp-hidden-target': {
-        'opacity': .001    // Can't be seen but still gets click events
+        'opacity': 0.001    // Can't be seen but still gets click events
       },
 
       /*************** Close button **********************/

@@ -143,9 +143,5 @@
   "rhino"         : false,    // Rhino
   "worker"        : false,    // Web Workers
   "wsh"           : false,    // Windows Scripting Host
-  "yui"           : false,    // Yahoo User Interface
-
-  // TODO: Remove this if there are no objections.
-  // Whether to tolerate decimal numbers like `var x = .543` without a leading zero, even though it could be a typo and is less readable.
-  "-W008": true      // Leading 0 before decimal point
+  "yui"           : false     // Yahoo User Interface
 }
