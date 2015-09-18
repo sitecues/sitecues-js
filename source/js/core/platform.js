@@ -61,9 +61,7 @@ define([], function() {
   })();
 
   // Convenience method as IE9 is a common issue
-  var isIE9 = (function() {
-    return browser.isIE && browser.version === 9;
-  })();
+  var isIE9 = browser.isIE && browser.version === 9;
 
   // Determine which opperating system is being used
   osStr = platform.indexOf('mac') >-1 ? 'mac' :
@@ -107,18 +105,13 @@ define([], function() {
   // When a window moves to another display, it can change
   var canUseRetinaCursors = browser.isChrome;
 
-  var cssPrefix = (function() {
-    if (browser.isWebKit) {
-      return '-webkit-';
-    }
-    if (browser.isFirefox) {
-      return '-moz-';
-    }
-    if (browser.isIE) {
-      return '-ms-';
-    }
-    return '';
-  })();
+  var cssPrefix = browser.isWebKit  ?
+                    '-webkit-'      :
+                  browser.isFirefox ?
+                    '-moz-'         :
+                  browser.isIE      ?
+                    '-ms-'          :
+                    '';
 
   var transformPropertyCss =  isIE9 ? '-ms-transform' : ((browser.isWebKit && !isCssPropSupported('transform'))? '-webkit-transform' : 'transform');
   var transformProperty = transformPropertyCss.replace('-t', 'T').replace('-', '');
