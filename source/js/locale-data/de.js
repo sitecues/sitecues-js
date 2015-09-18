@@ -10,16 +10,16 @@ define([], function() {
     zoom_in: 'Grösser',
     zoom_out: 'Kleiner',
     // - Secondary
-    more_features: 'More features',   /* new */
-    previous: 'Previous',             /* new */
-    next: 'Next',                     /* new */
+    more_features: 'Mehr Möglichkeiten',   /* new */
+    previous: 'Voriges',             /* new */
+    next: 'Nöchstes',                     /* new */
     // - Feedback
-    rating: 'Rating',                 /* new */
-    rating_1: '1 star',               /* new */
-    rating_2: '2 stars',              /* new */
-    rating_3: '3 stars',              /* new */
-    rating_4: '4 stars',              /* new */
-    rating_5: '5 stars',              /* new */
+    rating: 'Bewertung',                 /* new */
+    rating_1: '1 Stern',               /* new */
+    rating_2: '2 Stern',              /* new */
+    rating_3: '3 Stern',              /* new */
+    rating_4: '4 Stern',              /* new */
+    rating_5: '5 Stern',              /* new */
 
     // Visible labels
     // - Main
@@ -30,15 +30,15 @@ define([], function() {
     on: 'Ein',
     off: 'Aus',
     // - Secondary
-    tips: 'Tips',                     /* new */
-    settings: 'Settings',             /* new */
-    rate_us: 'Rate us',               /* new */
-    about: 'About',                   /* new */
+    tips: 'Tipps',                     /* new */
+    settings: 'Einstellungen',             /* new */
+    rate_us: 'Bewerten Sie uns',               /* new */
+    about: 'Über',                   /* new */
     // - Feedback
-    send: 'Send',                     /* new */
-    tell_us_something: 'Tell us something ...',      /* new */
-    thank_you: 'Thank you',                          /* new */
+    send: 'Senden',                     /* new */
+    tell_us_something: 'Teilen Sie uns etwas mit ...',      /* new */
+    thank_you: 'Danke',                          /* new */
     // - About
-    zoom_and_speech: 'zoom and speech'               /* new */
+    zoom_and_speech: 'Vergrösserung und Sprache'               /* new */
   };
 });
