@@ -20,7 +20,7 @@
 // Beta testing
 // Applause testing
 // Provisional patents  -- who can help? Jeff? Ai2?
-// TODO reduce cyclomatic complexity (option in .jshintrc)
+// TODO reduce cyclomatic complexity to 10 or less (option in .jshintrc)
 //
 // Later
 //Fix unit tests
