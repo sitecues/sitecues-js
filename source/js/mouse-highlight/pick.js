@@ -263,7 +263,92 @@ define(['$', 'util/common', 'dollar/dollar-utils', 'core/conf/user/manager', 'co
 
   // --------- Heuristic results ---------
 
-  // Allow leaf voting to modify results, thus improving overall consistency
+  function performVote(scoreObjs, bestIndex, candidates, extraWork, origBestIndex) {
+    function getNumericScore(scoreObj) {
+      return scoreObj.score;
+    }
+
+    while (true) {
+      var minSecondBestScore = scoreObjs[bestIndex].score - SECOND_BEST_IS_VIABLE_THRESHOLD;
+      var secondBestIndex = getCandidateWithHighestScore(scoreObjs, minSecondBestScore, bestIndex);
+
+      if (secondBestIndex < 0) {
+        var scores = scoreObjs.map(getNumericScore);
+        if (SC_DEV && isVoteDebuggingOn) {
+          console.log('--> break no other competitors: ' + JSON.stringify(scores));
+        }
+        break;  // Only one valid candidate
+      }
+
+      if (SC_DEV && isVoteDebuggingOn) {
+        console.log('1st = %d (score=%d) %O', bestIndex, scoreObjs[bestIndex].score, candidates[bestIndex]);
+        console.log('2nd = %d (score=%d) %O', secondBestIndex, scoreObjs[secondBestIndex].score, candidates[secondBestIndex]);
+      }
+
+      // 3. Choose between first and second best candidate
+      ++extraWork;
+      var topIndex = Math.max(bestIndex, secondBestIndex), // Top-most (container) choice
+        topElement = candidates[topIndex],
+        bottomIndex = Math.min(bestIndex, secondBestIndex), // Bottom-most (not container) choice
+        leaves = getLeavesForVote(candidates[topIndex], candidates[bottomIndex]),
+        leafIndex = 0,
+        votesForTop = (topIndex === bestIndex) ? 1 : -1;
+
+      if (SC_DEV && isVoteDebuggingOn) {
+        console.log('Starting vote: ' + votesForTop);
+      }
+      for (; leafIndex < leaves.length; leafIndex++) {
+        var candidatesForVote = getCandidates(leaves[leafIndex]),
+          scoresForVote = getScores(candidatesForVote),
+          leafVoteIndex = getCandidateWithHighestScore(scoresForVote),
+          isVoteForTop = candidatesForVote[leafVoteIndex] === topElement;
+        if (SC_DEV && isVoteDebuggingOn) {
+          console.log(
+            'Vote for top ? %s ---> %o voted for %O',
+            isVoteForTop,
+              leaves[leafIndex].firstChild || leaves[leafIndex],
+            candidatesForVote[leafVoteIndex]
+          );
+        }
+        votesForTop += isVoteForTop ? 1 : -1;
+      }
+
+      // The voters have chosen ...
+      if (votesForTop < 0) {
+        // The lower candidates to be highlighted as individuals
+        bestIndex = bottomIndex;
+        secondBestIndex = topIndex;
+      }
+      else {
+        // The upper candidate as a single highlighted container
+        bestIndex = topIndex;
+        secondBestIndex = bottomIndex;
+      }
+      if (SC_DEV) {
+        modifyResultsFromVote(votesForTop, scoreObjs, bestIndex, secondBestIndex);
+      }
+      scoreObjs[bestIndex].score = Math.max(scoreObjs[topIndex].score, scoreObjs[bottomIndex].score); // The new champ
+      scoreObjs[secondBestIndex].score = MIN_SCORE_TO_PICK;  // Take this one out of the running
+      // Now loop around to try and other underdogs within scoring range of the top
+    }
+
+    if (SC_DEV && isVoteDebuggingOn) {
+      if (origBestIndex !== bestIndex) {
+        candidates[origBestIndex].style.outline = '2px solid red';
+        candidates[bestIndex].style.outline = '2px solid green';
+      }
+      else {
+        console.log('Extra work ' + extraWork);
+        candidates[bestIndex].style.outline = (extraWork * 4) + 'px solid orange';
+      }
+      setTimeout(function () {
+        candidates[origBestIndex].style.outline = '';
+        candidates[bestIndex].style.outline = '';
+      }, 1000);
+    }
+    return bestIndex;
+  }
+
   function getHeuristicResult(candidates, doAllowVoting) {
     function processResult(pickedIndex) {
       // Log the results if necessary for debugging
@@ -286,110 +371,36 @@ define(['$', 'util/common', 'dollar/dollar-utils', 'core/conf/user/manager', 'co
       return processResult(-1); // No valid candidate
     }
 
-    function getNumericScore(scoreObj) {
-      return scoreObj.score;
-    }
-
     // 2. Get the second best candidate
-    while (doAllowVoting) {
-      var minSecondBestScore = scoreObjs[bestIndex].score - SECOND_BEST_IS_VIABLE_THRESHOLD;
-      var secondBestIndex = getCandidateWithHighestScore(scoreObjs, minSecondBestScore, bestIndex);
-
-      if (secondBestIndex < 0) {
-        var scores = scoreObjs.map(getNumericScore);
-        if (SC_DEV && isVoteDebuggingOn) {
-          console.log('--> break no other competitors: ' + JSON.stringify(scores));
-        }
-        break;  // Only one valid candidate
-      }
-
-      if (SC_DEV && isVoteDebuggingOn) {
-        console.log('1st = %d (score=%d) %O', bestIndex, scoreObjs[bestIndex].score, candidates[bestIndex]);
-        console.log('2nd = %d (score=%d) %O', secondBestIndex, scoreObjs[secondBestIndex].score, candidates[secondBestIndex]);
-      }
-
-      // 3. Choose between first and second best candidate
-      ++ extraWork;
-      var topIndex = Math.max(bestIndex, secondBestIndex), // Top-most (container) choice
-        topElement = candidates[topIndex],
-        bottomIndex = Math.min(bestIndex, secondBestIndex), // Bottom-most (not container) choice
-        leaves = getLeavesForVote(candidates[topIndex], candidates[bottomIndex]),
-        leafIndex = 0,
-        votesForTop = (topIndex === bestIndex) ? 1 : -1;
-
-      if (SC_DEV && isVoteDebuggingOn) {
-        console.log('Starting vote: ' + votesForTop);
-      }
-      for (; leafIndex < leaves.length; leafIndex++) {
-        var candidatesForVote = getCandidates(leaves[leafIndex]),
-          scoresForVote = getScores(candidatesForVote),
-          leafVoteIndex = getCandidateWithHighestScore(scoresForVote),
-          isVoteForTop = candidatesForVote[leafVoteIndex] === topElement;
-        if (SC_DEV && isVoteDebuggingOn) {
-          console.log(
-            'Vote for top ? %s ---> %o voted for %O',
-            isVoteForTop,
-            leaves[leafIndex].firstChild || leaves[leafIndex],
-            candidatesForVote[leafVoteIndex]
-          );
-        }
-        votesForTop += isVoteForTop ? 1 : -1;
-      }
-
-      // The voters have chosen ...
-      if (votesForTop < 0) {
-        // The lower candidates to be highlighted as individuals
-        bestIndex = bottomIndex;
-        secondBestIndex = topIndex;
-      }
-      else {
-        // The upper candidate as a single highlighted container
-        bestIndex = topIndex;
-        secondBestIndex = bottomIndex;
-      }
-      if (SC_DEV) {
-        if (isVoteDebuggingOn) {
-          console.log('votesForTop = ' + votesForTop);
-        }
-        // Debug info
-        var deltaBest = scoreObjs[bestIndex].score - scoreObjs[secondBestIndex].score,
-          deltaSecondBest = MIN_SCORE_TO_PICK - scoreObjs[secondBestIndex].score;
-        if (deltaBest) {
-          scoreObjs[bestIndex].factors.push({
-            about: 'vote-winner',
-            value: deltaBest,
-            weight: 1
-          });
-        }
-        if (deltaSecondBest) {
-          scoreObjs[secondBestIndex].factors.push({
-            about: 'vote-loser',
-            value: deltaSecondBest,
-            weight: 1
-          });
-        }
-      }
-      scoreObjs[bestIndex].score = Math.max(scoreObjs[topIndex].score, scoreObjs[bottomIndex].score); // The new champ
-      scoreObjs[secondBestIndex].score = MIN_SCORE_TO_PICK;  // Take this one out of the running
-      // Now loop around to try and other underdogs within scoring range of the top
-    }
-
-    if (SC_DEV && isVoteDebuggingOn) {
-      if (origBestIndex !== bestIndex) {
-        candidates[origBestIndex].style.outline = '2px solid red';
-        candidates[bestIndex].style.outline = '2px solid green';
-      }
-      else {
-        console.log('Extra work ' + extraWork);
-        candidates[bestIndex].style.outline = (extraWork * 4) + 'px solid orange';
-      }
-      setTimeout(function() {
-        candidates[origBestIndex].style.outline = '';
-        candidates[bestIndex].style.outline = '';
-      }, 1000);
+    if (doAllowVoting) {
+      bestIndex = performVote(scoreObjs, bestIndex, candidates, extraWork, origBestIndex);
     }
 
     return processResult(bestIndex);
+  }
+
+  // Allow leaf voting to modify results, thus improving overall consistency
+  function modifyResultsFromVote(votesForTop, scoreObjs, bestIndex, secondBestIndex) {
+    if (isVoteDebuggingOn) {
+      console.log('votesForTop = ' + votesForTop);
+    }
+    // Debug info
+    var deltaBest = scoreObjs[bestIndex].score - scoreObjs[secondBestIndex].score,
+      deltaSecondBest = MIN_SCORE_TO_PICK - scoreObjs[secondBestIndex].score;
+    if (deltaBest) {
+      scoreObjs[bestIndex].factors.push({
+        about: 'vote-winner',
+        value: deltaBest,
+        weight: 1
+      });
+    }
+    if (deltaSecondBest) {
+      scoreObjs[secondBestIndex].factors.push({
+        about: 'vote-loser',
+        value: deltaSecondBest,
+        weight: 1
+      });
+    }
   }
 
   function getLeavesForVote(startElement, avoidSubtree) {

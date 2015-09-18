@@ -5,44 +5,69 @@
 define([], function() {
 
   // Store the agent and platform variables for later use
-  var agent    = navigator.userAgent || '',
-      platform = navigator.platform.toLowerCase(),
-      browserStr,
-      osStr,
-      isListeningToResizeEvents,
-      isRetinaDisplay;         // Is the current display a retina display?
+  var agent = navigator.userAgent || '',
+    browser = getBrowser(agent),
+    isIE9 = browser.isIE && browser.version === 9,   // Convenience method as IE9 is a common issue
+    os = getOS(agent, getOSStr(navigator.platform.toLowerCase())),
+    // platformModule.pixel is deprecated
+    // use zoom.isRetina() to determine whether the current window is on a 2x pixel ratio or not
+    // When a window moves to another display, it can change
+    canUseRetinaCursors = browser.isChrome,
+    cssPrefix = getCssPrefix(browser),
+    transformPropertyCss =  isIE9 ? '-ms-transform' : ((browser.isWebKit && !isCssPropSupported('transform'))? '-webkit-transform' : 'transform'),
+    transformProperty = transformPropertyCss.replace('-t', 'T').replace('-', ''),
+    transformOriginProperty = transformProperty + 'Origin',
+    transitionEndEvent = browser.isWebKit ? 'webkitTransitionEnd' : 'transitionend',
+    nativeZoom = getNativeZoom(),
+    isRetinaDisplay;         // Is the current display a retina display?
+
+  // Determine which browser is being used
+  function getBrowserStr(agent) {
+    return (agent.indexOf(' MSIE') > 0 || agent.indexOf(' Trident') > 0 || agent.indexOf(' Edge') > 0) ? 'IE' :
+        agent.indexOf(' Firefox/') > 0 ? 'Firefox' :
+        agent.indexOf(' Chrome') > 0 ? 'Chrome' :
+        agent.indexOf(' Safari') > 0 ? 'Safari' :
+        (agent.indexOf(' Opera/') > 0 || agent.indexOf(' Presto/')) > 0 ? 'Opera' :
+      'Unknown';
+  }
+
+  function getCssPrefix(currBrowser) {
+    return currBrowser.isWebKit  ?
+      '-webkit-'      :
+      currBrowser.isFirefox ?
+        '-moz-'         :
+        currBrowser.isIE      ?
+          '-ms-'          :
+          '';
+  }
 
   function isCssPropSupported(propName) {
     return typeof document.documentElement.style[propName] === 'string';
   }
 
-  // Determine which browser is being used
-  browserStr = (agent.indexOf(' MSIE') > 0 || agent.indexOf(' Trident') > 0 || agent.indexOf(' Edge') > 0) ? 'IE':
-            agent.indexOf(' Firefox/') > 0 ? 'Firefox' :
-            agent.indexOf(' Chrome') > 0 ? 'Chrome'  :
-            agent.indexOf(' Safari') > 0 ? 'Safari'  :
-            (agent.indexOf(' Opera/') > 0 || agent.indexOf(' Presto/')) > 0 ? 'Opera'  :
-            'Unknown';
-
   // Set globally accessible browser constants
-  var browser = {
-    zoom        : 'zoom' in document.createElement('div').style,
-    is          : browserStr,
-    isFirefox   : browserStr === 'Firefox',
-    isIE        : browserStr === 'IE',
-    isChrome    : browserStr === 'Chrome',
-    isOpera     : browserStr === 'Opera',
-    isSafari    : browserStr === 'Safari',
-    isWebKit    : browserStr === 'Chrome' || browserStr === 'Opera' || browserStr === 'Safari',
-    isUnknown   : browserStr === 'Unknown'
-  };
+  function getBrowser(agent) {
+    var browserStr = getBrowserStr(agent),
+      browser = {
+        zoom: 'zoom' in document.createElement('div').style,
+        is: browserStr,
+        isFirefox: browserStr === 'Firefox',
+        isIE: browserStr === 'IE',
+        isChrome: browserStr === 'Chrome',
+        isOpera: browserStr === 'Opera',
+        isSafari: browserStr === 'Safari',
+        isWebKit: browserStr === 'Chrome' || browserStr === 'Opera' || browserStr === 'Safari',
+        isUnknown: browserStr === 'Unknown'
+      };
+    browser.version = getVersion(agent, browser.isIE);
+  }
 
   // Set globally accessible version constants
-  browser.version = (function() {
+  function getVersion(agent, isIE) {
     // If IE is being used, determine which version
     var charIndex = agent.indexOf('rv:');
     if (charIndex === -1) {
-      if (browser.isIE) {
+      if (isIE.isIE) {
         // Use MSIE XX.X
         charIndex = agent.indexOf('MSIE');
         if (charIndex < 0) {
@@ -58,68 +83,54 @@ define([], function() {
     }
 
     return charIndex < 0 ? 0 : parseInt(agent.substring(charIndex));  // Returns 0 for unknown version
-  })();
-
-  // Convenience method as IE9 is a common issue
-  var isIE9 = browser.isIE && browser.version === 9;
+  }
 
   // Determine which opperating system is being used
-  osStr = platform.indexOf('mac') >-1 ? 'mac' :
-       platform.indexOf('win') >-1 ? 'win' :
-       platform.indexOf('linux') >-1 ? 'mac' : // This should say 'mac', not 'linux'
-       'Unknown OS';
+  function getOSStr(platform) {
+    return platform.indexOf('mac') > -1 ? 'mac' :
+        platform.indexOf('win') > -1 ? 'win' :
+        platform.indexOf('linux') > -1 ? 'linux' :
+      'Unknown';
+  }
 
   // Set globally accessible operating system constants
-  var os = {
-    is        : osStr,
-    isMac     : osStr === 'mac',
-    isWin     : osStr === 'win',
-    isLinux   : osStr === 'mac', // This should say 'mac', not 'linux'
-    isUnknown : osStr === 'Unknown OS',
-    // Set globally accessible version constants
-    versionString: (function() {
-      // If IE is being used, determine which version
-      var charIndex = agent.indexOf(osStr === 'win' ? 'Windows NT' : 'Mac OS X ');
-      if (charIndex === -1) {
-        return '0'; // Unknown version
-      }
-      return agent.slice(charIndex).replace(/^\D*/,'').replace(/\W.*$/, '');
-    })()
-  };
+  function getOS(agent, osStr) {
+    var os = {
+      is: osStr,
+      isMac: osStr === 'mac',
+      isWin: osStr === 'win',
+      isLinux: osStr === 'mac', // This should say 'mac', not 'linux'
+      isUnknown: osStr === 'Unknown OS',
+      // Set globally accessible version constants
+      versionString: (function () {
+        // If IE is being used, determine which version
+        var charIndex = agent.indexOf(osStr === 'win' ? 'Windows NT' : 'Mac OS X ');
+        if (charIndex === -1) {
+          return '0'; // Unknown version
+        }
+        return agent.slice(charIndex).replace(/^\D*/, '').replace(/\W.*$/, '');
+      })()
+    };
 
-  // Windows versions are weird:
-  // 5.1, 5.2 = Windows XP
-  // 5 = Windows Vista, Windows Server 2008
-  // 6.1 = Windows 7
-  // 6.2 = Windows 8
-  // 6.3 = Windows 8.1
-  // 10 = Windows 10
-  // For more details see https://en.wikipedia.org/?title=Windows_NT
-  os.majorVersion = parseInt(os.versionString);
+    // Windows versions are weird:
+    // 5.1, 5.2 = Windows XP
+    // 5 = Windows Vista, Windows Server 2008
+    // 6.1 = Windows 7
+    // 6.2 = Windows 8
+    // 6.3 = Windows 8.1
+    // 10 = Windows 10
+    // For more details see https://en.wikipedia.org/?title=Windows_NT
+    os.majorVersion = parseInt(os.versionString);
 
-  // Restore if needed
-  //platformModule.os.minorVersion = parseInt(platformModule.os.versionString.split(/\D/)[1]);
+    // Restore if needed
+    // os.minorVersion = parseInt(platformModule.os.versionString.split(/\D/)[1]);
 
-  // platformModule.pixel is deprecated
-  // use zoom.isRetina() to determine whether the current window is on a 2x pixel ratio or not
-  // When a window moves to another display, it can change
-  var canUseRetinaCursors = browser.isChrome;
+    return os;
+  }
 
-  var cssPrefix = browser.isWebKit  ?
-                    '-webkit-'      :
-                  browser.isFirefox ?
-                    '-moz-'         :
-                  browser.isIE      ?
-                    '-ms-'          :
-                    '';
-
-  var transformPropertyCss =  isIE9 ? '-ms-transform' : ((browser.isWebKit && !isCssPropSupported('transform'))? '-webkit-transform' : 'transform');
-  var transformProperty = transformPropertyCss.replace('-t', 'T').replace('-', '');
-  var transformOriginProperty = transformProperty + 'Origin';
-  var transitionEndEvent = browser.isWebKit ? 'webkitTransitionEnd' : 'transitionend';
 
   // Retrieve and store the user's intentional amount of native browser zoom
-  var nativeZoom = (function() {
+  function getNativeZoom() {
     var computedNativeZoom = 1;
     if (browser.isWebKit) {
       computedNativeZoom = window.outerWidth / window.innerWidth;
@@ -137,7 +148,7 @@ define([], function() {
     }
 
     return computedNativeZoom;
-  })();
+  }
 
   // Retrieve and store whether the current window is on a Retina display
   function isRetina() {
@@ -164,16 +175,13 @@ define([], function() {
       isRetinaDisplay = devicePixelRatio >= 2;
     }
 
-    // Invalidate cached retina info on window resize, as it may have moved to another display
-    if (!isListeningToResizeEvents) {
-      isListeningToResizeEvents = true;
-      window.addEventListener('resize', function () {
-        isRetinaDisplay = undefined;
-      });
-    }
-
     return isRetinaDisplay;
   }
+
+  // Invalidate cached retina info on window resize, as it may have moved to another display
+  window.addEventListener('resize', function () {
+    isRetinaDisplay = undefined;
+  });
 
   var publics = {
     browser: browser,

@@ -96,10 +96,85 @@ define(['keys/element-classifier', '$'], function(elemClassifier, $) {
     return option.selected;
   }
 
+  function isImage($node) {
+    return elemClassifier.isVisualMedia($node[0]) || $node.is('input[type="image"]');
+  }
+
+  function appendNonLabelText(text, $node, styles) {
+    // CSS display: none -- hides entire subtree
+    if (styles.display === 'none') {
+      return; // Don't walk subtree, the entire thing is hidden
+    }
+
+    // CSS visibility -- child elements might still be visible, need to check each one
+    var isHidden = styles.visibility !== 'visible';
+    if (isHidden) {
+      $node.children().each(function() {
+        appendAccessibleTextFromSubtree(this);
+      });
+      return;
+    }
+
+    // Check for label/description pointed to but only if not already in the middle of doing that
+    // isLabel prevents infinite recursion when getting label from elsewhere in document, potentially overlapping
+    text += appendFromIdListAttribute($node, 'aria-labelledby') +
+      appendFromIdListAttribute($node, 'aria-describedby');
+
+    // If it has @usemap, add any alternative text from within the map
+    if ($node.is('img')) {
+      appendFromIdListAttribute($node, 'usemap');
+    }
+
+    return true;
+  }
+
+  function getInputLabelAttributeText(node) {
+    return node.getAttribute('placeholder') || node.getAttribute('title') || '';
+  }
+
+  function getImageText(node) {
+    return node.getAttribute('alt') || node.getAttribute('title') || '';
+  }
+
+  function appendTextEquivAndValue(node, $node, doWalkChildren, text) {
+    // Process 'text equivalents' which are attributes that contain additional descriptive text
+    // Note: unlike most text equivalent attributes, aria-label is supported on any element. It is different from
+    // aria-labelledby in that it directly contains the necessary text rather than point to an element by id.
+    var textEquiv = node.getAttribute('aria-label'),
+      value;
+    // alt or title on any image or visual media
+    if (isImage($node)) {
+      textEquiv = textEquiv || getImageText(node);
+    }
+    else if ($node.is('select')) {
+      textEquiv = node.getAttribute('title') || '';
+      value = $node.children().filter(isSelectedOption).text();
+      doWalkChildren = false; // Otherwise will read all the <option> elements
+    }
+
+    else if ($node.is('input[type=radio],input[type=checkbox],button')) {
+      // value, and title on these form controls
+      textEquiv = textEquiv || node.getAttribute('title') || '';
+    }
+
+    else if ($node.is('input,textarea,')) {
+      // value, placeholder and title on these form controls
+      textEquiv = textEquiv || getInputLabelAttributeText(node);
+      value = node.value;
+    }
+
+    if (textEquiv !== null) {
+      appendWithWordSeparation(textEquiv, text);
+    }
+    if (value) {
+      appendWithWordSeparation(value, text);
+    }
+    return doWalkChildren;
+  }
+
   function appendAccessibleTextFromSubtree(node, isLabel) {
     var text = '',
       styles,
-      isHidden,
       $node = $(node),
       doWalkChildren = true;
 
@@ -123,69 +198,15 @@ define(['keys/element-classifier', '$'], function(elemClassifier, $) {
     //    common technique to hide labels but have useful text for screen readers
     // 2) ARIA labels and descriptions: don't use if already inside a label, in order to avoid infinite recursion
     //    since labels could ultimately point in a circle.
-    if (!isLabel) {   // Hidden node checks, label id checks
-      // CSS display: none -- hides entire subtree
-      if (styles.display === 'none') {
-        return; // Don't walk subtree, the entire thing is hidden
-      }
-
-      // CSS visibility -- child elements might still be visible, need to check each one
-      isHidden = styles.visibility !== 'visible';
-      if (isHidden) {
-        $node.children().each(function() {
-          appendAccessibleTextFromSubtree(this, isLabel);
-        });
-        return;
-      }
-
-      // Check for label/description pointed to but only if not already in the middle of doing that
-      // isLabel prevents infinite recursion when getting label from elsewhere in document, potentially overlapping
-      text += appendFromIdListAttribute($node, 'aria-labelledby') +
-        appendFromIdListAttribute($node, 'aria-describedby');
-
-      // If it has @usemap, add any alternative text from within the map
-      if ($node.is('img')) {
-        appendFromIdListAttribute($node, 'usemap');
-      }
+    if (!isLabel && !appendNonLabelText(text, $node, styles)) {
+      return;
     }
 
     // Add characters to break up paragraphs (before block)
     if (styles.display !== 'inline') {
       appendBlockSeparator(text);
     }
-
-    // Process 'text equivalents' which are attributes that contain additional descriptive text
-    // Note: unlike most text equivalent attributes, aria-label is supported on any element. It is different from
-    // aria-labelledby in that it directly contains the necessary text rather than point to an element by id.
-    var textEquiv = node.getAttribute('aria-label'),
-      value;
-    // alt or title on any image or visual media
-    if (elemClassifier.isVisualMedia(node) || $node.is('input[type="image"]')) {
-      textEquiv = textEquiv || node.getAttribute('alt') || node.getAttribute('title') || '';
-    }
-    else if ($node.is('select')) {
-      textEquiv = node.getAttribute('title') || '';
-      value = $node.children().filter(isSelectedOption).text();
-      doWalkChildren = false; // Otherwise will read all the <option> elements
-    }
-
-    else if ($node.is('input[type=radio],input[type=checkbox]')) {
-      // value, and title on these form controls
-      textEquiv = textEquiv || node.getAttribute('title') || '';
-    }
-
-    else if ($node.is('input,textarea,button')) {
-      // value, placeholder and title on these form controls
-      textEquiv = textEquiv || node.getAttribute('placeholder') || node.getAttribute('title') || '';
-      value = node.value;
-    }
-
-    if (textEquiv !== null) {
-      appendWithWordSeparation(textEquiv, text);
-    }
-    if (value) {
-      appendWithWordSeparation(value, text);
-    }
+    doWalkChildren = appendTextEquivAndValue(node, $node, doWalkChildren, text);
 
     if (doWalkChildren) {
       // Recursively add text from children (both elements and text nodes)

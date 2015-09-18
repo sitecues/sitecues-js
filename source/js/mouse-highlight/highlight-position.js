@@ -295,12 +295,31 @@ define(['$', 'util/common', 'keys/element-classifier', 'zoom/zoom', 'core/platfo
     allRects.push(rect);
   }
 
+  function isInvisible(style) {
+    return style.visibility === 'hidden' || style.visibility === 'collapse'  || style.display === 'none';
+  }
+
+  function isOutOfFlow(elem, style, rect) {
+    if (style.position === 'absolute' || style.position === 'fixed') {
+      var parentRect = traitcache.getScreenRect(elem.parentNode),
+        FUZZ_FACTOR = 4;
+      // If the child bounds pop out of the parent bounds by more
+      // than FUZZ_FACTOR, it will need to be kept separate and
+      // not included in the current bounds calculation for this subtree
+      if (Math.abs(rect.left - parentRect.left) > FUZZ_FACTOR ||
+        Math.abs(rect.top - parentRect.top) > FUZZ_FACTOR ||
+        Math.abs(rect.right - parentRect.right) > FUZZ_FACTOR ||
+        Math.abs(rect.bottom - parentRect.bottom) > FUZZ_FACTOR) {
+        return true;
+      }
+    }
+  }
+
   function getHighlightInfoRecursive($selector, accumulatedResults, doStretchForSprites, doIgnoreFloats, isTop) {
     var
       allRects = accumulatedResults.allRects,
       hiddenElements = accumulatedResults.hiddenElements,
       viewPos = traitcache.getCachedViewPosition();
-
 
     $selector.each(function () {
       var isElement = this.nodeType === 1;
@@ -342,7 +361,7 @@ define(['$', 'util/common', 'keys/element-classifier', 'zoom/zoom', 'core/platfo
       var style = traitcache.getStyle(this);
 
       // --- Invisible elements ---
-      if (style.visibility === 'hidden' || style.visibility === 'collapse'  || style.display === 'none') {
+      if (isInvisible(style)) {
         hiddenElements.push(this);
         return;
       }
@@ -361,19 +380,9 @@ define(['$', 'util/common', 'keys/element-classifier', 'zoom/zoom', 'core/platfo
       }
 
       // -- Out of flow and is not the top element --
-      if (!isTop && (style.position === 'absolute' || style.position === 'fixed')) {
-        var parentRect = traitcache.getScreenRect(this.parentNode),
-          FUZZ_FACTOR = 4;
-        // If the child bounds pop out of the parent bounds by more
-        // than FUZZ_FACTOR, it will need to be kept separate and
-        // not included in the current bounds calculation for this subtree
-        if (Math.abs(thisRect.left - parentRect.left) > FUZZ_FACTOR ||
-          Math.abs(thisRect.top - parentRect.top) > FUZZ_FACTOR ||
-          Math.abs(thisRect.right - parentRect.right) > FUZZ_FACTOR ||
-          Math.abs(thisRect.bottom - parentRect.bottom) > FUZZ_FACTOR) {
-          hiddenElements.push(this);
-          return;
-        }
+      if (!isTop && isOutOfFlow(this, style, thisRect)) {
+        hiddenElements.push(this);
+        return;
       }
 
       // --- Media elements ---
