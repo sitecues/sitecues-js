@@ -11,10 +11,7 @@ define([], function() {
       osStr,
       isListeningToResizeEvents,
       isRetinaDisplay;         // Is the current display a retina display?
-  // var x = '.544';
-  // var y = parseInt(x);
-  // var z = x + y;
-  // console.log(z);
+
   function isCssPropSupported(propName) {
     return typeof document.documentElement.style[propName] === 'string';
   }
