@@ -60,6 +60,8 @@ define([], function() {
         isUnknown: browserStr === 'Unknown'
       };
     browser.version = getVersion(agent, browser.isIE);
+
+    return browser;
   }
 
   // Set globally accessible version constants
