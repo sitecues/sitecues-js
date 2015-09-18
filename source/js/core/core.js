@@ -196,10 +196,6 @@ define(['core/conf/site', 'core/conf/urls', 'core/run'], function (site, urls, r
   //////////////////////////////////////////////////////////////////////////////////////////
 
   // If the sitecues global object does not exist, then there is no basic site configuration
-
-  // Set the internal reference.
-  sitecues = window.sitecues;
-
   if (!sitecues || typeof sitecues !== 'object') {
     safe_production_msg('The base ' + window.sitecues + ' namespace was not found. The sitecues library will not load.');
     return;
