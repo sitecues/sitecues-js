@@ -39,7 +39,9 @@ define([], function () {
         return;
       }
 
-      onCompleteFn && onCompleteFn();
+      if (onCompleteFn) {
+        onCompleteFn();
+      }
 
       // Asynchronously decodes the audio file data contained in the ArrayBuffer.
       context.decodeAudioData(request.response, function (buffer) {

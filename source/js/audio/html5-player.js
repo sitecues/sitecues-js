@@ -21,7 +21,9 @@ define(['$'], function ($) {
   function playAudioSrc(url, onCompleteFn) {
     var audioElement = new Audio();
 
-    onCompleteFn && audioElement.addEventListener('playing', onCompleteFn);
+    if (onCompleteFn) {
+      audioElement.addEventListener('playing', onCompleteFn);
+    }
 
     audioElement.src = ''; // Clean up
     $(audioElement).one('canplay', playIt);

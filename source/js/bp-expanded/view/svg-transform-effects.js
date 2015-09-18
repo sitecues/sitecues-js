@@ -22,7 +22,6 @@ define(['bp/helper', 'bp/constants', 'core/platform', 'bp-expanded/view/svg-anim
 
   function toggleHover(target, isActiveHover) {
 
-
     if (target.getAttribute('aria-disabled') === 'true') {
       return;
     }
@@ -37,7 +36,9 @@ define(['bp/helper', 'bp/constants', 'core/platform', 'bp-expanded/view/svg-anim
         useAttribute: target instanceof SVGElement
       };
 
-    animations[id] && animations[id].cancel();
+    if (animations[id]) {
+      animations[id].cancel();
+    }
     animations[id] = animate.animateCssProperties(target, cssProperties, options);
   }
 

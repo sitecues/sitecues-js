@@ -39,16 +39,25 @@ define([], function () {
     xhr.onload = function() {
       if (!xhr.status || xhr.status === 200) {
         var successFn = successFnOverride || requestObj.success;
-        successFn && successFn(xhr.responseText);
+        if (successFn) {
+          successFn(xhr.responseText);
+        }
       }
       else {
         var errorFn = requestObj.error;
-        errorFn && errorFn(xhr.statusText);
+        if (errorFn) {
+          errorFn(xhr.statusText);
+        }
       }
     };
 
     // Send it!
-    postData ? xhr.send(postData) : xhr.send();
+    if (postData) {
+      xhr.send(postData);
+    }
+    else {
+      xhr.send();
+    }
   }
 
   return {

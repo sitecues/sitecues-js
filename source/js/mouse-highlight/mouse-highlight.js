@@ -1536,7 +1536,9 @@ define(['$', 'core/conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mou
       removeMouseWheelListener();
     }
 
-    state.overlayContainer && state.overlayContainer.removeAttribute(HIGHLIGHT_OUTLINE_ATTR);
+    if (state.overlayContainer) {
+      state.overlayContainer.removeAttribute(HIGHLIGHT_OUTLINE_ATTR);
+    }
     $('.' + HIGHLIGHT_OUTLINE_CLASS).remove();
 
     if (pickFromMouseTimer) {

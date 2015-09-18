@@ -107,7 +107,9 @@ define(['$', 'mouse-highlight/mouse-highlight', 'util/common', 'util/transform',
       return; // HLB could scroll -- finish
     }
 
-    isNavigationEnabled && performMovement(nextMove);
+    if (isNavigationEnabled) {
+      performMovement(nextMove);
+    }
   }
 
   // TODO Use bottoms of lines when scrolling down, so that the bottom of a line

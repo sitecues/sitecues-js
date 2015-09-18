@@ -73,7 +73,12 @@ define(['bp/constants', 'bp/helper', 'core/platform', 'bp/model/state', 'bp-expa
 
     require(['zoom/zoom'], function(zoomMod) {
       zoomMod.init(true);
-      isDecrease ? zoomMod.beginZoomDecrease(evt) : zoomMod.beginZoomIncrease(evt);
+      if (isDecrease) {
+        zoomMod.beginZoomDecrease(evt);
+      }
+      else {
+        zoomMod.beginZoomIncrease(evt);
+      }
     });
 
   }

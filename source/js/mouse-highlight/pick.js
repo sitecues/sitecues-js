@@ -348,7 +348,9 @@ define(['$', 'util/common', 'dollar/dollar-utils', 'core/conf/user/manager', 'co
         secondBestIndex = bottomIndex;
       }
       if (SC_DEV) {
-        isVoteDebuggingOn && console.log('votesForTop = ' + votesForTop);
+        if (isVoteDebuggingOn) {
+          console.log('votesForTop = ' + votesForTop);
+        }
         // Debug info
         var deltaBest = scoreObjs[bestIndex].score - scoreObjs[secondBestIndex].score,
           deltaSecondBest = MIN_SCORE_TO_PICK - scoreObjs[secondBestIndex].score;

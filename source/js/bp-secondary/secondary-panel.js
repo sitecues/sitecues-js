@@ -313,7 +313,11 @@ define(['bp/constants',
           1,
           getValueInTime(currentMenuBtnRotate, toGeo.menuBtnRotate, time)));
 
-      featureTick && featureTick(time, toGeo);
+      // TODO: Probably remove the if check? Functions are always truthy.
+      //       Not sure why this is here. Is this an API or isn't it?
+      if (featureTick) {
+        featureTick(time, toGeo);
+      }
     }
 
     function fadeInTextContentWhenLargeEnough() {

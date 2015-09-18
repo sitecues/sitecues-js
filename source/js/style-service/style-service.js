@@ -189,7 +189,9 @@ define(['$', 'style-service/css-aggregator', 'style-service/media-queries'], fun
   }
 
   function init(callbackFn) {
-    callbackFn && callbackFns.push(callbackFn);
+    if (callbackFn) {
+      callbackFns.push(callbackFn);
+    }
     if (isInitialized) {
       if (isCssComplete) {
         clearCallbacks();

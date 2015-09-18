@@ -40,7 +40,7 @@ define([], function() {
    */
   function getSitecuesLs() {
     if (isSupported()) {
-      return window.localStorage.getItem('sitecues') || setSitecuesLs();
+      return localStorage.getItem('sitecues') || setSitecuesLs();
     }
   }
 
@@ -50,7 +50,7 @@ define([], function() {
    */
   function setSitecuesLs(data) {
     if (isSupported()) {
-      window.localStorage.setItem('sitecues', JSON.stringify(data || {}));
+      localStorage.setItem('sitecues', JSON.stringify(data || {}));
       return getSitecuesLs();
     }
   }
@@ -60,7 +60,9 @@ define([], function() {
    * @returns {DOMString}
    */
   function clear() {
-    isSupported() && window.localStorage.removeItem('sitecues');
+    if (isSupported()) {
+      localStorage.removeItem('sitecues');
+    }
   }
 
   /*

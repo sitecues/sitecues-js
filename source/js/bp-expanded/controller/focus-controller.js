@@ -394,7 +394,12 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
     if (deltaSliderCommand) {
       require(['zoom/zoom'], function(zoomMod) {
         zoomMod.init();
-        deltaSliderCommand > 0 ? zoomMod.beginZoomIncrease(evt) : zoomMod.beginZoomDecrease(evt);
+        if (deltaSliderCommand > 0) {
+          zoomMod.beginZoomIncrease(evt);
+        }
+        else {
+          zoomMod.beginZoomDecrease(evt);
+        }
       });
     }
   }

@@ -371,7 +371,9 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'util/
 
   // Helper for calling back glide change listener
   function onGlideChange() {
-    thumbChangeListener && thumbChangeListener(getMidAnimationZoom());
+    if (thumbChangeListener) {
+      thumbChangeListener(getMidAnimationZoom());
+    }
   }
 
   // How many milliseconds have elapsed since the start of the zoom operation?
@@ -414,7 +416,9 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'util/
     // while the animation player is stopped so that it doesn't block future style attribute changes
     // from taking affect (e.g. via the slider)
     requestFrame(function() {
-      elementDotAnimatePlayer && elementDotAnimatePlayer.pause();
+      if (elementDotAnimatePlayer) {
+        elementDotAnimatePlayer.pause();
+      }
       requestFrame(freezeZoom);
     });
   }
@@ -484,7 +488,9 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'util/
     var zoomCss = getZoomCss(currentTargetZoom);
     if (platform.browser.isChrome && document.body.animate) {
       // Magically, this works with the new crisper (and the new crisper doesn't kill mouse events on floats ...)
-      elementDotAnimatePlayer && elementDotAnimatePlayer.cancel();
+      if (elementDotAnimatePlayer) {
+        elementDotAnimatePlayer.cancel();
+      }
       elementDotAnimatePlayer = body.animate(
         [zoomCss, zoomCss],
         {
@@ -496,7 +502,9 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'util/
     else {
       $body.css(zoomCss);
     }
-    thumbChangeListener && thumbChangeListener(currentTargetZoom);
+    if (thumbChangeListener) {
+      thumbChangeListener(currentTargetZoom);
+    }
   }
 
   function performElementDotAnimateZoomOperation() {
@@ -678,7 +686,9 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'util/
 
       sitecues.emit('zoom/begin');
 
-      animationReadyCallback && animationReadyCallback();
+      if (animationReadyCallback) {
+        animationReadyCallback();
+      }
     }
 
     if (shouldPrepareAnimations()) {

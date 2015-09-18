@@ -697,6 +697,7 @@ define(['$', 'util/common', 'keys/element-classifier', 'mouse-highlight/traitcac
       }
       // If none, return <li> with a single <a> element child
       return $(node).children('li').filter(function (index, elem) {
+        // TODO: Presumably, there is supposed ot be a `return` here...
         elem.childElementCount === 1 && elem.firstElementChild === 'a';
       });
     }

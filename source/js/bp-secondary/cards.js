@@ -92,7 +92,12 @@ define(['bp/constants', 'bp/helper', 'core/locale', 'bp/model/state', 'core/plat
       // bpContainer[addOrRemoveFn]('keydown', onKeyDown);
 
       bpContainer[addOrRemoveFn]('click', onClick);
-      willBeActive ? enablePulseOnMousePause(panelName) : disablePulseOnMousePause();
+      if (willBeActive) {
+        enablePulseOnMousePause(panelName);
+      }
+      else {
+        disablePulseOnMousePause();
+      }
     }
 
     // Active state
@@ -120,7 +125,9 @@ define(['bp/constants', 'bp/helper', 'core/locale', 'bp/model/state', 'core/plat
 
   function disablePulseOnMousePause() {
     clearPulseAnimation();
-    activePanel && activePanel.removeEventListener('mousemove', pulseAfterMousePause);
+    if (activePanel) {
+      activePanel.removeEventListener('mousemove', pulseAfterMousePause);
+    }
   }
 
   function isFirstTimeOnWelcomeCard() {
@@ -151,15 +158,17 @@ define(['bp/constants', 'bp/helper', 'core/locale', 'bp/model/state', 'core/plat
   }
 
   function clearPulseAnimation() {
+
+    var nextButton, options;
+
     clearTimeout(pulseAnimationTimeout);
     if (pulseAnimation) {
-      pulseAnimation && pulseAnimation.cancel();
-      var
-        nextButton = getPulseAnimationTarget(),
-        options = {
-          duration: PULSE_NEXT_BUTTON_ANIMATION_MS,
-          useAttribute: true
-        };
+      pulseAnimation.cancel();
+      nextButton = getPulseAnimationTarget();
+      options = {
+        duration: PULSE_NEXT_BUTTON_ANIMATION_MS,
+        useAttribute: true
+      };
       animate.animateCssProperties(nextButton, { transform: 'scale(1)' }, options);
       pulseAnimation = null;
     }

@@ -48,7 +48,9 @@ define(['$', 'zoom/zoom', 'util/color', 'core/conf/site'], function($, zoomMod, 
       imageData = ctx.getImageData(0, 0, width, height).data;
     }
     catch (ex) {
-      if (SC_DEV) { isDebuggingOn && console.log('Could not get image data for %s: %s', img.src, ex); }
+      if (SC_DEV && isDebuggingOn) {
+        console.log('Could not get image data for %s: %s', img.src, ex);
+      }
     }
     img.crossOrigin = oldCrossOrigin;
     return imageData;

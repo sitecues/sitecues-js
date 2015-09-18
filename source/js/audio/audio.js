@@ -199,7 +199,9 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
   // For Lumenvox, audio formats are aac or ogg
   function getAudioPlayer(callbackFn) {
     function onDependencyLoaded() {
-      audioPlayer && mediaTypeForTTS && callbackFn && callbackFn(audioPlayer);
+      if (audioPlayer && mediaTypeForTTS && callbackFn) {
+        callbackFn(audioPlayer);
+      }
     }
     function onAudioPlayerLoaded(player) {
       player.init();
