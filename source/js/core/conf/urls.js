@@ -20,7 +20,7 @@ define(['core/conf/site'], function(site) {
 
   function getBranch() {
     return isProduction() ? 'release' :
-      sitecues.getLibraryUrl().path.split('/v/')[1].split('/')[0];
+      (isLocal() ? '' : getLibraryUrl().path.split('/v/')[1].split('/')[0]);
   }
 
 
@@ -164,6 +164,10 @@ define(['core/conf/site'], function(site) {
 
   function isProduction() {
     return getLibraryUrl().hostname === 'js.sitecues.com';
+  }
+
+  function isLocal() {
+    return getLibraryUrl().hostname.indexOf('sitecues.com') < 0;
   }
 
   function init() {
