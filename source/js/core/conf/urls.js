@@ -22,13 +22,6 @@ define(['core/conf/site'], function(site) {
     return url && parseUrl(url);
   }
 
-  // Returns 'release' if production, or a branch name for dev versions, or '' if running locally
-  function getBranch() {
-    return isProduction() ? 'release' :
-      (isLocal() ? '' : sitecues.branch);
-  }
-
-
   //////////////////////////////////////////////////////////////////////////////////////////
   //
   //  URL Processing
@@ -175,7 +168,6 @@ define(['core/conf/site'], function(site) {
     getApiUrl: getApiUrl,
     getPrefsUrl: getPrefsUrl,
     getLibraryUrl: getLibraryUrl,
-    getBranch: getBranch,
     resolveResourceUrl: resolveResourceUrl,
     resolveSitecuesUrl: resolveSitecuesUrl,
     parseUrl: parseUrl,
