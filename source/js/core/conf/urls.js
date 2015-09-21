@@ -1,7 +1,8 @@
 define(['core/conf/site'], function(site) {
 
   var apiDomain,  // Either ws.sitecues.com/ or ws.dev.sitecues.com/
-    prefsDomain;  // Either up.sitecues.com/ or up.dev.sitecues.com/
+    prefsDomain,  // Either up.sitecues.com/ or up.dev.sitecues.com/
+    branchName = getBranch();
 
   function getApiUrl(restOfUrl) {
     return '//' + apiDomain + 'sitecues/api/' + restOfUrl;
@@ -17,11 +18,17 @@ define(['core/conf/site'], function(site) {
     return url && parseUrl(url);
   }
 
+  function getBranch() {
+    return isProduction() ? 'release' :
+      sitecues.getLibraryUrl().path.split('/v/')[1].split('/')[0];
+  }
+
+
   function getResourceUrl() {
     var libraryUrl = getLibraryUrl(),
       hostName = libraryUrl.hostname;
     if (hostName.indexOf('.sitecues.com') > 0) {
-      return 'http://s3.amazonaws.com/' + hostName + '/library/' + sitecues.branch + '/' + sitecues.version;
+      return 'http://s3.amazonaws.com/' + hostName + '/library/' + branchName + '/' + sitecues.version;
     }
 
     return hostName;
@@ -170,6 +177,7 @@ define(['core/conf/site'], function(site) {
     getApiUrl: getApiUrl,
     getPrefsUrl: getPrefsUrl,
     getLibraryUrl: getLibraryUrl,
+    getResourceUrl: getResourceUrl,
     resolveResourceUrl: resolveResourceUrl,
     resolveSitecuesUrl: resolveSitecuesUrl,
     parseUrl: parseUrl,
