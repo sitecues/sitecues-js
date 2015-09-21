@@ -84,10 +84,21 @@ build:
 	@(for F in `ls -d source/* | grep -Ev '^source/js$$'` ; do cp -r $$F $(build-dir)/etc ; done)
 	@echo
 
-	@echo "---- sitecues core source --------------------------------"
-	@./show-file-sizes.sh $(build-dir)/js "sitecues.js"
-	@echo "---- additional bundles source ---------------------------"
-	@./show-file-sizes.sh $(build-dir)/js "*.js" | grep -v ".src.js"
+	@#echo "---- sitecues core source --------------------------------"
+	#@./show-file-sizes.sh $(build-dir)/js "sitecues.js"
+	#@echo "---- additional bundles source ---------------------------"
+	#@./show-file-sizes.sh $(build-dir)/js "*.js" | grep -v ".src.js"
+
+	@echo "===== GZIP: Creating compressed (gzipped) JavaScript files."
+	@cd $(build-dir) ; find . -type f -name '*.*' ! -name "*.mp3" ! -name "*.cur" ! -name "*.mp3" ! -name "*.ogg" ! -name "*.map" ! -name "*.src.js" -exec sh -c $(gzip-command) \;
+
+  # Show file sizes but not for foo.src.bar -- those are built by r.js for sourcemaps
+	@echo "**** File sizes ******************************************"
+	@echo
+	@echo "---- sitecues core zipped --------------------------------"
+	@./show-file-sizes.sh $(build-dir)/js "sitecues*.js.gz"
+	@echo "----- additional bundles zipped --------------------------"
+	@./show-file-sizes.sh $(build-dir)/js "*.js.gz" | grep -v "sitecues"
 
 	@echo
 	@echo "===== COMPLETE: Building '$(custom-name)' library"
@@ -161,7 +172,7 @@ package:
   # Deep copy of $(build-dir)/js/  (only .js files)
   # Easiest way is to copy everything, then remove the useless files (.gz, .map, .src.js, etc.)
 	cp -R $(build-dir)/js/* $(package-dir)/js
-	find $(package-dir)/js -type f ! -name '*.js' -delete
+	find $(package-dir)/js -type f ! -name '*.js' ! -name '*.js.gz' -delete
 
   # Copy all the resources
 	cp -R $(build-dir)/etc/* $(package-dir)

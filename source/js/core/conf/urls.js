@@ -28,7 +28,7 @@ define(['core/conf/site'], function(site) {
     var libraryUrl = getLibraryUrl(),
       hostName = libraryUrl.hostname;
     if (hostName.indexOf('.sitecues.com') > 0) {
-      return 'http://s3.amazonaws.com/' + hostName + '/library/' + branchName + '/' + sitecues.version;
+      return '//s3.amazonaws.com/' + hostName + '/library/' + branchName + '/' + sitecues.version;
     }
 
     return hostName;
