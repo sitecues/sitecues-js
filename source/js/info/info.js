@@ -90,7 +90,7 @@ define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 
       localizedPageName = pageName + '-' + locale.getShortWebsiteLang(),
       sitecuesJsUrl = urls.getLibraryUrl().raw,
       hostUrl = window.location,
-      pageUrl = urls.resolveSitecuesUrl('../html/help/' + localizedPageName + '.html',
+      pageUrl = urls.resolveResourceUrl('html/help/' + localizedPageName + '.html',
         {
           scUrl: sitecuesJsUrl,
           siteId: site.getSiteId(),

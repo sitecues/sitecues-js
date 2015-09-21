@@ -1,7 +1,8 @@
 define(['core/conf/site'], function(site) {
 
   var apiDomain,  // Either ws.sitecues.com/ or ws.dev.sitecues.com/
-    prefsDomain;  // Either up.sitecues.com/ or up.dev.sitecues.com/
+    prefsDomain,  // Either up.sitecues.com/ or up.dev.sitecues.com/
+    BASE_URL = getRawScriptUrl().split('/js/')[0] + '/';
 
   function getApiUrl(restOfUrl) {
     return '//' + apiDomain + 'sitecues/api/' + restOfUrl;
@@ -11,9 +12,13 @@ define(['core/conf/site'], function(site) {
     return '//' + prefsDomain + restOfUrl;
   }
 
+  function getRawScriptUrl() {
+    return site.get('scriptUrl') || site.get('script_url');
+  }
+
   function getLibraryUrl() {
     // Underscore names deprecated
-    var url = site.get('scriptUrl') || site.get('script_url');
+    var url = getRawScriptUrl();
     return url && parseUrl(url);
   }
 
@@ -129,8 +134,8 @@ define(['core/conf/site'], function(site) {
 
   // Resolve a URL as relative to the main script URL.
   // Add a version parameter so that new versions of the library always get new versions of files we use, rather than cached versions.
-  function resolveSitecuesUrl(urlStr, paramsMap) {
-    var url = resolveUrl(urlStr, getLibraryUrl()) + '?version=' + sitecues.version;
+  function resolveResourceUrl(urlStr, paramsMap) {
+    var url = BASE_URL + urlStr;
 
     function addParam(name) {
       url += name + '=' + encodeURIComponent(paramsMap[name]) + '&';
@@ -140,8 +145,16 @@ define(['core/conf/site'], function(site) {
     return url;
   }
 
+  function resolveSitecuesUrl(urlStr) {
+    return getLibraryUrl() + '/' + urlStr;
+  }
+
   function isProduction() {
     return getLibraryUrl().hostname === 'js.sitecues.com';
+  }
+
+  function isLocal() {
+    return getLibraryUrl().hostname.indexOf('sitecues.com') < 0;
   }
 
   function init() {
@@ -155,6 +168,7 @@ define(['core/conf/site'], function(site) {
     getApiUrl: getApiUrl,
     getPrefsUrl: getPrefsUrl,
     getLibraryUrl: getLibraryUrl,
+    resolveResourceUrl: resolveResourceUrl,
     resolveSitecuesUrl: resolveSitecuesUrl,
     parseUrl: parseUrl,
     resolveUrl: resolveUrl

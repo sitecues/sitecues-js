@@ -2,7 +2,7 @@ define(['bp/helper', 'core/platform', 'bp/constants', 'core/conf/site', 'core/co
   function (helper, platform, BP_CONST, site, urls) {
 
   var
-    resolveUrl = urls.resolveSitecuesUrl,
+    resolveUrl = urls.resolveResourceUrl,
 
     isAnimationDebuggingOn = false,
 
@@ -431,33 +431,33 @@ define(['bp/helper', 'core/platform', 'bp/constants', 'core/conf/site', 'core/co
       /******************* Images ********************/
 
       '.scp-active #scp-demo-slider-bar': {
-        'background': 'url(' + resolveUrl('/images/tips/slider-bar-demo.svg') + ') 100% 100% no-repeat'
+        'background': 'url(' + resolveUrl('images/tips/slider-bar-demo.svg') + ') 100% 100% no-repeat'
       },
 
       '.scp-active #scp-demo-slider-thumb': {
-        'background': 'url(' + resolveUrl('/images/tips/slider-thumb-demo.svg') + ') 100% 100% no-repeat'
+        'background': 'url(' + resolveUrl('images/tips/slider-thumb-demo.svg') + ') 100% 100% no-repeat'
       },
 
       '#scp-speech-button-demo': {
-        'background': 'url(' + resolveUrl('/images/tips/speech-button-demo.svg') + ') 100% 100% no-repeat'
+        'background': 'url(' + resolveUrl('images/tips/speech-button-demo.svg') + ') 100% 100% no-repeat'
       },
 
       '#scp-demo-mouse': {
-        'background': 'url(' + resolveUrl('/images/tips/cursor-demo.svg') + ') 100% 100% no-repeat'
+        'background': 'url(' + resolveUrl('images/tips/cursor-demo.svg') + ') 100% 100% no-repeat'
       },
 
       // Full guide icon
       '#scp-guide-icon': {
-        'background-image': 'url(' + resolveUrl('/images/tips/full-guide-icon.png') + ')'
+        'background-image': 'url(' + resolveUrl('images/tips/full-guide-icon.png') + ')'
       },
 
       '.scp-card-indicator': {
-        'background-image': 'url(' + resolveUrl('/images/card-indicator.svg') + ')'
+        'background-image': 'url(' + resolveUrl('images/card-indicator.svg') + ')'
       },
 
       // Keyboard icon
       '#scp-kbd-icon': {
-        'background-image': 'url(' + resolveUrl('/images/tips/keyboard-icon.png') + ')'
+        'background-image': 'url(' + resolveUrl('images/tips/keyboard-icon.png') + ')'
       }
     },
 

@@ -157,7 +157,7 @@ define(['keys/element-classifier', '$'], function(elemClassifier, $) {
       textEquiv = textEquiv || node.getAttribute('title') || '';
     }
 
-    else if ($node.is('input,textarea,')) {
+    else if ($node.is('input,textarea')) {
       // value, placeholder and title on these form controls
       textEquiv = textEquiv || getInputLabelAttributeText(node);
       value = node.value;

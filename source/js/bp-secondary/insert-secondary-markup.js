@@ -39,8 +39,8 @@ var isInitialized,
         <use id="scp-stars-5" role="button" aria-pressed="false" aria-label="{{rating_5}}" class="scp-rating-star" xlink:href="#scp-rating-star-def" x="306" y="254"/>\
       </g>\
       <g id="scp-feedback-send" class="scp-hand-cursor" aria-disabled="true" role="button">\
-        <rect x="615" width="150" y="260" height="50" rx="20" ry="20"/>\
-        <text x="654" y="295" font-family="Arial" fill="white">{{send}}</text>\
+        <rect x="595" width="165" y="260" height="50" rx="20" ry="20"/>\
+        <text x="680" y="295" text-anchor="middle" font-family="Arial" fill="white">{{send}}</text>\
       </g>\
     </g>\
     <g id="scp-about" class="scp-if-about" transform="translate(805,16)">\

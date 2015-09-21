@@ -186,7 +186,7 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
   function playEarcon(earconName) {
     stopAudio();
 
-    var url = urls.resolveSitecuesUrl('../earcons/' + earconName + '.' + getMediaTypeForPrerecordedAudio());
+    var url = urls.resolveResourceUrl('earcons/' + earconName + '.' + getMediaTypeForPrerecordedAudio());
 
     getAudioPlayer(function(player) {
       player.playAudioSrc(url);
