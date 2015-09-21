@@ -39,7 +39,7 @@ define(['bp/constants',
     features = {
       tips: {
         module: tipsModule,
-        contentsHeight: 720, // The other features' heights are automatically computed -- this one is set manually get get perfect demo page spacing
+        contentsHeight: 780, // The other features' heights are automatically computed -- this one is set manually get get perfect demo page spacing
         menuButtonId: BP_CONST.TIPS_BUTTON_ID,
         labelId: BP_CONST.TIPS_LABEL_ID,
         panelId: BP_CONST.TIPS_CONTENT_ID

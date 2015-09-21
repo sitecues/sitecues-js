@@ -39,6 +39,6 @@ define([], function() {
     tell_us_something: 'Teilen Sie uns etwas mit ...',
     thank_you: 'Danke',
     // - About
-    zoom_and_speech: 'Vergrösserung und Sprache'
+    zoom_and_speech: 'Vergrösserung &amp; Sprache'
   };
 });
