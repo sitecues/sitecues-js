@@ -18,9 +18,10 @@ define(['core/conf/site'], function(site) {
     return url && parseUrl(url);
   }
 
+  // Returns 'release' if production, or a branch name for dev versions, or '' if running locally
   function getBranch() {
     return isProduction() ? 'release' :
-      (isLocal() ? '' : getLibraryUrl().path.split('/v/')[1].split('/')[0]);
+      (isLocal() ? '' : sitecues.version.split('-BRANCH-')[1]);
   }
 
 
