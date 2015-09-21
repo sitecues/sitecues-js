@@ -237,7 +237,7 @@ deps-clean:
 ################################################################################
 lint:
 	@echo "Linting started."
-	node_modules/grunt-contrib-jshint/node_modules/jshint/bin/jshint source/js
+	node_modules/.bin/jshint source/js
 	# lenient-lint --beep --error_trace --multiprocess --nojsdoc -r source/js --summary --time --unix_mode
 	@echo "Linting completed."
 
@@ -247,16 +247,8 @@ lint:
 ################################################################################
 lint-debug:
 	@echo "Linting started."
-	node_modules/grunt-contrib-jshint/node_modules/jshint/bin/jshint --config .jshintrc-debug source/js
+	node_modules/.bin/jshint --config .jshintrc-debug source/js
 	@echo "Linting completed."
-
-################################################################################
-# TARGET: run
-#	Run the web server, giving access to the library and test pages.
-#	DEPRECATED: Use start-testsite instead
-################################################################################
-run:
-	@./binary/web.js $(port) $(https) $(prod)
 
 ################################################################################
 # TARGET: start-testsite
@@ -276,41 +268,30 @@ stop-testsite:
 # TARGET: test-all
 #	Run all tests.
 ################################################################################
-test-all: test-unit test-smoke
-
-################################################################################
-# TARGET: test-smoke
-#	Run the smoke tests.
-################################################################################
-test-smoke:
-	#$(MAKE) --no-print-directory start-testsite prod=on
-	#@for _CUSTOM_CONF_NAME in $(custom-config-names) ; do \
-	#	$(MAKE) --no-print-directory -f core.mk test-smoke custom-config-name=$$_CUSTOM_CONF_NAME ; \
-	#done
-	@echo '===== Target test-smoke currently disabled ====='
+test-all: test-unit
 
 ################################################################################
 # TARGET: test-unit
 #	Run the unit tests.
 ################################################################################
 test-unit:
-	#@echo "TEST RUN ID: $(test-run-id)"
-	#@cd ./tests/unit ; ../../node_modules/mocha/bin/mocha $(testunit-mocha-options)
+	@echo "TEST RUN ID: $(test-run-id)"
+	@cd ./tests/unit ; ../../node_modules/mocha/bin/mocha $(testunit-mocha-options)
 
 ################################################################################
 # TARGET: nyan-test
 #	Run unit test with nyan-cat because awesome
 ################################################################################
 nyan-unit:
-	#@echo "TEST RUN ID: $(test-run-id)"
-	#@cd ./tests/unit ; ../../node_modules/mocha/bin/mocha -R nyan
+	@echo "TEST RUN ID: $(test-run-id)"
+	@cd ./tests/unit ; ../../node_modules/mocha/bin/mocha -R nyan
 
 ################################################################################
 # TARGET: dot-unit
 ################################################################################
 dot-unit:
-	#@echo "TEST RUN ID: $(test-run-id)"
-	#@cd ./tests/unit ; ../../node_modules/mocha/bin/mocha -R dot
+	@echo "TEST RUN ID: $(test-run-id)"
+	@cd ./tests/unit ; ../../node_modules/mocha/bin/mocha -R dot
 
 
 ################################################################################
@@ -318,10 +299,10 @@ dot-unit:
 #	Get test coverage output using blanket and mocha for node
 ################################################################################
 test-coverage:
-	#@echo "TEST RUN ID: $(test-run-id)"
-	#@mkdir -p ./report
-	#@cd ./tests/unit ; ../../node_modules/mocha/bin/mocha -r blanket -R html-cov > ../../report/unit-test-coverage.html
-	#@echo Coverage report generated in: ./report/unit-test-coverage.html
+	@echo "TEST RUN ID: $(test-run-id)"
+	@mkdir -p ./report
+	@cd ./tests/unit ; ../../node_modules/mocha/bin/mocha -r blanket -R html-cov > ../../report/unit-test-coverage.html
+	@echo Coverage report generated in: ./report/unit-test-coverage.html
 
 ################################################################################
 # TARGET: stop-all-services
