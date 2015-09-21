@@ -135,13 +135,17 @@ define(['core/conf/site'], function(site) {
   // Resolve a URL as relative to the main script URL.
   // Add a version parameter so that new versions of the library always get new versions of files we use, rather than cached versions.
   function resolveResourceUrl(urlStr, paramsMap) {
-    var url = BASE_URL + urlStr;
+    var url = BASE_URL + urlStr,
+      params = Object.keys();
 
     function addParam(name) {
       url += name + '=' + encodeURIComponent(paramsMap[name]) + '&';
     }
 
-    Object.keys(paramsMap || {}).forEach(addParam);
+    if (params) {
+      url += '?';
+      params.forEach(addParam);
+    }
     return url;
   }
 
