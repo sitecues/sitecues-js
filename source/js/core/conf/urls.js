@@ -20,6 +20,7 @@ define(['core/conf/site'], function(site) {
 
   // Returns 'release' if production, or a branch name for dev versions, or '' if running locally
   function getBranch() {
+    console.log('Branch name = ' + sitecues.branch);
     return isProduction() ? 'release' :
       (isLocal() ? '' : sitecues.version.split('-BRANCH-')[1]).toLowerCase();
   }
