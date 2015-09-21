@@ -72,7 +72,7 @@ define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 
   function onload(event) {
     // Try to focus iframe
     setTimeout(function() {
-      var iframe = event.target;
+      var iframe = $iframe[0];
       try {
         iframe.contentWindow.focus();
       }
