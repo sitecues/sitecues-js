@@ -22,7 +22,7 @@ define(['bp/constants', 'bp/helper', 'core/locale', 'bp/model/state', 'core/plat
 
   function loadPanelContents(panelName) {
     var localizedPanelName = panelName + '-' + locale.getShortWebsiteLang(),
-      panelUrl = urls.resolveSitecuesUrl('../html/' + panelName + '/' + localizedPanelName + '.html');
+      panelUrl = urls.resolveResourceUrl('html/' + panelName + '/' + localizedPanelName + '.html');
 
     xhr.get({
       url: panelUrl,

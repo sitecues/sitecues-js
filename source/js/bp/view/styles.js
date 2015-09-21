@@ -2,7 +2,7 @@ define(['bp/helper', 'core/platform', 'bp/constants', 'core/conf/site', 'core/co
   function (helper, platform, BP_CONST, site, urls) {
 
   var
-    resolveUrl = urls.resolveSitecuesUrl,
+    resolveUrl = urls.resolveResourceUrl,
 
     isAnimationDebuggingOn = false,
 

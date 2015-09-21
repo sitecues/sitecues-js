@@ -17,6 +17,17 @@ define(['core/conf/site'], function(site) {
     return url && parseUrl(url);
   }
 
+  function getResourceUrl() {
+    var libraryUrl = getLibraryUrl(),
+      hostName = libraryUrl.hostname;
+    if (hostName.indexOf('.sitecues.com') > 0) {
+      return 'http://s3.amazonaws.com/' + hostName + '/library/' + sitecues.branch + '/' + sitecues.version;
+    }
+
+    return hostName;
+
+  }
+
   //////////////////////////////////////////////////////////////////////////////////////////
   //
   //  URL Processing
@@ -129,8 +140,8 @@ define(['core/conf/site'], function(site) {
 
   // Resolve a URL as relative to the main script URL.
   // Add a version parameter so that new versions of the library always get new versions of files we use, rather than cached versions.
-  function resolveSitecuesUrl(urlStr, paramsMap) {
-    var url = resolveUrl(urlStr, getLibraryUrl()) + '?version=' + sitecues.version;
+  function resolveResourceUrl(urlStr, paramsMap) {
+    var url = getResourceUrl() + '/' + urlStr;
 
     function addParam(name) {
       url += name + '=' + encodeURIComponent(paramsMap[name]) + '&';
@@ -138,6 +149,10 @@ define(['core/conf/site'], function(site) {
 
     Object.keys(paramsMap || {}).forEach(addParam);
     return url;
+  }
+
+  function resolveSitecuesUrl(urlStr) {
+    return getLibraryUrl() + '/' + urlStr;
   }
 
   function isProduction() {
@@ -155,6 +170,7 @@ define(['core/conf/site'], function(site) {
     getApiUrl: getApiUrl,
     getPrefsUrl: getPrefsUrl,
     getLibraryUrl: getLibraryUrl,
+    resolveResourceUrl: resolveResourceUrl,
     resolveSitecuesUrl: resolveSitecuesUrl,
     parseUrl: parseUrl,
     resolveUrl: resolveUrl

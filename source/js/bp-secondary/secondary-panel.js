@@ -486,7 +486,7 @@ define(['bp/constants',
 
   function insertCss(name) {
     var cssLink = document.createElement('link'),
-      cssUrl = urls.resolveSitecuesUrl('../css/' + name + '.css');
+      cssUrl = urls.resolveResourceUrl('css/' + name + '.css');
     cssLink.setAttribute('rel', 'stylesheet');
     cssLink.setAttribute('href', cssUrl);
     document.querySelector('head').appendChild(cssLink);

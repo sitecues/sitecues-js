@@ -55,7 +55,7 @@ define(['core/platform', 'zoom/zoom', 'util/color', 'core/conf/urls'], function 
   function getUrl(type, sizeRatio, pixelRatio, doUseAjaxCursors, hue) {
 
     if (doUseAjaxCursors) {
-      return urls.resolveSitecuesUrl( '../images/cursors/win_' + type + '_' + getAjaxCursorSize(sizeRatio) + '.cur' );
+      return urls.resolveResourceUrl( 'images/cursors/win_' + type + '_' + getAjaxCursorSize(sizeRatio) + '.cur' );
     }
 
     var maxCursorSize = platform.os.isWin ? MAX_CURSOR_SIZE_WIN: MAX_CURSOR_SIZE_DEFAULT,
