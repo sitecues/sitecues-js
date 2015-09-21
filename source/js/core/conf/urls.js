@@ -2,7 +2,7 @@ define(['core/conf/site'], function(site) {
 
   var apiDomain,  // Either ws.sitecues.com/ or ws.dev.sitecues.com/
     prefsDomain,  // Either up.sitecues.com/ or up.dev.sitecues.com/
-    branchName = getBranch();
+    BASE_URL = getRawScriptUrl().split('/js/')[0] + '/';
 
   function getApiUrl(restOfUrl) {
     return '//' + apiDomain + 'sitecues/api/' + restOfUrl;
@@ -12,9 +12,13 @@ define(['core/conf/site'], function(site) {
     return '//' + prefsDomain + restOfUrl;
   }
 
+  function getRawScriptUrl() {
+    return site.get('scriptUrl') || site.get('script_url');
+  }
+
   function getLibraryUrl() {
     // Underscore names deprecated
-    var url = site.get('scriptUrl') || site.get('script_url');
+    var url = getRawScriptUrl();
     return url && parseUrl(url);
   }
 
@@ -22,20 +26,9 @@ define(['core/conf/site'], function(site) {
   function getBranch() {
     console.log('Branch name = ' + sitecues.branch);
     return isProduction() ? 'release' :
-      (isLocal() ? '' : sitecues.version.split('-BRANCH-')[1]).toLowerCase();
+      (isLocal() ? '' : sitecues.branch);
   }
 
-
-  function getResourceUrl() {
-    var libraryUrl = getLibraryUrl(),
-      hostName = libraryUrl.hostname;
-    if (hostName.indexOf('.sitecues.com') > 0) {
-      return '//s3.amazonaws.com/' + hostName + '/library/' + branchName + '/' + sitecues.version;
-    }
-
-    return hostName;
-
-  }
 
   //////////////////////////////////////////////////////////////////////////////////////////
   //
@@ -150,7 +143,7 @@ define(['core/conf/site'], function(site) {
   // Resolve a URL as relative to the main script URL.
   // Add a version parameter so that new versions of the library always get new versions of files we use, rather than cached versions.
   function resolveResourceUrl(urlStr, paramsMap) {
-    var url = getResourceUrl() + '/' + urlStr;
+    var url = BASE_URL + urlStr;
 
     function addParam(name) {
       url += name + '=' + encodeURIComponent(paramsMap[name]) + '&';
@@ -183,7 +176,7 @@ define(['core/conf/site'], function(site) {
     getApiUrl: getApiUrl,
     getPrefsUrl: getPrefsUrl,
     getLibraryUrl: getLibraryUrl,
-    getResourceUrl: getResourceUrl,
+    getBranch: getBranch,
     resolveResourceUrl: resolveResourceUrl,
     resolveSitecuesUrl: resolveSitecuesUrl,
     parseUrl: parseUrl,
