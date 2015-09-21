@@ -46,7 +46,7 @@ sourcemaps=true
 export version=$(default-version)
 
 # The build version.
-export branch=dev
+export branch
 
 ################################################################################
 # Tools
