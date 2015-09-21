@@ -70,7 +70,7 @@ build:
 
 	@mkdir -p $(build-dir)/js
 	@mkdir -p target/build-config
-	echo "sitecues.branch='$(SC_BRANCH_NAME)';sitecues.version='$(custom-version)';" > target/build-config/config.js
+	echo "sitecues.branch='$(branch)';sitecues.version='$(custom-version)';" > target/build-config/config.js
 
 	# Require.js build
 	node node_modules/.bin/r.js -o rjs-build-options.js baseUrl=source/js generateSourceMaps=$(sourcemaps) optimize=uglify2 uglify2.compress.global_defs.SC_DEV=false uglify2.compress.global_defs.SC_LOCAL=$(sc-local) uglify2.compress.global_defs.SC_UNIT=false dir=$(build-dir)/js wrap.start="'use strict';"
@@ -130,7 +130,7 @@ debug:
 
 	@mkdir -p $(build-dir)/js
 	@mkdir -p target/build-config
-	echo "sitecues.branch='$(SC_BRANCH_NAME)';sitecues.version='$(custom-version)';var SC_LOCAL=$(sc-local),SC_DEV=true,SC_UNIT=false;" > target/build-config/config.js
+	echo "sitecues.branch='$(branch)';sitecues.version='$(custom-version)';var SC_LOCAL=$(sc-local),SC_DEV=true,SC_UNIT=false;" > target/build-config/config.js
 
 	# Require.js build
 	# TODO add 'use strict' inside each module to help throw exceptions in debug mode
