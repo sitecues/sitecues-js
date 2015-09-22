@@ -15,3 +15,5 @@ With this function:
 
         return array.join(',').replace(/M\,/g, 'M').replace(/L\,/g, 'L').replace(/Q\,/g, 'Q').replace(/\,Z/, 'Z');
         };
+
+IMPORTANT! TODO: Firefox needs some more commas removed
