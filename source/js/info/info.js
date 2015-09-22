@@ -69,7 +69,7 @@ define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 
     removeCloseButton();
   }
 
-  function onload(event) {
+  function onload() {
     // Try to focus iframe
     setTimeout(function() {
       var iframe = $iframe[0];
