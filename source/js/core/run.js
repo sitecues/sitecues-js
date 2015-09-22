@@ -9,6 +9,8 @@
 // -- stars not activating via enter key in IE9
 // -- Sliders ugly in IE
 // -- Performance bad in IE10 with nytimes.com
+// -- hover for > arrow in tips messed up during tips animation
+// -- panel closing too easily after click on more button
 // Slow CSS in styles.js: [data-sc-reversible]
 // Slow CSS in styles.js: #scp-bp-container *
 // Accessibility testing

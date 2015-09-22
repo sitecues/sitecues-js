@@ -14,7 +14,10 @@ define(['bp/helper', 'bp/constants', 'core/platform', 'bp-expanded/view/svg-anim
     savedHoverElems = [],
     uniqueId = 0,
     origTransforms = [],
-    animations = [];
+    animations = [],
+    hoverState = [],
+    lastX = 0,
+    lastY = 0;
 
   function getContainer() {
     return byId(BP_CONST.BP_CONTAINER_ID);
@@ -22,7 +25,8 @@ define(['bp/helper', 'bp/constants', 'core/platform', 'bp-expanded/view/svg-anim
 
   function toggleHover(target, isActiveHover) {
 
-    if (target.getAttribute('aria-disabled') === 'true') {
+    if (target.getAttribute('aria-disabled') === 'true' ||
+      !target.hasAttribute('data-hover')) {
       return;
     }
 
@@ -36,10 +40,15 @@ define(['bp/helper', 'bp/constants', 'core/platform', 'bp-expanded/view/svg-anim
         useAttribute: target instanceof SVGElement
       };
 
+    if (hoverState[id] === isActiveHover) {
+      return; // Already doing this
+    }
+
     if (animations[id]) {
       animations[id].cancel();
     }
     animations[id] = animate.animateCssProperties(target, cssProperties, options);
+    hoverState[id] = isActiveHover;
   }
 
   function onMouseOver(evt) {
@@ -47,7 +56,13 @@ define(['bp/helper', 'bp/constants', 'core/platform', 'bp-expanded/view/svg-anim
   }
 
   function onMouseOut(evt) {
-    toggleHover(helper.getEventTarget(evt), false);
+    var target = helper.getEventTarget(evt),
+      rect = target.getBoundingClientRect();
+    if (evt.clientX < rect.left || evt.clientX  > rect.right ||
+      evt.clientY < rect.top || evt.clientY  > rect.bottom) {
+      // Sanity check necessary for IE, which fired spurious mouseleave events during other animations (e.g. tips animations)
+      toggleHover(target, false);
+    }
   }
 
   function toggleMouseListeners (willBeActive) {
@@ -88,6 +103,7 @@ define(['bp/helper', 'bp/constants', 'core/platform', 'bp-expanded/view/svg-anim
   }
 
   function cancelHovers() {
+    lastX = lastY = 0;
     var index = savedHoverElems.length;
     while (index --) {
       toggleHover(savedHoverElems[index], false);

@@ -19,13 +19,13 @@ var isInitialized,
       <g id="scp-prev-card" class="scp-arrow scp-hand-cursor scp-transition-opacity" transform="translate(640,72) rotate(90) scale(1.4)" role="button" aria-label="{{previous}}" aria-disabled="true">\
         <g data-hover="scale(1.3)">\
           <use xlink:href="#scp-arrow"/>\
-          <rect class="scp-hidden-target" x="-25" y="-15" width="50" height="50"/>\
+          <rect class="scp-hidden-target" x="-25" y="-10" width="50" height="50"/>\
         </g>\
       </g>\
       <g id="scp-next-card" class="scp-arrow scp-hand-cursor" transform="translate(729,72) rotate(-90) scale(1.4)" role="button" aria-label="{{next}}">\
         <g data-hover="scale(1.3)">\
           <use xlink:href="#scp-arrow"/>\
-          <rect class="scp-hidden-target" x="-25" y="-15" width="50" height="50"/>\
+          <rect class="scp-hidden-target" x="-25" y="-25" width="50" height="50"/>\
         </g>\
       </g>\
     </g>\

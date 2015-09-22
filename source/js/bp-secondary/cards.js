@@ -6,12 +6,6 @@ define(['bp/constants', 'bp/helper', 'core/locale', 'bp/model/state', 'core/plat
 
   var
     PANELS_WITH_CARDS = { tips: 1, settings: 1},
-    PULSE_NEXT_BUTTON_ANIMATION_MS = 300,
-    NUM_PULSE_STEPS = 12,
-    INITIAL_PULSE_WAIT_MS = 3000,
-    PULSE_SCALE = 1.2,
-    pulseAnimationTimeout,
-    pulseAnimation,
     byId = helper.byId,
     isInitialized,
     isActive = false,
@@ -92,12 +86,6 @@ define(['bp/constants', 'bp/helper', 'core/locale', 'bp/model/state', 'core/plat
       // bpContainer[addOrRemoveFn]('keydown', onKeyDown);
 
       bpContainer[addOrRemoveFn]('click', onClick);
-      if (willBeActive) {
-        enablePulseOnMousePause(panelName);
-      }
-      else {
-        disablePulseOnMousePause();
-      }
     }
 
     // Active state
@@ -113,65 +101,6 @@ define(['bp/constants', 'bp/helper', 'core/locale', 'bp/model/state', 'core/plat
     }
 
     isActive = willBeActive;
-  }
-
-  // Pulse the next button if the user doesn't do anything
-  function enablePulseOnMousePause(panelName) {
-    if (isFirstTimeOnWelcomeCard()) {
-      pulseAfterMousePause();
-      getPanelElement(panelName).addEventListener('mousemove', pulseAfterMousePause);
-    }
-  }
-
-  function disablePulseOnMousePause() {
-    clearPulseAnimation();
-    if (activePanel) {
-      activePanel.removeEventListener('mousemove', pulseAfterMousePause);
-    }
-  }
-
-  function isFirstTimeOnWelcomeCard() {
-    return isDisabled(BP_CONST.PREV_ID);
-  }
-
-  function getPulseAnimationTarget() {
-    return byId(BP_CONST.NEXT_ID).firstElementChild;
-  }
-
-  function pulseAfterMousePause() {
-    clearPulseAnimation();
-    pulseAnimationTimeout = setTimeout(pulseNextButton, INITIAL_PULSE_WAIT_MS);
-  }
-
-  function pulseNextButton() {
-    var
-      nextButton = getPulseAnimationTarget(),
-      options = {
-        duration    : PULSE_NEXT_BUTTON_ANIMATION_MS,
-        useAttribute: true,
-        animationFn: 'sinusoidal'
-      };
-
-    pulseAnimation = animate.animateCssProperties(nextButton, { transform: 'scale(' + PULSE_SCALE+ ')' }, options);
-
-    pulseAnimationTimeout = setTimeout(clearPulseAnimation, PULSE_NEXT_BUTTON_ANIMATION_MS * NUM_PULSE_STEPS);
-  }
-
-  function clearPulseAnimation() {
-
-    var nextButton, options;
-
-    clearTimeout(pulseAnimationTimeout);
-    if (pulseAnimation) {
-      pulseAnimation.cancel();
-      nextButton = getPulseAnimationTarget();
-      options = {
-        duration: PULSE_NEXT_BUTTON_ANIMATION_MS,
-        useAttribute: true
-      };
-      animate.animateCssProperties(nextButton, { transform: 'scale(1)' }, options);
-      pulseAnimation = null;
-    }
   }
 
   function onClick(evt) {
@@ -257,7 +186,6 @@ define(['bp/constants', 'bp/helper', 'core/locale', 'bp/model/state', 'core/plat
      * @param fromCard (optional) Card to navigate to next/prev from. If not specified will use current active card
      */
   function switchCard(direction, fromCard) {
-    disablePulseOnMousePause();
     var activeCard = fromCard || getActiveCard(),
       cardToSelect;
 
