@@ -8,10 +8,9 @@
 // - feedback page issues
 // -- stars not activating via enter key in IE9
 // -- Sliders ugly in IE
-// -- Performance bad in IE10 with nytimes.com
+// -- Performance bad in IE10 with nytimes.com (perhaps console was open)
 // -- panel closing too easily after click on more button
 // -- won't shut up from ctrl key
-// -- can only highlight one item in between zooms
 // Slow CSS in styles.js: [data-sc-reversible]
 // Slow CSS in styles.js: #scp-bp-container *
 // Accessibility testing

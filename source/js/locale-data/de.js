@@ -32,7 +32,7 @@ define([], function() {
     // - Secondary
     tips: 'Tipps',
     settings: 'Einstellungen',
-    rate_us: 'Bewerten Sie uns',
+    rate_us: 'Bewerten',
     about: 'Über',
     // - Feedback
     send: 'Senden',

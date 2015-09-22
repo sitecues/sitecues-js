@@ -147,6 +147,7 @@ sc-button-big {
 .scp-card-chooser > sc-link {
   display: table-cell;
   text-align: center;
+  font-size: 18px;
 }
 
 .scp-card-chooser > sc-link[aria-selected="true"] {
