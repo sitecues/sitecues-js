@@ -53,13 +53,18 @@ define(['bp/helper', 'bp/constants', 'core/platform', 'bp-expanded/view/svg-anim
     toggleHover(helper.getEventTarget(evt), true);
   }
 
-  function onMouseOut(evt) {
-    var target = helper.getEventTarget(evt),
-      rect = target.getBoundingClientRect();
-    if (evt.clientX < rect.left || evt.clientX  > rect.right ||
-      evt.clientY < rect.top || evt.clientY  > rect.bottom) {
-      // Sanity check necessary for IE, which fired spurious mouseleave events during other animations (e.g. tips animations)
-      toggleHover(target, false);
+  function onMouseMove(evt) {
+    var index = savedHoverElems.length,
+      x = evt.clientX,
+      y = evt.clientY;
+    while (index --) {
+      if (hoverState[index]) {
+        var rect = savedHoverElems[index].getBoundingClientRect();
+        if (x < rect.left || x > rect.right ||
+          y < rect.top || y > rect.bottom) {
+          toggleHover(savedHoverElems[index], false);
+        }
+      }
     }
   }
 
@@ -77,12 +82,12 @@ define(['bp/helper', 'bp/constants', 'core/platform', 'bp-expanded/view/svg-anim
 
     function addOrRemoveHovers(elem) {
       elem[addOrRemoveFn]('mouseenter', onMouseOver);
-      elem[addOrRemoveFn]('mouseleave', onMouseOut);
     }
 
     while (index--) {
       addOrRemoveHovers(savedHoverElems[index]);
     }
+    window[addOrRemoveFn]('mousemove', onMouseMove);
   }
 
   function storeAllHoverElements() {
