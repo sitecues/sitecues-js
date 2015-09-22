@@ -157,10 +157,6 @@ define(['core/conf/site'], function(site) {
     return getLibraryUrl().hostname === 'js.sitecues.com';
   }
 
-  function isLocal() {
-    return getLibraryUrl().hostname.indexOf('sitecues.com') < 0;
-  }
-
   function init() {
     var domainEnding = isProduction() ? '.sitecues.com/' : '.dev.sitecues.com/';
     apiDomain = 'ws' + domainEnding;
