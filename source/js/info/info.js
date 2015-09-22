@@ -77,7 +77,13 @@ define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 
         iframe.contentWindow.focus();
       }
       catch (ex) {}
+
+      $(window)
+        .one('focus', close)
+        .one('message', checkCloseMessage)
+        .on('DOMMouseScroll mousewheel', preventScroll);
     }, 0);
+
   }
 
   function showModal(pageName, anchor) {
@@ -106,11 +112,6 @@ define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 
       .css('border', getBorderCss())
       .one('load', onload)
       .appendTo('html');
-
-    $(window)
-      .one('focus', close)
-      .one('message', checkCloseMessage)
-      .on('DOMMouseScroll mousewheel', preventScroll);
 
     // Prevent panning in background content
 
