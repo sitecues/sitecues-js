@@ -75,6 +75,7 @@ define(['$', 'core/conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mou
   isAppropriateFocus,
   isWindowFocused = document.hasFocus(),
   isSticky,
+  isBPOpen,
   isColorDebuggingOn,
   isHighlightRectDebuggingOn,
   $highlightStyleSheet,   // Style sheet for overlay via :after
@@ -887,7 +888,6 @@ define(['$', 'core/conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mou
       ancestorStyle = state.styles[index];
       if (ancestorStyle.position !== 'static' && ancestorStyle.position !== 'relative' &&
         hasVerticalOverflow()) {
-        if (SC_DEV) { console.log('Highlight overlay container - absolute/fixed: %o', ancestor); }
         return ancestor;
       }
       // Don't tie to horizontal scroll -- these tend to not scrolled via
@@ -1381,7 +1381,7 @@ define(['$', 'core/conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mou
     var wasAppropriateFocus = isAppropriateFocus;
     // don't show highlight if current active isn't body
     var target = document.activeElement;
-    isAppropriateFocus = (!target || !elementClassifier.isSpacebarConsumer(target)) && isWindowActive();
+    isAppropriateFocus = isBPOpen || (!target || !elementClassifier.isSpacebarConsumer(target)) && isWindowActive();
     if (!isSticky) {
       if (wasAppropriateFocus && !isAppropriateFocus) {
         hide();
@@ -1390,6 +1390,16 @@ define(['$', 'core/conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mou
         resumeAppropriately();
       }
     }
+  }
+
+  function willExpand() {
+    isBPOpen = true;
+    testFocus();
+  }
+
+  function didShrink() {
+    isBPOpen = false;
+    testFocus();
   }
 
   function onFocusWindow() {
@@ -1592,6 +1602,10 @@ define(['$', 'core/conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mou
     // Turn mouse-tracking on or off
     sitecues.on('key/only-shift', setOnlyShift);
 
+    // Mosue highlighting not available while BP is open
+    sitecues.on('bp/will-expand', willExpand);
+    sitecues.on('bp/did-shrink', didShrink);
+
     sitecues.on('sitecues/did-toggle', function(isOn) {
       isSitecuesOn = isOn;
       refreshEventListeners();
@@ -1602,7 +1616,7 @@ define(['$', 'core/conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mou
 
     testFocus(); // Set initial focus state
 
-    refreshEventListeners();
+    refreshEventListeners();  // First time we initialize, highlighting should be turned on
   }
 
   if (SC_DEV) {

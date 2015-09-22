@@ -45,6 +45,7 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
     isZoomOn,
     isSpeechOn,
     isSitecuesOn = false,
+    wasSitecuesEverOn,
     EQUALS   = 187,
     NUMPAD_ADD = 107,
     PLUS_ALTERNATE_1 = 61,
@@ -94,8 +95,9 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
       isSitecuesOn = isOn;
       sitecues.emit('sitecues/did-toggle', isSitecuesOn);
     }
-    if (isOn && !isZoomInitialized && !isSpeechInitialized) {
+    if (isOn && !wasSitecuesEverOn) {
       initSitecuesOn();
+      wasSitecuesEverOn = true;
     }
   }
 
