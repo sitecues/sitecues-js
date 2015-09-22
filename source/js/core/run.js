@@ -51,7 +51,7 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
     PLUS_ALTERNATE_2 = 43,
     QUOTE = 222;
 
-    function initZoom() {
+  function initZoom() {
     require([ 'hpan/hpan', 'zoom/fixed-position-fixer', 'enhance/focus', 'cursor/cursor' ], function(hpan, fixer, focus, cursor) {
       hpan.init();
       fixer.init();
