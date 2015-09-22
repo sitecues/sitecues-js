@@ -11,6 +11,10 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
     // if the mouse happens to be over the badge/toolbar
     doIgnoreNextMouseMove = true;
 
+  function getBadgeElement() {
+    return helper.byId(BP_CONST.BADGE_ID);
+  }
+
   function isInActiveToolbarArea(evt, badgeRect) {
     var middleOfBadge = badgeRect.left + badgeRect.width / 2,
       allowedDistance = BP_CONST.ACTIVE_TOOLBAR_WIDTH / 2;
@@ -39,7 +43,10 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
 
   // Logic to determine whether we should begin to expand panel
   function onMouseMove(evt) {
-    cancelHoverDelayTimer();
+
+    if (hoverDelayTimer) {
+      return; // Already waiting to hover
+    }
 
     if (doIgnoreNextMouseMove) {
       doIgnoreNextMouseMove = false;
@@ -192,7 +199,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
   function init() {
     if (!isInitialized) {
       isInitialized = true;
-      var badgeElement = helper.byId(BP_CONST.BADGE_ID);
+      var badgeElement = getBadgeElement();
       badgeElement.addEventListener('keydown', processBadgeActivationKeys);
       badgeElement.addEventListener('click', clickToOpenPanel);
       badgeElement.addEventListener('mousemove', onMouseMove);
