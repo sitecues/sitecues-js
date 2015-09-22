@@ -119,7 +119,6 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
     firePageLoadEvent();
 
     // Initialize other features after bp
-    conf.def('zoom', parseFloat); // Will further define it if zoom is turned on, in zoom.js
     var initialZoom = conf.get('zoom');
     if (initialZoom > 1) {
       require(['zoom/zoom'], function (zoomMod) {
@@ -193,6 +192,7 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
 
     sitecues.on('locale/did-complete', onPrereqComplete); // Local prereq
 
+    conf.def('zoom', parseFloat); // Will further define it if zoom is turned on, in zoom.js
     userId.init();
     locale.init();
   };
