@@ -211,7 +211,7 @@ define(['$', 'style-service/style-service', 'core/conf/user/manager', 'cursor/cu
   // as opposed to the page cursors, which can be disabled during smooth zoom for performance
   function constructBPCursorStylesheet() {
     var cssText =
-      '#scp-main,.scp-toolbar {cursor:default;}\n' +
+      '#scp-bp-container,.scp-toolbar {cursor:default;}\n' +
       '.scp-hand-cursor {cursor:pointer};';
 
     $bpStylesheet = createStyleSheet(SITECUES_BP_CURSOR_CSS_ID, cssText);
