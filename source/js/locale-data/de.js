@@ -31,9 +31,9 @@ define([], function() {
     off: 'Aus',
     // - Secondary
     tips: 'Tipps',
-    settings: 'Einstellungen',
+    settings: 'Einstellen',
     rate_us: 'Bewerten',
-    about: 'Über',
+    about: 'Über uns',
     // - Feedback
     send: 'Senden',
     tell_us_something: 'Teilen Sie uns etwas mit ...',

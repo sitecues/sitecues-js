@@ -159,6 +159,7 @@ sc-button-big {
 }
 
 .scp-card-indicator {
+  background-image: url('../images/card-indicator.svg');
   position: absolute;
   top: 133px;
   left: 30px;
@@ -304,6 +305,13 @@ sc-card > * {
   margin-top: 24px;
 }
 
+.scp-active #scp-demo-slider-bar {
+  background: url('../images/tips/slider-bar-demo.svg') no-repeat;
+}
+
+.scp-active #scp-demo-slider-thumb {
+  background: url('../images/tips/slider-thumb-demo.svg') no-repeat;
+}
 .scp-active #scp-demo-slider-thumb[data-demo="true"] {
   transform: translateX(90px) scale(1.6);
 }
@@ -315,6 +323,7 @@ sc-kbd[data-demo="true"] {
   box-shadow: inset 0 0 1px #FFF, inset 0 0 .4em #CCC, 0 1px 0 #888, 0 1px 0 rgba(0, 0, 0, .4), 0 1px 1px rgba(0, 0, 0, .9);
 }
 #scp-demo-mouse {
+  background: url('../images/tips/cursor-demo.svg') no-repeat;
   position: absolute;
   height: 40px;
   width: 30px;
@@ -348,6 +357,7 @@ sc-kbd[data-demo="true"] {
 }
 
 #scp-speech-button-demo {
+  background: url('../images/tips/speech-button-demo.svg') 100% 100% no-repeat;
   position: relative;
   top: 2px;
   width: 39px;
@@ -355,11 +365,13 @@ sc-kbd[data-demo="true"] {
 }
 
 #scp-guide-icon {
+  background-image: url('../images/tips/full-guide-icon.png');
   height: 46px;
   margin-top: -8px;
 }
 
 #scp-kbd-icon {
+  background-image: url('../images/tips/keyboard-icon.png');
   height: 26px;
   margin-top: 11px;
 }
@@ -372,21 +384,34 @@ sc-kbd[data-demo="true"] {
   pointer-events: none;
   opacity: 0;
   transition: opacity 1s;
+  overflow: hidden;
 }
-#scp-bp-container input[type="range"] {
+.scp-normal-range {
   -webkit-appearance: none;
-  width: 420px;
-  height: 24px;
+  width: 442px;
+  height: 26px;
+  border-radius: 3px;
+  border: 1px solid white !important;
+  background-color: transparent !important; /* #e2e2e2 !important; */
+  /*overflow-x: hidden;*/
   margin: 0;
-  border: 4px solid #888;
-  padding: 1px 0;
-  border-radius: 14px;
-  background: transparent;
   outline: 0;
+  box-sizing: content-box !important;
 }
-#scp-bp-container input[type=range]::-webkit-slider-runnable-track {
-  border: 0;
+
+.scp-hue-range {
+  -webkit-appearance: none;
+  width: 442px;
+  height: 26px;
+  margin: 0;
+  padding: 1px 0;
+  border-radius: 3px;
+  outline: 0;
+  background-image: linear-gradient(to right, #f66 0, #ff6 16%, #6f6 32%, #6ff 48%, #66f 64%, #f6f 80%, #f66 96%, #fff 96.2%, #fff 100%) !important;
+  border: 1px solid #777 !important;
+  box-sizing: border-box !important;
 }
+
 #scp-bp-container input[type="range"]::-moz-range-track {
   border: 0;
   background: transparent;
@@ -405,15 +430,41 @@ sc-kbd[data-demo="true"] {
 #scp-bp-container input[type="range"]::-ms-tooltip {
   display: none;
 }
+
 #scp-bp-container input::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 18px;
-  height: 24px;
-  border: 4px solid #444;
-  border-radius: 12px;
-  transform: scale(1.7);
-  transition: transform .5s;
+  position: relative;
+  top: 3px;
+  width: 20px;
+  height: 50px;
+  background: url('../images/settings/slider-thumb.svg') no-repeat;
+  background-size: 98px 50px;
+  z-index: 99999999;
+  /*transform: scale(1.7);*/
+  /*transition: transform .5s;*/
 }
+.scp-normal-range::-webkit-slider-thumb::before {
+  content:"";
+  position: absolute;
+  left:-600px;
+  right:20px;
+  top:9px;
+  height:26px;
+  background: #538eca;
+  pointer-events: none;
+}
+
+.scp-normal-range::-webkit-slider-thumb::after {
+  content:"";
+  position: absolute;
+  width:600px;
+  left:20px;
+  top:9px;
+  height:26px;
+  background: #e1e3e3;
+  pointer-events: none;
+}
+
 #scp-bp-container input::-moz-range-thumb {
   -webkit-appearance: none;
   width: 18px;
@@ -432,9 +483,9 @@ sc-kbd[data-demo="true"] {
   transform: scale(1.7);
   transition: transform .5s;
 }
-#scp-bp-container input:hover::-webkit-slider-thumb {
-  transform: scale(2.1);
-}
+/*#scp-bp-container input:hover::-webkit-slider-thumb {*/
+  /*transform: scale(2.1);*/
+/*}*/
 #scp-bp-container input:hover::-ms-thumb {
   transform: scale(1.7);
 }
@@ -480,9 +531,6 @@ sc-button[data-setting-name="themeName"][data-setting-value="dark"] {
   color: #fff;
   background-color: #000;
 }
-#scp-theme-power::-webkit-slider-thumb {
-  background: #ddd !important;
-}
 #scp-theme-power::-moz-range-thumb {
   background: #ddd !important;
 }
@@ -493,16 +541,14 @@ sc-button[data-setting-name="themeName"][data-setting-value="dark"] {
   pointer-events: all;
   opacity: 1;
 }
-[data-type="hue"] {
-  background-image: linear-gradient(to right, #f66 0, #ff6 15%, #6f6 30%, #6ff 45%, #66f 60%, #f6f 75%, #f66 90%, #fff 92%, #fff 100%) !important;
+
+.scp-hue-range::-webkit-slider-thumb {
+  background-image: url('../images/settings/slider-thumb-with-hole.svg') !important;
 }
-[data-type="hue"]::-webkit-slider-thumb {
+.scp-hue-range::-moz-range-thumb {
   background: transparent !important;
 }
-[data-type="hue"]::-moz-range-thumb {
-  background: transparent !important;
-}
-[data-type="hue"]::-ms-thumb {
+.scp-hue-range::-ms-thumb {
   background: transparent !important;
 }
 #scp-mouse-settings-group {
@@ -515,38 +561,8 @@ sc-button[data-setting-name="themeName"][data-setting-value="dark"] {
   font-size: 26px;
   margin-top: 5px;
 }
-#scp-mouse-size {
-  border: 0 !important;
-  background: #fff url("data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0D%0A%3Cpath%20d%3D%22m280%2C5v27c0%2C2%20-1%2C3%20-3%2C3h-273c-2%2C0%20-3%2C-1%20-3%2C-3v-6c0%2C-1%201%2C-2%202%2C-3l273%2C-22c1%2C0%203%2C1%203%2C3l1%2C1z%22%20transform%3D%22scale%281.49%2C.65%29%22%2F%3E%0D%0A%3C%2Fsvg%3E") !important;
-  transform: scale(1.01);
-}
-#scp-mouse-size::-webkit-slider-thumb {
-  background: #80A9F8 !important;
-  margin-top: 3px;
-}
-#scp-mouse-size::-moz-range-thumb {
-  background: #80A9F8 !important;
-  margin-top: 3px;
-}
-#scp-mouse-size::-ms-thumb {
-  background: #80A9F8 !important;
-  margin-top: 3px;
-}
 .scp-lens-size-group {
   padding-top: 14px;
-}
-sc-button[data-setting-name="lensSize"] {
-  padding: 15px;
-}
-#scp-lens-small {
-  padding-left: 72px;
-  transform: translateX(-3px) scale(.9);
-}
-#scp-lens-medium {
-  transform: scale(1.2);
-}
-#scp-lens-large {
-  transform: scale(1.5) translateX(16px);
 }
 sc-button[data-setting-current="true"] {
   text-decoration: underline;
