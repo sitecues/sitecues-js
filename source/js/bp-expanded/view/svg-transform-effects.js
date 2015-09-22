@@ -15,9 +15,7 @@ define(['bp/helper', 'bp/constants', 'core/platform', 'bp-expanded/view/svg-anim
     uniqueId = 0,
     origTransforms = [],
     animations = [],
-    hoverState = [],
-    lastX = 0,
-    lastY = 0;
+    hoverState = [];
 
   function getContainer() {
     return byId(BP_CONST.BP_CONTAINER_ID);
@@ -103,7 +101,6 @@ define(['bp/helper', 'bp/constants', 'core/platform', 'bp-expanded/view/svg-anim
   }
 
   function cancelHovers() {
-    lastX = lastY = 0;
     var index = savedHoverElems.length;
     while (index --) {
       toggleHover(savedHoverElems[index], false);
