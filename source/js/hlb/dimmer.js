@@ -134,7 +134,7 @@ define(['$', 'core/conf/user/manager', 'util/common', 'core/platform'], function
 
     useCss.left = (absRect.left + useOutlineWidth) + 'px';
     useCss.top = (absRect.top + useOutlineWidth) + 'px';
-    useCss.outlineWidth = Math.round(useOutlineWidth) + 'px'; // Must round otherwise we get an outline in the middle
+    useCss.outlineWidth = Math.round(useOutlineWidth + 1) + 'px'; // Must round otherwise we get an outline in the middle
     useCss.display = 'block';
 
     return $('<sc>')
