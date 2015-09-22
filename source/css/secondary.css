@@ -150,6 +150,10 @@ sc-button-big {
   font-size: 18px;
 }
 
+#scp-settings .scp-card-chooser > sc-link {
+  font-size: 23px;  // TODO larger text in settings chooser, where we currently only have 2 cards
+}
+
 .scp-card-chooser > sc-link[aria-selected="true"] {
   font-weight: 600;
 }
