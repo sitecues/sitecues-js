@@ -1665,6 +1665,7 @@ define(['$', 'core/conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mou
     getHighlight: getHighlight,
     highlight: highlight,
     autoPick: autoPick,
+    setScrollTracking: setScrollTracking,
     hide: hide,
     init: init
   };
