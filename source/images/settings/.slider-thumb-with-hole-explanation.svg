@@ -13,7 +13,6 @@ With this function:
         array = array.concat(["L",x+w,y+h-r3, "Q",x+w,y+h, x+w-r3,y+h]); //C
         array = array.concat(["L",x+r4,y+h, "Q",x,y+h, x,y+h-r4, "Z"]); //D
 
-        return array.join(',').replace(/M\,/g, 'M').replace(/L\,/g, 'L').replace(/Q\,/g, 'Q').replace(/\,Z/, 'Z');
+        return array.join(',').replace(/M\,/g, 'M').replace(/\,L\,/g, 'L').replace(/\,Q\,/g, 'Q').replace(/\,Z/, 'Z');
         };
 
-IMPORTANT! TODO: Firefox needs some more commas removed

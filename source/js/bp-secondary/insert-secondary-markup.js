@@ -1,5 +1,6 @@
 // Markup for the secondary panel
-define(['bp/view/markup-finalizer', 'bp/helper'], function(finalizer, helper) {
+define(['bp/view/markup-finalizer', 'bp/helper', 'core/platform', 'bp-secondary/font-charset', 'core/conf/urls'],
+  function(finalizer, helper, platform, fontCharset, urls) {
   /*jshint multistr: true */
 
 var isInitialized,
@@ -120,11 +121,34 @@ htmlSecondary =
     where.parentNode.replaceChild(svgContentToInsert, where);
   }
 
+  function insertSheet(name) {
+    var cssLink = document.createElement('link'),
+      cssUrl = urls.resolveResourceUrl('css/' + name + '.css');
+    cssLink.setAttribute('rel', 'stylesheet');
+    cssLink.setAttribute('href', cssUrl);
+    document.querySelector('head').appendChild(cssLink);
+  }
+
+  function insertSheets() {
+    // CSS: always use secondary.css
+    insertSheet('secondary');
+    // CSS: use latin-ext.css etc. if necessary
+    var extendedFontCharsetName = fontCharset();
+    if (extendedFontCharsetName) {
+      insertSheet(extendedFontCharsetName);
+    }
+    // CSS: use vendor stylesheet as well (e.g. secondary-moz.css, secondary-ie.css, secondary-webkit.css)
+    if (platform.cssPrefix) {
+      insertSheet('secondary' + platform.cssPrefix);
+    }
+  }
+
   function init() {
     if (!isInitialized) {
       isInitialized = true;
       insertHtml('scp-html-secondary-anchor', htmlSecondary);
       insertSvg('scp-secondary-anchor', svgSecondary, true);
+      insertSheets();
     }
   }
 

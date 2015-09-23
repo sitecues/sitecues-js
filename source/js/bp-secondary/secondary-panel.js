@@ -16,10 +16,8 @@ define(['bp/constants',
     'bp-secondary/settings',
     'bp-secondary/feedback',
     'bp-secondary/about',
-    'bp-secondary/cards',
-    'bp-secondary/font-charset',
-    'core/conf/urls'],
-    function (BP_CONST, state, helper, animate, transform, markup, tipsModule, settingsModule, feedbackModule, aboutModule, cardsModule, fontCharset, urls) {
+    'bp-secondary/cards'],
+    function (BP_CONST, state, helper, animate, transform, markup, tipsModule, settingsModule, feedbackModule, aboutModule, cardsModule) {
 
   var BUTTON_CLICK_ANIMATION_DURATION = 800,
     ENABLED_PANEL_TRANSLATE_Y = 0,
@@ -484,36 +482,22 @@ define(['bp/constants',
     toggleMouseListeners(false);
   }
 
-  function insertCss(name) {
-    var cssLink = document.createElement('link'),
-      cssUrl = urls.resolveResourceUrl('css/' + name + '.css');
-    cssLink.setAttribute('rel', 'stylesheet');
-    cssLink.setAttribute('href', cssUrl);
-    document.querySelector('head').appendChild(cssLink);
-  }
-
   function init() {
     if (!isInitialized) {
       isInitialized = true;
 
       // Insert the markup for the secondary panel
       markup.init();
-
       // Add mouse listeners once BP is ready
       resetStyles();
-
-      insertCss('secondary');
-      var extendedFontCharsetName = fontCharset();
-      if (extendedFontCharsetName) {
-        insertCss(extendedFontCharsetName);
-      }
-      sitecues.on('bp/will-shrink', onPanelClose);
 
       aboutModule.init();
       feedbackModule.init();
       settingsModule.init();
       tipsModule.init();
       cardsModule.init();
+
+      sitecues.on('bp/will-shrink', onPanelClose);
     }
   }
 

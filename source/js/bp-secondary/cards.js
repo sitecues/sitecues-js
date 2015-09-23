@@ -53,7 +53,9 @@ define(['bp/constants', 'bp/helper', 'core/locale', 'bp/model/state', 'core/plat
       .replace(/<sc-menuitem /g, '<sc-menuitem role="button"' + INTERACTIVE+ '" ')
       .replace(/<sc-link /g, '<sc-link role="link"' + INTERACTIVE+ '" ')
       .replace(/<sc-normal-range /g, '<input type="range"' + INTERACTIVE + ' scp-normal-range" ')
-      .replace(/<sc-hue-range /g, '<input type="range"' + INTERACTIVE + ' scp-hue-range" ');
+      .replace(/<\/sc-normal-range>/g, '</input>')
+      .replace(/<sc-hue-range /g, '<input type="range"' + INTERACTIVE + ' scp-hue-range" ')
+      .replace(/<\/sc-hue-range>/g, '</input>');
   }
 
   function removeAllElements(elements) {

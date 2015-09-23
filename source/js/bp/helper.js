@@ -1,4 +1,3 @@
-// TODO suggest rename (if we still need to use this file)
 // It is too similar to utils.js which is confusing
 define(['core/platform', 'bp/constants'], function(platform, BP_CONST) {
   /**
