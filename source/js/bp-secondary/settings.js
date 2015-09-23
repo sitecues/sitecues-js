@@ -1,5 +1,5 @@
-define(['bp/constants', 'bp/helper', 'core/conf/user/manager', 'bp/model/state', 'core/metric'],
-  function (BP_CONST, helper, conf, state, metric) {
+define(['bp/constants', 'bp/helper', 'core/conf/user/manager', 'bp/model/state', 'core/metric', 'core/platform'],
+  function (BP_CONST, helper, conf, state, metric, platform) {
 
   var byId = helper.byId,
     isActive = false,
@@ -95,6 +95,7 @@ define(['bp/constants', 'bp/helper', 'core/conf/user/manager', 'bp/model/state',
       rangeElem = rangeElems[index];
       settingName = rangeElem.getAttribute('data-setting-name');
       initRangeListener(settingName, rangeElem);
+      adjustRangeBackgroundForFirefox(rangeElem);
     }
 
   }
@@ -152,10 +153,31 @@ define(['bp/constants', 'bp/helper', 'core/conf/user/manager', 'bp/model/state',
     }
   }
 
+  // Firefox doesn't have a pure CSS way of adjusting the background
+  function adjustRangeBackgroundForFirefox(slider) {
+    if (!platform.browser.isFirefox ||
+      slider.className.indexOf('scp-normal-range') < 0) {
+      return; // Don't do for hue ranges which have a rainbow bg
+    }
+    var value = + slider.value,
+      min = parseFloat(slider.min),
+      max = parseFloat(slider.max),
+      percent = (100 * (value - min) / ( max - min)) + '%',
+      LEFT_COLOR = '#538eca',
+      RIGHT_COLOR = '#e2e2e2',
+      gradient = 'linear-gradient(to right, ' +
+        LEFT_COLOR + ' 0%,' +
+        LEFT_COLOR + ' ' + percent + ',' +
+        RIGHT_COLOR + ' ' + percent + ',' +
+        RIGHT_COLOR + ' 100%)';
+    slider.style.backgroundImage = gradient;
+  }
+
   // Native input change
   // For sliders, this occurs when thumb moves at all, it doesn't need to be dropped there
   // We don't want to update too much, hence the timer
   function onSettingsNativeInputChangeDrag(evt) {
+    adjustRangeBackgroundForFirefox(evt.target);
     var currTime = + Date.now();
     if (currTime - lastDragUpdateTime > SLIDER_DRAG_UPDATE_MIN_INTERVAL) {
       lastDragUpdateTime = currTime;
