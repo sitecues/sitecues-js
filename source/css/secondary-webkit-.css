@@ -4,7 +4,7 @@
 .scp-normal-range {
   -webkit-appearance: none;
   width: 442px;
-  height: 26px;
+  height: 27px;
   border: 0 !important;
   border-radius: 1px !important;
   background-color: #e2e2e2 !important;
@@ -32,18 +32,18 @@
   -webkit-appearance: none;
   position: relative;
   top: 3px;
-  width: 20px;
-  height: 50px;
-  background: url('../images/settings/slider-thumb.svg') no-repeat;
-  background-size: 98px 50px;
+  width: 21px;
+  height: 46px;
+  background: url('../images/settings/slider-thumb.svg');
+  background-size: 100% 100%
 }
 .scp-normal-range::-webkit-slider-thumb::before {
   content:"";
   position: absolute;
   left:-600px;
-  right:20px;
-  top:9px;
-  height:26px;
+  right:21px;
+  top:6px;
+  height:27px;
   background: #538eca;
   pointer-events: none;
 }
