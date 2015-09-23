@@ -10,16 +10,16 @@ define([], function() {
     zoom_in: 'powiększ',
     zoom_out: 'pomniejsz',
     // - Secondary
-    more_features: 'More features',   /* new */
-    previous: 'Previous',             /* new */
-    next: 'Next',                     /* new */
+    more_features: 'Więcej ustawień',   /* new */
+    previous: 'Poprzedni',             /* new */
+    next: 'Następny',                     /* new */
     // - Feedback
-    rating: 'Rating',                 /* new */
-    rating_1: '1 star',               /* new */
-    rating_2: '2 stars',              /* new */
-    rating_3: '3 stars',              /* new */
-    rating_4: '4 stars',              /* new */
-    rating_5: '5 stars',              /* new */
+    rating: 'Ocena',                 /* new */
+    rating_1: '1 gwiazdka',               /* new */
+    rating_2: '2 gwiazdki',              /* new */
+    rating_3: '3 gwiazdki',              /* new */
+    rating_4: '4 gwiazdki',              /* new */
+    rating_5: '5 gwiazdek',              /* new */
 
     // Visible labels
     // - Main
@@ -30,15 +30,15 @@ define([], function() {
     on: 'Wł.',
     off: 'Wył',
     // - Secondary
-    tips: 'Tips',                     /* new */
-    settings: 'Settings',             /* new */
-    rate_us: 'Rate us',               /* new */
-    about: 'About',                   /* new */
+    tips: 'Porady',                     /* new */
+    settings: 'Ustawienia',             /* new */
+    rate_us: 'Oceń nas',               /* new */
+    about: 'O nas',                   /* new */
     // - Feedback
-    send: 'Send',                     /* new */
-    tell_us_something: 'Tell us something ...',      /* new */
-    thank_you: 'Thank you',                          /* new */
+    send: 'Wyślij',                     /* new */
+    tell_us_something: 'Powiedz nam ...',      /* new */
+    thank_you: 'Dziękujemy',                          /* new */
     // - About
-    zoom_and_speech: 'zoom and speech'               /* new */
+    zoom_and_speech: 'powiększenie i mowa'               /* new */
   };
 });

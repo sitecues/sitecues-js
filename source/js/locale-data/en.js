@@ -41,6 +41,4 @@ define([], function() {
     // - About
     zoom_and_speech: 'zoom &amp; speech'               /* new */
   };
-
-  // no publics
 });
