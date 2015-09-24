@@ -126,6 +126,7 @@ htmlSecondary =
       cssUrl = urls.resolveResourceUrl('css/' + name + '.css');
     cssLink.setAttribute('rel', 'stylesheet');
     cssLink.setAttribute('href', cssUrl);
+    cssLink.id = 'sitecues-' + name;
     document.querySelector('head').appendChild(cssLink);
   }
 
