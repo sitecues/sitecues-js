@@ -45,6 +45,9 @@ sourcemaps=true
 # The build version.
 export version=$(default-version)
 
+# jshint path
+jshint=$(shell npm ls -p jshint)/bin/jshint
+
 ################################################################################
 # Tools
 ################################################################################
@@ -237,7 +240,7 @@ deps-clean:
 ################################################################################
 lint:
 	@echo "Linting started."
-	node_modules/.bin/jshint source/js
+	$(jshint) source/js
 	# lenient-lint --beep --error_trace --multiprocess --nojsdoc -r source/js --summary --time --unix_mode
 	@echo "Linting completed."
 
@@ -247,7 +250,7 @@ lint:
 ################################################################################
 lint-debug:
 	@echo "Linting started."
-	node_modules/.bin/jshint --config .jshintrc-debug source/js
+	$(jshint) --config .jshintrc-debug source/js
 	@echo "Linting completed."
 
 ################################################################################
