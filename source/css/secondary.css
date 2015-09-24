@@ -520,7 +520,6 @@ sc-button[data-setting-current="true"] {
   fill: #ccc;
   stroke: #333;
   stroke-width: 1px;
-  pointer-events: all;
 }
 .scp-rating-star[aria-pressed="true"] {
   fill: #80A9F8;

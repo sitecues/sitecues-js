@@ -15,10 +15,10 @@
 // Slow CSS in styles.js: #scp-bp-container *
 // Accessibility testing
 // Cross-browser testing
-// Theme button sizes in Safari
 // Send out examples to Anton and Jarek
 // Rest of Alex's issues
 // Design refresh continuation
+// CLick more button too quickly, bottom of panel has no bg! At least in Chrome
 // TODO Localize, Anton Neuber (aneuber@aisquared.com), Jarek (Jaroslaw Urbansk) [jurbanski@harpo.com.pl]
 // TODO themes
 // TODO cursor size/hue settings only -- be careful of mousehue 1.1 which means nothing
