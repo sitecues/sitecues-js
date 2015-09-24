@@ -69,7 +69,7 @@ define([], function() {
     // If IE is being used, determine which version
     var charIndex = agent.indexOf('rv:');
     if (charIndex === -1) {
-      if (isIE.isIE) {
+      if (isIE) {
         // Use MSIE XX.X
         charIndex = agent.indexOf('MSIE');
         if (charIndex < 0) {

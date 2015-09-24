@@ -338,9 +338,12 @@ define(['bp/helper', 'core/platform', 'bp/constants', 'core/conf/site'],
 
       /******************* More **********************/
 
-      '.scp-ie9-true #scp-more-button-group': {
-        'display': 'none',
-        'opacity': 0 // Helps it not be tabbable in focus-controller
+      '.scp-ie9-true #scp-more-arrow': {
+        'display': 'none'
+      },
+
+      '.scp-ie9-false #scp-question': {
+        'display': 'none'   // IE9 -- provide help only
       },
 
       '#scp-more-button-container': {

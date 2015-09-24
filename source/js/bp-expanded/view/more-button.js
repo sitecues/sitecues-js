@@ -4,8 +4,8 @@
  *  keyboard commands.
  */
 
-define(['bp/constants', 'bp/helper', 'bp-expanded/view/svg-animate', 'bp-expanded/view/svg-transform-effects'],
-  function (BP_CONST, helper, animate, transformEffects) {
+define(['bp/constants', 'bp/helper', 'bp-expanded/view/svg-animate', 'bp-expanded/view/svg-transform-effects', 'core/platform'],
+  function (BP_CONST, helper, animate, transformEffects, platform) {
 
   var BUTTON_ENTER_ANIMATION_DURATION = 800, // Milliseconds
       NO_INPUT_TIMEOUT                = 7000,
@@ -19,6 +19,16 @@ define(['bp/constants', 'bp/helper', 'bp-expanded/view/svg-animate', 'bp-expande
       isInitialized;
 
   function getSecondaryPanel(doToggle) {
+    if (platform.isIE9) {
+      require(['info/info'], function(info) {
+        if (doToggle) {
+          info.showHelp();
+        }
+      });
+      return;
+    }
+
+    // Not IE9: go ahead with secondary panel
     require(['bp-secondary/secondary-panel'], function(secondary) {
       // Show or hide the secondary panel.
       secondary.init();
