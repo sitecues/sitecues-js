@@ -389,13 +389,20 @@ sc-kbd[data-demo="true"] {
 }
 
 .scp-color-theme-group {
-  margin: 36px 0 62px 0;
-}
-.scp-color-theme-group > :last-child {
-  margin-right: 0;
+  margin-bottom: 36px;
+  /* Need a table so that we can vertically align contents in the buttons */
+  display: table;
+  border-spacing: 18px;
+  /* The next two properties compensate for the 18px of cell padding on the left and right side of the table, which we don't want */
+  margin-left: -18px;
+  width: calc(100% + 36px)
 }
 sc-button[data-setting-name="themeName"] {
-  padding: 30px 0;
+  padding: 0;
+  display: table-cell;
+  vertical-align: middle;
+  width: 96px;
+  height: 96px;
   font-size: 18px;
   margin-right: 15px;
   border-radius: 6px;
@@ -405,6 +412,7 @@ sc-button[data-setting-name="themeName"] {
   border: 2px solid #000;
   background-color: #fff;
   font-weight: 100;
+
 }
 sc-button[data-setting-name="themeName"]:not([data-setting-value]) {
   position: relative;
@@ -415,14 +423,12 @@ sc-button[data-setting-name="themeName"][data-setting-value="increaseContrast"] 
   font-weight: 700;
   text-shadow: .4px .2px;
   border-width: 4px;
-  padding: 28px 0;
 }
 sc-button[data-setting-name="themeName"][data-setting-value="blueReduction"] {
   color: #777;
   border-color: #777;
   background-color: #fffdde;
   border-width: 1px;
-  padding: 31px 0;
 }
 
 sc-button[data-setting-name="themeName"][data-setting-value="dark"] {
