@@ -20,11 +20,11 @@
 
 /******************* Secondary content *********************/
 #scp-secondary {
-  display: none
+  display: none;
 }
 
 .scp-want-secondary #scp-secondary, .scp-is-secondary #scp-secondary {
-  display: block
+  display: block;
 }
 
 /** Enable secondary panel **/
