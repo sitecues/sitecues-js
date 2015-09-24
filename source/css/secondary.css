@@ -110,17 +110,15 @@ sc-button {
   border-radius: 5px;
   padding: 9px;
   margin-right: 10px;
+  transition: transform .5s;
+  -webkit-transition: -webkit-transform .5s;
 }
-sc-button-big {
-  display: inline-block;
-  padding: 10px 30px;
-  font-size: 24px;
-  border: 3px solid #447AC4;
-  border-radius: 4px;
-  color: #FFF;
-  text-align: center;
-  background: #447AC4;
+
+sc-button:hover {
+  -webkit-transform: scale(1.2);
+  transform: scale(1.2);
 }
+
 
 /*************** Common card elements *********************/
 
@@ -394,28 +392,27 @@ sc-kbd[data-demo="true"] {
   display: table;
   border-spacing: 18px;
   /* The next two properties compensate for the 18px of cell padding on the left and right side of the table, which we don't want */
-  margin-left: -18px;
+  position: relative;
+  left: -18px;
   width: calc(100% + 36px)
 }
 sc-button[data-setting-name="themeName"] {
   padding: 0;
   display: table-cell;
   vertical-align: middle;
-  width: 96px;
+  width: 75px;
   height: 96px;
   font-size: 18px;
   margin-right: 15px;
   border-radius: 6px;
   text-align: center;
   color: #000;
-  width: 90px;
   border: 2px solid #000;
   background-color: #fff;
   font-weight: 100;
-
+  box-sizing: border-box !important;
 }
 sc-button[data-setting-name="themeName"]:not([data-setting-value]) {
-  position: relative;
   color: #222;
   border-width: 2px;
 }
@@ -432,7 +429,6 @@ sc-button[data-setting-name="themeName"][data-setting-value="blueReduction"] {
 }
 
 sc-button[data-setting-name="themeName"][data-setting-value="dark"] {
-  position: relative;
   color: #fff;
   background-color: #000;
 }

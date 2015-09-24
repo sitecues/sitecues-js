@@ -49,7 +49,7 @@ define(['bp/constants', 'bp/helper', 'core/locale', 'bp/model/state', 'core/plat
   // Add useful attributes to various elements, based on elemTypes
   function addSemanticSugar(html) {
     var INTERACTIVE =  ' class="scp-hand-cursor scp-tabbable';
-    return html.replace(/(<sc-button(?:-big)?)/g, '$1 role="button" data-hover="scale(1.2)"' + INTERACTIVE + '" ')
+    return html.replace(/(<sc-button )/g, '<sc-button role="button"' + INTERACTIVE + '" ')
       .replace(/<sc-menuitem /g, '<sc-menuitem role="button"' + INTERACTIVE+ '" ')
       .replace(/<sc-link /g, '<sc-link role="link"' + INTERACTIVE+ '" ')
       .replace(/<sc-normal-range /g, '<input type="range"' + INTERACTIVE + ' scp-normal-range" ')
