@@ -13,10 +13,11 @@
 // -- won't shut up from ctrl key
 // Slow CSS in styles.js: [data-sc-reversible]
 // Slow CSS in styles.js: #scp-bp-container *
-// Accessibility testing
-// Cross-browser testing
+// Accessibility testing// Cross-browser testing
 // Send out examples to Anton and Jarek
-// Rest of Alex's issues
+// French
+// Should IE9 have ? button?
+// SC-3104 -- after an hour of use no TTS?
 // Design refresh continuation
 // CLick more button too quickly, bottom of panel has no bg! At least in Chrome
 // TODO Localize, Anton Neuber (aneuber@aisquared.com), Jarek (Jaroslaw Urbansk) [jurbanski@harpo.com.pl]
