@@ -19,9 +19,6 @@
 }
 
 /******************* Secondary content *********************/
-#scp-secondary {
-  display: none;
-}
 
 .scp-want-secondary #scp-secondary, .scp-is-secondary #scp-secondary {
   display: block;

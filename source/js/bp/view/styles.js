@@ -363,6 +363,10 @@ define(['bp/helper', 'core/platform', 'bp/constants', 'core/conf/site'],
         'transition': 'opacity 0s'
       },
 
+      '#scp-secondary, .scp-secondary-feature': {
+        'display': 'none'  /* Do this here to prevent flashing in case content loads before secondary.css */
+      },
+
       /******** Mouse targets must be hidden but still able to handle events *************/
 
       '.scp-hidden-target': {

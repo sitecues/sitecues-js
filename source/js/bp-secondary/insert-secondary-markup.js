@@ -83,12 +83,14 @@ var isInitialized,
   </g>\
 </g>',
 htmlSecondary =
-'<sc-h1 id="scp-feedback-header" class="scp-card-header">{{rate_us}}</sc-h1>\
-<sc-p id="scp-feedback-prompt" class="scp-if-feedback scp-secondary-feature scp-transition-opacity">{{rate_us_suggest}} {{rate_us_prompt}}</sc-p>\
-<textarea id="scp-feedback-textarea" class="scp-if-feedback scp-transition-opacity scp-secondary-feature scp-hand-cursor" \
-  aria-describedby="scp-feedback-prompt" data-visible-focus-on="scp-feedback-input-rect" placeholder="{{tell_us_something}}"></textarea>\
-<sc id="scp-feedback-thanks" class="scp-if-feedback-sent scp-transition-opacity scp-secondary-feature">\
-  <sc-h1>{{thank_you}}</sc-h1>\
+'<sc class="scp-secondary-feature scp-transition-opacity">\
+  <sc-h1 id="scp-feedback-header" class="scp-card-header">{{rate_us}}</sc-h1>\
+  <sc-p id="scp-feedback-prompt" class="scp-if-feedback">{{rate_us_suggest}} {{rate_us_prompt}}</sc-p>\
+  <textarea id="scp-feedback-textarea" class="scp-if-feedback scp-hand-cursor" \
+    aria-describedby="scp-feedback-prompt" data-visible-focus-on="scp-feedback-input-rect" placeholder="{{tell_us_something}}"></textarea>\
+  <sc id="scp-feedback-thanks" class="scp-if-feedback-sent">\
+    <sc-h1>{{thank_you}}</sc-h1>\
+  </sc>\
 </sc>\
 <sc class="scp-about-teaser scp-if-about scp-transition-opacity scp-secondary-feature">\
   <sc-p>\
