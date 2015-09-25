@@ -3,7 +3,7 @@
  *   The core module of the sitecues library.
  */
 
-// TODO CLick more button too quickly, bottom of panel has no bg! At least in Chrome
+// TODO ??? CLick more button too quickly, bottom of panel has no bg! At least in Chrome
 // TODO French, Spanish
 // TODO SC-3104 -- after an hour of use no TTS?
 // TODO About panel
