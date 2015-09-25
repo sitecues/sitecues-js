@@ -3,7 +3,7 @@
  *   The core module of the sitecues library.
  */
 
-// TODO slowly enter data-hover, nothing happens -- make sure still nice in IE during other animations
+// TODO CLick more button too quickly, bottom of panel has no bg! At least in Chrome
 // TODO French, Spanish
 // TODO SC-3104 -- after an hour of use no TTS?
 // TODO About panel
@@ -18,7 +18,6 @@
 // Slow CSS in styles.js: #scp-bp-container *
 // Comment CSS to be more readable
 // Accessibility testing// Cross-browser testing
-// CLick more button too quickly, bottom of panel has no bg! At least in Chrome
 // TODO Localize, Anton Neuber (aneuber@aisquared.com), Jarek (Jaroslaw Urbansk) [jurbanski@harpo.com.pl]
 // TODO themes
 // TODO cursor size/hue settings only -- be careful of mousehue 1.1 which means nothing

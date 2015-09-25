@@ -60,8 +60,8 @@ define(['bp/helper', 'bp/constants', 'core/platform', 'bp-expanded/view/svg-anim
     while (index --) {
       if (hoverState[index]) {
         var rect = savedHoverElems[index].getBoundingClientRect();
-        if (x < rect.left || x > rect.right ||
-          y < rect.top || y > rect.bottom) {
+        if (x < rect.left -1 || x > rect.right + 1||
+          y < rect.top -1 || y > rect.bottom + 1) {
           toggleHover(savedHoverElems[index], false);
         }
       }
