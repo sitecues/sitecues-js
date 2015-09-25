@@ -44,8 +44,8 @@ define([], function() {
   }
 
   function getFullWebsiteLang() {
-    var browserLang = navigator.language,
-      websiteLang = getWebsiteLang() || browserLang || DEFAULT_LANG;
+    var browserLang = getBrowserLangStringName(),
+      websiteLang = getWebsiteLang() || browserLang;
     if (websiteLang && browserLang && browserLang.indexOf('-') > 0) {
       if (getBaseLanguage(websiteLang) === getBaseLanguage(browserLang)) {
         // If document is in the same language as the browser, then
