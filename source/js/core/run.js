@@ -3,17 +3,17 @@
  *   The core module of the sitecues library.
  */
 
-// TODO ??? CLick more button too quickly, bottom of panel has no bg! At least in Chrome
 // TODO French, Spanish
 // TODO SC-3104 -- after an hour of use no TTS?
 // TODO About panel
 //
-//Firefox -- BP animation slow
 // IE
 // - feedback page issues
 // -- Performance bad in IE10 with nytimes.com (perhaps console was open)
 // -- panel closing too easily after click on more button
 // -- won't shut up from ctrl key
+
+//Firefox -- BP animation slow
 // Slow CSS in styles.js: [data-sc-reversible]
 // Slow CSS in styles.js: #scp-bp-container *
 // Comment CSS to be more readable
