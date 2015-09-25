@@ -100,6 +100,10 @@ htmlSecondary =
   <sc-p>\
     <a id="scp-about-3" target="_blank" href="mailto:sales@sitecues.com">sales@sitecues.com</a>\
   </sc-p>\
+  <sc-p id="scp-about-rate-footer">\
+    {{rate_us_suggest}}<br/>\
+    <sc-button id="scp-about-rate-button">{{rate_us}}</sc-button>\
+  </sc-p>\
 </sc>';
 
   function insertHtml(insertionId, markup) {

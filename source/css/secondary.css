@@ -586,9 +586,25 @@ sc-button[data-setting-current="true"] {
 .scp-about-teaser {
   position: absolute;
   z-index: 9999;
-  left: 163px;
-  top: 99px;
+  left: 24px;
+  width: 460px;
+  top: 120px;
   text-align: center;
+  font-size: 23px;
+}
+
+.scp-about-teaser > sc-p > a {
+  text-decoration: none;
+}
+
+#scp-about-rate-footer {
+  margin-top: 100px;
+}
+
+#scp-about-rate-button {
+  margin-top: 20px;
+  padding: 2px 17px;
+  font-weight: 100;
 }
 
 #scp-button-menu > * {

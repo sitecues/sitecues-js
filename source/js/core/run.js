@@ -4,9 +4,12 @@
  */
 
 // TODO slowly enter data-hover, nothing happens -- make sure still nice in IE during other animations
-// Send out examples to Anton and Jarek
-// French
-// SC-3104 -- after an hour of use no TTS?
+// TODO Send out examples to Anton and Jarek
+// TODO French
+// TODO SC-3104 -- after an hour of use no TTS?
+// TODO About panel
+// Design refresh continuation  -- new images, which theme is current?
+//
 //Firefox -- BP animation slow
 // IE
 // - feedback page issues
@@ -16,9 +19,7 @@
 // Slow CSS in styles.js: [data-sc-reversible]
 // Slow CSS in styles.js: #scp-bp-container *
 // Comment CSS to be more readable
-// About panel
 // Accessibility testing// Cross-browser testing
-// Design refresh continuation  -- rate us heading too soon, about panel contents
 // CLick more button too quickly, bottom of panel has no bg! At least in Chrome
 // TODO Localize, Anton Neuber (aneuber@aisquared.com), Jarek (Jaroslaw Urbansk) [jurbanski@harpo.com.pl]
 // TODO themes
