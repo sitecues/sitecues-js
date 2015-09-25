@@ -114,7 +114,6 @@ define(['bp/constants', 'bp/helper', 'bp/model/state', 'core/platform', 'core/me
 
   function getGeometryTargets(cssValues) {
 
-    cssValues[true].menuBtnTranslateX = 674; // The feedback icon goes to the top right
     return cssValues;
   }
 

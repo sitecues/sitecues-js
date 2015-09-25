@@ -14,7 +14,7 @@ var isInitialized,
     <text id="scp-feedback-label" text-anchor="middle" class="scp-hand-cursor" role="link" data-feature="feedback" x="517" y="178">{{rate_us}}</text>\
     <text id="scp-about-label" text-anchor="middle" class="scp-hand-cursor" role="link" data-feature="about" x="730" y="178">{{about}}</text>\
   </g>\
-  <rect id="scp-card-header-bg" class="scp-if-tips scp-secondary-feature" width="808" height="134" stroke="#C0BFBF" stroke-width="1" fill="#EEE"/>\
+  <rect id="scp-card-header-bg" class="scp-secondary-feature-only" width="808" height="134" stroke="#C0BFBF" stroke-width="1" fill="#EEE"/>\
   <g>\
     <g id="scp-arrows" class="scp-transition-opacity scp-secondary-feature scp-if-settings scp-if-tips">\
       <g id="scp-prev-card" class="scp-arrow scp-hand-cursor scp-transition-opacity" transform="translate(640,72) rotate(90) scale(1.4)" role="button" aria-label="{{previous}}" aria-disabled="true">\
@@ -31,17 +31,17 @@ var isInitialized,
       </g>\
     </g>\
     <g id="scp-feedback" class="scp-if-feedback scp-transition-opacity scp-secondary-feature">\
-      <rect id="scp-feedback-input-rect" data-own-focus-ring x="45" y="35" width="715" height="200" stroke-width="3" stroke="#aaa" fill="none" rx="20" ry="20"/>\
+      <rect id="scp-feedback-input-rect" data-own-focus-ring x="45" y="315" width="715" height="400" stroke-width="3" stroke="#aaa" fill="#fdfcfc" rx="20" ry="20"/>\
       <g id="scp-rating" class="scp-hand-cursor" role="group" aria-label="{{rating}}">\
-        <use id="scp-stars-1" role="button" aria-pressed="false" aria-label="{{rating_1}}" class="scp-rating-star" xlink:href="#scp-rating-star-def" x="42" y="254"/>\
-        <use id="scp-stars-2" role="button" aria-pressed="false" aria-label="{{rating_2}}" class="scp-rating-star" xlink:href="#scp-rating-star-def" x="108" y="254"/>\
-        <use id="scp-stars-3" role="button" aria-pressed="false" aria-label="{{rating_3}}" class="scp-rating-star" xlink:href="#scp-rating-star-def" x="174" y="254"/>\
-        <use id="scp-stars-4" role="button" aria-pressed="false" aria-label="{{rating_4}}" class="scp-rating-star" xlink:href="#scp-rating-star-def" x="240" y="254"/>\
-        <use id="scp-stars-5" role="button" aria-pressed="false" aria-label="{{rating_5}}" class="scp-rating-star" xlink:href="#scp-rating-star-def" x="306" y="254"/>\
+        <use id="scp-stars-1" role="button" aria-pressed="false" aria-label="{{rating_1}}" class="scp-rating-star" xlink:href="#scp-rating-star-def" x="42" y="736"/>\
+        <use id="scp-stars-2" role="button" aria-pressed="false" aria-label="{{rating_2}}" class="scp-rating-star" xlink:href="#scp-rating-star-def" x="108" y="736"/>\
+        <use id="scp-stars-3" role="button" aria-pressed="false" aria-label="{{rating_3}}" class="scp-rating-star" xlink:href="#scp-rating-star-def" x="174" y="736"/>\
+        <use id="scp-stars-4" role="button" aria-pressed="false" aria-label="{{rating_4}}" class="scp-rating-star" xlink:href="#scp-rating-star-def" x="240" y="736"/>\
+        <use id="scp-stars-5" role="button" aria-pressed="false" aria-label="{{rating_5}}" class="scp-rating-star" xlink:href="#scp-rating-star-def" x="306" y="736"/>\
       </g>\
       <g id="scp-feedback-send" class="scp-hand-cursor" aria-disabled="true" role="button">\
-        <rect x="595" width="165" y="260" height="50" rx="20" ry="20"/>\
-        <text x="680" y="295" text-anchor="middle" font-family="Arial" fill="white">{{send}}</text>\
+        <rect x="595" width="165" y="740" height="50" rx="20" ry="20"/>\
+        <text x="678" y="775" text-anchor="middle" font-family="Arial" fill="white">{{send}}</text>\
       </g>\
     </g>\
     <g id="scp-about" class="scp-if-about" transform="translate(805,16)">\
@@ -83,8 +83,11 @@ var isInitialized,
   </g>\
 </g>',
 htmlSecondary =
-'<textarea id="scp-feedback-textarea" class="scp-if-feedback scp-transition-opacity scp-secondary-feature scp-hand-cursor" data-visible-focus-on="scp-feedback-input-rect" placeholder="{{tell_us_something}}"></textarea>\
-<sc class="scp-if-feedback-sent scp-transition-opacity scp-secondary-feature">\
+'<sc-h1 id="scp-feedback-header" class="scp-card-header">{{rate_us}}</sc-h1>\
+<sc-p id="scp-feedback-prompt" class="scp-if-feedback scp-secondary-feature scp-transition-opacity">{{rate_us_suggest}} {{rate_us_prompt}}</sc-p>\
+<textarea id="scp-feedback-textarea" class="scp-if-feedback scp-transition-opacity scp-secondary-feature scp-hand-cursor" \
+  aria-describedby="scp-feedback-prompt" data-visible-focus-on="scp-feedback-input-rect" placeholder="{{tell_us_something}}"></textarea>\
+<sc id="scp-feedback-thanks" class="scp-if-feedback-sent scp-transition-opacity scp-secondary-feature">\
   <sc-h1>{{thank_you}}</sc-h1>\
 </sc>\
 <sc class="scp-about-teaser scp-if-about scp-transition-opacity scp-secondary-feature">\

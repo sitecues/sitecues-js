@@ -61,6 +61,7 @@ define(['bp/bp', 'bp/constants', 'bp/model/state'], function(bp, BP_CONST, state
 
     return className;
   }
+
   var publics = {
     getViewClasses: getViewClasses
   };

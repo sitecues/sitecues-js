@@ -33,12 +33,14 @@ define([], function() {
     tips: 'Tips',                     /* new */
     settings: 'Settings',             /* new */
     rate_us: 'Rate us',               /* new */
+    rate_us_prompt: 'We would love to hear from you!',  /* new */
+    rate_us_suggest: 'Have questions, comments or suggestions?', /* new */
     about: 'About',                   /* new */
     // - Feedback
     send: 'Send',                     /* new */
     tell_us_something: 'Tell us something ...',      /* new */
     thank_you: 'Thank you',                          /* new */
     // - About
-    zoom_and_speech: 'zoom &amp; speech'               /* new */
+    zoom_and_speech: 'zoom &amp; speech'             /* new */
   };
 });

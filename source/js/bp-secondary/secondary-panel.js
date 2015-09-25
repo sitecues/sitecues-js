@@ -33,11 +33,11 @@ define(['bp/constants',
     byId = helper.byId,
     getElemTransform = transform.getElemTransform,
     getTransformString = transform.getTransformString,
+    CONTENTS_HEIGHT = 780,
 
     features = {
       tips: {
         module: tipsModule,
-        contentsHeight: 780, // The other features' heights are automatically computed -- this one is set manually get get perfect demo page spacing
         menuButtonId: BP_CONST.TIPS_BUTTON_ID,
         labelId: BP_CONST.TIPS_LABEL_ID,
         panelId: BP_CONST.TIPS_CONTENT_ID
@@ -181,54 +181,11 @@ define(['bp/constants',
 
   }
 
-  // For each SVG pixel of size, how many screen pixels do we get?
-  function getSVGExpansionRatio() {
-    var heightInSvgPixels = getCurrentOutlineHeight(),
-      heightInScreenPixels = byId(BP_CONST.MAIN_OUTLINE_ID).getBoundingClientRect().height;
-    return heightInScreenPixels / heightInSvgPixels;
-  }
-
-  // Compute based on the size of the contents
-  // Auto-resizing is better because the contents will always fit, even if we change them (and importantly after l10n)
-  function getPanelContentsHeight(featureName) {
-    var contentElements = document.querySelectorAll('.scp-if-' + featureName),
-      feature = features[featureName],
-      numContentElements = contentElements.length,
-      maxHeight = origPanelContentsRect.height,
-      normalTop = origPanelContentsRect.top,
-      index = 0;
-
-    function addRect(item) {
-      var thisRect = item.getBoundingClientRect(),
-        height = thisRect.bottom - normalTop;
-      if (height > maxHeight) {
-        maxHeight = height;
-      }
-    }
-
-    if (!feature.contentsHeight) {
-      for (; index < numContentElements; index++) {
-        var elem = contentElements[index],
-          children = elem.children || [],
-          childIndex = children.length;
-        addRect(elem);
-        while (childIndex--) {
-          addRect(children[childIndex]);
-        }
-      }
-
-      feature.contentsHeight = maxHeight / getSVGExpansionRatio();
-    }
-
-    return feature.contentsHeight;
-  }
-
-
   function getGeometryTargets(featureName, menuButton) {
     var
       feature = features[featureName],
       origMenuBtnTransforms = BP_CONST.TRANSFORMS[menuButton.id],
-      panelContentsHeight = getPanelContentsHeight(featureName),
+      panelContentsHeight = CONTENTS_HEIGHT,
       baseGeometryTargets = {
         false: {  // Feature disabled
           outlineHeight: origOutlineHeight,

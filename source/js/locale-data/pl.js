@@ -33,6 +33,8 @@ define([], function() {
     tips: 'Porady',                     /* new */
     settings: 'Ustawienia',             /* new */
     rate_us: 'Oceń nas',               /* new */
+    rate_us_prompt: 'Have some feedback or suggestions on how we can improve? We would love to hear from you!',  /* new */
+    rate_us_suggest: 'Have questions, comments or suggestions?', /* new */
     about: 'O nas',                   /* new */
     // - Feedback
     send: 'Wyślij',                     /* new */

@@ -215,6 +215,18 @@ sc-button:hover {
 .scp-is-secondary .scp-secondary-only {
   opacity: 1 !important;
 }
+.scp-secondary-feature-only {
+  display: none;
+  opacity: 0;
+  transition: opacity .5s;
+}
+
+.scp-is-secondary:not(.scp-panel-button-menu) .scp-secondary-feature-only {
+  display: block;
+  opacity: 1;
+}
+
+
 .scp-is-secondary > svg > #scp-main > * {
   pointer-events: none;
 }
@@ -453,6 +465,21 @@ sc-button[data-setting-name="themeName"][data-setting-value="dark"] {
 sc-button[data-setting-current="true"] {
   text-decoration: underline;
 }
+
+#scp-feedback-header {
+  transition: opacity .5s; /* Fade in after the animation is finished */
+  opacity: 0;
+  display: none;
+}
+.scp-panel-feedback #scp-feedback-header {
+  opacity: 1;
+  display: block;
+}
+.scp-secondary-expanding #scp-feedback-header {
+  display: none;
+  opacity: 0;
+}
+
 .scp-feedback-sent .scp-if-feedback.scp-secondary-feature {
   pointer-events: none;
   visibility: hidden;
@@ -471,9 +498,17 @@ sc-button[data-setting-current="true"] {
   visibility: visible;
   opacity: 1;
 }
+
+#scp-feedback-prompt {
+  position: absolute !important;
+  top: 90px !important;
+  left: 29px !important;
+  font-size: 20px !important;
+  width: 446px;
+}
 #scp-feedback-textarea {
   position: absolute !important;
-  top: 23px !important;
+  top: 188px !important;
   left: 29px !important;
   font-size: 22px !important;
   font-family: 'Open Sans',Arial,serif !important;
@@ -522,10 +557,10 @@ sc-button[data-setting-current="true"] {
   stroke-width: 1px;
 }
 .scp-rating-star[aria-pressed="true"] {
-  fill: #80A9F8;
+  fill: #e4be62;
 }
 #scp-rating:hover > .scp-rating-star {
-  fill: #80A9F8;
+  fill: #e4be62;
 }
 .scp-rating-star:hover ~ .scp-rating-star {
   fill: #aaa !important;
@@ -536,6 +571,12 @@ sc-button[data-setting-current="true"] {
 #scp-feedback-send[aria-disabled="true"]>rect {
   fill: #aaa !important;
 }
+#scp-feedback-thanks {
+  margin-top: 100px;
+}
+
+/***** About *****/
+
 #scp-logo-text {
   display: none;
 }
