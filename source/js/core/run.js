@@ -4,11 +4,10 @@
  */
 
 // TODO slowly enter data-hover, nothing happens -- make sure still nice in IE during other animations
-// TODO Send out examples to Anton and Jarek
 // TODO French
 // TODO SC-3104 -- after an hour of use no TTS?
 // TODO About panel
-// Design refresh continuation  -- new images, which theme is current?
+// TODO Design refresh continuation  -- new images, which theme is current?
 //
 //Firefox -- BP animation slow
 // IE

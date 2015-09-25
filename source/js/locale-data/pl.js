@@ -33,8 +33,8 @@ define([], function() {
     tips: 'Porady',                     /* new */
     settings: 'Ustawienia',             /* new */
     rate_us: 'Oceń nas',               /* new */
-    rate_us_prompt: 'We would love to hear from you!',  /* new */
-    rate_us_suggest: 'Have questions, comments or suggestions?', /* new */
+    rate_us_prompt: 'Chcielibyśmy je usłyszeć!”',  /* new */
+    rate_us_suggest: 'Masz pytania, komentarze, sugestie?', /* new */
     about: 'O nas',                   /* new */
     // - Feedback
     send: 'Wyślij',                     /* new */
