@@ -468,8 +468,8 @@ sc-button[data-setting-name="themeName"][data-setting-value="dark"] {
 sc-button[data-setting-current="true"]:after {
   content: "";
   position: absolute;
-  top: 87px;
-  left: 37px;
+  top: 85px;
+  left: 34px;
   width: 24px;
   height: 19px;
   background-image: url('../images/settings/theme-indicator.svg')
