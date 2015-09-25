@@ -109,6 +109,7 @@ sc-button {
   margin-right: 10px;
   transition: transform .5s;
   -webkit-transition: -webkit-transform .5s;
+  position: relative;
 }
 
 sc-button:hover {
@@ -464,8 +465,14 @@ sc-button[data-setting-name="themeName"][data-setting-value="dark"] {
 .scp-lens-size-group {
   padding-top: 14px;
 }
-sc-button[data-setting-current="true"] {
-  text-decoration: underline;
+sc-button[data-setting-current="true"]:after {
+  content: "";
+  position: absolute;
+  top: 87px;
+  left: 37px;
+  width: 24px;
+  height: 19px;
+  background-image: url('../images/settings/theme-indicator.svg')
 }
 
 #scp-feedback-header {
