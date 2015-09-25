@@ -68,7 +68,8 @@
         'util/transform',
         'core/metric',
         'core/conf/urls',
-        'core/conf/user/manager'
+        'core/conf/user/manager',
+        'zoom/zoom'
       ]
     },
     {

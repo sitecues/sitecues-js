@@ -9,8 +9,7 @@
 define(['$', 'style-service/style-service', 'core/conf/user/manager', 'cursor/cursor-css', 'core/platform'],
   function (  $, styleService, conf, cursorCss, platform) {
 
-  var autoSize,
-      isInitialized,
+  var isInitialized,
       // Regexp is used to match URL in the string given(see below).
       URL_REGEXP = '//[a-z0-9\-_]+(\.[a-z0-9\-_]+)+([a-z0-9\-_\.,@\?^=%&;:/~\+#]*[a-z0-9\-@\?^=%&;/~\+#])?',
       CURSOR_TYPES = ['default', 'pointer' ],
@@ -26,6 +25,7 @@ define(['$', 'style-service/style-service', 'core/conf/user/manager', 'cursor/cu
       bpCursorStylesheetObject,
       MAX_USER_SPECIFIED_CURSOR_SIZE = 3.5,
       MAX_USER_SPECIFIED_MOUSE_HUE = 1.1,// If > 1.0 then use white
+      autoSize,
       userSpecifiedSize,
       userSpecifiedHue,
       doAllowCursors = true,
@@ -175,6 +175,7 @@ define(['$', 'style-service/style-service', 'core/conf/user/manager', 'cursor/cu
   }
 
   function setCursorsDisabled(doDisable) {
+    console.log('disable cursors? ' + doDisable);
     cursorStylesheetObject.disabled = !!doDisable;
   }
 
@@ -207,7 +208,7 @@ define(['$', 'style-service/style-service', 'core/conf/user/manager', 'cursor/cu
       // While zooming, turn off our CSS rules so that the browser doesn't spend
       // CPU cycles recalculating the custom cursor rules to apply during each frame
       // This makes a difference in IE 9/10 -- doesn't seem to help in other browsers.
-      sitecues.on('zoom/begin', setCursorsDisabled);
+      sitecues.on('zoom/begin', function() {setCursorsDisabled(true); });
     }
   }
 

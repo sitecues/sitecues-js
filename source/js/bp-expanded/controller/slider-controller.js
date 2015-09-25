@@ -1,8 +1,8 @@
 /*
  Slider Controller
  */
-define(['bp/constants', 'bp/helper', 'core/platform', 'bp/model/state', 'bp-expanded/view/slider'],
-  function (BP_CONST, helper, platform, state, sliderView) {
+define(['bp/constants', 'bp/helper', 'core/platform', 'bp/model/state', 'bp-expanded/view/slider', 'zoom/zoom'],
+  function (BP_CONST, helper, platform, state, sliderView, zoomMod) {
 
   var isListeningToWindowMouseEvents,
     isInitialized;
@@ -51,11 +51,8 @@ define(['bp/constants', 'bp/helper', 'core/platform', 'bp/model/state', 'bp-expa
       sliderWidth     = sliderRect.width - sliderThumbRect.width,
       newPercent      = (evt.clientX - sliderLeft) / sliderWidth;
 
-    require(['zoom/zoom'], function(zoomMod) {
-      var newValue        = (newPercent * zoomMod.RANGE) + zoomMod.MIN;
-      zoomMod.init(true);
-      zoomMod.jumpTo(newValue);
-    });
+    var newValue        = (newPercent * zoomMod.RANGE) + zoomMod.MIN;
+    zoomMod.jumpTo(newValue);
 
     evt.preventDefault();
 
@@ -71,22 +68,17 @@ define(['bp/constants', 'bp/helper', 'core/platform', 'bp/model/state', 'bp-expa
 
     window.addEventListener('mouseup', finishZoomChanges);
 
-    require(['zoom/zoom'], function(zoomMod) {
-      zoomMod.init(true);
-      if (isDecrease) {
-        zoomMod.beginZoomDecrease(evt);
-      }
-      else {
-        zoomMod.beginZoomIncrease(evt);
-      }
-    });
+    if (isDecrease) {
+      zoomMod.beginZoomDecrease(evt);
+    }
+    else {
+      zoomMod.beginZoomIncrease(evt);
+    }
 
   }
 
   function finishZoomChanges() {
-    require(['zoom/zoom'], function(zoomMod) {
-      zoomMod.zoomStopRequested();
-    });
+    zoomMod.zoomStopRequested();
     removeWindowMouseMoveListeners();
   }
 
@@ -95,11 +87,11 @@ define(['bp/constants', 'bp/helper', 'core/platform', 'bp/model/state', 'bp-expa
       return;
     }
     isInitialized = true;
-    // Add permanent listeners
-    require(['zoom/zoom'], function(zoomMod) {
-      sliderView.render(zoomMod.getCompletedZoom());
-      zoomMod.setThumbChangeListener(sliderView.updateThumbPosition);
-    });
+
+    // Init zoom, add permanent listeners
+    zoomMod.init();
+    sliderView.render(zoomMod.getCompletedZoom());
+    zoomMod.setThumbChangeListener(sliderView.updateThumbPosition);
 
     // Zoom controls
     var sliderTarget = helper.byId(BP_CONST.ZOOM_SLIDER_ID),
