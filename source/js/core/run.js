@@ -3,20 +3,21 @@
  *   The core module of the sitecues library.
  */
 
+// TODO slowly enter data-hover, nothing happens -- make sure still nice in IE during other animations
+// Send out examples to Anton and Jarek
+// French
+// SC-3104 -- after an hour of use no TTS?
 //Firefox -- BP animation slow
 // IE
 // - feedback page issues
-// -- stars not activating via enter key in IE9
-// -- Sliders ugly in IE
 // -- Performance bad in IE10 with nytimes.com (perhaps console was open)
 // -- panel closing too easily after click on more button
 // -- won't shut up from ctrl key
 // Slow CSS in styles.js: [data-sc-reversible]
 // Slow CSS in styles.js: #scp-bp-container *
+// Comment CSS to be more readable
+// About panel
 // Accessibility testing// Cross-browser testing
-// Send out examples to Anton and Jarek
-// French
-// SC-3104 -- after an hour of use no TTS?
 // Design refresh continuation  -- rate us heading too soon, about panel contents
 // CLick more button too quickly, bottom of panel has no bg! At least in Chrome
 // TODO Localize, Anton Neuber (aneuber@aisquared.com), Jarek (Jaroslaw Urbansk) [jurbanski@harpo.com.pl]
@@ -26,7 +27,7 @@
 // Beta testing
 // Applause testing
 // Provisional patents  -- who can help? Jeff? Ai2?
-// TODO reduce cyclomatic complexity to 10 or less (option in .jshintrc)
+// reduce cyclomatic complexity to 10 or less (option in .jshintrc)
 // Network perf testing:
 // curl 'http://js.sitecues.com/l/s;id=s-1596260c/js/sitecues.js' -H 'Accept-Encoding: gzip, deflate, sdch' -H 'Accept-Language: en,en-US;q=0.8' -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.45 Safari/537.36' -H 'Accept: */*' -H 'Referer: http://ts.dev.sitecues.com/pages/beta-release.html' -H 'Cookie: WT_FPC=id=03de260b-effd-425a-a765-2aa6974f6cd5:lv=1403532403187:ss=1403531462422; optimizelyEndUserId=oeu1426033793307r0.13574404059909284; s_lv_undefined=1426033793360; AMCV_10D31225525FF5790A490D4D%40AdobeOrg=-2017484664%7CMCMID%7C62262721649324530111324499568253467117%7CMCAAMLH-1426638593%7C7%7CMCAAMB-1426638593%7CNRX38WO0n5BH8Th-nqAG_A%7CMCAID%7C2856C1E885079CB5-60000100A000E574; utag_main=v_id:014c063cd8e8005436ef87deb5d80f078003c0700093c$_sn:1$_ss:1$_pn:1%3Bexp-session$_st:1426035594098$ses_id:1426033793256%3Bexp-session; __qca=P0-2117751363-1426034638497; umbel_browser_id=fea5542f-a235-4062-9ff3-f56ffe6bc567; optimizelySegments=%7B%221802991005%22%3A%22false%22%2C%221804580032%22%3A%22direct%22%2C%221804630110%22%3A%22none%22%2C%221811611346%22%3A%22gc%22%2C%222568330011%22%3A%22false%22%2C%222571810058%22%3A%22direct%22%2C%222577670042%22%3A%22gc%22%7D; optimizelyBuckets=%7B%7D; _ga=GA1.2.655861627.1391438275; _ai2_sc_uid=1984ccfe-ae3f-4f79-ae2b-5a28627cac63' -H 'Connection: keep-alive' -H 'Cache-Control: max-age=0' --compressed -o /dev/null -w"\n            namelookup:  %{time_namelookup}\n           pretransfer:  %{time_pretransfer}\n         starttransfer:  %{time_starttransfer}\n                   end:  %{time_total}\n\n"
 // Going to Virginia instead of New York?
