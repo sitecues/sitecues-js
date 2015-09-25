@@ -375,16 +375,21 @@ sc-kbd[data-demo="true"] {
   height: 26px;
 }
 
+#scp-full-guide-card {
+  top: 168px;
+  left: 65px;
+}
+
 #scp-guide-icon {
-  background-image: url('../images/tips/full-guide-icon.png');
+  background-image: url('../images/tips/full-guide-icon.svg');
   height: 46px;
-  margin-top: -8px;
+  margin-top: 14px;
 }
 
 #scp-kbd-icon {
-  background-image: url('../images/tips/keyboard-icon.png');
+  background-image: url('../images/tips/keyboard-icon.svg');
   height: 26px;
-  margin-top: 11px;
+  margin-top: 14px;
 }
 
 /** Settings **/
