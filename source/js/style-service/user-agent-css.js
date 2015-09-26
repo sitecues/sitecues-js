@@ -16,14 +16,14 @@ var text =
 'html{\n\
   cursor:default;\n\
 }\n\
-input,textarea,select,button,label[for]{\n\
+a,input,textarea,select,button,label{\n\
   cursor:pointer;\n\
 }\n\
-body {\n\
+body{\n\
     background-color:#fff;\n\
     color:#000;\n\
 }\n\
-select {\n\
+select{\n\
   background-color:#fff;\n\
   color:#000;\n\
   border-color:#fff;\n\
@@ -50,11 +50,10 @@ hr {\n\
 img[usemap], object[usemap] {\n\
   color:#00f;\n\
 }\n\
-:link {\n\
+a{\n\
   color:#00f;\n\
-  cursor:pointer;\n\
 }\n\
-:visited {\n\
+a:visited {\n\
   color:#551a8b;\n\
 }';
 
