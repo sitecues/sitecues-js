@@ -119,21 +119,22 @@ define(['$', 'core/conf/user/manager', 'util/common', 'core/platform'], function
         outlineColor: color,
         outlineStyle: 'solid'
       },
+      elemThickness = (platform.browser.isIE ? 0 : 1) + 'px',
       useOutlineWidth;
 
     if (absRect.width > absRect.height) {   // Wider than tall: draw horizontal line
       useOutlineWidth = absRect.height / 2;
       useCss.width = absRect.width - 2 * useOutlineWidth + 'px';
-      useCss.height = 1;
+      useCss.height = elemThickness;
     }
     else {   // Taller than wide: draw vertical line
       useOutlineWidth = absRect.width / 2;
       useCss.height = absRect.height - 2 * useOutlineWidth + 'px';
-      useCss.width = 1;
+      useCss.width = elemThickness;
     }
 
-    useCss.left = (absRect.left + useOutlineWidth) + 'px';
-    useCss.top = (absRect.top + useOutlineWidth) + 'px';
+    useCss.left = Math.round(absRect.left + useOutlineWidth) + 'px';
+    useCss.top = Math.round(absRect.top + useOutlineWidth) + 'px';
     useCss.outlineWidth = Math.round(useOutlineWidth + 1) + 'px'; // Must round otherwise we get an outline in the middle
     useCss.display = 'block';
 
