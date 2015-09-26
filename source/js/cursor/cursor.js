@@ -6,8 +6,8 @@
  * - switches custom cursor image when hover over elements that demand certain - not default or auto - cursor;
  * - attaches correspondent window events so that handle custom cursor events.
  */
-define(['$', 'style-service/style-service', 'core/conf/user/manager', 'cursor/cursor-css', 'core/platform'],
-  function (  $, styleService, conf, cursorCss, platform) {
+define(['$', 'style-service/style-service', 'core/conf/user/manager', 'cursor/cursor-css', 'core/platform', 'core/conf/site'],
+  function ($, styleService, conf, cursorCss, platform, site) {
 
   var isInitialized,
       // Regexp is used to match URL in the string given(see below).
@@ -28,9 +28,10 @@ define(['$', 'style-service/style-service', 'core/conf/user/manager', 'cursor/cu
       autoSize,
       userSpecifiedSize,
       userSpecifiedHue,
-      doAllowCursors = true,
+      doAllowCursors = !site.get('disableCursorEnhancement'),
       doUseAjaxCursors = platform.browser.isIE,
       doDisableDuringZoom = platform.browser.isIE,
+      doUseUserAgentRulesOnly = platform.browser.isIE && platform.browser.version < 11, // Otherwise IE can't keep up with mousemoves!
       getAutoSize = cursorCss.getCursorZoom;
 
   /*
@@ -175,7 +176,6 @@ define(['$', 'style-service/style-service', 'core/conf/user/manager', 'cursor/cu
   }
 
   function setCursorsDisabled(doDisable) {
-    console.log('disable cursors? ' + doDisable);
     cursorStylesheetObject.disabled = !!doDisable;
   }
 
@@ -185,14 +185,22 @@ define(['$', 'style-service/style-service', 'core/conf/user/manager', 'cursor/cu
       .text(cssText);
   }
 
-  function getCursorStyles() {
-    return styleService.getAllMatchingStyles('cursor');
+  function getCursorStylesAsText() {
+    // Old IE: no slow rules -- it destroys performance of the page to have cursor rules
+    // with any descendant or attribute selector
+    if (doUseUserAgentRulesOnly) {
+      return 'html{cursor:default;} a,input,textarea,select,button,label{cursor:pointer;}';
+    }
+
+    // Use all cursor styles from the user agent stylesheet and the page
+//    var cursorStyleSubset = getCursorStyles();
+    var cursorStyleSubset = styleService.getAllMatchingStyles('cursor');
+    return styleService.getStyleText(cursorStyleSubset, 'cursor');
   }
 
   // Create a stylesheet with only the cursor-related style rules
   function constructCursorStylesheet(callback) {
-    var cursorStyleSubset = getCursorStyles(),
-      cssText = styleService.getStyleText(cursorStyleSubset, 'cursor');
+    var cssText = getCursorStylesAsText();
 
     // Create the sitecues <style id="sitecues-cursor"> element and content
     $stylesheet = createStyleSheet(SITECUES_CURSOR_CSS_ID, cssText);
