@@ -9,7 +9,11 @@
 //
 // IE
 // - feedback page issues
-// -- Performance bad in IE10 with nytimes.com (perhaps console was open)
+// -- Performance bad in IE10 with nytimes.com --
+//    it's the custom cursor rules --
+//    Okay in IE11?
+//    Disable cursor support in IE9,10?
+//    Even just user agent rules bad?
 // -- panel closing too easily after click on more button
 // -- won't shut up from ctrl key
 
