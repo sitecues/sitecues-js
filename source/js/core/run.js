@@ -6,14 +6,9 @@
 // TODO French, Spanish
 // TODO SC-3104 -- after an hour of use no TTS?
 // TODO About panel
-//
+// IE9/10 performance and mouse cursor -- disable completely or allow a few rules?
 // IE
 // - feedback page issues
-// -- Performance bad in IE10 with nytimes.com --
-//    it's the custom cursor rules --
-//    Okay in IE11?
-//    Disable cursor support in IE9,10?
-//    Even just user agent rules bad?
 // -- panel closing too easily after click on more button
 // -- won't shut up from ctrl key
 
