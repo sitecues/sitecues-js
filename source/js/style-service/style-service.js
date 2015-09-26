@@ -1,5 +1,5 @@
 /**
- * Service that lazily gets user agent stylesheets
+ * Service that lazily gets user agent and page stylesheets
  * and provides information about them.
  */
 define(['$', 'style-service/css-aggregator', 'style-service/media-queries'], function ($, cssAggregator, mediaQueries) {
