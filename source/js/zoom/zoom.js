@@ -129,7 +129,6 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'util/
         cancelGlideChangeTimer();
         zoomInput.isSliderDrag = true;
         if (shouldPerformContinualUpdates) {
-          console.log('performContinualUpdates');
           zoomAnimator = requestFrame(performContinualZoomUpdates);
         }
       }
@@ -139,7 +138,6 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'util/
     }
 
     if (!shouldPerformContinualUpdates) {
-      console.log('performInstant');
       performInstantZoomOperation();
     }
   }
@@ -206,7 +204,6 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'util/
   }
 
   function finishZoomSliderOperation() {
-    console.log('finishZoom');
 
     // ---- Slider drag ----
     if (zoomInput.isSliderDrag) {
@@ -655,7 +652,6 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'util/
 
   // Must be called before beginning any type zoom operation, to set up the operation.
   function beginZoomOperation(targetZoom, input, animationReadyCallback) {
-    console.log('beginZoomOp');
     // Initialize zoom input info
     zoomInput = $.extend({
       isSlider: false,                  // Slider in panel
@@ -669,8 +665,6 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'util/
 
     // Make sure we're ready
     initBodyInfo();
-
-    console.log('restrict? ' + shouldRestrictWidth());
 
     // Ensure no other operation is running
     clearZoomCallbacks();
