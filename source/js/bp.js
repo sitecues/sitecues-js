@@ -45,10 +45,19 @@ sitecues.def('bp', function (bp, callback) {
       getSVGElement().setAttribute('class', 'scp-animate');
     }
 
+    // Update accessibility attributes
+    function updateAria(isPanel) {
+      // Let the user know that the button is expandable
+      // If we are expanding or contracting, aria-expanded is true (enables CSS and informs screen readers)
+      helper.byId(BP_CONST.BADGE_ID).setAttribute('aria-expanded',isPanel);
+
+      // Hide the inner contents of the button when it's just a button
+      helper.byId(BP_CONST.BP_CONTAINER_ID).setAttribute('aria-hidden', !isPanel);
+    }
+
     function updateView(isFirstTime) {
 
-      // If we are expanding or contracting, aria-expanded is true (enables CSS)
-      helper.byId(BP_CONST.BADGE_ID).setAttribute('aria-expanded', state.isPanelRequested());
+      updateAria(state.isPanelRequested());
 
       // 2. Suppress animations if necessary
       // This is done for the first view change
