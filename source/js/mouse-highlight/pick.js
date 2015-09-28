@@ -26,8 +26,8 @@
  */
 
 define(['$', 'util/common', 'dollar/dollar-utils', 'core/conf/user/manager', 'core/conf/site',
-    'mouse-highlight/traitcache', 'mouse-highlight/traits', 'mouse-highlight/judge'],
-  function($, common, $utils, conf, site, traitcache, traits, judge) {
+    'mouse-highlight/traitcache', 'mouse-highlight/traits', 'mouse-highlight/judge', 'core/platform'],
+  function($, common, $utils, conf, site, traitcache, traits, judge, platform) {
 
   var UNUSABLE_SCORE = -99999,       // A score so low there is no chance of picking the item
     MAX_ANCESTORS_TO_ANALYZE = 14,   // Maximum ancestors to climb looking for start.
@@ -110,7 +110,7 @@ define(['$', 'util/common', 'dollar/dollar-utils', 'core/conf/user/manager', 'co
     isDebuggingOn,
     isVoteDebuggingOn,
     isAutoPickDebuggingOn,
-    isVotingOn = true, // Temporarily off by default until it works in IE9, and so we can see it's effect
+    isVotingOn = !platform.browser.isIE || platform.browser.version >= 11,
     lastPicked;
 
   /*

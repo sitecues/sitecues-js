@@ -28,10 +28,9 @@ define(['$', 'style-service/style-service', 'core/conf/user/manager', 'cursor/cu
       autoSize,
       userSpecifiedSize,
       userSpecifiedHue,
-      doAllowCursors = !site.get('disableCursorEnhancement'),
+      doAllowCursors = !platform.browser.isIE || platform.browser.version >= 11 || site.get('disableCursorEnhancement') === false,
       doUseAjaxCursors = platform.browser.isIE,
       doDisableDuringZoom = platform.browser.isIE,
-      doUseUserAgentRulesOnly = platform.browser.isIE && platform.browser.version < 11, // Otherwise IE can't keep up with mousemoves!
       getAutoSize = cursorCss.getCursorZoom;
 
   /*
@@ -186,14 +185,7 @@ define(['$', 'style-service/style-service', 'core/conf/user/manager', 'cursor/cu
   }
 
   function getCursorStylesAsText() {
-    // Old IE: no slow rules -- it destroys performance of the page to have cursor rules
-    // with any descendant or attribute selector
-    if (doUseUserAgentRulesOnly) {
-      return 'html{cursor:default;} a,input,textarea,select,button,label{cursor:pointer;}';
-    }
-
     // Use all cursor styles from the user agent stylesheet and the page
-//    var cursorStyleSubset = getCursorStyles();
     var cursorStyleSubset = styleService.getAllMatchingStyles('cursor');
     return styleService.getStyleText(cursorStyleSubset, 'cursor');
   }
