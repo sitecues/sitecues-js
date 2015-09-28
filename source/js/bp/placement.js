@@ -59,6 +59,7 @@ sitecues.def('bp/placement', function(placement, callback) {
         bpElement,
         svgElement,
         ratioOfSVGToVisibleBadgeSize,
+        SHOULD_FIX_USE_ELEMENTS = platform.browser.isIE && platform.browser.version >= 11 && platform.os.majorVersion >= 10,
 
         // The width/height of the <SVG>
         // Note: this currently stays the same in badge vs panel sizes even though the panel stretches,
@@ -113,7 +114,7 @@ sitecues.def('bp/placement', function(placement, callback) {
     // Once the BP is moved, these browsers are not re-recognizing the @xlink:href on <use> elements
     // if they are moved. However, toggling a space in front of the attribute value fixes the issue.
     function fixUseElementsInIE() {
-      if (!platform.browser.isIE || platform.browser.version === 9) {
+      if (!SHOULD_FIX_USE_ELEMENTS) {
         return;
       }
       var useElements = svgElement.getElementsByTagName('use'),
