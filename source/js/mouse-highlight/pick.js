@@ -112,7 +112,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       isDebuggingOn,
       isVoteDebuggingOn,
       isAutoPickDebuggingOn,
-      isVotingOn = true, // Temporarily off by default until it works in IE9, and so we can see it's effect
+      isVotingOn = !platform.browser.isIE || platform.browser.version >= 11,
       lastPicked;
 
     /*
