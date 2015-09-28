@@ -174,6 +174,7 @@ define(['bp/constants', 'bp/model/state', 'core/locale', 'bp/helper', 'core/conf
     div.style.width   = badgeImgBoundingBox.width  - (badgeComputedStyles.paddingLeft + badgeComputedStyles.paddingRight)  + 'px';
     div.style.float   = badgeComputedStyles.float;
 
+    badgeElement.setAttribute('aria-hidden', true); // Existing badge is hidden from screen readers, because the new <div> parent will be the real badge
     badgeElement.parentElement.insertBefore(div, badgeElement);
 
     div.appendChild(badgeElement);
