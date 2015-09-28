@@ -68,8 +68,8 @@ define(['bp/constants', 'bp/helper', 'core/locale', 'bp/model/state', 'core/plat
   function removeUnsupportedContent(panelElement) {
     if (platform.browser.isIE) {
       removeAllElements(panelElement.getElementsByClassName('scp-no-ie'));
-      if (platform.isIE9) {
-        removeAllElements(panelElement.getElementsByClassName('scp-no-ie9'));
+      if (platform.browser.version <= 10) {
+        removeAllElements(panelElement.getElementsByClassName('scp-no-ie10'));
       }
     }
   }
