@@ -615,7 +615,3 @@ sc-button[data-setting-current="true"]:after {
   padding: 2px 17px;
   font-weight: 100;
 }
-
-#scp-button-menu > * {
-  will-change: transform;
-}

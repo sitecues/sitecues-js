@@ -320,6 +320,12 @@ define(['bp/constants',
     return features[secondaryPanelName] && secondaryPanelName;
   }
 
+  function optimizeButtonAnimations() {
+    forEachFeature(function(feature) {
+      feature.menuButtonId.style.willChange = helper.transformProperty;
+    });
+  }
+      
   /**
    * Toggle back and forth between main panel and secondary panel
    */
@@ -346,6 +352,10 @@ define(['bp/constants',
     animateButtonMenuDrop(willEnable);
 
     toggleMouseListeners(willEnable);
+
+    if (willEnable) {
+      optimizeButtonAnimations();
+    }
   }
 
   /**
