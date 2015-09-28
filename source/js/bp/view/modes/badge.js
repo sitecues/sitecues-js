@@ -163,6 +163,8 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
 
       badgeElement.parentElement.insertBefore(div, badgeElement);
 
+      badgeElement.setAttribute('aria-hidden', true); // Existing badge is hidden, because the new <div> parent will be the real badge
+
       div.appendChild(badgeElement);
 
     }
