@@ -28,7 +28,7 @@
 sitecues.def('mouse-highlight/picker', function(picker, callback) {
   'use strict';
   sitecues.use('jquery', 'util/common', 'conf', 'conf/site',
-               'mouse-highlight/traitcache', 'mouse-highlight/traits', 'mouse-highlight/judge', 'core/platform',
+               'mouse-highlight/traitcache', 'mouse-highlight/traits', 'mouse-highlight/judge', 'platform',
                function($, common, conf, site, traitcache, traits, judge, platform) {
 
     var UNUSABLE_SCORE = -99999,       // A score so low there is no chance of picking the item
