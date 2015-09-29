@@ -8,7 +8,7 @@
 // - SC-3104 -- after an hour of use no TTS?
 // - SC-3120 -- sitecues TTS and Safari
 // - About panel
-// -- focus outlines off in SVG when scale used on BP (try EEOC at zoom 2.5)
+// - Text overflowing feedback area at high levels of zoom
 // IE
 // -- panel closing too easily after click on more button
 // Edge

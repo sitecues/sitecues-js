@@ -166,7 +166,8 @@ define(['bp/constants',
       FUDGE_FACTOR = 100, // Extra space at bottom -- for more button and just space itself
       screenBottomOverlap = secondaryRect.bottom + FUDGE_FACTOR - window.innerHeight;
 
-    return Math.min(screenBottomOverlap, secondaryRect.top);
+    // Don't shift above top of screen, and only shift up (or not at all)
+    return Math.max(Math.min(screenBottomOverlap, secondaryRect.top), 0);
   }
 
   function getTargetSecondaryPanelTranslateY() {
