@@ -1,5 +1,5 @@
-define(['bp/constants', 'bp/helper', 'bp/model/state', 'core/platform', 'core/metric', 'util/transform'],
-  function (BP_CONST, helper, state, platform, metric, transform) {
+define(['bp/constants', 'bp/helper', 'bp/model/state', 'core/platform', 'core/metric'],
+  function (BP_CONST, helper, state, platform, metric) {
   var byId = helper.byId,
     isActive = false,
     isInitialized,
@@ -29,7 +29,7 @@ define(['bp/constants', 'bp/helper', 'bp/model/state', 'core/platform', 'core/me
   function autoSizeTextarea() {
     var feedbackTextareaStyle = getFeedbackArea().style,
       feedbackInputRect = getFeedbackInputRect().getBoundingClientRect(),
-      scale = transform.getStyleTransform(getBPContainer()).scale,
+      scale = helper.getBpContainerScale(),
       ROOM_FOR_ROUNDED_OUTLINE = 22,
       width = (feedbackInputRect.width - ROOM_FOR_ROUNDED_OUTLINE) / scale,
       height = (feedbackInputRect.height - ROOM_FOR_ROUNDED_OUTLINE) / scale;

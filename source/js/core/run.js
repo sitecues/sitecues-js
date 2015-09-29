@@ -8,9 +8,9 @@
 // - SC-3104 -- after an hour of use no TTS?
 // - SC-3120 -- sitecues TTS and Safari
 // - About panel
-// - Text overflowing feedback area at high levels of zoom
 // IE
 // -- panel closing too easily after click on more button
+// - Plus/minus key more unreliable than they used to be
 // Edge
 // - Thumbs look wrong
 // Firefox -- BP animation slow

@@ -66,11 +66,8 @@ define(['bp/constants', 'bp/helper', 'core/locale', 'bp/model/state', 'core/plat
   }
 
   function removeUnsupportedContent(panelElement) {
-    if (platform.browser.isIE) {
-      removeAllElements(panelElement.getElementsByClassName('scp-no-ie'));
-      if (platform.browser.version <= 10) {
-        removeAllElements(panelElement.getElementsByClassName('scp-no-ie10'));
-      }
+    if (platform.browser.isIE && platform.browser.version <= 10) {
+      removeAllElements(panelElement.querySelectorAll('[data-no-ie10]'));
     }
   }
 
@@ -159,10 +156,12 @@ define(['bp/constants', 'bp/helper', 'core/locale', 'bp/model/state', 'core/plat
     }
     var chooser = activePanel.querySelector('.scp-card-chooser'),
       chosenItem = chooser.querySelector('[data-target="' + getActiveCard().id + '"]'),
+      bpScale = helper.getBpContainerScale(),
       indicator = activePanel.querySelector('.scp-card-indicator'),
       indicatorRect = indicator.getBoundingClientRect(),
       chosenItemRect = chosenItem.getBoundingClientRect(),
-      left = chosenItemRect.left - indicatorRect.left,
+      choseItemLeft = chosenItemRect.left - indicatorRect.left,
+      indicatorLeft = -442 + (choseItemLeft + chosenItemRect.width / 2) / bpScale,
       previouslyChosen = chooser.querySelector('[aria-selected="true"]');
 
     // Reset old selection
@@ -171,7 +170,7 @@ define(['bp/constants', 'bp/helper', 'core/locale', 'bp/model/state', 'core/plat
     }
 
     // Set indicator
-    indicator.style.backgroundPosition = (-442 + left + chosenItemRect.width / 2) + 'px 0';
+    indicator.style.backgroundPosition = indicatorLeft + 'px 0';
     chosenItem.setAttribute('aria-selected', 'true');
   }
 

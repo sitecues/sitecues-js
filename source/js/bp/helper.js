@@ -1,5 +1,5 @@
 // It is too similar to utils.js which is confusing
-define(['core/platform', 'bp/constants'], function(platform, BP_CONST) {
+define(['core/platform', 'bp/constants', 'util/transform'], function(platform, BP_CONST, transform) {
   /**
    *** Getters ***
    */
@@ -45,6 +45,13 @@ define(['core/platform', 'bp/constants'], function(platform, BP_CONST) {
    */
   function getRectById(id) {
     return getRect(byId(id));
+  }
+
+  /**
+   * Return the amount of transform scale applied to <scp-bp-container>
+   */
+  function getBpContainerScale() {
+    return transform.getStyleTransform(byId(BP_CONST.BP_CONTAINER_ID)).scale;
   }
 
   /**
@@ -122,6 +129,7 @@ define(['core/platform', 'bp/constants'], function(platform, BP_CONST) {
     invalidateId: invalidateId,
     getRect: getRect,
     getRectById: getRectById,
+    getBpContainerScale: getBpContainerScale,
     setAttributes: setAttributes,
     getCurrentSVGElementTransforms: getCurrentSVGElementTransforms,
     getNumberFromString: getNumberFromString,

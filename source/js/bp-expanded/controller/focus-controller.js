@@ -1,6 +1,6 @@
 /* Focus Controller */
-define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric', 'util/transform' ],
-  function (BP_CONST, state, helper, metric, transform) {
+define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
+  function (BP_CONST, state, helper, metric) {
 
   var savedDocumentFocus,
     tabbedElement,
@@ -228,8 +228,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric', 'util/tran
     // @data-own-focus-ring = element will show it's own focus ring
 
     var showFocusOn = getElementToShowFocusOn(tabbedElement),
-      bpContainer = getPanelContainer(),
-      scale = transform.getStyleTransform(bpContainer).scale;
+      scale = helper.getBpContainerScale();
 
     function getFinalCoordinate(coord) {
       return (coord / scale) + 'px';
@@ -240,7 +239,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric', 'util/tran
       // Show focus outline
       var EXTRA_FOCUS_PADDING = 1,
         clientFocusRect = helper.getRect(showFocusOn),
-        clientPanelRect = helper.getRect(bpContainer),  // Focus rect is positioned relative to this
+        clientPanelRect = helper.getRect(getPanelContainer()),  // Focus rect is positioned relative to this
         focusOutlineStyle = byId(BP_CONST.OUTLINE_ID).style;
 
       focusOutlineStyle.display = 'block';
