@@ -201,7 +201,7 @@ define(['bp/constants',
 
   }
 
-  function getGeometryTargets(featureName, menuButton, currentBpContainerTranslateY) {
+  function getGeometryTargets(featureName, menuButton) {
     var
       feature = features[featureName],
       origMenuBtnTransforms = BP_CONST.TRANSFORMS[menuButton.id],
@@ -210,13 +210,14 @@ define(['bp/constants',
         false: {  // Feature disabled
           outlineHeight: origOutlineHeight,
           menuBtnTranslateX: origMenuBtnTransforms.translateX,
-          menuBtnRotate: 0  // Will be used by icons that roll
+          menuBtnRotate: 0,  // Will be used by icons that roll
+          bpContainerTranslateY: 0
         },
         true: {   // Feature enabled
           outlineHeight: panelContentsHeight + 103, // The outline
           menuBtnTranslateX: 26, // The icon rolls left by default
           menuBtnRotate: 0,    // Will be used by the icons that roll
-          bpContainerTranslateY: currentBpContainerTranslateY - getAmountToShiftSecondaryTop()
+          bpContainerTranslateY: getAmountToShiftSecondaryTop()
         }
       };
 
@@ -258,7 +259,7 @@ define(['bp/constants',
       currentMenuBtnTranslateX = currentMenuBtnTransform.translate.left,
       currentMenuBtnRotate = currentMenuBtnTransform.rotate,
 
-      geometryTargets = getGeometryTargets(name, menuButton, currentBpContainerTransforms.translate.top),
+      geometryTargets = getGeometryTargets(name, menuButton),
       fromGeo = geometryTargets[!doEnable],
       toGeo = geometryTargets[doEnable],
 
@@ -283,8 +284,8 @@ define(['bp/constants',
       var newPanelHeight = getValueInTime(currentOutlineHeight, toGeo.outlineHeight, time),
         newTranslateY;
       setPanelHeight(newPanelHeight, MORE_BUTTON_ROTATION_ENABLED);
-      if (Number.isFinite(toGeo.bpContainerTranslateY)) {
-        newTranslateY = getValueInTime(currentBpContainerTransforms.translate.top, toGeo.bpContainerTranslateY, time);
+      if (toGeo.bpContainerTranslateY) {
+        newTranslateY = currentBpContainerTransforms.translate.top - getValueInTime(0, toGeo.bpContainerTranslateY, time);
         transform.setStyleTransform(bpContainer, currentBpContainerTransforms.translate.left, newTranslateY, currentBpContainerTransforms.scale);
       }
     }
