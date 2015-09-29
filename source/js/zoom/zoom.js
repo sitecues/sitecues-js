@@ -769,6 +769,7 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'util/
       require(['audio/audio-cues'], function (audioCues) {
         audioCues.playZoomCue(completedZoom);
       });
+      metric('zoom-changed', zoomInput);
     }
 
     clearZoomCallbacks();
