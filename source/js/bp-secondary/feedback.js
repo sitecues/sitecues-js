@@ -1,5 +1,5 @@
-define(['bp/constants', 'bp/helper', 'bp/model/state', 'core/platform', 'core/metric'],
-  function (BP_CONST, helper, state, platform, metric) {
+define(['bp/constants', 'bp/helper', 'bp/model/state', 'core/platform', 'core/metric', 'util/transform'],
+  function (BP_CONST, helper, state, platform, metric, transform) {
   var byId = helper.byId,
     isActive = false,
     isInitialized,
@@ -28,13 +28,17 @@ define(['bp/constants', 'bp/helper', 'bp/model/state', 'core/platform', 'core/me
 
   function autoSizeTextarea() {
     var feedbackTextareaStyle = getFeedbackArea().style,
-      feedbackInputRect = getFeedbackInputRect().getBoundingClientRect();
+      feedbackInputRect = getFeedbackInputRect().getBoundingClientRect(),
+      scale = transform.getStyleTransform(getBPContainer()).scale,
+      ROOM_FOR_ROUNDED_OUTLINE = 22,
+      width = (feedbackInputRect.width - ROOM_FOR_ROUNDED_OUTLINE) / scale,
+      height = (feedbackInputRect.height - ROOM_FOR_ROUNDED_OUTLINE) / scale;
 
-    feedbackTextareaStyle.width = feedbackInputRect.width + 'px';
-    feedbackTextareaStyle.height = feedbackInputRect.height + 'px';
+    feedbackTextareaStyle.width = width + 'px';
+    feedbackTextareaStyle.height = height + 'px';
     // Hide scrollbar in IE
     if (platform.browser.isIE) {
-      feedbackTextareaStyle.clip = 'rect(0,' + (feedbackInputRect.width - 20) + 'px,' + feedbackTextareaStyle.height + ',0)';
+      feedbackTextareaStyle.clip = 'rect(0,' + (width - 20) + 'px,' + height + ',0)';
     }
   }
 
