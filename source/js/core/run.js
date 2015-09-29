@@ -4,14 +4,16 @@
  */
 
 // High priority
+// - Feedback icon white bg
 // - French, Spanish
 // - SC-3104 -- after an hour of use no TTS?
+// - SC-3120 -- sitecues TTS and Safari
 // - About panel
-// - IE9/10 performance and mouse cursor -- disable completely or allow a few rules?
 // IE
-// - feedback page issues
 // -- panel closing too easily after click on more button
-// -- won't shut up from ctrl key
+// -- focus outline off in feedback page, also in other places?
+// Edge
+// - Thumbs look wrong
 // Firefox -- BP animation slow
 // CSS improvements
 // - Slow CSS in styles.js: [data-sc-reversible]

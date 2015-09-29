@@ -32,7 +32,8 @@ define(['bp/constants',
     // Oft-used functions. Putting it in a variable helps minifier, convenience, brevity
     byId = helper.byId,
     getElemTransform = transform.getElemTransform,
-    getTransformString = transform.getTransformString,
+    setElemTransform = transform.setElemTransform,
+    setTransform = transform.setElemTransform,
     CONTENTS_HEIGHT = 780,
 
     features = {
@@ -89,6 +90,14 @@ define(['bp/constants',
     sitecues.emit('bp/did-change');
   }
 
+  function getBPContainer() {
+    return byId(BP_CONST.BP_CONTAINER_ID);
+  }
+
+  function getSecondary() {
+    return byId(BP_CONST.SECONDARY_ID);
+  }
+
   function getMoreButton() {
     return byId(BP_CONST.MORE_BUTTON_CONTAINER_ID);
   }
@@ -104,10 +113,9 @@ define(['bp/constants',
   function updateMoreButton(outlineHeight, moreButtonRotate) {
     var MORE_BUTTON_Y_OFFSET = 10,
       moreButton = getMoreButton();
-    moreButton.setAttribute('transform',
-      getTransformString(
-        BP_CONST.TRANSFORMS[BP_CONST.MORE_BUTTON_CONTAINER_ID].translateX,
-          outlineHeight + MORE_BUTTON_Y_OFFSET, 1, moreButtonRotate));
+
+    setElemTransform(moreButton, BP_CONST.TRANSFORMS[BP_CONST.MORE_BUTTON_CONTAINER_ID].translateX,
+          outlineHeight + MORE_BUTTON_Y_OFFSET, 1, moreButtonRotate);
   }
 
   function setPanelHeight(outlineHeight, moreButtonRotate) {
@@ -117,7 +125,7 @@ define(['bp/constants',
     setCurrentOutlineHeight(outlineHeight);
 
     // Bottom gray area
-    getBottom().setAttribute('transform', getTransformString(0, outlineHeight + BOTTOM_Y_OFFSET));
+    setElemTransform(getBottom(), 0, outlineHeight + BOTTOM_Y_OFFSET);
 
     // More button
     updateMoreButton(outlineHeight, moreButtonRotate);
@@ -150,22 +158,33 @@ define(['bp/constants',
     return from + (to - from) * time;
   }
 
-  function getTargetMorePanelTranslateY() {
+  // Move up to make sure we fit onscreen when the secondary feature expands
+  function getAmountToShiftSecondaryTop() {
+    var
+      secondaryContent = getSecondary(),
+      secondaryRect = secondaryContent.getBoundingClientRect(),
+      FUDGE_FACTOR = 80,
+      screenBottomOverlap = secondaryRect.bottom + FUDGE_FACTOR - window.innerHeight;
+
+    return Math.min(screenBottomOverlap, secondaryRect.top);
+  }
+
+  function getTargetSecondaryPanelTranslateY() {
     return state.isSecondaryPanelRequested() ? ENABLED_PANEL_TRANSLATE_Y : DISABLED_PANEL_TRANSLATE_Y;
   }
 
   function animateButtonMenuDrop(willEnable) {
 
-    var moreId = BP_CONST.MORE_ID,
-      morePanel = byId(moreId),
-      morePanelCurrentPos = getElemTransform(morePanel).translate.top,
-      targetPanelPos = getTargetMorePanelTranslateY(),
-      posDiff = targetPanelPos - morePanelCurrentPos,
+    var secondaryId = BP_CONST.SECONDARY_ID,
+      secondaryPanel = byId(secondaryId),
+      secondaryPanelCurrentPos = getElemTransform(secondaryPanel).translate.top,
+      targetPanelPos = getTargetSecondaryPanelTranslateY(),
+      posDiff = targetPanelPos - secondaryPanelCurrentPos,
       moreBtnStartRotation = willEnable ? 0 : MORE_BUTTON_ROTATION_ENABLED,
       moreBtnEndRotation = willEnable ? MORE_BUTTON_ROTATION_ENABLED : 0;
 
     function onButtonMenuDropTick(time) {
-      transform.setTransform(morePanel, 0, morePanelCurrentPos + posDiff * time);
+      setTransform(secondaryPanel, 0, secondaryPanelCurrentPos + posDiff * time);
       var moreBtnRotation = getValueInTime(moreBtnStartRotation, moreBtnEndRotation, time);
       updateMoreButton(origOutlineHeight, moreBtnRotation);
     }
@@ -181,7 +200,7 @@ define(['bp/constants',
 
   }
 
-  function getGeometryTargets(featureName, menuButton) {
+  function getGeometryTargets(featureName, menuButton, currentBpContainerTranslateY) {
     var
       feature = features[featureName],
       origMenuBtnTransforms = BP_CONST.TRANSFORMS[menuButton.id],
@@ -195,7 +214,8 @@ define(['bp/constants',
         true: {   // Feature enabled
           outlineHeight: panelContentsHeight + 103, // The outline
           menuBtnTranslateX: 26, // The icon rolls left by default
-          menuBtnRotate: 0    // Will be used by the icons that roll
+          menuBtnRotate: 0,    // Will be used by the icons that roll
+          bpContainerTranslateY: currentBpContainerTranslateY - getAmountToShiftSecondaryTop()
         }
       };
 
@@ -226,6 +246,9 @@ define(['bp/constants',
       featureModule = feature.module,
       featureTick = featureModule.tick,
       menuButton = byId(feature.menuButtonId),
+      bpContainer = getBPContainer(),
+
+      currentBpContainerTransforms = transform.getStyleTransform(bpContainer),
 
       currentMenuBtnTransform = getElemTransform(menuButton),
 
@@ -234,7 +257,7 @@ define(['bp/constants',
       currentMenuBtnTranslateX = currentMenuBtnTransform.translate.left,
       currentMenuBtnRotate = currentMenuBtnTransform.rotate,
 
-      geometryTargets = getGeometryTargets(name, menuButton),
+      geometryTargets = getGeometryTargets(name, menuButton, currentBpContainerTransforms.translate.top),
       fromGeo = geometryTargets[!doEnable],
       toGeo = geometryTargets[doEnable],
 
@@ -256,17 +279,19 @@ define(['bp/constants',
 
     function panelHeightTick(time) {
       // SVG height and outline
-      setPanelHeight(getValueInTime(currentOutlineHeight, toGeo.outlineHeight, time), MORE_BUTTON_ROTATION_ENABLED);
+      var newPanelHeight = getValueInTime(currentOutlineHeight, toGeo.outlineHeight, time),
+        newTranslateY;
+      setPanelHeight(newPanelHeight, MORE_BUTTON_ROTATION_ENABLED);
+      if (Number.isFinite(toGeo.bpContainerTranslateY)) {
+        newTranslateY = getValueInTime(currentBpContainerTransforms.translate.top, toGeo.bpContainerTranslateY, time);
+        transform.setStyleTransform(bpContainer, currentBpContainerTransforms.translate.left, newTranslateY, currentBpContainerTransforms.scale);
+      }
     }
 
     function openFeatureAnimationTick(time) {
       // Menu button
-      menuButton.setAttribute('transform',
-        getTransformString(
-          getValueInTime(currentMenuBtnTranslateX, toGeo.menuBtnTranslateX, time),
-          0,
-          1,
-          getValueInTime(currentMenuBtnRotate, toGeo.menuBtnRotate, time)));
+      setElemTransform(menuButton, getValueInTime(currentMenuBtnTranslateX, toGeo.menuBtnTranslateX, time),
+          0, 1, getValueInTime(currentMenuBtnRotate, toGeo.menuBtnRotate, time));
 
       // TODO: Probably remove the if check? Functions are always truthy.
       //       Not sure why this is here. Is this an API or isn't it?
@@ -410,9 +435,9 @@ define(['bp/constants',
 
   function resetStyles() {
 
-    var morePanelId = BP_CONST.MORE_ID,
+    var morePanelId = BP_CONST.SECONDARY_ID,
       more = byId(morePanelId);
-    more.setAttribute('transform', getTransformString(0, BP_CONST.TRANSFORMS[morePanelId].translateY));
+    setElemTransform(more, 0, BP_CONST.TRANSFORMS[morePanelId].translateY);
 
     resetButtonStyles();
   }
@@ -422,7 +447,7 @@ define(['bp/constants',
     forEachFeature(function(feature) {
       var button = feature.menuButtonId,
         transform = BP_CONST.TRANSFORMS[button];
-      byId(button).setAttribute('transform', getTransformString(transform.translateX, 0));
+      setElemTransform(byId(button), transform.translateX, 0);
     });
   }
 

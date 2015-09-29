@@ -20,6 +20,10 @@ define([ 'core/platform' ], function(platform) {
     return parseFloat(transform.substring(7)) || 1;
   }
 
+  function getStyleTransform(elem) {
+    return getTransform(elem.style[platform.transformProperty]);
+  }
+
   function getElemTransform(elem) {
     return getTransform(elem.getAttribute('transform'));
   }
@@ -84,10 +88,13 @@ define([ 'core/platform' ], function(platform) {
 
   }
 
-  function setTransform(element, left, top, transformScale, rotate, x, y) {
+  function setStyleTransform(elem, left, top, transformScale, rotate) {
+    var newTransformString = getTransformString(left + 'px', top + 'px', transformScale, rotate);
+    elem.style[platform.transformProperty] = newTransformString;
+  }
 
-    element.setAttribute('transform', getTransformString(left, top, transformScale, rotate, x, y));
-
+  function setElemTransform(element, left, top, transformScale, rotate) {
+    element.setAttribute('transform', getTransformString(left, top, transformScale, rotate));
   }
 
   function getTransformString(left, top, scale, rotate) {
@@ -102,9 +109,11 @@ define([ 'core/platform' ], function(platform) {
 
   var publics = {
     getComputedScale: getComputedScale,
-    getElemTransform: getElemTransform,
     getTransform: getTransform,
-    setTransform: setTransform,
+    getStyleTransform: getStyleTransform,
+    getElemTransform: getElemTransform,
+    setStyleTransform: setStyleTransform,
+    setElemTransform: setElemTransform,
     getTransformString: getTransformString
   };
 

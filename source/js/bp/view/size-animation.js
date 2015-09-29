@@ -32,8 +32,8 @@ define(['bp/model/state', 'bp/constants', 'bp/helper', 'core/platform'],
       // The minimum amount we want to increase the badge size
       // when transitioning to the panel.  Basically, the panel
       // should be BP_CONST.IDEAL_PANEL_WIDTH by BP_CONST.IDEAL_PANEL_HEIGHT
-      // or 1.5x the size of the badge.
-      MINIMUM_PANEL_SIZE_INCREASE = 1.5,
+      // or 1.2x the size of the badge.
+      MINIMUM_PANEL_SIZE_INCREASE = 1.2,
       panelScaleFromBadge,
       badgeScaleFromPanel,
       transformElementId          = BP_CONST.BP_CONTAINER_ID,

@@ -51,7 +51,7 @@ define([], function() {
 
   constants.SHOW_ID                  = 'scp-show';
 
-  constants.MORE_ID                  = 'scp-secondary';
+  constants.SECONDARY_ID             = 'scp-secondary';
   constants.MORE_BUTTON_GROUP_ID     = 'scp-more-button-group';
   constants.MORE_BUTTON_CONTAINER_ID = 'scp-more-button-container';
 
@@ -147,7 +147,7 @@ define([], function() {
     scaleY    : 1
   };
 
-  constants.TRANSFORMS[constants.MORE_ID]                  = {translateY: -198};
+  constants.TRANSFORMS[constants.SECONDARY_ID]                  = {translateY: -198};
   constants.TRANSFORMS[constants.MORE_BUTTON_CONTAINER_ID] = {translateX: 400, translateY: 198};
   constants.TRANSFORMS[constants.TIPS_BUTTON_ID]           = {translateX: 25};
   constants.TRANSFORMS[constants.SETTINGS_BUTTON_ID]       = {translateX: 235};
