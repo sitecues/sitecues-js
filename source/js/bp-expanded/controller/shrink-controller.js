@@ -7,6 +7,8 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
   var MIN_DISTANCE = 75, // Min distance before shrink
     mouseLeaveShrinkTimer,  // How long we wait before shrinking BP from any mouseout (even only just barely outside panel)
     isListening,
+    isZooming,
+    isExpandingOrExpanded,
     isInitialized,
     isSticky,
     // Feature panels are larger, need to know this so that mouseout doesn't exit accidentally after we close feature panel
@@ -178,22 +180,39 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
   function toggleListeners(doTurnOn) {
     var addOrRemoveFn = doTurnOn ? 'addEventListener' : 'removeEventListener';
 
-    if (isListening !== doTurnOn) {
-      isListening = doTurnOn;
-      // Pressing tab or shift tab when panel is open switches it to keyboard mode
-      window[addOrRemoveFn]('mousedown', winMouseDown);
-      window[addOrRemoveFn]('mousemove', winMouseMove);
-      window[addOrRemoveFn]('blur', winBlur);
-      window[addOrRemoveFn]('mouseout', winMouseLeave);
+    // Pressing tab or shift tab when panel is open switches it to keyboard mode
+    window[addOrRemoveFn]('mousedown', winMouseDown);
+    window[addOrRemoveFn]('mousemove', winMouseMove);
+    window[addOrRemoveFn]('blur', winBlur);
+    window[addOrRemoveFn]('mouseout', winMouseLeave);
+  }
+
+  function refresh() {
+    var shouldBeOn = !isZooming && isExpandingOrExpanded;
+    if (shouldBeOn !== isListening) {
+      isListening = shouldBeOn;
+      toggleListeners(isListening);
     }
   }
 
+  function willZoom() {
+    isZooming = true;
+    refresh();
+  }
+
+  function didZoom() {
+    isZooming = false;
+    refresh();
+  }
+
   function willExpand() {
-    toggleListeners(true);
+    isExpandingOrExpanded = true;
+    refresh();
   }
 
   function willShrink() {
-    toggleListeners(false);
+    isExpandingOrExpanded = false;
+    refresh();
   }
 
   function didShrink() {
@@ -217,6 +236,8 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
     sitecues.on('bp/will-expand', willExpand);
     sitecues.on('bp/will-shrink', willShrink);
     sitecues.on('bp/did-shrink', didShrink);
+    sitecues.on('zoom/begin', willZoom);
+    sitecues.on('zoom', didZoom);
 
     toggleListeners(true);
   }

@@ -2,6 +2,7 @@ define(['core/conf/user/manager', 'dollar/dollar-utils', 'zoom/zoom'], function 
   var isOn = false,
     isHlbOn = false,
     isPanelOpen = false,
+    isZooming = false,
     MIN_EDGE_PORTION = 0.1,
     MAX_EDGE_PORTION = 0.25,
     SPEED_FACTOR = 4,
@@ -94,11 +95,17 @@ define(['core/conf/user/manager', 'dollar/dollar-utils', 'zoom/zoom'], function 
     return movementX;
   }
 
+  function onZoomBegin() {
+    isZooming = true;
+    refresh();
+  }
+
   function onZoomChange(zoomLevel) {
     if (zoomLevel> 1 && !isListeningToResize) {
       isListeningToResize = true;
       sitecues.on('resize', refresh);
     }
+    isZooming = false;
     refresh();
   }
 
@@ -110,7 +117,7 @@ define(['core/conf/user/manager', 'dollar/dollar-utils', 'zoom/zoom'], function 
 
     // Turn on if zoom is > 1 and content overflows window more than a tiny amount
     var zoom = getZoom(),
-      doTurnOn = zoom > 1 && zoomMod.getBodyRight() / window.innerWidth > 1.02 && !isHlbOn && !isPanelOpen;
+      doTurnOn = zoom > 1 && zoomMod.getBodyRight() / window.innerWidth > 1.02 && !isHlbOn && !isPanelOpen && !isZooming;
 
     if (doTurnOn !== isOn) {
       if (doTurnOn) {
@@ -147,6 +154,8 @@ define(['core/conf/user/manager', 'dollar/dollar-utils', 'zoom/zoom'], function 
       isPanelOpen = false;
       refresh();
     });
+
+    sitecues.on('zoom', onZoomBegin);
 
     // react on any zoom change
     sitecues.on('zoom', onZoomChange);

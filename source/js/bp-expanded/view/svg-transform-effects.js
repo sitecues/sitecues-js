@@ -128,8 +128,8 @@ define(['bp/helper', 'bp/constants', 'core/platform', 'bp-expanded/view/svg-anim
 
   function init() {
     refreshHovers(); // Current expansion
-    sitecues.on('bp/did-expand', hoversOn); // Future expansions
-    sitecues.on('bp/will-shrink', hoversOff);
+    sitecues.on('bp/did-expand zoom', hoversOn); // Future expansions
+    sitecues.on('bp/will-shrink zoom/begin', hoversOff);
     sitecues.on('bp/content-loaded', refreshHovers);
     sitecues.on('bp/will-show-secondary-feature', cancelHovers);
   }
