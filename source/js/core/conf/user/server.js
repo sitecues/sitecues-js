@@ -58,12 +58,10 @@ define(['core/conf/user/manager', 'core/conf/urls', 'core/conf/user/localstorage
   // Saves a key/value pair.
   function saveData(key, value) {
 
-    // Load the data from localStorage: User ID namespace.
-    lsByUserId = ls.getPrefs(); // String.
-    if (lsByUserId) {
-      ls.setPref(key, value);
-    }
+    // Save the data from localStorage: User ID namespace.
+    ls.setPref(key, value);
 
+    // Save the data to server as well
     saveDataToServer(key, value);
   }
 

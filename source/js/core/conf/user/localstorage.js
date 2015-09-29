@@ -18,30 +18,11 @@
 define([], function() {
 
   /*
-   * Run the function everytime we want to work with Local Storage
-   * because settings can be changes while working with sitecues.
-   * @returns {Boolean}
-   */
-  function isSupported() {
-    var testKey = 'test', storage = window.sessionStorage;
-    try {
-      storage.setItem(testKey, '1');
-      storage.removeItem(testKey);
-      return true;
-    } catch (error) {
-      if (SC_DEV) { console.log('Local Storage is not supported or cannot be used.'); }
-      return false;
-    }
-  }
-
-  /*
    * Get value of Local Storage's "sitecues" key which is the outer namespace.
    * @returns {DOMString}
    */
   function getSitecuesLs() {
-    if (isSupported()) {
-      return localStorage.getItem('sitecues') || setSitecuesLs();
-    }
+    return localStorage.getItem('sitecues') || setSitecuesLs();
   }
 
   /*
@@ -49,10 +30,8 @@ define([], function() {
    * @returns {DOMString}
    */
   function setSitecuesLs(data) {
-    if (isSupported()) {
-      localStorage.setItem('sitecues', JSON.stringify(data || {}));
-      return getSitecuesLs();
-    }
+    localStorage.setItem('sitecues', JSON.stringify(data || {}));
+    return getSitecuesLs();
   }
 
   /*
@@ -60,9 +39,7 @@ define([], function() {
    * @returns {DOMString}
    */
   function clear() {
-    if (isSupported()) {
-      localStorage.removeItem('sitecues');
-    }
+    localStorage.removeItem('sitecues');
   }
 
   /*
@@ -70,12 +47,10 @@ define([], function() {
    * @returns {JSON.parse.j|Array|Object}
    */
   function getUserId() {
-    if (isSupported()) {
-      var sitecuesLs = getSitecuesLs();
-      if (sitecuesLs) {
-        var internalLs = JSON.parse(sitecuesLs);
-        return internalLs && internalLs.userId;
-      }
+    var sitecuesLs = getSitecuesLs();
+    if (sitecuesLs) {
+      var internalLs = JSON.parse(sitecuesLs);
+      return internalLs && internalLs.userId;
     }
   }
 
@@ -84,13 +59,11 @@ define([], function() {
    * @returns {JSON.parse.j|Array|Object}
    */
   function setUserId(value) {
-    if (isSupported()) {
-      var sitecuesLs = getSitecuesLs() || setSitecuesLs();
-      if (sitecuesLs) {
-        var internalLs = JSON.parse(sitecuesLs);
-        internalLs.userId = value || {};
-        setSitecuesLs(internalLs);
-      }
+    var sitecuesLs = getSitecuesLs() || setSitecuesLs();
+    if (sitecuesLs) {
+      var internalLs = JSON.parse(sitecuesLs);
+      internalLs.userId = value || {};
+      setSitecuesLs(internalLs);
     }
   }
 
@@ -100,14 +73,12 @@ define([], function() {
    * @returns {void}
    */
   function setPrefs(userPrefData) {
-    if (isSupported()) {
-      var sitecuesLs = JSON.parse(getSitecuesLs());
-      sitecuesLs[getUserId()] = userPrefData || '{}';
+    var sitecuesLs = JSON.parse(getSitecuesLs());
+    sitecuesLs[getUserId()] = userPrefData || '{}';
 
-      // Set the initial data under userId namespace.
-      setSitecuesLs(sitecuesLs);
-      if (SC_DEV) { console.log('Setting the data in LocalStorage: ' + JSON.stringify(sitecuesLs)); }
-    }
+    // Set the initial data under userId namespace.
+    setSitecuesLs(sitecuesLs);
+    if (SC_DEV) { console.log('Setting the data in LocalStorage: ' + JSON.stringify(sitecuesLs)); }
   }
 
   /**
@@ -118,16 +89,14 @@ define([], function() {
    * @returns {void}
    */
   function setPref(key, value) {
-    if (isSupported()) {
-      var userPrefData = getPrefs();
-      var sitecuesLs = JSON.parse(getSitecuesLs());
-      // Update value.
-      userPrefData[key] = value;
-      sitecuesLs[getUserId()] = userPrefData;
-      // Save in LocalStorage.
-      setSitecuesLs(sitecuesLs);
-      //if (SC_DEV) { console.log('Updating the data in LocalStorage: ' + JSON.stringify(sitecuesLs)); }
-    }
+    var userPrefData = getPrefs();
+    var sitecuesLs = JSON.parse(getSitecuesLs());
+    // Update value.
+    userPrefData[key] = value;
+    sitecuesLs[getUserId()] = userPrefData;
+    // Save in LocalStorage.
+    setSitecuesLs(sitecuesLs);
+    //if (SC_DEV) { console.log('Updating the data in LocalStorage: ' + JSON.stringify(sitecuesLs)); }
   }
 
   /**
@@ -135,10 +104,9 @@ define([], function() {
    * @returns {DOMString}
    */
   function getPrefs() {
-    if (isSupported()) {
-      var sitecuesLs = JSON.parse(getSitecuesLs());
-      return sitecuesLs[getUserId()];
-    }
+    var sitecuesLs = JSON.parse(getSitecuesLs()),
+      prefs = sitecuesLs[getUserId()];
+    return typeof prefs === 'object' ? prefs : {};
   }
 
   var publics = {
