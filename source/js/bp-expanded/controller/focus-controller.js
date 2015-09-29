@@ -1,6 +1,6 @@
 /* Focus Controller */
-define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
-  function (BP_CONST, state, helper, metric) {
+define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric', 'util/transform' ],
+  function (BP_CONST, state, helper, metric, transform) {
 
   var savedDocumentFocus,
     tabbedElement,
@@ -227,22 +227,28 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
     // @data-show-focus = focus to be shown on this element
     // @data-own-focus-ring = element will show it's own focus ring
 
-    var showFocusOn = getElementToShowFocusOn(tabbedElement);
+    var showFocusOn = getElementToShowFocusOn(tabbedElement),
+      bpContainer = getPanelContainer(),
+      scale = transform.getStyleTransform(bpContainer).scale;
+
+    function getFinalCoordinate(coord) {
+      return (coord / scale) + 'px';
+    }
 
     showFocusOn.setAttribute('data-show-focus', '');
     if (!showFocusOn.hasAttribute('data-own-focus-ring')) {
       // Show focus outline
       var EXTRA_FOCUS_PADDING = 1,
         clientFocusRect = helper.getRect(showFocusOn),
-        clientPanelRect = helper.getRect(getPanelContainer()),  // Focus rect is positioned relative to this
+        clientPanelRect = helper.getRect(bpContainer),  // Focus rect is positioned relative to this
         focusOutlineStyle = byId(BP_CONST.OUTLINE_ID).style;
 
       focusOutlineStyle.display = 'block';
-      focusOutlineStyle.width = (clientFocusRect.width + 2 * EXTRA_FOCUS_PADDING) + 'px';
-      focusOutlineStyle.height = (clientFocusRect.height + 2 * EXTRA_FOCUS_PADDING) + 'px';
+      focusOutlineStyle.width = getFinalCoordinate(clientFocusRect.width + 2 * EXTRA_FOCUS_PADDING);
+      focusOutlineStyle.height = getFinalCoordinate(clientFocusRect.height + 2 * EXTRA_FOCUS_PADDING);
 
-      focusOutlineStyle.top = (clientFocusRect.top - EXTRA_FOCUS_PADDING - clientPanelRect.top) + 'px';
-      focusOutlineStyle.left = (clientFocusRect.left - EXTRA_FOCUS_PADDING - clientPanelRect.left) + 'px';
+      focusOutlineStyle.top = getFinalCoordinate(clientFocusRect.top - EXTRA_FOCUS_PADDING - clientPanelRect.top);
+      focusOutlineStyle.left = getFinalCoordinate(clientFocusRect.left - EXTRA_FOCUS_PADDING - clientPanelRect.left);
     }
   }
 
