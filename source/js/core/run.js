@@ -8,9 +8,9 @@
 // - SC-3104 -- after an hour of use no TTS?
 // - SC-3120 -- sitecues TTS and Safari
 // - About panel
+// -- focus outlines off in SVG when scale used on BP (try EEOC at zoom 2.5)
 // IE
 // -- panel closing too easily after click on more button
-// -- focus outline off in feedback page, also in other places?
 // Edge
 // - Thumbs look wrong
 // Firefox -- BP animation slow

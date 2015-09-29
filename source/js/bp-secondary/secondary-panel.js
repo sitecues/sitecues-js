@@ -163,7 +163,7 @@ define(['bp/constants',
     var
       secondaryContent = getSecondary(),
       secondaryRect = secondaryContent.getBoundingClientRect(),
-      FUDGE_FACTOR = 80,
+      FUDGE_FACTOR = 100, // Extra space at bottom -- for more button and just space itself
       screenBottomOverlap = secondaryRect.bottom + FUDGE_FACTOR - window.innerHeight;
 
     return Math.min(screenBottomOverlap, secondaryRect.top);
