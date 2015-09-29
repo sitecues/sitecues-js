@@ -70,7 +70,7 @@ var isInitialized,
     </g>\
     <g id="scp-feedback-button" class="scp-if-feedback scp-hand-cursor scp-transition-opacity" role="button" data-feature="feedback" aria-labelledby="scp-feedback-label">\
       <g data-hover="scale(1.2)">\
-        <path d="m-10,40c3,1 7,1 11,1c27,0 49,-19 49,-43c0,-24 -22,-44 -49,-44c-27,0 -50,19 -50,43c0,12 6,23 15,31m24,11.5c-6,5 -19,9.4 -41,9m17.4,-20.3c-2.2,9.2 -7.6,14.8 -17,20.7" stroke-miterlimit="10" stroke-linecap="round" stroke-width="5.5" stroke="#548ECE" fill="#FFF"/>\
+        <path d="m-10,40c3,1 7,1 11,1c27,0 49,-19 49,-43c0,-24 -22,-44 -49,-44c-27,0 -50,19 -50,43c0,12 6,23 15,31c-2.2,9.2 -7.6,14.8 -17,20.7c15,-1 25,2 41,-9" stroke="#548ECE" stroke-miterlimit="5" stroke-linejoin="round" stroke-linecap="round" stroke-width="5.5" fill="#FFF"/>\
         <rect fill="none" width="120" height="120" y="-60" x="-60" class="scp-hand-cursor"/>\
       </g>\
     </g>\

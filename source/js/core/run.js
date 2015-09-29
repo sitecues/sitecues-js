@@ -4,7 +4,6 @@
  */
 
 // High priority
-// - Feedback icon white bg
 // - French, Spanish
 // - SC-3104 -- after an hour of use no TTS?
 // - SC-3120 -- sitecues TTS and Safari
