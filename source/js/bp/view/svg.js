@@ -71,9 +71,9 @@ define(['bp/view/markup-finalizer'], function(finalizer) {
   <g id="scp-bottom" class="scp-panel-only" opacity="0">\
     <use id="scp-bottom-mousetarget" xlink:href="#scp-bottom-def"/>\
     <g id="scp-bottom-text" opacity="0">\
-      <text id="scp-zoom-label" x="25" y="178"><tspan id="scp-zoom-value"> </tspan></text>\
+      <text id="scp-zoom-label" x="25" y="178"><tspan id="scp-zoom-value">{{zoom_off}}</tspan></text>\
       <text id="scp-speech-label" x="581" y="178" data-x-start="581" data-x-end="795">\
-        {{speech}}<tspan> </tspan><tspan id="scp-speech-state"> </tspan>\
+        {{speech}}<tspan> </tspan><tspan id="scp-speech-state">{{off}}</tspan>\
       </text>\
     </g>\
     <rect opacity="0" x="0" y="195" width="808" height="64"/>\
