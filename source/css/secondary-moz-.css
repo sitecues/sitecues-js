@@ -23,24 +23,19 @@
   box-sizing: border-box !important;
 }
 
-.scp-normal-range::-moz-range-thumb {
-  width: 20px;
+.scp-normal-range::-moz-range-thumb, .scp-hue-range::-moz-range-thumb {
+  position: relative;
+  width: 19px;
   height: 51px;
   background: url('../images/settings/slider-thumb.svg') no-repeat;
-  background-size: 20px 46px;
-  background-position: 0 5px;
+  background-size: stretch;
+  background-position: 0 6px;
   border: 0;
   outline: 0;
 }
 
 .scp-hue-range::-moz-range-thumb {
-  width: 20px;
-  height: 51px;
-  background: url('../images/settings/slider-thumb-with-hole.svg') no-repeat;
-  background-size: 20px 46px;
-  background-position: 0 5px;
-  border: 0;
-  outline: 0;
+  background-image: url('../images/settings/slider-thumb-with-hole.svg');
 }
 
 #scp-bp-container input[type="range"]::-moz-range-track {

@@ -26,27 +26,30 @@
   box-sizing: border-box !important;
 }
 
-/* ----------- WebKit ranges ------------ */
+/* ----------- Thumb ------------ */
 
 #scp-bp-container input::-webkit-slider-thumb {
   -webkit-appearance: none;
   position: relative;
   top: 3px;
-  width: 21px;
-  height: 46px;
+  width: 19px;
+  height: 45px;
   background: url('../images/settings/slider-thumb.svg');
-  background-size: 100% 100%
+  background-size: stretch;
 }
+.scp-hue-range::-webkit-slider-thumb {
+  background-image: url('../images/settings/slider-thumb-with-hole.svg') !important;
+}
+
+/* ---------- Two-tone range --------------- */
+
 .scp-normal-range::-webkit-slider-thumb::before {
   content:"";
   position: absolute;
   left:-600px;
-  right:21px;
+  right:19px;
   top:6px;
   height:27px;
   background: #538eca;
   pointer-events: none;
-}
-.scp-hue-range::-webkit-slider-thumb {
-  background-image: url('../images/settings/slider-thumb-with-hole.svg') !important;
 }
