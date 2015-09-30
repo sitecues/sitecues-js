@@ -4,8 +4,6 @@
  * persisted in the user preferences data store.
  */
 define([], function () {
-  'use strict';
-
   // private variables
   var storedData = {},
       handlers  = {},

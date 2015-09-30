@@ -90,7 +90,9 @@ define(['core/conf/user/manager', 'core/conf/urls', 'core/conf/user/localstorage
   function loadFromServerCallback(data) {
     cleanupJsonp();
 
-    ls.setPrefs(data);
+    if (data) {
+      ls.setPrefs(data);
+    }
 
     loadCallback(data);
   }
