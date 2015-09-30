@@ -134,9 +134,9 @@ define(['bp/constants',
   /********************** ANIMATIONS **************************/
 
     // When something major happens, such as an action to open a new panel, we cancel all current animations
-  function cancelAllAnimations() {
+  function finishAllAnimations() {
     runningAnimations.forEach(function (animation) {
-      animation.cancel();
+      animation.finishNow();
     });
     runningAnimations.length = 0;
   }
@@ -195,7 +195,7 @@ define(['bp/constants',
       fireBpChanged();
     }
 
-    cancelAllAnimations();
+    finishAllAnimations();
 
     createAnimation(BUTTON_CLICK_ANIMATION_DURATION, onButtonMenuDropTick, onFinish);
 
@@ -317,7 +317,7 @@ define(['bp/constants',
       createAnimation(openFeatureDuration, openFeatureAnimationTick);
     }
 
-    cancelAllAnimations();
+    finishAllAnimations();
 
     updateGlobalState(doEnable && name, isExpanding);
 
@@ -470,7 +470,7 @@ define(['bp/constants',
 
     state.set('secondaryPanelTransitionTo', DISABLED);
 
-    cancelAllAnimations();
+    finishAllAnimations();
     updateGlobalState();
 
     toggleMouseListeners(false);

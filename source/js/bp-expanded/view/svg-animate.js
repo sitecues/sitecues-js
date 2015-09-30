@@ -19,8 +19,8 @@ define(['util/transform', 'core/platform'], function (transform, platform) {
       // https://gist.github.com/gre/1650294
       animationFunctions = {
         linear: function (t) { return t; },
-        easeOutCubic: function (t) { return (--t) * t * t + 1; },
-        sinusoidal: function(t) { return -0.5 * (Math.cos(Math.PI * t ) - 1); }
+        easeOutCubic: function (t) { return (--t) * t * t + 1; }
+        //sinusoidal: function(t) { return -0.5 * (Math.cos(Math.PI * t ) - 1); }
       },
 
       defaultAnimation = 'easeOutCubic';
@@ -91,6 +91,7 @@ define(['util/transform', 'core/platform'], function (transform, platform) {
       }
     }
 
+    this.isRunning = true;
     this.animationId = this.tick(); // Start the animation automatically.
 
   }
@@ -133,6 +134,7 @@ define(['util/transform', 'core/platform'], function (transform, platform) {
     this.animationFn        = options.animationFn ? animationFunctions[options.animationFn] : animationFunctions[defaultAnimation];
     this.duration           = options.duration || 1;
     this.animationStartTime = Date.now();
+    this.isRunning          = true;
     this.animationId        = this.tick(); // Start the animation automatically.
   }
 
@@ -153,11 +155,27 @@ define(['util/transform', 'core/platform'], function (transform, platform) {
       if (this.onFinish) {
         this.onFinish(normalizedAnimationTime);
       }
+      this.isRunning = false;
     }
   };
 
   ArbitraryAnimate.prototype.cancel = function () {
-    cancelFrameFn(this.animationId);
+    if (this.isRunning) {
+      cancelFrameFn(this.animationId);
+      this.isRunning = false;
+    }
+  };
+
+  ArbitraryAnimate.prototype.finishNow= function () {
+    if (this.isRunning) {
+      if (this.onTick) {
+        this.onTick(1);
+      }
+      if (this.onFinish) {
+        this.onFinish(1);
+      }
+      this.cancel();
+    }
   };
 
   function animateCssProperties(element, CSSProperties, options) {
