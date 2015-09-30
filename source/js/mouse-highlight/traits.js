@@ -162,8 +162,4 @@ define(['$', 'mouse-highlight/traitcache', 'mouse-highlight/highlight-position',
     return {
       getTraitStack: getTraitStack
     };
-
-    if (SC_UNIT) {
-      module.exports = publics;
-    }
   });

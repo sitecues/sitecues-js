@@ -150,7 +150,4 @@ define(['$', 'core/conf/user/manager', 'core/platform'], function ($, conf, plat
     return {
       applyZoomFixes: applyZoomFixes
     };
-    if (SC_UNIT) {
-      module.exports = publics;
-    }
   });
