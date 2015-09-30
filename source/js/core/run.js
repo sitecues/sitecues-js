@@ -11,8 +11,6 @@
 // IE
 // -- panel closing too easily after click on more button
 // - Plus/minus key more unreliable than they used to be
-// Edge
-// - Thumbs look wrong
 // Firefox -- BP animation slow
 // CSS improvements
 // - Slow CSS in styles.js: [data-sc-reversible]
