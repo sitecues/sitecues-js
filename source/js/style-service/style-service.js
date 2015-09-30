@@ -203,7 +203,7 @@ define(['$', 'style-service/css-aggregator', 'style-service/media-queries'], fun
     requestCss();
   }
 
-  var publics = {
+  return {
     isReady: isReady,
     requestCss: requestCss,
     init: init,
@@ -212,8 +212,4 @@ define(['$', 'style-service/css-aggregator', 'style-service/media-queries'], fun
     getDOMStylesheet: getDOMStylesheet,
     getStyleText: getStyleText
   };
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

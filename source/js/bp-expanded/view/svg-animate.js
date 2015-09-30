@@ -172,13 +172,9 @@ define(['util/transform', 'core/platform'], function (transform, platform) {
     return Math.abs(((to - currentVal) / (to - from))) * duration;
   }
 
-  var publics = {
+  return {
     animateCssProperties: animateCssProperties,
     animateViaCallbacks: animateViaCallbacks,
     getDuration: getDuration
   };
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

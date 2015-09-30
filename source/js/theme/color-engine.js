@@ -695,13 +695,9 @@ define(['$', 'core/conf/user/manager', 'style-service/style-service', 'core/plat
     sitecues.applyTheme  = applyTheme;
   }
 
-  var publics = {
+  return {
     init: init,
     applyTheme: applyTheme
   };
 
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

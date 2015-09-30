@@ -151,7 +151,7 @@ define(['$', 'zoom/zoom'], function($, zoomMod) {
     cachedViewSize.width = window.innerWidth;
     cachedViewSize.zoom = zoomMod.getCompletedZoom();
   }
-  var publics = {
+  return {
     resetCache: resetCache,
     updateCachedViewPosition: updateCachedViewPosition,
     getCachedViewPosition: getCachedViewPosition,
@@ -164,8 +164,4 @@ define(['$', 'zoom/zoom'], function($, zoomMod) {
     getUniqueId: getUniqueId
   };
 
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

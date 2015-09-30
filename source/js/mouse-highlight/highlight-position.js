@@ -496,15 +496,11 @@ define(['$', 'util/common', 'keys/element-classifier', 'zoom/zoom', 'core/platfo
     }
   }
 
-  var publics = {
+  return {
     getHighlightPositionInfo: getHighlightPositionInfo,
     getRect: getRect,
     getContentsRangeRect: getContentsRangeRect,
     combineIntersectingRects: combineIntersectingRects
   };
 
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

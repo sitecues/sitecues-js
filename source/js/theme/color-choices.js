@@ -342,14 +342,10 @@ define(['$', 'util/color'], function ($, colorUtil) {
     return mixRgbaColors(rgba, mixInRgba, mixInRatio);
   }
 
-  var publics = {
+  return {
     dark: dark,
     increaseContrast: increaseContrast,
     blueReduction: blueReduction
   };
 
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

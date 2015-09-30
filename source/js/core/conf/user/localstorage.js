@@ -109,7 +109,7 @@ define([], function() {
     return typeof prefs === 'object' ? prefs : {};
   }
 
-  var publics = {
+  return {
     clear: clear,
     getUserId: getUserId,
     setUserId: setUserId,
@@ -117,9 +117,5 @@ define([], function() {
     setPref: setPref,
     getPrefs: getPrefs
   };
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });
 

@@ -143,13 +143,9 @@ define(['$', 'core/conf/user/manager', 'util/common', 'core/platform'], function
       .appendTo(optionalParent || 'html');
   }
 
-  var publics = {
+  return {
     dimBackgroundContent: dimBackgroundContent,
     undimBackgroundContent: undimBackgroundContent
   };
 
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

@@ -134,12 +134,8 @@ define(['bp/helper', 'bp/constants', 'core/platform', 'bp-expanded/view/svg-anim
     sitecues.on('bp/will-show-secondary-feature', cancelHovers);
   }
 
-  var publics = {
+  return {
     init: init
   };
 
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

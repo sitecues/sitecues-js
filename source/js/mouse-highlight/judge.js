@@ -839,13 +839,9 @@ define(['$', 'util/common', 'keys/element-classifier', 'mouse-highlight/traitcac
     }
     return traitStack[0];
   }
-  var publics = {
+  return {
     getJudgementStack: getJudgementStack,
     provideCustomJudgements: provideCustomJudgements
   };
 
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

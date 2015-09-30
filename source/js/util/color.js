@@ -438,7 +438,7 @@ define([], function () {
     sitecues.getColorString = getColorString;
   }
 
-  var publics = {
+  return {
     isDarkColor: isDarkColor,
     isOnDarkBackground: isOnDarkBackground,
     getColorString: getColorString,
@@ -453,9 +453,5 @@ define([], function () {
     getDocumentBackgroundColor: getDocumentBackgroundColor
   };
 
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
 
-  return publics;
 });

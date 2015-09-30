@@ -81,14 +81,10 @@ define([], function () {
     return storedData;
   }
 
-  var publics = {
+  return {
     get: get,
     set: set,
     def: def,
     data: data
   };
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

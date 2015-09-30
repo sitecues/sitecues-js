@@ -124,7 +124,7 @@ define(['core/platform', 'bp/constants', 'util/transform'], function(platform, B
     return false;
   }
 
-  var publics = {
+  return {
     byId: byId,
     invalidateId: invalidateId,
     getRect: getRect,
@@ -137,8 +137,4 @@ define(['core/platform', 'bp/constants', 'util/transform'], function(platform, B
     cancelEvent: cancelEvent
   };
 
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

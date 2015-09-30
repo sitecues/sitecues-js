@@ -60,15 +60,11 @@ define([], function () {
       isContentEditable(element);
   }
 
-  var publics = {
+  return {
     isVisualMedia: isVisualMedia,
     isFormControl: isFormControl,
     isSpacebarConsumer: isSpacebarConsumer,
     isEditable: isEditable
   };
 
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

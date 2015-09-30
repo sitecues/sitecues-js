@@ -495,13 +495,9 @@ define(['bp/constants',
     }
   }
 
-  var publics = {
+  return {
     init: init,
     toggleSecondaryPanel: toggleSecondaryPanel
   };
 
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

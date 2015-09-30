@@ -50,12 +50,8 @@ define([], function() {
     };
   }
 
-  var publics = {
+  return {
     getSafeZoneBoundingBox: getSafeZoneBoundingBox
   };
 
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

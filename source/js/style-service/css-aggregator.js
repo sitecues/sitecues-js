@@ -352,11 +352,7 @@ define(['$', 'style-service/user-agent-css', 'core/conf/site', 'core/conf/urls',
     $styleElems.each(addSheetForElem);
   }
 
-  var publics = {
+  return {
     collectAllCss: collectAllCss
   };
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

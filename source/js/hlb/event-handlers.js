@@ -140,13 +140,9 @@ define(['$', 'util/common', 'core/platform'], function($, common, platform) {
     window.addEventListener(wheelEventName, wheelEventCallback);
   }
 
-  var publics = {
+  return {
     releaseWheelEvents: releaseWheelEvents,
     captureWheelEvents: captureWheelEvents
   };
 
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

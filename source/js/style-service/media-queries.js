@@ -21,11 +21,7 @@ define([], function () {
     return mediaQuery !== 'print';  // The most realistic value that we need to ignore
   }
 
-  var publics = {
+  return {
     isActiveMediaQuery: isActiveMediaQuery
   };
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

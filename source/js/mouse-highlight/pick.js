@@ -796,7 +796,7 @@ define(['$', 'util/common', 'dollar/dollar-utils', 'core/conf/user/manager', 'co
       console.log('Auto pick debugging: ' + (isAutoPickDebuggingOn = !isAutoPickDebuggingOn));
     };
   }
-  var publics = {
+  return {
     find: find,
     reset: reset,
     getAutoPickScore: getAutoPickScore,
@@ -804,8 +804,4 @@ define(['$', 'util/common', 'dollar/dollar-utils', 'core/conf/user/manager', 'co
     provideCustomWeights: provideCustomWeights
   };
 
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

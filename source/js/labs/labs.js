@@ -24,12 +24,8 @@ define(['core/conf/user/manager', '$'], function(conf, $) {
     labSettings = $.extend({}, labInfo);
     conf.set('labs', labSettings);
   });
-  var publics = {
+  return {
     isEnabled: isEnabled
   };
 
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

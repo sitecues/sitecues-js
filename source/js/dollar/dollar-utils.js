@@ -13,12 +13,8 @@ define(['$'], function ($) {
       $(element).closest('#sitecues-badge,#scp-bp-container').length;
   }
 
-  var publics = {
+  return {
     isInSitecuesUI: isInSitecuesUI
   };
 
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

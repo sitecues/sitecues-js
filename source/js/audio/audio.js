@@ -348,7 +348,7 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
     ttsOn = conf.get('ttsOn');
   }
 
-  var publics = {
+  return {
     stopAudio: stopAudio,
     setSpeechState: setSpeechState,
     toggleSpeech: toggleSpeech,
@@ -361,8 +361,4 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
     getTTSUrl: getTTSUrl,
     init: init
   };
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

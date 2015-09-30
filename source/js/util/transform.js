@@ -107,7 +107,7 @@ define([ 'core/platform' ], function(platform) {
 
   }
 
-  var publics = {
+  return {
     getComputedScale: getComputedScale,
     getTransform: getTransform,
     getStyleTransform: getStyleTransform,
@@ -117,9 +117,5 @@ define([ 'core/platform' ], function(platform) {
     getTransformString: getTransformString
   };
 
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
 
-  return publics;
 });

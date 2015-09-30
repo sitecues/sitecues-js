@@ -140,13 +140,9 @@ define(['bp/constants', 'bp/helper'], function (BP_CONST, helper) {
     }
   }
 
-  var publics = {
+  return {
     getGeometryTargets: getGeometryTargets,
     init: init
   };
 
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

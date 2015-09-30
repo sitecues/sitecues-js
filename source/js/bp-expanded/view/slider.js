@@ -82,14 +82,10 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/locale'],
       postZoomText = locale.translate(BP_CONST.ZOOM_STATE_LABELS.POST_ZOOM);
     return preZoomText + locale.translateNumber(currZoom, 2) + postZoomText;
   }
-  var publics = {
+  return {
     updateThumbPosition: updateThumbPosition,
     render: render,
     updateZoomValue: updateZoomValue
   };
 
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

@@ -85,14 +85,10 @@ define([], function () {
     }
   }
 
-  var publics = {
+  return {
     init: init,
     playAudioSrc: playAudioSrc,
     isBusy: isBusy,
     stop: stop
   };
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

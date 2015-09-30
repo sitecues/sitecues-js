@@ -69,14 +69,10 @@ define([], function() {
     }
   }
 
-  var publics = {
+  return {
     isPointInRect: isPointInRect,
     isPointInAnyRect: isPointInAnyRect,
     expandOrContractRect: expandOrContractRect,
     expandOrContractRects: expandOrContractRects
   };
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

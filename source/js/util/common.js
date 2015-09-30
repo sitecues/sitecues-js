@@ -213,7 +213,7 @@ define(['keys/element-classifier'], function (elemClassifier) {
     return px;
   }
 
-  var publics = {
+  return {
     equals: equals,
     isEmpty: isEmpty,
     isVisualRegion: isVisualRegion,
@@ -231,8 +231,4 @@ define(['keys/element-classifier'], function (elemClassifier) {
     getBulletWidth: getBulletWidth
   };
 
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

@@ -310,12 +310,8 @@ define(['bp/view/badge', 'bp/model/state', 'bp/constants', 'bp/helper', 'core/pl
     }
   }
 
-  var publics = {
+  return {
     init: init
   };
 
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

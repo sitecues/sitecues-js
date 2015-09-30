@@ -356,13 +356,9 @@ define(['bp/constants', 'bp/model/state', 'core/locale', 'bp/helper', 'core/conf
     return classBuilder;
   }
 
-  var publics = {
+  return {
     init: init,
     getViewClasses: getViewClasses
   };
 
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

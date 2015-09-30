@@ -698,7 +698,7 @@ define(['$', 'core/conf/user/manager', 'hlb/styling', 'util/common', 'keys/eleme
     hlbStyle[platform.transformOriginProperty] = originCSS;
   }
 
-  var publics = {
+  return {
     getOriginCSS: getOriginCSS,
     getTranslateCSS: getTranslateCSS,
     setOriginCSS: setOriginCSS,
@@ -710,8 +710,4 @@ define(['$', 'core/conf/user/manager', 'hlb/styling', 'util/common', 'keys/eleme
     positionHLB: positionHLB
   };
 
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

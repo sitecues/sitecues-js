@@ -818,7 +818,7 @@ define(['$', 'core/platform', 'util/common', 'core/conf/user/manager'],
     return cssText;
   }
 
-  var publics = {
+  return {
     defaultBorder: defaultBorder,
     defaultPadding: defaultPadding,
     transitionProperty: transitionProperty,
@@ -829,8 +829,4 @@ define(['$', 'core/platform', 'util/common', 'core/conf/user/manager'],
     getComputedStyleCssText: getComputedStyleCssText
   };
 
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

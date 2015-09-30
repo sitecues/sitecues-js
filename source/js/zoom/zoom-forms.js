@@ -147,11 +147,10 @@ define(['$', 'core/conf/user/manager', 'core/platform'], function ($, conf, plat
       return platform.browser.isWebKit ? 1 : 5;
     }
 
-    var publics = {
+    return {
       applyZoomFixes: applyZoomFixes
     };
     if (SC_UNIT) {
       module.exports = publics;
     }
-    return publics;
-});
+  });

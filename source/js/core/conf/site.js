@@ -42,14 +42,10 @@ define([], function() {
     return sitecues.everywhereConfig || {};
   }
 
-  var publics = {
+  return {
     get: get,
     getSiteId: getSiteId,
     getSiteConfig: getSiteConfig,
     getEverywhereConfig: getEverywhereConfig
   };
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

@@ -195,13 +195,9 @@ define(['bp/constants', 'bp/helper', 'core/conf/user/manager', 'bp/model/state',
     sitecues.on('bp/did-change', onPanelUpdate);
   }
 
-  var publics = {
+  return {
     getGeometryTargets: getGeometryTargets,
     init: init
   };
 
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

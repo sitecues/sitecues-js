@@ -220,13 +220,9 @@ define(['keys/element-classifier', '$'], function(elemClassifier, $) {
     }
   }
 
-  var publics = {
+  return {
     getText : getText
   };
 
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 
 });

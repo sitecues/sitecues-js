@@ -788,12 +788,8 @@ define(['$', 'mouse-highlight/mouse-highlight', 'util/common', 'util/transform',
     });
   }
 
-  var publics = {
+  return {
     queueKey: queueKey,
     init: init
   };
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

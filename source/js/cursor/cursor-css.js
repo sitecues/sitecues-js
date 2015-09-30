@@ -133,12 +133,8 @@ define(['core/platform', 'zoom/zoom', 'util/color', 'core/conf/urls'], function 
     return CURSOR_ZOOM_RANGE * Math.sin(zoomDiff / zoomModule.RANGE * (Math.PI / 2.8)) + CURSOR_ZOOM_MIN;
   }
 
-  var publics = {
+  return {
     getCursorCss: getCursorCss,
     getCursorZoom: getCursorZoom
   };
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

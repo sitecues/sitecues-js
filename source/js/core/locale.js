@@ -107,7 +107,7 @@ define([], function() {
 
   }
 
-  var publics = {
+  return {
     getShortWebsiteLang: getShortWebsiteLang,
     getFullWebsiteLang: getFullWebsiteLang,
     getBrowserLangStringName: getBrowserLangStringName,
@@ -117,9 +117,5 @@ define([], function() {
     init: init
   };
 
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
 
-  return publics;
 });

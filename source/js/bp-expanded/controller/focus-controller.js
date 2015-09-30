@@ -476,15 +476,11 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
 
   }
 
-  var publics = {
+  return {
     init: init,
     getFocusedItem: getFocusedItem,
     navigateInDirection: navigateInDirection,
     processKey: processKey
   };
 
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

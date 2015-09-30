@@ -41,14 +41,10 @@ define(['bp/constants', 'bp/helper', 'util/transform', 'core/conf/urls'], functi
     }
   }
 
-  var publics = {
+  return {
     getGeometryTargets: getGeometryTargets,
     tick: tick,
     init: init
   };
 
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

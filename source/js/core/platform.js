@@ -185,7 +185,7 @@ define([], function() {
     isRetinaDisplay = undefined;
   });
 
-  var publics = {
+  return {
     browser: browser,
     os: os,
     isIE9: isIE9,
@@ -200,8 +200,4 @@ define([], function() {
     isCssPropSupported: isCssPropSupported
   };
 
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

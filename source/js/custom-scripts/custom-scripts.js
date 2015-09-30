@@ -43,13 +43,9 @@ require([], function() {
 
   }
 
-  var publics = {
+  return {
     register: register,
     check: check
   };
 
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

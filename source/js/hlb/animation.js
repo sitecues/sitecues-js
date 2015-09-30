@@ -112,13 +112,9 @@ define(['hlb/dimmer', 'util/transform', 'hlb/positioning', 'core/platform'],
     return scale > hlbPositioning.getStartingScale($hlb);
   }
 
-  var publics = {
+  return {
     transitionInHLB: transitionInHLB,
     transitionOutHLB: transitionOutHLB
   };
 
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

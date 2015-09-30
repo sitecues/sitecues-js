@@ -94,7 +94,7 @@ define([], function() {
     return 'main';
   }
 
-  var publics = {
+  return {
     get: get,
     set: set,
     isPanel: isPanel,
@@ -107,8 +107,4 @@ define([], function() {
     getPanelName: getPanelName
   };
 
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

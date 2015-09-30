@@ -187,12 +187,11 @@ define(['$', 'zoom/zoom', 'core/platform', 'style-service/style-service', 'dolla
       }
     }
 
-    var publics = {
+    return {
       setAllowMouseEvents: setAllowMouseEvents,
       init: init
     };
     if (SC_UNIT) {
       module.exports = publics;
     }
-    return publics;
-  });
+    });

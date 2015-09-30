@@ -159,12 +159,11 @@ define(['$', 'mouse-highlight/traitcache', 'mouse-highlight/highlight-position',
       );
   }
 
-    var publics = {
+    return {
       getTraitStack: getTraitStack
     };
 
     if (SC_UNIT) {
       module.exports = publics;
     }
-    return publics;
-});
+  });

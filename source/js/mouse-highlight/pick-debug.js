@@ -123,12 +123,8 @@ define([], function () {
       console.groupEnd();
     }
   }
-  var publics = {
+  return {
     logHeuristicResult: logHeuristicResult
   };
 
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

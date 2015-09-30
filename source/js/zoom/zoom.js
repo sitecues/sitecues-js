@@ -1285,7 +1285,7 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'util/
     fixZoomBodyCss(); // Get it read as soon as zoom might be used
   }
 
-  var publics = {
+  return {
     MAX: MAX,
     MIN: MIN,
     STEP: STEP,
@@ -1307,8 +1307,4 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'util/
     init: init
   };
 
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

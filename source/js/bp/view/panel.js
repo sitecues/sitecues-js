@@ -62,12 +62,8 @@ define(['bp/bp', 'bp/constants', 'bp/model/state'], function(bp, BP_CONST, state
     return className;
   }
 
-  var publics = {
+  return {
     getViewClasses: getViewClasses
   };
 
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

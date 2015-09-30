@@ -788,12 +788,8 @@ define(['bp/model/state', 'bp/constants', 'bp/helper', 'core/platform'],
   }
 
 
-  var publics = {
+  return {
     init: init
   };
 
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

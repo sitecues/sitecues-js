@@ -1675,7 +1675,7 @@ define(['$', 'core/conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mou
     }
   }
 
-  var publics = {
+  return {
     getHighlight: getHighlight,
     highlight: highlight,
     autoPick: autoPick,
@@ -1684,8 +1684,4 @@ define(['$', 'core/conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mou
     init: init
   };
 
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

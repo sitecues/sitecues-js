@@ -725,14 +725,10 @@ define([
 //    return size === '-' || size === '+' ? size : null;
 //  });
 //
-  var publics = {
+  return {
     getElement: getElement,
     toggleHLB: toggleHLB,
     retargetHLB: retargetHLB
   };
 
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

@@ -348,12 +348,8 @@ define(['$', 'zoom/zoom', 'util/color', 'core/conf/site'], function($, zoomMod, 
 //      sitecues.debugImageClassifier();
   }
 
-  var publics = {
+  return {
     shouldInvertBgImage: shouldInvertBgImage,
     classify: classify
   };
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

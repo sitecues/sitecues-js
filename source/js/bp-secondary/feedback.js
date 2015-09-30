@@ -128,13 +128,9 @@ define(['bp/constants', 'bp/helper', 'bp/model/state', 'core/platform', 'core/me
     }
   }
 
-  var publics = {
+  return {
     getGeometryTargets: getGeometryTargets,
     init: init
   };
 
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });

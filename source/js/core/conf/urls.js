@@ -163,7 +163,7 @@ define(['core/conf/site'], function(site) {
     prefsDomain = 'up' + domainEnding;
   }
 
-  var publics = {
+  return {
     init: init,
     getApiUrl: getApiUrl,
     getPrefsUrl: getPrefsUrl,
@@ -174,8 +174,4 @@ define(['core/conf/site'], function(site) {
     resolveUrl: resolveUrl
   };
 
-  if (SC_UNIT) {
-    module.exports = publics;
-  }
-  return publics;
 });
