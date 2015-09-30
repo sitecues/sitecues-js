@@ -73,6 +73,7 @@ build:
 	echo "sitecues.version='$(custom-version)';" > target/build-config/config.js
 
 	# Require.js build
+	# TODO not sure if we want use strict in production versions -- good temporarily though
 	node node_modules/.bin/r.js -o rjs-build-options.js baseUrl=source/js generateSourceMaps=$(sourcemaps) optimize=uglify2 uglify2.compress.global_defs.SC_DEV=false uglify2.compress.global_defs.SC_LOCAL=$(sc-local) uglify2.compress.global_defs.SC_UNIT=false dir=$(build-dir)/js wrap.start="'use strict';"
 
 	# Insert runtime bundle configuration
