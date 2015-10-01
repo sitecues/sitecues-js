@@ -5,19 +5,16 @@
 
 // High priority
 // / French, Spanish
+// / Accessibility
 // / SC-3104 -- after an hour of use no TTS?
 // / SC-3120 -- sitecues TTS and Safari
 // - About panel
-// IE
-// - Plus/minus key more unreliable than they used to be
-// Firefox -- BP animation slow
 // CSS improvements
 // - Slow CSS in styles.js: [data-sc-reversible]
 // - Slow CSS in styles.js: #scp-bp-container *
 // - Comment CSS to be more readable
 // Small
 // - cursor size/hue settings only -- be careful of mousehue 1.1 which means nothing
-// Accessibility
 // UX testing
 // Beta testing
 // Theme testing on customer sites
