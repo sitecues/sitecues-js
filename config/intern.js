@@ -9,10 +9,10 @@ define(
 
         var build = 'UNKNOWN',
             proxyPort = 9000,
-            testDir = 'test/';
+            testDir = '../../test/';
 
         // make sure we are in Node and not a browser...
-        if (typeof process !== 'undefined' && process.env) {
+        if (typeof process === 'object' && process && process.env) {
             build = process.env.BUILD || process.env.COMMIT || process.env.TRAVIS_COMMIT;
         }
 
@@ -57,6 +57,7 @@ define(
             // }
             // Options to pass to the AMD module loader...
             loaderOptions: {
+                baseUrl: 'source/js',
                 packages: [
                     { name: 'unit', location: testDir + 'unit' },
                     { name: 'functional', location: testDir + 'functional' }

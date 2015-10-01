@@ -13,7 +13,6 @@ define(
         'intern/dojo/node!leadfoot/helpers/pollUntil'  // utility to pause until an expression is truthy
     ],
     function (tdd, assert, keys, fs, pollUntil) {
-
         var url = 'http://tools.qa.sitecues.com:9000/' +
                   'site/simple.html' +
                   '?scjsurl=//js.dev.sitecues.com/l/s;id=s-00000005/v/dev/latest/js/sitecues.js' +
@@ -164,6 +163,7 @@ define(
                 /////////////////////////////// ------- test boundary -------
 
                 test('HLB Respects Text', function () {
+<<<<<<< HEAD
 
                     return this.remote               // represents the browser being tested
                         .findById('sitecues-hlb')    // get the HLB!
@@ -313,6 +313,43 @@ define(
                             .type(
                                 expected
                             )
+=======
+        console.log('global stuff.... ');
+        console.log(global.process.mainModule);
+                    return this.remote               // represents the browser being tested
+                        .maximizeWindow()            // best effort to normalize window sizes (not every browser opens the same)
+                        .get(url)                    // navigate to the desired page
+                        .setFindTimeout(6000)        // fail test if any find method can't succeed this quickly
+                        .findById('sitecues-panel')  // finding this is our sign that sitecues is loaded and ready
+                            .execute(                // run the given code in the remote browser
+                                function () {
+                                    function onZoom() {
+                                        sitecues.zoomIsDone = true; // set a state we can look for
+                                    }
+                                    sitecues.on('zoom', onZoom);  // listener for when the zoom animation is done
+                                }
+                            )
+                            .pressKeys(keys.ADD)     // unicode for: hit the + key!
+                            .end()                   // get out of the current element context
+                        .then(
+                            pollUntil(
+                                function () {        // keeps running until it returns a value other than null or undefined
+                                    return sitecues.zoomIsDone === true || undefined;
+                                },
+                                undefined,           // arguments to pass to the poller
+                                3000,                // timeout - max duration, if unsuccessful
+                                30                   // interval - how often to run
+                            )
+                        )
+                        .execute(                    // run the given code in the remote browser
+                            function () {
+                                delete sitecues.zoomIsDone; 
+                                sitecues.highlight('#p1');
+                            }
+                        )
+                        .findById('p1')
+                            .pressKeys('\uE00D')   // hit the spacebar, to open the HLB
+>>>>>>> d44d259fc65d236622e8fce55d5501fb75405876
                             .end()
                         .execute(                    // run the given code in the remote browser
                             function (selector) {
@@ -405,31 +442,35 @@ define(
 
                 /////////////////////////////// ------- test boundary -------
 
+<<<<<<< HEAD
                 // test('Screenshot experiment', function () {
+=======
+                test('HLB Closes Properly', function () {
+>>>>>>> d44d259fc65d236622e8fce55d5501fb75405876
 
-                //     var canDoScreenshot = this.remote.session.capabilities.takesScreenshot;
+                    var canDoScreenshot = this.remote.session.capabilities.takesScreenshot;
 
-                //     return this.remote               // represents the browser being tested
-                //         .then(
-                //             function () {
-                //                 if (canDoScreenshot) {
-                //                     this.takeScreenshot()
-                //                         .then(
-                //                             function (image) {
-                //                                 fs.writeFileSync(
-                //                                     '/Users/sholladay/Desktop/myfile' + Date.now() + '.png',
-                //                                     image
-                //                                 );
-                //                             }
-                //                         )
-                //                 }
-                //             }
-                //         )
-                //         .findById('sitecues-hlb')
-                //             .pressKeys(keys.SPACE)     // hit the spacebar, to close the HLB
-                //             .end()                   // get out of the current element context
-                //         .waitForDeletedById('sitecues-hlb')
-                // });
+                    return this.remote               // represents the browser being tested
+                        .then(
+                            function () {
+                                if (canDoScreenshot) {
+                                    this.takeScreenshot()
+                                        .then(
+                                            function (image) {
+                                                fs.writeFileSync(
+                                                    'test/images/' + Date.now() + '.png',
+                                                    image
+                                                );
+                                            }
+                                        )
+                                }
+                            }
+                        )
+                        .findById('sitecues-hlb')
+                            .pressKeys(keys.SPACE)     // hit the spacebar, to close the HLB
+                            .end()                   // get out of the current element context
+                        .waitForDeletedById('sitecues-hlb')
+                });
             });
         }
     }

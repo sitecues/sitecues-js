@@ -1,6 +1,5 @@
-// This file is designed to return a list of filepaths,
-// relative to this directory and without extensions,
-// to be processed as unit tests
+// This file is designed to return a list of filepaths, without extensions,
+// relative to the unit test directory that you want to run as tests.
 
 define(
     [   // dependencies...
@@ -8,7 +7,7 @@ define(
     ],
     function () {
         return [
-            // 'foo/baz'
+            'common'
         ];
     }
 )
