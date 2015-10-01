@@ -18,7 +18,7 @@ define(['bp/constants', 'bp/helper', 'bp-expanded/view/svg-animate', 'bp-expande
       currentTranslate = moreButtonContainer.getAttribute('transform'),
       isInitialized;
 
-  function getSecondaryPanel(doToggle) {
+  function getHelpOrSecondaryPanel(doToggle) {
     if (platform.isIE9) {
       require(['info/info'], function(info) {
         if (doToggle) {
@@ -39,7 +39,7 @@ define(['bp/constants', 'bp/helper', 'bp-expanded/view/svg-animate', 'bp-expande
   }
 
   function onMouseClick () {
-    getSecondaryPanel(true);
+    getHelpOrSecondaryPanel(true);
   }
 
   function addMouseListeners () {
@@ -90,7 +90,7 @@ define(['bp/constants', 'bp/helper', 'bp-expanded/view/svg-animate', 'bp-expande
     // Once we show the button, always show it.
     doAlwaysShowButton = true;
 
-    getSecondaryPanel(); // Preload
+    getHelpOrSecondaryPanel(); // Preload
   }
 
   function showMoreButtonSlowly() {

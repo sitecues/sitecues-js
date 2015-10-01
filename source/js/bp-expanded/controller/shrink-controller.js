@@ -72,7 +72,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
       if (id || id === BP_CONST.BP_CONTAINER_ID) {
         break;
       }
-      ancestor = ancestor.parentElement;
+      ancestor = ancestor.parentNode;
     }
 
     function getTrimmedId(id) {
@@ -155,7 +155,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
       if (elem.id === id) {
         return true;
       }
-      elem = elem.parentElement;
+      elem = elem.parentNode;
     }
   }
 

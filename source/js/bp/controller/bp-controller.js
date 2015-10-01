@@ -135,7 +135,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
   //   so that clicks around the panel don't accidentally open it.
   function clickToOpenPanel() {
     var badgeElem = helper.byId(BP_CONST.BADGE_ID);
-    if (document.activeElement === badgeElem) {
+    if (document.activeElement === badgeElem && state.isBadge()) {
       // Click is in visible area and badge has focus -- go ahead and open the panel
       changeModeToPanel();
     }

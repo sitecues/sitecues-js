@@ -370,7 +370,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
         tabbedElement = target;
         break;
       }
-      target = target.parentElement;
+      target = target.parentNode;
     }
 
     if (tabbedElement) {

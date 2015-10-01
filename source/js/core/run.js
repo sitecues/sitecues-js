@@ -9,7 +9,6 @@
 // / SC-3120 -- sitecues TTS and Safari
 // - About panel
 // IE
-// -- panel closing too easily after click on more button
 // - Plus/minus key more unreliable than they used to be
 // Firefox -- BP animation slow
 // CSS improvements
