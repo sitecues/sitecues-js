@@ -95,21 +95,12 @@
       ]
     },
     {  // We could split into audio and zoom features
-      name: 'keys',
+      name: 'enhance',
       create: true,
       include: [
         'keys/keys',
         'keys/commands',
-        'keys/element-classifier'
-      ],
-      exclude: [
-        'core/metric'
-      ]
-    },
-    {  // We could split into audio and zoom features
-      name: 'enhance',
-      create: true,
-      include: [
+        'keys/element-classifier',
         'mouse-highlight/mouse-highlight',
         'util/transform',
         'util/common',
@@ -134,7 +125,8 @@
         'core/conf/urls',
         'core/conf/site',
         'core/conf/user/manager',
-        'keys/element-classifier'
+        'core/conf/user/server',
+        'core/conf/user/localstorage'
       ]
     },
     {
