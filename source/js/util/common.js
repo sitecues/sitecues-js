@@ -15,10 +15,10 @@ define(['keys/element-classifier'], function (elemClassifier) {
   }
 
   /**
-   * Checks if the value given is empty or not.
+   * Checks if the text in a text node given is empty or not.
    */
-  function isEmpty(node) {
-    var val = node.data;
+  function isEmpty(textNode) {
+    var val = textNode.data;
     return !val || /^\W*$/.test(val);  // Only whitespace or punctuation
   }
 
