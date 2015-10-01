@@ -29,7 +29,7 @@ sitecues.def('cursor', function (cursor, callback) {
         cursorStylesheetObject,
         bpCursorStylesheetObject,
         isStyleServiceReady,
-        doAllowCursors = !platform.browser.isIE || platform.browser.version >= 11 || site.get('disableCursorEnhancement') === false,
+        doAllowCursors = !platform.browser.isIE || platform.browser.version >= 11,
         doUseAjaxCursors = platform.browser.isIE,
         doDisableDuringZoom = platform.browser.isIE;
 

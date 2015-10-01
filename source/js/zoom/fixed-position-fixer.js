@@ -20,11 +20,12 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
         // These browsers need the position of fixed elements to be adjusted on the fly.
         // Note: we avoid this in Safari on Mac and Chrome on Windows because of general shakiness.
         //       In those browsers the fixed content just gets scrolled off when the user scrolls down.
-        SHOULD_POSITION_FIXED_ELEMENTS = platform.browser.isFirefox ||
+        SHOULD_POSITION_FIXED_ELEMENTS_ON_SCROLL = platform.browser.isFirefox ||
           (platform.browser.isChrome && platform.os.isMac),
         // In IE, fixed content stays fixed even with a transform, so the position does not need to be corrected.
         // However, the fixed elements are not scaled. We therefore need to apply the scale transform directly to the fixed elements.
-        SHOULD_ZOOM_FIXED_ELEMENTS = platform.browser.isIE;
+        SHOULD_ZOOM_FIXED_ELEMENTS = platform.browser.isIE,
+        SHOULD_POSITION_FIXED_ELEMENTS_ABOVE_TOOLBAR = SHOULD_ZOOM_FIXED_ELEMENTS;
 
       /*
        For every fixed element on the page, we must translate them to their correct positions using
@@ -40,7 +41,9 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
          * @param  elements [element to position]
          */
         function adjustElement(index, element) {
-          if (common.isInSitecuesUI(element)) {
+          var id = element.id,
+            idPrefix = id && id.split('-')[0];
+          if (idPrefix === 'sitecues' || idPrefix === 'scp') {
             return;
           }
 
@@ -49,7 +52,8 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
           };
 
           if ($(element).css('position') === 'fixed') {
-            if (SHOULD_POSITION_FIXED_ELEMENTS) {
+            if (SHOULD_POSITION_FIXED_ELEMENTS_ON_SCROLL ||
+              (SHOULD_POSITION_FIXED_ELEMENTS_ABOVE_TOOLBAR && toolbarHeight && element.offsetTop < toolbarHeight)) {
               css.transform = 'translate3d(' + offsetLeft + 'px, ' + offsetTop + 'px,0px) ';
             }
             if (scaleTransform !== 1) {
@@ -77,10 +81,11 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
           // Will be 1 if the current zoom level is <= MAX_ZOOM_FIXED_CONTENT, because the size doesn't need to change.
           // Otherwise, will be < 1 in order to reduce the size.
           scaleTransform = desiredFixedItemZoom / appliedFixedItemZoom,
-          bodyRect = document.body.getBoundingClientRect(),
+          anchorForFixedElems = platform.browser.isIE ? document.documentElement : document.body,
+          anchorRect = anchorForFixedElems.getBoundingClientRect(),
           // Amount to move the fixed positioned items so that they appear in the correct place
-          offsetLeft = (- bodyRect.left / pageZoom).toFixed(1),
-          offsetTop = ((toolbarHeight - bodyRect.top) / pageZoom).toFixed(1),
+          offsetLeft = (- anchorRect.left / pageZoom).toFixed(1),
+          offsetTop = ((toolbarHeight - anchorRect.top) / pageZoom).toFixed(1),
           // To help restrict the width of toolbars
           winWidth = window.innerWidth;
 
@@ -162,7 +167,7 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
       }
 
 
-      if (SHOULD_POSITION_FIXED_ELEMENTS || SHOULD_ZOOM_FIXED_ELEMENTS) {
+      if (SHOULD_POSITION_FIXED_ELEMENTS_ON_SCROLL || SHOULD_ZOOM_FIXED_ELEMENTS) {
         initializeModule();
       }
 
@@ -173,7 +178,9 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
         var doTurnOn = fixedSelector && (document.body.style.transform !== '' || toolbarHeight);
 
         if (!doTurnOn) {
-          $(window).off('scroll', refresh);
+          if (SHOULD_POSITION_FIXED_ELEMENTS_ON_SCROLL) {
+            $(window).off('scroll', refresh);
+          }
           clearTimeout(autoRefreshTimer);
           return;
         }
@@ -181,7 +188,9 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
         // the sitecues transform stays on the body in that case, in order to avoid the Chrome jerk-back bug on zoom
         if (!isOn) {
           isOn = true;
-          $(window).on('scroll', refresh);
+          if (SHOULD_POSITION_FIXED_ELEMENTS_ON_SCROLL) {
+            $(window).on('scroll', refresh);
+          }
           autoRefreshTimer = setTimeout(refreshTimer, AUTO_REFRESH_MS);
         }
 
