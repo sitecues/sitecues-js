@@ -93,7 +93,7 @@ define(['bp/constants', 'bp/model/state', 'core/locale', 'bp/helper', 'core/conf
       console.log('No element with #sitecues-badge provided by page. Backup badge inserted. Contact support@sitecues.com for support.');
     }
 
-    adjustFixedElementsBelowToolbar();
+    adjustFixedElementsBelowToolbar(toolbarElement);
 
     return toolbarElement;
   }
@@ -102,12 +102,13 @@ define(['bp/constants', 'bp/model/state', 'core/locale', 'bp/helper', 'core/conf
   // - it doesn't work that well across sites
   // - it's heavy in the page
   // - it causes us to load the page-features module just because we have a toolbar
-  function adjustFixedElementsBelowToolbar() {
+  function adjustFixedElementsBelowToolbar(toolbarElement) {
     require(['zoom/fixed-position-fixer'], function(fixer) {
       // However, in the case of the toolbar, we must always move fixed position elements
       // down. As this process requires the style-service, when the toolbar is inserted,
       // we will initialize the style service immediately.
-      fixer.init();
+      document.body.style.position = 'relative';
+      fixer.init(toolbarElement.offsetHeight);
     });
   }
 

@@ -4,9 +4,9 @@
  */
 
 // High priority
-// - French, Spanish
-// - SC-3104 -- after an hour of use no TTS?
-// - SC-3120 -- sitecues TTS and Safari
+// / French, Spanish
+// / SC-3104 -- after an hour of use no TTS?
+// / SC-3120 -- sitecues TTS and Safari
 // - About panel
 // IE
 // -- panel closing too easily after click on more button

@@ -3,8 +3,8 @@
  * for the current zoom and scroll position in the window.
  * It is used as little as possible because it runs code on scroll events, which can slow down scrolling significantly.
  */
-define(['$', 'zoom/zoom', 'core/platform', 'style-service/style-service', 'dollar/dollar-utils'],
-  function ($, zoomMod, platform, styleService, jqUtils) {
+define(['$', 'zoom/zoom', 'core/platform', 'style-service/style-service' ],
+  function ($, zoomMod, platform, styleService) {
 
     var isOn = false,
       toolbarHeight = 0,
@@ -16,11 +16,12 @@ define(['$', 'zoom/zoom', 'core/platform', 'style-service/style-service', 'dolla
       // These browsers need the position of fixed elements to be adjusted on the fly.
       // Note: we avoid this in Safari on Mac and Chrome on Windows because of general shakiness.
       //       In those browsers the fixed content just gets scrolled off when the user scrolls down.
-      SHOULD_POSITION_FIXED_ELEMENTS = platform.browser.isFirefox ||
+      SHOULD_POSITION_FIXED_ELEMENTS_ON_SCROLL = platform.browser.isFirefox ||
         (platform.browser.isChrome && platform.os.isMac),
       // In IE, fixed content stays fixed even with a transform, so the position does not need to be corrected.
       // However, the fixed elements are not scaled. We therefore need to apply the scale transform directly to the fixed elements.
-      SHOULD_ZOOM_FIXED_ELEMENTS = platform.browser.isIE;
+      SHOULD_ZOOM_FIXED_ELEMENTS = platform.browser.isIE,
+      SHOULD_POSITION_FIXED_ELEMENTS_ABOVE_TOOLBAR = SHOULD_ZOOM_FIXED_ELEMENTS;
 
     /*
      For every fixed element on the page, we must translate them to their correct positions using
@@ -36,7 +37,9 @@ define(['$', 'zoom/zoom', 'core/platform', 'style-service/style-service', 'dolla
        * @param  elements [element to position]
        */
       function adjustElement(index, element) {
-        if (jqUtils.isInSitecuesUI(element)) {
+        var id = element.id,
+          idPrefix = id && id.split('-')[0];
+        if (idPrefix === 'sitecues' || idPrefix === 'scp') {
           return;
         }
 
@@ -45,7 +48,8 @@ define(['$', 'zoom/zoom', 'core/platform', 'style-service/style-service', 'dolla
         };
 
         if ($(element).css('position') === 'fixed') {
-          if (SHOULD_POSITION_FIXED_ELEMENTS) {
+          if (SHOULD_POSITION_FIXED_ELEMENTS_ON_SCROLL ||
+            (SHOULD_POSITION_FIXED_ELEMENTS_ABOVE_TOOLBAR && toolbarHeight && element.offsetTop < toolbarHeight)) {
             css.transform = 'translate3d(' + offsetLeft + 'px, ' + offsetTop + 'px,0px) ';
           }
           if (scaleTransform !== 1) {
@@ -78,10 +82,11 @@ define(['$', 'zoom/zoom', 'core/platform', 'style-service/style-service', 'dolla
         // Will be 1 if the current zoom level is <= MAX_ZOOM_FIXED_CONTENT, because the size doesn't need to change.
         // Otherwise, will be < 1 in order to reduce the size.
         scaleTransform = desiredFixedItemZoom / appliedFixedItemZoom,
-        bodyRect = document.body.getBoundingClientRect(),
+        anchorForFixedElems = platform.browser.isIE ? document.documentElement : document.body,
+        anchorRect = anchorForFixedElems.getBoundingClientRect(),
         // Amount to move the fixed positioned items so that they appear in the correct place
-        offsetLeft = (- bodyRect.left / pageZoom).toFixed(1),
-        offsetTop = ((toolbarHeight - bodyRect.top) / pageZoom).toFixed(1),
+        offsetLeft = (- anchorRect.left / pageZoom).toFixed(1),
+        offsetTop = ((toolbarHeight - anchorRect.top) / pageZoom).toFixed(1),
         // To help restrict the width of toolbars
         winWidth = window.innerWidth;
 
@@ -117,11 +122,6 @@ define(['$', 'zoom/zoom', 'core/platform', 'style-service/style-service', 'dolla
       autoRefreshTimer = setTimeout(refreshTimer, AUTO_REFRESH_MS);
     }
 
-    function onToolbarEnabled() {
-      toolbarHeight = $('.scp-toolbar')[0].offsetHeight;
-      lazyTurnOn();
-    }
-
     /**
      * Basically, it gets any styles that declare position:fixed so we can later filter for
      * any elements that are dynamically fixed.
@@ -155,8 +155,6 @@ define(['$', 'zoom/zoom', 'core/platform', 'style-service/style-service', 'dolla
         // we come up with a more clever solution.
         $(fixedSelector).css('transform', 'translate(-9999px,-9999px)');
       });
-
-      sitecues.on('bp/did-insert-toolbar', onToolbarEnabled);
     }
 
     // Initialize only when we really have to, because it's a very, very bad idea to
@@ -166,7 +164,9 @@ define(['$', 'zoom/zoom', 'core/platform', 'style-service/style-service', 'dolla
       var doTurnOn = fixedSelector && (document.body.style.transform !== '' || toolbarHeight);
 
       if (!doTurnOn) {
-        $(window).off('scroll', refresh);
+        if (SHOULD_POSITION_FIXED_ELEMENTS_ON_SCROLL) {
+          $(window).off('scroll', refresh);
+        }
         clearTimeout(autoRefreshTimer);
         return;
       }
@@ -174,15 +174,21 @@ define(['$', 'zoom/zoom', 'core/platform', 'style-service/style-service', 'dolla
       // the sitecues transform stays on the body in that case, in order to avoid the Chrome jerk-back bug on zoom
       if (!isOn) {
         isOn = true;
-        $(window).on('scroll', refresh);
+        if (SHOULD_POSITION_FIXED_ELEMENTS_ON_SCROLL) {
+          $(window).on('scroll', refresh);
+        }
         autoRefreshTimer = setTimeout(refreshTimer, AUTO_REFRESH_MS);
       }
 
       refresh();
     }
 
-    function init() {
-      if (SHOULD_POSITION_FIXED_ELEMENTS || SHOULD_ZOOM_FIXED_ELEMENTS) {
+    // init() and optionally provide toolbar height
+    function init(toolbarHeightIfKnown) {
+      if (toolbarHeightIfKnown) {
+        toolbarHeight = toolbarHeightIfKnown;
+      }
+      if (SHOULD_POSITION_FIXED_ELEMENTS_ON_SCROLL || SHOULD_ZOOM_FIXED_ELEMENTS) {
         initializeModule();
       }
     }
