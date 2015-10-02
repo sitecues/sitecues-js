@@ -16,7 +16,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
     RIGHT = 39,
     DOWN  = 40,
 
-    TABBABLE = {
+    TABBABLE = {    // IMPORTANT: remove 'scp-' prefix -- it gets added in by the code
       'main': [
         'zoom-slider-bar',
         'speech',
@@ -30,21 +30,24 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
         'more-button-group'
       ],
       'tips':[
-        'tips-button',
         '$',   // Current card contents
         'prev-card',
         'next-card',
+        'settings-label',
+        'feedback-label',
+        'about-label',
         'more-button-group'
       ],
       'settings':[
-        'settings-button',
         '$',   // Current card contents
         'prev-card',
         'next-card',
+        'tips-label',
+        'feedback-label',
+        'about-label',
         'more-button-group'
       ],
       'feedback':[
-        'feedback-button',
         'feedback-textarea',
         'stars-1',
         'stars-2',
@@ -52,13 +55,19 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
         'stars-4',
         'stars-5',
         'feedback-send',
+        'tips-label',
+        'settings-label',
+        'about-label',
         'more-button-group'
       ],
       'about':[
-        'about-button',
         'about-1',
         'about-2',
         'about-3',
+        'about-rate-button',
+        'tips-label',
+        'settings-label',
+        'feedback-label',
         'more-button-group'
       ]
     },
@@ -95,8 +104,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
     if (focusShownOn) {
       focusShownOn.removeAttribute('data-show-focus');
     }
-    var outlineStyle = byId(BP_CONST.OUTLINE_ID).style;
-    outlineStyle.display = 'none';
+    byId(BP_CONST.OUTLINE_ID).removeAttribute('data-show');
   }
 
   function updateDOMFocusState() {
@@ -240,9 +248,10 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
       var EXTRA_FOCUS_PADDING = 1,
         clientFocusRect = helper.getRect(showFocusOn),
         clientPanelRect = helper.getRect(getPanelContainer()),  // Focus rect is positioned relative to this
-        focusOutlineStyle = byId(BP_CONST.OUTLINE_ID).style;
+        focusOutline = byId(BP_CONST.OUTLINE_ID),
+        focusOutlineStyle = focusOutline.style;
 
-      focusOutlineStyle.display = 'block';
+      focusOutline.setAttribute('data-show', true);
       focusOutlineStyle.width = getFinalCoordinate(clientFocusRect.width + 2 * EXTRA_FOCUS_PADDING);
       focusOutlineStyle.height = getFinalCoordinate(clientFocusRect.height + 2 * EXTRA_FOCUS_PADDING);
 
