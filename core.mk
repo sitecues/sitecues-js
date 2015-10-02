@@ -9,21 +9,6 @@
 # Load the custom configuration file
 ################################################################################
 
-# Not a fan of special cases, but 'common' is a special case.
-ifeq ($(custom-config-name), common)
-	custom-name=common
-	custom-files=
-	# The common build does not modify the version, etc...
-	custom-suffix=
-	custom-suffix-upper=
-else
-	# Include the 'configuration' file.
-	include custom-config/$(custom-config-name).mk
-	# The custom builds append their name to the version, etc...
-	custom-suffix=-$(custom-name)
-	custom-suffix-upper=-$(shell echo $(custom-name) | $(to-upper))
-endif
-
 # Are we making a local-only version?
 ifeq ($(sc-local), true)
 	# Build a version that doesn't use AJAX for settings, config or metrics -- can be used locally or pasted into a console
@@ -49,13 +34,10 @@ gzip-command='gzip -c "{}" > "{}.gz"'
 # gzip-command='gzip "{}"'
 
 
-# Make a build-specific version.
-custom-version=$(version)$(custom-suffix-upper)
-
 # Set up the build-specific directory and package name.
 build-basedir:=target
-build-dir:=$(build-basedir)/$(custom-name)
-package-name:=$(product-name)-js-$(custom-version)
+build-dir:=$(build-basedir)/common
+package-name:=$(product-name)-js-$(version)
 package-file-name:=$(package-name).tgz
 package-basedir:=$(build-dir)/package
 package-dir:=$(package-basedir)/$(package-name)
@@ -65,12 +47,12 @@ package-dir:=$(package-basedir)/$(package-name)
 # TARGET: build
 ################################################################################
 build:
-	@echo "===== STARTING: Building '$(custom-name)' library ====="
+	@echo "===== STARTING: Building sitecues library ====="
 	@echo
 
 	@mkdir -p $(build-dir)/js
 	@mkdir -p target/build-config
-	echo "sitecues.version='$(custom-version)';" > target/build-config/config.js
+	echo "sitecues.version='$(version)';" > target/build-config/config.js
 
 	# Require.js build
 	# TODO not sure if we want use strict in production versions -- good temporarily though
@@ -91,9 +73,9 @@ build:
 	@./show-file-sizes.sh $(build-dir)/js "*.js" | grep -v ".src.js"
 
 	@echo
-	@echo "===== COMPLETE: Building '$(custom-name)' library"
+	@echo "===== COMPLETE: Building sitecues library"
 	@echo
-	@echo "===== VERSION: $(custom-version)"
+	@echo "===== VERSION: $(version)"
 	@echo
 
 ################################################################################
@@ -115,12 +97,12 @@ checksize:
 # TARGET: debug
 ################################################################################
 debug:
-	@echo "===== STARTING: Build for '$(custom-name)' library (DEBUG VER) ====="
+	@echo "===== STARTING: Build for sitecues library (DEBUG VER) ====="
 	@echo
 
 	@mkdir -p $(build-dir)/js
 	@mkdir -p target/build-config
-	echo "sitecues.version='$(custom-version)';var SC_LOCAL=$(sc-local),SC_DEV=true,SC_UNIT=false;" > target/build-config/config.js
+	echo "sitecues.version='$(version)';var SC_LOCAL=$(sc-local),SC_DEV=true,SC_UNIT=false;" > target/build-config/config.js
 
 	# Require.js build
 	node node_modules/.bin/r.js -o rjs-build-options.js baseUrl=source/js generateSourceMaps=$(sourcemaps) optimize=none dir=$(build-dir)/js wrap.start='"use strict";'
@@ -141,22 +123,21 @@ debug:
 	@./show-file-sizes.sh $(build-dir)/js "*.js" | grep -v "sitecues"
 
 	@echo
-	@echo "===== COMPLETE: Building '$(custom-name)' library (DEBUG VER) ====="
+	@echo "===== COMPLETE: Building sitecues library (DEBUG VER) ====="
 	@echo
-	@echo "===== VERSION: $(custom-version)"
+	@echo "===== VERSION: $(version)"
 	@echo
 
 ################################################################################
 # TARGET: package
 ################################################################################
 package:
-	@echo "===== STARTING: Packaging '$(custom-name)' library"
+	@echo "===== STARTING: Packaging sitecues library"
 	rm -rf $(package-dir)
 	mkdir -p $(package-dir)
 	mkdir -p $(package-dir)/js
-	echo $(custom-version) > $(package-dir)/VERSION.TXT
-	echo "SC_BUILD_NAME=$(custom-name)" > $(package-dir)/BUILD.TXT
-	echo "SC_BUILD_SUFFIX=$(custom-suffix)" >> $(package-dir)/BUILD.TXT
+	echo $(version) > $(package-dir)/VERSION.TXT
+	echo "SC_BUILD_NAME=common" > $(package-dir)/BUILD.TXT
 
   # Deep copy of $(build-dir)/js/  (only .js files)
   # Easiest way is to copy everything, then remove the useless files (.gz, .map, .src.js, etc.)
@@ -167,5 +148,5 @@ package:
 	cp -R $(build-dir)/etc/* $(package-dir)
 
 	tar -C $(package-basedir) -zcf $(build-basedir)/$(package-file-name) $(package-name)
-	@echo "===== COMPLETE: Packaging '$(custom-name)' library"
+	@echo "===== COMPLETE: Packaging sitecues library"
 	@echo
