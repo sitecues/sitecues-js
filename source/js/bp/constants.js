@@ -203,7 +203,7 @@ define([], function() {
   constants.NO_INPUT_TIMEOUT     = 7000;  // Show more button if no activity for this amount of time
 
   // TODO is this still needed? It's fixed in Firefox
-  constants.FIREFOX_SLIDER_OFFSET = 83; // Hardcoded because of https://bugzilla.mozilla.org/show_bug.cgi?id=479058
+  constants.FIREFOX_SLIDER_OFFSET = 69; // Hardcoded because of https://bugzilla.mozilla.org/show_bug.cgi?id=479058
 
   // TODO compute this ratio
   // It's used to set the slider thumb properly

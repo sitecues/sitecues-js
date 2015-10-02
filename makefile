@@ -15,11 +15,6 @@ all: debug
 # Command line options.
 ################################################################################
 
-targets=common
-# Restore if we get custom builds again
-#targets=common $(shell cd custom-config && ls *.mk | sed 's%.mk%%g')
-custom-config-names:=$(shell echo "$(targets)" | sed 's%,% %g')
-
 # If true, clean and update the Node.js package dependencies.
 clean-deps=false
 
@@ -160,9 +155,7 @@ endif
 build: clean $(_force-deps-refresh) $(_build_lint_dep)
 	@echo "Node version : $(shell node --version)"
 	@echo "npm version  : v$(shell npm --version)"
-	@for _CUSTOM_CONF_NAME in $(custom-config-names) ; do \
-		$(MAKE) --no-print-directory -f core.mk build custom-config-name=$$_CUSTOM_CONF_NAME ; \
-	done
+	$(MAKE) --no-print-directory -f core.mk build
 
 ################################################################################
 # TARGET: checksize
@@ -171,9 +164,7 @@ build: clean $(_force-deps-refresh) $(_build_lint_dep)
 checksize: clean $(_force-deps-refresh) $(_build_lint_debug_dep)
 	@echo "Node version : $(shell node --version)"
 	@echo "npm version  : v$(shell npm --version)"
-	@for _CUSTOM_CONF_NAME in $(custom-config-names) ; do \
-		$(MAKE) --no-print-directory -f core.mk build checksize sourcemaps=false custom-config-name=$$_CUSTOM_CONF_NAME ; \
-	done
+	$(MAKE) --no-print-directory -f core.mk build checksize sourcemaps=false
 
 ################################################################################
 # TARGET: debug
@@ -181,9 +172,7 @@ checksize: clean $(_force-deps-refresh) $(_build_lint_debug_dep)
 ################################################################################
 debug: clean $(_force-deps-refresh) $(_build_lint_debug_dep)
 	@echo
-	@for _CUSTOM_CONF_NAME in $(custom-config-names) ; do \
-		$(MAKE) --no-print-directory -f core.mk debug custom-config-name=$$_CUSTOM_CONF_NAME ; \
-	done
+	$(MAKE) --no-print-directory -f core.mk debug
 
 ################################################################################
 # TARGET: package
@@ -196,10 +185,8 @@ ifeq ($(sc_dev), true)
 endif
 	@echo "Node version : $(shell node --version)"
 	@echo "npm version  : v$(shell npm --version)"
-	@for _CUSTOM_CONF_NAME in $(custom-config-names) ; do \
-		$(MAKE) --no-print-directory -f core.mk build custom-config-name=$$_CUSTOM_CONF_NAME sourcemaps=false ; \
-		$(MAKE) --no-print-directory -f core.mk package custom-config-name=$$_CUSTOM_CONF_NAME ; \
-	done
+	$(MAKE) --no-print-directory -f core.mk build sourcemaps=false
+	$(MAKE) --no-print-directory -f core.mk package
 
 ################################################################################
 # TARGET: clean
@@ -306,7 +293,5 @@ stop-all-services: stop-testsite
 ################################################################################
 local: clean $(_force-deps-refresh) $(_build_lint_dep)
 	@echo
-	@for _CUSTOM_CONF_NAME in $(custom-config-names) ; do \
-		$(MAKE) --no-print-directory -f core.mk debug sc-local=true custom-config-name=$$_CUSTOM_CONF_NAME ; \
-	done
+	$(MAKE) --no-print-directory -f core.mk debug sc-local=true
 
