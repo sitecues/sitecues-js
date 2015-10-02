@@ -401,6 +401,10 @@ sc-kbd[data-demo="true"] {
   overflow: hidden;
 }
 
+.scp-range-group > input {
+  opacity: inherit;  /* Make sure also opacity: 0 when hidden so that it doesn't get focused */
+}
+
 .scp-color-theme-group {
   margin-bottom: 36px;
   /* Need a table so that we can vertically align contents in the buttons */
