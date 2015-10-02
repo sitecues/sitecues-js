@@ -31,8 +31,6 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
       ],
       'tips':[
         '$',   // Current card contents
-        'prev-card',
-        'next-card',
         'settings-label',
         'feedback-label',
         'about-label',
@@ -40,8 +38,6 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
       ],
       'settings':[
         '$',   // Current card contents
-        'prev-card',
-        'next-card',
         'tips-label',
         'feedback-label',
         'about-label',
@@ -261,7 +257,15 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
   }
 
   function getAllTabbableItemsInActiveCard () {
-    return document.querySelectorAll('#scp-' + state.getPanelName() + ' > .scp-active .scp-tabbable:not([data-show="false"])');
+    function getItems(itemsSelector) {
+      var panelSelector = '#scp-' + state.getPanelName() + '>',
+        nodeList = document.querySelectorAll(panelSelector + itemsSelector);
+      return Array.prototype.slice.call(nodeList);  // Convert to array
+    }
+    var cardChooserLinks = getItems('.scp-card-chooser>:not([aria-selected])'),
+      cardContentItems = getItems('.scp-active .scp-tabbable:not([data-show="false"])');
+
+    return cardChooserLinks.concat(cardContentItems);
   }
 
   function getAdjacentTabbableItem (all, current, direction) {
