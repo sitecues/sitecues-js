@@ -377,20 +377,6 @@ define(['bp/helper', 'core/platform', 'bp/constants', 'core/conf/site'],
         'opacity': 0.001    // Can't be seen but still gets click events
       },
 
-      /*************** Close button **********************/
-
-      '#scp-close-button': {
-        'visibility': 'hidden',
-        'position': 'absolute',
-        'width': '70px',
-        'height': '70px'
-      },
-
-      '.scp-is-panel.scp-keyboard #scp-close-button': {
-        'visibility': 'visible',
-        'z-index': '99999999'
-      },
-
       /*************** Focus **************************/
 
       /* Do not use outline because it ends up being larger than the visible content, at least in Firefox */
@@ -398,7 +384,7 @@ define(['bp/helper', 'core/platform', 'bp/constants', 'core/conf/site'],
         'outline': '0 !important'
       },
 
-      '#sitecues-badge[aria-expanded="false"]:focus #scp-badge-focus-rect': {
+      '#sitecues-badge[aria-expanded="false"]:focus > .scp-is-badge #scp-badge-focus-rect': {
         'stroke': 'rgba(82, 168, 236, 0.8)',
         'stroke-width': '24px'
       },
@@ -412,7 +398,7 @@ define(['bp/helper', 'core/platform', 'bp/constants', 'core/conf/site'],
         'z-index': 99999
       },
 
-      '.scp-is-panel.scp-keyboard > #scp-focus-outline': {
+      '.scp-is-panel.scp-keyboard > #scp-focus-outline[data-show]': {
         'display': 'block'
       },
 
