@@ -11,13 +11,14 @@ define(['bp/constants',
     'bp/helper',
     'bp-expanded/view/svg-animate',
     'util/transform',
+    'core/locale',
     'bp-secondary/insert-secondary-markup',
     'bp-secondary/tips',
     'bp-secondary/settings',
     'bp-secondary/feedback',
     'bp-secondary/about',
     'bp-secondary/cards'],
-    function (BP_CONST, state, helper, animate, transform, markup, tipsModule, settingsModule, feedbackModule, aboutModule, cardsModule) {
+    function (BP_CONST, state, helper, animate, transform, locale, markup, tipsModule, settingsModule, feedbackModule, aboutModule, cardsModule) {
 
   var BUTTON_CLICK_ANIMATION_DURATION = 800,
     ENABLED_PANEL_TRANSLATE_Y = 0,
@@ -386,9 +387,17 @@ define(['bp/constants',
 
     toggleMouseListeners(willEnable);
 
+    updateMoreButtonLabel(willEnable);
+
     if (willEnable) {
       optimizeButtonAnimations();
     }
+  }
+
+  function updateMoreButtonLabel(doPointToMainPanel) {
+    var labelName = doPointToMainPanel ? 'sitecues_main_panel' : 'more_features',
+      localizedLabel = locale.translate(labelName);
+    byId(BP_CONST.MORE_BUTTON_GROUP_ID).setAttribute('aria-label', localizedLabel);
   }
 
   /**
@@ -406,6 +415,7 @@ define(['bp/constants',
    */
   function toggleSecondaryFeature(featureName) {
     var willEnable = state.getSecondaryPanelName() !== featureName;
+    updateMoreButtonLabel(!willEnable);
     if (willEnable && !isFeatureAvailable(featureName)) {
       // The feature was not loaded -- punt and go to help page
       require(['info/info'], function(info) {
