@@ -4,7 +4,6 @@
  */
 
 // High priority
-// Firefox thumb is off for some reason -- from this change
 // / French, Spanish
 // / Accessibility
 // / SC-3104 -- after an hour of use no TTS?
