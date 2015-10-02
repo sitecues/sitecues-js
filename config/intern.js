@@ -71,7 +71,7 @@ define(
             // tunnel: 'SauceLabsTunnel',    // SauceLabs
             // tunnel: 'TestingBotTunnel',   // TestingBot
             tunnelOptions: {
-                host: '127.0.0.1:4447'  // custom location to find the selenium server
+                host: 'localhost:4447'  // custom location to find the selenium server
                 // verbose: true           // more logging, only supported by BrowserStack
             },
 
