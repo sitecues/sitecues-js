@@ -84,10 +84,18 @@ define(
             grep: /.*/,
 
             // The paths that match this regex will NOT be included in code coverage reports...
-            excludeInstrumentation: /^(?:config|test|node_modules)\//
+            excludeInstrumentation: /^(?:config|test|node_modules)\//,
 
-            // Test result output mechanisms.
-            // reporters: ['Pretty']
+            // How to display or save test run info.
+            reporters: [
+                // Test result reporters.
+                { id : 'Runner' }
+                // { id : 'JUnit',    filename : 'report/test/junit.xml' },
+                // // Code coverage reporters.
+                // { id : 'Cobertura', filename  : 'report/coverage/info/cobertura.info' },
+                // { id : 'Lcov',      filename  : 'report/coverage/info/lcov.info' },
+                // { id : 'LcovHtml',  directory : 'report/coverage/html' }
+            ]
         };
     }
 );
