@@ -191,6 +191,12 @@ define(['bp/constants',
     }
 
     function onFinish() {
+      aboutModule.init();
+      feedbackModule.init();
+      settingsModule.init();
+      tipsModule.init();
+      cardsModule.init();
+
       state.set('isSecondaryPanel', willEnable);
       fireBpChanged();
     }
@@ -484,12 +490,6 @@ define(['bp/constants',
       markup.init();
       // Add mouse listeners once BP is ready
       resetStyles();
-
-      aboutModule.init();
-      feedbackModule.init();
-      settingsModule.init();
-      tipsModule.init();
-      cardsModule.init();
 
       sitecues.on('bp/will-shrink', onPanelClose);
     }

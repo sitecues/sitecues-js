@@ -9,6 +9,18 @@
 // / SC-3104 -- after an hour of use no TTS?
 // / SC-3120 -- sitecues TTS and Safari
 // - About panel
+// Accessibility
+// - JAWS 16 with IE 11 - tabbing, role announced as link. Arrowing, you don't discover it at all.
+// - When 4 button menu comes up, automatically focus tips if in kbd mode
+// - When settings open, need initial focus
+// - When settings open, either more detailed labels on buttons or set role="group" parent with the label
+// - Should not be able to focus invisible sliders in settings
+// - Set aria-pressed on current theme button
+// - Leave left/right button out of tab order, but put named items in
+// - Don't need two buttons to be able to get back in tab order. Which ever is used need a good 'back to menu' name. Or put 'Tips', 'Settings'.. in tab order instead.
+// - Need good initial focus when we go back
+// - Under tips, tell screen readers how to get full help guide.
+// - About: rate us button with description should be in tab order
 // CSS improvements
 // - Slow CSS in styles.js: [data-sc-reversible]
 // - Slow CSS in styles.js: #scp-bp-container *
