@@ -65,7 +65,7 @@ define(['bp/constants', 'bp/helper', 'core/conf/user/manager', 'bp/model/state',
         while (index -- ) {
           elem = settingElems[index];
           isCurrentValue = elem.getAttribute('data-setting-value') === newValue;
-          elem.setAttribute('data-setting-current', isCurrentValue);
+          elem.setAttribute('aria-pressed', isCurrentValue);
         }
       });
     });
