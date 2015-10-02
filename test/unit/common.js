@@ -6,6 +6,8 @@ define(
     ],
     function (tdd, assert, common) {
 
+        'use strict';
+
         var suite  = tdd.suite,
             test   = tdd.test;
 

@@ -8,14 +8,14 @@ define(
     ],
     function (unitSuites, functionalSuites) {
 
+        var i, len;
+
         // Prepend each test suite with its directory name, to make
         // them proper module IDs as the testing system expects
         prependDir('unit', unitSuites);
         prependDir('functional', functionalSuites);
 
         function prependDir(dir, list) {
-
-            var len;
 
             if (list && typeof list === 'object' && (len = list.length) > 0) {
                 for (i = 0; i < len; i = i + 1) {
@@ -31,4 +31,4 @@ define(
             functional : functionalSuites
         };
     }
-)
+);

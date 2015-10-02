@@ -47,7 +47,7 @@ module.exports = function (grunt) {
                     freeze    : true,       // prohibits altering the prototype of native objects
                     immed     : true,       // IIFEs must be wrapped in parentheses (function(){}())
                     indent    : 4,          // NOT enforced - intended spaces-per-tab for better error messages
-                    latedef   : true,       // variables and functions must be declared before use
+                    latedef   : 'nofunc',       // variables and functions must be declared before use
                     maxdepth  : 8,          // don't allow insane nesting of blocks
                     maxlen    : 140,        // maximum number of characters on a single line
                     maxparams : 4,          // max number of parameters functions are allowed to have
@@ -94,7 +94,8 @@ module.exports = function (grunt) {
                     },
                     files : {
                         src : [
-                            'test/**/*.js'
+                            'test/**/*.js',
+                            '!test/legacy/**'
                         ]
                     }
                 },
