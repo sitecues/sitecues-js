@@ -10,17 +10,17 @@ define(
         'intern/chai!assert',              // helps throw errors to fail tests, based on conditions
         'intern/dojo/node!leadfoot/keys',  // unicode string constants used to control the keyboard
         'intern/dojo/node!fs',             // Node's filesystem API, used to save screenshots
-        'intern/dojo/node!leadfoot/helpers/pollUntil'  // utility to pause until an expression is truthy
+        'intern/dojo/node!leadfoot/helpers/pollUntil',  // utility to pause until an expression is truthy
+        'page-object'
     ],
-    function (tdd, assert, keys, fs, pollUntil) {
+    function (tdd, assert, keys, fs, pollUntil, pageObject) {
 
         'use strict';
 
         var suite  = tdd.suite,
             test   = tdd.test,
             before = tdd.before,
-            url    = 'http://tools.qa.sitecues.com:9000/' +
-                     'site/simple.html' +
+            url    = 'http://tools.qa.sitecues.com:9000/site/simple.html' +
                      '?scjsurl=//js.dev.sitecues.com/l/s;id=s-00000005/v/dev/latest/js/sitecues.js' +
                      '&scwsid=s-00000005' +
                      '&scuimode=badge' +
@@ -29,11 +29,14 @@ define(
         suite('HLB Simple', function () {
 
             var picked = {
-                selector : 'p'
-            };
+                    selector : 'p'
+                },
+                picker;
 
             // Code to run when the suite starts, before tests...
             before(function () {
+
+                picker = pageObject.createPicker(this.remote);
 
                 return this.remote                // represents the browser being tested
                     .maximizeWindow()             // best effort to normalize window sizes (not every browser opens the same)
@@ -249,12 +252,8 @@ define(
 
             test('HLB is a <ul> if picked element is a <li>', function () {
 
-                return this.remote               // represents the browser being tested
-                    .execute(                    // run the given code in the remote browser
-                        function () {
-                            sitecues.highlight('li');
-                        }
-                    )
+                return picker
+                    .highlight('li')
                     .pressKeys(keys.SPACE)       // open the HLB
                     .setFindTimeout(20)          // the HLB has this many milliseconds to come into existence
                     .findById('sitecues-hlb')    // get the HLB!

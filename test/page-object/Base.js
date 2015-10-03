@@ -4,6 +4,8 @@ define(
     [],
     function () {
 
+        'use strict';
+
         class Base {
             constructor(remote) {
                 this.remote = remote;

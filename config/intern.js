@@ -60,7 +60,8 @@ define(
                 baseUrl: 'source/js',
                 packages: [
                     { name: 'unit', location: testDir + 'unit' },
-                    { name: 'functional', location: testDir + 'functional' }
+                    { name: 'functional', location: testDir + 'functional' },
+                    { name: 'page-object', location: testDir + 'page-object', main: 'index' }
                 ]
             },
 

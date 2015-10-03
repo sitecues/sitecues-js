@@ -4,6 +4,8 @@ define(
     ],
     function (Base) {
 
+        'use strict';
+
         class Lens extends Base {
 
             constructor(remote) {

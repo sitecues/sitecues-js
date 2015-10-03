@@ -4,6 +4,8 @@ define(
     ],
     function (Base) {
 
+        'use strict';
+
         class Picker extends Base {
 
             constructor(remote) {
@@ -21,6 +23,6 @@ define(
             }
         }
 
-        return Lens;
+        return Picker;
     }
 );
