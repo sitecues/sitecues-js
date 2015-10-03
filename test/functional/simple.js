@@ -118,8 +118,8 @@ define(
                                 'viewport': {
                                     'left'  : 0,
                                     'top'   : 0,
-                                    'right' : window.innerWidth,
-                                    'bottom': window.innerHeight
+                                    'right' : innerWidth,
+                                    'bottom': innerHeight
                                 }
                             };
                         }
