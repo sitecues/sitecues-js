@@ -16,21 +16,22 @@ define(
 
         'use strict';
 
-        let suite  = tdd.suite,
-            test   = tdd.test,
-            before = tdd.before,
-            URL    = 'http://tools.qa.sitecues.com:9000/site/simple.html' +
-                     '?scjsurl=//js.dev.sitecues.com/l/s;id=s-00000005/v/dev/latest/js/sitecues.js' +
-                     '&scwsid=s-00000005' +
-                     '&scuimode=badge' +
-                     '&scisv=2';
+        const suite  = tdd.suite,
+              test   = tdd.test,
+              before = tdd.before,
+              URL    = 'http://tools.qa.sitecues.com:9000/site/simple.html' +
+                       '?scjsurl=//js.dev.sitecues.com/l/s;id=s-00000005/v/dev/latest/js/sitecues.js' +
+                       '&scwsid=s-00000005' +
+                       '&scuimode=badge' +
+                       '&scisv=2';
 
         suite('HLB Simple', function () {
 
-            let picked = {
-                    selector : 'p'
-                },
-                picker,
+            const picked = {
+                      selector : 'p'
+                  };
+
+            let picker,
                 lens;
 
             // Code to run when the suite starts, before tests...
@@ -281,8 +282,8 @@ define(
 
             test('HLB Copies <textarea> Value', function () {
 
-                let selector = 'textarea',
-                    expected = 'Yipee!';
+                const selector = 'textarea',
+                      expected = 'Yipee!';
 
                 return this.remote               // represents the browser being tested
                     .findByCssSelector(selector)
@@ -323,7 +324,7 @@ define(
 
                 this.skip('WebDriver claims the checkbox is not visible. Why?');
 
-                let selector = 'input[type="checkbox"]';
+                const selector = 'input[type="checkbox"]';
 
                 return this.remote               // represents the browser being tested
                     .findByCssSelector(selector)
@@ -390,7 +391,7 @@ define(
 
             // test('Screenshot experiment', function () {
 
-            //     let canDoScreenshot = this.remote.session.capabilities.takesScreenshot;
+            //     const canDoScreenshot = this.remote.session.capabilities.takesScreenshot;
 
             //     return this.remote               // represents the browser being tested
             //         .then(
