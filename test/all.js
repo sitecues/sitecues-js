@@ -1,5 +1,5 @@
-// NOTE: This file is essentially a utility, it constructs and returns
-// lists of test suite module IDs for test automation
+// This is a utility that constructs and returns lists of module IDs
+// for test suite modules, to be used by the automation framework.
 
 define(
     [   // dependencies...
@@ -8,27 +8,27 @@ define(
     ],
     function (unitSuites, functionalSuites) {
 
-        var i, len;
+        'use strict';
 
-        // Prepend each test suite with its directory name, to make
-        // them proper module IDs as the testing system expects
-        prependDir('unit', unitSuites);
-        prependDir('functional', functionalSuites);
+        // Prepend test modules with a directory path, to make them proper
+        // module IDs as the testing system expects. Note that, due to
+        // how module IDs work, the forward slashes are in fact
+        // cross-platform compatible.
+        function prependDir(list, dir) {
 
-        function prependDir(dir, list) {
+            var len = list.length,
+                i;
 
-            if (list && typeof list === 'object' && (len = list.length) > 0) {
-                for (i = 0; i < len; i = i + 1) {
-                    list[i] = dir + '/' + list[i];
-                }
+            for (i = 0; i < len; i += 1) {
+                list[i] = dir + list[i];
             }
 
             return list;
         }
 
         return {
-            unit       : unitSuites,
-            functional : functionalSuites
+            unit       : prependDir(unitSuites, 'unit/'),
+            functional : prependDir(functionalSuites, 'functional/')
         };
     }
 );

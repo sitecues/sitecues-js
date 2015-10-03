@@ -8,13 +8,13 @@ define(
 
         'use strict';
 
-        const suite  = tdd.suite,
-              test   = tdd.test;
+        var suite  = tdd.suite,
+            test   = tdd.test;
 
         suite('common', function () {
             test('.equals() cares about sameness', function () {
-                const obj1 = { a : 1, b : [ 2, 3 ] },
-                      obj2 = { a : 1, b : [ 2, 3 ] };
+                var obj1 = { a : 1, b : [ 2, 3 ] },
+                    obj2 = { a : 1, b : [ 2, 3 ] };
 
                 assert.isTrue(
                     common.equals(obj1, obj1),
@@ -40,13 +40,13 @@ define(
                 );
             });
             test('.createSVGFragment() makes useful markup', function () {
-                const // Testing weird markup, since it should be agnostic.
-                      content   = ',,,!!!',
-                      className = 'blah',
-                      fragment  = common.createSVGFragment(content, className),
-                      // Using .childNodes over .children because we specifically
-                      // do not expect an immediate text node child.
-                      svg       = fragment.childNodes[0];
+                var // Testing weird markup, since it should be agnostic.
+                    content   = ',,,!!!',
+                    className = 'blah',
+                    fragment  = common.createSVGFragment(content, className),
+                    // Using .childNodes over .children because we specifically
+                    // do not expect an immediate text node child.
+                    svg       = fragment.childNodes[0];
 
                 assert.strictEqual(
                     fragment.nodeType,
