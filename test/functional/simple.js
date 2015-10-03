@@ -10,10 +10,9 @@ define(
         'intern/chai!assert',              // helps throw errors to fail tests, based on conditions
         'intern/dojo/node!leadfoot/keys',  // unicode string constants used to control the keyboard
         'intern/dojo/node!fs',             // Node's filesystem API, used to save screenshots
-        'intern/dojo/node!leadfoot/helpers/pollUntil',  // utility to pause until an expression is truthy
         'page-object'
     ],
-    function (tdd, assert, keys, fs, pollUntil, pageObject) {
+    function (tdd, assert, keys, fs, pageObject) {
 
         'use strict';
 
