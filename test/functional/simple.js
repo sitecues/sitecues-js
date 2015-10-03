@@ -16,7 +16,7 @@ define(
 
         'use strict';
 
-        var suite  = tdd.suite,
+        let suite  = tdd.suite,
             test   = tdd.test,
             before = tdd.before,
             URL    = 'http://tools.qa.sitecues.com:9000/site/simple.html' +
@@ -27,7 +27,7 @@ define(
 
         suite('HLB Simple', function () {
 
-            var picked = {
+            let picked = {
                     selector : 'p'
                 },
                 picker,
@@ -281,7 +281,7 @@ define(
 
             test('HLB Copies <textarea> Value', function () {
 
-                var selector = 'textarea',
+                let selector = 'textarea',
                     expected = 'Yipee!';
 
                 return this.remote               // represents the browser being tested
@@ -323,7 +323,7 @@ define(
 
                 this.skip('WebDriver claims the checkbox is not visible. Why?');
 
-                var selector = 'input[type="checkbox"]';
+                let selector = 'input[type="checkbox"]';
 
                 return this.remote               // represents the browser being tested
                     .findByCssSelector(selector)
@@ -390,7 +390,7 @@ define(
 
             // test('Screenshot experiment', function () {
 
-            //     var canDoScreenshot = this.remote.session.capabilities.takesScreenshot;
+            //     let canDoScreenshot = this.remote.session.capabilities.takesScreenshot;
 
             //     return this.remote               // represents the browser being tested
             //         .then(
