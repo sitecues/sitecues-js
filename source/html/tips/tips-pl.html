@@ -1,4 +1,4 @@
-<sc-card id="scp-zoom-card">
+<sc-card id="scp-zoom-card" aria-labelledby="scp-zoom-tab">
   <sc-center>
     <sc-h2 id="scp-use-slider-heading">
       Użyj suwaka powiększenia
@@ -12,7 +12,7 @@
   </sc-center>
 </sc-card>
 
-<sc-card id="scp-zoom-keys-card" data-advanced>
+<sc-card id="scp-zoom-keys-card" aria-labelledby="scp-zoom-keys-tab" data-advanced>
   <sc-center>
     <sc-p>Przytrzymaj klawisz aby bardziej powiększyć.</sc-p>
     <sc-h2>
@@ -25,25 +25,25 @@
   </sc-center>
 </sc-card>
 
-<sc-card id="scp-highlight-card">
+<sc-card id="scp-highlight-card" aria-labelledby="scp-highlight-tab">
   <sc-h2>Podświetlenie wybiera obszary do odczytania.</sc-h2>
   <sc-p>1. Wybierz interesujący Cię obszar.</sc-p>
   <sc-p>2. Przesuń mysz aby go podświetlić.</sc-p>
 </sc-card>
 
-<sc-card id="scp-lens-card">
+<sc-card id="scp-lens-card" aria-labelledby="scp-lens-tab">
   <sc-h2>Lupa powiększa.</sc-h2>
   <sc-p>1. Wybierz interesujący Cię obszar.</sc-p>
   <sc-p>2. Wciśnij <sc-kbd class="scp-space" id="scp-demo-lens-spacebar">spację</sc-kbd></sc-p>
 </sc-card>
 
-<sc-card id="scp-speech-card">
+<sc-card id="scp-speech-card" aria-labelledby="scp-speech-tab">
   <sc-h2>Funkcja mowy czyta tekst na głos.</sc-h2>
   <sc-p>1. Kliknij przycisk mowy &nbsp; <sc-span id="scp-speech-button-demo"></sc-span></sc-p>
   <sc-p>2. Podświetl &amp; wciśnij <sc-kbd class="scp-space" id="scp-demo-speech-spacebar">spację</sc-kbd></sc-p>
 </sc-card>
 
-<sc-card id="scp-full-guide-card">
+<sc-card id="scp-full-guide-card" aria-labelledby="scp-full-guide-tab">
   <sc-h2 class="scp-icon-menuitem">
     <sc-button id="scp-guide-icon" data-target="#"></sc-button>
     <sc-link data-target="#">Pełny podręcznik</sc-link><br/>
@@ -59,12 +59,12 @@
 <!-- Header -->
 <sc-h1 class="scp-card-header">Tips</sc-h1>
 
-<sc class="scp-card-chooser">
-  <sc-link data-target="scp-zoom-card">Powiększenie</sc-link>
-  <sc-link data-target="scp-highlight-card">Podświetlenie</sc-link>
-  <sc-link data-target="scp-lens-card">Lupa</sc-link>
-  <sc-link data-target="scp-speech-card">Mowa</sc-link>
-  <sc-link data-target="scp-full-guide-card">Więcej</sc-link>
+<sc role="tablist" class="scp-card-chooser">
+  <sc-tab id="scp-zoom-tab" data-target="scp-zoom-card">Powiększenie</sc-tab>
+  <sc-tab id="scp-highlight-tab" data-target="scp-highlight-card">Podświetlenie</sc-tab>
+  <sc-tab id="scp-lens-tab" data-target="scp-lens-card">Lupa</sc-tab>
+  <sc-tab id="scp-speech-tab" data-target="scp-speech-card">Mowa</sc-tab>
+  <sc-tab id="scp-full-guide-tab" data-target="scp-full-guide-card">Więcej</sc-tab>
 </sc>
 
 <sc class="scp-card-indicator"></sc>
