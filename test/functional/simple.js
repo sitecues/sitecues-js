@@ -244,9 +244,9 @@ define(
             test('HLB is a <ul> if picked element is a <li>', function () {
 
                 return picker.highlight('li')
-                    .pressKeys(keys.SPACE)       // open the HLB
-                    .setFindTimeout(20)          // the HLB has this many milliseconds to come into existence
-                    .findById('sitecues-hlb')    // get the HLB!
+                    .pressKeys(keys.SPACE)       // open the Lens
+                    .setFindTimeout(20)          // the Lens has this many milliseconds to come into existence
+                    .findById('sitecues-hlb')    // get the Lens!
                     .getProperty('tagName')
                     .then(function (data) {
                         assert.strictEqual(

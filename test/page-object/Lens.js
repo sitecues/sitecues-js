@@ -1,8 +1,9 @@
 define(
     [
-        './Base'
+        './Base',
+        'intern/dojo/node!leadfoot/keys',  // unicode string constants used to control the keyboard
     ],
-    function (Base) {
+    function (Base, keys) {
 
         'use strict';
 
@@ -12,11 +13,9 @@ define(
                 super(remote);
             }
 
+            // Open the Lens and wait for its animation to finish.
             open() {
-                return this.remote
-                    .pressKeys(keys.SPACE)     // hit the spacebar, to open the Lens
-                    .setFindTimeout(20)        // the Lens has this many milliseconds to come into existence
-                    .findById(Lens.ID)
+                return this.instantOpen()
                         .executeAsync(         // run an async callback in the remote browser
                             function (event, done) {
                                 sitecues.on(event, done);  // use our event system to know when the Lens is ready
@@ -25,6 +24,7 @@ define(
                         );
             }
 
+            // Destroy the Lens and wait for its animation to finish.
             close() {
                 return this.remote
                     .pressKeys(keys.SPACE)       // close the Lens
@@ -38,7 +38,15 @@ define(
                             });
                         },
                         [Lens.CLOSED_EVENT, Lens.ID]
-                    )
+                    );
+            }
+
+            // Open the Lens without waiting for any animation.
+            instantOpen() {
+                return this.remote
+                    .pressKeys(keys.SPACE)  // open the Lens
+                    .setFindTimeout(20)     // the Lens has this many milliseconds to come into existence
+                    .findById(Lens.ID);     // get the Lens!
             }
         }
 
