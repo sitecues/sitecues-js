@@ -13,6 +13,11 @@
     "npm": "^3.3.4"
   },
   "bin": "binary/web.js",
+  "scripts": {
+    "pretest": "selenium-server -port 4447 > /dev/null 2>&1 &",
+    "test": "intern-runner",
+    "posttest": "kill $(lsof -t -i:4447)"
+  },
   "dependencies": {
     "bg-runner": "https://s3.amazonaws.com/npm.sitecues.com/bg-runner-0.0.2.tgz",
     "express": "3.21.2",
