@@ -19,7 +19,7 @@ define(
         var suite  = tdd.suite,
             test   = tdd.test,
             before = tdd.before,
-            url    = 'http://tools.qa.sitecues.com:9000/site/simple.html' +
+            URL    = 'http://tools.qa.sitecues.com:9000/site/simple.html' +
                      '?scjsurl=//js.dev.sitecues.com/l/s;id=s-00000005/v/dev/latest/js/sitecues.js' +
                      '&scwsid=s-00000005' +
                      '&scuimode=badge' +
@@ -30,16 +30,19 @@ define(
             var picked = {
                     selector : 'p'
                 },
-                picker;
+                picker,
+                lens;
 
             // Code to run when the suite starts, before tests...
             before(function () {
 
+                // Create UI abstractions.
                 picker = pageObject.createPicker(this.remote);
+                lens   = pageObject.createLens(this.remote);
 
                 return this.remote                // represents the browser being tested
                     .maximizeWindow()             // best effort to normalize window sizes (not every browser opens the same)
-                    .get(url)                     // navigate to the desired page
+                    .get(URL)                     // navigate to the desired page
                     .setExecuteAsyncTimeout(800)  // max ms for executeAsync calls to complete
                     // Store some data about the original picked element before
                     // we do anything to mess with it, for later comparison.
@@ -230,20 +233,9 @@ define(
 
             test('Spacebar Closes HLB', function () {
 
-                return this.remote               // represents the browser being tested
-                    .pressKeys(keys.SPACE)       // close the HLB
-                    .setExecuteAsyncTimeout(1200)
-                    .executeAsync(
-                        function (done) {
-                            sitecues.on('hlb/closed', function () {
-                                done(
-                                    document.getElementById('sitecues-hlb')
-                                );
-                            });
-                        }
-                    )
+                return lens.close()
                     .then(function (data) {
-                        assert.notOk(data, 'HLB no longer exists.');
+                        assert.isNull(data, 'HLB no longer exists.');
                     });
             });
 
@@ -251,8 +243,7 @@ define(
 
             test('HLB is a <ul> if picked element is a <li>', function () {
 
-                return picker
-                    .highlight('li')
+                return picker.highlight('li')
                     .pressKeys(keys.SPACE)       // open the HLB
                     .setFindTimeout(20)          // the HLB has this many milliseconds to come into existence
                     .findById('sitecues-hlb')    // get the HLB!
