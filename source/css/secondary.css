@@ -469,7 +469,7 @@ sc-button[data-setting-name="themeName"][data-setting-value="dark"] {
 .scp-lens-size-group {
   padding-top: 14px;
 }
-sc-button[data-setting-current="true"]:after {
+sc-button[aria-pressed="true"]:after {
   content: "";
   position: absolute;
   top: 85px;
