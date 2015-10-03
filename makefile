@@ -266,7 +266,7 @@ test-all: test-unit
 ################################################################################
 test-unit:
 	#@echo "TEST RUN ID: $(test-run-id)"
-	#@cd ./tests/unit ; ../../node_modules/mocha/bin/mocha $(testunit-mocha-options)
+	npm test config=config/intern
 
 ################################################################################
 # TARGET: stop-all-services
