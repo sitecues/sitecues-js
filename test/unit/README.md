@@ -1,4 +1,4 @@
 # `/test/unit`
-This folder contains automated unit test cases.
+This folder contains unit test cases, which are collections of individual tests.
 
-These files are designed to interact with the API of our application to check that all input/output patterns remain in tact over time, etc. They gaurantee the expectations of developers and dependent programs.
+Unit tests are designed to interact with the API of our application to check that all input/output patterns remain in tact over time. They gaurantee the expectations of developers and dependent programs.

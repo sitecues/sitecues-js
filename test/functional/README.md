@@ -1,4 +1,4 @@
 # `/test/functional`
-This folder contains automated functional test cases.
+This folder contains functional test suites, which are collections of individual tests.
 
-These files are designed to interact with the user interface of our application to check that features and modes of interaction remain in tact over time, etc. They gaurantee the expectations of users and product management.
+Functional tests are designed to interact with the user interface of our application to check that features and their user experience remain in tact over time. They gaurantee the expectations of users and product management.
