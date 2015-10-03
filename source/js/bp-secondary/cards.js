@@ -170,7 +170,9 @@ define(['bp/constants', 'bp/helper', 'core/locale', 'bp/model/state', 'core/plat
   }
 
   function getActiveTab() {
-    return activePanel.querySelector('.scp-card-chooser [data-target="' + getActiveCard().id + '"]');
+    var activeCard = getActiveCard(),
+      tabId = activeCard.getAttribute('aria-labelledby');
+    return document.getElementById(tabId);
   }
 
   function moveIndicator() {
