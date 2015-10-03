@@ -398,7 +398,7 @@ define(['bp/helper', 'core/platform', 'bp/constants', 'core/conf/site'],
         'z-index': 99999
       },
 
-      '.scp-is-panel.scp-keyboard > #scp-focus-outline[data-show]': {
+      '.scp-is-panel.scp-keyboard:not(.scp-secondary-expanding) > #scp-focus-outline[data-show]': {
         'display': 'block'
       },
 

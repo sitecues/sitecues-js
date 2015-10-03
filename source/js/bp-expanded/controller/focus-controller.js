@@ -129,7 +129,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
 
     updateDOMFocusState();
 
-    if (!tabbedElement || !state.get('isKeyboardMode')) {
+    if (!tabbedElement || !isKeyboardMode()) {
       // No focus to show or not in keyboard mode
       hideFocus();
     }
@@ -153,6 +153,30 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
       bpContainer.addEventListener('mousedown', clickToFocus);
     }
   }
+
+  function isKeyboardMode() {
+    return state.get('isKeyboardMode');
+  }
+
+  function focusCard(id, tabElement) {
+    if (isKeyboardMode() && tabElement) {
+      clearPanelFocus();
+      tabbedElement = tabElement;
+      showFocus();
+    }
+  }
+
+  function focusFirstItem(isNewPanel) {
+    if (isNewPanel && isKeyboardMode()) {
+      navigateInDirection(1, true);
+    }
+  }
+
+//  function focusCard() {
+//    if (isKeyboardMode()) {
+//      navigateInDirection(1, true, true);
+//    }
+//  }
 
   /*
    If the badge was focused, the panel will go into focus mode when it's entered.
@@ -231,7 +255,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
     // @data-show-focus = focus to be shown on this element
     // @data-own-focus-ring = element will show it's own focus ring
 
-    var showFocusOn = getElementToShowFocusOn(tabbedElement),
+    var showFocusOn = getElementToShowFocusOn(),
       scale = helper.getBpContainerScale();
 
     function getFinalCoordinate(coord) {
@@ -256,16 +280,16 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
     }
   }
 
-  function getAllTabbableItemsInActiveCard () {
+  function getAllTabbableItemsInActiveCard() {
     function getItems(itemsSelector) {
       var panelSelector = '#scp-' + state.getPanelName() + '>',
         nodeList = document.querySelectorAll(panelSelector + itemsSelector);
       return Array.prototype.slice.call(nodeList);  // Convert to array
     }
-    var cardChooserLinks = getItems('.scp-card-chooser>:not([aria-selected])'),
+    var cardTabs = getItems('.scp-card-chooser>sc-link'),
       cardContentItems = getItems('.scp-active .scp-tabbable:not([data-show="false"])');
 
-    return cardChooserLinks.concat(cardContentItems);
+    return cardTabs.concat(cardContentItems);
   }
 
   function getAdjacentTabbableItem (all, current, direction) {
@@ -298,7 +322,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
       parseFloat(getComputedStyle(elem).opacity) > 0.1;
   }
 
-  function navigateInDirection(direction) {
+  function navigateInDirection(direction, doStartFromTop) {
 
     if (!state.isPanel()) {
       return;
@@ -307,7 +331,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
     hideFocus();
 
     var tabbable = getTabbableItems(),
-      focusIndex = getFocusIndexForElement(getFocusedItem()),
+      focusIndex = doStartFromTop ? -1 : getFocusIndexForElement(getFocusedItem()),
       isFirstTimeInCard = tabbable[focusIndex] !== '$',
       numItems = tabbable.length,
       nextItem;
@@ -316,6 +340,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
       nextItem = null;
       if (tabbable[focusIndex] === '$') {
         nextItem = navigateInCard(direction, isFirstTimeInCard, tabbedElement);
+        isFirstTimeInCard = false;
       }
       if (!nextItem) {
         focusIndex = focusIndex + direction;
@@ -482,6 +507,9 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
     }
     isInitialized = true;
     sitecues.on('bp/will-toggle-feature bp/did-activate-link bp/do-send-feedback', hideFocus);
+    sitecues.on('bp/did-change', focusFirstItem);
+    sitecues.on('bp/did-show-card', focusCard);
+//    sitecues.on('bp/did-switch-card', focusCard);
     beginKeyHandling(); // First time badge expands
     sitecues.on('bp/will-expand', beginKeyHandling);
     sitecues.on('bp/will-shrink', endKeyHandling);

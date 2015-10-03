@@ -9,10 +9,10 @@ var isInitialized,
   <use id="scp-secondary-outline" xlink:href="#scp-outline-def" fill="white"/>\
   <g id="scp-bottom-secondary">\
     <use xlink:href="#scp-bottom-def"/>\
-    <text id="scp-tips-label" text-anchor="middle" class="scp-hand-cursor" role="link" data-feature="tips" x="75" y="178">{{tips}}</text>\
-    <text id="scp-settings-label" text-anchor="middle" class="scp-hand-cursor" role="link" data-feature="settings" x="285" y="178">{{settings}}</text>\
-    <text id="scp-feedback-label" text-anchor="middle" class="scp-hand-cursor" role="link" data-feature="feedback" x="517" y="178">{{rate_us}}</text>\
-    <text id="scp-about-label" text-anchor="middle" class="scp-hand-cursor" role="link" data-feature="about" x="730" y="178">{{about}}</text>\
+    <text id="scp-tips-label" text-anchor="middle" class="scp-hand-cursor" role="button" data-feature="tips" x="75" y="178">{{tips}}</text>\
+    <text id="scp-settings-label" text-anchor="middle" class="scp-hand-cursor" role="button" data-feature="settings" x="285" y="178">{{settings}}</text>\
+    <text id="scp-feedback-label" text-anchor="middle" class="scp-hand-cursor" role="button" data-feature="feedback" x="517" y="178">{{rate_us}}</text>\
+    <text id="scp-about-label" text-anchor="middle" class="scp-hand-cursor" role="button" data-feature="about" x="730" y="178">{{about}}</text>\
   </g>\
   <rect id="scp-card-header-bg" class="scp-secondary-feature-only" width="808" height="134" stroke="#C0BFBF" stroke-width="1" fill="#EEE"/>\
   <g>\

@@ -51,7 +51,9 @@ define(['bp/constants', 'bp/helper', 'core/locale', 'bp/model/state', 'core/plat
     var INTERACTIVE =  ' class="scp-hand-cursor scp-tabbable';
     return html.replace(/(<sc-button )/g, '<sc-button role="button"' + INTERACTIVE + '" ')
       .replace(/<sc-menuitem /g, '<sc-menuitem role="button"' + INTERACTIVE+ '" ')
-      .replace(/<sc-link /g, '<sc-link role="link"' + INTERACTIVE+ '" ')
+      .replace(/<sc-card /g, '<sc-card role="tabpanel"')
+      .replace(/<sc-tab /g, '<sc-link role="tab"' + INTERACTIVE+ '" ')
+      .replace(/<\/sc-tab/g, '</sc-link')
       .replace(/<sc-normal-range /g, '<input type="range"' + INTERACTIVE + ' scp-normal-range" ')
       .replace(/<\/sc-normal-range>/g, '</input>')
       .replace(/<sc-hue-range /g, '<input type="range"' + INTERACTIVE + ' scp-hue-range" ')
@@ -86,14 +88,17 @@ define(['bp/constants', 'bp/helper', 'core/locale', 'bp/model/state', 'core/plat
       // bpContainer[addOrRemoveFn]('keydown', onKeyDown);
 
       bpContainer[addOrRemoveFn]('click', onClick);
+      bpContainer[addOrRemoveFn]('keydown', onKeyDown);
     }
 
     // Active state
     if (willBeActive) {
-      activePanelName = panelName;
-      activePanel = getPanelElement(panelName);
-      moveIndicator();
-      newCardNotification();
+      if (activePanelName !== panelName) {
+        activePanelName = panelName;
+        activePanel = getPanelElement(panelName);
+        moveIndicator();
+        newCardNotification();
+      }
     }
     else {
       activePanelName = null;
@@ -122,8 +127,22 @@ define(['bp/constants', 'bp/helper', 'core/locale', 'bp/model/state', 'core/plat
     }
   }
 
+  function onKeyDown(event) {
+    var LEFT  = 37,
+      RIGHT = 39;
+    if (event.target.localName !== 'input') {
+      if (event.keyCode === LEFT) {
+        switchCard(-1);
+      }
+      else if (event.keyCode === RIGHT) {
+        switchCard(1);
+      }
+    }
+  }
+
   function newCardNotification() {
-    sitecues.emit('bp/did-show-card', getActiveCard().id);
+    var cardId = getActiveCard().id;
+    sitecues.emit('bp/did-show-card', cardId, getActiveTab());
   }
 
 
@@ -150,19 +169,22 @@ define(['bp/constants', 'bp/helper', 'core/locale', 'bp/model/state', 'core/plat
     }
   }
 
+  function getActiveTab() {
+    return activePanel.querySelector('.scp-card-chooser [data-target="' + getActiveCard().id + '"]');
+  }
+
   function moveIndicator() {
     if (!activePanel) {
       return;
     }
-    var chooser = activePanel.querySelector('.scp-card-chooser'),
-      chosenItem = chooser.querySelector('[data-target="' + getActiveCard().id + '"]'),
+    var chosenItem = getActiveTab(),
       bpScale = helper.getBpContainerScale(),
       indicator = activePanel.querySelector('.scp-card-indicator'),
       indicatorRect = indicator.getBoundingClientRect(),
       chosenItemRect = chosenItem.getBoundingClientRect(),
       choseItemLeft = chosenItemRect.left - indicatorRect.left,
       indicatorLeft = -442 + (choseItemLeft + chosenItemRect.width / 2) / bpScale,
-      previouslyChosen = chooser.querySelector('[aria-selected="true"]');
+      previouslyChosen = chosenItem.parentNode.querySelector('[aria-selected="true"]');
 
     // Reset old selection
     if (previouslyChosen) {
@@ -242,7 +264,6 @@ define(['bp/constants', 'bp/helper', 'core/locale', 'bp/model/state', 'core/plat
     loadPanelContents('tips');
 
     sitecues.on('bp/did-change', onPanelUpdate);
-    sitecues.on('bp/do-target-card', selectNewCard);
   }
 
   return {

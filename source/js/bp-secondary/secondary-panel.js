@@ -87,8 +87,8 @@ define(['bp/constants',
     fireBpChanged();
   }
 
-  function fireBpChanged() {
-    sitecues.emit('bp/did-change');
+  function fireBpChanged(isNewPanelReady) {
+    sitecues.emit('bp/did-change', isNewPanelReady);
   }
 
   function getBPContainer() {
@@ -199,7 +199,7 @@ define(['bp/constants',
       cardsModule.init();
 
       state.set('isSecondaryPanel', willEnable);
-      fireBpChanged();
+      fireBpChanged(true);
     }
 
     finishAllAnimations();
@@ -312,7 +312,7 @@ define(['bp/constants',
     function fadeInTextContentWhenLargeEnough() {
       setTimeout(function () {
         state.set('isSecondaryExpanding', false);
-        fireBpChanged();
+        fireBpChanged(true);
       }, heightAnimationDelay + heightAnimationDuration * 0.7);
     }
 
@@ -409,12 +409,26 @@ define(['bp/constants',
     return byId(features[featureName].panelId);
   }
 
+  function setSelectedFeature(featureName, isEnabled) {
+    function setSelected(feature, isSelected) {
+      byId(feature.labelId).setAttribute('aria-pressed', !!isSelected);
+    }
+    // First clear selected state on all
+    forEachFeature(setSelected);
+
+    // Now set selected state if necessary
+    if (isEnabled) {
+      setSelected(features[featureName], true);
+    }
+  }
+
   /**
    * Toggle back and forth between button menu and a feature
    * @param featureName
    */
   function toggleSecondaryFeature(featureName) {
     var willEnable = state.getSecondaryPanelName() !== featureName;
+    setSelectedFeature(featureName, willEnable);
     updateMoreButtonLabel(!willEnable);
     if (willEnable && !isFeatureAvailable(featureName)) {
       // The feature was not loaded -- punt and go to help page
@@ -458,6 +472,9 @@ define(['bp/constants',
     setElemTransform(more, 0, BP_CONST.TRANSFORMS[morePanelId].translateY);
 
     resetButtonStyles();
+
+    // Clear selected state on feature button labels
+    setSelectedFeature();
   }
 
   function resetButtonStyles() {
