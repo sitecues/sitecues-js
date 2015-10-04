@@ -13,7 +13,7 @@ define(
 
         // make sure we are in Node and not a browser...
         if (typeof process === 'object' && process && process.env) {
-            build = process.env.BUILD || process.env.COMMIT || process.env.TRAVIS_COMMIT;
+            build = process.env.BUILD || process.env.COMMIT;
         }
 
         return {
