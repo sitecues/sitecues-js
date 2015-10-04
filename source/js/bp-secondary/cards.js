@@ -121,8 +121,7 @@ define(['bp/constants', 'bp/helper', 'core/locale', 'bp/model/state', 'core/plat
       }
       else {
         // Card link
-        selectNewCard(byId(linkTarget));
-        sitecues.emit('bp/did-activate-link');
+        selectNewCard(byId(linkTarget), true);
       }
     }
   }
@@ -140,9 +139,8 @@ define(['bp/constants', 'bp/helper', 'core/locale', 'bp/model/state', 'core/plat
     }
   }
 
-  function newCardNotification() {
-    var cardId = getActiveCard().id;
-    sitecues.emit('bp/did-show-card', cardId, getActiveTab());
+  function newCardNotification(isFromLink) {
+    sitecues.emit('bp/did-show-card', getActiveTab(), isFromLink);
   }
 
 
@@ -228,14 +226,14 @@ define(['bp/constants', 'bp/helper', 'core/locale', 'bp/model/state', 'core/plat
   }
 
   // Returns true on success
-  function selectNewCard(cardToSelect) {
+  function selectNewCard(cardToSelect, isFromLink) {
     if (cardToSelect) {
       // Always skip advanced cards for now
       if (cardToSelect.localName === 'sc-card' && !cardToSelect.hasAttribute('data-advanced')) {
         toggleCardActive(getActiveCard(), false);
         toggleCardActive(cardToSelect, true);
         moveIndicator();
-        newCardNotification();
+        newCardNotification(isFromLink);
         // At first, back button is disabled when on first card
         // However, once we've gone forward we allow backwards cycling
         byId(BP_CONST.PREV_ID).removeAttribute('aria-disabled');

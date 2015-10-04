@@ -158,10 +158,16 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
     return state.get('isKeyboardMode');
   }
 
-  function focusCard(id, tabElement) {
+  function focusCard(tabElement, isFromLink) {
     if (isKeyboardMode() && tabElement) {
       clearPanelFocus();
       tabbedElement = tabElement;
+      if (isFromLink) {
+        // When jumping directly to tab, navigate to the first content inside the tab
+        while (tabbedElement && tabbedElement.getAttribute('role') === 'tab') {
+          navigateInDirection(1);
+        }
+      }
       showFocus();
     }
   }
@@ -399,10 +405,10 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
     var target = state.isPanel() && helper.getEventTarget(event);
     clearPanelFocus();
     while (target && target.id !== BP_CONST.BADGE_ID && target.id !== BP_CONST.BP_CONTAINER_ID) {
-      var ariaControls = target.getAttribute('aria-controls');
-      if (ariaControls) {
+      var forwardClickFocus = target.getAttribute('aria-controls');
+      if (forwardClickFocus) {
         // Clicking slider thumb should focus slider bar
-        target = byId(ariaControls);
+        target = byId(forwardClickFocus);
       }
       if (getFocusIndexForElement(target) >= 0) {
         tabbedElement = target;
@@ -506,7 +512,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
       return;
     }
     isInitialized = true;
-    sitecues.on('bp/will-toggle-feature bp/did-activate-link bp/do-send-feedback', hideFocus);
+    sitecues.on('bp/will-toggle-feature bp/do-send-feedback', hideFocus);
     sitecues.on('bp/did-change', focusFirstItem);
     sitecues.on('bp/did-show-card', focusCard);
 //    sitecues.on('bp/did-switch-card', focusCard);
