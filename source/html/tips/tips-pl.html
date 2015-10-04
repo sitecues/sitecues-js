@@ -1,5 +1,5 @@
 <sc-card id="scp-zoom-card" aria-labelledby="scp-zoom-tab">
-  <sc-center>
+  <sc-center class="scp-tabbable">
     <sc-h2 id="scp-use-slider-heading">
       Użyj suwaka powiększenia
     </sc-h2>
@@ -13,7 +13,7 @@
 </sc-card>
 
 <sc-card id="scp-zoom-keys-card" aria-labelledby="scp-zoom-keys-tab" data-advanced>
-  <sc-center>
+  <sc-center class="scp-tabbable">
     <sc-p>Przytrzymaj klawisz aby bardziej powiększyć.</sc-p>
     <sc-h2>
       <sc-span aria-label="Powększenie strony - wciśnij klawisz - lub + ">
@@ -26,31 +26,37 @@
 </sc-card>
 
 <sc-card id="scp-highlight-card" aria-labelledby="scp-highlight-tab">
-  <sc-h2>Podświetlenie wybiera obszary do odczytania.</sc-h2>
-  <sc-p>1. Wybierz interesujący Cię obszar.</sc-p>
-  <sc-p>2. Przesuń mysz aby go podświetlić.</sc-p>
+  <sc class="scp-tabbable">
+    <sc-h2>Podświetlenie wybiera obszary do odczytania.</sc-h2>
+    <sc-p>1. Wybierz interesujący Cię obszar.</sc-p>
+    <sc-p>2. Przesuń mysz aby go podświetlić.</sc-p>
+  </sc>
 </sc-card>
 
 <sc-card id="scp-lens-card" aria-labelledby="scp-lens-tab">
-  <sc-h2>Lupa powiększa.</sc-h2>
-  <sc-p>1. Wybierz interesujący Cię obszar.</sc-p>
-  <sc-p>2. Wciśnij <sc-kbd class="scp-space" id="scp-demo-lens-spacebar">spację</sc-kbd></sc-p>
+  <sc class="scp-tabbable">
+    <sc-h2>Lupa powiększa.</sc-h2>
+    <sc-p>1. Wybierz interesujący Cię obszar.</sc-p>
+    <sc-p>2. Wciśnij <sc-kbd class="scp-space" id="scp-demo-lens-spacebar">spację</sc-kbd></sc-p>
+  </sc>
 </sc-card>
 
 <sc-card id="scp-speech-card" aria-labelledby="scp-speech-tab">
-  <sc-h2>Funkcja mowy czyta tekst na głos.</sc-h2>
-  <sc-p>1. Kliknij przycisk mowy &nbsp; <sc-span id="scp-speech-button-demo"></sc-span></sc-p>
-  <sc-p>2. Podświetl &amp; wciśnij <sc-kbd class="scp-space" id="scp-demo-speech-spacebar">spację</sc-kbd></sc-p>
+  <sc class="scp-tabbable">
+    <sc-h2>Funkcja mowy czyta tekst na głos.</sc-h2>
+    <sc-p>1. Kliknij przycisk mowy &nbsp; <sc-span id="scp-speech-button-demo"></sc-span></sc-p>
+    <sc-p>2. Podświetl &amp; wciśnij <sc-kbd class="scp-space" id="scp-demo-speech-spacebar">spację</sc-kbd></sc-p>
+  </sc>
 </sc-card>
 
 <sc-card id="scp-full-guide-card" aria-labelledby="scp-full-guide-tab">
   <sc-h2 class="scp-icon-menuitem">
-    <sc-button id="scp-guide-icon" data-target="#"></sc-button>
-    <sc-link data-target="#">Pełny podręcznik</sc-link><br/>
+    <sc-button id="scp-guide-icon" aria-labelledby="scp-guide-label" data-target="#"></sc-button>
+    <sc-link id="scp-kbd-label" id="scp-guide-label" data-target="#">Pełny podręcznik</sc-link><br/>
     <sc-span>Ćwicz sitecues</sc-span>
   </sc-h2>
   <sc-h2 class="scp-icon-menuitem">
-    <sc-button id="scp-kbd-icon" data-target="##keyboard"></sc-button>
+    <sc-button id="scp-kbd-icon" aria-labelledby="scp-kbd-label" data-target="##keyboard"></sc-button>
     <sc-link data-target="##keyboard">Pomoc klawiatury</sc-link><br/>
     <sc-span>Skocz wprost tam</sc-span>
   </sc-h2>

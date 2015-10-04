@@ -11,8 +11,6 @@
 // - About panel
 // Accessibility
 // - JAWS 16 with IE 11 - tabbing, role announced as link. Arrowing, you don't discover it at all.
-// - Initial focus
-// - Set aria-pressed on current theme button
 // - Labeled groups!
 // - Accessible tips. Or, under tips, tell screen readers how to get full help guide.
 // CSS improvements

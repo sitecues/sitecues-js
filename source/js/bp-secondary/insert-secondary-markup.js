@@ -30,7 +30,7 @@ var isInitialized,
         </g>\
       </g>\
     </g>\
-    <g id="scp-feedback" class="scp-if-feedback scp-transition-opacity scp-secondary-feature">\
+    <g id="scp-feedback" class="scp-if-feedback scp-transition-opacity scp-secondary-feature" role="group" aria-labelledby="scp-feedback-header">\
       <rect id="scp-feedback-input-rect" data-own-focus-ring x="45" y="315" width="715" height="400" stroke-width="3" stroke="#aaa" fill="#fdfcfc" rx="20" ry="20"/>\
       <g id="scp-rating" class="scp-hand-cursor" role="group" aria-label="{{rating}}">\
         <use id="scp-stars-1" role="button" aria-pressed="false" aria-label="{{rating_1}}" class="scp-rating-star" xlink:href="#scp-rating-star-def" x="42" y="736"/>\
@@ -84,7 +84,7 @@ var isInitialized,
 </g>',
 htmlSecondary =
 '<sc-h1 id="scp-feedback-header" class="scp-card-header">{{rate_us}}</sc-h1>\
-<sc class="scp-secondary-feature scp-transition-opacity scp-if-feedback">\
+<sc class="scp-secondary-feature scp-transition-opacity scp-if-feedback" role="group" aria-labelledby="scp-feedback-header">\
   <sc-p id="scp-feedback-prompt">{{rate_us_suggest}} {{rate_us_prompt}}</sc-p>\
   <textarea id="scp-feedback-textarea" class="scp-hand-cursor" \
     aria-describedby="scp-feedback-prompt" data-visible-focus-on="scp-feedback-input-rect" placeholder="{{tell_us_something}}"></textarea>\
@@ -92,7 +92,7 @@ htmlSecondary =
 <sc id="scp-feedback-thanks" class="scp-if-feedback-sent">\
   <sc-h1>{{thank_you}}</sc-h1>\
 </sc>\
-<sc class="scp-about-teaser scp-if-about scp-transition-opacity scp-secondary-feature">\
+<sc class="scp-about-teaser scp-if-about scp-transition-opacity scp-secondary-feature" role="group" aria-label="{{about}} sitecues">\
   <sc-p>\
     <a id="scp-about-1" target="_blank" href="http://sitecues.com">sitecues.com</a>\
     </sc-p>\
