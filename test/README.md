@@ -1,5 +1,5 @@
 # `/test`
-This folder contains automated test cases and helpers.
+This folder contains automated test suites and helpers.
 
 Note: We have many old tests from a previous version of our testing architecture located in the `legacy` folder. The intention is to migrate those to Intern.
 

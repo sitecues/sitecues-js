@@ -13,7 +13,7 @@ define(
 
         // make sure we are in Node and not a browser...
         if (typeof process === 'object' && process && process.env) {
-            build = process.env.BUILD || process.env.COMMIT || process.env.TRAVIS_COMMIT;
+            build = process.env.BUILD || process.env.COMMIT;
         }
 
         return {
@@ -22,7 +22,7 @@ define(
 
             capabilities: {
                 // See examples: https://code.google.com/p/selenium/wiki/DesiredCapabilities
-                'name': 'Automated tests - sitecues.js',  // name of the test run, for logging purposes
+                'name': 'Automated Test - sitecues-js',   // name of the test run, for logging purposes
                 'selenium-version': '2.45.0',             // request a version, which may not always be respected
                 'build': build                            // useful to log success history tied to code changes
             },
@@ -34,19 +34,19 @@ define(
                 //     // pretend to be Chrome, to avoid fallbacks...
                 //     'phantomjs.page.settings.userAgent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.111 Safari/537.36'
                 // },
-                { browserName: 'chrome' },
-                { browserName: 'firefox' }
-                // { browserName: 'safari' }
+                // { browserName: 'safari' },
+                // { browserName: 'firefox' },
+                { browserName: 'chrome' }
                 // BrowserStack-style...
-                // { os: 'Windows', os_version: '8.1',       browser: 'chrome',  browser_version: '36.0' },
-                // { os: 'Windows', os_version: '8.1',       browser: 'firefox', browser_version: '31.0' },
-                // { os: "Windows", os_version: '8.1',       browser: 'ie',      browser_version: '11.0' },
-                // { os: 'OS X',    os_version: 'Mavericks', browser: 'safari',  browser_version: '7.0' }
-                // SuaceLabs-style...
-                // { platform: 'Windows 8.1', browserName: 'chrome',            version: '36' },
-                // { platform: 'Windows 8.1', browserName: 'firefox',           version: '31' },
-                // { platform: 'Windows 8.1', browserName: 'internet explorer', version: '11' },
-                // { platform: 'OS X 10.9',   browserName: 'safari',            version: '7' }
+                // { os: 'Windows', os_version: '10',       browser: 'edge',    browser_version: '12.0' },
+                // { os: 'Windows', os_version: '10',       browser: 'firefox', browser_version: '40.0' },
+                // { os: 'Windows', os_version: '10',       browser: 'chrome',  browser_version: '44.0' },
+                // { os: 'OS X',    os_version: 'Yosemite', browser: 'safari',  browser_version: '8.0' },
+                // SauceLabs-style...
+                // { platform: 'Windows 10', browserName: 'internet explorer', version: '11' },
+                // { platform: 'Windows 10', browserName: 'firefox',           version: '40' },
+                // { platform: 'Windows 10', browserName: 'chrome',            version: '44' },
+                // { platform: 'OS X 10.10', browserName: 'safari',            version: '8' }
             ],
 
             maxConcurrency: 3,  // how many browsers may be open at once
@@ -60,7 +60,8 @@ define(
                 baseUrl: 'source/js',
                 packages: [
                     { name: 'unit', location: testDir + 'unit' },
-                    { name: 'functional', location: testDir + 'functional' }
+                    { name: 'functional', location: testDir + 'functional' },
+                    { name: 'page-object', location: testDir + 'page-object', main: 'index' }
                 ]
             },
 

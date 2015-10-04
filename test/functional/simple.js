@@ -10,34 +10,40 @@ define(
         'intern/chai!assert',              // helps throw errors to fail tests, based on conditions
         'intern/dojo/node!leadfoot/keys',  // unicode string constants used to control the keyboard
         'intern/dojo/node!fs',             // Node's filesystem API, used to save screenshots
-        'intern/dojo/node!leadfoot/helpers/pollUntil'  // utility to pause until an expression is truthy
+        'page-object'
     ],
-    function (tdd, assert, keys, fs, pollUntil) {
+    function (tdd, assert, keys, fs, pageObject) {
 
         'use strict';
 
-        var suite  = tdd.suite,
-            test   = tdd.test,
-            before = tdd.before,
-            url    = 'http://tools.qa.sitecues.com:9000/' +
-                     'site/simple.html' +
-                     '?scjsurl=//js.dev.sitecues.com/l/s;id=s-00000005/v/dev/latest/js/sitecues.js' +
-                     '&scwsid=s-00000005' +
-                     '&scuimode=badge' +
-                     '&scisv=2';
+        const suite  = tdd.suite,
+              test   = tdd.test,
+              before = tdd.before,
+              URL    = 'http://tools.qa.sitecues.com:9000/site/simple.html' +
+                       '?scjsurl=//js.dev.sitecues.com/l/s;id=s-00000005/v/dev/latest/js/sitecues.js' +
+                       '&scwsid=s-00000005' +
+                       '&scuimode=badge' +
+                       '&scisv=2';
 
         suite('HLB Simple', function () {
 
-            var picked = {
-                selector : 'p'
-            };
+            const picked = {
+                      selector : 'p'
+                  };
+
+            let picker,
+                lens;
 
             // Code to run when the suite starts, before tests...
             before(function () {
 
+                // Create UI abstractions.
+                picker = pageObject.createPicker(this.remote);
+                lens   = pageObject.createLens(this.remote);
+
                 return this.remote                // represents the browser being tested
                     .maximizeWindow()             // best effort to normalize window sizes (not every browser opens the same)
-                    .get(url)                     // navigate to the desired page
+                    .get(URL)                     // navigate to the desired page
                     .setExecuteAsyncTimeout(800)  // max ms for executeAsync calls to complete
                     // Store some data about the original picked element before
                     // we do anything to mess with it, for later comparison.
@@ -118,8 +124,8 @@ define(
                                 'viewport': {
                                     'left'  : 0,
                                     'top'   : 0,
-                                    'right' : window.innerWidth,
-                                    'bottom': window.innerHeight
+                                    'right' : innerWidth,
+                                    'bottom': innerHeight
                                 }
                             };
                         }
@@ -228,20 +234,9 @@ define(
 
             test('Spacebar Closes HLB', function () {
 
-                return this.remote               // represents the browser being tested
-                    .pressKeys(keys.SPACE)       // close the HLB
-                    .setExecuteAsyncTimeout(1200)
-                    .executeAsync(
-                        function (done) {
-                            sitecues.on('hlb/closed', function () {
-                                done(
-                                    document.getElementById('sitecues-hlb')
-                                );
-                            });
-                        }
-                    )
+                return lens.close()
                     .then(function (data) {
-                        assert.notOk(data, 'HLB no longer exists.');
+                        assert.isNull(data, 'HLB no longer exists.');
                     });
             });
 
@@ -249,15 +244,10 @@ define(
 
             test('HLB is a <ul> if picked element is a <li>', function () {
 
-                return this.remote               // represents the browser being tested
-                    .execute(                    // run the given code in the remote browser
-                        function () {
-                            sitecues.highlight('li');
-                        }
-                    )
-                    .pressKeys(keys.SPACE)       // open the HLB
-                    .setFindTimeout(20)          // the HLB has this many milliseconds to come into existence
-                    .findById('sitecues-hlb')    // get the HLB!
+                return picker.highlight('li')
+                    .pressKeys(keys.SPACE)       // open the Lens
+                    .setFindTimeout(20)          // the Lens has this many milliseconds to come into existence
+                    .findById('sitecues-hlb')    // get the Lens!
                     .getProperty('tagName')
                     .then(function (data) {
                         assert.strictEqual(
@@ -292,8 +282,8 @@ define(
 
             test('HLB Copies <textarea> Value', function () {
 
-                var selector = 'textarea',
-                    expected = 'Yipee!';
+                const selector = 'textarea',
+                      expected = 'Yipee!';
 
                 return this.remote               // represents the browser being tested
                     .findByCssSelector(selector)
@@ -334,7 +324,7 @@ define(
 
                 this.skip('WebDriver claims the checkbox is not visible. Why?');
 
-                var selector = 'input[type="checkbox"]';
+                const selector = 'input[type="checkbox"]';
 
                 return this.remote               // represents the browser being tested
                     .findByCssSelector(selector)
@@ -401,7 +391,7 @@ define(
 
             // test('Screenshot experiment', function () {
 
-            //     var canDoScreenshot = this.remote.session.capabilities.takesScreenshot;
+            //     const canDoScreenshot = this.remote.session.capabilities.takesScreenshot;
 
             //     return this.remote               // represents the browser being tested
             //         .then(
