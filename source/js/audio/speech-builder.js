@@ -182,7 +182,7 @@ define(['keys/element-classifier', '$'], function(elemClassifier, $) {
 
     if (node.nodeType === TEXT_NODE) {
       // Text node: we append the text contents
-      appendText(node.textContent);
+      appendText(node.nodeValue);
       return;
     }
 
