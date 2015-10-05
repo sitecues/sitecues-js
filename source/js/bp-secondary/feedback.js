@@ -57,6 +57,10 @@ define(['bp/constants', 'bp/helper', 'bp/model/state', 'core/platform', 'core/me
       }
     }
 
+    if (!willBeActive) {
+      state.set('isFeedbackSent', false);
+    }
+
     isActive = willBeActive;
   }
 
@@ -111,8 +115,8 @@ define(['bp/constants', 'bp/helper', 'bp/model/state', 'core/platform', 'core/me
         rating: currRating  // 0 = no rating, otherwise 1-5 stars
       });
       toggleSendEnabled(false); // Disable feedback button after sent, so that feedback isn't accidentally clicked twice
-      var bpContainer = getBPContainer();
-      bpContainer.className += bpContainer.className + ' scp-feedback-sent';
+      state.set('isFeedbackSent', true);
+      sitecues.emit('bp/did-change', false, true);
     }
   }
 

@@ -51,6 +51,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
         'stars-4',
         'stars-5',
         'feedback-send',
+        'feedback-thanks',
         'tips-label',
         'settings-label',
         'about-label',
@@ -174,15 +175,11 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
 
   function focusFirstItem(isFirstTime, isNewPanel) {
     if (isNewPanel && isKeyboardMode()) {
-      navigateInDirection(1, true);
+      setTimeout(function() {
+        navigateInDirection(1, true);
+      }, 0);
     }
   }
-
-//  function focusCard() {
-//    if (isKeyboardMode()) {
-//      navigateInDirection(1, true, true);
-//    }
-//  }
 
   /*
    If the badge was focused, the panel will go into focus mode when it's entered.
@@ -512,10 +509,9 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
       return;
     }
     isInitialized = true;
-    sitecues.on('bp/will-toggle-feature bp/do-send-feedback', hideFocus);
+    sitecues.on('bp/will-toggle-feature', hideFocus);
     sitecues.on('bp/did-change', focusFirstItem);
     sitecues.on('bp/did-show-card', focusCard);
-//    sitecues.on('bp/did-switch-card', focusCard);
     beginKeyHandling(); // First time badge expands
     sitecues.on('bp/will-expand', beginKeyHandling);
     sitecues.on('bp/will-shrink', endKeyHandling);

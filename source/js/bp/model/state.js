@@ -20,6 +20,7 @@ define([], function() {
     settingsIconVersion     : 1,     // Which settings icon to use?
     aboutIconVersion        : 1,     // Which about icon to use?
     isShrinkingFromKeyboard : false, // Is the panel shrinking because of a keyboard command?
+    isFeedbackSent          : false, // Is the feedback sent?
     ratioOfSVGToVisibleBadgeSize: undefined // ratio of svg to visible badge size
   };
 

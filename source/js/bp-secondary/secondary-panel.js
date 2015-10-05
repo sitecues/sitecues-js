@@ -200,6 +200,7 @@ define(['bp/constants',
 
       state.set('isSecondaryPanel', willEnable);
       fireBpChanged(true);
+      updateMoreButtonLabel(willEnable);
     }
 
     finishAllAnimations();
@@ -387,17 +388,17 @@ define(['bp/constants',
 
     toggleMouseListeners(willEnable);
 
-    updateMoreButtonLabel(willEnable);
-
     if (willEnable) {
       optimizeButtonAnimations();
     }
   }
 
   function updateMoreButtonLabel(doPointToMainPanel) {
-    var labelName = doPointToMainPanel ? 'sitecues_main_panel' : 'more_features',
-      localizedLabel = locale.translate(labelName);
-    byId(BP_CONST.MORE_BUTTON_GROUP_ID).setAttribute('aria-label', localizedLabel);
+    setTimeout(function() {
+      var labelName = doPointToMainPanel ? 'sitecues_main_panel' : 'more_features',
+        localizedLabel = locale.translate(labelName);
+      byId(BP_CONST.MORE_BUTTON_GROUP_ID).setAttribute('aria-label', localizedLabel);
+    }, 0); // Defer until after focus changes
   }
 
   /**
@@ -409,18 +410,20 @@ define(['bp/constants',
     return byId(features[featureName].panelId);
   }
 
-  function setSelectedFeature(featureName, isEnabled) {
-    function setSelected(feature, isSelected) {
-      byId(feature.labelId).setAttribute('aria-pressed', !!isSelected);
-    }
-    // First clear selected state on all
-    forEachFeature(setSelected);
-
-    // Now set selected state if necessary
-    if (isEnabled) {
-      setSelected(features[featureName], true);
-    }
-  }
+  // Not really useful to call these toggle buttons
+      // TODO probably remove
+//  function setSelectedFeature(featureName, isEnabled) {
+//    function setSelected(feature, isSelected) {
+//      byId(feature.labelId).setAttribute('aria-pressed', !!isSelected);
+//    }
+//    // First clear selected state on all
+//    forEachFeature(setSelected);
+//
+//    // Now set selected state if necessary
+//    if (isEnabled) {
+//      setSelected(features[featureName], true);
+//    }
+//  }
 
   /**
    * Toggle back and forth between button menu and a feature
@@ -428,7 +431,8 @@ define(['bp/constants',
    */
   function toggleSecondaryFeature(featureName) {
     var willEnable = state.getSecondaryPanelName() !== featureName;
-    setSelectedFeature(featureName, willEnable);
+    // TODO probably remove
+//    setSelectedFeature(featureName, willEnable);
     updateMoreButtonLabel(!willEnable);
     if (willEnable && !isFeatureAvailable(featureName)) {
       // The feature was not loaded -- punt and go to help page
@@ -474,7 +478,8 @@ define(['bp/constants',
     resetButtonStyles();
 
     // Clear selected state on feature button labels
-    setSelectedFeature();
+    // TODO probably remove
+//    setSelectedFeature();
   }
 
   function resetButtonStyles() {

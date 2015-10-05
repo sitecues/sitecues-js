@@ -498,13 +498,20 @@ sc-button[aria-pressed="true"]:after {
   visibility: hidden;
   opacity: 0;
 }
+.scp-feedback-sent .scp-if-feedback [role],
+.scp-feedback-sent .scp-if-feedback textarea
+{
+  opacity: 0;  /* Make sure controls not focusable by hiding them */
+}
+
 .scp-if-feedback-sent {
   visibility: hidden;
   opacity: 0;
   position: absolute;
-  left: 154px;
   top: 62px;
-  width: 340px;
+  left: 20px;
+  width: 460px;
+  text-align: center;
 }
 .scp-panel-feedback.scp-feedback-sent .scp-if-feedback-sent {
   pointer-events: all;
@@ -600,7 +607,7 @@ sc-button[aria-pressed="true"]:after {
   position: absolute;
   z-index: 9999;
   left: 24px;
-  width: 460px;
+  width: 465px;
   top: 120px;
   text-align: center;
   font-size: 23px;

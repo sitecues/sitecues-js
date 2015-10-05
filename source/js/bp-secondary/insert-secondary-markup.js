@@ -9,10 +9,10 @@ var isInitialized,
   <use id="scp-secondary-outline" xlink:href="#scp-outline-def" fill="white"/>\
   <g id="scp-bottom-secondary">\
     <use xlink:href="#scp-bottom-def"/>\
-    <text id="scp-tips-label" text-anchor="middle" class="scp-hand-cursor" role="button" data-feature="tips" x="75" y="178">{{tips}}</text>\
-    <text id="scp-settings-label" text-anchor="middle" class="scp-hand-cursor" role="button" data-feature="settings" x="285" y="178">{{settings}}</text>\
-    <text id="scp-feedback-label" text-anchor="middle" class="scp-hand-cursor" role="button" data-feature="feedback" x="517" y="178">{{rate_us}}</text>\
-    <text id="scp-about-label" text-anchor="middle" class="scp-hand-cursor" role="button" data-feature="about" x="730" y="178">{{about}}</text>\
+    <text id="scp-tips-label" text-anchor="middle" class="scp-hand-cursor" role="button" aria-label="{{tips}}" data-feature="tips" x="75" y="178">{{tips}}</text>\
+    <text id="scp-settings-label" text-anchor="middle" class="scp-hand-cursor" role="button" aria-label="{{settings}}" data-feature="settings" x="285" y="178">{{settings}}</text>\
+    <text id="scp-feedback-label" text-anchor="middle" class="scp-hand-cursor" role="button" aria-label="{{rate_us}}" data-feature="feedback" x="517" y="178">{{rate_us}}</text>\
+    <text id="scp-about-label" text-anchor="middle" class="scp-hand-cursor" role="button" aria-label="{{about}}" data-feature="about" x="730" y="178">{{about}}</text>\
   </g>\
   <rect id="scp-card-header-bg" class="scp-secondary-feature-only" width="808" height="134" stroke="#C0BFBF" stroke-width="1" fill="#EEE"/>\
   <g>\
@@ -41,7 +41,7 @@ var isInitialized,
       </g>\
       <g id="scp-feedback-send" class="scp-hand-cursor" aria-disabled="true" role="button">\
         <rect x="595" width="165" y="740" height="50" rx="20" ry="20"/>\
-        <text x="678" y="775" text-anchor="middle" font-family="Arial" fill="white">{{send}}</text>\
+        <text x="678" y="775" text-anchor="middle" font-family="Arial" fill="white" aria-label="{{send}}">{{send}}</text>\
       </g>\
     </g>\
     <g id="scp-about" class="scp-if-about" transform="translate(805,16)">\
@@ -89,7 +89,7 @@ htmlSecondary =
   <textarea id="scp-feedback-textarea" class="scp-hand-cursor" \
     aria-describedby="scp-feedback-prompt" data-visible-focus-on="scp-feedback-input-rect" placeholder="{{tell_us_something}}"></textarea>\
 </sc>\
-<sc id="scp-feedback-thanks" class="scp-if-feedback-sent">\
+<sc id="scp-feedback-thanks" class="scp-if-feedback-sent" role="note" aria-label="{{thank_you}}">\
   <sc-h1>{{thank_you}}</sc-h1>\
 </sc>\
 <sc class="scp-about-teaser scp-if-about scp-transition-opacity scp-secondary-feature" role="group" aria-label="{{about}} sitecues">\
@@ -103,7 +103,7 @@ htmlSecondary =
     <a id="scp-about-3" target="_blank" href="mailto:sales@sitecues.com">sales@sitecues.com</a>\
   </sc-p>\
   <sc-p id="scp-about-rate-footer">\
-    <sc-span id="scp-rate-us-suggest">{{rate_us_suggest}}</sc-span><br/>\
+    <sc-span id="scp-rate-us-suggest" role="heading">{{rate_us_suggest}}</sc-span><br/>\
     <sc-button id="scp-about-rate-button" aria-describedby="scp-rate-us-suggest">{{rate_us}}</sc-button>\
   </sc-p>\
 </sc>';
