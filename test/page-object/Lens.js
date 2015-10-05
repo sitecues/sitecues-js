@@ -18,7 +18,9 @@ define(
                 return this.instantOpen()
                         .executeAsync(         // run an async callback in the remote browser
                             function (event, done) {
-                                sitecues.on(event, done);  // use our event system to know when the Lens is ready
+                                sitecues.on(event, function () {
+                                    done();
+                                });
                             },
                             [Lens.READY_EVENT]
                         );
@@ -27,8 +29,8 @@ define(
             // Destroy the Lens and wait for its animation to finish.
             close() {
                 return this.remote
+                    .setExecuteAsyncTimeout(4000)
                     .pressKeys(keys.SPACE)       // close the Lens
-                    .setExecuteAsyncTimeout(1200)
                     .executeAsync(
                         function (event, id, done) {
                             sitecues.on(event, function () {
@@ -44,8 +46,9 @@ define(
             // Open the Lens without waiting for any animation.
             instantOpen() {
                 return this.remote
+                    .setFindTimeout(100)     // the Lens has this many milliseconds to come into existence
+                    .setExecuteAsyncTimeout(4000)  // Set in case we are used for open()
                     .pressKeys(keys.SPACE)  // open the Lens
-                    .setFindTimeout(20)     // the Lens has this many milliseconds to come into existence
                     .findById(Lens.ID);     // get the Lens!
             }
         }

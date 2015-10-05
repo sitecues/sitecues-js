@@ -44,7 +44,11 @@ define(
                 return this.remote                // represents the browser being tested
                     .maximizeWindow()             // best effort to normalize window sizes (not every browser opens the same)
                     .get(URL)                     // navigate to the desired page
-                    .setExecuteAsyncTimeout(800)  // max ms for executeAsync calls to complete
+                    .setTimeout('script', 9000)
+                    .setTimeout('implicit', 9000)
+                    .setTimeout('page load', 9000)
+                    .setFindTimeout(9000)
+                    .setExecuteAsyncTimeout(9000)  // max ms for executeAsync calls to complete
                     // Store some data about the original picked element before
                     // we do anything to mess with it, for later comparison.
                     .findByCssSelector(picked.selector)
@@ -67,11 +71,12 @@ define(
                         },
                         [picked.selector]
                     )
-                    .pressKeys(keys.EQUALS)       // zoom in to enable sitecues features
+                    .pressKeys([keys.EQUALS, keys.EQUALS])       // zoom in to enable sitecues features
                     .executeAsync(                // run an async callback in the remote browser
-                        function (done) {
-                            sitecues.on('zoom', done);  // use our event system to know when zoom is done
-                        }
+                        function (event, done) {
+                            sitecues.on(event, done);  // use our event system to know when zoom is done
+                        },
+                        ['zoom']
                     )
                     .execute(                     // run a callback in the remote browser
                         function (selector) {
@@ -84,15 +89,21 @@ define(
             test('Spacebar Opens the HLB', function () {
 
                 return this.remote
-                        .pressKeys(keys.SPACE)   // hit the spacebar, to open the HLB
-                        .end()
-                    .setFindTimeout(20)          // the HLB has this many milliseconds to come into existence
-                    .findById('sitecues-hlb')
-                        .executeAsync(           // run an async callback in the remote browser
-                            function (done) {
-                                sitecues.on('hlb/ready', done);  // use our event system to know when the HLB is ready
-                            }
-                        );
+                    .setExecuteAsyncTimeout(3000)  // max ms for executeAsync calls to complete
+                    .pressKeys(keys.SPACE)         // hit the spacebar, to open the HLB
+                    .executeAsync(                 // run an async callback in the remote browser
+                        function (event, id, done) {
+                            sitecues.on(event, function () {
+                                done(
+                                    document.getElementById(id)
+                                );
+                            });  // use our event system to know when the HLB is ready
+                        },
+                        ['hlb/ready', 'sitecues-hlb']
+                    )
+                    .then(function (element) {
+                        assert.ok(element, 'HLB exists');
+                    });
             });
 
             /////////////////////////////// ------- test boundary -------
@@ -103,13 +114,13 @@ define(
 
                 return this.remote
                     .findById('sitecues-hlb')
-                    .isDisplayed()
-                    .then(function (isDisplayed) {
-                        assert.isTrue(
-                            isDisplayed,
-                            'HLB must be displayed to be useful.'
-                        );
-                    });
+                        .isDisplayed()
+                        .then(function (isDisplayed) {
+                            assert.isTrue(
+                                isDisplayed,
+                                'HLB must be displayed to be useful'
+                            );
+                        });
             });
 
             /////////////////////////////// ------- test boundary -------
@@ -134,22 +145,22 @@ define(
                         assert.isAbove(
                             data.hlb.left,
                             data.viewport.left,
-                            'HLB must be inside the viewport to be seen.'
+                            'HLB must be inside the viewport to be seen'
                         );
                         assert.isAbove(
                             data.hlb.top,
                             data.viewport.top,
-                            'HLB must be inside the viewport to be seen.'
+                            'HLB must be inside the viewport to be seen'
                         );
                         assert.isBelow(
                             data.hlb.right,
                             data.viewport.right,
-                            'HLB must be inside the viewport to be seen.'
+                            'HLB must be inside the viewport to be seen'
                         );
                         assert.isBelow(
                             data.hlb.bottom,
                             data.viewport.bottom,
-                            'HLB must be inside the viewport to be seen.'
+                            'HLB must be inside the viewport to be seen'
                         );
                     });
             });
@@ -219,7 +230,7 @@ define(
                     .findById('sitecues-hlb')    // get the HLB!
                         .getAttribute('class')
                         .then(function (data) {
-                            assert.notOk(data, 'HLB element does not have a class');
+                            assert.isNull(data, 'HLB element does not have a class');
                         })
                         .end()
                     .execute(                    // run the given code in the remote browser
@@ -236,7 +247,7 @@ define(
 
                 return lens.close()
                     .then(function (data) {
-                        assert.isNull(data, 'HLB no longer exists.');
+                        assert.isNull(data, 'HLB no longer exists');
                     });
             });
 
@@ -265,13 +276,14 @@ define(
                 return this.remote               // represents the browser being tested
                     .pressKeys(keys.ESCAPE)
                     .executeAsync(
-                        function (done) {
-                            sitecues.on('hlb/closed', function () {
+                        function (event, id, done) {
+                            sitecues.on(event, function () {
                                 done(
-                                    document.getElementById('sitecues-hlb')
+                                    document.getElementById(id)
                                 );
                             });
-                        }
+                        },
+                        ['hlb/closed', 'sitecues-hlb']
                     )
                     .then(function (data) {
                         assert.isNull(data, 'HLB no longer exists.');
@@ -359,32 +371,34 @@ define(
             test('Outside Mouse Click Closes HLB.', function () {
 
                 return this.remote               // represents the browser being tested
+                    .setFindTimeout(100)          // the HLB has this many milliseconds to come into existence
+                    .setExecuteAsyncTimeout(3000)  // max ms for executeAsync calls to complete
                     .pressKeys(keys.SPACE)       // hit the spacebar, to open the HLB
-                        .end()
-                    .setFindTimeout(20)          // the HLB has this many milliseconds to come into existence
+                    .executeAsync(           // run an async callback in the remote browser
+                        function (event, done) {
+                            sitecues.on(event, done);  // use our event system to know when the HLB is ready
+                        },
+                        ['hlb/ready']
+                    )
                     .findById('sitecues-hlb')
-                        .executeAsync(           // run an async callback in the remote browser
-                            function (done) {
-                                sitecues.on('hlb/ready', done);  // use our event system to know when the HLB is ready
-                            }
-                        )
                         .end()
                     .findByCssSelector('body')
-                        .moveMouseTo()
+                        .moveMouseTo(undefined, 2, 3)
                         .click()
-                        .end()
-                    .executeAsync(
-                        function (done) {
-                            sitecues.on('hlb/closed', function () {
-                                done(
-                                    document.getElementById('sitecues-hlb')
-                                );
-                            });
-                        }
-                    )
-                    .then(function (data) {
-                        assert.isNull(data, 'HLB no longer exists.');
-                    });
+                        .executeAsync(
+                            function (event, id, done) {
+                                sitecues.on(event, function () {
+                                    done(
+                                        document.getElementById(id)
+                                    );
+                                });
+                            },
+                            ['hlb/closed', 'sitecues-hlb']
+                        )
+                        .then(function (data) {
+                            assert.isNull(data, 'HLB no longer exists.');
+                        })
+                        .end();
             });
 
             /////////////////////////////// ------- test boundary -------
