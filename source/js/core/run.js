@@ -4,11 +4,8 @@
  */
 
 // High priority
-// - use kbd to go back, slider is squished
-// Enter key on
 // / French, Spanish
 // / Accessibility
-// - NVDA just calls bottom link buttons toggle button with no name
 // / SC-3104 -- after an hour of use no TTS?
 // / SC-3120 -- sitecues TTS and Safari
 // - About panel
