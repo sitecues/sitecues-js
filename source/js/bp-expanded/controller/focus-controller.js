@@ -172,7 +172,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
     }
   }
 
-  function focusFirstItem(isNewPanel) {
+  function focusFirstItem(isFirstTime, isNewPanel) {
     if (isNewPanel && isKeyboardMode()) {
       navigateInDirection(1, true);
     }

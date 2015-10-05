@@ -88,7 +88,7 @@ define(['bp/constants',
   }
 
   function fireBpChanged(isNewPanelReady) {
-    sitecues.emit('bp/did-change', isNewPanelReady);
+    sitecues.emit('bp/did-change', false, isNewPanelReady);
   }
 
   function getBPContainer() {
