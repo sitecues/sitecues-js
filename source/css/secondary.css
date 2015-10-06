@@ -135,7 +135,7 @@ sc-button:hover {
 /* Card chooser */
 .scp-card-chooser {
   position: absolute;
-  top: 99px;
+  top: 120px;
   left: 30px;
   width: 440px;
   display: table;
@@ -148,7 +148,7 @@ sc-button:hover {
 }
 
 #scp-settings .scp-card-chooser > sc-link {
-  font-size: 23px;  // TODO larger text in settings chooser, where we currently only have 2 cards
+  font-size: 23px;  /* TODO larger text in settings chooser, where we currently only have 2 cards */
 }
 
 .scp-card-chooser > sc-link[aria-selected="true"] {
@@ -607,22 +607,26 @@ sc-button[aria-pressed="true"]:after {
   position: absolute;
   z-index: 9999;
   left: 24px;
-  width: 465px;
-  top: 120px;
+  width: 445px;
+  top: 99px;
+  font-size: 22px;
   text-align: center;
-  font-size: 23px;
+}
+
+.scp-about-teaser > sc-p > sc-span {
+  display: inline;
 }
 
 .scp-about-teaser > sc-p > a {
-  text-decoration: none;
+  text-decoration: underline;
 }
 
 #scp-about-rate-footer {
-  margin-top: 100px;
+  margin-top: 40px;
 }
 
 #scp-about-rate-button {
-  margin-top: 20px;
-  padding: 2px 17px;
+  margin-top: 15px;
+  padding: 4px 23px;
   font-weight: 100;
 }

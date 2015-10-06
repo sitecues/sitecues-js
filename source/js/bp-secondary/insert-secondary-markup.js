@@ -94,17 +94,12 @@ htmlSecondary =
 </sc>\
 <sc class="scp-about-teaser scp-if-about scp-transition-opacity scp-secondary-feature" role="group" aria-label="{{about}} sitecues">\
   <sc-p>\
-    <a id="scp-about-1" target="_blank" href="http://sitecues.com">sitecues.com</a>\
-    </sc-p>\
-  <sc-p>\
-    <a id="scp-about-2" target="_blank" href="tel:+1-857-259-5272">+1-857-259-5272</a>\
-  </sc-p>\
-  <sc-p>\
-    <a id="scp-about-3" target="_blank" href="mailto:sales@sitecues.com">sales@sitecues.com</a>\
+    <sc-span id="scp-about-preamble">{{about_preamble}}</sc-span>\
+    <a id="scp-about-sitecues-link" aria-describedby="scp-about-preamble" target="_blank" href="http://sitecues.com">sitecues.com</a>.\
   </sc-p>\
   <sc-p id="scp-about-rate-footer">\
-    <sc-span id="scp-rate-us-suggest" role="heading">{{rate_us_suggest}}</sc-span><br/>\
-    <sc-button id="scp-about-rate-button" aria-describedby="scp-rate-us-suggest">{{rate_us}}</sc-button>\
+    <sc-span id="scp-rate-us-suggest" role="heading">{{about_rate_us}}</sc-span><br/>\
+    <sc-button id="scp-about-rate-button" aria-describedby="scp-rate-us-suggest">{{rate_us}}!</sc-button>\
   </sc-p>\
 </sc>';
 

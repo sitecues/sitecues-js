@@ -58,9 +58,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
         'more-button-group'
       ],
       'about':[
-        'about-1',
-        'about-2',
-        'about-3',
+        'about-sitecues-link',
         'about-rate-button',
         'tips-label',
         'settings-label',
