@@ -6,7 +6,6 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
     tabbedElement,
     isInitialized,
     isListeningToClicks,
-    isListeningToKeyUp,
     byId = helper.byId,
     TAB   = 9,
     ENTER = 13,
@@ -158,7 +157,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
     return state.get('isKeyboardMode');
   }
 
-  function focusCard(tabElement, isFromLink) {
+  function focusCard(cardId, tabElement, isFromLink) {
     if (isKeyboardMode() && tabElement) {
       clearPanelFocus();
       tabbedElement = tabElement;

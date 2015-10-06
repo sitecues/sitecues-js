@@ -167,7 +167,7 @@ define(['bp/constants', 'bp/helper', 'core/locale', 'bp/model/state', 'core/plat
   }
 
   function newCardNotification(isFromLink) {
-    sitecues.emit('bp/did-show-card', getActiveTab(), isFromLink);
+    sitecues.emit('bp/did-show-card', getActiveCard().id, getActiveTab(), isFromLink);
   }
 
 
