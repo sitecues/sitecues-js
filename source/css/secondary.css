@@ -135,7 +135,7 @@ sc-button:hover {
 /* Card chooser */
 .scp-card-chooser {
   position: absolute;
-  top: 120px;
+  top: 99px;
   left: 30px;
   width: 440px;
   display: table;
@@ -608,7 +608,7 @@ sc-button[aria-pressed="true"]:after {
   z-index: 9999;
   left: 24px;
   width: 445px;
-  top: 99px;
+  top: 120px;
   font-size: 22px;
   text-align: center;
 }
