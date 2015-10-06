@@ -398,7 +398,7 @@ define(['bp/constants',
       var labelName = doPointToMainPanel ? 'sitecues_main_panel' : 'more_features',
         localizedLabel = locale.translate(labelName);
       byId(BP_CONST.MORE_BUTTON_GROUP_ID).setAttribute('aria-label', localizedLabel);
-    }, 0); // Defer until after focus changes
+    }, 500); // Defer until after focus changes
   }
 
   /**
