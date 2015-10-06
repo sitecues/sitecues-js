@@ -39,9 +39,9 @@ var isInitialized,
         <use id="scp-stars-4" role="button" aria-pressed="false" aria-label="{{rating_4}}" class="scp-rating-star" xlink:href="#scp-rating-star-def" x="240" y="736"/>\
         <use id="scp-stars-5" role="button" aria-pressed="false" aria-label="{{rating_5}}" class="scp-rating-star" xlink:href="#scp-rating-star-def" x="306" y="736"/>\
       </g>\
-      <g id="scp-feedback-send" class="scp-hand-cursor" aria-disabled="true" role="button">\
+      <g id="scp-feedback-send" class="scp-hand-cursor" aria-disabled="true" role="button" aria-label="{{send}}">\
         <rect x="595" width="165" y="740" height="50" rx="20" ry="20"/>\
-        <text x="678" y="775" text-anchor="middle" font-family="Arial" fill="white" aria-label="{{send}}">{{send}}</text>\
+        <text x="678" y="775" text-anchor="middle" font-family="Arial" fill="white">{{send}}</text>\
       </g>\
     </g>\
     <g id="scp-about" class="scp-if-about" transform="translate(805,16)">\
@@ -99,7 +99,7 @@ htmlSecondary =
   </sc-p>\
   <sc-p id="scp-about-rate-footer">\
     <sc-span id="scp-rate-us-suggest" role="heading">{{about_rate_us}}</sc-span><br/>\
-    <sc-button id="scp-about-rate-button" aria-describedby="scp-rate-us-suggest">{{rate_us}}</sc-button>\
+    <sc-button id="scp-about-rate-button" role="button" aria-describedby="scp-rate-us-suggest">{{rate_us}}</sc-button>\
   </sc-p>\
 </sc>';
 
