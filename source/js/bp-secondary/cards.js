@@ -21,13 +21,20 @@ define(['bp/constants', 'bp/helper', 'core/locale', 'bp/model/state', 'core/plat
     xhr.get({
       url: panelUrl,
       success: function(html) {
-        var panelElement = document.createElement('sc-cards');
+        var panelElement = document.createElement('sc-cards'),
+          tabStrip;
         panelElement.id = 'scp-' + panelName;
         panelElement.className = 'scp-if-' + panelName + ' scp-transition-opacity scp-secondary-feature';
         panelElement.innerHTML = addSemanticSugar(html);
 
         getContainer().appendChild(panelElement);
         removeUnsupportedContent(panelElement);
+
+        tabStrip = panelElement.querySelector('.scp-card-chooser');
+        if (tabStrip.childElementCount > 3) {
+          fixTabStripSpacing(tabStrip);
+        }
+
 
         toggleCardActive(panelElement.firstElementChild, true);
 
@@ -58,6 +65,26 @@ define(['bp/constants', 'bp/helper', 'core/locale', 'bp/model/state', 'core/plat
       .replace(/<\/sc-normal-range>/g, '</input>')
       .replace(/<sc-hue-range /g, '<input type="range"' + INTERACTIVE + ' scp-hue-range" ')
       .replace(/<\/sc-hue-range>/g, '</input>');
+  }
+
+  // Use all the spacing to the left and right of the tab strip
+  // We need as much as we can get
+  function fixTabStripSpacing(tabStrip) {
+    var firstTab = tabStrip.firstElementChild,
+      tabStripStyle = getComputedStyle(tabStrip),
+      firstWidth = getTabTextWidth(firstTab),
+      additionalSpaceLeft = (firstTab.getBoundingClientRect().width - firstWidth) / 2;
+
+    function getTabTextWidth(tab) {
+      // Temporarily use inline so we can measure the width of these tabs
+      tab.style.display = 'inline';
+      var width = tab.getBoundingClientRect().width;
+      tab.style.display = '';
+      return width;
+    }
+
+    tabStrip.style.left = (parseFloat(tabStripStyle.left) - additionalSpaceLeft) + 'px';
+    tabStrip.style.width = (parseFloat(tabStripStyle.width) + additionalSpaceLeft * 2) + 'px';
   }
 
   function removeAllElements(elements) {
