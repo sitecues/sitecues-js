@@ -6,6 +6,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
     tabbedElement,
     isInitialized,
     isListeningToClicks,
+    isListeningToKeyUp,
     byId = helper.byId,
     TAB   = 9,
     ENTER = 13,
@@ -433,10 +434,17 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
     element.dispatchEvent(event);
   }
 
+  function onZoomKeyUp() {
+    require(['zoom/zoom'], function(zoomMod) {
+      zoomMod.zoomStopRequested();
+    });
+  }
+
   function performZoomSliderCommand(keyCode, evt) {
     var deltaSliderCommand = DELTA_KEYS[keyCode];
     if (deltaSliderCommand) {
       require(['zoom/zoom'], function(zoomMod) {
+        window.removeEventListener('keyup', onZoomKeyUp); // Zoom module will listen from here
         zoomMod.init();
         if (deltaSliderCommand > 0) {
           zoomMod.beginZoomIncrease(evt);
@@ -445,6 +453,8 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
           zoomMod.beginZoomDecrease(evt);
         }
       });
+
+      window.addEventListener('keyup', onZoomKeyUp);  // Capture key up that may happen while waiting for zoom module
     }
   }
 
