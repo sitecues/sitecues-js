@@ -79,7 +79,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
       return id.split('scp-')[1] || id;
     }
 
-    metric('panel-clicked', { target: getTrimmedId(id) || 'window' });
+    metric('panel-clicked', { target: id ? getTrimmedId() : 'window' });
   }
 
 
