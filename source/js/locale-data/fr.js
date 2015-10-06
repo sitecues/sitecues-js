@@ -10,16 +10,16 @@ define([], function() {
     zoom_in: 'agrandir',
     zoom_out: 'réduire',
     // - Secondary
-    more_features: 'More features',   /* new */
-    previous: 'Previous',             /* new */
-    next: 'Next',                     /* new */
+    more_features: 'plus de fonctionnalités',
+    previous: ' précédent',
+    next: ' Suivant',
     // - Feedback
-    rating: 'Rating',                 /* new */
-    rating_1: '1 star',               /* new */
-    rating_2: '2 stars',              /* new */
-    rating_3: '3 stars',              /* new */
-    rating_4: '4 stars',              /* new */
-    rating_5: '5 stars',              /* new */
+    rating: 'évaluation',
+    rating_1: '1 étoile ',
+    rating_2: '2 étoiles ',
+    rating_3: '3 étoiles ',
+    rating_4: '4 étoiles',
+    rating_5: ' étoiles',
 
     // Visible labels
     // - Main
@@ -30,17 +30,19 @@ define([], function() {
     on: 'activée',
     off: 'desactivée',
     // - Secondary
-    tips: 'Tips',                     /* new */
-    settings: 'Settings',             /* new */
-    rate_us: 'Rate us',               /* new */
-    rate_us_prompt: 'Have some feedback or suggestions on how we can improve? We would love to hear from you!',  /* new */
-    rate_us_suggest: 'Have questions, comments or suggestions?', /* new */
-    about: 'About',                   /* new */
+    tips: 'Pointe',
+    settings: 'Réglages',
+    rate_us: 'Évaluez',
+    rate_us_prompt: 'Nous serons très heureux de vous entendre!',
+    rate_us_suggest: 'Avez-vous des questions, des commentaires ou suggestions?',
+    about: 'Environ',
     // - Feedback
-    send: 'Send',                     /* new */
-    tell_us_something: 'Tell us something ...',      /* new */
-    thank_you: 'Thank you',                          /* new */
+    send: 'Envoyer',
+    tell_us_something: 'Parlez nous de vous en quelques choses...',
+    thank_you: 'Merci',
     // - About
-    zoom_and_speech: 'zoom and speech'               /* new */
+    about_preamble: 'Cet site web à ajouté des sites pour le rendre plus simple à voir, entendre, et à utiliser. Pour plus d\'information, visiter nous s\'il vous plait ',
+    about_rate_us: 'Nous vous encourageons à fournir des commentaires sur votre expérience.',
+    zoom_and_speech: 'zoom et discours'
   };
 });

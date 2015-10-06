@@ -547,7 +547,7 @@ sc-button[aria-pressed="true"]:after {
 #scp-feedback-textarea::-moz-placeholder {
   position: relative;
   font-size: 26px;
-  left: 40px;
+  left: 20px;
   top: 35px;
 }
 #scp-feedback-textarea:focus::-moz-placeholder {
@@ -556,7 +556,7 @@ sc-button[aria-pressed="true"]:after {
 #scp-feedback-textarea::-webkit-input-placeholder {
   position: relative;
   font-size: 26px;
-  left: 40px;
+  left: 20px;
   top: 35px;
 }
 #scp-feedback-textarea:focus::-webkit-input-placeholder {
@@ -565,7 +565,7 @@ sc-button[aria-pressed="true"]:after {
 #scp-feedback-textarea:-ms-input-placeholder {
   position: relative;
   font-size: 26px;
-  left: 40px;
+  left: 20px;
   top: 35px;
 }
 #scp-feedback-textarea:focus:-ms-input-placeholder {

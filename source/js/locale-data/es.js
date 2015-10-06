@@ -10,16 +10,16 @@ define([], function() {
     zoom_in: 'aumentar acercamiento',
     zoom_out: 'aisminuir acercamiento',
     // - Secondary
-    more_features: 'More features',   /* new */
-    previous: 'Previous',             /* new */
-    next: 'Next',                     /* new */
+    more_features: 'Más características',
+    previous: 'Previo',
+    next: 'Siguiente',
     // - Feedback
-    rating: 'Rating',                 /* new */
-    rating_1: '1 star',               /* new */
-    rating_2: '2 stars',              /* new */
-    rating_3: '3 stars',              /* new */
-    rating_4: '4 stars',              /* new */
-    rating_5: '5 stars',              /* new */
+    rating: 'Clasificación',
+    rating_1: '1 estrella',
+    rating_2: '2 estrellas',
+    rating_3: '3 estrellas',
+    rating_4: '4 estrellas',
+    rating_5: '5 estrellas',
 
     // Visible labels
     // - Main
@@ -30,17 +30,19 @@ define([], function() {
     on: 'Alta',
     off: 'Baja',
     // - Secondary
-    tips: 'Tips',                     /* new */
-    settings: 'Settings',             /* new */
-    rate_us: 'Rate us',               /* new */
-    rate_us_prompt: 'We would love to hear from you!',  /* new */
-    rate_us_suggest: 'Have questions, comments or suggestions?', /* new */
-    about: 'About',                   /* new */
+    tips: 'Consejos',
+    settings: 'Ajustes',
+    rate_us: 'Feedback',
+    rate_us_prompt: '¡Nos encantaría saber de usted!',
+    rate_us_suggest: '¿Tiene preguntas, comentarios o sugerencias?',
+    about: 'Sobre',
     // - Feedback
-    send: 'Send',                     /* new */
-    tell_us_something: 'Tell us something ...',      /* new */
-    thank_you: 'Thank you',                          /* new */
+    send: 'Enviar',
+    tell_us_something: 'Cuéntanos algo...',
+    thank_you: 'Gracias',
     // - About
-    zoom_and_speech: 'zoom and speech'               /* new */
+    about_preamble: 'Este sitio web ha añadido sitecues para que sea más fácil de ver, oír y usar. Para mayor información por favor visite ',
+    about_rate_us: 'Le animamos a proporcionar comentarios sobre su experiencia.',
+    zoom_and_speech: 'amplia y habla'
   };
 });
