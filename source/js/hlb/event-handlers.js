@@ -57,7 +57,7 @@ define(['$', 'util/common', 'core/platform'], function($, common, platform) {
 
       // Sometimes there is no deltaY number, or a deltaY of "0"
       // (when the user is scrolling horizontally along X)
-      if (isNaN(deltaY) || deltaY >-1 && deltaY <1) {
+      if (!deltaY) {
 
         // We prevent the scroll event for horizontal scrolls
         return preventScroll(event);
