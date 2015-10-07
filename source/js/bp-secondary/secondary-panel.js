@@ -529,7 +529,8 @@ define(['bp/constants',
 
   return {
     init: init,
-    toggleSecondaryPanel: toggleSecondaryPanel
+    toggleSecondaryPanel: toggleSecondaryPanel,
+    toggleSecondaryFeature: toggleSecondaryFeature
   };
 
 });

@@ -99,7 +99,7 @@ htmlSecondary =
   </sc-p>\
   <sc-p id="scp-about-rate-footer">\
     <sc-span id="scp-rate-us-suggest" role="heading">{{about_rate_us}}</sc-span><br/>\
-    <sc-button id="scp-about-rate-button" role="button" aria-describedby="scp-rate-us-suggest">{{rate_us}}</sc-button>\
+    <sc-button id="scp-about-rate-button" class="scp-hand-cursor" role="button" aria-describedby="scp-rate-us-suggest">{{rate_us}}</sc-button>\
   </sc-p>\
 </sc>';
 

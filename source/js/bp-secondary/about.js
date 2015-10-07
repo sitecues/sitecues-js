@@ -38,6 +38,11 @@ define(['bp/constants', 'bp/helper', 'util/transform', 'core/conf/urls'], functi
     if (!isInitialized) {
       isInitialized = true;
       loadImage();
+      byId('scp-about-rate-button').addEventListener('click', function() {
+        require(['bp-secondary/secondary-panel'], function(secondaryPanel) {
+          secondaryPanel.toggleSecondaryFeature('feedback');
+        });
+      });
     }
   }
 
