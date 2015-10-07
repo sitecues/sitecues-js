@@ -3,8 +3,6 @@
  *   The core module of the sitecues library.
  */
 
-// - Stretch out 'tabs' in cards
-// - Tips demo page disappeared
 // - Caching
 // - Review
 // - Send Chrome beta out -- Anton, Shelly
@@ -16,6 +14,8 @@
 // - JAWS 16 with IE 11 - tabbing, role announced as link. Arrowing, you don't discover it at all.
 // - Labeled groups!
 // - Accessible tips. Or, under tips, tell screen readers how to get full help guide.
+// Themes
+// - sitecues inversion color theme doesnt work well on this site: http://goodnowlibrary.org/
 // CSS improvements
 // - Slow CSS in styles.js: [data-sc-reversible]
 // - Slow CSS in styles.js: #scp-bp-container *
