@@ -14,7 +14,7 @@
     {
       name: 'sitecues',
       include : [
-        '../../build-config/config.js',
+        '../../../build-config/config.js',
         'core/core',
         'core/alameda.js'  // Was: '../../../node_modules/alameda/alameda.js'
       ],

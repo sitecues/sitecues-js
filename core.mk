@@ -51,26 +51,32 @@ build:
 	@echo
 
 	@mkdir -p $(build-dir)/js
+	@mkdir -p $(build-dir)/js/$(version)
 	@mkdir -p target/build-config
 	echo "sitecues.version='$(version)';" > target/build-config/config.js
 
 	# Require.js build
 	# TODO not sure if we want use strict in production versions -- good temporarily though
-	node node_modules/.bin/r.js -o rjs-build-options.js baseUrl=source/js generateSourceMaps=$(sourcemaps) optimize=uglify2 uglify2.compress.global_defs.SC_DEV=false uglify2.compress.global_defs.SC_LOCAL=$(sc-local) uglify2.compress.global_defs.SC_UNIT=false dir=$(build-dir)/js wrap.start="'use strict';"
+	node node_modules/.bin/r.js -o rjs-build-options.js baseUrl=source/js generateSourceMaps=$(sourcemaps) optimize=uglify2 uglify2.compress.global_defs.SC_DEV=false uglify2.compress.global_defs.SC_LOCAL=$(sc-local) uglify2.compress.global_defs.SC_UNIT=false dir=$(build-dir)/js/$(version) wrap.start="'use strict';"
+
+	# Move sitecues.js out of version-named subfolder into /js (up one directory)
+	# This is because sitcues.js is loaded by the load script, which knows nothing of versions
+	# All other dependent resources are loaded by JS and are versioned
+	mv $(build-dir)/js/$(version)/sitecues.js $(build-dir)/js
 
 	# Insert runtime bundle configuration
-	./finalize-loader-config.js $(build-dir)/js/sitecues.js target/build-config/sitecues-bundles.js $(allow-zepto)
-	#./finalize-loader-config.js $(build-dir)/js/sitecues-ie9.js target/build-config/sitecues-bundles-ie9.js false
+	./finalize-loader-config.js $(build-dir)/js/sitecues.js target/build-config/sitecues-bundles.js $(allow-zepto) $(version)
+	#./finalize-loader-config.js $(build-dir)/js/sitecues-ie9.js target/build-config/sitecues-bundles-ie9.js false $(version)
 
 	# Copy non-js files, such as css, images, html, audio files
-	@mkdir -p $(build-dir)/etc
-	@(for F in `ls -d source/* | grep -Ev '^source/js$$'` ; do cp -r $$F $(build-dir)/etc ; done)
+	@mkdir -p $(build-dir)/$(version)
+	@(for F in `ls -d source/* | grep -Ev '^source/js$$'` ; do cp -r $$F $(build-dir)/$(version) ; done)
 	@echo
 
 	@echo "---- sitecues core source --------------------------------"
 	@./show-file-sizes.sh $(build-dir)/js "sitecues.js"
 	@echo "---- additional bundles source ---------------------------"
-	@./show-file-sizes.sh $(build-dir)/js "*.js" | grep -v ".src.js"
+	@./show-file-sizes.sh $(build-dir)/js "*.js" | grep -v ".src.js" | grep -v "sitecues"
 
 	@echo
 	@echo "===== COMPLETE: Building sitecues library"
@@ -101,19 +107,25 @@ debug:
 	@echo
 
 	@mkdir -p $(build-dir)/js
+	@mkdir -p $(build-dir)/js/$(version)
 	@mkdir -p target/build-config
 	echo "sitecues.version='$(version)';var SC_LOCAL=$(sc-local),SC_DEV=true,SC_UNIT=false;" > target/build-config/config.js
 
 	# Require.js build
-	node node_modules/.bin/r.js -o rjs-build-options.js baseUrl=source/js generateSourceMaps=$(sourcemaps) optimize=none dir=$(build-dir)/js wrap.start='"use strict";'
+	node node_modules/.bin/r.js -o rjs-build-options.js baseUrl=source/js generateSourceMaps=$(sourcemaps) optimize=none dir=$(build-dir)/js/$(version) wrap.start='"use strict";'
+
+	# Move sitecues.js out of version-named subfolder into /js (up one directory)
+	# This is because sitcues.js is loaded by the load script, which knows nothing of versions
+	# All other dependent resources are loaded by JS and are versioned
+	mv $(build-dir)/js/$(version)/sitecues.js $(build-dir)/js
 
 	# Insert runtime bundle configuration
-	./finalize-loader-config.js $(build-dir)/js/sitecues.js target/build-config/sitecues-bundles.js $(allow-zepto)
-	#./finalize-loader-config.js $(build-dir)/js/sitecues-ie9.js target/build-config/sitecues-bundles-ie9.js false
+	./finalize-loader-config.js $(build-dir)/js/sitecues.js target/build-config/sitecues-bundles.js $(allow-zepto) $(version)
+	#./finalize-loader-config.js $(build-dir)/js/sitecues-ie9.js target/build-config/sitecues-bundles-ie9.js false $(version)
 
 	# Non-js files, such as css, images, html, audio files
-	@mkdir -p $(build-dir)/etc
-	@(for F in `ls -d source/* | grep -Ev '^source/js$$'` ; do cp -r $$F $(build-dir)/etc ; done)
+	@mkdir -p $(build-dir)/$(version)
+	@(for F in `ls -d source/* | grep -Ev '^source/js$$'` ; do cp -r $$F $(build-dir)/$(version) ; done)
 	@echo
 
 	@echo "**** File sizes ******************************************"
@@ -133,20 +145,9 @@ debug:
 ################################################################################
 package:
 	@echo "===== STARTING: Packaging sitecues library"
-	rm -rf $(package-dir)
-	mkdir -p $(package-dir)
-	mkdir -p $(package-dir)/js
-	echo $(version) > $(package-dir)/VERSION.TXT
-	echo "SC_BUILD_NAME=common" > $(package-dir)/BUILD.TXT
+	echo $(version) > $(build-dir)/VERSION.TXT
+	echo "SC_BUILD_NAME=common" > $(build-dir)/BUILD.TXT
 
-  # Deep copy of $(build-dir)/js/  (only .js files)
-  # Easiest way is to copy everything, then remove the useless files (.gz, .map, .src.js, etc.)
-	cp -R $(build-dir)/js/* $(package-dir)/js
-	find $(package-dir)/js -type f ! -name '*.js' -delete
-
-  # Copy all the resources
-	cp -R $(build-dir)/etc/* $(package-dir)
-
-	tar -C $(package-basedir) -zcf $(build-basedir)/$(package-file-name) $(package-name)
+	tar --exclude='*.src.js' --exclude='*.js.map' -C $(build-dir) -zcf $(build-basedir)/$(package-file-name) .
 	@echo "===== COMPLETE: Packaging sitecues library"
 	@echo
