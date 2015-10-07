@@ -2,7 +2,7 @@ define(['core/conf/site'], function(site) {
 
   var apiDomain,  // Either ws.sitecues.com/ or ws.dev.sitecues.com/
     prefsDomain,  // Either up.sitecues.com/ or up.dev.sitecues.com/
-    BASE_RESOURCE_URL = sitecues.requirejs.nameToUrl('').split('/js/')[0] + '/' + sitecues.version + '/';
+    BASE_RESOURCE_URL = sitecues.requirejs.nameToUrl('').split('/js/')[0] + '/';
 
   function getApiUrl(restOfUrl) {
     return '//' + apiDomain + 'sitecues/api/' + restOfUrl;

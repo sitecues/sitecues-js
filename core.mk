@@ -50,19 +50,24 @@ build:
 	@echo "===== STARTING: Building sitecues library ====="
 	@echo
 
+	# Where sitecues.js goes
 	@mkdir -p $(build-dir)/js
-	@mkdir -p $(build-dir)/js/$(version)
+	# Where all dependent resources will go
+	@mkdir -p $(build-dir)/$(version)
+	# Where dependent JS will go
+	@mkdir -p $(build-dir)/$(version)/js
+	# Where build-config will go
 	@mkdir -p target/build-config
 	echo "sitecues.version='$(version)';" > target/build-config/config.js
 
 	# Require.js build
 	# TODO not sure if we want use strict in production versions -- good temporarily though
-	node node_modules/.bin/r.js -o rjs-build-options.js baseUrl=source/js generateSourceMaps=$(sourcemaps) optimize=uglify2 uglify2.compress.global_defs.SC_DEV=false uglify2.compress.global_defs.SC_LOCAL=$(sc-local) uglify2.compress.global_defs.SC_UNIT=false dir=$(build-dir)/js/$(version) wrap.start="'use strict';"
+	node node_modules/.bin/r.js -o rjs-build-options.js baseUrl=source/js generateSourceMaps=$(sourcemaps) optimize=uglify2 uglify2.compress.global_defs.SC_DEV=false uglify2.compress.global_defs.SC_LOCAL=$(sc-local) uglify2.compress.global_defs.SC_UNIT=false dir=$(build-dir)/$(version)/js wrap.start="'use strict';"
 
 	# Move sitecues.js out of version-named subfolder into /js (up one directory)
 	# This is because sitcues.js is loaded by the load script, which knows nothing of versions
 	# All other dependent resources are loaded by JS and are versioned
-	mv $(build-dir)/js/$(version)/sitecues.js $(build-dir)/js
+	mv $(build-dir)/$(version)/js/sitecues.js $(build-dir)/js
 
 	# Insert runtime bundle configuration
 	./finalize-loader-config.js $(build-dir)/js/sitecues.js target/build-config/sitecues-bundles.js $(allow-zepto) $(version)
@@ -76,7 +81,7 @@ build:
 	@echo "---- sitecues core source --------------------------------"
 	@./show-file-sizes.sh $(build-dir)/js "sitecues.js"
 	@echo "---- additional bundles source ---------------------------"
-	@./show-file-sizes.sh $(build-dir)/js "*.js" | grep -v ".src.js" | grep -v "sitecues"
+	@./show-file-sizes.sh $(build-dir)/$(version)/js "*.js" | grep -v ".src.js"
 
 	@echo
 	@echo "===== COMPLETE: Building sitecues library"
@@ -90,6 +95,7 @@ build:
 checksize:
 	@echo "===== GZIP: Creating compressed (gzipped) JavaScript files."
 	@cd $(build-dir)/js ; find . -type f -name '*.js' ! -name "*.map" ! -name "*.src.js" -exec sh -c $(gzip-command) \;
+	@cd $(build-dir)/$(version)/js ; find . -type f -name '*.js' ! -name "*.map" ! -name "*.src.js" -exec sh -c $(gzip-command) \;
 
   # Show file sizes but not for foo.src.bar -- those are built by r.js for sourcemaps
 	@echo "**** File sizes ******************************************"
@@ -97,7 +103,7 @@ checksize:
 	@echo "---- sitecues core zipped --------------------------------"
 	@./show-file-sizes.sh $(build-dir)/js "sitecues*.js.gz"
 	@echo "----- additional bundles zipped --------------------------"
-	@./show-file-sizes.sh $(build-dir)/js "*.js.gz" | grep -v "sitecues"
+	@./show-file-sizes.sh $(build-dir)/$(version)/js "*.js.gz"
 
 ################################################################################
 # TARGET: debug
@@ -106,18 +112,23 @@ debug:
 	@echo "===== STARTING: Build for sitecues library (DEBUG VER) ====="
 	@echo
 
+	# Where sitecues.js goes
 	@mkdir -p $(build-dir)/js
-	@mkdir -p $(build-dir)/js/$(version)
+	# Where all dependent resources will go
+	@mkdir -p $(build-dir)/$(version)
+	# Where dependent JS will go
+	@mkdir -p $(build-dir)/$(version)/js
+	# Where build-config will go
 	@mkdir -p target/build-config
 	echo "sitecues.version='$(version)';var SC_LOCAL=$(sc-local),SC_DEV=true,SC_UNIT=false;" > target/build-config/config.js
 
 	# Require.js build
-	node node_modules/.bin/r.js -o rjs-build-options.js baseUrl=source/js generateSourceMaps=$(sourcemaps) optimize=none dir=$(build-dir)/js/$(version) wrap.start='"use strict";'
+	node node_modules/.bin/r.js -o rjs-build-options.js baseUrl=source/js generateSourceMaps=$(sourcemaps) optimize=none dir=$(build-dir)/$(version)/js wrap.start='"use strict";'
 
 	# Move sitecues.js out of version-named subfolder into /js (up one directory)
 	# This is because sitcues.js is loaded by the load script, which knows nothing of versions
 	# All other dependent resources are loaded by JS and are versioned
-	mv $(build-dir)/js/$(version)/sitecues.js $(build-dir)/js
+	mv $(build-dir)/$(version)/js/sitecues.js $(build-dir)/js
 
 	# Insert runtime bundle configuration
 	./finalize-loader-config.js $(build-dir)/js/sitecues.js target/build-config/sitecues-bundles.js $(allow-zepto) $(version)
@@ -132,7 +143,7 @@ debug:
 	@echo "---- sitecues core source --------------------------------"
 	@./show-file-sizes.sh $(build-dir)/js "sitecues*.js"
 	@echo "---- additional bundles source ---------------------------"
-	@./show-file-sizes.sh $(build-dir)/js "*.js" | grep -v "sitecues"
+	@./show-file-sizes.sh $(build-dir)/$(version)/js "*.js" | grep -v "sitecues"
 
 	@echo
 	@echo "===== COMPLETE: Building sitecues library (DEBUG VER) ====="
