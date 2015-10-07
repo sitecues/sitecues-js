@@ -19,6 +19,6 @@ var fs = require('fs'),
   text = fs.readFileSync(sitecuesLibraryFilename, { encoding: 'utf8' } ),
   newText = text.replace(matchText, bundleText)
     .replace('sitecues.__ALLOW_ZEPTO__', args[2])
-    .replace('__VERSION__', args[3]);
+    .replace(/__VERSION__/g, args[3]);
 
 fs.writeFileSync(sitecuesLibraryFilename, newText);
