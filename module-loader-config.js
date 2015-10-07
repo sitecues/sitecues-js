@@ -15,7 +15,7 @@ var require = {
     var scriptUrl = config.scriptUrl || config.script_url, // Old load script sometimes used underscore names, which is deprecated but still supported
       folderOnly = scriptUrl.substring(0, scriptUrl.lastIndexOf('/js/')),
       withVersionName = folderOnly + '/__VERSION__/js/',
-      withLatestReplaced = withVersionName.replace('/latest/js', '/__VERSION__/js');  // The /latest/ means the current version
+      withLatestReplaced = withVersionName.replace('/latest/', '/__VERSION__/');  // The /latest/ means the current version
     return withLatestReplaced;  // Includes version name so that cached resources are only used with the appropriately matching sitecues.js
   })(sitecues.everywhereConfig || sitecues.config),
   // Make aliases to modules, for convenience.
