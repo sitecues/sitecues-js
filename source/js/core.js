@@ -103,11 +103,11 @@
   }
 
   function getApiUrl(restOfUrl) {
-    return 'https://' + apiDomain + 'sitecues/api/' + restOfUrl;
+    return '//' + apiDomain + 'sitecues/api/' + restOfUrl;
   }
 
   function getPrefsUrl(restOfUrl) {
-    return 'https://' + prefsDomain + restOfUrl;
+    return '//' + prefsDomain + restOfUrl;
   }
 
   function getLibraryUrl() {
