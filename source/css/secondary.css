@@ -480,17 +480,17 @@ sc-button[aria-pressed="true"]:after {
 }
 
 #scp-feedback-header {
-  transition: opacity .5s; /* Fade in after the animation is finished */
   opacity: 0;
-  display: none;
+  width: 0; /* Use width: 0 instead of display:none because IE wouldn't refresh the styles after sending feedback, clicking about, and coming back to feedback */
 }
 .scp-panel-feedback #scp-feedback-header {
+  transition: opacity .5s; /* Fade in after the animation is finished */
   opacity: 1;
-  display: block;
+  width: 256px;
 }
 .scp-secondary-expanding #scp-feedback-header {
-  display: none;
   opacity: 0;
+  width: 256px;
 }
 
 .scp-feedback-sent .scp-if-feedback.scp-secondary-feature {
