@@ -124,8 +124,31 @@ define(['util/transform', 'core/platform'], function (transform, platform) {
 
   };
 
+  function cancel(animation) {
+    if (animation.isRunning) {
+      cancelFrameFn(animation.animationId);
+      animation.isRunning = false;
+    }
+  }
+
+  function finishNow(animation) {
+    if (animation.isRunning) {
+      if (animation.onTick) {
+        animation.onTick(1);
+      }
+      if (animation.onFinish) {
+        animation.onFinish(1);
+      }
+      animation.cancel();
+    }
+  }
+  
   Animate.prototype.cancel = function () {
-    cancelFrameFn(this.animationId);
+    cancel(this);
+  };
+
+  Animate.prototype.finishNow = function () {
+    finishNow(this);
   };
 
   function ArbitraryAnimate (options) {
@@ -160,22 +183,11 @@ define(['util/transform', 'core/platform'], function (transform, platform) {
   };
 
   ArbitraryAnimate.prototype.cancel = function () {
-    if (this.isRunning) {
-      cancelFrameFn(this.animationId);
-      this.isRunning = false;
-    }
+    cancel(this);
   };
 
   ArbitraryAnimate.prototype.finishNow= function () {
-    if (this.isRunning) {
-      if (this.onTick) {
-        this.onTick(1);
-      }
-      if (this.onFinish) {
-        this.onFinish(1);
-      }
-      this.cancel();
-    }
+    finishNow(this);
   };
 
   function animateCssProperties(element, CSSProperties, options) {

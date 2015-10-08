@@ -29,6 +29,8 @@ define(['bp/constants',
     origOutlineHeight,
     isActive = false,
     isInitialized,
+    fadeInTimer,
+    animateHeightTimer,
 
     // Oft-used functions. Putting it in a variable helps minifier, convenience, brevity
     byId = helper.byId,
@@ -139,6 +141,8 @@ define(['bp/constants',
     runningAnimations.forEach(function (animation) {
       animation.finishNow();
     });
+    clearTimeout(fadeInTimer);
+    clearTimeout(animateHeightTimer);
     runningAnimations.length = 0;
   }
 
@@ -311,7 +315,7 @@ define(['bp/constants',
     }
 
     function fadeInTextContentWhenLargeEnough() {
-      setTimeout(function () {
+      fadeInTimer = setTimeout(function () {
         state.set('isSecondaryExpanding', false);
         fireBpChanged(true);
       }, heightAnimationDelay + heightAnimationDuration * 0.7);
@@ -333,7 +337,7 @@ define(['bp/constants',
     openFeatureAnimation();
 
     // Animate the height at the right time
-    setTimeout(animateHeight, heightAnimationDelay);
+    animateHeightTimer = setTimeout(animateHeight, heightAnimationDelay);
 
     fadeInTextContentWhenLargeEnough();
 
