@@ -130,7 +130,7 @@ define(['bp/helper', 'bp/constants', 'core/platform', 'bp-expanded/view/svg-anim
     refreshHovers(); // Current expansion
     sitecues.on('bp/did-expand zoom', hoversOn); // Future expansions
     sitecues.on('bp/will-shrink zoom/begin', hoversOff);
-    sitecues.on('bp/content-loaded', refreshHovers);
+    sitecues.on('bp/did-init-secondary bp/content-loaded', refreshHovers);
     sitecues.on('bp/will-show-secondary-feature', cancelHovers);
   }
 

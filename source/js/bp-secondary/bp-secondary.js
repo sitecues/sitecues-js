@@ -528,6 +528,8 @@ define(['bp/constants',
       resetStyles();
 
       sitecues.on('bp/will-shrink', onPanelClose);
+
+      sitecues.emit('bp/did-init-secondary');
     }
   }
 
