@@ -439,9 +439,9 @@ define(['bp/constants',
 //    setSelectedFeature(featureName, willEnable);
     updateMoreButtonLabel(!willEnable);
     if (willEnable && !isFeatureAvailable(featureName)) {
-      // The feature was not loaded -- punt and go to help page
-      require(['info/info'], function(info) {
-        info.showHelp();
+      // The feature was not loaded yet -- wait until loaded
+      sitecues.on('bp/content-loaded', function() {
+        toggleSecondaryFeature(featureName);
       });
     }
     else {
