@@ -41,6 +41,8 @@ define([], function() {
     tell_us_something: 'Powiedz nam ...',      /* new */
     thank_you: 'Dziękujemy',                          /* new */
     // - About
+    about_preamble: 'Ta strona zawiera sitecues, dzięki czemu można ją lepiej zobaczyć, usłyszeć i używać. Więcej informacji znajdziesz tutaj ',
+    about_rate_us: 'Prosimy o informację o Państwa doświadczeniach.',
     zoom_and_speech: 'powiększenie i mowa'               /* new */
   };
 });
