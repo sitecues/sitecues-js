@@ -6,6 +6,7 @@
 // - Review
 // - Send Chrome beta out -- Anton, Shelly
 // Accessibility
+// - Secret message for screen readers in highlighting tips
 // - JAWS 16 with IE 11 - tabbing, role announced as link. Arrowing, you don't discover it at all.
 // Themes
 // - sitecues inversion color theme doesnt work well on this site: http://goodnowlibrary.org/
