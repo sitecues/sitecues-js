@@ -159,7 +159,7 @@ package:
 	echo $(version) > $(build-dir)/VERSION.TXT
 	echo "SC_BUILD_NAME=common" > $(build-dir)/BUILD.TXT
 
-	cp $(build-dir)/js/sitecues.js $(build-dir)/js/sitecues-$(version).js
+	cp $(build-dir)/js/sitecues.js $(build-dir)/sitecues-$(version).js
 	tar --exclude='*.src.js' --exclude='*.js.map' -C $(build-dir) -zcf $(build-basedir)/$(package-file-name) .
 	@echo "===== COMPLETE: Packaging sitecues library"
 	@echo
