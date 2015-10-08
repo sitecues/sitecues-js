@@ -12,7 +12,7 @@
  * Note: "Growth" is a synonym for "Expansion" -- very intuitive for Aaron but no one else!
  */
 
-define(['$', 'util/common', 'keys/element-classifier', 'mouse-highlight/traitcache'],
+define(['$', 'util/common', 'keys/element-classifier', 'highlight/traitcache'],
   function($, common, elemClassifier, traitcache) {
 
     'use strict';

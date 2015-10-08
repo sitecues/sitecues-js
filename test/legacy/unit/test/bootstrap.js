@@ -20,7 +20,7 @@ sinon.stub(jquery.fn, 'style', expectedBehaviour);
 // document, window, nodes etc.
 require('../data/w3c');
 
-// Need this for mouse-highlight tests
+// Need this for highlight tests
 document.hasFocus = function() {
   return false;
 }

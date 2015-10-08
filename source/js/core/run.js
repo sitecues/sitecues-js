@@ -3,7 +3,6 @@
  *   The core module of the sitecues library.
  */
 
-// - Caching
 // - Review
 // - Send Chrome beta out -- Anton, Shelly
 // Accessibility
@@ -50,7 +49,7 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
     QUOTE = 222;
 
   function initZoom() {
-    require([ 'hpan/hpan', 'zoom/fixed-position-fixer', 'enhance/focus', 'cursor/cursor' ], function(hpan, fixer, focus, cursor) {
+    require([ 'hpan/hpan', 'zoom/fixed-position-fixer', 'focus/focus', 'cursor/cursor' ], function(hpan, fixer, focus, cursor) {
       hpan.init();
       fixer.init();
       focus.init();
@@ -66,7 +65,7 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
   }
 
   function initSitecuesOn() {
-    require([ 'mouse-highlight/mouse-highlight', 'keys/keys', 'mouse-highlight/move-keys' ], function(highlight, keys, moveKeys) {
+    require([ 'highlight/highlight', 'keys/keys', 'highlight/move-keys' ], function(highlight, keys, moveKeys) {
       highlight.init();
       keys.init();
       moveKeys.init();
@@ -74,7 +73,7 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
   }
 
   function initThemes() {
-    require([ 'theme/color-engine' ], function(themes) {
+    require([ 'theme/theme' ], function(themes) {
       themes.init();
     });
   }

@@ -26,7 +26,7 @@
  */
 
 define(['$', 'util/common', 'dollar/dollar-utils', 'core/conf/user/manager', 'core/conf/site',
-    'mouse-highlight/traitcache', 'mouse-highlight/traits', 'mouse-highlight/judge', 'core/platform'],
+    'highlight/traitcache', 'highlight/traits', 'highlight/judge', 'core/platform'],
   function($, common, $utils, conf, site, traitcache, traits, judge, platform) {
 
   var UNUSABLE_SCORE = -99999,       // A score so low there is no chance of picking the item
@@ -353,7 +353,7 @@ define(['$', 'util/common', 'dollar/dollar-utils', 'core/conf/user/manager', 'co
     function processResult(pickedIndex) {
       // Log the results if necessary for debugging
       if (SC_DEV && isDebuggingOn) {
-        require(['mouse-highlight/pick-debug'], function(pickDebug) {
+        require(['highlight/pick-debug'], function(pickDebug) {
           // Use sitecues.togglePickerDebugging() to turn on the logging
           pickDebug.logHeuristicResult(scoreObjs, bestIndex, candidates);
         });

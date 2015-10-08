@@ -76,7 +76,7 @@
       name: 'bp-secondary',
       create: true,
       include: [
-        'bp-secondary/secondary-panel'
+        'bp-secondary/bp-secondary'
       ],
       exclude: [
         'core/locale',
@@ -101,17 +101,17 @@
         'keys/keys',
         'keys/commands',
         'keys/element-classifier',
-        'mouse-highlight/mouse-highlight',
+        'highlight/highlight',
         'util/transform',
         'util/common',
         'dollar/dollar-utils',
         'dollar/zepto',
         'audio/audio',
-        'mouse-highlight/move-keys',
+        'highlight/move-keys',
         'zoom/zoom',
         'hpan/hpan',
         'zoom/fixed-position-fixer',
-        'enhance/focus',
+        'focus/focus',
         'cursor/cursor'
       ],
       exclude: [
@@ -158,7 +158,7 @@
       name: 'themes',
       create: true,
       include: [
-        'theme/color-engine',
+        'theme/theme',
         'theme/color-choices',
         'theme/img-classifier'
       ],

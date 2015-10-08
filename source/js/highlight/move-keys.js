@@ -1,5 +1,5 @@
-define(['$', 'mouse-highlight/mouse-highlight', 'util/common', 'util/transform',
-  'mouse-highlight/pick', 'zoom/zoom', 'util/geo', 'zoom/fixed-position-fixer'],
+define(['$', 'highlight/highlight', 'util/common', 'util/transform',
+  'highlight/pick', 'zoom/zoom', 'util/geo', 'zoom/fixed-position-fixer'],
   function($, mh, common, transform, picker, zoomMod, geo, fixedFixer) {
 
   var STEP_SIZE_VERT = 18,

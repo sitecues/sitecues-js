@@ -29,7 +29,7 @@ define(['bp/constants', 'bp/helper', 'bp-expanded/view/svg-animate', 'bp-expande
     }
 
     // Not IE9: go ahead with secondary panel
-    require(['bp-secondary/secondary-panel'], function(secondary) {
+    require(['bp-secondary/bp-secondary'], function(secondary) {
       // Show or hide the secondary panel.
       secondary.init();
       if (doToggle) {

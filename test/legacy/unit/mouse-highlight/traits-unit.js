@@ -1,4 +1,4 @@
-var modulePath = '../../../source/js/mouse-highlight/traits',
+var modulePath = '../../../source/js/highlight/traits',
   traits = require(modulePath),
   nodes = [],
   win;
