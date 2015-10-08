@@ -6,9 +6,6 @@
 // - Caching
 // - Review
 // - Send Chrome beta out -- Anton, Shelly
-// About -- German, Polish text
-// This website's owner has added sitecues to make it easier for visitors with diverse abilities to see, hear, and use. We encourage you to provide feedback on your experience to the website owner.
-// For more information about sitecues, please visit: www.sitecues.com (include UTM tracking link)
 // Accessibility
 // - JAWS 16 with IE 11 - tabbing, role announced as link. Arrowing, you don't discover it at all.
 // Themes
