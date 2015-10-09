@@ -36,7 +36,6 @@ define(['bp/constants',
     byId = helper.byId,
     getElemTransform = transform.getElemTransform,
     setElemTransform = transform.setElemTransform,
-    setTransform = transform.setElemTransform,
     CONTENTS_HEIGHT = 780,
 
     features = {
@@ -61,6 +60,7 @@ define(['bp/constants',
       about: {
         module: aboutModule,
         menuButtonId: BP_CONST.ABOUT_BUTTON_ID,
+        animatedImageId: BP_CONST.ABOUT_CONTENT_IMAGE_ID,
         labelId: BP_CONST.ABOUT_LABEL_ID,
         panelId: BP_CONST.ABOUT_CONTENT_ID,
         heightAnimationDelay: 1200
@@ -159,6 +159,19 @@ define(['bp/constants',
     runningAnimations.push(newAnimation);
   }
 
+  // Create an animation and store it in runningAnimations so we can cancel it if need be
+  function createOptimizedAnimation(elem, duration, onTickFn, onFinishFn) {
+    var options = {
+      duration: duration,
+      onTick: onTickFn,
+      onFinish: onFinishFn
+    };
+
+    var newAnimation = animate.animateTransform(elem, options);
+
+    runningAnimations.push(newAnimation);
+  }
+
   function getValueInTime(from, to, time) {
     return from + (to - from) * time;
   }
@@ -190,7 +203,7 @@ define(['bp/constants',
       moreBtnEndRotation = willEnable ? MORE_BUTTON_ROTATION_ENABLED : 0;
 
     function onButtonMenuDropTick(time) {
-      setTransform(secondaryPanel, 0, secondaryPanelCurrentPos + posDiff * time);
+      setElemTransform(secondaryPanel, 0, secondaryPanelCurrentPos + posDiff * time);
       var moreBtnRotation = getValueInTime(moreBtnStartRotation, moreBtnEndRotation, time);
       updateMoreButton(origOutlineHeight, moreBtnRotation);
     }
@@ -257,8 +270,7 @@ define(['bp/constants',
 
     var
       feature = features[name],
-      featureModule = feature.module,
-      featureTick = featureModule.tick,
+      animatedImageElem = byId(feature.animatedImageId),
       menuButton = byId(feature.menuButtonId),
       bpContainer = getBPContainer(),
 
@@ -302,16 +314,26 @@ define(['bp/constants',
       }
     }
 
-    function openFeatureAnimationTick(time) {
+    function menuButtonTick(time) {
       // Menu button
+      var hasRotation = fromGeo.menuBtnRotate || toGeo.menuBtnRotate,
+        // Rotations (for the about button) need to be done half and half, otherwise the rotation does not happen
+        // Basically, the browser optimizes a -360deg rotation as 0!
+        // So we do -180 on the parent and -180 on the child
+        // Don't need to use in IE where CSS transitions aren't used with SVG
+        useRotationHalves = hasRotation && transform.useCssInSvg,
+        toRotation = toGeo.menuBtnRotate * (useRotationHalves ? 0.5 : 1);
       setElemTransform(menuButton, getValueInTime(currentMenuBtnTranslateX, toGeo.menuBtnTranslateX, time),
-          0, 1, getValueInTime(currentMenuBtnRotate, toGeo.menuBtnRotate, time));
-
-      // TODO: Probably remove the if check? Functions are always truthy.
-      //       Not sure why this is here. Is this an API or isn't it?
-      if (featureTick) {
-        featureTick(time, toGeo);
+          0, 1, getValueInTime(currentMenuBtnRotate, toRotation, time));
+      if (useRotationHalves) {
+        setElemTransform(menuButton.firstElementChild, 0, 0, 1, getValueInTime(currentMenuBtnRotate, toRotation, time));
       }
+    }
+
+    // Custom animation of feature
+    function animatedImageTick(time) {
+      var translateX = getValueInTime(0, toGeo.menuImageTranslateX, time);
+      transform.setElemTransform(animatedImageElem, translateX, 0);
     }
 
     function fadeInTextContentWhenLargeEnough() {
@@ -326,7 +348,10 @@ define(['bp/constants',
     }
 
     function openFeatureAnimation() {
-      createAnimation(openFeatureDuration, openFeatureAnimationTick);
+      createOptimizedAnimation(menuButton, openFeatureDuration, menuButtonTick);
+      if (animatedImageElem) {
+        createOptimizedAnimation(animatedImageElem, openFeatureDuration, animatedImageTick);
+      }
     }
 
     finishAllAnimations();

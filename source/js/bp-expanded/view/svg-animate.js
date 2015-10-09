@@ -124,13 +124,6 @@ define(['util/transform', 'core/platform'], function (transform, platform) {
 
   };
 
-  function cancel(animation) {
-    if (animation.isRunning) {
-      cancelFrameFn(animation.animationId);
-      animation.isRunning = false;
-    }
-  }
-
   function finishNow(animation) {
     if (animation.isRunning) {
       if (animation.onTick) {
@@ -139,14 +132,11 @@ define(['util/transform', 'core/platform'], function (transform, platform) {
       if (animation.onFinish) {
         animation.onFinish(1);
       }
-      animation.cancel();
+      cancelFrameFn(animation.animationId);
+      animation.isRunning = false;
     }
   }
   
-  Animate.prototype.cancel = function () {
-    cancel(this);
-  };
-
   Animate.prototype.finishNow = function () {
     finishNow(this);
   };
@@ -182,10 +172,6 @@ define(['util/transform', 'core/platform'], function (transform, platform) {
     }
   };
 
-  ArbitraryAnimate.prototype.cancel = function () {
-    cancel(this);
-  };
-
   ArbitraryAnimate.prototype.finishNow= function () {
     finishNow(this);
   };
@@ -198,6 +184,38 @@ define(['util/transform', 'core/platform'], function (transform, platform) {
     return new ArbitraryAnimate(options);
   }
 
+  // Optimized transform animation that works via @transform on IE, CSS transition on other browsers
+  // Currently only works with CSS transform, on element at a time
+  function animateTransform(element, options) {
+    if (platform.browser.isIE) {
+      return animateViaCallbacks(options); // Cannot use CSS for SVG in IE
+    }
+    // Will use CSS instead
+    function stopAnimation(t) {
+      element.removeEventListener(platform.transitionEndEvent, options.onFinish);
+      element.style.transition = '';
+      options.onTick(t);
+    }
+
+    function finishNow() {
+      stopAnimation(1);
+    }
+
+    function beginTransition() {
+      element.addEventListener(platform.transitionEndEvent, options.onFinish);
+      element.style.transition = platform.transformPropertyCss + ' ' + options.duration + 'ms';
+      setTimeout(function() { options.onTick(1); }, 0);
+    }
+
+    stopAnimation(0);  // Reset to start
+    element.removeAttribute('transform'); // Don't use transform attribute
+    setTimeout(beginTransition, 0);
+
+    return {
+      finishNow: finishNow
+    };
+  }
+
   function getDuration(duration, from, to, currentVal) {
     return Math.abs(((to - currentVal) / (to - from))) * duration;
   }
@@ -205,6 +223,7 @@ define(['util/transform', 'core/platform'], function (transform, platform) {
   return {
     animateCssProperties: animateCssProperties,
     animateViaCallbacks: animateViaCallbacks,
+    animateTransform: animateTransform,
     getDuration: getDuration
   };
 });

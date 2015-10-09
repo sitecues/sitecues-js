@@ -43,7 +43,7 @@ define(['bp/helper', 'bp/constants', 'core/platform', 'bp-expanded/view/svg-anim
     }
 
     if (animations[id]) {
-      animations[id].cancel();
+      animations[id].finishNow();
     }
     animations[id] = animate.animateCssProperties(target, cssProperties, options);
     hoverState[id] = isActiveHover;

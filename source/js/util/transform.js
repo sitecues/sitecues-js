@@ -8,6 +8,8 @@
 
 define([ 'core/platform' ], function(platform) {
 
+  var useCssInSvg = !platform.browser.isIE;
+
   // Skips past non-numeric characters and get the next number as type 'number'
   // It will include a negative sign and decimal point if it exists in the string
   function getNumberFromString(str) {
@@ -20,12 +22,22 @@ define([ 'core/platform' ], function(platform) {
     return parseFloat(transform.substring(7)) || 1;
   }
 
+  // Always get style transform
   function getStyleTransform(elem) {
     return getTransform(elem.style[platform.transformProperty]);
   }
 
+  // Get @transform or CSS transform as appropriate
   function getElemTransform(elem) {
-    return getTransform(elem.getAttribute('transform'));
+    var transformString;
+    if (useCssInSvg && elem instanceof SVGElement) {
+      transformString = elem.style[platform.transformProperty];
+    }
+    if (!transformString) {
+      transformString = elem.getAttribute('transform');
+    }
+
+    return getTransform(transformString);
   }
 
   function getTransform(transform) {
@@ -89,18 +101,25 @@ define([ 'core/platform' ], function(platform) {
   }
 
   function setStyleTransform(elem, left, top, transformScale, rotate) {
-    var newTransformString = getTransformString(left + 'px', top + 'px', transformScale, rotate);
+    var newTransformString = getTransformString(left + 'px', top + 'px', transformScale, rotate && rotate + 'deg');
     elem.style[platform.transformProperty] = newTransformString;
   }
 
-  function setElemTransform(element, left, top, transformScale, rotate) {
-    element.setAttribute('transform', getTransformString(left, top, transformScale, rotate));
+  // Set @transform or CSS transform as appropriate
+  function setElemTransform(elem, left, top, transformScale, rotate) {
+//    elem.removeAttribute('transform');
+    if (useCssInSvg || elem instanceof SVGElement) {  // Always use CSS, even in SVG
+      setStyleTransform(elem, left, top, transformScale, rotate);
+    }
+    else {
+      elem.setAttribute('transform', getTransformString(left, top, transformScale, rotate));
+    }
   }
 
   function getTransformString(left, top, scale, rotate) {
 
     var translateCSS = 'translate(' + left + ' , ' + top + ') ',
-      scaleCSS = scale ? ' scale(' + scale + ') ' : '',
+      scaleCSS = scale > 1 ? ' scale(' + scale + ') ' : '',
       rotateCSS = rotate ? ' rotate(' + rotate + ') ' : '';
 
     return translateCSS + scaleCSS + rotateCSS;
@@ -108,6 +127,7 @@ define([ 'core/platform' ], function(platform) {
   }
 
   return {
+    useCssInSvg: useCssInSvg,
     getComputedScale: getComputedScale,
     getTransform: getTransform,
     getStyleTransform: getStyleTransform,
