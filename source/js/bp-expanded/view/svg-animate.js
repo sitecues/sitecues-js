@@ -186,15 +186,23 @@ define(['util/transform', 'core/platform'], function (transform, platform) {
 
   // Optimized transform animation that works via @transform on IE, CSS transition on other browsers
   // Currently only works with CSS transform, on element at a time
-  function animateTransform(element, options) {
+  function animateTransform(elements, options) {
     if (platform.browser.isIE) {
       return animateViaCallbacks(options); // Cannot use CSS for SVG in IE
     }
     // Will use CSS instead
     function stopAnimation(t) {
-      element.removeEventListener(platform.transitionEndEvent, options.onFinish);
-      element.style.transition = '';
+      elements[0].removeEventListener(platform.transitionEndEvent, options.onFinish);
+      setTransition('');
       options.onTick(t);
+    }
+
+    function setTransition(transition) {
+      elements.forEach(function(elem) {
+        if (elem) {
+          elem.style.transition = transition;
+        }
+      });
     }
 
     function finishNow() {
@@ -202,13 +210,12 @@ define(['util/transform', 'core/platform'], function (transform, platform) {
     }
 
     function beginTransition() {
-      element.addEventListener(platform.transitionEndEvent, options.onFinish);
-      element.style.transition = platform.transformPropertyCss + ' ' + options.duration + 'ms';
+      elements[0].addEventListener(platform.transitionEndEvent, options.onFinish);
+      setTransition(platform.transformPropertyCss + ' ' + options.duration + 'ms');
       setTimeout(function() { options.onTick(1); }, 0);
     }
 
     stopAnimation(0);  // Reset to start
-    element.removeAttribute('transform'); // Don't use transform attribute
     setTimeout(beginTransition, 0);
 
     return {

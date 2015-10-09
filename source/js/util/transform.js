@@ -8,8 +8,6 @@
 
 define([ 'core/platform' ], function(platform) {
 
-  var useCssInSvg = !platform.browser.isIE;
-
   // Skips past non-numeric characters and get the next number as type 'number'
   // It will include a negative sign and decimal point if it exists in the string
   function getNumberFromString(str) {
@@ -25,19 +23,6 @@ define([ 'core/platform' ], function(platform) {
   // Always get style transform
   function getStyleTransform(elem) {
     return getTransform(elem.style[platform.transformProperty]);
-  }
-
-  // Get @transform or CSS transform as appropriate
-  function getElemTransform(elem) {
-    var transformString;
-    if (useCssInSvg && elem instanceof SVGElement) {
-      transformString = elem.style[platform.transformProperty];
-    }
-    if (!transformString) {
-      transformString = elem.getAttribute('transform');
-    }
-
-    return getTransform(transformString);
   }
 
   function getTransform(transform) {
@@ -105,17 +90,6 @@ define([ 'core/platform' ], function(platform) {
     elem.style[platform.transformProperty] = newTransformString;
   }
 
-  // Set @transform or CSS transform as appropriate
-  function setElemTransform(elem, left, top, transformScale, rotate) {
-//    elem.removeAttribute('transform');
-    if (useCssInSvg || elem instanceof SVGElement) {  // Always use CSS, even in SVG
-      setStyleTransform(elem, left, top, transformScale, rotate);
-    }
-    else {
-      elem.setAttribute('transform', getTransformString(left, top, transformScale, rotate));
-    }
-  }
-
   function getTransformString(left, top, scale, rotate) {
 
     var translateCSS = 'translate(' + left + ' , ' + top + ') ',
@@ -127,13 +101,10 @@ define([ 'core/platform' ], function(platform) {
   }
 
   return {
-    useCssInSvg: useCssInSvg,
     getComputedScale: getComputedScale,
     getTransform: getTransform,
     getStyleTransform: getStyleTransform,
-    getElemTransform: getElemTransform,
     setStyleTransform: setStyleTransform,
-    setElemTransform: setElemTransform,
     getTransformString: getTransformString
   };
 

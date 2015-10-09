@@ -1,3 +1,4 @@
+//jshint -W071
 define([], function() {
 
   var constants = {};
@@ -66,7 +67,7 @@ define([], function() {
   constants.SETTINGS_BUTTON_ID       = 'scp-settings-button';
   constants.FEEDBACK_BUTTON_ID       = 'scp-feedback-button';
   constants.ABOUT_BUTTON_ID          = 'scp-about-button';
-
+  constants.ABOUT_ROTATE_HELPER_ID   = 'scp-about-rotate-helper';
   constants.TIPS_LABEL_ID            = 'scp-tips-label';
   constants.SETTINGS_LABEL_ID        = 'scp-settings-label';
   constants.FEEDBACK_LABEL_ID        = 'scp-feedback-label';
