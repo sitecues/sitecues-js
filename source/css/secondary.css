@@ -29,6 +29,14 @@
   display: block;
 }
 
+/* Secondary panel has it's own stretchable outline  and shadow*/
+#scp-outline, #scp-shadow {
+  transition: opacity .2s;
+}
+.scp-is-secondary.scp-want-secondary #scp-outline, .scp-is-secondary.scp-want-secondary #scp-shadow {
+  opacity: 0 !important;
+}
+
 /** Custom elements to help avoid page pollution **/
 
 sc,sc-cards,sc-card {

@@ -28,6 +28,7 @@ define(['bp/constants',
     runningAnimations = [],
     origPanelContentsRect,
     origOutlineHeight,
+    origFillHeight,
     SHOULD_USE_CSS_IN_SVG = !platform.browser.isIE,
     isActive = false,
     isInitialized,
@@ -110,8 +111,16 @@ define(['bp/constants',
     return byId(BP_CONST.BOTTOM_MORE_ID);
   }
 
-  function getOutlineSVG() {
-    return byId(BP_CONST.MAIN_OUTLINE_BORDER_ID);
+  function getShadow() {
+    return byId('scp-secondary-shadow');
+  }
+
+  function getOutlineFill() {
+    return byId('scp-secondary-fill');
+  }
+
+  function getSecondaryOutline() {
+    return byId('scp-secondary-outline');
   }
 
   function updateMoreButton(outlineHeight, moreButtonRotate) {
@@ -151,12 +160,12 @@ define(['bp/constants',
   }
 
   // Set @transform or CSS transform as appropriate
-  function setSvgTransform(elem, left, top, transformScale, rotate) {
+  function setSvgTransform(elem, left, top, scale, rotate) {
     if (SHOULD_USE_CSS_IN_SVG) {  // Always use CSS, even in SVG
-      transform.setStyleTransform(elem, left, top, transformScale, rotate);
+      transform.setStyleTransform(elem, left, top, scale, rotate);
     }
     else {
-      elem.setAttribute('transform', transform.getTransformString(left, top, transformScale, rotate));
+      elem.setAttribute('transform', transform.getTransformString(left, top, scale, rotate));
     }
   }
 
@@ -171,24 +180,12 @@ define(['bp/constants',
   }
 
   // Create an animation and store it in runningAnimations so we can cancel it if need be
-  function createAnimation(duration, onTickFn, onFinishFn) {
-    var options = {
-        duration: duration,
-        onTick: onTickFn,
-        onFinish: onFinishFn
-      };
-
-    var newAnimation = animate.animateViaCallbacks(options);
-
-    runningAnimations.push(newAnimation);
-  }
-
-  // Create an animation and store it in runningAnimations so we can cancel it if need be
-  function createOptimizedAnimation(elems, duration, onTickFn, onFinishFn) {
+  function createAnimation(elems, duration, onTickFn, onFinishFn) {
     var options = {
       duration: duration,
       onTick: onTickFn,
-      onFinish: onFinishFn
+      onFinish: onFinishFn,
+      shouldUseCssTransition: SHOULD_USE_CSS_IN_SVG
     };
 
     var newAnimation = animate.animateTransform(elems, options);
@@ -246,7 +243,7 @@ define(['bp/constants',
 
     finishAllAnimations();
 
-    createAnimation(BUTTON_CLICK_ANIMATION_DURATION, onButtonMenuDropTick, onFinish);
+    createAnimation([secondaryPanel, getMoreButton()], BUTTON_CLICK_ANIMATION_DURATION, onButtonMenuDropTick, onFinish);
 
   }
 
@@ -274,16 +271,32 @@ define(['bp/constants',
   }
 
   function getCurrentOutlineHeight() {
+    function getOutlineSVG() {
+      return byId(BP_CONST.MAIN_OUTLINE_BORDER_ID);
+    }
     var outlinePath = getOutlineSVG().getAttribute('d');
     return parseInt(outlinePath.split(' ')[2]);
   }
 
   function setCurrentOutlineHeight(height) {
-    var outlineSVG = getOutlineSVG(),
-      shadowSVG = byId(BP_CONST.SHADOW_ID);
+    var outlineSVG = getSecondaryOutline(),
+      shadow = getShadow(),
+      outlineFill = getOutlineFill(),
+      bottomTranslateY = height - origOutlineHeight,
+      fillScaleY = 'scale(1,' + (height / origFillHeight) + ')'; // Use scale not scaleY because of @transform requirements
+    setSvgTransform(outlineSVG, 0, bottomTranslateY);
+    setSvgTransform(shadow, 0, bottomTranslateY);
+    if (SHOULD_USE_CSS_IN_SVG) {  // Always use CSS, even in SVG
+      outlineFill.style[platform.transformProperty] = fillScaleY;
+    }
+    else {
+      outlineFill.setAttribute('transform', fillScaleY);
+    }
+
+//      shadowSVG = byId(BP_CONST.SHADOW_ID);
     // Important: do not take the space out. We need it for parsing in getCurrentOutlineHeight()
-    outlineSVG.setAttribute('d', 'M 808 ' + height + 'c0 6-5 11-11 11H11 c-6 0-11-5-11-11V0c0 0 5 0 11 0h786c6 0 11 0 11 0V ' + height);
-    shadowSVG.setAttribute('d', 'm808,' + height + 'c0,6 -5,11 -11,11H11m797,-11v-' + height);
+//    outlineSVG.setAttribute('d', 'M 808 ' + height + 'c0 6-5 11-11 11H11 c-6 0-11-5-11-11V0c0 0 5 0 11 0h786c6 0 11 0 11 0V ' + height);
+    //shadowSVG.setAttribute('d', 'm808,' + height + 'c0,6 -5,11 -11,11H11m797,-11v-' + height);
   }
 
   function animateSecondaryFeature(name, doEnable) {
@@ -328,17 +341,6 @@ define(['bp/constants',
       return Math.abs(((toGeo.outlineHeight - currentOutlineHeight) / (toGeo.outlineHeight - fromGeo.outlineHeight)));
     }
 
-    function panelHeightTick(time) {
-      // SVG height and outline
-      var newPanelHeight = getValueInTime(currentOutlineHeight, toGeo.outlineHeight, time),
-        newTranslateY;
-      setPanelHeight(newPanelHeight, MORE_BUTTON_ROTATION_ENABLED);
-      if (toGeo.bpContainerTranslateY) {
-        newTranslateY = currentBpContainerTransforms.translate.top - getValueInTime(0, toGeo.bpContainerTranslateY, time);
-        transform.setStyleTransform(bpContainer, currentBpContainerTransforms.translate.left, newTranslateY, currentBpContainerTransforms.scale);
-      }
-    }
-
     function menuButtonTick(time) {
       // Menu button
       var hasRotation = fromGeo.menuBtnRotate || toGeo.menuBtnRotate,
@@ -368,12 +370,24 @@ define(['bp/constants',
       }, heightAnimationDelay + heightAnimationDuration * 0.7);
     }
 
+    function panelHeightTick(time) {
+      // SVG height and outline
+      var newPanelHeight = getValueInTime(currentOutlineHeight, toGeo.outlineHeight, time),
+        newTranslateY;
+      setPanelHeight(newPanelHeight, MORE_BUTTON_ROTATION_ENABLED);
+      // Move panel up if necessary
+      if (toGeo.bpContainerTranslateY) {
+        newTranslateY = currentBpContainerTransforms.translate.top - getValueInTime(0, toGeo.bpContainerTranslateY, time);
+        transform.setStyleTransform(bpContainer, currentBpContainerTransforms.translate.left, newTranslateY, currentBpContainerTransforms.scale);
+      }
+    }
+
     function animateHeight() {
-      createAnimation(heightAnimationDuration, panelHeightTick);
+      createAnimation([getMoreButton(), getBottom(), getOutlineFill(), getSecondaryOutline(), getShadow(), bpContainer], heightAnimationDuration, panelHeightTick);
     }
 
     function openFeatureAnimation() {
-      createOptimizedAnimation([menuButton, rotationHelperElem, animatedImageElem], openFeatureDuration, menuButtonTick);
+      createAnimation([menuButton, rotationHelperElem, animatedImageElem], openFeatureDuration, menuButtonTick);
     }
 
     finishAllAnimations();
@@ -424,6 +438,7 @@ define(['bp/constants',
     }
 
     origOutlineHeight = origOutlineHeight || getCurrentOutlineHeight();
+    origFillHeight = origFillHeight || parseFloat(getOutlineFill().getAttribute('data-height'));
     origPanelContentsRect = origPanelContentsRect || document.getElementById(BP_CONST.MAIN_CONTENT_FILL_ID).getBoundingClientRect();
 
     var ENABLED = BP_CONST.SECONDARY_PANEL_ENABLED,

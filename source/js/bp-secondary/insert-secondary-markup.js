@@ -3,10 +3,18 @@ define(['bp/view/markup-finalizer', 'bp/helper', 'core/platform', 'bp-secondary/
   function(finalizer, helper, platform, fontCharset, urls) {
   /*jshint multistr: true */
 
+    //<line x1="0" y1="0" x2="200" y2="200" style="stroke:rgb(255,0,0);stroke-width:2" />
+    // #C0BFBF
 var isInitialized,
   svgSecondary =
-'<g id="scp-secondary" class="scp-secondary-only" aria-label="{{more_features}}" clip-path="url(#scp-outline-clip-def)">\
-  <use id="scp-secondary-outline" xlink:href="#scp-outline-def" fill="white"/>\
+'<g id="scp-secondary" class="scp-secondary-only" aria-label="{{more_features}}">\
+  <path id="scp-secondary-shadow" d="m808,188c0,6 -5,11 -11,11H11m797,-11v-888" stroke="#000" stroke-width="2" filter="url(#scp-shadowblur)" fill="none"/>\
+  <g id="scp-secondary-fill" data-height="132">\
+    <rect x="1" y="1" width="806" height="132" fill="white" stroke-width="0"/>\
+    <line stroke="#C0BFBF" stroke-width="1" x1="0" y1="1" x2="0" y2="132"/>\
+    <line stroke="#C0BFBF" stroke-width="1" x1="807" y1="1" x2="807" y2="132"/>\
+  </g>\
+  <path id="scp-secondary-outline" d="M808 186.5c0 6-5 11-11 11H11 c-6 0-11-5-11-11" fill="transparent" stroke="#C0BFBF" stroke-width="1"/>\
   <g id="scp-bottom-secondary">\
     <use xlink:href="#scp-bottom-def"/>\
     <text id="scp-tips-label" text-anchor="middle" class="scp-hand-cursor" role="button" aria-label="{{tips}}" data-feature="tips" x="75" y="178">{{tips}}</text>\

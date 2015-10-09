@@ -85,15 +85,15 @@ define([ 'core/platform' ], function(platform) {
 
   }
 
-  function setStyleTransform(elem, left, top, transformScale, rotate) {
-    var newTransformString = getTransformString(left + 'px', top + 'px', transformScale, rotate && rotate + 'deg');
+  function setStyleTransform(elem, left, top, scale, rotate) {
+    var newTransformString = getTransformString(left + 'px', top + 'px', scale, rotate && rotate + 'deg');
     elem.style[platform.transformProperty] = newTransformString;
   }
 
   function getTransformString(left, top, scale, rotate) {
 
     var translateCSS = 'translate(' + left + ' , ' + top + ') ',
-      scaleCSS = scale > 1 ? ' scale(' + scale + ') ' : '',
+      scaleCSS = (scale && scale !== 1) ? ' scale(' + scale + ') ' : '',
       rotateCSS = rotate ? ' rotate(' + rotate + ') ' : '';
 
     return translateCSS + scaleCSS + rotateCSS;

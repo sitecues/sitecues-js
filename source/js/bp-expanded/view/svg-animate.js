@@ -39,6 +39,7 @@ define(['util/transform', 'core/platform'], function (transform, platform) {
     }
     else {
       element.style[platform.transformProperty] = attrVal;
+      element.style.willChange = platform.transformProperty;
     }
 
   }
@@ -187,7 +188,7 @@ define(['util/transform', 'core/platform'], function (transform, platform) {
   // Optimized transform animation that works via @transform on IE, CSS transition on other browsers
   // Currently only works with CSS transform, on element at a time
   function animateTransform(elements, options) {
-    if (platform.browser.isIE) {
+    if (!options.shouldUseCssTransition) {
       return animateViaCallbacks(options); // Cannot use CSS for SVG in IE
     }
     // Will use CSS instead
