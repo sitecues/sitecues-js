@@ -109,7 +109,6 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
     sitecues.emit('bp/will-shrink');
 
     state.set('transitionTo', BP_CONST.BADGE_MODE);
-    state.set('featurePanelName', '');
     state.set('isShrinkingFromKeyboard', isFromKeyboard);
     state.set('isSecondaryPanel', false);
     state.set('secondaryPanelTransitionTo', 0);

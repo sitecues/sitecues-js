@@ -3,10 +3,8 @@
  * Currently this module implements data-hover="[transform attributes]"
  */
 
-define(['bp/helper', 'bp/constants', 'core/platform', 'bp-expanded/view/svg-animate'],
-  function(helper, BP_CONST, platform, animate) {
-
-'use strict';
+define(['bp/helper', 'bp/constants', 'core/platform', 'bp-expanded/view/transform-util', 'bp-expanded/view/transform-animate'],
+  function(helper, BP_CONST, platform, transformUtil, animate) {
 
   var isActivePanel = false,
     byId = helper.byId,
@@ -30,13 +28,7 @@ define(['bp/helper', 'bp/constants', 'core/platform', 'bp-expanded/view/svg-anim
 
     var id = + target.getAttribute('data-id'),
       origTransform = origTransforms[id] || '',
-      cssProperties = {
-        transform: origTransform + ' ' + (isActiveHover ? target.getAttribute('data-hover') : '')
-      },
-      options = {
-        duration    : HOVER_ANIMATION_MS,
-        useAttribute: target instanceof SVGElement
-      };
+      transformValue = origTransform + ' ' + (isActiveHover ? target.getAttribute('data-hover') : '');
 
     if (hoverState[id] === isActiveHover) {
       return; // Already doing this
@@ -45,7 +37,7 @@ define(['bp/helper', 'bp/constants', 'core/platform', 'bp-expanded/view/svg-anim
     if (animations[id]) {
       animations[id].finishNow();
     }
-    animations[id] = animate.animateCssProperties(target, cssProperties, options);
+    animations[id] = animate.animateTransformLinear(target, transformUtil.getTransformMap(transformValue), HOVER_ANIMATION_MS);
     hoverState[id] = isActiveHover;
   }
 
@@ -137,5 +129,4 @@ define(['bp/helper', 'bp/constants', 'core/platform', 'bp-expanded/view/svg-anim
   return {
     init: init
   };
-
 });

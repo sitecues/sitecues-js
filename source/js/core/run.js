@@ -3,6 +3,8 @@
  *   The core module of the sitecues library.
  */
 
+// - New animations
+// - setOpacityTransition in more button prolly does nothing now
 // - Review
 // - Send Chrome beta out -- Anton, Shelly
 // - 'About' on jsonline -- clipped logo

@@ -65,7 +65,6 @@
         'util/common',
         'dollar/dollar-utils',
         'dollar/zepto',
-        'util/transform',
         'core/metric',
         'core/conf/urls',
         'core/conf/user/manager',
@@ -81,14 +80,15 @@
       exclude: [
         'core/locale',
         'core/platform',
+        'bp-expanded/bp-expanded',
         'bp/constants',
         'bp/model/state',
         'bp/helper',
         'bp/view/markup-finalizer',
         'core/util/xhr',
         'util/common',
-        'bp-expanded/view/svg-animate',
-        'util/transform',
+        'bp-expanded/view/transform-animate',
+        'bp-expanded/view/transform-util',
         'core/metric',
         'core/conf/urls',
         'core/conf/user/manager'
@@ -102,7 +102,6 @@
         'keys/commands',
         'keys/element-classifier',
         'highlight/highlight',
-        'util/transform',
         'util/common',
         'dollar/dollar-utils',
         'dollar/zepto',
@@ -150,8 +149,7 @@
         'core/metric',
         'core/conf/urls',
         'keys/element-classifier',
-        'util/geo',
-        'util/transform'
+        'util/geo'
       ]
     },
     {
@@ -181,7 +179,6 @@
         'style-service/media-queries.js',
         'style-service/css-aggregator.js',
         'style-service/style-service.js',
-        'util/transform.js',
         'core/metric',
         'zoom/zoom-forms.js',
         'zoom/zoom.js'

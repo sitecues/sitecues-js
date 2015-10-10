@@ -8,6 +8,11 @@ define(['bp/view/markup-finalizer', 'bp/helper', 'core/platform', 'bp-secondary/
 var isInitialized,
   svgSecondary =
 '<g id="scp-secondary" class="scp-secondary-only" aria-label="{{more_features}}">\
+  <defs>\
+    <mask id="scp-secondary-mask-def">\
+      <rect x="1" y="1" width="806" height="132" fill="#fff"/>\
+    </mask>\
+  </defs>\
   <path id="scp-secondary-shadow" d="m808,188c0,6 -5,11 -11,11H11m797,-11v-888" stroke="#000" stroke-width="2" filter="url(#scp-shadowblur)" fill="none"/>\
   <g id="scp-secondary-fill" data-height="132">\
     <rect x="1" y="1" width="806" height="132" fill="white" stroke-width="0"/>\
@@ -52,10 +57,12 @@ var isInitialized,
         <text x="678" y="775" text-anchor="middle" font-family="Arial" fill="white">{{send}}</text>\
       </g>\
     </g>\
-    <g id="scp-about" class="scp-if-about" transform="translate(805,16)">\
-      <g id="scp-logo-text">\
-        <image id="scp-sitecues-text" transform="scale(.84) translate(-28, -12)" width="400" height="100"></image>\
-        <text text-anchor="end" style="font-family:Open Sans;font-size:24px" y="96" x="300">{{zoom_and_speech}}</text>\
+    <g mask="url(#scp-secondary-mask-def)">\
+      <g id="scp-about" class="scp-if-about" transform="translate(805,16)">\
+        <g id="scp-logo-text">\
+          <image id="scp-sitecues-text" transform="scale(.84) translate(-28, -12)" width="400" height="100"></image>\
+          <text text-anchor="end" style="font-family:Open Sans;font-size:24px" y="96" x="300">{{zoom_and_speech}}</text>\
+        </g>\
       </g>\
     </g>\
   </g>\

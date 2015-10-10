@@ -37,6 +37,11 @@
   opacity: 0 !important;
 }
 
+/* Don't show main content under secondary panel, it confuses Window-Eyes even though it's hidden underneath */
+.scp-is-secondary.scp-want-secondary #scp-main {
+  display: none
+}
+
 /** Custom elements to help avoid page pollution **/
 
 sc,sc-cards,sc-card {

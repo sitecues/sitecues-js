@@ -32,9 +32,7 @@ define(['bp/view/markup-finalizer'], function(finalizer) {
     <rect x="0" y="134" width="808" stroke="#C0BFBF" stroke-width="1" height="1" fill="none"/>\
     <path d="M806,186c0,6-5,11-11,11H12C6,196,1,192,1,187v-42 c0-6,0-11,0-11h806c0,0,0,5,0,11V186" fill="#EEE"/>\
   </g>\
-  <clipPath id="scp-outline-clip-def">\
-    <path id="scp-outline-def" d="M 808 187c0 6-5 11-11 11H11 c-6 0-11-5-11-11V0c0 0 5 0 11 0h786c6 0 11 0 11 0V187" stroke="#999" stroke-width="1.5"/>\
-  </clipPath>\
+  <path id="scp-outline-def" d="M 808 187c0 6-5 11-11 11H11 c-6 0-11-5-11-11V0c0 0 5 0 11 0h786c6 0 11 0 11 0V187" stroke="#999" stroke-width="1.5"/>\
   <g id="scp-rating-star-def">\
     <path d="M30 45L48 54L44 35L59 21L39 18L30 0L21 18L1 21L16 35L12 54L30 45"/>\
     <rect class="scp-hidden-target scp-hand-cursor" width="66" height="62"/>\
@@ -81,11 +79,13 @@ define(['bp/view/markup-finalizer'], function(finalizer) {
 </g>\
 <g id="scp-secondary-anchor"/>\
 <use id="scp-outline" xlink:href="#scp-outline-def" class="scp-panel-only" fill="none" opacity="0"/>\
-<g id="scp-more-button-container" transform="translate(400,198)">\
-  <g id="scp-more-button-group" data-hover="scale(1.2)" class="scp-hand-cursor" role="button" aria-label="{{more_features}}">\
-    <circle fill="#FFF" stroke="#777" stroke-width="5" stroke-miterlimit="10" cx="0" cy="0" r="34"/>\
-    <use id="scp-more-arrow" fill="#777" xlink:href="#scp-arrow"/>\
-    <path id="scp-question" fill="#777" stroke="#777" stroke-width="2" d="M0,-16c-3.4 0-6 1-7.5 2.6-1.6 1.6-2.2 3.6-2.4 5.1l4 .5c.2-1 .5-2 1.2-2.8 .8-.8 2-1.5 4.6-1.5 2.6 0 4.1 .5 4 1.4 .8 .7 1.1 1.6 1.1 2.6 0 3.3-1.4 4.2-3.4 6-2 1.8-4.6 4.3-4.6 9v1h4v-1c0-3.3 1.2-4.2 3.2-6 2-1.8 4.8-4.3 4.8-9 0-2-.7-4.1-2.4-5.6-1.7-1.6-4.3-2.4-7.6-2.4zm-2.8 28v4h4v-4h-4z"></path>\
+<g transform="translate(400,198)">\
+  <g id="scp-more-button-container">\
+    <g id="scp-more-button-group" data-hover="scale(1.2)" class="scp-hand-cursor" role="button" aria-label="{{more_features}}">\
+      <circle fill="#FFF" stroke="#777" stroke-width="5" stroke-miterlimit="10" cx="0" cy="0" r="34"/>\
+      <use id="scp-more-arrow" fill="#777" xlink:href="#scp-arrow"/>\
+      <path id="scp-question" fill="#777" stroke="#777" stroke-width="2" d="M0,-16c-3.4 0-6 1-7.5 2.6-1.6 1.6-2.2 3.6-2.4 5.1l4 .5c.2-1 .5-2 1.2-2.8 .8-.8 2-1.5 4.6-1.5 2.6 0 4.1 .5 4 1.4 .8 .7 1.1 1.6 1.1 2.6 0 3.3-1.4 4.2-3.4 6-2 1.8-4.6 4.3-4.6 9v1h4v-1c0-3.3 1.2-4.2 3.2-6 2-1.8 4.8-4.3 4.8-9 0-2-.7-4.1-2.4-5.6-1.7-1.6-4.3-2.4-7.6-2.4zm-2.8 28v4h4v-4h-4z"></path>\
+    </g>\
   </g>\
 </g>\
 <rect id="scp-mouseover-target" x="0" y="0" width="700" height="160" opacity="0"/>\

@@ -1,6 +1,6 @@
 /* Focus Controller */
-define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
-  function (BP_CONST, state, helper, metric) {
+define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric', 'bp-expanded/bp-expanded' ],
+  function (BP_CONST, state, helper, metric, bpExpanded) {
 
   var savedDocumentFocus,
     tabbedElement,
@@ -257,7 +257,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
     // @data-own-focus-ring = element will show it's own focus ring
 
     var showFocusOn = getElementToShowFocusOn(),
-      scale = helper.getBpContainerScale();
+      scale = bpExpanded.getBpContainerScale();
 
     function getFinalCoordinate(coord) {
       return (coord / scale) + 'px';
