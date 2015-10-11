@@ -5,6 +5,7 @@ define([], function() {
     transitionTo            : 0,     // 0 - 1, 0 is badge, 1 is panel, it cannot be anything in between (doesnt seem to make sense to transition to anything other than the badge or panel state)
     isSecondaryPanel        : false,  // Are we currently in the secondary panel
     secondaryPanelTransitionTo: 0,
+    scale                   : 1, // How much transform scale used on expanded BP
     isRealSettings          : false, // Are we currently showing the actual settings or fake settings?
     secondaryPanelName      : 'button-menu', // 'button-menu', 'tips', 'settings', 'feedback', 'about'
     isSecondaryExpanding    : false, // Is secondary panel currently expanding to accommodate new contents?
