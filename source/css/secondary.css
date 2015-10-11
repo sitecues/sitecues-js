@@ -557,33 +557,6 @@ sc-button[aria-pressed="true"]:after {
 #scp-feedback-textarea:focus {
   box-shadow: none !important;
 }
-#scp-feedback-textarea::-moz-placeholder {
-  position: relative;
-  font-size: 26px;
-  left: 20px;
-  top: 35px;
-}
-#scp-feedback-textarea:focus::-moz-placeholder {
-  color: transparent;
-}
-#scp-feedback-textarea::-webkit-input-placeholder {
-  position: relative;
-  font-size: 26px;
-  left: 20px;
-  top: 35px;
-}
-#scp-feedback-textarea:focus::-webkit-input-placeholder {
-  color: transparent;
-}
-#scp-feedback-textarea:-ms-input-placeholder {
-  position: relative;
-  font-size: 26px;
-  left: 20px;
-  top: 35px;
-}
-#scp-feedback-textarea:focus:-ms-input-placeholder {
-  color: transparent;
-}
 .scp-rating-star {
   fill: #ccc;
   stroke: #333;

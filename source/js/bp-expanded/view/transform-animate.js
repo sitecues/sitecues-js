@@ -130,7 +130,7 @@ define(['bp-expanded/view/transform-util', 'core/platform'], function (transform
     function removeListener() {
       elements[0].removeEventListener(platform.transitionEndEvent, onFinish);
     }
-    
+
     function onFinish() {
       removeListener();
       if (onCustomFinish) {
