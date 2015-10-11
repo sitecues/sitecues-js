@@ -16,10 +16,7 @@ var isInitialized,
   <image id="scp-secondary-shadow" width="818" height="900" y="-698" xlink:href="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20820%20902%22%20preserveAspectRatio%3D%22xMinYMin%22%3E%3Cdefs%3E%3Cfilter%20id%3D%22shadowblur%22%3E%20%3CfeGaussianBlur%20in%3D%22SourceGraphic%22%20stdDeviation%3D%224%22%2F%3E%3C%2Ffilter%3E%3C%2Fdefs%3E%3Cpath%20filter%3D%22url%28%23shadowblur%29%22%20d%3D%22m808%2C888c0%2C6%20-5%2C11%20-11%2C11H11m797%2C-11v-888%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20fill%3D%22none%22%2F%3E%3C%2Fsvg%3E"/>\
   <g id="scp-secondary-fill" data-height="132">\
     <rect x="1" y="1" width="806" height="132" fill="white" stroke-width="0"/>\
-    <line stroke="#C0BFBF" stroke-width="1" x1="0" y1="1" x2="0" y2="132"/>\
-    <line stroke="#C0BFBF" stroke-width="1" x1="807" y1="1" x2="807" y2="132"/>\
   </g>\
-  <path id="scp-secondary-outline" d="M808 186.5c0 6-5 11-11 11H11 c-6 0-11-5-11-11" fill="transparent" stroke="#C0BFBF" stroke-width="1"/>\
   <g id="scp-bottom-secondary">\
     <use xlink:href="#scp-bottom-def"/>\
     <text id="scp-tips-label" text-anchor="middle" class="scp-hand-cursor" role="button" aria-label="{{tips}}" data-feature="tips" x="75" y="178">{{tips}}</text>\
@@ -27,7 +24,13 @@ var isInitialized,
     <text id="scp-feedback-label" text-anchor="middle" class="scp-hand-cursor" role="button" aria-label="{{rate_us}}" data-feature="feedback" x="517" y="178">{{rate_us}}</text>\
     <text id="scp-about-label" text-anchor="middle" class="scp-hand-cursor" role="button" aria-label="{{about}}" data-feature="about" x="730" y="178">{{about}}</text>\
   </g>\
-  <rect id="scp-card-header-bg" class="scp-secondary-feature-only" width="808" height="134" stroke="#C0BFBF" stroke-width="1" fill="#EEE"/>\
+  <rect id="scp-card-header-bg" class="scp-secondary-feature-only" y="1" width="808" height="133" stroke="#C0BFBF" stroke-width="1" fill="#EEE"/>\
+  <g id="scp-secondary-outline">\
+    <path d="M808 186.5c0 6-5 11-11 11H11.5 c-6 0-11-5-11-11" fill="transparent" stroke="#999" stroke-width="1.5"/>\
+    <line stroke="#999" stroke-width="1.5" x1=".5" y1="-700" x2=".5" y2="188"/>\
+    <line stroke="#999" stroke-width="1.5" x1="807" y1="-700" x2="807" y2="188"/>\
+  </g>\
+  <line stroke="#999" stroke="#999" stroke-width="1" x1="0" y1="1" x2="808" y2="1"/> <!-- outline top -->\
   <g>\
     <g id="scp-arrows" class="scp-transition-opacity scp-secondary-feature scp-if-settings scp-if-tips">\
       <g id="scp-prev-card" class="scp-arrow scp-hand-cursor scp-transition-opacity" transform="translate(640,72) rotate(90) scale(1.4)" role="button" aria-label="{{previous}}" aria-disabled="true">\

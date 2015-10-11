@@ -32,7 +32,7 @@ define(['bp/view/markup-finalizer'], function(finalizer) {
     <rect x="0" y="134" width="808" stroke="#C0BFBF" stroke-width="1" height="1" fill="none"/>\
     <path d="M806,186c0,6-5,11-11,11H12C6,196,1,192,1,187v-42 c0-6,0-11,0-11h806c0,0,0,5,0,11V186" fill="#EEE"/>\
   </g>\
-  <path id="scp-outline-def" d="M 808 187c0 6-5 11-11 11H11 c-6 0-11-5-11-11V0c0 0 5 0 11 0h786c6 0 11 0 11 0V187" stroke="#999" stroke-width="1.5"/>\
+  <path id="scp-outline-def" d="M 808 187c0 6-5 11-11 11H11.5 c-6 0-11-5-11-11V0c0 0 5 0 11 0h786c6 0 11 0 11 0V187" stroke="#999" stroke-width="1.5"/>\
   <g id="scp-rating-star-def">\
     <path d="M30 45L48 54L44 35L59 21L39 18L30 0L21 18L1 21L16 35L12 54L30 45"/>\
     <rect class="scp-hidden-target scp-hand-cursor" width="66" height="62"/>\
