@@ -96,16 +96,15 @@ define(['bp-expanded/view/transform-util', 'core/platform'], function (transform
 
   // Optimized transform animation that works via @transform on IE, CSS transition on other browsers
   // Currently only works with CSS transform, on element at a time
-  function animateTransforms(elements, transforms, duration, onFinish, timingFunctionName) {
+  function animateTransforms(elements, transforms, duration, onCustomFinish, timingFunctionName) {
 
     timingFunctionName = timingFunctionName || 'ease-out';
 
     if (!SHOULD_USE_CSS_TRANSITION_IN_SVG) {
-      return new JsAnimation(elements, transforms, duration, onFinish);  // Cannot use CSS transform for SVG in IE
+      return new JsAnimation(elements, transforms, duration, onCustomFinish);  // Cannot use CSS transform for SVG in IE
     }
     // Will use CSS instead
     function stopAnimation() {
-      elements[0].removeEventListener(platform.transitionEndEvent, onFinish);
       initTransitionStyles('');
     }
 
@@ -128,8 +127,21 @@ define(['bp-expanded/view/transform-util', 'core/platform'], function (transform
       }
     }
 
+    function removeListener() {
+      elements[0].removeEventListener(platform.transitionEndEvent, onFinish);
+    }
+    
+    function onFinish() {
+      removeListener();
+      if (onCustomFinish) {
+        onCustomFinish();
+      }
+    }
+
     function finishNow() {
+      removeListener();
       stopAnimation();
+      onFinish();
     }
 
     function beginTransition() {
