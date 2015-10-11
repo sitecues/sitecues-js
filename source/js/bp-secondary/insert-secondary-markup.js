@@ -28,9 +28,9 @@ var isInitialized,
   <g id="scp-secondary-outline">\
     <path d="M808 186.5c0 6-5 11-11 11H11.5 c-6 0-11-5-11-11" fill="transparent" stroke="#999" stroke-width="1.5"/>\
     <line stroke="#999" stroke-width="1.5" x1=".5" y1="-700" x2=".5" y2="188"/>\
-    <line stroke="#999" stroke-width="1.5" x1="807" y1="-700" x2="807" y2="188"/>\
+    <line stroke="#999" stroke-width="1.5" x1="808" y1="-700" x2="808" y2="188"/>\
   </g>\
-  <line stroke="#999" stroke="#999" stroke-width="1" x1="0" y1="1" x2="808" y2="1"/> <!-- outline top -->\
+  <line stroke="#999" stroke="#999" stroke-width="1" x1="0" y1=".5" x2="808" y2=".5"/> <!-- outline top -->\
   <g>\
     <g id="scp-arrows" class="scp-transition-opacity scp-secondary-feature scp-if-settings scp-if-tips">\
       <g id="scp-prev-card" class="scp-arrow scp-hand-cursor scp-transition-opacity" transform="translate(640,72) rotate(90) scale(1.4)" role="button" aria-label="{{previous}}" aria-disabled="true">\
