@@ -8,11 +8,6 @@ define(['bp/view/markup-finalizer', 'bp/helper', 'core/platform', 'bp-secondary/
 var isInitialized,
   svgSecondary =
 '<g id="scp-secondary" class="scp-secondary-only" aria-label="{{more_features}}">\
-  <defs>\
-    <mask id="scp-secondary-mask-def">\
-      <rect x="1" y="1" width="806" height="132" fill="#fff"/>\
-    </mask>\
-  </defs>\
   <image id="scp-secondary-shadow" width="818" height="900" y="-698" xlink:href="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20820%20902%22%20preserveAspectRatio%3D%22xMinYMin%22%3E%3Cdefs%3E%3Cfilter%20id%3D%22shadowblur%22%3E%20%3CfeGaussianBlur%20in%3D%22SourceGraphic%22%20stdDeviation%3D%224%22%2F%3E%3C%2Ffilter%3E%3C%2Fdefs%3E%3Cpath%20filter%3D%22url%28%23shadowblur%29%22%20d%3D%22m808%2C888c0%2C6%20-5%2C11%20-11%2C11H11m797%2C-11v-888%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20fill%3D%22none%22%2F%3E%3C%2Fsvg%3E"/>\
   <g id="scp-secondary-fill" data-height="132">\
     <rect x="1" y="1" width="806" height="132" fill="white" stroke-width="0"/>\
@@ -60,7 +55,7 @@ var isInitialized,
         <text x="678" y="775" text-anchor="middle" font-family="Arial" fill="white">{{send}}</text>\
       </g>\
     </g>\
-    <g mask="url(#scp-secondary-mask-def)">\
+    <g clip-path="url(#scp-clip-def)">\
       <g id="scp-about" class="scp-if-about" transform="translate(805,16)">\
         <g id="scp-logo-text">\
           <image id="scp-sitecues-text" transform="scale(.84) translate(-28, -12)" width="400" height="100"></image>\
