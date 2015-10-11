@@ -13,7 +13,7 @@ var isInitialized,
       <rect x="1" y="1" width="806" height="132" fill="#fff"/>\
     </mask>\
   </defs>\
-  <path id="scp-secondary-shadow" d="m808,188c0,6 -5,11 -11,11H11m797,-11v-888" stroke="#000" stroke-width="2" filter="url(#scp-shadowblur)" fill="none"/>\
+  <image id="scp-secondary-shadow" width="818" height="900" y="-698" xlink:href="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20820%20902%22%20preserveAspectRatio%3D%22xMinYMin%22%3E%3Cdefs%3E%3Cfilter%20id%3D%22shadowblur%22%3E%20%3CfeGaussianBlur%20in%3D%22SourceGraphic%22%20stdDeviation%3D%224%22%2F%3E%3C%2Ffilter%3E%3C%2Fdefs%3E%3Cpath%20filter%3D%22url%28%23shadowblur%29%22%20d%3D%22m808%2C888c0%2C6%20-5%2C11%20-11%2C11H11m797%2C-11v-888%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20fill%3D%22none%22%2F%3E%3C%2Fsvg%3E"/>\
   <g id="scp-secondary-fill" data-height="132">\
     <rect x="1" y="1" width="806" height="132" fill="white" stroke-width="0"/>\
     <line stroke="#C0BFBF" stroke-width="1" x1="0" y1="1" x2="0" y2="132"/>\

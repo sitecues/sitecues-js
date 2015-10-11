@@ -37,9 +37,6 @@ define(['bp/view/markup-finalizer'], function(finalizer) {
     <path d="M30 45L48 54L44 35L59 21L39 18L30 0L21 18L1 21L16 35L12 54L30 45"/>\
     <rect class="scp-hidden-target scp-hand-cursor" width="66" height="62"/>\
   </g>\
-  <filter id="scp-shadowblur">\
-    <feGaussianBlur in="SourceGraphic" stdDeviation="4"/>\
-  </filter>\
   <filter id="scp-focusblur">\
     <feGaussianBlur in="SourceGraphic" stdDeviation="2"/>\
   </filter>\
@@ -48,7 +45,7 @@ define(['bp/view/markup-finalizer'], function(finalizer) {
 <rect id="scp-badge-bg" fill="white" stroke-width="0" x="0" y="0" width="630" height="124" opacity="0"/>\
 <rect id="scp-badge-focus-rect" fill="transparent" stroke-width="0" x="10" y="10" width="620" height="114" rx="15" ry="15" filter="url(#scp-shadowblur)"/>\
 <g id="scp-main" aria-label="{{sitecues_main_panel}}">\
-  <path id="scp-shadow" d="m808,188c0,6 -5,11 -11,11H11m797,-11v-188" stroke="#000" stroke-width="2" filter="url(#scp-shadowblur)" fill="none"/>\
+  <image id="scp-shadow" width="818" height="900" y="-698" xlink:href="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20820%20902%22%20preserveAspectRatio%3D%22xMinYMin%22%3E%3Cdefs%3E%3Cfilter%20id%3D%22shadowblur%22%3E%20%3CfeGaussianBlur%20in%3D%22SourceGraphic%22%20stdDeviation%3D%224%22%2F%3E%3C%2Ffilter%3E%3C%2Fdefs%3E%3Cpath%20filter%3D%22url%28%23shadowblur%29%22%20d%3D%22m808%2C888c0%2C6%20-5%2C11%20-11%2C11H11m797%2C-11v-888%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20fill%3D%22none%22%2F%3E%3C%2Fsvg%3E"/>\
   <rect id="scp-main-content-fill" fill="white" stroke-width="0" x="1" y="1" width="806" height="134" class="scp-panel-only" opacity="0"/>\
   <use id="scp-main-outline" xlink:href="#scp-outline-def" class="scp-panel-only" opacity="0" fill="none"/>\
   <use id="scp-small-A" xlink:href="#scp-small-A-def" y="48" role="button" aria-label="{{zoom_out}}" class="scp-A-button"/>\
