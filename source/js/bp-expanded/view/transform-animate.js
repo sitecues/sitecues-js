@@ -127,31 +127,35 @@ define(['bp-expanded/view/transform-util', 'core/platform'], function (transform
       }
     }
 
-    function removeListener() {
+    function addTransitionEndListener() {
+      elements[0].addEventListener(platform.transitionEndEvent, onFinish);
+    }
+
+    function removeTransitionEndListener() {
       elements[0].removeEventListener(platform.transitionEndEvent, onFinish);
     }
 
     function onFinish() {
-      removeListener();
+      removeTransitionEndListener();
       if (onCustomFinish) {
         onCustomFinish();
       }
     }
 
     function finishNow() {
-      removeListener();
+      removeTransitionEndListener();
       stopAnimation();
       onFinish();
     }
 
     function beginTransition() {
-      elements[0].addEventListener(platform.transitionEndEvent, onFinish);
+      addTransitionEndListener();
       initTransitionStyles(platform.transformPropertyCss + ' ' + duration + 'ms');
       initTransforms();
     }
 
-    stopAnimation();  // Reset to start
-    setTimeout(beginTransition, 0);
+
+    beginTransition();
 
     return {
       finishNow: finishNow

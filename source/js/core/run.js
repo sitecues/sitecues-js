@@ -3,9 +3,10 @@
  *   The core module of the sitecues library.
  */
 
-// - New animations
+// New animations
+// - Panel disappears momentarily after click more in CHrome
 // - setOpacityTransition in more button prolly does nothing now
-// - Review
+// Review
 // - Send Chrome beta out -- Anton, Shelly
 // - 'About' on jsonline -- clipped logo
 // Accessibility
