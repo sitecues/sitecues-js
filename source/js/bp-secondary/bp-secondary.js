@@ -224,7 +224,7 @@ define(['bp/constants',
     return parseInt(outlinePath.split(' ')[2]);
   }
 
-  function animateSecondaryFeature(name, doEnable) {
+  function animateFeature(name, doEnable) {
     if (doEnable && getFeaturePanelName()) {
       // If we are switching from one panel to another, make sure buttons start from initial state
       resetButtonStyles();
@@ -337,7 +337,7 @@ define(['bp/constants',
 
     var featureName = e.currentTarget.getAttribute('data-feature');
     if (featureName) {
-      toggleSecondaryFeature(featureName);
+      toggleFeature(featureName);
     }
   }
 
@@ -359,7 +359,7 @@ define(['bp/constants',
 
     var featurePanelName = feature || getFeaturePanelName();
     if (featurePanelName) {
-      toggleSecondaryFeature(featurePanelName);
+      toggleFeature(featurePanelName);
       return;
     }
 
@@ -406,18 +406,18 @@ define(['bp/constants',
    * Toggle back and forth between button menu and a feature
    * @param featureName
    */
-  function toggleSecondaryFeature(featureName) {
+  function toggleFeature(featureName) {
     var willEnable = state.getSecondaryPanelName() !== featureName;
     updateMoreButtonLabel(!willEnable);
     if (willEnable && !isFeatureAvailable(featureName)) {
       // The feature was not loaded yet -- wait until loaded
       sitecues.on('bp/content-loaded', function() {
-        toggleSecondaryFeature(featureName);
+        toggleFeature(featureName);
       });
     }
     else {
       sitecues.emit('bp/will-toggle-feature');
-      animateSecondaryFeature(featureName, willEnable);
+      animateFeature(featureName, willEnable);
     }
   }
 
@@ -512,7 +512,7 @@ define(['bp/constants',
   return {
     init: init,
     toggleSecondaryPanel: toggleSecondaryPanel,
-    toggleSecondaryFeature: toggleSecondaryFeature
+    toggleSecondaryFeature: toggleFeature
   };
 
 });
