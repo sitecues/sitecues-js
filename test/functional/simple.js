@@ -21,10 +21,14 @@ define(
               before = tdd.before,
               // beforeEach = tdd.beforeEach,
               URL    = 'http://tools.qa.sitecues.com:9000/site/simple.html' +
-                       '?scjsurl=//js.dev.sitecues.com/l/s;id=s-00000005/v/dev/latest/js/sitecues.js' +
+                       '?scjsurl=//js.dev.sitecues.com/l/s;id=s-00000005/dev/latest/js/sitecues.js' +
                        '&scwsid=s-00000005' +
-                       '&scuimode=badge' +
-                       '&scisv=2';
+                       '&scuimode=badge',
+              events = {
+                  zoom : {
+                      changed : 'zoom'
+                  }
+              };
 
         suite('HLB Simple', function () {
 
@@ -44,9 +48,9 @@ define(
 
                 return this.remote                // represents the browser being tested
                     .maximizeWindow()             // best effort to normalize window sizes (not every browser opens the same)
-                    .setTimeout('script', 2000)
-                    .setTimeout('implicit', 2000)
-                    .setTimeout('page load', 2000)
+                    // NOTE: Page load timeouts are not yet supported in SafariDriver.
+                    //       However, we are not testing Safari at the moment.
+                    .setPageLoadTimeout(2000)
                     .setFindTimeout(2000)
                     .setExecuteAsyncTimeout(2000)  // max ms for executeAsync calls to complete
                     .get(URL)                      // navigate to the desired page
@@ -77,7 +81,7 @@ define(
                         function (event, done) {
                             sitecues.on(event, done);  // use our event system to know when zoom is done
                         },
-                        ['zoom']
+                        [events.zoom.changed]
                     )
                     .execute(                     // run a callback in the remote browser
                         function (selector) {
