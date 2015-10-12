@@ -1,3 +1,4 @@
+//jshint -W071
 define([], function() {
 
   var constants = {};
@@ -66,7 +67,7 @@ define([], function() {
   constants.SETTINGS_BUTTON_ID       = 'scp-settings-button';
   constants.FEEDBACK_BUTTON_ID       = 'scp-feedback-button';
   constants.ABOUT_BUTTON_ID          = 'scp-about-button';
-
+  constants.ABOUT_ROTATE_HELPER_ID   = 'scp-about-rotate-helper';
   constants.TIPS_LABEL_ID            = 'scp-tips-label';
   constants.SETTINGS_LABEL_ID        = 'scp-settings-label';
   constants.FEEDBACK_LABEL_ID        = 'scp-feedback-label';
@@ -147,8 +148,8 @@ define([], function() {
     scaleY    : 1
   };
 
-  constants.TRANSFORMS[constants.SECONDARY_ID]                  = {translateY: -198};
-  constants.TRANSFORMS[constants.MORE_BUTTON_CONTAINER_ID] = {translateX: 400, translateY: 198};
+  constants.TRANSFORMS[constants.SECONDARY_ID]             = {translateY: -198};
+  constants.TRANSFORMS[constants.MORE_BUTTON_CONTAINER_ID] = { };
   constants.TRANSFORMS[constants.TIPS_BUTTON_ID]           = {translateX: 25};
   constants.TRANSFORMS[constants.SETTINGS_BUTTON_ID]       = {translateX: 235};
   constants.TRANSFORMS[constants.FEEDBACK_BUTTON_ID]       = {translateX: 465};
@@ -213,8 +214,8 @@ define([], function() {
   // Ideal panel size for correct formatting of all contents.
   // We may need to use a larger size if the badge was already large
   // In that case we will make up the extra size using transform scale, so as not to disturb the HTML formatting
-  constants.IDEAL_PANEL_WIDTH = 656;
-  constants.IDEAL_PANEL_HEIGHT = 160;
+  constants.IDEAL_PANEL_WIDTH = 506;
+  constants.IDEAL_PANEL_HEIGHT = 148;
 
   // Amount toolbar space that will open badge
   constants.ACTIVE_TOOLBAR_WIDTH = 500;

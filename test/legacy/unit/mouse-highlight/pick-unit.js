@@ -1,5 +1,5 @@
 // Require the module file we want to test.
-var modulePath = '../../../source/js/mouse-highlight/pick',
+var modulePath = '../../../source/js/highlight/pick',
   pick = require(modulePath),
   win;
 

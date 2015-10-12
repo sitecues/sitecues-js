@@ -1,13 +1,13 @@
 /**
- * This file contain unit test(s) for mouse-highlight.js file.
+ * This file contain unit test(s) for highlight.js file.
  */
 require('./../test/bootstrap');
 
-var modulePath = '../../../source/js/mouse-highlight/mouse-highlight',
+var modulePath = '../../../source/js/highlight/highlight',
   mh = require(modulePath),
   $ = jquery;
 
-describe('mouse-highlight', function () {
+describe('highlight', function () {
 
   describe('#getMaxZIndex()', function () {
     it('should return the largest z-index in array of styles', function (done) {

@@ -142,10 +142,6 @@ app.all(/\/html\/|\/images\/cursors\//, function(req, res, next) {
       pathRoot : pathJoin(projectRoot, 'target', buildName)
     });
 
-    buildData.searchPath.push({
-      pathRoot : pathJoin(projectRoot, 'target', buildName, 'etc')
-    });
-
     return buildData;
   };
 
@@ -359,7 +355,6 @@ if (!prodMode) {
 
 // The common assets,
 app.use(express.static(pathJoin(projectRoot, 'target', 'common')));
-app.use(express.static(pathJoin(projectRoot, 'target', 'common', 'etc')));
 
 
 // Start the HTTP listener

@@ -240,7 +240,7 @@ define(['bp/model/state', 'bp/constants', 'bp/helper', 'core/platform'],
     var svgRect             = getRect(getSvgElement()),
         portionRemaining    = 1 - state.get('currentMode'),
         newPanelWidth       = Math.max(BP_CONST.IDEAL_PANEL_WIDTH, svgRect.width * MINIMUM_PANEL_SIZE_INCREASE * portionRemaining),
-        newPanelHeight      = svgRect.height * newPanelWidth / svgRect.width;
+        newPanelHeight      = newPanelWidth * BP_CONST.IDEAL_PANEL_HEIGHT / BP_CONST.IDEAL_PANEL_WIDTH;
 
     return {
       width : newPanelWidth,

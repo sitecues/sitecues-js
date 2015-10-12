@@ -290,7 +290,7 @@ define(['bp/helper', 'core/platform', 'bp/constants', 'core/conf/site'],
         'opacity': 0
       },
 
-      '.scp-want-panel.scp-ie9-false #scp-shadow': {
+      '.scp-is-panel.scp-ie9-false #scp-shadow': {
         'opacity': 1
       },
 

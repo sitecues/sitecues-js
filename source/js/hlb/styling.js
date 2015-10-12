@@ -430,9 +430,9 @@ define(['$', 'core/platform', 'util/common', 'core/conf/user/manager'],
 
    /**
    * [shouldRemovePadding determines if children of our HLB have padding that should be
-   * removed because the mouse-highlight clips padding.]
+   * removed because the highlight clips padding.]
    * @param  {[jQuery Element]} $child [Child element of the HLB]
-   * @param  {[Object]} initialHLBRect [Mouse-highlight rectangle]
+   * @param  {[Object]} initialHLBRect [highlight rectangle]
    * @return {[Boolean]}               [True: Remove Padding. False: Do Nothing]
    */
   function shouldRemovePadding ($child, initialHLBRect) {
@@ -465,7 +465,7 @@ define(['$', 'core/platform', 'util/common', 'core/conf/user/manager'],
    * [getChildPadding computes and returns the padding for a child element of the HLB.  Taking into account the
    * initialHLBRect, clipping padding is something to be done to preserve that HLB size.]
    * @param  {[jQuery Element]} $child [Child element of the HLB]
-   * @param  {[Object]} initialHLBRect [Mouse-highlight rectangle]
+   * @param  {[Object]} initialHLBRect [highlight rectangle]
    * @return {[Object]}                [Padding styles for a child element]
    */
   function getChildPadding ($child, initialHLBRect) {

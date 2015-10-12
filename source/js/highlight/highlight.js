@@ -1,7 +1,7 @@
 // TODO Work in Firefox + EEOC menus
 // TODO Test! Especially in IE
-define(['$', 'core/conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mouse-highlight/traitcache',
-    'mouse-highlight/highlight-position', 'util/common', 'util/color',
+define(['$', 'core/conf/user/manager', 'zoom/zoom', 'highlight/pick', 'highlight/traitcache',
+    'highlight/highlight-position', 'util/common', 'util/color',
     'audio/audio', 'util/geo', 'keys/element-classifier', 'core/platform'],
   function($, conf, zoomMod, picker, traitcache, mhpos, common, colorUtil, audio, geo, elementClassifier, platform) {
 

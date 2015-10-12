@@ -12,8 +12,12 @@ var require = {
   // attribute, since this could have weird consequences on customer pages.
   skipDataMain : true,
   baseUrl: (function(config) {
-    var scriptUrl = config.scriptUrl || config.script_url; // Old load script sometimes used underscore names, which is deprecated but still supported
-    return scriptUrl.substring(0, scriptUrl.lastIndexOf('/')) + '/'; })(sitecues.everywhereConfig || sitecues.config),
+    var scriptUrl = config.scriptUrl || config.script_url, // Old load script sometimes used underscore names, which is deprecated but still supported
+      folderOnly = scriptUrl.substring(0, scriptUrl.lastIndexOf('/js/')),
+      withVersionName = folderOnly + '/__VERSION__/js/',
+      withLatestReplaced = withVersionName.replace('/latest/', '/__VERSION__/');  // The /latest/ means the current version
+    return withLatestReplaced;  // Includes version name so that cached resources are only used with the appropriately matching sitecues.js
+  })(sitecues.everywhereConfig || sitecues.config),
   // Make aliases to modules, for convenience.
   map: {
     // All modules get 'zepto' when they ask for $

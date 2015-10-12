@@ -5,6 +5,7 @@ define([], function() {
     transitionTo            : 0,     // 0 - 1, 0 is badge, 1 is panel, it cannot be anything in between (doesnt seem to make sense to transition to anything other than the badge or panel state)
     isSecondaryPanel        : false,  // Are we currently in the secondary panel
     secondaryPanelTransitionTo: 0,
+    scale                   : 1, // How much transform scale used on expanded BP
     isRealSettings          : false, // Are we currently showing the actual settings or fake settings?
     secondaryPanelName      : 'button-menu', // 'button-menu', 'tips', 'settings', 'feedback', 'about'
     isSecondaryExpanding    : false, // Is secondary panel currently expanding to accommodate new contents?
@@ -14,12 +15,12 @@ define([], function() {
     isPageBadge             : true,  // Is set to false if default badge is inserted
     isToolbarBadge          : false, // Set to true if using a badge toolbar. This may eventually become redundant with isPageBadge (the opposite of it) if we only use toolbar default badges.
     wasMouseInPanel         : false, // Was the mouse inside the panel since last expansion
-    featurePanelName        : null,  // Either null, or 'settings' | 'about' | 'tips' | 'feedback'
     paletteName             : 'b',   // Currently either 'b' for basic or 'r' for red
     isAdaptivePalette       : false, // Is an adaptive palette name
     settingsIconVersion     : 1,     // Which settings icon to use?
     aboutIconVersion        : 1,     // Which about icon to use?
     isShrinkingFromKeyboard : false, // Is the panel shrinking because of a keyboard command?
+    isFeedbackSent          : false, // Is the feedback sent?
     ratioOfSVGToVisibleBadgeSize: undefined // ratio of svg to visible badge size
   };
 

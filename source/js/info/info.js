@@ -60,8 +60,11 @@ define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 
 
     $(window)
       .off('focus', close)
-      .off('message', checkCloseMessage)
-      .off('DOMMouseScroll mousewheel', preventScroll);
+      .off('message', checkCloseMessage);
+
+    $('html')
+      .off('DOMMouseScroll mousewheel wheel', preventScroll);
+
     enableWebPagePointerEvents(true);
 
     dimmer.undimBackgroundContent(DIMMER_SPEED);
@@ -80,8 +83,10 @@ define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 
 
       $(window)
         .one('focus', close)
-        .one('message', checkCloseMessage)
-        .on('DOMMouseScroll mousewheel', preventScroll);
+        .one('message', checkCloseMessage);
+
+      $('html')
+        .on('DOMMouseScroll mousewheel wheel', preventScroll);
     }, 0);
 
   }
@@ -116,7 +121,6 @@ define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 
     // Prevent panning in background content
 
     enableWebPagePointerEvents(false);
-
 
     dimmer.dimBackgroundContent(DIMMER_SPEED);
 

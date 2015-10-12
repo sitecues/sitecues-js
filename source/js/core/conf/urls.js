@@ -2,7 +2,7 @@ define(['core/conf/site'], function(site) {
 
   var apiDomain,  // Either ws.sitecues.com/ or ws.dev.sitecues.com/
     prefsDomain,  // Either up.sitecues.com/ or up.dev.sitecues.com/
-    BASE_URL = getRawScriptUrl().split('/js/')[0] + '/';
+    BASE_RESOURCE_URL = sitecues.requirejs.nameToUrl('').split('/js/')[0] + '/';
 
   function getApiUrl(restOfUrl) {
     return '//' + apiDomain + 'sitecues/api/' + restOfUrl;
@@ -135,7 +135,7 @@ define(['core/conf/site'], function(site) {
   // Resolve a URL as relative to the main script URL.
   // Add a version parameter so that new versions of the library always get new versions of files we use, rather than cached versions.
   function resolveResourceUrl(urlStr, paramsMap) {
-    var url = BASE_URL + urlStr,
+    var url = BASE_RESOURCE_URL + urlStr,
       params = paramsMap && Object.keys(paramsMap);
 
     function addParam(name) {

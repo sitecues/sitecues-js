@@ -1,8 +1,8 @@
 /**
  * Generic module for handling the cards used by tips and settings
  */
-define(['bp/constants', 'bp/helper', 'core/locale', 'bp/model/state', 'core/platform', 'bp-expanded/view/svg-animate', 'core/util/xhr', 'core/conf/urls'],
-  function (BP_CONST, helper, locale, state, platform, animate, xhr, urls) {
+define(['bp/constants', 'bp/helper', 'core/locale', 'bp/model/state', 'core/platform', 'core/util/xhr', 'core/conf/urls'],
+  function (BP_CONST, helper, locale, state, platform, xhr, urls) {
 
   var
     PANELS_WITH_CARDS = { tips: 1, settings: 1},
@@ -21,13 +21,20 @@ define(['bp/constants', 'bp/helper', 'core/locale', 'bp/model/state', 'core/plat
     xhr.get({
       url: panelUrl,
       success: function(html) {
-        var panelElement = document.createElement('sc-cards');
+        var panelElement = document.createElement('sc-cards'),
+          tabStrip;
         panelElement.id = 'scp-' + panelName;
         panelElement.className = 'scp-if-' + panelName + ' scp-transition-opacity scp-secondary-feature';
         panelElement.innerHTML = addSemanticSugar(html);
 
         getContainer().appendChild(panelElement);
         removeUnsupportedContent(panelElement);
+
+        tabStrip = panelElement.querySelector('.scp-card-chooser');
+        if (tabStrip.childElementCount > 3) {
+          fixTabStripSpacing(tabStrip);
+        }
+
 
         toggleCardActive(panelElement.firstElementChild, true);
 
@@ -52,12 +59,33 @@ define(['bp/constants', 'bp/helper', 'core/locale', 'bp/model/state', 'core/plat
     return html.replace(/(<sc-button )/g, '<sc-button role="button"' + INTERACTIVE + '" ')
       .replace(/<sc-menuitem /g, '<sc-menuitem role="button"' + INTERACTIVE+ '" ')
       .replace(/<sc-card /g, '<sc-card role="tabpanel"')
-      .replace(/<sc-tab /g, '<sc-link role="tab"' + INTERACTIVE+ '" ')
+      .replace(/<sc-link /g, '<sc-link role="link"' + INTERACTIVE+ '" ')
+      .replace(/<sc-tab /g, '<sc-link role="tab" aria-selected="false"' + INTERACTIVE+ '" ')
       .replace(/<\/sc-tab/g, '</sc-link')
       .replace(/<sc-normal-range /g, '<input type="range"' + INTERACTIVE + ' scp-normal-range" ')
       .replace(/<\/sc-normal-range>/g, '</input>')
       .replace(/<sc-hue-range /g, '<input type="range"' + INTERACTIVE + ' scp-hue-range" ')
       .replace(/<\/sc-hue-range>/g, '</input>');
+  }
+
+  // Use all the spacing to the left and right of the tab strip
+  // We need as much as we can get
+  function fixTabStripSpacing(tabStrip) {
+    var firstTab = tabStrip.firstElementChild,
+      tabStripStyle = getComputedStyle(tabStrip),
+      firstWidth = getTabTextWidth(firstTab),
+      additionalSpaceLeft = (firstTab.getBoundingClientRect().width - firstWidth) / 2;
+
+    function getTabTextWidth(tab) {
+      // Temporarily use inline so we can measure the width of these tabs
+      tab.style.display = 'inline';
+      var width = tab.getBoundingClientRect().width;
+      tab.style.display = '';
+      return width;
+    }
+
+    tabStrip.style.left = (parseFloat(tabStripStyle.left) - additionalSpaceLeft) + 'px';
+    tabStrip.style.width = (parseFloat(tabStripStyle.width) + additionalSpaceLeft * 2) + 'px';
   }
 
   function removeAllElements(elements) {
@@ -140,7 +168,7 @@ define(['bp/constants', 'bp/helper', 'core/locale', 'bp/model/state', 'core/plat
   }
 
   function newCardNotification(isFromLink) {
-    sitecues.emit('bp/did-show-card', getActiveTab(), isFromLink);
+    sitecues.emit('bp/did-show-card', getActiveCard().id, getActiveTab(), isFromLink);
   }
 
 
@@ -178,7 +206,7 @@ define(['bp/constants', 'bp/helper', 'core/locale', 'bp/model/state', 'core/plat
       return;
     }
     var chosenItem = getActiveTab(),
-      bpScale = helper.getBpContainerScale(),
+      bpScale = state.get('scale'),
       indicator = activePanel.querySelector('.scp-card-indicator'),
       indicatorRect = indicator.getBoundingClientRect(),
       chosenItemRect = chosenItem.getBoundingClientRect(),
@@ -188,7 +216,7 @@ define(['bp/constants', 'bp/helper', 'core/locale', 'bp/model/state', 'core/plat
 
     // Reset old selection
     if (previouslyChosen) {
-      previouslyChosen.removeAttribute('aria-selected');
+      previouslyChosen.setAttribute('aria-selected', 'false');
     }
 
     // Set indicator

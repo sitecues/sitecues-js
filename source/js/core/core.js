@@ -23,7 +23,6 @@ define(['core/conf/site', 'core/conf/urls', 'core/run'], function (site, urls, r
   function exportPublicFields() {
     sitecues.getVersion = getVersion;
     sitecues.on = on;
-//    sitecues.off = off;
     sitecues.emit = emit;
     sitecues.status = getStatus;
   }

@@ -12,7 +12,7 @@ define(['bp/view/markup-finalizer'], function(finalizer) {
   var svg = '\
 <sc id="scp-focus-outline" role="presentation"></sc>\
 \
-<svg id="scp-svg" role="group" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1050 300" preserveAspectRatio="xMinYMin" data-sc-reversible="false" data-metric="panel">\
+<svg id="scp-svg" role="group" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 810 300" preserveAspectRatio="xMinYMin" data-sc-reversible="false" data-metric="panel">\
 <defs>\
   <g id="scp-small-A-def">\
     <path d="m37 .2l23 62h-14l-5 -14h-23l-5 14h-14l23 -62h14zm1 38l-9 -23h0l-8 23h16z"/>\
@@ -30,18 +30,13 @@ define(['bp/view/markup-finalizer'], function(finalizer) {
   <path id="scp-wave3-def" d="m167 2c0 0 48 47 0 97c-3 3 -9 2 -11 1c-2 -1 -3 -5 -2 -6c36 -47 0 -87 0 -87c-1 -2 0 -5 2 -6c2 -1 9 -2 11 1z"/>\
   <g id="scp-bottom-def">\
     <rect x="0" y="134" width="808" stroke="#C0BFBF" stroke-width="1" height="1" fill="none"/>\
-    <path d="M807,186c0,6-5,11-11,11H12C6,196,1,192,1,187v-42 c0-6,0-11,0-11h807c0,0,0,5,0,11V186" fill="#EEE"/>\
+    <path d="M806,186c0,6-5,11-11,11H12C6,196,1,192,1,187v-42 c0-6,0-11,0-11h806c0,0,0,5,0,11V186" fill="#EEE"/>\
   </g>\
-  <clipPath id="scp-outline-clip-def">\
-    <path id="scp-outline-def" d="M 808 187c0 6-5 11-11 11H11 c-6 0-11-5-11-11V0c0 0 5 0 11 0h786c6 0 11 0 11 0V 187" stroke="#999" stroke-width="1.5"/>\
-  </clipPath>\
+  <path id="scp-outline-def" d="M 808 187c0 6-5 11-11 11H11.5 c-6 0-11-5-11-11V0c0 0 5 0 11 0h786c6 0 11 0 11 0V187" stroke="#999" stroke-width="1.5"/>\
   <g id="scp-rating-star-def">\
     <path d="M30 45L48 54L44 35L59 21L39 18L30 0L21 18L1 21L16 35L12 54L30 45"/>\
     <rect class="scp-hidden-target scp-hand-cursor" width="66" height="62"/>\
   </g>\
-  <filter id="scp-shadowblur">\
-    <feGaussianBlur in="SourceGraphic" stdDeviation="4"/>\
-  </filter>\
   <filter id="scp-focusblur">\
     <feGaussianBlur in="SourceGraphic" stdDeviation="2"/>\
   </filter>\
@@ -50,9 +45,8 @@ define(['bp/view/markup-finalizer'], function(finalizer) {
 <rect id="scp-badge-bg" fill="white" stroke-width="0" x="0" y="0" width="630" height="124" opacity="0"/>\
 <rect id="scp-badge-focus-rect" fill="transparent" stroke-width="0" x="10" y="10" width="620" height="114" rx="15" ry="15" filter="url(#scp-shadowblur)"/>\
 <g id="scp-main" aria-label="{{sitecues_main_panel}}">\
-  <path id="scp-shadow" d="m808,188c0,6 -5,11 -11,11H11m797,-11v-188" stroke="#000" stroke-width="2" filter="url(#scp-shadowblur)" fill="none"/>\
+  <image id="scp-shadow" width="818" height="900" y="-698" xlink:href="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20820%20902%22%20preserveAspectRatio%3D%22xMinYMin%22%3E%3Cdefs%3E%3Cfilter%20id%3D%22shadowblur%22%3E%20%3CfeGaussianBlur%20in%3D%22SourceGraphic%22%20stdDeviation%3D%224%22%2F%3E%3C%2Ffilter%3E%3C%2Fdefs%3E%3Cpath%20filter%3D%22url%28%23shadowblur%29%22%20d%3D%22m808%2C888c0%2C6%20-5%2C11%20-11%2C11H11m797%2C-11v-888%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20fill%3D%22none%22%2F%3E%3C%2Fsvg%3E"/>\
   <rect id="scp-main-content-fill" fill="white" stroke-width="0" x="1" y="1" width="806" height="134" class="scp-panel-only" opacity="0"/>\
-  <use id="scp-main-outline" xlink:href="#scp-outline-def" class="scp-panel-only" opacity="0" fill="none"/>\
   <use id="scp-small-A" xlink:href="#scp-small-A-def" y="48" role="button" aria-label="{{zoom_out}}" class="scp-A-button"/>\
   <g id="scp-zoom-slider-bar" role="slider" aria-valuemin="1" aria-valuemax="3" aria-valuenow="1" aria-labelledby="scp-zoom-label" data-thumb-mover="scp-zoom-slider-thumb">\
     <use xlink:href="#scp-zoom-slider-bar-def" x="80" y="60"/>\
@@ -80,12 +74,14 @@ define(['bp/view/markup-finalizer'], function(finalizer) {
   </g>\
 </g>\
 <g id="scp-secondary-anchor"/>\
-<use id="scp-outline" xlink:href="#scp-outline-def" class="scp-panel-only" fill="none" opacity="0"/>\
-<g id="scp-more-button-container" transform="translate(400,198)">\
-  <g id="scp-more-button-group" data-hover="scale(1.2)" class="scp-hand-cursor" role="button" aria-label="{{more_features}}" aria-pressed="false">\
-    <circle fill="#FFF" stroke="#777" stroke-width="5" stroke-miterlimit="10" cx="0" cy="0" r="34"/>\
-    <use id="scp-more-arrow" fill="#777" xlink:href="#scp-arrow"/>\
-    <path id="scp-question" fill="#777" stroke="#777" stroke-width="2" d="M0,-16c-3.4 0-6 1-7.5 2.6-1.6 1.6-2.2 3.6-2.4 5.1l4 .5c.2-1 .5-2 1.2-2.8 .8-.8 2-1.5 4.6-1.5 2.6 0 4.1 .5 4 1.4 .8 .7 1.1 1.6 1.1 2.6 0 3.3-1.4 4.2-3.4 6-2 1.8-4.6 4.3-4.6 9v1h4v-1c0-3.3 1.2-4.2 3.2-6 2-1.8 4.8-4.3 4.8-9 0-2-.7-4.1-2.4-5.6-1.7-1.6-4.3-2.4-7.6-2.4zm-2.8 28v4h4v-4h-4z"></path>\
+<use id="scp-main-outline" xlink:href="#scp-outline-def" class="scp-panel-only" fill="none" opacity="0"/>\
+<g transform="translate(400,198)">\
+  <g id="scp-more-button-container">\
+    <g id="scp-more-button-group" data-hover="scale(1.2)" class="scp-hand-cursor" role="button" aria-label="{{more_features}}">\
+      <circle fill="#FFF" stroke="#777" stroke-width="5" stroke-miterlimit="10" cx="0" cy="0" r="34"/>\
+      <use id="scp-more-arrow" fill="#777" xlink:href="#scp-arrow"/>\
+      <path id="scp-question" fill="#777" stroke="#777" stroke-width="2" d="M0,-16c-3.4 0-6 1-7.5 2.6-1.6 1.6-2.2 3.6-2.4 5.1l4 .5c.2-1 .5-2 1.2-2.8 .8-.8 2-1.5 4.6-1.5 2.6 0 4.1 .5 4 1.4 .8 .7 1.1 1.6 1.1 2.6 0 3.3-1.4 4.2-3.4 6-2 1.8-4.6 4.3-4.6 9v1h4v-1c0-3.3 1.2-4.2 3.2-6 2-1.8 4.8-4.3 4.8-9 0-2-.7-4.1-2.4-5.6-1.7-1.6-4.3-2.4-7.6-2.4zm-2.8 28v4h4v-4h-4z"></path>\
+    </g>\
   </g>\
 </g>\
 <rect id="scp-mouseover-target" x="0" y="0" width="700" height="160" opacity="0"/>\

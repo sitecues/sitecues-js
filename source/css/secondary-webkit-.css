@@ -1,3 +1,14 @@
+/* ------------- Textarea placeholder ------------ */
+
+#scp-feedback-textarea::-webkit-input-placeholder {
+  position: relative;
+  font-size: 26px;
+  left: 20px;
+  top: 35px;
+}
+#scp-feedback-textarea:focus::-webkit-input-placeholder {
+  color: transparent;
+}
 
 /* --------------- General ranges ---------------- */
 
@@ -35,7 +46,6 @@
   width: 19px;
   height: 45px;
   background: url('../images/settings/slider-thumb.svg');
-  background-size: stretch;
 }
 .scp-hue-range::-webkit-slider-thumb {
   background-image: url('../images/settings/slider-thumb-with-hole.svg') !important;

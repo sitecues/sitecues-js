@@ -1,4 +1,4 @@
-define(['zoom/zoom', 'mouse-highlight/move-keys', 'core/conf/user/manager', 'core/conf/user/server', 'audio/audio', 'mouse-highlight/mouse-highlight'],
+define(['zoom/zoom', 'highlight/move-keys', 'core/conf/user/manager', 'core/conf/user/server', 'audio/audio', 'highlight/highlight'],
   function(zoomMod, moveKeys, conf, server, audio, mh) {
   return {
     decreaseZoom: function(event) {

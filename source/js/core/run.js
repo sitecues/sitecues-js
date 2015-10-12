@@ -3,16 +3,16 @@
  *   The core module of the sitecues library.
  */
 
-// High priority
-// / French, Spanish
-// / Accessibility
-// / SC-3104 -- after an hour of use no TTS?
-// / SC-3120 -- sitecues TTS and Safari
-// - About panel
+// New animations - IE?
+// Review
+// - Send Chrome beta out -- Anton, Shelly
 // Accessibility
+// - Secret message for screen readers in highlighting tips
 // - JAWS 16 with IE 11 - tabbing, role announced as link. Arrowing, you don't discover it at all.
-// - Labeled groups!
-// - Accessible tips. Or, under tips, tell screen readers how to get full help guide.
+// - JAWS activating buttons sometimes closes panel -- moving mouse?
+// - Window-Eyes speaking stuff in the first panel because it's not really hidden
+// Themes
+// - sitecues inversion color theme doesnt work well on this site: http://goodnowlibrary.org/
 // CSS improvements
 // - Slow CSS in styles.js: [data-sc-reversible]
 // - Slow CSS in styles.js: #scp-bp-container *
@@ -53,7 +53,7 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
     QUOTE = 222;
 
   function initZoom() {
-    require([ 'hpan/hpan', 'zoom/fixed-position-fixer', 'enhance/focus', 'cursor/cursor' ], function(hpan, fixer, focus, cursor) {
+    require([ 'hpan/hpan', 'zoom/fixed-position-fixer', 'focus/focus', 'cursor/cursor' ], function(hpan, fixer, focus, cursor) {
       hpan.init();
       fixer.init();
       focus.init();
@@ -69,7 +69,7 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
   }
 
   function initSitecuesOn() {
-    require([ 'mouse-highlight/mouse-highlight', 'keys/keys', 'mouse-highlight/move-keys' ], function(highlight, keys, moveKeys) {
+    require([ 'highlight/highlight', 'keys/keys', 'highlight/move-keys' ], function(highlight, keys, moveKeys) {
       highlight.init();
       keys.init();
       moveKeys.init();
@@ -77,7 +77,7 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
   }
 
   function initThemes() {
-    require([ 'theme/color-engine' ], function(themes) {
+    require([ 'theme/theme' ], function(themes) {
       themes.init();
     });
   }

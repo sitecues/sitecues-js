@@ -41,6 +41,8 @@ define([], function() {
     tell_us_something: 'Teilen Sie uns etwas mit ...',
     thank_you: 'Danke',
     // - About
+    about_preamble: 'Diese Seite verwendet sirecues um Ihnen den Zugang zu erleichtern. Sie können die Inhalte vergrößern oder sogar vorlesen lassen. Weitere Informationen finden Sie unter ',
+    about_rate_us: 'Wir freuen uns über Rückmeldung Ihrer Erfahrungen mit sitecues.',
     zoom_and_speech: 'Vergrösserung &amp; Sprache'
   };
 });

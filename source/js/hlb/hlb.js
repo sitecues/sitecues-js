@@ -194,7 +194,7 @@ define([
     }
 
     // Let the rest of the application know that the hlb is ready
-    // Listeners: hpan.js, invert.js, mouse-highlight.js, speech.js
+    // Listeners: hpan.js, invert.js, highlight.js, speech.js
     sitecues.emit('hlb/ready', $hlb);
   }
 
@@ -643,7 +643,7 @@ define([
     // Clean up "module scoped" vars
     isHLBClosing = false;
 
-    // Listeners: hpan.js, mouse-highlight.js, speech.js
+    // Listeners: hpan.js, highlight.js, speech.js
     sitecues.emit('hlb/closed', event);
 
     $foundation = undefined;

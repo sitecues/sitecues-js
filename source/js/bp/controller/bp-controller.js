@@ -107,7 +107,6 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
   function setPanelExpandedState() {
     state.set('wasMouseInPanel', false);
     state.set('transitionTo', BP_CONST.PANEL_MODE);
-    state.set('featurePanelName', null);  // We're not in a feature panel
     turnOnRealSettings();
   }
 

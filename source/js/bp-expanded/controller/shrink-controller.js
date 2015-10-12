@@ -8,11 +8,9 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
     mouseLeaveShrinkTimer,  // How long we wait before shrinking BP from any mouseout (even only just barely outside panel)
     isListening,
     isZooming,
-    isExpandingOrExpanded,
+    isExpandingOrExpanded = true,  // First time, we will already be expanded
     isInitialized,
-    isSticky,
-    // Feature panels are larger, need to know this so that mouseout doesn't exit accidentally after we close feature panel
-    wasInFeaturePanel = false;
+    isSticky = SC_DEV;
 
   function cancelMouseLeaveShrinkTimer() {
     clearTimeout(mouseLeaveShrinkTimer);
@@ -41,13 +39,6 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
 
     if (isButtonDown(evt)) {
       return; // Slider in use or text selection, etc.
-    }
-
-    if (wasInFeaturePanel) {
-      // Don't treat as mouse out if mouse just clicked on more button and panel shrunk
-      // Only once back in the panel, reenable mouseout exit feature
-      wasInFeaturePanel = isMouseOutsidePanel(evt, 0);
-      return;
     }
 
     if (isMouseOutsidePanel(evt, MIN_DISTANCE)) {
@@ -79,7 +70,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
       return id.split('scp-')[1] || id;
     }
 
-    metric('panel-clicked', { target: getTrimmedId(id) || 'window' });
+    metric('panel-clicked', { target: id ? getTrimmedId(id) : 'window' });
   }
 
 
@@ -87,8 +78,6 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
     if (SC_DEV && isSticky) {
       return;
     }
-    // Once mouse used, no longer need this protection against accidental closure
-    wasInFeaturePanel = false;
 
     if (isMouseOutsidePanel(evt, 0)) { // Any click anywhere outside of visible contents, no safe-zone needed
       shrinkPanel();
@@ -120,7 +109,6 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
     sitecues.emit('bp/will-shrink');
 
     state.set('transitionTo', BP_CONST.BADGE_MODE);
-    state.set('featurePanelName', '');
     state.set('isShrinkingFromKeyboard', isFromKeyboard);
     state.set('isSecondaryPanel', false);
     state.set('secondaryPanelTransitionTo', 0);

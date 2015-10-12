@@ -41,6 +41,8 @@ define([], function() {
     tell_us_something: 'Tell us something ...',      /* new */
     thank_you: 'Thank you',                          /* new */
     // - About
+    about_preamble: 'This website has added sitecues to make it easier to see, hear, and use. For more information, please visit ',
+    about_rate_us: 'We encourage you to provide feedback on your experience.',
     zoom_and_speech: 'zoom &amp; speech'             /* new */
   };
 });

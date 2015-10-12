@@ -1,7 +1,7 @@
 <sc-card id="scp-zoom-card" aria-labelledby="scp-zoom-tab">
-  <sc-center class="scp-tabbable">
+  <sc-center class="scp-tabbable" role="document">
     <sc-h2 id="scp-use-slider-heading">
-      [[Use the zoom slider]]
+      Utiliser le curseur de zoom
     </sc-h2>
     <sc-p>
       <sc-span id="scp-demo-slider">
@@ -13,10 +13,10 @@
 </sc-card>
 
 <sc-card id="scp-zoom-keys-card" aria-labelledby="scp-zoom-keys-tab" data-advanced>
-  <sc-center class="scp-tabbable">
-    <sc-p>[[Hold keys longer to zoom more.]]</sc-p>
+  <sc-center class="scp-tabbable" role="document">
+    <sc-p>Maintenir de cliquer pour zoomer plus.</sc-p>
     <sc-h2>
-      <sc-span aria-label="[[Press the - or + key to zoom the page]]">
+      <sc-span aria-label="Appuyiez sur le bouton - ou + pour zoomer la page">
         <sc-kbd id="scp-demo-zoom-minus">&#65293;</sc-kbd>
         &nbsp;/&nbsp;
         <sc-kbd id="scp-demo-zoom-plus">+</sc-kbd>
@@ -26,51 +26,51 @@
 </sc-card>
 
 <sc-card id="scp-highlight-card" aria-labelledby="scp-highlight-tab">
-  <sc class="scp-tabbable">
-    <sc-h2>[[The highlighter selects areas to read.]]</sc-h2>
-    <sc-p>[[1. Choose something to focus on.]]</sc-p>
-    <sc-p>[[2. Move your mouse to highlight it.]]</sc-p>
+  <sc class="scp-tabbable" role="document">
+    <sc-h2>Les zones sélectionnés à lire.</sc-h2>
+    <sc-p>1. Choisissez  quelque chose à se concentrer sur.</sc-p>
+    <sc-p>2. Déplacez votre souris pour mettre en surbrillance.</sc-p>
   </sc>
 </sc-card>
 
 <sc-card id="scp-lens-card" aria-labelledby="scp-lens-tab">
-  <sc class="scp-tabbable">
-    <sc-h2>[[The lens magnifies.]]</sc-h2>
-    <sc-p>[[1. Highlight something interesting]]</sc-p>
-    <sc-p>[[2. Press ]]<sc-kbd class="scp-space" id="scp-demo-lens-spacebar">[[spacebar]]</sc-kbd></sc-p>
+  <sc class="scp-tabbable" role="document">
+    <sc-h2>La loupe de la lentille.</sc-h2>
+    <sc-p>1. Mettre quelque chose en surbrillance</sc-p>
+    <sc-p>2. appuyez <sc-kbd class="scp-space" id="scp-demo-lens-spacebar">bare d’espace</sc-kbd></sc-p>
   </sc>
 </sc-card>
 
 <sc-card id="scp-speech-card" aria-labelledby="scp-speech-tab">
-  <sc class="scp-tabbable">
-    <sc-h2>[[The speech feature reads text aloud.]]</sc-h2>
-    <sc-p>[[1. Click the speech button]] &nbsp; <sc-span id="scp-speech-button-demo"></sc-span></sc-p>
-    <sc-p>[[2. Highlight]] &amp; [[press]] <sc-kbd class="scp-space" id="scp-demo-speech-spacebar">[[spacebar]]</sc-kbd></sc-p>
+  <sc class="scp-tabbable" role="document">
+    <sc-h2>La fonction vocale lit le texte à haute voix.</sc-h2>
+    <sc-p>1. Cliquez sur le discoure bouton &nbsp; <sc-span id="scp-speech-button-demo"></sc-span></sc-p>
+    <sc-p>2. Surbrillance &amp; appuyez <sc-kbd class="scp-space" id="scp-demo-speech-spacebar">bar d’espace</sc-kbd></sc-p>
   </sc>
 </sc-card>
 
 <sc-card id="scp-full-guide-card" aria-labelledby="scp-full-guide-tab">
   <sc-h2 class="scp-icon-menuitem">
     <sc-button id="scp-guide-icon" aria-labelledby="scp-guide-label" data-target="#"></sc-button>
-    <sc-link id="scp-guide-label" data-target="#">[[Full guide]]</sc-link><br/>
-    <sc-span>[[Practice sitecues]]</sc-span>
+    <sc-link id="scp-guide-label" data-target="#">Guide complet</sc-link><br/>
+    <sc-span>Pratiquez sitecues</sc-span>
   </sc-h2>
   <sc-h2 class="scp-icon-menuitem">
     <sc-button id="scp-kbd-icon" aria-labelledby="scp-kbd-label" data-target="##keyboard"></sc-button>
-    <sc-link id="scp-kbd-label" data-target="##keyboard">[[Keyboard help]]</sc-link><br/>
-    <sc-span>[[Jump straight there]]</sc-span>
+    <sc-link id="scp-kbd-label" data-target="##keyboard">Aide du clavier</sc-link><br/>
+    <sc-span>Aller directemet ici</sc-span>
   </sc-h2>
 </sc-card>
 
 <!-- Header -->
-<sc-h1 class="scp-card-header">Tips</sc-h1>
+<sc-h1 class="scp-card-header">Pointe</sc-h1>
 
 <sc role="tablist" class="scp-card-chooser">
-  <sc-tab id="scp-zoom-tab" data-target="scp-zoom-card">[[Zoom]]</sc-tab>
-  <sc-tab id="scp-highlight-tab" data-target="scp-highlight-card">[[Highlight]]</sc-tab>
-  <sc-tab id="scp-lens-tab" data-target="scp-lens-card">[[Lens]]</sc-tab>
-  <sc-tab id="scp-speech-tab" data-target="scp-speech-card">[[Speech]]</sc-tab>
-  <sc-tab id="scp-full-guide-tab" data-target="scp-full-guide-card">[[More]]</sc-tab>
+  <sc-tab id="scp-zoom-tab" data-target="scp-zoom-card">Zoom</sc-tab>
+  <sc-tab id="scp-highlight-tab" data-target="scp-highlight-card">Surbrillance</sc-tab>
+  <sc-tab id="scp-lens-tab" data-target="scp-lens-card">Lentille</sc-tab>
+  <sc-tab id="scp-speech-tab" data-target="scp-speech-card">Discoure</sc-tab>
+  <sc-tab id="scp-full-guide-tab" data-target="scp-full-guide-card">Plus</sc-tab>
 </sc>
 
 <sc class="scp-card-indicator"></sc>
@@ -78,8 +78,8 @@
 <!-- Fake demo page -->
 <sc id="scp-demo-page">
   <sc id="scp-demo-page-contents">
-    <sc-p><sc-span id="scp-demo-para">[[Welcome!]]</sc-span></sc-p>
+    <sc-p><sc-span id="scp-demo-para">Bienvenue!</sc-span></sc-p>
     <sc-span id="scp-demo-mouse"></sc-span>
-    <sc-p>[[sitecues reads the web.]]</sc-p>
+    <sc-p>sitecues lit le web.</sc-p>
   </sc>
 </sc>

@@ -1,6 +1,6 @@
-define(['$', 'mouse-highlight/mouse-highlight', 'util/common', 'util/transform',
-  'mouse-highlight/pick', 'zoom/zoom', 'util/geo', 'zoom/fixed-position-fixer'],
-  function($, mh, common, transform, picker, zoomMod, geo, fixedFixer) {
+define(['$', 'highlight/highlight', 'util/common',
+  'highlight/pick', 'zoom/zoom', 'util/geo', 'zoom/fixed-position-fixer'],
+  function($, mh, common, picker, zoomMod, geo, fixedFixer) {
 
   var STEP_SIZE_VERT = 18,
     STEP_SIZE_HORIZ = 24,  // Different step sizes because content tends to be wider than tall (lines of text)
@@ -120,7 +120,7 @@ define(['$', 'mouse-highlight/mouse-highlight', 'util/common', 'util/transform',
           document.createNodeIterator(hlbElement, NodeFilter.SHOW_TEXT, null, false),
         range = document.createRange(),
         lineTops = [],
-        hlbZoom = transform.getComputedScale(hlbElement);
+        hlbZoom = common.getComputedScale(hlbElement);
 
     while (true) {
       var textNode = nodeIterator.nextNode(),

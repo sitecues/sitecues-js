@@ -4,8 +4,8 @@
  *  keyboard commands.
  */
 
-define(['bp/constants', 'bp/helper', 'bp-expanded/view/svg-animate', 'bp-expanded/view/svg-transform-effects', 'core/platform'],
-  function (BP_CONST, helper, animate, transformEffects, platform) {
+define(['bp/constants', 'bp/helper', 'bp-expanded/view/transform-util', 'bp-expanded/view/transform-animate', 'bp-expanded/view/transform-hovers', 'core/platform'],
+  function (BP_CONST, helper, transformUtil, animate, hovers, platform) {
 
   var BUTTON_ENTER_ANIMATION_DURATION = 800, // Milliseconds
       NO_INPUT_TIMEOUT                = 7000,
@@ -15,7 +15,6 @@ define(['bp/constants', 'bp/helper', 'bp-expanded/view/svg-animate', 'bp-expande
       // Oft-used functions. Putting it in a variable helps minifier, convenience, brevity
       byId = helper.byId,
       moreButtonContainer = byId(BP_CONST.MORE_BUTTON_CONTAINER_ID),
-      currentTranslate = moreButtonContainer.getAttribute('transform'),
       isInitialized;
 
   function getHelpOrSecondaryPanel(doToggle) {
@@ -29,7 +28,7 @@ define(['bp/constants', 'bp/helper', 'bp-expanded/view/svg-animate', 'bp-expande
     }
 
     // Not IE9: go ahead with secondary panel
-    require(['bp-secondary/secondary-panel'], function(secondary) {
+    require(['bp-secondary/bp-secondary'], function(secondary) {
       // Show or hide the secondary panel.
       secondary.init();
       if (doToggle) {
@@ -44,10 +43,6 @@ define(['bp/constants', 'bp/helper', 'bp-expanded/view/svg-animate', 'bp-expande
 
   function addMouseListeners () {
     moreButtonContainer.addEventListener('click', onMouseClick);
-  }
-
-  function getTransformString(scale) {
-    return currentTranslate + ' scale(' + scale + ')';
   }
 
   function setOpacityTransition(btnContainer, useInstantTransition) {
@@ -76,15 +71,10 @@ define(['bp/constants', 'bp/helper', 'bp-expanded/view/svg-animate', 'bp-expande
     // The first time the button is presented to the user, scale the button to 0.5 and then animate it to a scale of 1
     if (!doAlwaysShowButton && !useInstantTransition) {
 
-      moreButtonContainer.setAttribute('transform', getTransformString(0.5));
-
-      animate.animateCssProperties(moreButtonContainer, {
-        'transform'   : getTransformString(1)
-      }, {
-        'duration'    : BUTTON_ENTER_ANIMATION_DURATION,
-        'useAttribute': true
-      });
-
+      transformUtil.setElemTransform(moreButtonContainer, { scale: 0.5 }); // Starting point
+      setTimeout(function() {
+        animate.animateTransformLinear(moreButtonContainer, { scale: 1 }, BUTTON_ENTER_ANIMATION_DURATION);
+      }, 0);
     }
 
     // Once we show the button, always show it.
@@ -168,7 +158,7 @@ define(['bp/constants', 'bp/helper', 'bp-expanded/view/svg-animate', 'bp-expande
     // Always hide the more button when the panel is about to collapse.
     sitecues.on('bp/will-shrink', hideHelpButton);
 
-    transformEffects.init();
+    hovers.init();
   }
 
   return {

@@ -29,6 +29,19 @@
   display: block;
 }
 
+/* Secondary panel has it's own stretchable outline  and shadow*/
+#scp-main-outline, #scp-shadow {
+  transition: opacity .2s;
+}
+.scp-is-secondary.scp-want-secondary #scp-main-outline, .scp-is-secondary.scp-want-secondary #scp-shadow {
+  opacity: 0 !important;
+}
+
+/* Don't show main content under secondary panel, it confuses Window-Eyes even though it's hidden underneath */
+.scp-is-secondary.scp-want-secondary #scp-main {
+  display: none
+}
+
 /** Custom elements to help avoid page pollution **/
 
 sc,sc-cards,sc-card {
@@ -144,11 +157,11 @@ sc-button:hover {
 .scp-card-chooser > sc-link {
   display: table-cell;
   text-align: center;
-  font-size: 18px;
+  font-size: 19px;
 }
 
 #scp-settings .scp-card-chooser > sc-link {
-  font-size: 23px;  // TODO larger text in settings chooser, where we currently only have 2 cards
+  font-size: 23px;  /* TODO larger text in settings chooser, where we currently only have 2 cards */
 }
 
 .scp-card-chooser > sc-link[aria-selected="true"] {
@@ -480,17 +493,17 @@ sc-button[aria-pressed="true"]:after {
 }
 
 #scp-feedback-header {
-  transition: opacity .5s; /* Fade in after the animation is finished */
   opacity: 0;
-  display: none;
+  width: 0; /* Use width: 0 instead of display:none because IE wouldn't refresh the styles after sending feedback, clicking about, and coming back to feedback */
 }
 .scp-panel-feedback #scp-feedback-header {
+  transition: opacity .5s; /* Fade in after the animation is finished */
   opacity: 1;
-  display: block;
+  width: 256px;
 }
 .scp-secondary-expanding #scp-feedback-header {
-  display: none;
   opacity: 0;
+  width: 256px;
 }
 
 .scp-feedback-sent .scp-if-feedback.scp-secondary-feature {
@@ -498,13 +511,20 @@ sc-button[aria-pressed="true"]:after {
   visibility: hidden;
   opacity: 0;
 }
+.scp-feedback-sent .scp-if-feedback [role],
+.scp-feedback-sent .scp-if-feedback textarea
+{
+  opacity: 0;  /* Make sure controls not focusable by hiding them */
+}
+
 .scp-if-feedback-sent {
   visibility: hidden;
   opacity: 0;
   position: absolute;
-  left: 154px;
   top: 62px;
-  width: 340px;
+  left: 20px;
+  width: 460px;
+  text-align: center;
 }
 .scp-panel-feedback.scp-feedback-sent .scp-if-feedback-sent {
   pointer-events: all;
@@ -536,33 +556,6 @@ sc-button[aria-pressed="true"]:after {
 }
 #scp-feedback-textarea:focus {
   box-shadow: none !important;
-}
-#scp-feedback-textarea::-moz-placeholder {
-  position: relative;
-  font-size: 26px;
-  left: 40px;
-  top: 35px;
-}
-#scp-feedback-textarea:focus::-moz-placeholder {
-  color: transparent;
-}
-#scp-feedback-textarea::-webkit-input-placeholder {
-  position: relative;
-  font-size: 26px;
-  left: 40px;
-  top: 35px;
-}
-#scp-feedback-textarea:focus::-webkit-input-placeholder {
-  color: transparent;
-}
-#scp-feedback-textarea:-ms-input-placeholder {
-  position: relative;
-  font-size: 26px;
-  left: 40px;
-  top: 35px;
-}
-#scp-feedback-textarea:focus:-ms-input-placeholder {
-  color: transparent;
 }
 .scp-rating-star {
   fill: #ccc;
@@ -600,22 +593,26 @@ sc-button[aria-pressed="true"]:after {
   position: absolute;
   z-index: 9999;
   left: 24px;
-  width: 460px;
+  width: 445px;
   top: 120px;
+  font-size: 22px;
   text-align: center;
-  font-size: 23px;
+}
+
+.scp-about-teaser > sc-p > sc-span {
+  display: inline;
 }
 
 .scp-about-teaser > sc-p > a {
-  text-decoration: none;
+  text-decoration: underline;
 }
 
 #scp-about-rate-footer {
-  margin-top: 100px;
+  margin-top: 40px;
 }
 
 #scp-about-rate-button {
-  margin-top: 20px;
-  padding: 2px 17px;
+  margin-top: 15px;
+  padding: 4px 23px;
   font-weight: 100;
 }

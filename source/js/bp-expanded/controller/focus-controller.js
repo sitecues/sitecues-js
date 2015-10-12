@@ -51,15 +51,14 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
         'stars-4',
         'stars-5',
         'feedback-send',
+        'feedback-thanks',
         'tips-label',
         'settings-label',
         'about-label',
         'more-button-group'
       ],
       'about':[
-        'about-1',
-        'about-2',
-        'about-3',
+        'about-sitecues-link',
         'about-rate-button',
         'tips-label',
         'settings-label',
@@ -158,7 +157,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
     return state.get('isKeyboardMode');
   }
 
-  function focusCard(tabElement, isFromLink) {
+  function focusCard(cardId, tabElement, isFromLink) {
     if (isKeyboardMode() && tabElement) {
       clearPanelFocus();
       tabbedElement = tabElement;
@@ -172,17 +171,13 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
     }
   }
 
-  function focusFirstItem(isNewPanel) {
+  function focusFirstItem(isFirstTime, isNewPanel) {
     if (isNewPanel && isKeyboardMode()) {
-      navigateInDirection(1, true);
+      setTimeout(function() {
+        navigateInDirection(1, true);
+      }, 0);
     }
   }
-
-//  function focusCard() {
-//    if (isKeyboardMode()) {
-//      navigateInDirection(1, true, true);
-//    }
-//  }
 
   /*
    If the badge was focused, the panel will go into focus mode when it's entered.
@@ -262,7 +257,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
     // @data-own-focus-ring = element will show it's own focus ring
 
     var showFocusOn = getElementToShowFocusOn(),
-      scale = helper.getBpContainerScale();
+      scale = state.get('scale');
 
     function getFinalCoordinate(coord) {
       return (coord / scale) + 'px';
@@ -438,10 +433,17 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
     element.dispatchEvent(event);
   }
 
+  function onZoomKeyUp() {
+    require(['zoom/zoom'], function(zoomMod) {
+      zoomMod.zoomStopRequested();
+    });
+  }
+
   function performZoomSliderCommand(keyCode, evt) {
     var deltaSliderCommand = DELTA_KEYS[keyCode];
     if (deltaSliderCommand) {
       require(['zoom/zoom'], function(zoomMod) {
+        window.removeEventListener('keyup', onZoomKeyUp); // Zoom module will listen from here
         zoomMod.init();
         if (deltaSliderCommand > 0) {
           zoomMod.beginZoomIncrease(evt);
@@ -450,6 +452,8 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
           zoomMod.beginZoomDecrease(evt);
         }
       });
+
+      window.addEventListener('keyup', onZoomKeyUp);  // Capture key up that may happen while waiting for zoom module
     }
   }
 
@@ -512,10 +516,9 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
       return;
     }
     isInitialized = true;
-    sitecues.on('bp/will-toggle-feature bp/do-send-feedback', hideFocus);
+    sitecues.on('bp/will-toggle-feature', hideFocus);
     sitecues.on('bp/did-change', focusFirstItem);
     sitecues.on('bp/did-show-card', focusCard);
-//    sitecues.on('bp/did-switch-card', focusCard);
     beginKeyHandling(); // First time badge expands
     sitecues.on('bp/will-expand', beginKeyHandling);
     sitecues.on('bp/will-shrink', endKeyHandling);
