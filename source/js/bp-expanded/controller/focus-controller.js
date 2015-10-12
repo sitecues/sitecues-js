@@ -257,7 +257,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
     // @data-own-focus-ring = element will show it's own focus ring
 
     var showFocusOn = getElementToShowFocusOn(),
-      scale = helper.getBpContainerScale();
+      scale = state.get('scale');
 
     function getFinalCoordinate(coord) {
       return (coord / scale) + 'px';

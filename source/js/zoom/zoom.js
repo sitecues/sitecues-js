@@ -3,8 +3,8 @@
  * See docs at https://equinox.atlassian.net/wiki/display/EN/Smooth+Zoom
  */
 
-define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'util/common', 'util/transform', 'core/metric'],
-  function ($, conf, site, platform, common, transform, metric) {
+define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'util/common', 'core/metric'],
+  function ($, conf, site, platform, common, metric) {
 
   // Default zoom configuration
 
@@ -468,7 +468,7 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'util/
 
   // Get the current zoom value as reported by the layout engine
   function getActualZoom() {
-    return getSanitizedZoomValue(transform.getComputedScale(body));
+    return getSanitizedZoomValue(common.getComputedScale(body));
   }
 
   function onGlideStopped() {

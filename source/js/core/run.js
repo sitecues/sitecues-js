@@ -3,12 +3,14 @@
  *   The core module of the sitecues library.
  */
 
-// - Review
+// New animations - IE?
+// Review
 // - Send Chrome beta out -- Anton, Shelly
-// - 'About' on jsonline -- clipped logo
 // Accessibility
 // - Secret message for screen readers in highlighting tips
 // - JAWS 16 with IE 11 - tabbing, role announced as link. Arrowing, you don't discover it at all.
+// - JAWS activating buttons sometimes closes panel -- moving mouse?
+// - Window-Eyes speaking stuff in the first panel because it's not really hidden
 // Themes
 // - sitecues inversion color theme doesnt work well on this site: http://goodnowlibrary.org/
 // CSS improvements
