@@ -50,7 +50,7 @@ define(['bp/helper', 'bp/constants', 'core/platform', 'bp-expanded/view/transfor
       x = evt.clientX,
       y = evt.clientY;
     while (index --) {
-      if (hoverState[index]) {
+      if (hoverState[index] && evt.target !== savedHoverElems[index] && evt.target.parentNode !== savedHoverElems[index] ) {
         var rect = savedHoverElems[index].getBoundingClientRect();
         if (x < rect.left -1 || x > rect.right + 1||
           y < rect.top -1 || y > rect.bottom + 1) {
