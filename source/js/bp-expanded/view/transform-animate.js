@@ -141,11 +141,14 @@ define(['bp-expanded/view/transform-util', 'core/platform'], function (transform
     }
 
     function onFinish(evt) {
-      removeTransitionEndListener();
-      if (onCustomFinish) {
-        onCustomFinish();
+      // Don't bubble to a parent animation (e.g the secondary panel may still need to animate while a hover finishes animating)
+      if (evt.target === evt.currentTarget) {
+        evt.stopPropagation();
+        removeTransitionEndListener();
+        if (onCustomFinish) {
+          onCustomFinish();
+        }
       }
-      evt.stopPropagation(); // Don't bubble to a parent animation (e.g the secondary panel may still need to animate while a hover finishes animating)
     }
 
     function finishNow() {
