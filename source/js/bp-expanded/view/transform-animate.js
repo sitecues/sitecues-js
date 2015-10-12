@@ -117,8 +117,9 @@ define(['bp-expanded/view/transform-util', 'core/platform'], function (transform
       elements.forEach(function(elem) {
         if (elem) {
           elem.style.transition = transition;
-          elem.style.willChange = platform.transformPropertyCss;
-          elem.style.transitionTimingFunction = timingFunctionName;
+          if (transition) {
+            elem.style.transitionTimingFunction = timingFunctionName;
+          }
         }
       });
     }
@@ -144,10 +145,7 @@ define(['bp-expanded/view/transform-util', 'core/platform'], function (transform
       // Don't bubble to a parent animation (e.g the secondary panel may still need to animate while a hover finishes animating)
       if (evt.target === evt.currentTarget) {
         evt.stopPropagation();
-        removeTransitionEndListener();
-        if (onCustomFinish) {
-          onCustomFinish();
-        }
+        finishNow();
       }
     }
 

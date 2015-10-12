@@ -15,6 +15,7 @@ define(['bp/constants', 'bp/helper', 'bp-expanded/view/transform-util', 'bp-expa
       // Oft-used functions. Putting it in a variable helps minifier, convenience, brevity
       byId = helper.byId,
       moreButtonContainer = byId(BP_CONST.MORE_BUTTON_CONTAINER_ID),
+      moreOpacityElem = byId('scp-more-button-opacity'),
       isInitialized;
 
   function getHelpOrSecondaryPanel(doToggle) {
@@ -45,7 +46,7 @@ define(['bp/constants', 'bp/helper', 'bp-expanded/view/transform-util', 'bp-expa
     moreButtonContainer.addEventListener('click', onMouseClick);
   }
 
-  function setOpacityTransition(btnContainer, useInstantTransition) {
+  function setOpacityTransition(useInstantTransition) {
     // Only use instant transition if true, not truthy, because mouse event is
     // passed in when we use event listeners
     var opacityType;
@@ -56,17 +57,17 @@ define(['bp/constants', 'bp/helper', 'bp-expanded/view/transform-util', 'bp-expa
       opacityType = doAlwaysShowButton ? '' : '-fast';
     }
 
-    btnContainer.setAttribute('class', 'scp-transition-opacity' + opacityType);
+    moreOpacityElem.setAttribute('class', 'scp-transition-opacity' + opacityType);
 
     // The class we set above takes care of the opacity animation...
-    btnContainer.style.opacity = 1;
+    moreOpacityElem.style.opacity = 1;
   }
 
   function showMoreButton (useInstantTransition) {
 
     byId(BP_CONST.BOTTOM_MOUSETARGET_ID).removeEventListener('mousemove', showMoreButtonSlowly);
 
-    setOpacityTransition(moreButtonContainer, useInstantTransition);
+    setOpacityTransition(useInstantTransition);
 
     // The first time the button is presented to the user, scale the button to 0.5 and then animate it to a scale of 1
     if (!doAlwaysShowButton && !useInstantTransition) {
@@ -93,8 +94,8 @@ define(['bp/constants', 'bp/helper', 'bp-expanded/view/transform-util', 'bp-expa
 
   function hideHelpButton () {
 
-    moreButtonContainer.setAttribute('class', '');
-    moreButtonContainer.style.opacity = 0;
+    moreOpacityElem.setAttribute('class', '');
+    moreOpacityElem.style.opacity = 0;
 
     byId(BP_CONST.BOTTOM_MOUSETARGET_ID).removeEventListener('mousemove', showMoreButtonSlowly);
 

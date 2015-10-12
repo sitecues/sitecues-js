@@ -75,7 +75,7 @@ define(['bp/view/markup-finalizer'], function(finalizer) {
 </g>\
 <g id="scp-secondary-anchor"/>\
 <use id="scp-main-outline" xlink:href="#scp-outline-def" class="scp-panel-only" fill="none" opacity="0"/>\
-<g transform="translate(400,198)">\
+<g id="scp-more-button-opacity" transform="translate(400,198)">\
   <g id="scp-more-button-container">\
     <g id="scp-more-button-group" data-hover="scale(1.2)" class="scp-hand-cursor" role="button" aria-label="{{more_features}}">\
       <circle fill="#FFF" stroke="#777" stroke-width="5" stroke-miterlimit="10" cx="0" cy="0" r="34"/>\

@@ -445,10 +445,19 @@ define(['bp/constants',
   /********************** INIT / RESET **************************/
 
   function resetStyles() {
-    var morePanelId = BP_CONST.SECONDARY_ID,
-      more = byId(morePanelId),
-      origMorePos = BP_CONST.TRANSFORMS[BP_CONST.MORE_BUTTON_CONTAINER_ID];
-    transformUtil.setElemTransform(more, origMorePos);
+    var moreButton = getMoreButton(),
+      HEIGHT_RELATED_ELEMS = [ getSecondary(), moreButton, getBottom(), getOutlineFill(), getSecondaryOutline(), getShadow()];
+
+    HEIGHT_RELATED_ELEMS.forEach(function(elem) {
+      transformUtil.setElemTransform(elem, {});
+    });
+
+    // Hack to fix Chrome/Safari bug where the more button was in the wrong place after resetting styles
+    // This forces WebKit to reflow the element's layout.
+    moreButton.style.display = 'none';
+    // jshint unused:false
+    var unused = moreButton.offsetHeight;
+    moreButton.style.display = 'block';
 
     resetButtonStyles();
   }
