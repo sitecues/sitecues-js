@@ -135,17 +135,20 @@ define(['bp-expanded/view/transform-util', 'core/platform'], function (transform
       elements[0].removeEventListener(platform.transitionEndEvent, onFinish);
     }
 
-    function onFinish() {
+    function onFinish(evt) {
       removeTransitionEndListener();
       if (onCustomFinish) {
         onCustomFinish();
       }
+      evt.stopPropagation(); // Don't bubble to a parent animation (e.g the secondary panel may still need to animate while a hover finishes animating)
     }
 
     function finishNow() {
       removeTransitionEndListener();
       stopAnimation();
-      onFinish();
+      if (onCustomFinish) {
+        onCustomFinish();
+      }
     }
 
     function beginTransition() {
