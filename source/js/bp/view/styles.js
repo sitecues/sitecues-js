@@ -346,7 +346,7 @@ define(['bp/helper', 'core/platform', 'bp/constants', 'core/conf/site'],
         'display': 'none'   // IE9 -- provide help only
       },
 
-      '#scp-more-button-container': {
+      '#scp-more-button-opacity': {
         'opacity': 0,
         'pointer-events': 'all'
       },

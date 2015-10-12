@@ -155,10 +155,10 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
     if (ttsOn !== isOn) {
       ttsOn = isOn;
       conf.set('ttsOn', ttsOn);
+      sitecues.emit('speech/did-change', ttsOn);
       if (!doSuppressAudioCue) {
         require(['audio/audio-cues'], function(audioCues) {
           audioCues.playSpeechCue(ttsOn);
-          sitecues.emit('speech/did-change', ttsOn);
         });
       }
     }
