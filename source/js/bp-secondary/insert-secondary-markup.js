@@ -55,12 +55,10 @@ var isInitialized,
         <text x="678" y="775" text-anchor="middle" font-family="Arial" fill="white">{{send}}</text>\
       </g>\
     </g>\
-    <g clip-path="url(#scp-clip-def)">\
-      <g id="scp-about" class="scp-if-about" transform="translate(805,16)">\
-        <g id="scp-logo-text">\
-          <image id="scp-sitecues-text" transform="scale(.84) translate(-28, -12)" width="400" height="100"></image>\
-          <text text-anchor="end" style="font-family:Open Sans;font-size:24px" y="96" x="300">{{zoom_and_speech}}</text>\
-        </g>\
+    <g id="scp-about" class="scp-if-about" transform="translate(805,16)">\
+      <g id="scp-logo-text">\
+        <image id="scp-sitecues-text" transform="scale(.84) translate(-28, -12)" width="400" height="100"></image>\
+        <text text-anchor="end" style="font-family:Open Sans;font-size:24px" y="96" x="300">{{zoom_and_speech}}</text>\
       </g>\
     </g>\
   </g>\

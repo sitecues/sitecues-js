@@ -214,8 +214,8 @@ define([], function() {
   // Ideal panel size for correct formatting of all contents.
   // We may need to use a larger size if the badge was already large
   // In that case we will make up the extra size using transform scale, so as not to disturb the HTML formatting
-  constants.IDEAL_PANEL_WIDTH = 656;
-  constants.IDEAL_PANEL_HEIGHT = 160;
+  constants.IDEAL_PANEL_WIDTH = 506;
+  constants.IDEAL_PANEL_HEIGHT = 123;
 
   // Amount toolbar space that will open badge
   constants.ACTIVE_TOOLBAR_WIDTH = 500;
