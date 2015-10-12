@@ -25,7 +25,7 @@ define(['bp-expanded/view/transform-util', 'core/platform'], function (transform
           return t;
         }
       },
-      SHOULD_USE_CSS_TRANSITION_IN_SVG = false; //!platform.browser.isIE;
+      SHOULD_USE_CSS_TRANSITION_IN_SVG = !platform.browser.isIE;
 
   function getOrigTransforms(elements) {
     var index = elements.length,
