@@ -72,7 +72,9 @@ define(['bp/constants', 'bp/helper', 'bp-expanded/view/transform-util', 'bp-expa
     if (!doAlwaysShowButton && !useInstantTransition) {
 
       transformUtil.setElemTransform(moreButtonContainer, { scale: 0.5 }); // Starting point
-      animate.animateTransformLinear(moreButtonContainer, { scale: 1 }, BUTTON_ENTER_ANIMATION_DURATION);
+      setTimeout(function() {
+        animate.animateTransformLinear(moreButtonContainer, { scale: 1 }, BUTTON_ENTER_ANIMATION_DURATION);
+      }, 0);
     }
 
     // Once we show the button, always show it.
