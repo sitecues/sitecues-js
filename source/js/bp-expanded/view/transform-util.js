@@ -33,7 +33,7 @@ define([ 'core/platform' ], function(platform) {
     var useCss = shouldUseCss(elem),
       transformString = getTransformString(transformMap, useCss);
 
-    if (shouldUseCss) {  // Always use CSS, even in SVG
+    if (useCss) {  // Always use CSS, even in SVG
       elem.style[platform.transformProperty] = transformString;
     }
     else {

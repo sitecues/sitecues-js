@@ -25,26 +25,31 @@ define(['bp-expanded/view/transform-util', 'core/platform'], function (transform
           return t;
         }
       },
-      SHOULD_USE_CSS_TRANSITION_IN_SVG = !platform.browser.isIE;
+      SHOULD_USE_CSS_TRANSITION_IN_SVG = false; //!platform.browser.isIE;
 
-
-  function JsAnimation(elements, finalTransforms, duration, onFinish, timingFunctionName) {
-    this.onFinish           = onFinish;
-    this.isRunning          = true;
-    this.onTick             = tick;
-    this.animationId        = tick(); // Start the animation automatically.
-
-    var animationStartTime = Date.now(),
-      index = elements.length,
-      origTransforms = [],
-      timingFn = timingFunctions[timingFunctionName];
-
+  function getOrigTransforms(elements) {
+    var index = elements.length,
+      origTransforms = [];
     // Get the original transforms for each element
     while (index --) {
       if (elements[index]) {
         origTransforms[index] = transformUtil.getElemTransformMap(elements[index]);
       }
     }
+    return origTransforms;
+  }
+
+
+  function JsAnimation(elements, finalTransforms, duration, onFinish, timingFunctionName) {
+    var animationStartTime = Date.now(),
+      origTransforms = getOrigTransforms(elements),
+      timingFn = timingFunctions[timingFunctionName],
+      currAnimation = this;
+
+    this.onFinish           = onFinish;
+    this.isRunning          = true;
+    this.onTick             = tick;
+    this.animationId        = tick(); // Start the animation automatically.
 
     function tick() {
       var time = timingFn(Math.min(1, (Date.now() - animationStartTime) / duration)),
@@ -66,10 +71,10 @@ define(['bp-expanded/view/transform-util', 'core/platform'], function (transform
       }
 
       if (time < 1) {
-        this.animationId = requestFrameFn(tick);
+        currAnimation.animationId = requestFrameFn(tick);
       }
       else {
-        this.isRunning = false;
+        currAnimation.isRunning = false;
         if (onFinish) {
           onFinish();
         }
@@ -101,7 +106,7 @@ define(['bp-expanded/view/transform-util', 'core/platform'], function (transform
     timingFunctionName = timingFunctionName || 'ease-out';
 
     if (!SHOULD_USE_CSS_TRANSITION_IN_SVG) {
-      return new JsAnimation(elements, transforms, duration, onCustomFinish);  // Cannot use CSS transform for SVG in IE
+      return new JsAnimation(elements, transforms, duration, onCustomFinish, timingFunctionName);  // Cannot use CSS transform for SVG in IE
     }
     // Will use CSS instead
     function stopAnimation() {
