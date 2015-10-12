@@ -19,6 +19,7 @@ define(
         const suite  = tdd.suite,
               test   = tdd.test,
               before = tdd.before,
+              // beforeEach = tdd.beforeEach,
               URL    = 'http://tools.qa.sitecues.com:9000/site/simple.html' +
                        '?scjsurl=//js.dev.sitecues.com/l/s;id=s-00000005/v/dev/latest/js/sitecues.js' +
                        '&scwsid=s-00000005' +
@@ -34,7 +35,7 @@ define(
             let picker,
                 lens;
 
-            // Code to run when the suite starts, before tests...
+            // Code to run when the suite starts, before any test.
             before(function () {
 
                 // Create UI abstractions.
@@ -43,12 +44,12 @@ define(
 
                 return this.remote                // represents the browser being tested
                     .maximizeWindow()             // best effort to normalize window sizes (not every browser opens the same)
-                    .get(URL)                     // navigate to the desired page
-                    .setTimeout('script', 9000)
-                    .setTimeout('implicit', 9000)
-                    .setTimeout('page load', 9000)
-                    .setFindTimeout(9000)
-                    .setExecuteAsyncTimeout(9000)  // max ms for executeAsync calls to complete
+                    .setTimeout('script', 2000)
+                    .setTimeout('implicit', 2000)
+                    .setTimeout('page load', 2000)
+                    .setFindTimeout(2000)
+                    .setExecuteAsyncTimeout(2000)  // max ms for executeAsync calls to complete
+                    .get(URL)                      // navigate to the desired page
                     // Store some data about the original picked element before
                     // we do anything to mess with it, for later comparison.
                     .findByCssSelector(picked.selector)
@@ -86,10 +87,18 @@ define(
                     );
             });
 
+            // TODO: Move most of our before() code into beforeEach() to make
+            //       tests more robust. Reset timeouts, load a new page, etc.
+
+            // Code to run prior to each individual test.
+            // beforeEach(function () {
+            //     return this.remote
+
+            // });
+
             test('Spacebar Opens the HLB', function () {
 
                 return this.remote
-                    .setExecuteAsyncTimeout(3000)  // max ms for executeAsync calls to complete
                     .pressKeys(keys.SPACE)         // hit the spacebar, to open the HLB
                     .executeAsync(                 // run an async callback in the remote browser
                         function (event, id, done) {
@@ -257,7 +266,6 @@ define(
 
                 return picker.highlight('li')
                     .pressKeys(keys.SPACE)       // open the Lens
-                    .setFindTimeout(20)          // the Lens has this many milliseconds to come into existence
                     .findById('sitecues-hlb')    // get the Lens!
                     .getProperty('tagName')
                     .then(function (data) {
@@ -312,7 +320,6 @@ define(
                         [selector]
                     )
                     .pressKeys(keys.SPACE)       // hit the spacebar, to open the HLB
-                    .setFindTimeout(2000)        // set the find timeout to be more strict
                     .findById('sitecues-hlb')    // get the HLB!
                     .getProperty('value')
                     .then(function (data) {
@@ -349,7 +356,6 @@ define(
                         [selector]
                     )
                     .pressKeys(keys.SPACE)       // hit the spacebar, to open the HLB
-                    .setFindTimeout(2000)        // set the find timeout to be more strict
                     .findById('sitecues-hlb')    // get the HLB!
                     .getProperty('checked')
                     .then(function (data) {
@@ -371,8 +377,6 @@ define(
             test('Outside Mouse Click Closes HLB.', function () {
 
                 return this.remote               // represents the browser being tested
-                    .setFindTimeout(100)          // the HLB has this many milliseconds to come into existence
-                    .setExecuteAsyncTimeout(3000)  // max ms for executeAsync calls to complete
                     .pressKeys(keys.SPACE)       // hit the spacebar, to open the HLB
                     .executeAsync(           // run an async callback in the remote browser
                         function (event, done) {

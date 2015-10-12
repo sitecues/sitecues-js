@@ -53,8 +53,8 @@ define(
             }
         }
 
-        Lens.ID = 'sitecues-hlb';
-        Lens.READY_EVENT = 'hlb/ready';
+        Lens.ID           = 'sitecues-hlb';
+        Lens.READY_EVENT  = 'hlb/ready';
         Lens.CLOSED_EVENT = 'hlb/closed';
 
         return Lens;
