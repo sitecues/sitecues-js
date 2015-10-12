@@ -36,8 +36,11 @@ define([ 'core/platform' ], function(platform) {
     if (useCss) {  // Always use CSS, even in SVG
       elem.style[platform.transformProperty] = transformString;
     }
-    else {
+    else if (transformString) {
       elem.setAttribute('transform', transformString);
+    }
+    else {
+      elem.removeAttribute('transform');
     }
   }
 
@@ -112,8 +115,8 @@ define([ 'core/platform' ], function(platform) {
           : '',
       scale = transformMap.scale,
       hasScale = scale && scale !== 1,
-      scaleType = transformMap.scaleType || 'scale',
-      scaleCSS = hasScale ? scaleType + '(' + scale + ') ' : '',
+      scaleType = transformMap.scaleType === 'scaleY' ? 'scale(1,' : 'scale(',
+      scaleCSS = hasScale ? scaleType + scale + ') ' : '',
       rotate = transformMap.rotate,
       rotateUnits = useCss ? 'deg' : '',
       rotateCSS = rotate ? ' rotate(' + rotate + rotateUnits + ') ' : '';

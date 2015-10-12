@@ -10,7 +10,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
     isZooming,
     isExpandingOrExpanded = true,  // First time, we will already be expanded
     isInitialized,
-    isSticky;
+    isSticky = SC_DEV;
 
   function cancelMouseLeaveShrinkTimer() {
     clearTimeout(mouseLeaveShrinkTimer);

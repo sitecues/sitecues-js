@@ -364,7 +364,7 @@ define(['bp/constants',
     }
 
     origOutlineHeight = origOutlineHeight || getCurrentOutlineHeight();
-    origFillHeight = origFillHeight || parseFloat(getOutlineFill().getAttribute('data-height'));
+    origFillHeight = origFillHeight || parseFloat(getOutlineFill().getAttribute('height'));
     origPanelContentsRect = origPanelContentsRect || document.getElementById(BP_CONST.MAIN_CONTENT_FILL_ID).getBoundingClientRect();
 
     var ENABLED = BP_CONST.SECONDARY_PANEL_ENABLED,
