@@ -19,12 +19,12 @@ define(['zoom/zoom', 'highlight/move-keys', 'core/conf/user/manager', 'core/conf
       // Alt+Shift+0 -> Full reset for all of sitecues, including themes, cursors, cues ... everything
       // Turn off zoom
       zoomMod.resetZoom();
-      if (event.shiftKey) {
+      if (event.altKey) {
         // Turn off speech
         audio.setSpeechState(false, true);
         audio.stopAudio();
 
-        if (event.altKey) {
+        if (event.shiftKey) {
           server.reset();
           audio.playEarcon('quit-organ');
         }
