@@ -285,6 +285,16 @@ define(['bp/helper', 'core/platform', 'bp/constants', 'core/conf/site'],
         'opacity': '1 !important'
       },
 
+      /************** Shadow *********************/
+
+      '#scp-shadow': {
+        'position': 'absolute',
+        'top': '-437px',
+        'width': '513px',
+        'height': '564px',
+        'background-image': 'url(data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20820%20902%22%20preserveAspectRatio%3D%22xMinYMin%22%3E%3Cdefs%3E%3Cfilter%20id%3D%22shadowblur%22%3E%20%3CfeGaussianBlur%20in%3D%22SourceGraphic%22%20stdDeviation%3D%225%22%2F%3E%3C%2Ffilter%3E%3C%2Fdefs%3E%3Cpath%20filter%3D%22url%28%23shadowblur%29%22%20d%3D%22m808%2C888c0%2C6%20-5%2C11%20-11%2C11H11m797%2C-11v-888%22%20stroke%3D%22%23222%22%20stroke-width%3D%222%22%20fill%3D%22none%22%2F%3E%3C%2Fsvg%3E)'
+      },
+
       '#scp-shadow-container': {
         'display': 'none',
         'opacity': 0
