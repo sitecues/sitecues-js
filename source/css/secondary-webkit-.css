@@ -63,3 +63,23 @@
   background: #538eca;
   pointer-events: none;
 }
+
+/* ----------- Button hover ---------- */
+
+sc-button {
+  -webkit-transition: -webkit-transform .5s;
+}
+
+sc-button:hover {
+  -webkit-transform: scale(1.2);
+}
+
+/* ----------- Terrible Safari hack to fix clipped hover effect for settings buttons --------- */
+/* Not sure why it even works */
+sc-button[data-setting-name="themeName"]:after {
+  position: absolute;
+  content: "";
+  height: 20px !important;
+  width: 99px !important;
+  background-color: rgba(0, 0, 0, .001);
+}
