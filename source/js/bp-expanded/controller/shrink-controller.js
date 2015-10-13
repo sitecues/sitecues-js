@@ -10,7 +10,8 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
     isZooming,
     isExpandingOrExpanded = true,  // First time, we will already be expanded
     isInitialized,
-    isSticky;
+    isSticky,
+    byId = helper.byId;
 
   function cancelMouseLeaveShrinkTimer() {
     clearTimeout(mouseLeaveShrinkTimer);
@@ -147,8 +148,18 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
     }
   }
 
-  function isMouseOutsideRect(evt, elem, minDistance) {
-    var rect = helper.getRect(elem);
+  function getVisiblePanelRect() {
+    var mainOutline = byId(BP_CONST.MAIN_OUTLINE_ID),
+      secondaryOutlineHeight,
+      rect = helper.getRect(mainOutline);
+    if (state.isSecondaryPanelRequested()) {
+      secondaryOutlineHeight = byId(BP_CONST.MORE_OUTLINE_ID).getBoundingClientRect().height;
+      rect.height = secondaryOutlineHeight;
+      rect.bottom = rect.top + rect.height;
+    }
+    return rect;
+  }
+  function isMouseOutsideRect(evt, rect, minDistance) {
     return evt.clientY > rect.bottom + minDistance || evt.clientY < rect.top - minDistance ||
       evt.clientX > rect.right + minDistance || evt.clientX < rect.left - minDistance;
   }
@@ -158,8 +169,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
       targetId = target.id;
     if (targetId !== BP_CONST.BP_CONTAINER_ID && targetId !== BP_CONST.BADGE_ID &&
       !isWithinContainer(target, BP_CONST.MORE_BUTTON_CONTAINER_ID)) {
-      var visiblePanelContainer = helper.byId(state.isSecondaryPanelRequested() ? BP_CONST.MORE_OUTLINE_ID : BP_CONST.MAIN_OUTLINE_ID);
-      return isMouseOutsideRect(evt, visiblePanelContainer, distance);
+      return isMouseOutsideRect(evt, getVisiblePanelRect(), distance);
     }
   }
 
