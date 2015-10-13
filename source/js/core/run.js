@@ -3,7 +3,6 @@
  *   The core module of the sitecues library.
  */
 
-// New animations - IE?
 // Review
 // - Send Chrome beta out -- Anton, Shelly
 // Accessibility

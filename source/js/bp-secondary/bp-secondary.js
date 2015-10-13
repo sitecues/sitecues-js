@@ -248,7 +248,7 @@ define(['bp/constants',
       wasEnabled = !!getFeaturePanelName(),
       percentRemaining = (wasEnabled === doEnable) ? 0 : 1,
       heightAnimationDuration = (doEnable ? ENABLE_ANIMATION_MS : DISABLE_ANIMATION_MS) * percentRemaining,
-      heightAnimationDelay = (doEnable && doEnable && feature.heightAnimationDelay) || 0,
+      heightAnimationDelay = (doEnable  && feature.heightAnimationDelay) || 0,
       openFeatureDuration = doEnable && feature.heightAnimationDelay ? ENABLE_ANIMATION_MS : heightAnimationDuration;
 
     function fadeInTextContentWhenLargeEnough() {

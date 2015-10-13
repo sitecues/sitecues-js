@@ -1,9 +1,8 @@
 /**
  * This file contains helper methods for dealing with the string that is returned
  * when using Element.style.transform or Element.getAttribute('transform')
- *
- * TODO: Have a single method that returns an object with properties that map to the
- * values we would ever care about when dealing with transform styles.
+ * This module supports translateX, translateY, scale, scaleY and rotate.
+ * In the case of scaleY it is get/set as a scale(1,y) value with a paired property scaleType = 'scaleY'
  */
 
 define([ 'core/platform' ], function(platform) {
@@ -17,7 +16,7 @@ define([ 'core/platform' ], function(platform) {
   }
 
   function shouldUseCss(elem) {
-    return false; //SHOULD_USE_CSS_TRANSFORM_IN_SVG || !(elem instanceof SVGElement);
+    return SHOULD_USE_CSS_TRANSFORM_IN_SVG || !(elem instanceof SVGElement);
   }
 
   // Set @transform or CSS transform as appropriate
@@ -61,6 +60,7 @@ define([ 'core/platform' ], function(platform) {
 
     var hasTranslate = transformString && transformString.indexOf('translate') !== -1,
       hasScale = transformString && transformString.indexOf('scale') !== -1,
+      hasScaleY = hasScale && transformString.indexOf('scale(1,') !== -1,  // Only vertical scaling used (scaleY)
       hasRotate = transformString && transformString.indexOf('rotate') !== -1,
 
       translateY = 0,
@@ -86,8 +86,15 @@ define([ 'core/platform' ], function(platform) {
     }
 
     if (hasScale) {
-      transformValues = transformString.split('scale');
+      if (hasScaleY) {
+        // Only vertical scaling used (scaleY)
+        transformValues = transformString.split('scale(1,');
+      }
+      else {
+        transformValues = transformString.split('scale');
+      }
       scale = hasRotate ? transformValues[1].split('rotate')[0] : transformValues[1];
+      console.log(scale);
     }
 
     if (hasRotate) {
@@ -103,6 +110,7 @@ define([ 'core/platform' ], function(platform) {
       translateX: getNumberFromString(translateX),
       translateY: getNumberFromString(translateY),
       scale: getNumberFromString(scale),
+      scaleType: hasScaleY ? 'scaleY': 'scale',
       rotate: getNumberFromString(rotate)
     };
 
