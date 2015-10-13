@@ -5,7 +5,6 @@
 
 // Layout turds in sitecues logo text in Safari
 // Js animate - panel shifts from left to right if about is first click
-// Badge focus rect
 // Review
 // - Send Chrome beta out -- Anton, Shelly
 // Accessibility
