@@ -144,13 +144,14 @@ define(['bp/constants',
   // Move up to make sure we fit onscreen when the secondary feature expands
   function getAmountToShiftSecondaryTop() {
     var
-      secondaryContent = getSecondary(),
-      secondaryRect = secondaryContent.getBoundingClientRect(),
-      FUDGE_FACTOR = 100, // Extra space at bottom -- for more button and just space itself
-      screenBottomOverlap = secondaryRect.bottom + FUDGE_FACTOR - window.innerHeight;
+      panelTop = byId(BP_CONST.MAIN_OUTLINE_ID).getBoundingClientRect().top,
+      secondaryBottom = panelTop + CONTENTS_HEIGHT,
+      FUDGE_FACTOR = 190, // Extra space at bottom -- for more button and just space itself
+      MIN_TOP = 10,
+      screenBottomOverlap = secondaryBottom - FUDGE_FACTOR - window.innerHeight;
 
     // Don't shift above top of screen, and only shift up (or not at all)
-    return Math.max(Math.min(screenBottomOverlap, secondaryRect.top), 0);
+    return Math.max(Math.min(screenBottomOverlap, panelTop - MIN_TOP), 0);
   }
 
   function animateButtonMenuDrop(willEnable) {
