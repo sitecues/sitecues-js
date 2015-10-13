@@ -36,11 +36,11 @@ define(['bp-expanded/view/transform-util', 'core/platform'], function (transform
       fromTransform = fromTransforms[index] || {};
       toTransform = toTransforms[index] || {};
       finalTransforms[index] = {
-        translateX: toTransform.translateX || fromTransform.translateX || 0,
-        translateY: toTransform.translateY || fromTransforms.translateY || 0,
-        scale: toTransform.scale || fromTransform.scale || 1,
+        translateX: (typeof toTransform.translateX === 'number') ? toTransform.translateX : fromTransform.translateX || 0,
+        translateY: (typeof toTransform.translateY === 'number') ? toTransform.translateY : fromTransforms.translateY || 0,
+        scale: (typeof toTransform.scale === 'number') ? toTransform.scale : fromTransform.scale || 1,
         scaleType: toTransform.scaleType,
-        rotate: toTransform.rotate || fromTransform.rotate || 0
+        rotate: (typeof toTransform.rotate === 'number') ? toTransform.rotate : fromTransform.rotate || 0
       };
     }
     return finalTransforms;
@@ -52,17 +52,15 @@ define(['bp-expanded/view/transform-util', 'core/platform'], function (transform
     // Get the original transforms for each element
     while (index --) {
       if (elements[index]) {
-        origTransforms[index] = transformUtil.getAttrTransformMap(elements[index]);
+        origTransforms[index] = transformUtil.getElemTransformMap(elements[index]);
       }
     }
     return origTransforms;
   }
 
 
-  function JsAnimation(elements, requestedTransforms, duration, onFinish, timingFunctionName) {
+  function JsAnimation(elements, fromTransforms, toTransforms, duration, onFinish, timingFunctionName) {
     var animationStartTime = Date.now(),
-      origTransforms = getOrigTransforms(elements),
-      finalTransforms = getFinalTransforms(requestedTransforms, origTransforms),
       timingFn = timingFunctions[timingFunctionName],
       currAnimation = this;
 
@@ -74,21 +72,21 @@ define(['bp-expanded/view/transform-util', 'core/platform'], function (transform
     function tick() {
       var time = duration > 0 ? timingFn(Math.min(1, (Date.now() - animationStartTime) / duration)) : 1,
         index = elements.length,
-        fromTransforms,
-        toTransforms,
-        interimTransforms;
+        from,
+        to,
+        interim;
       while (index --) {
         if (elements[index]) {
-          fromTransforms = origTransforms[index];
-          toTransforms = finalTransforms[index];
-          interimTransforms = {
-            translateX: fromTransforms.translateX + (toTransforms.translateX - fromTransforms.translateX) * time,
-            translateY: fromTransforms.translateY + (toTransforms.translateY - fromTransforms.translateY) * time,
-            scale: fromTransforms.scale + (toTransforms.scale - fromTransforms.scale) * time,
-            scaleType: toTransforms.scaleType,
-            rotate: fromTransforms.rotate + (toTransforms.rotate - fromTransforms.rotate) * time
+          from = fromTransforms[index];
+          to = toTransforms[index];
+          interim = {
+            translateX: from.translateX + (to.translateX - from.translateX) * time,
+            translateY: from.translateY + (to.translateY - from.translateY) * time,
+            scale: from.scale + (to.scale - from.scale) * time,
+            scaleType: to.scaleType,
+            rotate: from.rotate + (to.rotate - from.rotate) * time
           };
-          transformUtil.setElemTransform(elements[index], interimTransforms);
+          transformUtil.setElemTransform(elements[index], interim);
         }
       }
 
@@ -117,7 +115,7 @@ define(['bp-expanded/view/transform-util', 'core/platform'], function (transform
     }
   };
 
-  function CssAnimation(elements, transforms, duration, onCustomFinish, timingFunctionName) {
+  function CssAnimation(elements, fromTransforms, toTransforms, duration, onCustomFinish, timingFunctionName) {
     function stopAnimation() {
       initTransitionStyles('');
     }
@@ -137,7 +135,7 @@ define(['bp-expanded/view/transform-util', 'core/platform'], function (transform
       var index = elements.length;
       while (index --) {
         if (elements[index]) {
-          transformUtil.setElemTransform(elements[index], transforms[index]);
+          transformUtil.setElemTransform(elements[index], toTransforms[index]);
         }
       }
     }
@@ -186,13 +184,15 @@ define(['bp-expanded/view/transform-util', 'core/platform'], function (transform
 
   // Optimized transform animation that works via @transform on IE, CSS transition on other browsers
   // Currently only works with CSS transform, on element at a time
-  function animateTransforms(elements, transforms, duration, onCustomFinish, timingFunctionName) {
+  function animateTransforms(elements, requestedTransforms, duration, onCustomFinish, timingFunctionName) {
 
     timingFunctionName = timingFunctionName || 'ease-out';
 
-    var animationType = transformUtil.shouldUseCss(elements[0]) ? CssAnimation : JsAnimation;
+    var animationType = transformUtil.shouldUseCss(elements[0]) ? CssAnimation : JsAnimation,
+      fromTransforms = getOrigTransforms(elements),
+      toTransforms = getFinalTransforms(requestedTransforms, fromTransforms);
 
-    return new animationType(elements, transforms, duration, onCustomFinish, timingFunctionName);  // Cannot use CSS transform for SVG in IE
+    return new animationType(elements, fromTransforms, toTransforms, duration, onCustomFinish, timingFunctionName);  // Cannot use CSS transform for SVG in IE
   }
 
   return {

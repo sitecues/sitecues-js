@@ -264,8 +264,7 @@ define(['bp/constants',
         bottomTranslateY = newPanelHeight - origOutlineHeight,
         BOTTOM_Y_OFFSET = -188,
         moreButtonTransform = {
-          translateY: newPanelHeight + BOTTOM_Y_OFFSET,
-          rotate: MORE_BUTTON_ROTATION_ENABLED
+          translateY: newPanelHeight + BOTTOM_Y_OFFSET
         },
         bottomTransform = {
           translateY: newPanelHeight + BOTTOM_Y_OFFSET
@@ -282,9 +281,7 @@ define(['bp/constants',
 
         },
         bpContainerTransform = {
-          translateX: currentBpContainerTransforms.translateX,
-          translateY: newTranslateY,
-          scale: currentBpContainerTransforms.scale
+          translateY: newTranslateY
 
         };
       createAnimation(

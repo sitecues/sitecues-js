@@ -94,7 +94,6 @@ define([ 'core/platform' ], function(platform) {
         transformValues = transformString.split('scale');
       }
       scale = hasRotate ? transformValues[1].split('rotate')[0] : transformValues[1];
-      console.log(scale);
     }
 
     if (hasRotate) {
@@ -140,7 +139,6 @@ define([ 'core/platform' ], function(platform) {
     getTransformMap: getTransformMap,
     getElemTransformMap: getElemTransformMap,
     getStyleTransformMap: getStyleTransformMap,
-    getAttrTransformMap: getAttrTransformMap,
     setElemTransform: setElemTransform,
     shouldUseCss: shouldUseCss
   };
