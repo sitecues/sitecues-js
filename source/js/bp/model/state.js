@@ -76,6 +76,11 @@ define([], function() {
     return data.secondaryPanelTransitionTo === 1;
   }
 
+  function isSecondaryFeaturePanel() {
+    var panelName = getSecondaryPanelName();
+    return panelName && panelName !== 'button-menu';
+  }
+
   function isShrinking() {
     return data.transitionTo === 0 && data.currentMode !== 0;
   }
@@ -103,6 +108,7 @@ define([], function() {
     isPanelRequested: isPanelRequested,
     isExpanding: isExpanding,
     isSecondaryPanelRequested: isSecondaryPanelRequested,
+    isSecondaryFeaturePanel: isSecondaryFeaturePanel,
     isShrinking: isShrinking,
     getSecondaryPanelName: getSecondaryPanelName,
     getPanelName: getPanelName

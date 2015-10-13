@@ -152,7 +152,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
     var mainOutline = byId(BP_CONST.MAIN_OUTLINE_ID),
       secondaryOutlineHeight,
       rect = helper.getRect(mainOutline);
-    if (state.isSecondaryPanelRequested()) {
+    if (state.isSecondaryFeaturePanel()) {
       secondaryOutlineHeight = byId(BP_CONST.MORE_OUTLINE_ID).getBoundingClientRect().height;
       rect.height = secondaryOutlineHeight;
       rect.bottom = rect.top + rect.height;
