@@ -449,28 +449,34 @@ define(['bp/constants',
       transformUtil.setElemTransform(elem, {});
     });
 
-    // Hack to fix Chrome/Safari bug where the more button was in the wrong place after resetting styles
-    // This forces WebKit to reflow the element's layout.
-    moreButton.style.display = 'none';
-    // jshint unused:false
-    var unused = moreButton.offsetHeight;
-    moreButton.style.display = 'block';
+    resetWebKitLayout(moreButton);
 
     resetButtonStyles();
+  }
+
+  function resetWebKitLayout(elem) {
+    // Hack to fix Chrome/Safari bug where the more button was in the wrong place after resetting styles
+    // This forces WebKit to reflow the element's layout.
+    elem.style.display = 'none';
+    // jshint unused:false
+    var unused = elem.offsetHeight;
+    elem.style.display = 'block';
   }
 
   function resetButtonStyles() {
     // Menu buttons
     forEachFeature(function(feature) {
       var button = feature.menuButtonId,
-        transform = BP_CONST.TRANSFORMS[button];
-      transformUtil.setElemTransform(byId(button), transform);
+        transform = BP_CONST.TRANSFORMS[button],
+        buttonElem = byId(button);
+      transformUtil.setElemTransform(buttonElem, transform);
       if (feature.menuButtonHelperId) {
         transformUtil.setElemTransform(byId(feature.menuButtonHelperId), {});
       }
       if (feature.animatedImageId) {
         transformUtil.setElemTransform(byId(feature.animatedImageId), {});
       }
+      resetWebKitLayout(buttonElem);
     });
   }
 
