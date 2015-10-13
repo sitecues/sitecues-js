@@ -11,7 +11,8 @@ define(['bp/constants', 'bp/helper'], function (BP_CONST, helper) {
       'scp-zoom-keys-card': 'zoom',
       'scp-highlight-card': 'highlight',
       'scp-lens-card': 'lens',
-      'scp-speech-card': 'lens'
+      'scp-speech-card': 'lens',
+      'scp-full-guide-card': 'none'
     },
     animationFnMap = {
       'zoom': animateZoom,
@@ -39,18 +40,24 @@ define(['bp/constants', 'bp/helper'], function (BP_CONST, helper) {
 
     // Find an appropriate animation
     var newAnimation = animationFns[id],
-      demoPage = byId(BP_CONST.DEMO_PAGE);
+      demoPage,
+      hasAnimation;
     if (!newAnimation) {
       return;
     }
 
-    // Run the animation function for this card (if any)
-    animationFnMap[newAnimation](id);
+    demoPage = byId(BP_CONST.DEMO_PAGE);
+    hasAnimation = newAnimation !== 'none';
+    demoPage.setAttribute('data-hasdemo', hasAnimation);
 
-    // Set a class on the demo-page element so it knows what's up
-    demoPage.className = 'scp-demo-' + newAnimation;
-    demoPage.setAttribute('data-hasdemo', !!newAnimation);
-    byId(BP_CONST.TIPS_CONTENT_ID).setAttribute('data-active', id);
+    if (hasAnimation) {
+      // Run the animation function for this card (if any)
+      animationFnMap[newAnimation](id);
+
+      // Set a class on the demo-page element so it knows what's up
+      demoPage.className = 'scp-demo-' + newAnimation;
+      byId(BP_CONST.TIPS_CONTENT_ID).setAttribute('data-active', id);
+    }
   }
 
   function pushTimeout(fn, howLongMs) {

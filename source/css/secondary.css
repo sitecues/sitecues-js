@@ -370,6 +370,7 @@ sc-kbd[data-demo="true"] {
   transform: scale(1.6);
   box-shadow: 0 0 0 999px rgba(0,0,0,.3);
 }
+
 #scp-demo-page[data-hasdemo="false"] {
   display: none;
 }
