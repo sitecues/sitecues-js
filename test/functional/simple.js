@@ -115,8 +115,7 @@ define(
                         ['hlb/ready', 'sitecues-hlb']
                     )
                     .then(function (element) {
-                        // TODO: Should this be assert.isObject()?
-                        assert.ok(element, 'Lens exists');
+                        assert.isObject(element, 'Lens exists');
                     });
             });
 

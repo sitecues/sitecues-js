@@ -29,8 +29,8 @@ define(
             // Miscellaneous configuration, mainly for Selenium.
             // Examples: https://code.google.com/p/selenium/wiki/DesiredCapabilities
             capabilities: {
-                name: 'Automated Test - sitecues-js',   // name of the test run, for logging purposes
-                build: build                            // useful to log success history tied to code changes
+                name  : 'Automated Test - sitecues-js',   // name of the test run, for logging purposes
+                build : build                             // useful to log success history tied to code changes
             },
             // Places where unit and/or functional tests will be run...
             environments: [
