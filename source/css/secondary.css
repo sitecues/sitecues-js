@@ -29,11 +29,12 @@
   display: block;
 }
 
-/* Secondary panel has it's own stretchable outline  and shadow*/
-#scp-main-outline, #scp-shadow {
+/* Secondary panel has it's own stretchable outline */
+#scp-main-outline {
   transition: opacity .2s;
 }
-.scp-is-secondary.scp-want-secondary #scp-main-outline, .scp-is-secondary.scp-want-secondary #scp-shadow {
+
+.scp-is-secondary.scp-want-secondary #scp-main-outline {
   opacity: 0 !important;
 }
 

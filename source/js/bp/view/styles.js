@@ -285,12 +285,17 @@ define(['bp/helper', 'core/platform', 'bp/constants', 'core/conf/site'],
         'opacity': '1 !important'
       },
 
-      '#scp-shadow': {
-        'transition': 'opacity 1s',
+      '#scp-shadow-container': {
+        'display': 'none',
         'opacity': 0
       },
 
-      '.scp-is-panel.scp-ie9-false #scp-shadow': {
+      '.scp-want-panel.scp-ie9-false #scp-shadow-container': {
+        'transition': 'opacity 1s',
+        'display': 'block'
+      },
+
+      '.scp-is-panel.scp-ie9-false #scp-shadow-container': {
         'opacity': 1
       },
 

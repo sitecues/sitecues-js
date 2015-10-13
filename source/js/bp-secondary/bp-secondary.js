@@ -111,7 +111,7 @@ define(['bp/constants',
   }
 
   function getShadow() {
-    return byId('scp-secondary-shadow');
+    return byId('scp-shadow');
   }
 
   function getOutlineFill() {
@@ -278,7 +278,7 @@ define(['bp/constants',
           translateY: bottomTranslateY
         },
         shadowTransform = {
-          translateY: bottomTranslateY
+          translateY: doEnable ? 435 : 0// bottomTranslateY
 
         },
         bpContainerTransform = {
