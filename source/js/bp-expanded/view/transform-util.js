@@ -17,7 +17,7 @@ define([ 'core/platform' ], function(platform) {
   }
 
   function shouldUseCss(elem) {
-    return SHOULD_USE_CSS_TRANSFORM_IN_SVG || !(elem instanceof SVGElement);
+    return false; //SHOULD_USE_CSS_TRANSFORM_IN_SVG || !(elem instanceof SVGElement);
   }
 
   // Set @transform or CSS transform as appropriate
@@ -45,12 +45,16 @@ define([ 'core/platform' ], function(platform) {
   }
 
   // Always get style transform
-  function getStyleTransform(elem) {
+  function getStyleTransformMap(elem) {
     return getTransformMap(elem.style[platform.transformProperty]);
   }
 
   function getElemTransformMap(elem) {
-    return shouldUseCss(elem) ? getStyleTransform(elem) : getTransformMap(elem.getAttribute('transform'));
+    return shouldUseCss(elem) ? getStyleTransformMap(elem) : getAttrTransformMap(elem);
+  }
+
+  function getAttrTransformMap(elem) {
+    return getTransformMap(elem.getAttribute('transform'));
   }
 
   function getTransformMap(transformString) {
@@ -127,7 +131,9 @@ define([ 'core/platform' ], function(platform) {
   return {
     getTransformMap: getTransformMap,
     getElemTransformMap: getElemTransformMap,
-    getStyleTransform: getStyleTransform,
-    setElemTransform: setElemTransform
+    getStyleTransformMap: getStyleTransformMap,
+    getAttrTransformMap: getAttrTransformMap,
+    setElemTransform: setElemTransform,
+    shouldUseCss: shouldUseCss
   };
 });

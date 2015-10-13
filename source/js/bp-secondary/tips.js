@@ -37,12 +37,15 @@ define(['bp/constants', 'bp/helper'], function (BP_CONST, helper) {
     animationTimers.length = 0;
     ACTORS.forEach(clearElementDemo);
 
-    // Run the animation function for this card (if any)
+    // Find an appropriate animation
     var newAnimation = animationFns[id],
       demoPage = byId(BP_CONST.DEMO_PAGE);
-    if (newAnimation) {
-      animationFnMap[newAnimation](id);
+    if (!newAnimation) {
+      return;
     }
+
+    // Run the animation function for this card (if any)
+    animationFnMap[newAnimation](id);
 
     // Set a class on the demo-page element so it knows what's up
     demoPage.className = 'scp-demo-' + newAnimation;
@@ -57,12 +60,14 @@ define(['bp/constants', 'bp/helper'], function (BP_CONST, helper) {
   // Reset demo page element back to original state
   function clearElementDemo(id) {
     var elem = byId(id);
-    // Reset element back to normal position instantly (temporarily turn of animations)
-    elem.setAttribute('data-demo', false);
-    elem.style.transitionDuration = '0s';
-    setTimeout(function () {
-      elem.style.transitionDuration = '';
-    }, 20); // Wait at least one frame tick to turn animations back on
+    if (elem) {
+      // Reset element back to normal position instantly (temporarily turn of animations)
+      elem.setAttribute('data-demo', false);
+      elem.style.transitionDuration = '0s';
+      setTimeout(function () {
+        elem.style.transitionDuration = '';
+      }, 20); // Wait at least one frame tick to turn animations back on
+    }
   }
 
   // Optional -- howLongMs is how logn to wait before doing it

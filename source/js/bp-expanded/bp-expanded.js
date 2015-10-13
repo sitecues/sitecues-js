@@ -10,7 +10,7 @@ define(['bp-expanded/controller/slider-controller', 'bp-expanded/controller/shri
 
   function init() {
     if (!isInitialized) {
-      state.set('scale', transform.getStyleTransform(helper.byId(BP_CONST.BP_CONTAINER_ID)).scale);
+      state.set('scale', transform.getStyleTransformMap(helper.byId(BP_CONST.BP_CONTAINER_ID)).scale);
       sliderController.init();
       shrinkController.init();
       focusController.init();

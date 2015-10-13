@@ -237,7 +237,7 @@ define(['bp/constants',
       menuButton = byId(feature.menuButtonId),
       bpContainer = getBPContainer(),
 
-      currentBpContainerTransforms = transformUtil.getStyleTransform(bpContainer),
+      currentBpContainerTransforms = transformUtil.getStyleTransformMap(bpContainer),
 
       geometryTargets = getGeometryTargets(name, menuButton),
       toGeo = geometryTargets[doEnable],
