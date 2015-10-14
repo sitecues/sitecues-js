@@ -319,15 +319,15 @@ define(['$', 'style-service/user-agent-css', 'core/conf/site', 'core/conf/urls',
     }
 
     function isUsableStyleElement(styleElem) {
-      if (styleElem.firstChild) {
-        var SITECUES_STYLE_ID_PREFIX = 'sitecues-',  // <style id="sitecues-XXX"> are sitecues stylesheets
-          id = styleElem.id;
-        return !id || !startsWith(id, SITECUES_STYLE_ID_PREFIX);
-      }
+      return !!styleElem.firstChild;
     }
 
     function isUsable(index, elem) {
-      return elem.localName === 'link' ? isUsableLinkedStyleSheet(elem) : isUsableStyleElement(elem);
+      var SITECUES_STYLE_ID_PREFIX = 'sitecues-',  // <style id="sitecues-XXX"> are sitecues stylesheets
+        id = styleElem.id;
+      if (!id || !startsWith(id, SITECUES_STYLE_ID_PREFIX)) {
+        return elem.localName === 'link' ? isUsableLinkedStyleSheet(elem) : isUsableStyleElement(elem);
+      }
     }
 
     function addSheetForElem(index, elem) {

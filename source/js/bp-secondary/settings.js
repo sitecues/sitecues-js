@@ -18,7 +18,6 @@ define(['bp/constants', 'bp/helper', 'core/conf/user/manager', 'bp/model/state',
         if (!settingsPanel) {
           initContents();
         }
-        initThemes();
         settingsCards.addEventListener('click', onSettingsClick);
         settingsCards.addEventListener('change', onSettingsNativeInputChange);
         settingsCards.addEventListener('input', onSettingsNativeInputChangeDrag);
@@ -31,12 +30,6 @@ define(['bp/constants', 'bp/helper', 'core/conf/user/manager', 'bp/model/state',
     }
 
     isActive = willBeActive;
-  }
-
-  function initThemes() {
-    require([ 'theme/theme' ], function(themes) {
-      themes.init();
-    });
   }
 
   function initContents() {
