@@ -1,0 +1,9 @@
+/* ----------- Terrible Safari hack to fix clipped hover effect for settings buttons --------- */
+/* Not sure why it even works */
+sc-button[data-setting-name="themeName"]:after {
+  position: absolute;
+  content: "";
+  height: 20px !important;
+  width: 100px !important;
+  background-color: rgba(0, 0, 0, .001);
+}
