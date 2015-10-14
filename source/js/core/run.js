@@ -9,8 +9,6 @@
 //
 // IE10 secondary bp arrow isnt showing up
 //
-// Border of HLB in dark theme -- just use highlight color
-//
 //aaron [2:04 PM]
 //Super slow in Safari when theme used, especially with HLB
 //
@@ -53,9 +51,6 @@
 //
 //  aaron [2:35 PM]
 //UX-wise, should tabbing move the focus / should they sync?
-//
-//  aaron [2:35 PM]
-//focus outline too hard to see over dark stuff especially with dark theme
 //
 //seth [2:41 PM]
 //Win/Firefox: Cursor hotspot is way off.
@@ -137,8 +132,9 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
   }
 
   function initThemes() {
-    require([ 'theme/theme' ], function(themes) {
+    require([ 'theme/theme', 'focus/focus' ], function(themes, focus) {
       themes.init();
+      focus.init();
     });
   }
 
