@@ -3,6 +3,67 @@
  *   The core module of the sitecues library.
  */
 
+//gradetsky [2:02 PM]
+//1. when changing themes in secondary panel the performance slows down on mac safari.
+//2. when highlighting not on normal theme in secondary panel highlighting is off, specifically reproduced in dropdown on eeoc.gov.
+//
+// IE10 secondary bp arrow isnt showing up
+//
+// Border of HLB in dark theme -- just use highlight color
+//
+//aaron [2:04 PM]
+//Super slow in Safari when theme used, especially with HLB
+//
+//  meistermittens [2:04 PM]
+//IE10 secondary bp arrow isnt showing up
+//  :disappointed:1
+//
+//aaron [2:07 PM]
+//Sometimes 4 button menu plops down
+//
+//seth [2:08 PM]
+//IE9: Keyboard arrows don’t work to move highlight while in Help box.
+//
+//  aaron [2:08 PM]
+//HLB open, Cmd+ is doing native zoom (edited)
+//
+//aaron [2:09 PM]
+//Graham managed to get badge to float out there in Safari while using +/-
+//
+//  seth [2:11 PM]
+//IE9: Escape key doesn’t close the Help box.
+//
+//  seth [2:18 PM]
+//Settings changed while help box is open do not persist when it is closed. (edited)
+//
+//seth [2:22 PM]
+//`sitecues.status()` is broken, never logs any data (edited)
+//
+//aaron [2:23 PM]
+//IE10 - more down arrow not showing up is because opacity=0 on #more-button-opacity
+//
+//seth [2:28 PM]
+//Win/Firefox: Panel gets funky and shifts position after expanding from badge. Maybe due to drop shadow.
+//
+//  aaron [2:31 PM]
+//also drop shadow didn’t match final position
+//
+//aaron [2:31 PM]
+//makes me :angry:
+//
+//  aaron [2:35 PM]
+//UX-wise, should tabbing move the focus / should they sync?
+//
+//  aaron [2:35 PM]
+//focus outline too hard to see over dark stuff especially with dark theme
+//
+//seth [2:41 PM]
+//Win/Firefox: Cursor hotspot is way off.
+//  Win/Chrome: Cursor hotspot is a tiny bit off. (edited)
+//
+//aaron [2:42 PM]
+//sometimes 4 button panel plops down instead of animating
+
 // Review
 // - Send Chrome beta out -- Anton, Shelly
 // Accessibility

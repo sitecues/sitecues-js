@@ -428,7 +428,7 @@ define([
     // This step must occur after filtering, because some of the HLB default styles (such as padding),
     // are filtered as well.  For example, if we want to HLB an element that has 20px of padding, we filter
     // the padding styles (blacklist) and apply default styles.
-    hlbStyles = hlbStyling.getHLBStyles($picked, $foundation);
+    hlbStyles = hlbStyling.getHLBStyles($picked, $foundation, highlight);
 
     // Set the styles for the HLB and append to the wrapping element
     $hlb

@@ -81,14 +81,14 @@ define(['$', 'core/platform', 'util/common', 'core/conf/user/manager'],
       defaultHLBStyles  = {
         'position'         : 'absolute',   // Doesn't interfere with document flow
         'zIndex'           : HLB_Z_INDEX,  // Max z-index for HLB overlay
-        'border'           : defaultBorder + 'px solid black',
+        'border'           : defaultBorder + 'px solid #000',
         'padding'          : defaultPadding,
         'margin'           : 0,            // Margin isn't necessary and only adds complexity
-        'border-radius'    : '4px',        // Aesthetic purposes
-        'box-sizing'       : 'content-box', // Default value.  If we do not force this property, then our positioning algorithm must be dynamic...
+        'borderRadius'     : '4px',        // Aesthetic purposes
+        'boxSizing'        : 'content-box', // Default value.  If we do not force this property, then our positioning algorithm must be dynamic...
         'visibility'       : 'visible',
-        'max-width'        : 'none',
-        'max-height'       : 'none',
+        'maxWidth'         : 'none',
+        'maxHeight'        : 'none',
         'opacity'          : 1
       };
 
@@ -697,7 +697,7 @@ define(['$', 'core/platform', 'util/common', 'core/conf/user/manager'],
    * @param {[DOM element]} $foundation [the original element]
    * @return {[Object]} [CSS style object to be used by jQuery.css()]
    */
-  function getHLBStyles($picked, $foundation) {
+  function getHLBStyles($picked, $foundation, highlight) {
 
     var originalElement       = $foundation[0],
         originalElementRect   = originalElement.getBoundingClientRect(),
@@ -705,10 +705,13 @@ define(['$', 'core/platform', 'util/common', 'core/conf/user/manager'],
         backgroundStyles      = getHLBBackgroundImage($picked, elementComputedStyle),
         backgroundColor       = getHLBBackgroundColor($picked, elementComputedStyle),
         calculatedHLBStyles   = {
-          'padding-left' : getHLBLeftPadding($foundation, elementComputedStyle),
+          'paddingLeft' : getHLBLeftPadding($foundation, elementComputedStyle),
           'display'      : getHLBDisplay(elementComputedStyle),
           'left'         : originalElementRect.left + window.scrollLeft,
           'top'          : originalElementRect.top + window.scrollTop
+        },
+        borderStyles = {
+          borderColor: highlight.hasDarkBackgroundColor ? highlight.highlightBorderColor : '#000'
         },
         animationOptimizationStyles = {
           willChange: platform.transformPropertyCss,
@@ -722,11 +725,6 @@ define(['$', 'core/platform', 'util/common', 'core/conf/user/manager'],
       calculatedHLBStyles.backgroundColor = HLB_DEFAULT_BACKGROUND_COLOR;
     } else {
       calculatedHLBStyles.backgroundColor = backgroundColor;
-    }
-
-    // A black HLB background should use a white border
-    if (isBlack(calculatedHLBStyles.backgroundColor)) {
-      calculatedHLBStyles.border = defaultBorder + 'px solid #fff';
     }
 
     // If the original element uses a background image, preserve original padding.
@@ -759,6 +757,7 @@ define(['$', 'core/platform', 'util/common', 'core/conf/user/manager'],
 
     return $.extend({},
       defaultHLBStyles,
+      borderStyles,
       calculatedHLBStyles,
       backgroundStyles,
       animationOptimizationStyles
