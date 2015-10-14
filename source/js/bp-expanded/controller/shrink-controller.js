@@ -1,8 +1,8 @@
 /*
  Panel Controller
  */
-define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric', 'core/conf/site'],
-  function (BP_CONST, state, helper, metric, site) {
+define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
+  function (BP_CONST, state, helper, metric) {
 
   var MIN_DISTANCE = 75, // Min distance before shrink
     mouseLeaveShrinkTimer,  // How long we wait before shrinking BP from any mouseout (even only just barely outside panel)
@@ -10,8 +10,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric', 'core/conf
     isZooming,
     isExpandingOrExpanded = true,  // First time, we will already be expanded
     isInitialized,
-    isSticky = site.get('useStickyPanel'),
-    byId = helper.byId;
+    isSticky;
 
   function cancelMouseLeaveShrinkTimer() {
     clearTimeout(mouseLeaveShrinkTimer);
@@ -43,7 +42,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric', 'core/conf
     }
 
     if (isMouseOutsidePanel(evt, MIN_DISTANCE)) {
-      if (isSticky) {
+      if (SC_DEV && isSticky) {
         return;
       }
       if (state.get('wasMouseInPanel')) {
@@ -76,7 +75,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric', 'core/conf
 
 
   function winMouseDown(evt) {
-    if (isSticky) {
+    if (SC_DEV && isSticky) {
       return;
     }
 
@@ -88,7 +87,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric', 'core/conf
   }
 
   function winBlur() {
-    if (isSticky) {
+    if (SC_DEV && isSticky) {
       return;
     }
     shrinkPanel(true);
@@ -148,18 +147,9 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric', 'core/conf
     }
   }
 
-  function getVisiblePanelRect() {
-    var mainOutline = byId(BP_CONST.MAIN_OUTLINE_ID),
-      secondaryOutlineHeight,
-      rect = helper.getRect(mainOutline);
-    if (state.isSecondaryFeaturePanel()) {
-      secondaryOutlineHeight = byId(BP_CONST.MORE_OUTLINE_ID).getBoundingClientRect().height;
-      rect.height = secondaryOutlineHeight;
-      rect.bottom = rect.top + rect.height;
-    }
-    return rect;
-  }
   function isMouseOutsideRect(evt, rect, minDistance) {
+    console.log('--> ' + evt.clientX + ' ' + evt.clientY);
+    console.log(JSON.stringify(rect));
     return evt.clientY > rect.bottom + minDistance || evt.clientY < rect.top - minDistance ||
       evt.clientX > rect.right + minDistance || evt.clientX < rect.left - minDistance;
   }
@@ -169,7 +159,8 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric', 'core/conf
       targetId = target.id;
     if (targetId !== BP_CONST.BP_CONTAINER_ID && targetId !== BP_CONST.BADGE_ID &&
       !isWithinContainer(target, BP_CONST.MORE_BUTTON_CONTAINER_ID)) {
-      return isMouseOutsideRect(evt, getVisiblePanelRect(), distance);
+      var visiblePanelRect = getVisiblePanelRect();
+      return isMouseOutsideRect(evt, visiblePanelContainer, distance);
     }
   }
 
