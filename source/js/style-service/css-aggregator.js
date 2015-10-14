@@ -277,7 +277,7 @@ define(['$', 'style-service/user-agent-css', 'core/conf/site', 'core/conf/urls',
     });
 
     Object.keys(bgColors).forEach(function (bgColor) {
-      cssText += '[bgColor="' + bgColor + '"] { background-color:' + bgColor + ' };\n';
+      cssText += '[bgColor="' + bgColor + '"] { background-color:' + bgColor + ' }\n';
     });
     if (cssText) {
       addSheet(null, cssText, SC_DEV && 'bgcolor attrs');
