@@ -218,7 +218,7 @@ define(['$', 'style-service/style-service', 'core/conf/user/manager', 'cursor/cu
   function constructBPCursorStylesheet() {
     var cssText =
       '#scp-bp-container,.scp-toolbar {cursor:default;}\n' +
-      '.scp-hand-cursor {cursor:pointer};';
+      '.scp-hand-cursor {cursor:pointer}';
 
     $bpStylesheet = createStyleSheet(SITECUES_BP_CURSOR_CSS_ID, cssText);
 
