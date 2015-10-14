@@ -35,7 +35,15 @@
     "webkitAudioContext"  : false,
     "CSSPrimitiveValue"   : false,
     "CSSStyleDeclaration" : false,
-    "devicePixelRatio"    : false
+    "devicePixelRatio"    : false,
+    "pageXOffset"         : false,
+    "pageYOffset"         : false,
+    "innerWidth"          : false,
+    "innerHeight"         : false,
+    "outerWidth"          : false,
+    "outerHeight"         : false,
+    "screenX"             : false,
+    "screenY"             : false
   },
 
   // Enforcing - Rules that cause the linter to complain more.
