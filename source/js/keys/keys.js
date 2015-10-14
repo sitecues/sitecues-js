@@ -86,6 +86,23 @@ define(['keys/element-classifier', 'keys/commands', 'core/metric'],
           return canUseZoomKey(event);
         }
       },
+      'hlbMinus': function(event) {
+        // Test all of the possible minus keycodes, including drom the numeric keypad
+        if (event.keyCode === DASH || event.keyCode === NUMPAD_SUBTRACT ||
+          event.keyCode === MINUS_ALTERNATE_1 || event.keyCode === MINUS_ALTERNATE_2) {
+
+          return isLensVisible && hasCommandModifier(event);
+        }
+      },
+      'hlbPlus': function(event) {
+        // Test all of the possible plus keycodes, including from the numeric keypad.
+        // Also tests for equals (=) key, which is effectively an unmodified + key press
+        if (event.keyCode === EQUALS || event.keyCode === NUMPAD_ADD ||
+          event.keyCode === PLUS_ALTERNATE_1 || event.keyCode === PLUS_ALTERNATE_2) {
+
+          return isLensVisible && hasCommandModifier(event);
+        }
+      },
       'reset': function(event) {  // Ctrl+0, Cmd+0 or just 0 to reset zoom only, Alt+0 to reset zoom & speech, Alt+Shift+0 to reset all
         return event.keyCode === NUMPAD_0 && (!elemClassifier.isEditable(event.target) || hasCommandModifier(event));
       },
@@ -142,6 +159,8 @@ define(['keys/element-classifier', 'keys/commands', 'core/metric'],
     KEY_EVENT_MAP = {
       'minus': 'decreaseZoom',
       'plus': 'increaseZoom',
+      'hlbMinus': 'notImplemented',
+      'hlbPlus': 'notImplemented',
       'reset': 'resetSitecues',
       'speech': 'toggleSpeech'
     },

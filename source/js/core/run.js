@@ -21,43 +21,15 @@
 //
 //seth [2:08 PM]
 //IE9: Keyboard arrows don’t work to move highlight while in Help box.
-//
-//  aaron [2:08 PM]
-//HLB open, Cmd+ is doing native zoom (edited)
-//
-//aaron [2:09 PM]
-//Graham managed to get badge to float out there in Safari while using +/-
-//
-//  seth [2:11 PM]
-//IE9: Escape key doesn’t close the Help box.
-//
-//  seth [2:18 PM]
-//Settings changed while help box is open do not persist when it is closed. (edited)
-//
-//seth [2:22 PM]
-//`sitecues.status()` is broken, never logs any data (edited)
-//
-//aaron [2:23 PM]
-//IE10 - more down arrow not showing up is because opacity=0 on #more-button-opacity
-//
-//seth [2:28 PM]
-//Win/Firefox: Panel gets funky and shifts position after expanding from badge. Maybe due to drop shadow.
-//
-//  aaron [2:31 PM]
-//also drop shadow didn’t match final position
-//
-//aaron [2:31 PM]
-//makes me :angry:
-//
-//  aaron [2:35 PM]
-//UX-wise, should tabbing move the focus / should they sync?
-//
-//seth [2:41 PM]
-//Win/Firefox: Cursor hotspot is way off.
-//  Win/Chrome: Cursor hotspot is a tiny bit off. (edited)
-//
-//aaron [2:42 PM]
-//sometimes 4 button panel plops down instead of animating
+// HLB open, Cmd+ is doing native zoom (edited)
+// Weird: Graham managed to get badge to float out there in Safari while using +/-
+// IE9: Escape key doesn’t close the Help box.
+// UX: should tabbing move the highlight should focus and sync?
+// Cursor: Win/Firefox: Cursor hotspot is way off. Win/Chrome: Cursor hotspot is a tiny bit off. (edited)
+// Panel:
+// - Sometimes 4 button panel plops down instead of animating
+// - Win/Firefox: Panel gets funky and shifts position after expanding from badge. Maybe due to drop shadow -- drop shadow didn’t match final position
+// - IE10 - more down arrow not showing up is because opacity=0 on #more-button-opacity
 
 // Review
 // - Send Chrome beta out -- Anton, Shelly
