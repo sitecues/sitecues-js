@@ -541,7 +541,7 @@ define([
         pickedElementClone         = pickedElement.cloneNode(true),
         $pickedAndDescendants      = $picked.find('*').addBack(),
         $pickedCloneAndDescendants = $(pickedElementClone).find('*').addBack(),
-        $submitButton              = $picked.closest('form').find(':submit'),
+        $submitButton              = $picked.closest('form').find('input[type="submit"],button[type="submit"]'),
         submitButtonClone          = $submitButton.clone(true),
         $foundation                = $('<form>').append(pickedElementClone, submitButtonClone),
         i;
