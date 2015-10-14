@@ -3,26 +3,11 @@
  *   The core module of the sitecues library.
  */
 
-//gradetsky [2:02 PM]
-//1. when changing themes in secondary panel the performance slows down on mac safari.
-//2. when highlighting not on normal theme in secondary panel highlighting is off, specifically reproduced in dropdown on eeoc.gov.
-//
-// IE10 secondary bp arrow isnt showing up
-//
-//aaron [2:04 PM]
-//Super slow in Safari when theme used, especially with HLB
-//
-//  meistermittens [2:04 PM]
-//IE10 secondary bp arrow isnt showing up
-//  :disappointed:1
-//
-//aaron [2:07 PM]
-//Sometimes 4 button menu plops down
-//
-//seth [2:08 PM]
-//IE9: Keyboard arrows don’t work to move highlight while in Help box.
-// HLB open, Cmd+ is doing native zoom (edited)
-// Weird: Graham managed to get badge to float out there in Safari while using +/-
+// Safari:
+// - Super slow in Safari when theme used, especially with HLB. Also when changing themes.
+// - When highlighting not on normal theme in secondary panel highlighting is off, specifically reproduced in dropdown on eeoc.gov.
+// IE10 secondary bp arrow isn't showing up
+// IE9: Keyboard arrows don’t work to move highlight while in Help box.
 // IE9: Escape key doesn’t close the Help box.
 // UX: should tabbing move the highlight should focus and sync?
 // Cursor: Win/Firefox: Cursor hotspot is way off. Win/Chrome: Cursor hotspot is a tiny bit off. (edited)
@@ -30,6 +15,7 @@
 // - Sometimes 4 button panel plops down instead of animating
 // - Win/Firefox: Panel gets funky and shifts position after expanding from badge. Maybe due to drop shadow -- drop shadow didn’t match final position
 // - IE10 - more down arrow not showing up is because opacity=0 on #more-button-opacity
+// Weird: Graham managed to get badge to float out there in Safari while using +/-
 
 // Review
 // - Send Chrome beta out -- Anton, Shelly
