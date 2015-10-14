@@ -40,6 +40,7 @@ define(['zoom/zoom', 'highlight/move-keys', 'core/conf/user/manager', 'core/conf
     toggleSpeech:  function() {
       audio.init();
       audio.toggleSpeech();
-    }
+    },
+    notImplemented: function() {}
   };
 });
