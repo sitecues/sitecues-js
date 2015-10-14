@@ -324,7 +324,7 @@ define(['$', 'style-service/user-agent-css', 'core/conf/site', 'core/conf/urls',
 
     function isUsable(index, elem) {
       var SITECUES_STYLE_ID_PREFIX = 'sitecues-',  // <style id="sitecues-XXX"> are sitecues stylesheets
-        id = styleElem.id;
+        id = elem.id;
       if (!id || !startsWith(id, SITECUES_STYLE_ID_PREFIX)) {
         return elem.localName === 'link' ? isUsableLinkedStyleSheet(elem) : isUsableStyleElement(elem);
       }
