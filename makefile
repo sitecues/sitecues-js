@@ -41,7 +41,7 @@ sourcemaps=true
 export version=$(default-version)
 
 # jshint path
-jshint=$(shell npm ls -p jshint)/bin/jshint
+jshint=$(shell npm ls -p jshint)/../.bin/jshint
 
 ################################################################################
 # Tools

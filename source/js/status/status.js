@@ -23,7 +23,7 @@ define(
 
     function consoleCallback(status) {
 
-      // The default status formatter, logs all data to the console.
+      // The default status reporter, logs all data to the console.
 
       // Make sure we are not running from a file (unit testing in node)...
       if (location.protocol === 'http:' || location.protocol === 'https:') {
