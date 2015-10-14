@@ -21,7 +21,6 @@ define(['$', 'highlight/highlight', 'util/common',
     // Helps us know whether it's the first repeat and therefore how much to delay
     isKeyRepeating,
     isInitialized,
-    isLensVisible,
     repeatDelayTimer,
     MAX_PIXELS_TO_PAN = 999,
     HEADING_TAGS = { h1:1,h2:1,h3:1,h4:1,h5:1,h6:1 },
@@ -103,7 +102,7 @@ define(['$', 'highlight/highlight', 'util/common',
 
   function onMovementCommand(nextMove) {
     // Movement command
-    if (isLensVisible && performHLBScroll(nextMove)) {
+    if (hlbElement && performHLBScroll(nextMove)) {
       return; // HLB could scroll -- finish
     }
 
@@ -311,7 +310,7 @@ define(['$', 'highlight/highlight', 'util/common',
       speakHighlight();
     }
 
-    if (isLensVisible) {
+    if (hlbElement) {
       // Open new HLB
       if (SC_DEV) { console.log('Retarget HLB'); }
       retargetHLB();
@@ -743,7 +742,7 @@ define(['$', 'highlight/highlight', 'util/common',
   }
 
   function onSpace(doSpeakText) {
-    if (isLensVisible || getHighlight().isVisible) {
+    if (hlbElement || getHighlight().isVisible) {
       // Has an HLB or a highlight -- toggle HLB
       toggleHLB();
     }
@@ -757,7 +756,7 @@ define(['$', 'highlight/highlight', 'util/common',
   }
 
   function onEscape() {
-    if (isLensVisible) {
+    if (hlbElement) {
       toggleHLB();
     }
     else {
@@ -779,12 +778,12 @@ define(['$', 'highlight/highlight', 'util/common',
       isKeyRepeating = false;
     });
 
-    sitecues.on('hlb/create', function() {
-      isLensVisible = true;
+    sitecues.on('hlb/create', function($hlb) {
+      hlbElement = $hlb[0];
     });
 
     sitecues.on('hlb/closed', function() {
-      isLensVisible = false;
+      hlbElement = null;
     });
   }
 
