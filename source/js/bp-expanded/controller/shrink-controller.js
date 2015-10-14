@@ -43,7 +43,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric', 'core/conf
     }
 
     if (isMouseOutsidePanel(evt, MIN_DISTANCE)) {
-      if (SC_DEV && isSticky) {
+      if (isSticky) {
         return;
       }
       if (state.get('wasMouseInPanel')) {
@@ -76,7 +76,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric', 'core/conf
 
 
   function winMouseDown(evt) {
-    if (SC_DEV && isSticky) {
+    if (isSticky) {
       return;
     }
 
@@ -88,7 +88,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric', 'core/conf
   }
 
   function winBlur() {
-    if (SC_DEV && isSticky) {
+    if (isSticky) {
       return;
     }
     shrinkPanel(true);
