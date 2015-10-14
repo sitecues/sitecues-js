@@ -23,7 +23,7 @@ define(['bp/constants', 'bp/helper', 'core/conf/urls'], function (BP_CONST, help
       isInitialized = true;
       loadImage();
       byId('scp-about-rate-button').addEventListener('click', function() {
-        require(['bp-secondary/secondary-panel'], function(secondaryPanel) {
+        require(['bp-secondary/bp-secondary'], function(secondaryPanel) {
           secondaryPanel.toggleSecondaryFeature('feedback');
         });
       });
