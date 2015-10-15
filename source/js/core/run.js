@@ -203,10 +203,11 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
     // Load and initialize the prereqs before doing anything else
     numPrereqsToComplete = 2;  // User settings (conf) and locale
 
-//    sitecues.on('user-id/did-complete', function() {  // TEMPORARY EXPERIMENT!!!! Why are broken in IE10?
+    sitecues.on('user-id/did-complete', function() {  // TEMPORARY EXPERIMENT!!!! Why are broken in IE10?
+      console.log('use id complete');
       sitecues.on('conf/did-complete', onPrereqComplete); // User setting prereq: dependent on user id completion
       userSettingsServer.init();
-//    });
+    });
 
     sitecues.on('locale/did-complete', onPrereqComplete); // Local prereq
 
