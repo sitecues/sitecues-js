@@ -103,7 +103,7 @@ define([], function() {
     console.log('locale#init#1  ' + langModuleName);
 
     // Hack: sitecues.require() is used instead of require() so that we can use it with a variable name
-    sitecues.require([ langModuleName ], function(langEntries) {
+    sitecues.require([ 'locale-data/en' ], function(langEntries) {
       console.log('locale#init#2');
       translations = langEntries;
       sitecues.emit('locale/did-complete');
