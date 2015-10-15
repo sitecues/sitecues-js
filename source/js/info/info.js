@@ -59,8 +59,9 @@ define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 
     }, INFLATION_SPEED);
 
     $(window)
-      .off('focus', close)
-      .off('message', checkCloseMessage);
+      .off('focus', close);
+
+    window.removeEventListener('message', checkCloseMessage);
 
     $('html')
       .off('DOMMouseScroll mousewheel wheel', preventScroll);
@@ -81,9 +82,10 @@ define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 
       }
       catch (ex) {}
 
-      $(window)
-        .one('focus', close)
-        .one('message', checkCloseMessage);
+      $(window).one('focus', close);
+
+
+      window.addEventListener('message', checkCloseMessage);
 
       $('html')
         .on('DOMMouseScroll mousewheel wheel', preventScroll);
@@ -148,7 +150,7 @@ define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 
   }
 
   function checkCloseMessage(evt) {
-    if (evt.originalEvent.data === 'sc-close-iframe') {
+    if (evt.data === 'sc-close-iframe') {
       close();
     }
   }
