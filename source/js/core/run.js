@@ -131,7 +131,6 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
   }
 
   function onAllPrereqsComplete() {
-    console.log('all prereqs complete');
     firePageLoadEvent();
 
     // Initialize other features after bp
@@ -191,7 +190,6 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
   }
 
   function onPrereqComplete() {
-    console.log('pre req complete ' + (numPrereqsToComplete - 1));
     if (--numPrereqsToComplete === 0) {
       bp.init(onAllPrereqsComplete);
     }
@@ -203,7 +201,6 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
     numPrereqsToComplete = 2;  // User settings (conf) and locale
 
     sitecues.on('user-id/did-complete', function() {  // TEMPORARY EXPERIMENT!!!! Why are broken in IE10?
-      console.log('use id complete');
       sitecues.on('conf/did-complete', onPrereqComplete); // User setting prereq: dependent on user id completion
       userSettingsServer.init();
     });
@@ -212,7 +209,6 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
 
     conf.def('zoom', parseFloat); // Will further define it if zoom is turned on, in zoom.js
     userId.init();
-    console.log('pre-locale-init');
     locale.init();
   };
 });

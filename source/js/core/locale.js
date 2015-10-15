@@ -8,13 +8,11 @@
  * - Localize a number string
  */
 define([], function() {
-  console.log('locale-define#AA');
   var translations = {},  // TODO this is a workaround
     DEFAULT_LANG = 'en',
     LANG_PREFIX = 'locale-data/',
     SUPPORTED_LANGS = ['de', 'en', 'es', 'fr', 'pl'];
 
-  console.log('locale-define#BB');
   // Get the language but not the regional differences
   // For example, return just 'en' but not 'en-US'.
   function getBaseLanguage(lang) {
@@ -100,17 +98,11 @@ define([], function() {
       sanitizedLang = SUPPORTED_LANGS.indexOf(lang) === -1 ? DEFAULT_LANG : lang,
       langModuleName = LANG_PREFIX + sanitizedLang;
 
-    console.log('locale#init#1  ' + langModuleName);
-    translations = {};
-    sitecues.emit('locale/did-complete');
-
-
     // Hack: sitecues.require() is used instead of require() so that we can use it with a variable name
-//    require([ 'locale-data/en' ], function(langEntries) {
-//      console.log('locale#init#2');
-//      translations = langEntries;
-//      sitecues.emit('locale/did-complete');
-//    });
+    require([ langModuleName ], function(langEntries) {
+      translations = langEntries;
+      sitecues.emit('locale/did-complete');
+    });
 
   }
 
