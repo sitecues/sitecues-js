@@ -29,7 +29,6 @@ define(['core/conf/user/manager', 'core/conf/urls', 'core/conf/user/localstorage
       params = '/' + location.hostname + '?callback=sitecues.jsonpCallback&' + additionalParams,
       url = urls.getPrefsUrl(type) + params;
 
-    console.log('jsonp url: ' + url);
     scriptEl.setAttribute('src', url);
     scriptEl.id = 'sitecues-jsonp';
     document.querySelector('head').appendChild(scriptEl);
@@ -99,7 +98,6 @@ define(['core/conf/user/manager', 'core/conf/urls', 'core/conf/user/localstorage
   }
 
   function loadCallback(data) {
-    console.log('server#loadCallback');
     if (typeof data === 'string') {
       data = JSON.parse(data);
     }
@@ -110,7 +108,6 @@ define(['core/conf/user/manager', 'core/conf/urls', 'core/conf/user/localstorage
   }
 
   function settingsComplete() {
-    console.log('server#settingsComplete');
     sitecues.emit('conf/did-complete');
   }
 
@@ -125,17 +122,12 @@ define(['core/conf/user/manager', 'core/conf/urls', 'core/conf/user/localstorage
       saveData(key, value);
     });
 
-    console.log('server#init');
-
     // Load the data from localStorage: User ID namespace.
     lsByUserId = ls.getPrefs();
-    console.log('lsByUserId ' + JSON.stringify(lsByUserId));
     if (lsByUserId || SC_LOCAL) {
-      console.log('server#init#localStorage');
       loadCallback(lsByUserId);
     }
     else {
-      console.log('server#init#jsonp');
       // Load the server data.
       initJsonp('load', '', loadFromServerCallback);
     }
