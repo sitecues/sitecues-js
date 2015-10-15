@@ -110,7 +110,7 @@ define(['core/conf/user/manager', 'core/conf/urls', 'core/conf/user/localstorage
   }
 
   function settingsComplete() {
-    console.log('server#settingsComplete')
+    console.log('server#settingsComplete');
     sitecues.emit('conf/did-complete');
   }
 
