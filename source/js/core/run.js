@@ -6,9 +6,9 @@
 // Safari:
 // - Super slow in Safari when theme used, especially with HLB. Also when changing themes.
 // - When highlighting not on normal theme in secondary panel highlighting is off, specifically reproduced in dropdown on eeoc.gov.
-// IE10 secondary bp arrow isn't showing up
+// IE10 BP not showing up or secondary bp arrow isn't showing up
 // IE9: Keyboard arrows don’t work to move highlight while in Help box.
-// IE9: Escape key doesn’t close the Help box.
+// Any browser: Escape key doesn’t close the Help box.
 // UX: should tabbing move the highlight should focus and sync?
 // Cursor: Win/Firefox: Cursor hotspot is way off. Win/Chrome: Cursor hotspot is a tiny bit off. (edited)
 // Panel:
