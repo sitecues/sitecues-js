@@ -99,8 +99,12 @@ define([], function() {
 
   function init() {
     // On load fetch the translations only once
-    // Hack: run is only included so that the first argument is a string, otherwise r.js optimizer won't namespace the require  call
+    // Hack: run is only included so that the first argument is a string, otherwise r.js optimizer won't namespace the require call
+
+    console.log('locale#init#1');
+
     require([ 'core/run', langModuleName ], function(run, langEntries) {
+      console.log('locale#init#2');
       translations = langEntries;
       sitecues.emit('locale/did-complete');
     });

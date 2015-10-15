@@ -192,7 +192,8 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
   }
 
   function onPrereqComplete() {
-    console.log('pre req complete');
+    console.log('pre req complete ' + (numPrereqsToComplete - 1);
+    console.trace();
     if (--numPrereqsToComplete === 0) {
       bp.init(onAllPrereqsComplete);
     }
