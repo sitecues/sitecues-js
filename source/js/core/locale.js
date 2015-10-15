@@ -10,6 +10,7 @@
  * - Localize a number string
  */
 define([], function() {
+  console.log('locale-define#AA');
   var translations = {},  // TODO this is a workaround
     DEFAULT_LANG = 'en',
     LANG_PREFIX = 'locale-data/',
@@ -18,6 +19,7 @@ define([], function() {
     sanitizedLang = SUPPORTED_LANGS.indexOf(lang) === -1 ? DEFAULT_LANG : lang,
     langModuleName = LANG_PREFIX + sanitizedLang;
 
+  console.log('locale-define#BB');
   // Get the language but not the regional differences
   // For example, return just 'en' but not 'en-US'.
   function getBaseLanguage(lang) {
