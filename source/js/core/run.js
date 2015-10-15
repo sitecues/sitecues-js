@@ -8,12 +8,11 @@
 // - When highlighting not on normal theme in secondary panel highlighting is off, specifically reproduced in dropdown on eeoc.gov.
 // IE10 secondary bp arrow isn't showing up
 // IE9: Keyboard arrows don’t work to move highlight while in Help box.
-// IE9: Escape key doesn’t close the Help box.
-// UX: should tabbing move the highlight should focus and sync?
+// UX: should tabbing move the highlight? Should focus and sync?
 // Cursor: Win/Firefox: Cursor hotspot is way off. Win/Chrome: Cursor hotspot is a tiny bit off. (edited)
 // Panel:
-// - Sometimes 4 button panel plops down instead of animating
-// - Win/Firefox: Panel gets funky and shifts position after expanding from badge. Maybe due to drop shadow -- drop shadow didn’t match final position
+// ? Cannot repro -- Sometimes 4 button panel plops down instead of animating
+// ? Cannot repro -- [Seth] Win/Firefox: Panel gets funky and shifts position after expanding from badge. Maybe due to drop shadow -- drop shadow didn’t match final position
 // - IE10 - more down arrow not showing up is because opacity=0 on #more-button-opacity
 // Weird: Graham managed to get badge to float out there in Safari while using +/-
 
