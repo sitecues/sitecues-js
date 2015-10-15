@@ -193,7 +193,6 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
 
   function onPrereqComplete() {
     console.log('pre req complete ' + (numPrereqsToComplete - 1));
-    console.trace();
     if (--numPrereqsToComplete === 0) {
       bp.init(onAllPrereqsComplete);
     }
@@ -214,6 +213,7 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
 
     conf.def('zoom', parseFloat); // Will further define it if zoom is turned on, in zoom.js
     userId.init();
+    console.log('pre-locale-init');
     locale.init();
   };
 });
