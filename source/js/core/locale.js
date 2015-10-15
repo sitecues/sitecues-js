@@ -1,5 +1,3 @@
-// TODO make it simpler to add new locales
-// TODO Locales should probably be loaded dynamically
 // TODO sub-locales should provide things like 'colour' vs 'color'
 
 /**
@@ -14,10 +12,7 @@ define([], function() {
   var translations = {},  // TODO this is a workaround
     DEFAULT_LANG = 'en',
     LANG_PREFIX = 'locale-data/',
-    SUPPORTED_LANGS = ['de', 'en', 'es', 'fr', 'pl'],
-    lang = getShortWebsiteLang(),
-    sanitizedLang = SUPPORTED_LANGS.indexOf(lang) === -1 ? DEFAULT_LANG : lang,
-    langModuleName = LANG_PREFIX + sanitizedLang;
+    SUPPORTED_LANGS = ['de', 'en', 'es', 'fr', 'pl'];
 
   console.log('locale-define#BB');
   // Get the language but not the regional differences
@@ -101,11 +96,14 @@ define([], function() {
 
   function init() {
     // On load fetch the translations only once
-    // Hack: run is only included so that the first argument is a string, otherwise r.js optimizer won't namespace the require call
+    var lang = getShortWebsiteLang(),
+      sanitizedLang = SUPPORTED_LANGS.indexOf(lang) === -1 ? DEFAULT_LANG : lang,
+      langModuleName = LANG_PREFIX + sanitizedLang;
 
-    console.log('locale#init#1');
+    console.log('locale#init#1  ' + langModuleName);
 
-    require([ 'core/run', langModuleName ], function(run, langEntries) {
+    // Hack: sitecues.require() is used instead of require() so that we can use it with a variable name
+    sitecues.require([ langModuleName ], function(langEntries) {
       console.log('locale#init#2');
       translations = langEntries;
       sitecues.emit('locale/did-complete');
@@ -125,3 +123,4 @@ define([], function() {
 
 
 });
+
