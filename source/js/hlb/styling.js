@@ -96,12 +96,6 @@ define(['$', 'core/platform', 'util/common', 'core/conf/user/manager'],
   // PRIVATE FUNCTIONS
   //////////////////////////
 
-  function isBlack (style) {
-    if (style === '#000' || style === '#000000' || style === 'rgb(0, 0, 0)') {
-      return true;
-    }
-  }
-
   /**
    * [filterElements removes HLBElementBlacklist elements from the HLB element, but not its children]
    * @param  {[DOM element]} $hlb [HLB element]

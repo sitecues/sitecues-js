@@ -1,8 +1,8 @@
 /*
  Panel Controller
  */
-define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric', 'core/conf/site'],
-  function (BP_CONST, state, helper, metric, site) {
+define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
+  function (BP_CONST, state, helper, metric) {
 
     var MIN_DISTANCE = 75, // Min distance before shrink
       mouseLeaveShrinkTimer,  // How long we wait before shrinking BP from any mouseout (even only just barely outside panel)
