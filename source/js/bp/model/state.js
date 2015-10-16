@@ -2,7 +2,7 @@
 define([], function() {
   var data = {
     currentMode             : 0,     // 0 - 1, 0 is badge, 1 is panel, anything in between means its currently transitioning
-    transitionTo            : 0,     // 0 - 1, 0 is badge, 1 is panel, it cannot be anything in between (doesnt seem to make sense to transition to anything other than the badge or panel state)
+    transitionTo            : 0,     // 0 - 1, 0 is badge, 1 is panel, it cannot be anything in between (doesn' t seem to make sense to transition to anything other than the badge or panel state)
     isSecondaryPanel        : false,  // Are we currently in the secondary panel
     secondaryPanelTransitionTo: 0,
     scale                   : 1, // How much transform scale used on expanded BP
@@ -100,6 +100,10 @@ define([], function() {
     return 'main';
   }
 
+  function isButtonMenu() {
+    return isPanel() && data.secondaryPanelName === 'button-menu';
+  }
+
   return {
     get: get,
     set: set,
@@ -111,6 +115,7 @@ define([], function() {
     isSecondaryFeaturePanel: isSecondaryFeaturePanel,
     isShrinking: isShrinking,
     getSecondaryPanelName: getSecondaryPanelName,
+    isButtonMenu: isButtonMenu,
     getPanelName: getPanelName
   };
 

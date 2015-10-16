@@ -400,7 +400,9 @@ define(['bp/constants',
     if (willEnable && !isFeatureAvailable(featureName)) {
       // The feature was not loaded yet -- wait until loaded
       sitecues.on('bp/content-loaded', function() {
-        toggleFeature(featureName);
+        if (state.isButtonMenu()) {  // Make sure user hasn't left the 4 button menu while we waited
+          toggleFeature(featureName);
+        }
       });
     }
     else {
