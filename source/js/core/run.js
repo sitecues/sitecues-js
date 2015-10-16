@@ -6,7 +6,8 @@
 // Safari:
 // - Super slow in Safari when theme used, especially with HLB. Also when changing themes.
 // - When highlighting not on normal theme in secondary panel highlighting is off, specifically reproduced in dropdown on eeoc.gov.
-// IE9: Keyboard arrows don’t work to move highlight while in Help box. Not sure help is working too well at all.
+// IE10 secondary bp arrow isn't showing up
+// IE9: Keyboard arrows don’t work to move highlight while in Help box.
 // UX: should tabbing move the highlight? Should focus and sync?
 // Cursor: Win/Firefox: Cursor hotspot is way off. Win/Chrome: Cursor hotspot is a tiny bit off. (edited)
 // Panel:
@@ -199,7 +200,7 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
     // Load and initialize the prereqs before doing anything else
     numPrereqsToComplete = 2;  // User settings (conf) and locale
 
-    sitecues.on('user-id/did-complete', function() {
+    sitecues.on('user-id/did-complete', function() {  // TEMPORARY EXPERIMENT!!!! Why are broken in IE10?
       sitecues.on('conf/did-complete', onPrereqComplete); // User setting prereq: dependent on user id completion
       userSettingsServer.init();
     });
