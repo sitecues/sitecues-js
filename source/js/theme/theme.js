@@ -16,7 +16,7 @@ define(['$', 'core/conf/user/manager', 'style-service/style-service', 'core/plat
     originalBodyBackgroundColor,
     isOriginalThemeDark,
     transitionTimer,
-    MAX_USER_SPECIFIED_HUE = 1.1,   // If > 1.0 then use white
+    MAX_USER_SPECIFIED_HUE = 1.03,   // If > 1.0 then use white
     TRANSITION_CLASS = 'sc-animate-theme',
     TRANSITION_MS_FAST = 300,
     TRANSITION_MS_SLOW = 1400,

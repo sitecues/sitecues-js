@@ -30,7 +30,7 @@ define(['core/platform', 'zoom/zoom', 'util/color', 'core/conf/urls'], function 
       CURSOR_HUE_LIGHTNESS = 0.7,
       MAX_CURSOR_SIZE_DEFAULT = 128,
       MAX_CURSOR_PIXELS_WIN = 71,
-      CURSOR_ZOOM_MAX = platform.os.isWin? 3 : 4,
+      CURSOR_ZOOM_MAX = platform.os.isWin? 3: 4,
       CURSOR_OFFSETS = {
         _default : {x: 10,  y: 5, xStep: 0, yStep: 2.5},
         _pointer : {x: 12, y: 5, xStep: 3.6, yStep: 1.7}

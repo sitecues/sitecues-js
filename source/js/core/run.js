@@ -14,6 +14,7 @@
 // ? Cannot repro -- Sometimes 4 button panel plops down instead of animating
 // ? Cannot repro -- [Seth] Win/Firefox: Panel gets funky and shifts position after expanding from badge. Maybe due to drop shadow -- drop shadow didn’t match final position
 // - IE10 - more down arrow not showing up is because opacity=0 on #more-button-opacity
+// Firefox: keyboard navigation completely off
 // Weird: Graham managed to get badge to float out there in Safari while using +/-
 
 // Review
