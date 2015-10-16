@@ -490,7 +490,8 @@ var requirejs, require, define;
         load = function (map) {
                     var script,
                         id = map.id,
-                        url = map.url;
+                        url = map.url,
+                        target;
 
                     if (urlFetched[url]) {
                         return;
@@ -506,10 +507,14 @@ var requirejs, require, define;
                     loadCount += 1;
                     if (isOldIE) {
                       script.addEventListener('readystatechange', function (evt) {
-                        console.log('IE script load: ' + evt.currentTarget.readyState);
-                        if (evt.currentTarget.readyState === 'complete') {
-                          loadCount -= 1;
-                          takeQueue(id);
+                        target = evt.currentTarget;
+                        if (target.readyState === 'complete' ||
+                          target.readyState === 'loaded') {
+                          if (!target.hasAttribute('data-loaded')) {
+                            target.setAttribute('data-loaded', true);
+                            loadCount -= 1;
+                            takeQueue(id);
+                          }
                         }
                       });
                     }
