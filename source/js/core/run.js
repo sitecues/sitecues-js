@@ -3,6 +3,7 @@
  *   The core module of the sitecues library.
  */
 
+// onReady call back missing?
 // Safari:
 // - Super slow in Safari when theme used, especially with HLB. Also when changing themes.
 // - When highlighting not on normal theme in secondary panel highlighting is off, specifically reproduced in dropdown on eeoc.gov.
