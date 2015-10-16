@@ -87,6 +87,11 @@ define(['$', 'zoom/zoom'], function($, zoomMod) {
       rect = rectCache[id];
     if (!rect) {
       // Copy rect object into our own object so we can modify values
+      if (!element.getBoundingClientRect) {
+        console.log('Error in traitcache#getRect');
+        console.log(element);
+        console.trace();
+      }
       rect = $.extend({}, element.getBoundingClientRect());
 
       // Use the scroll height when the overflow is visible, as it shows the full height
