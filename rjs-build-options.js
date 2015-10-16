@@ -16,7 +16,7 @@
       include : [
         '../../../build-config/config.js',
         'core/core',
-        'core/alameda.js'  // Was: '../../../node_modules/alameda/alameda.js'
+        'core/alameda-custom.js'  // Was: '../../../node_modules/alameda/alameda.js'
       ],
       create: true,
       insertRequire: ['core/core']

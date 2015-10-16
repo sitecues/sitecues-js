@@ -99,7 +99,7 @@ define([], function() {
       langModuleName = LANG_PREFIX + sanitizedLang;
 
     // Hack: sitecues.require() is used instead of require() so that we can use it with a variable name
-    require([ langModuleName ], function(langEntries) {
+    sitecues.require([ langModuleName ], function(langEntries) {
       translations = langEntries;
       sitecues.emit('locale/did-complete');
     });

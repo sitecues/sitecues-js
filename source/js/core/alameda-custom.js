@@ -22,7 +22,8 @@ var requirejs, require, define;
         bootstrapConfig = requirejs || require,
         hasOwn = Object.prototype.hasOwnProperty,
         contexts = {},
-        queue = [];
+        queue = [],
+        isOldIE = !''.__proto__;
 
     function hasProp(obj, prop) {
         return hasOwn.call(obj, prop);
@@ -500,11 +501,20 @@ var requirejs, require, define;
                     script.async = true;
 
                     loadCount += 1;
-
-                    script.addEventListener('load', function () {
+                    if (isOldIE) {
+                      script.addEventListener('readystatechange', function (evt) {
+                        if (evt.currentTarget.readyState === 'complete') {
+                          loadCount -= 1;
+                          takeQueue(id);
+                        }
+                      });
+                    }
+                    else {
+                      script.addEventListener('load', function () {
                         loadCount -= 1;
                         takeQueue(id);
-                    }, false);
+                      }, false);
+                    }
 // Removed this because it caused the console to not display error stacks, which we need for debugging
 //                    script.addEventListener('error', function () {
 //                        loadCount -= 1;
