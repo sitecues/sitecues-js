@@ -15,6 +15,9 @@
 
 /* globals -define, -require */
 
+/* jshint proto: true */
+
+
 var requirejs, require, define;
 (function (global, undef) {
     /* globals setImmediate:false, process:false */
