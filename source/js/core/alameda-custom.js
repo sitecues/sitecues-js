@@ -26,7 +26,7 @@ var requirejs, require, define;
         hasOwn = Object.prototype.hasOwnProperty,
         contexts = {},
         queue = [],
-        isOldIE = !''.__proto__;
+        isOldIE = !!window.attachEvent; // If attachEvent exists then we're in IE9 or IE10
 
     function hasProp(obj, prop) {
         return hasOwn.call(obj, prop);
@@ -506,6 +506,7 @@ var requirejs, require, define;
                     loadCount += 1;
                     if (isOldIE) {
                       script.addEventListener('readystatechange', function (evt) {
+                        console.log('IE script load: ' + evt.currentTarget.readyState);
                         if (evt.currentTarget.readyState === 'complete') {
                           loadCount -= 1;
                           takeQueue(id);
