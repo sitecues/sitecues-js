@@ -3,6 +3,7 @@
  *   The core module of the sitecues library.
  */
 
+// Proper caching
 // onReady call back missing?
 // Safari:
 // - Super slow in Safari when theme used, especially with HLB. Also when changing themes.
