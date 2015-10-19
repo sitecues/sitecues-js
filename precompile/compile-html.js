@@ -39,8 +39,6 @@ function readTemplate(templateName) {
 }
 
 function clean(html) {
-  return html;
-
   return minify(html, {
     removeComments: true,
     removeAttributeQuotes: true,
