@@ -1,7 +1,6 @@
 var handlebars = require('handlebars'),
   targetDir = process.argv[2] + '/',
   fs = require('fs'),
-  minify = require('html-minifier').minify,
   sources = ['settings', 'tips']; // TODO 'help'
 
 sources.forEach(readTemplate);
@@ -21,12 +20,11 @@ function readTemplate(templateName) {
     function compileTemplateForLang(langFileName) {
       var data = getLanguageData(templateName, langFileName),
         targetFileName = targetDir + templateName + '/' + langFileName.split('.')[0] + '.html',
-        templatedHtml = template(data),
-        cleanedHtml = clean(templatedHtml);
+        templatedHtml = template(data);
 
       console.log('Created html: ' + targetFileName);
 
-      fs.writeFile(targetFileName, cleanedHtml);
+      fs.writeFile(targetFileName, templatedHtml);
     }
 
     var template = handlebars.compile(templateBuffer.toString()),
@@ -36,14 +34,6 @@ function readTemplate(templateName) {
 
     langFileNames.forEach(compileTemplateForLang);
   }
-}
-
-function clean(html) {
-  return minify(html, {
-    removeComments: true,
-    removeAttributeQuotes: true,
-    collapseWhitespace: true
-  });
 }
 
 function getLangsForTemplate(name) {

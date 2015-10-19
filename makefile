@@ -49,10 +49,13 @@ export build-dir=$(build-basedir)/common
 export resource-dir=$(build-dir)/$(version)
 
 # cleancss path
-cleancss=$(shell npm ls -p --depth=0 clean-css)/bin/cleancss
+cleancss=$(shell npm ls -p --depth=0 clean-css)/bin/cleancss  --skip-rebase
 
 # html-minifier command used for SVG -- do not remove quotes around attributes in the SVG
 cleansvg=$(shell npm ls -p --depth=0 html-minifier)/cli.js --remove-comments --collapse-whitespace
+
+# html-minifier command used for HTML
+cleanhtml=$(shell npm ls -p --depth=0 html-minifier)/cli.js --remove-comments --collapse-whitespace --remove-attribute-quotes
 
 ################################################################################
 # Tools
@@ -161,7 +164,7 @@ endif
 # TARGET: build
 #	Build the minified version
 ################################################################################
-build: clean mkdirs resources $(_force-deps-refresh) $(_build_lint_dep)
+build: clean mkdirs resources minify $(_force-deps-refresh) $(_build_lint_dep)
 	@echo "Node version : $(shell node --version)"
 	@echo "npm version  : v$(shell npm --version)"
 	$(MAKE) --no-print-directory -f core.mk build
@@ -180,7 +183,6 @@ checksize: clean mkdirs resources $(_force-deps-refresh) $(_build_lint_debug_dep
 #	Build the debug version
 ################################################################################
 debug: clean mkdirs resources $(_force-deps-refresh) $(_build_lint_debug_dep)
-	@echo
 	$(MAKE) --no-print-directory -f core.mk debug
 
 ################################################################################
@@ -188,7 +190,7 @@ debug: clean mkdirs resources $(_force-deps-refresh) $(_build_lint_debug_dep)
 #	Package up the files into a deployable bundle, and create a manifest for local
 # file deployment.
 ################################################################################
-package: clean mkdirs resources $(_force-deps-refresh) $(_build_lint_dep)
+package: clean mkdirs resources minify $(_force-deps-refresh) $(_build_lint_dep)
 ifeq ($(sc_dev), true)
 	$(error Unable to package a development build)
 endif
@@ -208,7 +210,7 @@ clean:
 
 ################################################################################
 # TARGET: resources
-#	Localize and minify
+#	Localize and copy resources
 ################################################################################
 resources: html css earcons images
 
@@ -223,12 +225,9 @@ html: mkdirs
 
 ################################################################################
 # TARGET: css
-#	TODO: minify the CSS
 ################################################################################
 css: mkdirs
 	cp -r source/css $(resource-dir)
-	find $(resource-dir)/css -type f -name '*.css' -execdir $(cleancss) {} -o {} \;
-#	@(for F in `ls source/css`; do $(cleancss) -o $(resource-dir)/css/$$F source/css/$$F ; done)
 
 ################################################################################
 # TARGET: images
@@ -236,13 +235,24 @@ css: mkdirs
 ################################################################################
 images: mkdirs
 	cp -r source/images $(resource-dir)
-	find $(resource-dir)/images -type f -name '*.svg' -execdir $(cleansvg) {} -o {} \;
 
 ################################################################################
 # TARGET: earcons
 ################################################################################
 earcons: mkdirs
 	cp -r source/earcons $(resource-dir)
+
+################################################################################
+# TARGET: minify
+# Minify the CSS and SVG
+################################################################################
+minify:
+# CSS
+	find $(resource-dir)/css -type f -name '*.css' -execdir $(cleancss) {} -o {} \;
+# SVG
+	find $(resource-dir)/images -type f -name '*.svg' -execdir $(cleansvg) {} -o {} \;
+# HTML
+	find $(resource-dir)/html -type f -name '*.html' -execdir $(cleanhtml) {} -o {} \;
 
 ################################################################################
 # TARGET: deps
