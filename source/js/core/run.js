@@ -3,6 +3,11 @@
  *   The core module of the sitecues library.
  */
 
+// User's favorite accent no longer chosen -- for example:
+// http://ts.dev.sitecues.com/pages/tired-fr-ca.html?branch=bp3-require  -- should speak in French Canadian, sounds same as
+// http://ts.dev.sitecues.com/pages/tired-fr.html?branch=bp3-require
+// http://ts.dev.sitecues.com/pages/tired-en-uk.html?branch=bp3-require  -- should speak in UK English, sounds same as
+// http://ts.dev.sitecues.com/pages/tired-en.html?branch=bp3-require
 // dealerEmail config option
 // Proper caching
 // onReady call back missing?
