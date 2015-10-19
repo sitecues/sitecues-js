@@ -15,7 +15,7 @@ define(['bp/constants', 'bp/helper', 'core/locale', 'bp/model/state', 'core/plat
     panelsToLoad = NUM_PANELS_WITH_CARDS;
 
   function loadPanelContents(panelName) {
-    var localizedPanelName = panelName + '-' + locale.getSuffixForLocalizedFileName(),
+    var localizedPanelName = panelName + '-' + locale.getTranslationLang(),
       panelUrl = urls.resolveResourceUrl('html/' + panelName + '/' + localizedPanelName + '.html');
 
     xhr.get({

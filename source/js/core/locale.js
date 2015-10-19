@@ -7,29 +7,27 @@
  * - Translate text with {{keys}} in it
  * - Localize a number string
  */
-define([], function() {
+define(['core/conf/site'], function(site) {
   var translations = {},  // TODO this is a workaround
     DEFAULT_LANG = 'en-us',
     LANG_PREFIX = 'locale-data/',
     SUPPORTED_LANGS = ['de', 'en', 'es', 'fr', 'pl'],
     // Countries which have localization files that are different from the default for that language
     // For example, en-us files use 'color' instead of the worldwide standard 'colour'
-    COUNTRY_EXCEPTIONS = {'en-us': 1};
+    COUNTRY_EXCEPTIONS = { 'en-us': 1 },
+    browserLang = site.get('browserLang') || navigator.language || navigator.userLanguage || navigator.browserLanguage || DEFAULT_LANG;
 
   // Get the language but not the regional differences
   // For example, return just 'en' but not 'en-US'.
-  function getBaseLanguage(lang) {
+  function getLanguagePrefix(lang) {
     return lang.split('-')[0];
   }
 
-  function getWebsiteLang() {
-    var docElem = document.documentElement;
-    var lang = docElem.lang;
-    if (!lang) {
-      lang = docElem.getAttribute('xml:lang');
-    }
-
-    return lang.toLowerCase();
+  // The the foll xx-XX code for the website
+  function getFullWebsiteLang() {
+    var docElem = document.documentElement,
+      lang = docElem.lang || docElem.getAttribute('xml:lang') || browserLang || DEFAULT_LANG;
+    return lang;
   }
 
   /**
@@ -39,33 +37,56 @@ define([], function() {
    * @returns String
    */
   function getShortWebsiteLang() {
-    var websiteLanguage = getWebsiteLang();
-    return getBaseLanguage(websiteLanguage || DEFAULT_LANG);
+    var websiteLanguage = getFullWebsiteLang();
+    return getLanguagePrefix(websiteLanguage);
   }
 
-  function getFullWebsiteLang() {
-    var browserLang = getBrowserLangStringName(),
-      websiteLang = getWebsiteLang() || browserLang;
-    if (websiteLang && browserLang && browserLang.indexOf('-') > 0) {
-      if (getBaseLanguage(websiteLang) === getBaseLanguage(browserLang)) {
-        // If document is in the same language as the browser, then
-        // we should prefer to use the browser's locale.
-        // This helps make sure UK users get a UK accent on all English sites, for example.
-        return browserLang;
+  // The language for audio
+  // Takes an optional parameter for a lang (e.g. from an element to be spoken). If not provided, assumes the doc language.
+  // Returns a full country-affected language, like en-CA when the browser's language matches the site's language prefix.
+  // For example, if an fr-CA browser visits an fr-FR website, then fr-CA is returned instead of the page code,
+  // because that is the preferred accent for French.
+  // However, if the fr-CA browser visits an en-US or en-UK page, the page's code is returned because the
+  // user's preferred English accent in unknown
+  function getAudioLang(optionalStartingLang) {
+    var langToConvert = optionalStartingLang || getFullWebsiteLang();
+
+    return extendLangWithBrowserCountry(langToConvert);
+  }
+
+  // If document is in the same language as the browser, then
+  // we should prefer to use the browser's country-specific version of that language.
+  // This helps make sure UK users get a UK accent on all English sites, for example.
+  // We now check all the preferred languages of the browser.
+  function extendLangWithBrowserCountry(lang, acceptableCodes) {
+    function extendLangWith(extendCode) {
+      if (extendCode.indexOf('-') > 0 && langPrefix === getLanguagePrefix(extendCode)) {
+        if (!acceptableCodes || acceptableCodes.hasOwnProperty(extendCode)) {
+          return extendCode;
+        }
       }
     }
 
-    return websiteLang;
+    var langPrefix = getLanguagePrefix(lang),
+      allBrowserLangs = (navigator.languages || [ ]),
+      langWithCountry,
+      index;
+
+    if (SC_DEV) {
+      allBrowserLangs.unshift(browserLang); // Make sure the one we're testing with is first
+    }
+
+    for (index = 0; index < allBrowserLangs.length; index ++) {
+      langWithCountry = extendLangWith(allBrowserLangs[index]);
+      if (langWithCountry) {
+        return langWithCountry; // Matched one of the preferred accents
+      }
+    }
+
+    return lang;
   }
 
-  /**
-   * Represents browser language.
-   * @returns String Example: 'en_US'
-   */
-  function getBrowserLangStringName() {
-     return navigator.language || DEFAULT_LANG;
-  }
-
+  // Return the translated text for the key
   function translate(key) {
     var lang = getShortWebsiteLang(),
       text = translations[key];
@@ -97,23 +118,18 @@ define([], function() {
     return numDigits ? translated.slice(0, numDigits + 1) : translated;
   }
 
+  // The language of user interface text:
   // In most cases, just returns 'en', 'de', etc.
   // However, when there are special files for a country translation, returns a longer name like 'en-us' for the U.S.
   // The language is based on the page, but the country is based on the browser (if the lang is the same)
-  function getSuffixForLocalizedFileName() {
-    var langOnly = getShortWebsiteLang(),
-      browserLang = getBrowserLangStringName().toLocaleLowerCase(),
-      isSameLangAsBrowser = langOnly === getBaseLanguage(browserLang),
-      langWithCountry;
+  function getTranslationLang() {
+    var langOnly = getShortWebsiteLang();
 
-    if (isSameLangAsBrowser) {
-      langWithCountry = browserLang;
-      if (COUNTRY_EXCEPTIONS[langWithCountry]) {  // We have country exceptions for the browser home country
-        return langWithCountry;
-      }
-    }
+    return extendLangWithBrowserCountry(langOnly, COUNTRY_EXCEPTIONS);
+  }
 
-    return langOnly;
+  function getBrowserLang() {
+    return browserLang;
   }
 
   function init() {
@@ -132,15 +148,13 @@ define([], function() {
 
   return {
     getShortWebsiteLang: getShortWebsiteLang,
-    getFullWebsiteLang: getFullWebsiteLang,
-    getBrowserLangStringName: getBrowserLangStringName,
-    getSuffixForLocalizedFileName: getSuffixForLocalizedFileName,
+    getAudioLang: getAudioLang,
+    getBrowserLang: getBrowserLang,
+    getTranslationLang: getTranslationLang,
     translate: translate,
     localizeStrings: localizeStrings,
     translateNumber: translateNumber,
     init: init
   };
-
-
 });
 

@@ -15,7 +15,7 @@ define(['core/locale'], function(locale) {
           'hu', // Hungarian
           'lv', // Latvian
           'lt', // Lithuanian
-          'pl',  // Polish
+          'pl', // Polish
           'ro', // Romanian
           'sr', // Serbian
           'sk', // Slovak
