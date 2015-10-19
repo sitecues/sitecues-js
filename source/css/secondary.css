@@ -129,6 +129,11 @@ sc-button:hover {
   transform: scale(1.2);
 }
 
+/*************** Screen readers only *********************/
+
+.scp-only-screenreaders {
+  text-indent: -9999px;
+}
 
 /*************** Common card elements *********************/
 

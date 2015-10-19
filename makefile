@@ -43,6 +43,17 @@ export version=$(default-version)
 # jshint path
 jshint=$(shell npm ls -p jshint)/../.bin/jshint
 
+# target path
+export build-basedir=target
+export build-dir=$(build-basedir)/common
+export resource-dir=$(build-dir)/$(version)
+
+# cleancss path
+cleancss=$(shell npm ls -p --depth=0 clean-css)/bin/cleancss
+
+# html-minifier command
+cleanhtml=$(shell npm ls -p --depth=0 html-minifier)/cli.js --remove-comments --remove-attribute-quotes --collapse-whitespace
+
 ################################################################################
 # Tools
 ################################################################################
@@ -152,7 +163,7 @@ endif
 # TARGET: build
 #	Build the minified version
 ################################################################################
-build: clean $(_force-deps-refresh) $(_build_lint_dep)
+build: clean mkdirs resources $(_force-deps-refresh) $(_build_lint_dep)
 	@echo "Node version : $(shell node --version)"
 	@echo "npm version  : v$(shell npm --version)"
 	$(MAKE) --no-print-directory -f core.mk build
@@ -161,7 +172,7 @@ build: clean $(_force-deps-refresh) $(_build_lint_dep)
 # TARGET: checksize
 #	Build the compressed version and show sizes
 ################################################################################
-checksize: clean $(_force-deps-refresh) $(_build_lint_debug_dep)
+checksize: clean mkdirs resources $(_force-deps-refresh) $(_build_lint_debug_dep)
 	@echo "Node version : $(shell node --version)"
 	@echo "npm version  : v$(shell npm --version)"
 	$(MAKE) --no-print-directory -f core.mk build checksize sourcemaps=false
@@ -170,7 +181,7 @@ checksize: clean $(_force-deps-refresh) $(_build_lint_debug_dep)
 # TARGET: debug
 #	Build the debug version
 ################################################################################
-debug: clean $(_force-deps-refresh) $(_build_lint_debug_dep)
+debug: clean mkdirs resources $(_force-deps-refresh) $(_build_lint_debug_dep)
 	@echo
 	$(MAKE) --no-print-directory -f core.mk debug
 
@@ -179,7 +190,7 @@ debug: clean $(_force-deps-refresh) $(_build_lint_debug_dep)
 #	Package up the files into a deployable bundle, and create a manifest for local
 # file deployment.
 ################################################################################
-package: clean $(_force-deps-refresh) $(_build_lint_dep)
+package: clean mkdirs resources $(_force-deps-refresh) $(_build_lint_dep)
 ifeq ($(sc_dev), true)
 	$(error Unable to package a development build)
 endif
@@ -196,6 +207,42 @@ clean:
 	@echo "Cleaning started."
 	@rm -fr target/*
 	@echo "Cleaning completed."
+
+################################################################################
+# TARGET: resources
+#	Localize and minify
+################################################################################
+resources: html css earcons images
+
+################################################################################
+# TARGET: html
+#	Use handlebars to localize the html
+################################################################################
+html: mkdirs
+	node precompile/compile-html.js $(resource-dir)/html
+# TODO precompile help as well, for now just copy the files
+	cp -r source/html/help $(resource-dir)/html
+
+################################################################################
+# TARGET: css
+#	TODO: minify the CSS
+################################################################################
+css: mkdirs
+	@(for F in `ls source/css`; do $(cleancss) -o $(resource-dir)/css/$$F source/css/$$F ; done)
+
+################################################################################
+# TARGET: images
+#	TODO: minify the SVG
+################################################################################
+images: mkdirs
+	cp -r source/images $(resource-dir)
+	find $(resource-dir)/images -type f -name '*.svg' -execdir $(cleanhtml) {} -o {} \;
+
+################################################################################
+# TARGET: earcons
+################################################################################
+earcons: mkdirs
+	cp -r source/earcons $(resource-dir)
 
 ################################################################################
 # TARGET: deps
@@ -218,17 +265,33 @@ deps-clean:
 	@echo "Cleaning dependencies completed."
 
 ################################################################################
+# TARGET: mkdirs
+#	Create the necessary target folders
+################################################################################
+mkdirs:
+# Where sitecues.js goes
+	@mkdir -p $(build-dir)/js
+# Where all dependent resources will go
+	@mkdir -p $(resource-dir)
+# Where dependent resources will go
+	@mkdir -p $(resource-dir)/js
+	@mkdir -p $(resource-dir)/html
+	@mkdir -p $(resource-dir)/images
+	@mkdir -p $(resource-dir)/css
+	@mkdir -p $(resource-dir)/earcons
+# Where build-config will go
+	@mkdir -p $(build-basedir)/build-config
+
+################################################################################
 # TARGET: lint
 #	Run lenienter and jshint on the JavaScript source.
 #
-# ALTERNATE: Run manally (Google closure and jshint)
-#	gjslint --nojsdoc -r source/js
+# ALTERNATE: Run manally
 #	jshint source/js
 ################################################################################
 lint:
 	@echo "Linting started."
 	$(jshint) source/js
-	# lenient-lint --beep --error_trace --multiprocess --nojsdoc -r source/js --summary --time --unix_mode
 	@echo "Linting completed."
 
 ################################################################################

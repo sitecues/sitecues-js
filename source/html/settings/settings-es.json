@@ -1,22 +1,22 @@
 {
   "theme": {
-    "None": "None",
-    "Warm": "Warm",
-    "Bold": "Bold",
-    "Dark": "Dark",
-    "intensity": "intensity",
-    "text_color": "text colour"
+    "None": "Ninguno",
+    "Warm": "Cálida",
+    "Bold": "Audaz",
+    "Dark": "Oscuro",
+    "intensity": "intensidad",
+    "text_color": "color de textor"
   },
 
   "mouse": {
-    "size": "size",
-    "color": "colour"
+    "size": "tamaño",
+    "color": "color"
   },
 
-  "title": "Settings",
+  "title": "Ajustes",
 
   "cards": {
-    "Colors": "Colours",
-    "Mouse": "Mouse"
+    "Colors": "Colores",
+    "Mouse": "Ratón"
   }
 }

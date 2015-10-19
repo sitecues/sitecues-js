@@ -1,85 +1,52 @@
-<sc-card id="scp-zoom-card" aria-labelledby="scp-zoom-tab">
-  <sc-center class="scp-tabbable" role="document">
-    <sc-h2 id="scp-use-slider-heading">
-      Utiliser le curseur de zoom
-    </sc-h2>
-    <sc-p>
-      <sc-span id="scp-demo-slider">
-        <sc-span id="scp-demo-slider-bar"></sc-span>
-        <sc-span id="scp-demo-slider-thumb"></sc-span>
-      </sc-span>
-    </sc-p>
-  </sc-center>
-</sc-card>
+{
+  "spacebar": "barre d’espace",
 
-<sc-card id="scp-zoom-keys-card" aria-labelledby="scp-zoom-keys-tab" data-advanced>
-  <sc-center class="scp-tabbable" role="document">
-    <sc-p>Maintenir de cliquer pour zoomer plus.</sc-p>
-    <sc-h2>
-      <sc-span aria-label="Appuyiez sur le bouton - ou + pour zoomer la page">
-        <sc-kbd id="scp-demo-zoom-minus">&#65293;</sc-kbd>
-        &nbsp;/&nbsp;
-        <sc-kbd id="scp-demo-zoom-plus">+</sc-kbd>
-      </sc-span>
-    </sc-h2>
-  </sc-center>
-</sc-card>
+  "slider": {
+    "howto": "Utiliser le curseur de zoom"
+  },
+  "zoomkeys": {
+    "long_press": "Maintenir de cliquer pour zoomer plus.",
+    "howto": "Appuyiez sur le bouton - ou + pour zoomer la page"
+  },
+  "highlight": {
+    "purpose": "Les zones sélectionnés à lire.",
+    "step1": "1. Choisissez  quelque chose à se concentrer sur.",
+    "step2": "2. Déplacez votre souris pour mettre en surbrillance.",
+    "keys": ""
+  },
+  "lens": {
+    "purpose": "La loupe de la lentille.",
+    "step1": "1. Mettre quelque chose en surbrillance<",
+    "step2": "2. Appuyez"
+  },
+  "speech": {
+    "purpose": "La fonction vocale lit le texte à haute voix.",
+    "step1": "1. Cliquez sur le discoure bouton",
+    "step2": "2. Surbrillance & appuyez"
+  },
+  "guide": {
+    "full": {
+      "full_guide_label": "Guide complet",
+      "action": "Pratiquez sitecues"
+    },
+    "keyboard": {
+      "label": "Aide du clavier",
+      "action": "Aller directemet ici"
+    }
+  },
 
-<sc-card id="scp-highlight-card" aria-labelledby="scp-highlight-tab">
-  <sc class="scp-tabbable" role="document">
-    <sc-h2>Les zones sélectionnés à lire.</sc-h2>
-    <sc-p>1. Choisissez  quelque chose à se concentrer sur.</sc-p>
-    <sc-p>2. Déplacez votre souris pour mettre en surbrillance.</sc-p>
-  </sc>
-</sc-card>
+  "title": "Pointe",
 
-<sc-card id="scp-lens-card" aria-labelledby="scp-lens-tab">
-  <sc class="scp-tabbable" role="document">
-    <sc-h2>La loupe de la lentille.</sc-h2>
-    <sc-p>1. Mettre quelque chose en surbrillance</sc-p>
-    <sc-p>2. appuyez <sc-kbd class="scp-space" id="scp-demo-lens-spacebar">bare d’espace</sc-kbd></sc-p>
-  </sc>
-</sc-card>
+  "cards": {
+    "Zoom": "Zoom",
+    "Highlight": "Surbrillance",
+    "Lens": "Lentille",
+    "Speech": "Discoure",
+    "More": "Plus"
+  },
 
-<sc-card id="scp-speech-card" aria-labelledby="scp-speech-tab">
-  <sc class="scp-tabbable" role="document">
-    <sc-h2>La fonction vocale lit le texte à haute voix.</sc-h2>
-    <sc-p>1. Cliquez sur le discoure bouton &nbsp; <sc-span id="scp-speech-button-demo"></sc-span></sc-p>
-    <sc-p>2. Surbrillance &amp; appuyez <sc-kbd class="scp-space" id="scp-demo-speech-spacebar">bar d’espace</sc-kbd></sc-p>
-  </sc>
-</sc-card>
-
-<sc-card id="scp-full-guide-card" aria-labelledby="scp-full-guide-tab">
-  <sc-h2 class="scp-icon-menuitem">
-    <sc-button id="scp-guide-icon" aria-labelledby="scp-guide-label" data-target="#"></sc-button>
-    <sc-link id="scp-guide-label" data-target="#">Guide complet</sc-link><br/>
-    <sc-span>Pratiquez sitecues</sc-span>
-  </sc-h2>
-  <sc-h2 class="scp-icon-menuitem">
-    <sc-button id="scp-kbd-icon" aria-labelledby="scp-kbd-label" data-target="##keyboard"></sc-button>
-    <sc-link id="scp-kbd-label" data-target="##keyboard">Aide du clavier</sc-link><br/>
-    <sc-span>Aller directemet ici</sc-span>
-  </sc-h2>
-</sc-card>
-
-<!-- Header -->
-<sc-h1 class="scp-card-header">Pointe</sc-h1>
-
-<sc role="tablist" class="scp-card-chooser">
-  <sc-tab id="scp-zoom-tab" data-target="scp-zoom-card">Zoom</sc-tab>
-  <sc-tab id="scp-highlight-tab" data-target="scp-highlight-card">Surbrillance</sc-tab>
-  <sc-tab id="scp-lens-tab" data-target="scp-lens-card">Lentille</sc-tab>
-  <sc-tab id="scp-speech-tab" data-target="scp-speech-card">Discoure</sc-tab>
-  <sc-tab id="scp-full-guide-tab" data-target="scp-full-guide-card">Plus</sc-tab>
-</sc>
-
-<sc class="scp-card-indicator"></sc>
-
-<!-- Fake demo page -->
-<sc id="scp-demo-page">
-  <sc id="scp-demo-page-contents">
-    <sc-p><sc-span id="scp-demo-para">Bienvenue!</sc-span></sc-p>
-    <sc-span id="scp-demo-mouse"></sc-span>
-    <sc-p>sitecues lit le web.</sc-p>
-  </sc>
-</sc>
+  "demopage": {
+    "welcome": "Bienvenue!",
+    "blurb": "sitecues lit le web."
+  }
+}

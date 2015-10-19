@@ -35,8 +35,6 @@ gzip-command='gzip -c "{}" > "{}.gz"'
 
 
 # Set up the build-specific directory and package name.
-build-basedir:=target
-build-dir:=$(build-basedir)/common
 package-name:=$(product-name)-js-$(version)
 package-file-name:=$(package-name).tgz
 package-basedir:=$(build-dir)/package
@@ -50,14 +48,6 @@ build:
 	@echo "===== STARTING: Building sitecues library ====="
 	@echo
 
-	# Where sitecues.js goes
-	@mkdir -p $(build-dir)/js
-	# Where all dependent resources will go
-	@mkdir -p $(build-dir)/$(version)
-	# Where dependent JS will go
-	@mkdir -p $(build-dir)/$(version)/js
-	# Where build-config will go
-	@mkdir -p target/build-config
 	echo "sitecues.version='$(version)';" > target/build-config/config.js
 
 	# Require.js build
@@ -72,11 +62,6 @@ build:
 	# Insert runtime bundle configuration
 	./finalize-loader-config.js $(build-dir)/js/sitecues.js target/build-config/sitecues-bundles.js $(allow-zepto) $(version)
 	#./finalize-loader-config.js $(build-dir)/js/sitecues-ie9.js target/build-config/sitecues-bundles-ie9.js false $(version)
-
-	# Copy non-js files, such as css, images, html, audio files
-	@mkdir -p $(build-dir)/$(version)
-	@(for F in `ls -d source/* | grep -Ev '^source/js$$'` ; do cp -r $$F $(build-dir)/$(version) ; done)
-	@echo
 
 	@echo "---- sitecues core source --------------------------------"
 	@./show-file-sizes.sh $(build-dir)/js "sitecues.js"
@@ -112,14 +97,6 @@ debug:
 	@echo "===== STARTING: Build for sitecues library (DEBUG VER) ====="
 	@echo
 
-	# Where sitecues.js goes
-	@mkdir -p $(build-dir)/js
-	# Where all dependent resources will go
-	@mkdir -p $(build-dir)/$(version)
-	# Where dependent JS will go
-	@mkdir -p $(build-dir)/$(version)/js
-	# Where build-config will go
-	@mkdir -p target/build-config
 	echo "sitecues.version='$(version)';var SC_LOCAL=$(sc-local),SC_DEV=true,SC_UNIT=false;" > target/build-config/config.js
 
 	# Require.js build
@@ -133,11 +110,6 @@ debug:
 	# Insert runtime bundle configuration
 	./finalize-loader-config.js $(build-dir)/js/sitecues.js target/build-config/sitecues-bundles.js $(allow-zepto) $(version)
 	#./finalize-loader-config.js $(build-dir)/js/sitecues-ie9.js target/build-config/sitecues-bundles-ie9.js false $(version)
-
-	# Non-js files, such as css, images, html, audio files
-	@mkdir -p $(build-dir)/$(version)
-	@(for F in `ls -d source/* | grep -Ev '^source/js$$'` ; do cp -r $$F $(build-dir)/$(version) ; done)
-	@echo
 
 	@echo "**** File sizes ******************************************"
 	@echo "---- sitecues core source --------------------------------"

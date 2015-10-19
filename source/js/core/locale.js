@@ -9,9 +9,12 @@
  */
 define([], function() {
   var translations = {},  // TODO this is a workaround
-    DEFAULT_LANG = 'en',
+    DEFAULT_LANG = 'en-us',
     LANG_PREFIX = 'locale-data/',
-    SUPPORTED_LANGS = ['de', 'en', 'es', 'fr', 'pl'];
+    SUPPORTED_LANGS = ['de', 'en', 'es', 'fr', 'pl'],
+    // Countries which have localization files that are different from the default for that language
+    // For example, en-us files use 'color' instead of the worldwide standard 'colour'
+    COUNTRY_EXCEPTIONS = {'en-us': 1};
 
   // Get the language but not the regional differences
   // For example, return just 'en' but not 'en-US'.
@@ -26,16 +29,18 @@ define([], function() {
       lang = docElem.getAttribute('xml:lang');
     }
 
-    return lang;
+    return lang.toLowerCase();
   }
 
   /**
    * Represents website language.
-   * @returns String Example: 'en-US'
+   * For example, returns 'en', 'de'
+   * If there are country-specific translation exceptions, return the full string, e.g. 'en-us'
+   * @returns String
    */
   function getShortWebsiteLang() {
     var websiteLanguage = getWebsiteLang();
-    return websiteLanguage ? getBaseLanguage(websiteLanguage) : DEFAULT_LANG;
+    return getBaseLanguage(websiteLanguage || DEFAULT_LANG);
   }
 
   function getFullWebsiteLang() {
@@ -58,7 +63,7 @@ define([], function() {
    * @returns String Example: 'en_US'
    */
   function getBrowserLangStringName() {
-     return (navigator && navigator.language) || DEFAULT_LANG;
+     return navigator.language || DEFAULT_LANG;
   }
 
   function translate(key) {
@@ -92,6 +97,25 @@ define([], function() {
     return numDigits ? translated.slice(0, numDigits + 1) : translated;
   }
 
+  // In most cases, just returns 'en', 'de', etc.
+  // However, when there are special files for a country translation, returns a longer name like 'en-us' for the U.S.
+  // The language is based on the page, but the country is based on the browser (if the lang is the same)
+  function getSuffixForLocalizedFileName() {
+    var langOnly = getShortWebsiteLang(),
+      browserLang = getBrowserLangStringName().toLocaleLowerCase(),
+      isSameLangAsBrowser = langOnly === getBaseLanguage(browserLang),
+      langWithCountry;
+
+    if (isSameLangAsBrowser) {
+      langWithCountry = browserLang;
+      if (COUNTRY_EXCEPTIONS[langWithCountry]) {  // We have country exceptions for the browser home country
+        return langWithCountry;
+      }
+    }
+
+    return langOnly;
+  }
+
   function init() {
     // On load fetch the translations only once
     var lang = getShortWebsiteLang(),
@@ -110,6 +134,7 @@ define([], function() {
     getShortWebsiteLang: getShortWebsiteLang,
     getFullWebsiteLang: getFullWebsiteLang,
     getBrowserLangStringName: getBrowserLangStringName,
+    getSuffixForLocalizedFileName: getSuffixForLocalizedFileName,
     translate: translate,
     localizeStrings: localizeStrings,
     translateNumber: translateNumber,

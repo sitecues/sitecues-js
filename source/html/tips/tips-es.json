@@ -1,86 +1,52 @@
-<sc-card id="scp-zoom-card" aria-labelledby="scp-zoom-tab">
-  <sc-center class="scp-tabbable" role="document">
-    <sc-h2 id="scp-use-slider-heading">
-      Utilice el control deslizante para ampliar
-    </sc-h2>
-    <sc-p>
-      <sc-span id="scp-demo-slider">
-        <sc-span id="scp-demo-slider-bar"></sc-span>
-        <sc-span id="scp-demo-slider-thumb"></sc-span>
-      </sc-span>
-    </sc-p>
-  </sc-center>
-</sc-card>
+{
+  "spacebar": "barra de espacio",
 
-<sc-card id="scp-zoom-keys-card" aria-labelledby="scp-zoom-keys-tab" data-advanced>
-  <sc-center class="scp-tabbable" role="document">
-    <sc-p>Mantenga las llaves más largo para acercar más.</sc-p>
-    <sc-h2>
-      <sc-span aria-label="Pulse la tecla - o + para acercar la página">
-        <sc-kbd id="scp-demo-zoom-minus">&#65293;</sc-kbd>
-        &nbsp;/&nbsp;
-        <sc-kbd id="scp-demo-zoom-plus">+</sc-kbd>
-      </sc-span>
-    </sc-h2>
-  </sc-center>
-</sc-card>
+  "slider": {
+    "howto": "Utilice el control deslizante para ampliar"
+  },
+  "zoomkeys": {
+    "long_press": "Mantenga las llaves más largo para acercar más.",
+    "howto": "Pulse la tecla - o + para acercar la página"
+  },
+  "highlight": {
+    "purpose": "El resaltador selecciona áreas para leer.",
+    "step1": "1. Elija algo en qué concentrarse.",
+    "step2": "2. Mueva su ratón para resaltarlo.",
+    "keys": ""
+  },
+  "lens": {
+    "purpose": "Los lentes magnifican.",
+    "step1": "1. Destaca algo interesante",
+    "step2": "2. Prensa"
+  },
+  "speech": {
+    "purpose": "La característica voz lee en voz alta el texto.",
+    "step1": "1. Haga clic en el botón de voz",
+    "step2": "2. Destacar & prensa"
+  },
+  "guide": {
+    "full": {
+      "full_guide_label": "Guía completa",
+      "action": "Práctica sitecues"
+    },
+    "keyboard": {
+      "label": "Ayuda del teclado",
+      "action": "Saltar directamente allí"
+    }
+  },
 
-<sc-card id="scp-highlight-card" aria-labelledby="scp-highlight-tab">
-  <sc class="scp-tabbable" role="document">
-    <sc-h2>El resaltador selecciona áreas para leer.</sc-h2>
-    <sc-p>1. Elija algo en qué concentrarse.</sc-p>
-    <sc-p>2. Mueva su ratón para resaltarlo.</sc-p>
-  </sc>
-</sc-card>
+  "title": "Consejos",
 
-<sc-card id="scp-lens-card" aria-labelledby="scp-lens-tab">
-  <sc class="scp-tabbable" role="document">
-    <sc-h2>Los lentes magnifican.</sc-h2>
-    <sc-p>1. Destaca algo interesante</sc-p>
-    <sc-p>2. Prensa <sc-kbd class="scp-space" id="scp-demo-lens-spacebar">barra de espacio</sc-kbd></sc-p>
-  </sc>
-</sc-card>
+  "cards": {
+    "Zoom": "Ampliar",
+    "Highlight": "Destacar",
+    "Lens": "Lentes",
+    "Speech": "Voz",
+    "More": "Más"
+  },
 
-<sc-card id="scp-speech-card" aria-labelledby="scp-speech-tab">
-  <sc class="scp-tabbable" role="document">
-    <sc-h2>La característica voz lee en voz alta el texto.</sc-h2>
-    <sc-p>1. Haga clic en el botón de voz] &nbsp; <sc-span id="scp-speech-button-demo"></sc-span></sc-p>
-    <sc-p>2. Destacar &amp; prensa <sc-kbd class="scp-space" id="scp-demo-speech-spacebar">barra de espacio</sc-kbd></sc-p>
-  </sc>
-</sc-card>
-
-<sc-card id="scp-full-guide-card" aria-labelledby="scp-full-guide-tab">
-  <sc class="scp-tabbable" role="document">
-  <sc-h2 class="scp-icon-menuitem">
-    <sc-button id="scp-guide-icon" aria-labelledby="scp-guide-label" data-target="#"></sc-button>
-    <sc-link id="scp-guide-label" data-target="#">Guía completa</sc-link><br/>
-    <sc-span>Práctica sitecues</sc-span>
-  </sc-h2>
-  <sc-h2 class="scp-icon-menuitem">
-    <sc-button id="scp-kbd-icon" aria-labelledby="scp-kbd-label" data-target="##keyboard"></sc-button>
-    <sc-link id="scp-kbd-label" data-target="##keyboard">Ayuda del teclado</sc-link><br/>
-    <sc-span>Saltar directamente allí</sc-span>
-  </sc-h2>
-</sc-card>
-
-<!-- Header -->
-<sc-h1 class="scp-card-header">Consejos</sc-h1>
-
-<sc role="tablist" class="scp-card-chooser">
-  <sc-tab id="scp-zoom-tab" data-target="scp-zoom-card">Ampliar</sc-tab>
-  <sc-tab id="scp-highlight-tab" data-target="scp-highlight-card">Destacar</sc-tab>
-  <sc-tab id="scp-lens-tab" data-target="scp-lens-card">Lentes</sc-tab>
-  <sc-tab id="scp-speech-tab" data-target="scp-speech-card">Voz</sc-tab>
-  <sc-tab id="scp-full-guide-tab" data-target="scp-full-guide-card">Más</sc-tab>
-</sc>
-
-<sc class="scp-card-indicator"></sc>
-
-<!-- Fake demo page -->
-<sc id="scp-demo-page">
-  <sc id="scp-demo-page-contents">
-    <sc-p><sc-span id="scp-demo-para">¡Bienvenida!</sc-span></sc-p>
-    <sc-span id="scp-demo-mouse"></sc-span>
-    <sc-p>sitecues lee la web.</sc-p>
-  </sc>
-</sc>
+  "demopage": {
+    "welcome": "¡Bienvenida!",
+    "blurb": "sitecues lee la web."
+  }
+}
