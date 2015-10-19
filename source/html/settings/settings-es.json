@@ -1,0 +1,22 @@
+{
+  "theme": {
+    "None": "None",
+    "Warm": "Warm",
+    "Bold": "Bold",
+    "Dark": "Dark",
+    "intensity": "intensity",
+    "text_color": "text colour"
+  },
+
+  "mouse": {
+    "size": "size",
+    "color": "colour"
+  },
+
+  "title": "Settings",
+
+  "cards": {
+    "Colors": "Colours",
+    "Mouse": "Mouse"
+  }
+}

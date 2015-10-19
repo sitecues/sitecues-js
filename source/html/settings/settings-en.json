@@ -1,0 +1,16 @@
+{
+  None: 'None',
+  Warm: 'Warm',
+  Bold: 'Bold',
+  Dark: 'Dark',
+
+  intensity: 'intensity',
+  text_color: 'text color',
+  size: 'size',
+  color: 'color',
+  Settings: 'Settings',
+  cards: {
+    Colors: 'Colors',
+    Mouse: 'Mouse'
+  }
+}

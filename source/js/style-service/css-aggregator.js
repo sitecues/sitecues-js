@@ -77,7 +77,7 @@ define(['$', 'style-service/user-agent-css', 'core/conf/site', 'core/conf/urls',
     this.send = function () {
       var chromeRequest = this;
       $(window).one('ProcessCss-' + chromeRequestId, function (event) {
-        var responseText = event.originalEvent.detail,
+        var responseText = event.detail,
           responseEvent = { target: chromeRequest };
         if (responseText) {  // We succeeded in getting the content and the response text is in the detail field
           chromeRequest.responseText = responseText;
