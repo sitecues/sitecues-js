@@ -26,7 +26,7 @@
   },
   "guide": {
     "full": {
-      "full_guide_label": "Pełny podręcznik",
+      "label": "Pełny podręcznik",
       "action": "Ćwicz sitecues"
     },
     "keyboard": {

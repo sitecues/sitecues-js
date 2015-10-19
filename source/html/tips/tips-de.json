@@ -27,7 +27,7 @@
   },
   "guide": {
     "full": {
-      "full_guide_label": "Vollständige Dokumentation",
+      "label": "Vollständige Dokumentation",
       "action": "sitecues verwenden"
     },
     "keyboard": {
