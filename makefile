@@ -51,8 +51,8 @@ export resource-dir=$(build-dir)/$(version)
 # cleancss path
 cleancss=$(shell npm ls -p --depth=0 clean-css)/bin/cleancss
 
-# html-minifier command
-cleanhtml=$(shell npm ls -p --depth=0 html-minifier)/cli.js --remove-comments --remove-attribute-quotes --collapse-whitespace
+# html-minifier command used for SVG -- do not remove quotes around attributes in the SVG
+cleansvg=$(shell npm ls -p --depth=0 html-minifier)/cli.js --remove-comments --collapse-whitespace
 
 ################################################################################
 # Tools
@@ -157,8 +157,6 @@ else
 	phantomjs-service-root:=$(shell cd ../.. && pwd)
 endif
 
-
-
 ################################################################################
 # TARGET: build
 #	Build the minified version
@@ -228,7 +226,9 @@ html: mkdirs
 #	TODO: minify the CSS
 ################################################################################
 css: mkdirs
-	@(for F in `ls source/css`; do $(cleancss) -o $(resource-dir)/css/$$F source/css/$$F ; done)
+	cp -r source/css $(resource-dir)
+	find $(resource-dir)/css -type f -name '*.css' -execdir $(cleancss) {} -o {} \;
+#	@(for F in `ls source/css`; do $(cleancss) -o $(resource-dir)/css/$$F source/css/$$F ; done)
 
 ################################################################################
 # TARGET: images
@@ -236,7 +236,7 @@ css: mkdirs
 ################################################################################
 images: mkdirs
 	cp -r source/images $(resource-dir)
-	find $(resource-dir)/images -type f -name '*.svg' -execdir $(cleanhtml) {} -o {} \;
+	find $(resource-dir)/images -type f -name '*.svg' -execdir $(cleansvg) {} -o {} \;
 
 ################################################################################
 # TARGET: earcons
