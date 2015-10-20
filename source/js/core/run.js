@@ -9,8 +9,6 @@
 // http://ts.dev.sitecues.com/pages/tired-en-uk.html?branch=bp3-require  -- should speak in UK English, sounds same as
 // http://ts.dev.sitecues.com/pages/tired-en.html?branch=bp3-require
 // dealerEmail config option
-// Proper caching
-// onReady call back missing?
 // Safari:
 // - Super slow in Safari when theme used, especially with HLB. Also when changing themes.
 // - When highlighting not on normal theme in secondary panel highlighting is off, specifically reproduced in dropdown on eeoc.gov.
@@ -132,16 +130,18 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
     }
   }
 
-  function firePageLoadEvent() {
+  function onSitecuesReady() {
     metric('page-visited', {
       nativeZoom: platform.nativeZoom,
       isRetina  : platform.isRetina()
     });
+
+    if (typeof sitecues.config.onReady === 'function') {
+      sitecues.config.onReady.call(sitecues);
+    }
   }
 
   function onAllPrereqsComplete() {
-    firePageLoadEvent();
-
     // Initialize other features after bp
     var initialZoom = conf.get('zoom');
     if (initialZoom > 1) {
@@ -196,6 +196,8 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
         }
       });
     }
+
+    onSitecuesReady();
   }
 
   function onPrereqComplete() {
