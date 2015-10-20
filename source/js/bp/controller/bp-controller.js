@@ -34,10 +34,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
   }
 
   function getVisibleBadgeRect() {
-    var rect = helper.getRect(helper.byId(BP_CONST.MOUSEOVER_TARGET)),
-      speechRect = helper.getRect(helper.byId(BP_CONST.SPEECH_ID));
-    rect.bottom = speechRect.bottom;
-    return rect;
+    return helper.getRect(helper.byId(BP_CONST.MOUSEOVER_TARGET));
   }
 
   // When window is newly activated, ignore the automatic first mousemove that is generated
@@ -119,11 +116,6 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
   }
 
   function changeModeToPanel() {
-    if (SC_DEV) {
-      console.log('----');
-      reportTime();
-    }
-
     cancelHoverDelayTimer();
     if (!state.get('isShrinkingFromKeyboard')) { // Don't re-expand while trying to close via Escape key
       expandPanel();
