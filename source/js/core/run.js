@@ -197,7 +197,7 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
       });
     }
 
-    onSitecuesReady();
+      onSitecuesReady();
   }
 
   function onPrereqComplete() {

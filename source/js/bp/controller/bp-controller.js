@@ -7,6 +7,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
   // How long we wait before expanding BP
   var hoverDelayTimer,
     isInitialized,
+    doRequireMouseStopBeforeExpansion,
     // We ignore the first mouse move when a window becomes active, otherwise badge opens
     // if the mouse happens to be over the badge/toolbar
     doIgnoreNextMouseMove = true;
@@ -23,8 +24,9 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
       evt.clientX < middleOfBadge + allowedDistance;
   }
 
-  function isInHorizontalBadgeArea(evt, badgeRect) {
-    return evt.clientX >= badgeRect.left && evt.clientX <= badgeRect.right;
+  function isInBadgeArea(evt, badgeRect) {
+    return evt.clientX >= badgeRect.left && evt.clientX <= badgeRect.right &&
+      evt.clientY >= badgeRect.top && evt.clientY <= badgeRect.bottom;
   }
 
   function isInVerticalBadgeArea(evt, badgeRect) {
@@ -32,7 +34,10 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
   }
 
   function getVisibleBadgeRect() {
-    return helper.byId(BP_CONST.MOUSEOVER_TARGET).getBoundingClientRect();
+    var rect = helper.getRect(helper.byId(BP_CONST.MOUSEOVER_TARGET)),
+      speechRect = helper.getRect(helper.byId(BP_CONST.SPEECH_ID));
+    rect.bottom = speechRect.bottom;
+    return rect;
   }
 
   // When window is newly activated, ignore the automatic first mousemove that is generated
@@ -44,10 +49,6 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
   // Logic to determine whether we should begin to expand panel
   function onMouseMove(evt) {
 
-    if (hoverDelayTimer) {
-      return; // Already waiting to hover
-    }
-
     if (doIgnoreNextMouseMove) {
       doIgnoreNextMouseMove = false;
       return;
@@ -57,10 +58,17 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
       return;  // Already expanding -> do nothing
     }
 
+    if (doRequireMouseStopBeforeExpansion) {
+      cancelHoverDelayTimer();
+    }
+    else if (hoverDelayTimer) {
+      return; // Already waiting to hover
+    }
+
     // Is the event related to the visible contents of the badge?
     // (as opposed to the hidden areas around the badge)
     var badgeRect = getVisibleBadgeRect(),
-      isInBadge = isInHorizontalBadgeArea(evt, badgeRect),
+      isInBadge = isInBadgeArea(evt, badgeRect),
       isInToolbar = state.get('isToolbarBadge') && isInActiveToolbarArea(evt, badgeRect);
 
     if (!isInVerticalBadgeArea(evt, badgeRect)) {
@@ -111,6 +119,11 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
   }
 
   function changeModeToPanel() {
+    if (SC_DEV) {
+      console.log('----');
+      reportTime();
+    }
+
     cancelHoverDelayTimer();
     if (!state.get('isShrinkingFromKeyboard')) { // Don't re-expand while trying to close via Escape key
       expandPanel();
@@ -120,12 +133,6 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
   function cancelHoverDelayTimer() {
     clearTimeout(hoverDelayTimer);
     hoverDelayTimer = 0;
-  }
-
-  function onMouseOut(evt) {
-    if (helper.getEventTarget(evt).id === BP_CONST.BADGE_ID) {
-      cancelHoverDelayTimer();
-    }
   }
 
   // When a click happens on the badge, it can be from one of two things:
@@ -198,11 +205,13 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
   function init() {
     if (!isInitialized) {
       isInitialized = true;
+      doRequireMouseStopBeforeExpansion = state.get('isToolbarBadge');
+
       var badgeElement = getBadgeElement();
       badgeElement.addEventListener('keydown', processBadgeActivationKeys);
       badgeElement.addEventListener('click', clickToOpenPanel);
       badgeElement.addEventListener('mousemove', onMouseMove);
-      badgeElement.addEventListener('mouseout', onMouseOut);
+      badgeElement.addEventListener('mouseout', cancelHoverDelayTimer);
 
       window.addEventListener('focus', onWindowFocus);
       sitecues.on('bp/will-expand', willExpand);

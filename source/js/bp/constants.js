@@ -107,7 +107,7 @@ define([], function() {
   constants.THEME_POWER_ID           = 'scp-theme-power-group';
   constants.THEME_TEXT_HUE_ID        = 'scp-theme-text-hue-group';
 
-  constants.HOVER_DELAY_BADGE = 70;
+  constants.HOVER_DELAY_BADGE = 50;
   constants.HOVER_DELAY_TOOLBAR = 200;
   constants.MOUSELEAVE_DELAY_SHRINK_BP = 2000;
 
