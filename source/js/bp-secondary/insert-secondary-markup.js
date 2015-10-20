@@ -3,10 +3,12 @@ define(['bp/view/markup-finalizer', 'bp/helper', 'core/platform', 'bp-secondary/
   function(finalizer, helper, platform, fontCharset, urls) {
   /*jshint multistr: true */
 
+    //<line x1="0" y1="0" x2="200" y2="200" style="stroke:rgb(255,0,0);stroke-width:2" />
+    // #C0BFBF
 var isInitialized,
   svgSecondary =
-'<g id="scp-secondary" class="scp-secondary-only" aria-label="{{more_features}}" clip-path="url(#scp-outline-clip-def)">\
-  <use id="scp-secondary-outline" xlink:href="#scp-outline-def" fill="white"/>\
+'<g id="scp-secondary" class="scp-secondary-only" aria-label="{{more_features}}">\
+  <rect id="scp-secondary-fill" x="1" y="1" width="806" height="132" fill="white" stroke-width="0"/>\
   <g id="scp-bottom-secondary">\
     <use xlink:href="#scp-bottom-def"/>\
     <text id="scp-tips-label" text-anchor="middle" class="scp-hand-cursor" role="button" aria-label="{{tips}}" data-feature="tips" x="75" y="178">{{tips}}</text>\
@@ -14,7 +16,7 @@ var isInitialized,
     <text id="scp-feedback-label" text-anchor="middle" class="scp-hand-cursor" role="button" aria-label="{{rate_us}}" data-feature="feedback" x="517" y="178">{{rate_us}}</text>\
     <text id="scp-about-label" text-anchor="middle" class="scp-hand-cursor" role="button" aria-label="{{about}}" data-feature="about" x="730" y="178">{{about}}</text>\
   </g>\
-  <rect id="scp-card-header-bg" class="scp-secondary-feature-only" width="808" height="134" stroke="#C0BFBF" stroke-width="1" fill="#EEE"/>\
+  <rect id="scp-card-header-bg" class="scp-secondary-feature-only" y="1" width="808" height="133" stroke="#C0BFBF" stroke-width="1" fill="#EEE"/>\
   <g>\
     <g id="scp-arrows" class="scp-transition-opacity scp-secondary-feature scp-if-settings scp-if-tips">\
       <g id="scp-prev-card" class="scp-arrow scp-hand-cursor scp-transition-opacity" transform="translate(640,72) rotate(90) scale(1.4)" role="button" aria-label="{{previous}}" aria-disabled="true">\
@@ -46,7 +48,7 @@ var isInitialized,
     </g>\
     <g id="scp-about" class="scp-if-about" transform="translate(805,16)">\
       <g id="scp-logo-text">\
-        <image id="scp-sitecues-text" transform="scale(.84) translate(-28, -12)" width="400" height="100"></image>\
+        <image id="scp-sitecues-text" x="-11" y="-12" width="400" height="100"></image>\
         <text text-anchor="end" style="font-family:Open Sans;font-size:24px" y="96" x="300">{{zoom_and_speech}}</text>\
       </g>\
     </g>\
@@ -75,12 +77,20 @@ var isInitialized,
       </g>\
     </g>\
     <g id="scp-about-button" class="scp-if-about scp-hand-cursor scp-transition-opacity" role="button" data-feature="about" aria-labelledby="scp-about-label">\
-      <g data-hover="scale(1.2)">\
-        <path d="m15.8,-9.5h-11.2c-1,0 -3.4,3.9 -3.4,5.2l.1,15.3l-49.8,6.1h0c-1.6,-5 -2.5,-10.3 -2.5,-15.8c0,-27.9 22.6,-50.4 50.4,-50.4c21.2,0 39.4,13 46.8,31.7h0c5,11.2 0,22.2 -10.89999,24.1l-16.10001,2l0,-13.1c0,-1.2 -2.39999,-5.1 -3.39999,-5.1zm-7,47.3c1.6,1.89999 2.8,0 2.8,0l7.1,-11.10001c.2,-.3 .4,-.6 .4,-1v0v-4h26.4h0c-7.8,17.8 -25.5,30.3 -46.2,30.3c-20.7,0 -38.4,-12.4 -46.2,-30.3v0h48.1v4.3c0,.3 .2,.6 .4,.9l7.2,10.9z" fill="#000"/>\
-        <rect fill="none" width="120" height="120" y="-60" x="-60" class="scp-hand-cursor"/>\
+      <g id="scp-about-rotate-helper">\
+        <g data-hover="scale(1.2)">\
+          <path d="m15.8,-9.5h-11.2c-1,0 -3.4,3.9 -3.4,5.2l.1,15.3l-49.8,6.1h0c-1.6,-5 -2.5,-10.3 -2.5,-15.8c0,-27.9 22.6,-50.4 50.4,-50.4c21.2,0 39.4,13 46.8,31.7h0c5,11.2 0,22.2 -10.89999,24.1l-16.10001,2l0,-13.1c0,-1.2 -2.39999,-5.1 -3.39999,-5.1zm-7,47.3c1.6,1.89999 2.8,0 2.8,0l7.1,-11.10001c.2,-.3 .4,-.6 .4,-1v0v-4h26.4h0c-7.8,17.8 -25.5,30.3 -46.2,30.3c-20.7,0 -38.4,-12.4 -46.2,-30.3v0h48.1v4.3c0,.3 .2,.6 .4,.9l7.2,10.9z" fill="#000"/>\
+          <rect fill="none" width="120" height="120" y="-60" x="-60" class="scp-hand-cursor"/>\
+        </g>\
       </g>\
     </g>\
   </g>\
+  <g id="scp-secondary-outline">\
+    <path d="M808 186.5c0 6-5 11-11 11H11.5 c-6 0-11-5-11-11" fill="transparent" stroke="#999" stroke-width="1.5"/>\
+    <line stroke="#999" stroke-width="1.5" x1=".5" y1="-700" x2=".5" y2="188"/>\
+    <line stroke="#999" stroke-width="1.5" x1="808" y1="-700" x2="808" y2="188"/>\
+  </g>\
+  <line stroke="#999" stroke="#999" stroke-width="1" x1="0" y1=".5" x2="808" y2=".5"/> <!-- outline top -->\
 </g>',
 htmlSecondary =
 '<sc-h1 id="scp-feedback-header" class="scp-card-header">{{rate_us}}</sc-h1>\
@@ -99,7 +109,7 @@ htmlSecondary =
   </sc-p>\
   <sc-p id="scp-about-rate-footer">\
     <sc-span id="scp-rate-us-suggest" role="heading">{{about_rate_us}}</sc-span><br/>\
-    <sc-button id="scp-about-rate-button" class="scp-hand-cursor" role="button" aria-describedby="scp-rate-us-suggest">{{rate_us}}</sc-button>\
+    <sc-button id="scp-about-rate-button" class="scp-hand-cursor" role="button" aria-label="{{rate_us}}" aria-describedby="scp-rate-us-suggest">{{rate_us}}</sc-button>\
   </sc-p>\
 </sc>';
 
@@ -145,6 +155,9 @@ htmlSecondary =
     // CSS: use vendor stylesheet as well (e.g. secondary-moz.css, secondary-ie.css, secondary-webkit.css)
     if (platform.cssPrefix) {
       insertSheet('secondary' + platform.cssPrefix);
+    }
+    if (platform.browser.isSafari) {
+      insertSheet('secondary-safari-');
     }
   }
 

@@ -1,8 +1,8 @@
 /**
  * Generic module for handling the cards used by tips and settings
  */
-define(['bp/constants', 'bp/helper', 'core/locale', 'bp/model/state', 'core/platform', 'bp-expanded/view/svg-animate', 'core/util/xhr', 'core/conf/urls'],
-  function (BP_CONST, helper, locale, state, platform, animate, xhr, urls) {
+define(['bp/constants', 'bp/helper', 'core/locale', 'bp/model/state', 'core/platform', 'core/util/xhr', 'core/conf/urls'],
+  function (BP_CONST, helper, locale, state, platform, xhr, urls) {
 
   var
     PANELS_WITH_CARDS = { tips: 1, settings: 1},
@@ -15,7 +15,7 @@ define(['bp/constants', 'bp/helper', 'core/locale', 'bp/model/state', 'core/plat
     panelsToLoad = NUM_PANELS_WITH_CARDS;
 
   function loadPanelContents(panelName) {
-    var localizedPanelName = panelName + '-' + locale.getShortWebsiteLang(),
+    var localizedPanelName = panelName + '-' + locale.getTranslationLang(),
       panelUrl = urls.resolveResourceUrl('html/' + panelName + '/' + localizedPanelName + '.html');
 
     xhr.get({
@@ -206,7 +206,7 @@ define(['bp/constants', 'bp/helper', 'core/locale', 'bp/model/state', 'core/plat
       return;
     }
     var chosenItem = getActiveTab(),
-      bpScale = helper.getBpContainerScale(),
+      bpScale = state.get('scale'),
       indicator = activePanel.querySelector('.scp-card-indicator'),
       indicatorRect = indicator.getBoundingClientRect(),
       chosenItemRect = chosenItem.getBoundingClientRect(),

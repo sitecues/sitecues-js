@@ -1,0 +1,22 @@
+{
+  "theme": {
+    "None": "Brak",
+    "Warm": "Ciepły",
+    "Bold": "Pogru-<br/>biony",
+    "Dark": "Ciemny",
+    "intensity": "intensywność",
+    "text_color": "kolor tekstu"
+  },
+
+  "mouse": {
+    "size": "wielkość",
+    "color": "kolor"
+  },
+
+  "title": "Ustawienia",
+
+  "cards": {
+    "Colors": "Kolory",
+    "Mouse": "Mysz"
+  }
+}

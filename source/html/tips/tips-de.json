@@ -1,0 +1,53 @@
+{
+  "spacebar": "Leertaste",
+
+  "slider": {
+    "howto": "Verwendung des Zoom Schiebereglers"
+  },
+  "zoomkeys": {
+    "long_press": "Halten Sie die Taste gedrückt um stärker zu vergrößern.",
+    "howto": "Drücken Sie die - oder + Taste , um die Seite zu vergrößern"
+  },
+  "highlight": {
+    "purpose": "Hervorgehobene Bereiche können gelesen werden.",
+    "step1": "1. Wählen Sie einen Bereich aus.",
+    "step2": "2. Bewegen Sie den Mauspfeil auf diesen Bereich um ihn hervorzuheben.",
+    "keys": ""
+  },
+  "lens": {
+    "purpose": "Das Vergrößerungsglas",
+    "step1": "1. Wählen Sie mit dem Mauspfeil aus was Sie interessiert.",
+    "step2": "2. Drücken Sie die"
+  },
+  "speech": {
+    "purpose": "Die Funktion Text vorlesen.",
+    "step1": "1. Aktivieren Sie die Schaltfläche ‘Sprache’",
+    "step2": "2. Hervorheben & ",
+    "step2-after": "drücken"
+  },
+  "guide": {
+    "full": {
+      "label": "Vollständige Dokumentation",
+      "action": "sitecues verwenden"
+    },
+    "keyboard": {
+      "label": "Hilfe zu Tastatur",
+      "action": "Direkt hinspringen"
+    }
+  },
+
+  "title": "Tipps",
+
+  "cards": {
+    "Zoom": "Grösser",
+    "Highlight": "Markierung",
+    "Lens": "Lupe",
+    "Speech": "Sprache",
+    "More": "Weitere"
+  },
+
+  "demopage": {
+    "welcome": "Willkommen!",
+    "blurb": "sitecues liest das Web."
+  }
+}

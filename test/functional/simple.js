@@ -19,13 +19,18 @@ define(
         const suite  = tdd.suite,
               test   = tdd.test,
               before = tdd.before,
+              // beforeEach = tdd.beforeEach,
               URL    = 'http://tools.qa.sitecues.com:9000/site/simple.html' +
-                       '?scjsurl=//js.dev.sitecues.com/l/s;id=s-00000005/v/dev/latest/js/sitecues.js' +
+                       '?scjsurl=//js.dev.sitecues.com/l/s;id=s-00000005/dev/latest/js/sitecues.js' +
                        '&scwsid=s-00000005' +
-                       '&scuimode=badge' +
-                       '&scisv=2';
+                       '&scuimode=badge',
+              events = {
+                  zoom : {
+                      changed : 'zoom'
+                  }
+              };
 
-        suite('HLB Simple', function () {
+        suite('Lens (simple)', function () {
 
             const picked = {
                       selector : 'p'
@@ -34,7 +39,7 @@ define(
             let picker,
                 lens;
 
-            // Code to run when the suite starts, before tests...
+            // Code to run when the suite starts, before any test.
             before(function () {
 
                 // Create UI abstractions.
@@ -43,18 +48,18 @@ define(
 
                 return this.remote                // represents the browser being tested
                     .maximizeWindow()             // best effort to normalize window sizes (not every browser opens the same)
-                    .get(URL)                     // navigate to the desired page
-                    .setTimeout('script', 9000)
-                    .setTimeout('implicit', 9000)
-                    .setTimeout('page load', 9000)
-                    .setFindTimeout(9000)
-                    .setExecuteAsyncTimeout(9000)  // max ms for executeAsync calls to complete
+                    // NOTE: Page load timeouts are not yet supported in SafariDriver.
+                    //       However, we are not testing Safari at the moment.
+                    .setPageLoadTimeout(2000)
+                    .setFindTimeout(2000)
+                    .setExecuteAsyncTimeout(2000)  // max ms for executeAsync calls to complete
+                    .get(URL)                      // navigate to the desired page
                     // Store some data about the original picked element before
                     // we do anything to mess with it, for later comparison.
                     .findByCssSelector(picked.selector)
                         .getVisibleText()
                         .then(function (text) {
-                            // A test in this suite checks if the HLB cloned all
+                            // A test in this suite checks if the Lens cloned all
                             // visible text properly.
                             picked.visibleText = text;
                         })
@@ -76,7 +81,7 @@ define(
                         function (event, done) {
                             sitecues.on(event, done);  // use our event system to know when zoom is done
                         },
-                        ['zoom']
+                        [events.zoom.changed]
                     )
                     .execute(                     // run a callback in the remote browser
                         function (selector) {
@@ -86,29 +91,37 @@ define(
                     );
             });
 
-            test('Spacebar Opens the HLB', function () {
+            // TODO: Move most of our before() code into beforeEach() to make
+            //       tests more robust. Reset timeouts, load a new page, etc.
+
+            // Code to run prior to each individual test.
+            // beforeEach(function () {
+            //     return this.remote
+
+            // });
+
+            test('Spacebar Opens the Lens', function () {
 
                 return this.remote
-                    .setExecuteAsyncTimeout(3000)  // max ms for executeAsync calls to complete
-                    .pressKeys(keys.SPACE)         // hit the spacebar, to open the HLB
+                    .pressKeys(keys.SPACE)         // hit the spacebar, to open the Lens
                     .executeAsync(                 // run an async callback in the remote browser
                         function (event, id, done) {
                             sitecues.on(event, function () {
                                 done(
                                     document.getElementById(id)
                                 );
-                            });  // use our event system to know when the HLB is ready
+                            });  // use our event system to know when the Lens is ready
                         },
                         ['hlb/ready', 'sitecues-hlb']
                     )
                     .then(function (element) {
-                        assert.ok(element, 'HLB exists');
+                        assert.isObject(element, 'Lens exists');
                     });
             });
 
             /////////////////////////////// ------- test boundary -------
 
-            test('HLB is Displayed', function () {
+            test('Lens is Displayed', function () {
 
                 this.skip('This fails for some reason. Why?');
 
@@ -118,21 +131,21 @@ define(
                         .then(function (isDisplayed) {
                             assert.isTrue(
                                 isDisplayed,
-                                'HLB must be displayed to be useful'
+                                'Lens must be displayed to be useful'
                             );
                         });
             });
 
             /////////////////////////////// ------- test boundary -------
 
-            test('HLB is Inside Viewport', function () {
+            test('Lens is Inside Viewport', function () {
 
                 return this.remote               // represents the browser being tested
                     .execute(
                         function () {
                             return {
-                                'hlb': document.getElementById('sitecues-hlb').getBoundingClientRect(),
-                                'viewport': {
+                                lens : document.getElementById('sitecues-hlb').getBoundingClientRect(),
+                                viewport : {
                                     'left'  : 0,
                                     'top'   : 0,
                                     'right' : innerWidth,
@@ -143,56 +156,56 @@ define(
                     )
                     .then(function (data) {
                         assert.isAbove(
-                            data.hlb.left,
+                            data.lens.left,
                             data.viewport.left,
-                            'HLB must be inside the viewport to be seen'
+                            'Lens must be inside the viewport to be seen'
                         );
                         assert.isAbove(
-                            data.hlb.top,
+                            data.lens.top,
                             data.viewport.top,
-                            'HLB must be inside the viewport to be seen'
+                            'Lens must be inside the viewport to be seen'
                         );
                         assert.isBelow(
-                            data.hlb.right,
+                            data.lens.right,
                             data.viewport.right,
-                            'HLB must be inside the viewport to be seen'
+                            'Lens must be inside the viewport to be seen'
                         );
                         assert.isBelow(
-                            data.hlb.bottom,
+                            data.lens.bottom,
                             data.viewport.bottom,
-                            'HLB must be inside the viewport to be seen'
+                            'Lens must be inside the viewport to be seen'
                         );
                     });
             });
 
             /////////////////////////////// ------- test boundary -------
 
-            test('HLB Respects Text', function () {
+            test('Lens Respects Text', function () {
 
                 return this.remote               // represents the browser being tested
-                    .findById('sitecues-hlb')    // get the HLB!
+                    .findById('sitecues-hlb')    // get the Lens!
                         .getVisibleText()
                         .then(function (text) {
                             assert.strictEqual(
                                 text,
                                 picked.visibleText,
-                                'The HLB must contain the same text as the picked element'
+                                'The Lens must contain the same text as the picked element'
                             );
                         });
             });
 
             /////////////////////////////// ------- test boundary -------
 
-            test('HLB Has Good Computed Styles', function () {
+            test('Lens Has Good Computed Styles', function () {
 
                 return this.remote               // represents the browser being tested
-                    .findById('sitecues-hlb')    // get the HLB!
+                    .findById('sitecues-hlb')    // get the Lens!
                         .getComputedStyle('position')
                         .then(function (data) {
                             assert.strictEqual(
                                 data,
                                 'absolute',
-                                'HLB must be positioned absolutely, so it does not affect the page'
+                                'Lens must be positioned absolutely, so it does not affect the page'
                             );
                         })
                         .getComputedStyle('borderWidth')
@@ -200,7 +213,7 @@ define(
                             assert.strictEqual(
                                 data,
                                 '3px',
-                                'HLB must have a specific border width, so it looks nice'
+                                'Lens must have a specific border width, so it looks nice'
                             );
                         })
                         .getComputedStyle('zIndex')
@@ -208,7 +221,7 @@ define(
                             assert.strictEqual(
                                 data,
                                 '2147483644',
-                                'HLB must have a high zIndex, so it\'s visible'
+                                'Lens must have a high zIndex, so it\'s visible'
                             );
                         })
                         .getComputedStyle('boxSizing')
@@ -216,7 +229,7 @@ define(
                             assert.strictEqual(
                                 data,
                                 'content-box',
-                                'HLB must consistently calculate its width and height'
+                                'Lens must consistently calculate its width and height'
                             );
                         });
 
@@ -224,13 +237,13 @@ define(
 
             /////////////////////////////// ------- test boundary -------
 
-            test('HLB Has No Class', function () {
+            test('Lens Has No Class', function () {
 
                 return this.remote               // represents the browser being tested
-                    .findById('sitecues-hlb')    // get the HLB!
+                    .findById('sitecues-hlb')    // get the Lens!
                         .getAttribute('class')
                         .then(function (data) {
-                            assert.isNull(data, 'HLB element does not have a class');
+                            assert.isNull(data, 'Lens element does not have a class');
                         })
                         .end()
                     .execute(                    // run the given code in the remote browser
@@ -243,35 +256,34 @@ define(
 
             /////////////////////////////// ------- test boundary -------
 
-            test('Spacebar Closes HLB', function () {
+            test('Spacebar Closes Lens', function () {
 
                 return lens.close()
                     .then(function (data) {
-                        assert.isNull(data, 'HLB no longer exists');
+                        assert.isNull(data, 'Lens no longer exists');
                     });
             });
 
             /////////////////////////////// ------- test boundary -------
 
-            test('HLB is a <ul> if picked element is a <li>', function () {
+            test('Lens is a <ul> if picked element is a <li>', function () {
 
                 return picker.highlight('li')
                     .pressKeys(keys.SPACE)       // open the Lens
-                    .setFindTimeout(20)          // the Lens has this many milliseconds to come into existence
                     .findById('sitecues-hlb')    // get the Lens!
                     .getProperty('tagName')
                     .then(function (data) {
                         assert.strictEqual(
                             data,
                             'UL',
-                            'HLB must be a valid standalone DOM element, to make browsers happy'
+                            'Lens must be a valid standalone DOM element, to make browsers happy'
                         );
                     });
             });
 
             /////////////////////////////// ------- test boundary -------
 
-            test('Escape Closes the HLB', function () {
+            test('Escape Closes the Lens', function () {
 
                 return this.remote               // represents the browser being tested
                     .pressKeys(keys.ESCAPE)
@@ -286,40 +298,37 @@ define(
                         ['hlb/closed', 'sitecues-hlb']
                     )
                     .then(function (data) {
-                        assert.isNull(data, 'HLB no longer exists.');
+                        assert.isNull(data, 'Lens no longer exists.');
                     });
             });
 
             /////////////////////////////// ------- test boundary -------
 
-            test('HLB Copies <textarea> Value', function () {
+            test('Lens Copies <textarea> Value', function () {
 
                 const selector = 'textarea',
                       expected = 'Yipee!';
 
                 return this.remote               // represents the browser being tested
                     .findByCssSelector(selector)
-                        .type(
-                            expected
-                        )
+                        .type(expected)
                         .end()
                     .execute(                    // run the given code in the remote browser
                         function (selector) {
-                            // Jump out of editing mode, so spacebar can open HLB.
+                            // Jump out of editing mode, so spacebar can open the Lens.
                             document.querySelector(selector).blur();
                             sitecues.highlight(selector);
                         },
                         [selector]
                     )
-                    .pressKeys(keys.SPACE)       // hit the spacebar, to open the HLB
-                    .setFindTimeout(2000)        // set the find timeout to be more strict
-                    .findById('sitecues-hlb')    // get the HLB!
+                    .pressKeys(keys.SPACE)       // hit the spacebar, to open the Lens
+                    .findById('sitecues-hlb')    // get the Lens!
                     .getProperty('value')
                     .then(function (data) {
                         assert.strictEqual(
                             data,
                             expected,
-                            'HLB copies <textarea> value'
+                            'Lens copies <textarea> value'
                         );
                     })
                     .pressKeys(keys.ESCAPE)
@@ -332,7 +341,7 @@ define(
 
             /////////////////////////////// ------- test boundary -------
 
-            test('HLB Copies <input type="checkbox"> Value.', function () {
+            test('Lens Copies <input type="checkbox"> Value.', function () {
 
                 this.skip('WebDriver claims the checkbox is not visible. Why?');
 
@@ -348,14 +357,13 @@ define(
                         },
                         [selector]
                     )
-                    .pressKeys(keys.SPACE)       // hit the spacebar, to open the HLB
-                    .setFindTimeout(2000)        // set the find timeout to be more strict
-                    .findById('sitecues-hlb')    // get the HLB!
+                    .pressKeys(keys.SPACE)       // hit the spacebar, to open the Lens
+                    .findById('sitecues-hlb')    // get the Lens!
                     .getProperty('checked')
                     .then(function (data) {
                         assert.isTrue(
                             data,
-                            'HLB copies <input type="checkbox"> value'
+                            'Lens copies <input type="checkbox"> value'
                         );
                     })
                     .pressKeys(keys.ESCAPE)
@@ -368,15 +376,13 @@ define(
 
             /////////////////////////////// ------- test boundary -------
 
-            test('Outside Mouse Click Closes HLB.', function () {
+            test('Outside Mouse Click Closes Lens.', function () {
 
                 return this.remote               // represents the browser being tested
-                    .setFindTimeout(100)          // the HLB has this many milliseconds to come into existence
-                    .setExecuteAsyncTimeout(3000)  // max ms for executeAsync calls to complete
-                    .pressKeys(keys.SPACE)       // hit the spacebar, to open the HLB
+                    .pressKeys(keys.SPACE)       // hit the spacebar, to open the Lens
                     .executeAsync(           // run an async callback in the remote browser
                         function (event, done) {
-                            sitecues.on(event, done);  // use our event system to know when the HLB is ready
+                            sitecues.on(event, done);  // use our event system to know when the Lens is ready
                         },
                         ['hlb/ready']
                     )
@@ -396,7 +402,7 @@ define(
                             ['hlb/closed', 'sitecues-hlb']
                         )
                         .then(function (data) {
-                            assert.isNull(data, 'HLB no longer exists.');
+                            assert.isNull(data, 'Lens no longer exists.');
                         })
                         .end();
             });
@@ -424,7 +430,7 @@ define(
             //             }
             //         )
             //         .findById('sitecues-hlb')
-            //             .pressKeys(keys.SPACE)     // hit the spacebar, to close the HLB
+            //             .pressKeys(keys.SPACE)     // hit the spacebar, to close the Lens
             //             .end()                   // get out of the current element context
             //         .waitForDeletedById('sitecues-hlb')
             // });

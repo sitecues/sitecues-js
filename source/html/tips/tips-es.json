@@ -1,0 +1,52 @@
+{
+  "spacebar": "barra de espacio",
+
+  "slider": {
+    "howto": "Utilice el control deslizante para ampliar"
+  },
+  "zoomkeys": {
+    "long_press": "Mantenga las llaves más largo para acercar más.",
+    "howto": "Pulse la tecla - o + para acercar la página"
+  },
+  "highlight": {
+    "purpose": "El resaltador selecciona áreas para leer.",
+    "step1": "1. Elija algo en qué concentrarse.",
+    "step2": "2. Mueva su ratón para resaltarlo.",
+    "keys": ""
+  },
+  "lens": {
+    "purpose": "Los lentes magnifican.",
+    "step1": "1. Destaca algo interesante",
+    "step2": "2. Prensa"
+  },
+  "speech": {
+    "purpose": "La característica voz lee en voz alta el texto.",
+    "step1": "1. Haga clic en el botón de voz",
+    "step2": "2. Destacar & prensa"
+  },
+  "guide": {
+    "full": {
+      "label": "Guía completa",
+      "action": "Práctica sitecues"
+    },
+    "keyboard": {
+      "label": "Ayuda del teclado",
+      "action": "Saltar directamente allí"
+    }
+  },
+
+  "title": "Consejos",
+
+  "cards": {
+    "Zoom": "Ampliar",
+    "Highlight": "Destacar",
+    "Lens": "Lentes",
+    "Speech": "Voz",
+    "More": "Más"
+  },
+
+  "demopage": {
+    "welcome": "¡Bienvenida!",
+    "blurb": "sitecues lee la web."
+  }
+}

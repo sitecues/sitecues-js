@@ -16,7 +16,7 @@
       include : [
         '../../../build-config/config.js',
         'core/core',
-        'core/alameda.js'  // Was: '../../../node_modules/alameda/alameda.js'
+        'core/alameda-custom.js'  // Was: '../../../node_modules/alameda/alameda.js'
       ],
       create: true,
       insertRequire: ['core/core']
@@ -65,7 +65,6 @@
         'util/common',
         'dollar/dollar-utils',
         'dollar/zepto',
-        'util/transform',
         'core/metric',
         'core/conf/urls',
         'core/conf/user/manager',
@@ -76,19 +75,20 @@
       name: 'bp-secondary',
       create: true,
       include: [
-        'bp-secondary/secondary-panel'
+        'bp-secondary/bp-secondary'
       ],
       exclude: [
         'core/locale',
         'core/platform',
+        'bp-expanded/bp-expanded',
         'bp/constants',
         'bp/model/state',
         'bp/helper',
         'bp/view/markup-finalizer',
         'core/util/xhr',
         'util/common',
-        'bp-expanded/view/svg-animate',
-        'util/transform',
+        'bp-expanded/view/transform-animate',
+        'bp-expanded/view/transform-util',
         'core/metric',
         'core/conf/urls',
         'core/conf/user/manager'
@@ -101,17 +101,16 @@
         'keys/keys',
         'keys/commands',
         'keys/element-classifier',
-        'mouse-highlight/mouse-highlight',
-        'util/transform',
+        'highlight/highlight',
         'util/common',
         'dollar/dollar-utils',
         'dollar/zepto',
         'audio/audio',
-        'mouse-highlight/move-keys',
+        'highlight/move-keys',
         'zoom/zoom',
         'hpan/hpan',
         'zoom/fixed-position-fixer',
-        'enhance/focus',
+        'focus/focus',
         'cursor/cursor'
       ],
       exclude: [
@@ -150,15 +149,14 @@
         'core/metric',
         'core/conf/urls',
         'keys/element-classifier',
-        'util/geo',
-        'util/transform'
+        'util/geo'
       ]
     },
     {
       name: 'themes',
       create: true,
       include: [
-        'theme/color-engine',
+        'theme/theme',
         'theme/color-choices',
         'theme/img-classifier'
       ],
@@ -181,7 +179,6 @@
         'style-service/media-queries.js',
         'style-service/css-aggregator.js',
         'style-service/style-service.js',
-        'util/transform.js',
         'core/metric',
         'zoom/zoom-forms.js',
         'zoom/zoom.js'

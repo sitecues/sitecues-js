@@ -29,7 +29,8 @@ define(['core/platform', 'zoom/zoom', 'util/color', 'core/conf/urls'], function 
       },
       CURSOR_HUE_LIGHTNESS = 0.7,
       MAX_CURSOR_SIZE_DEFAULT = 128,
-      MAX_CURSOR_SIZE_WIN = 71,
+      MAX_CURSOR_PIXELS_WIN = 71,
+      CURSOR_ZOOM_MAX = platform.os.isWin? 3.15: 4,
       CURSOR_OFFSETS = {
         _default : {x: 10,  y: 5, xStep: 0, yStep: 2.5},
         _pointer : {x: 12, y: 5, xStep: 3.6, yStep: 1.7}
@@ -54,11 +55,15 @@ define(['core/platform', 'zoom/zoom', 'util/color', 'core/conf/urls'], function 
 
   function getUrl(type, sizeRatio, pixelRatio, doUseAjaxCursors, hue) {
 
+    if (sizeRatio > CURSOR_ZOOM_MAX) {
+      sizeRatio = CURSOR_ZOOM_MAX;
+    }
+
     if (doUseAjaxCursors) {
       return urls.resolveResourceUrl( 'images/cursors/win_' + type + '_' + getAjaxCursorSize(sizeRatio) + '.cur' );
     }
 
-    var maxCursorSize = platform.os.isWin ? MAX_CURSOR_SIZE_WIN: MAX_CURSOR_SIZE_DEFAULT,
+    var maxCursorSize = platform.os.isWin ? MAX_CURSOR_PIXELS_WIN: MAX_CURSOR_SIZE_DEFAULT,
         hueString = hue ? colorUtil.getColorString(colorUtil.hslToRgb(hue, 1, CURSOR_HUE_LIGHTNESS)) : '#FFF',
         prefix = PREFIX
         .replace(/SIZE/g, '' + sizeRatio * pixelRatio)
@@ -125,7 +130,6 @@ define(['core/platform', 'zoom/zoom', 'util/color', 'core/conf/urls'], function 
     // SC-1431 Need to keep the cursor smaller than MAX_CURSOR_SIZE_WIN (defined in custom.js)
     // when on Windows OS, otherwise the cursor intermittently can become a large black square.
     // Therefore, on Windows we cannot zoom the cursor up as much as on the Mac (3.5x instead of 4x)
-      CURSOR_ZOOM_MAX = platform.os.isWin? 3.5 : 4,
       CURSOR_ZOOM_MIN = 1,
       CURSOR_ZOOM_RANGE = CURSOR_ZOOM_MAX - CURSOR_ZOOM_MIN;
 

@@ -1,0 +1,22 @@
+{
+  "theme": {
+    "None": "Aucun",
+    "Warm": "Chaud",
+    "Bold": "Auda-<br>cieux",
+    "Dark": "Noire",
+    "intensity": "intensité",
+    "text_color": "couleur du texte"
+  },
+
+  "mouse": {
+    "size": "taille",
+    "color": "couleur"
+  },
+
+  "title": "Réglages",
+
+  "cards": {
+    "Colors": "Couleurs",
+    "Mouse": "Souris"
+  }
+}

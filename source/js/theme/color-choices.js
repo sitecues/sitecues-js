@@ -271,7 +271,7 @@ define(['$', 'util/color'], function ($, colorUtil) {
       textShadowIntensity = Math.max(0, intensity - 0.8) * 0.8;
 
     if (style.prop === 'color') {
-      colorizedRgba = (textHue && textHue < 1) ? colorizeGrayText(rgba, textHue) : rgba;
+      colorizedRgba = (textHue && textHue <= 1) ? colorizeGrayText(rgba, textHue) : rgba;
       hsl = rgbToHsl(colorizedRgba.r, colorizedRgba.g, colorizedRgba.b);
       origLightness = Math.max(hsl.l, 1 - hsl.l);
       newLightness = foregroundIntensity * (origLightness + 0.1);

@@ -1,7 +1,7 @@
 /**
  * This is module for common utilities that might need to be used across all of the different modules.
  */
-define(['keys/element-classifier'], function (elemClassifier) {
+define(['keys/element-classifier', 'core/platform'], function (elemClassifier, platform) {
 
   /*
    * Check if two Javascript objects are equal.
@@ -213,6 +213,12 @@ define(['keys/element-classifier'], function (elemClassifier) {
     return px;
   }
 
+  function getComputedScale(elem) {
+    var style = getComputedStyle(elem),
+      transform = style[platform.transformProperty];
+    return parseFloat(transform.substring(7)) || 1;
+  }
+
   return {
     equals: equals,
     isEmpty: isEmpty,
@@ -228,7 +234,8 @@ define(['keys/element-classifier'], function (elemClassifier) {
     createSVGFragment: createSVGFragment,
     elementFromPoint: elementFromPoint,
     hasVertScroll: hasVertScroll,
-    getBulletWidth: getBulletWidth
+    getBulletWidth: getBulletWidth,
+    getComputedScale: getComputedScale
   };
 
 });

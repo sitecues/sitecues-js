@@ -77,7 +77,7 @@ define(['$', 'style-service/user-agent-css', 'core/conf/site', 'core/conf/urls',
     this.send = function () {
       var chromeRequest = this;
       $(window).one('ProcessCss-' + chromeRequestId, function (event) {
-        var responseText = event.originalEvent.detail,
+        var responseText = event.detail,
           responseEvent = { target: chromeRequest };
         if (responseText) {  // We succeeded in getting the content and the response text is in the detail field
           chromeRequest.responseText = responseText;
@@ -277,7 +277,7 @@ define(['$', 'style-service/user-agent-css', 'core/conf/site', 'core/conf/urls',
     });
 
     Object.keys(bgColors).forEach(function (bgColor) {
-      cssText += '[bgColor="' + bgColor + '"] { background-color:' + bgColor + ' };\n';
+      cssText += '[bgColor="' + bgColor + '"] { background-color:' + bgColor + ' }\n';
     });
     if (cssText) {
       addSheet(null, cssText, SC_DEV && 'bgcolor attrs');
@@ -319,15 +319,15 @@ define(['$', 'style-service/user-agent-css', 'core/conf/site', 'core/conf/urls',
     }
 
     function isUsableStyleElement(styleElem) {
-      if (styleElem.firstChild) {
-        var SITECUES_STYLE_ID_PREFIX = 'sitecues-',  // <style id="sitecues-XXX"> are sitecues stylesheets
-          id = styleElem.id;
-        return !id || !startsWith(id, SITECUES_STYLE_ID_PREFIX);
-      }
+      return !!styleElem.firstChild;
     }
 
     function isUsable(index, elem) {
-      return elem.localName === 'link' ? isUsableLinkedStyleSheet(elem) : isUsableStyleElement(elem);
+      var SITECUES_STYLE_ID_PREFIX = 'sitecues-',  // <style id="sitecues-XXX"> are sitecues stylesheets
+        id = elem.id;
+      if (!id || !startsWith(id, SITECUES_STYLE_ID_PREFIX)) {
+        return elem.localName === 'link' ? isUsableLinkedStyleSheet(elem) : isUsableStyleElement(elem);
+      }
     }
 
     function addSheetForElem(index, elem) {

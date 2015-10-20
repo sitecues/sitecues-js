@@ -11,7 +11,8 @@ define(['bp/constants', 'bp/helper'], function (BP_CONST, helper) {
       'scp-zoom-keys-card': 'zoom',
       'scp-highlight-card': 'highlight',
       'scp-lens-card': 'lens',
-      'scp-speech-card': 'lens'
+      'scp-speech-card': 'lens',
+      'scp-full-guide-card': 'none'
     },
     animationFnMap = {
       'zoom': animateZoom,
@@ -37,17 +38,26 @@ define(['bp/constants', 'bp/helper'], function (BP_CONST, helper) {
     animationTimers.length = 0;
     ACTORS.forEach(clearElementDemo);
 
-    // Run the animation function for this card (if any)
+    // Find an appropriate animation
     var newAnimation = animationFns[id],
-      demoPage = byId(BP_CONST.DEMO_PAGE);
-    if (newAnimation) {
-      animationFnMap[newAnimation](id);
+      demoPage,
+      hasAnimation;
+    if (!newAnimation) {
+      return;
     }
 
-    // Set a class on the demo-page element so it knows what's up
-    demoPage.className = 'scp-demo-' + newAnimation;
-    demoPage.setAttribute('data-hasdemo', !!newAnimation);
-    byId(BP_CONST.TIPS_CONTENT_ID).setAttribute('data-active', id);
+    demoPage = byId(BP_CONST.DEMO_PAGE);
+    hasAnimation = newAnimation !== 'none';
+    demoPage.setAttribute('data-hasdemo', hasAnimation);
+
+    if (hasAnimation) {
+      // Run the animation function for this card (if any)
+      animationFnMap[newAnimation](id);
+
+      // Set a class on the demo-page element so it knows what's up
+      demoPage.className = 'scp-demo-' + newAnimation;
+      byId(BP_CONST.TIPS_CONTENT_ID).setAttribute('data-active', id);
+    }
   }
 
   function pushTimeout(fn, howLongMs) {
@@ -57,12 +67,14 @@ define(['bp/constants', 'bp/helper'], function (BP_CONST, helper) {
   // Reset demo page element back to original state
   function clearElementDemo(id) {
     var elem = byId(id);
-    // Reset element back to normal position instantly (temporarily turn of animations)
-    elem.setAttribute('data-demo', false);
-    elem.style.transitionDuration = '0s';
-    setTimeout(function () {
-      elem.style.transitionDuration = '';
-    }, 20); // Wait at least one frame tick to turn animations back on
+    if (elem) {
+      // Reset element back to normal position instantly (temporarily turn of animations)
+      elem.setAttribute('data-demo', false);
+      elem.style.transitionDuration = '0s';
+      setTimeout(function () {
+        elem.style.transitionDuration = '';
+      }, 20); // Wait at least one frame tick to turn animations back on
+    }
   }
 
   // Optional -- howLongMs is how logn to wait before doing it

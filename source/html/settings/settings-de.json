@@ -1,0 +1,22 @@
+{
+  "theme": {
+    "None": "Normal",
+    "Warm": "Warm",
+    "Bold": "Stark",
+    "Dark": "Dunkel",
+    "intensity": "Intensität",
+    "text_color": "Text Farbe"
+  },
+
+  "mouse": {
+    "size": "Grösse",
+    "color": "Farbe"
+  },
+
+  "title": "Einstellen",
+
+  "cards": {
+    "Colors": "Farben",
+    "Mouse": "Maus"
+  }
+}

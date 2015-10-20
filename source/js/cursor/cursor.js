@@ -24,7 +24,7 @@ define(['$', 'style-service/style-service', 'core/conf/user/manager', 'cursor/cu
       cursorStylesheetObject,
       bpCursorStylesheetObject,
       MAX_USER_SPECIFIED_CURSOR_SIZE = 3.5,
-      MAX_USER_SPECIFIED_MOUSE_HUE = 1.1,// If > 1.0 then use white
+      MAX_USER_SPECIFIED_MOUSE_HUE = 1.09,// If > 1.0 then use white
       autoSize,
       userSpecifiedSize,
       userSpecifiedHue,
@@ -218,7 +218,7 @@ define(['$', 'style-service/style-service', 'core/conf/user/manager', 'cursor/cu
   function constructBPCursorStylesheet() {
     var cssText =
       '#scp-bp-container,.scp-toolbar {cursor:default;}\n' +
-      '.scp-hand-cursor {cursor:pointer};';
+      '.scp-hand-cursor {cursor:pointer}';
 
     $bpStylesheet = createStyleSheet(SITECUES_BP_CURSOR_CSS_ID, cssText);
 
@@ -338,7 +338,7 @@ define(['$', 'style-service/style-service', 'core/conf/user/manager', 'cursor/cu
   }
 
   function getRealUserHue() {
-    return userSpecifiedHue > 0 && userSpecifiedHue < 1.1 ? Math.min(userSpecifiedHue, 1) : 0;
+    return userSpecifiedHue > 0 && userSpecifiedHue <= 1 ? userSpecifiedHue : 0;
   }
 
   function onPageZoom(pageZoom) {

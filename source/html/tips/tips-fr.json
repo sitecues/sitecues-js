@@ -1,0 +1,52 @@
+{
+  "spacebar": "barre d’espace",
+
+  "slider": {
+    "howto": "Utiliser le curseur de zoom"
+  },
+  "zoomkeys": {
+    "long_press": "Maintenir de cliquer pour zoomer plus.",
+    "howto": "Appuyiez sur le bouton - ou + pour zoomer la page"
+  },
+  "highlight": {
+    "purpose": "Les zones sélectionnés à lire.",
+    "step1": "1. Choisissez  quelque chose à se concentrer sur.",
+    "step2": "2. Déplacez votre souris pour mettre en surbrillance.",
+    "keys": ""
+  },
+  "lens": {
+    "purpose": "La loupe de la lentille.",
+    "step1": "1. Mettre quelque chose en surbrillance<",
+    "step2": "2. Appuyez"
+  },
+  "speech": {
+    "purpose": "La fonction vocale lit le texte à haute voix.",
+    "step1": "1. Cliquez sur le discoure bouton",
+    "step2": "2. Surbrillance & appuyez"
+  },
+  "guide": {
+    "full": {
+      "label": "Guide complet",
+      "action": "Pratiquez sitecues"
+    },
+    "keyboard": {
+      "label": "Aide du clavier",
+      "action": "Aller directemet ici"
+    }
+  },
+
+  "title": "Pointe",
+
+  "cards": {
+    "Zoom": "Zoom",
+    "Highlight": "Surbrillance",
+    "Lens": "Lentille",
+    "Speech": "Discoure",
+    "More": "Plus"
+  },
+
+  "demopage": {
+    "welcome": "Bienvenue!",
+    "blurb": "sitecues lit le web."
+  }
+}

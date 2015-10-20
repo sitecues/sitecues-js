@@ -1,0 +1,52 @@
+{
+  "spacebar": "spację",
+
+  "slider": {
+    "howto": "Użyj suwaka powiększenia"
+  },
+  "zoomkeys": {
+    "long_press": "Przytrzymaj klawisz aby bardziej powiększyć.",
+    "howto": "Powększenie strony - wciśnij klawisz - lub +"
+  },
+  "highlight": {
+    "purpose": "Podświetlenie wybiera obszary do odczytania.",
+    "step1": "1. Wybierz interesujący Cię obszar.",
+    "step2": "2. Przesuń mysz aby go podświetlić.",
+    "keys": ""
+  },
+  "lens": {
+    "purpose": "Lupa powiększa.",
+    "step1": "1. Wybierz interesujący Cię obszar.",
+    "step2": "2. Wciśnij"
+  },
+  "speech": {
+    "purpose": "Funkcja mowy czyta tekst na głos.",
+    "step1": "1. Kliknij przycisk mowy",
+    "step2": "2. Podświetl & wciśnij"
+  },
+  "guide": {
+    "full": {
+      "label": "Pełny podręcznik",
+      "action": "Ćwicz sitecues"
+    },
+    "keyboard": {
+      "label": "Pomoc klawiatury",
+      "action": "Skocz wprost tam"
+    }
+  },
+
+  "title": "Tips",
+
+  "cards": {
+    "Zoom": "Powiększenie",
+    "Highlight": "Podświetlenie",
+    "Lens": "Lupa",
+    "Speech": "Mowa",
+    "More": "Więcej"
+  },
+
+  "demopage": {
+    "welcome": "Witamy!",
+    "blurb": "sitecues czyta internet."
+  }
+}

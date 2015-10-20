@@ -257,7 +257,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
     // @data-own-focus-ring = element will show it's own focus ring
 
     var showFocusOn = getElementToShowFocusOn(),
-      scale = helper.getBpContainerScale();
+      scale = state.get('scale');
 
     function getFinalCoordinate(coord) {
       return (coord / scale) + 'px';
@@ -463,9 +463,14 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
 
     // Escape = close
     if (keyCode === ESCAPE) {
-      require(['bp-expanded/controller/shrink-controller'], function(shrinkController) {
-        shrinkController.shrinkPanel(true);
-      });
+      if (state.isSecondaryPanelRequested()) {
+        simulateClick(byId(BP_CONST.MORE_BUTTON_GROUP_ID));
+      }
+      else {
+        require(['bp-expanded/controller/shrink-controller'], function (shrinkController) {
+          shrinkController.shrinkPanel(true);
+        });
+      }
       return;
     }
 

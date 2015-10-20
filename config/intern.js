@@ -3,16 +3,22 @@
 
 define(
     [   // dependencies...
+        'intern',   // public API for the test framework itself
         'test/all'
     ],
-    function (testSuites) {
+    function (intern, testSuites) {
+
+        'use strict';
 
         var build = 'UNKNOWN',
             proxyPort = 9000,
             testDir = '../../test/';
 
+        if (intern.args.build) {
+            build = intern.args.build;
+        }
         // make sure we are in Node and not a browser...
-        if (typeof process === 'object' && process && process.env) {
+        else if (typeof process === 'object' && process && process.env) {
             build = process.env.BUILD || process.env.COMMIT;
         }
 
@@ -20,11 +26,11 @@ define(
             proxyPort: proxyPort,
             proxyUrl: 'http://localhost:' + proxyPort + '/',
 
+            // Miscellaneous configuration, mainly for Selenium.
+            // Examples: https://code.google.com/p/selenium/wiki/DesiredCapabilities
             capabilities: {
-                // See examples: https://code.google.com/p/selenium/wiki/DesiredCapabilities
-                'name': 'Automated Test - sitecues-js',   // name of the test run, for logging purposes
-                'selenium-version': '2.45.0',             // request a version, which may not always be respected
-                'build': build                            // useful to log success history tied to code changes
+                name  : 'Automated Test - sitecues-js',   // name of the test run, for logging purposes
+                build : build                             // useful to log success history tied to code changes
             },
             // Places where unit and/or functional tests will be run...
             environments: [

@@ -1,0 +1,22 @@
+{
+  "theme": {
+    "None": "Ninguno",
+    "Warm": "Cálida",
+    "Bold": "Audaz",
+    "Dark": "Oscuro",
+    "intensity": "intensidad",
+    "text_color": "color de textor"
+  },
+
+  "mouse": {
+    "size": "tamaño",
+    "color": "color"
+  },
+
+  "title": "Ajustes",
+
+  "cards": {
+    "Colors": "Colores",
+    "Mouse": "Ratón"
+  }
+}

@@ -29,6 +29,20 @@
   display: block;
 }
 
+/* Secondary panel has it's own stretchable outline */
+#scp-main-outline {
+  transition: opacity .2s;
+}
+
+.scp-is-secondary.scp-want-secondary #scp-main-outline {
+  opacity: 0 !important;
+}
+
+/* Don't show main content under secondary panel, it confuses Window-Eyes even though it's hidden underneath */
+.scp-is-secondary.scp-want-secondary #scp-main {
+  display: none
+}
+
 /** Custom elements to help avoid page pollution **/
 
 sc,sc-cards,sc-card {
@@ -108,15 +122,18 @@ sc-button {
   padding: 9px;
   margin-right: 10px;
   transition: transform .5s;
-  -webkit-transition: -webkit-transform .5s;
   position: relative;
 }
 
 sc-button:hover {
-  -webkit-transform: scale(1.2);
   transform: scale(1.2);
 }
 
+/*************** Screen readers only *********************/
+
+.scp-only-screenreaders {
+  text-indent: -9999px;
+}
 
 /*************** Common card elements *********************/
 
@@ -357,6 +374,7 @@ sc-kbd[data-demo="true"] {
   transform: scale(1.6);
   box-shadow: 0 0 0 999px rgba(0,0,0,.3);
 }
+
 #scp-demo-page[data-hasdemo="false"] {
   display: none;
 }
@@ -543,33 +561,6 @@ sc-button[aria-pressed="true"]:after {
 }
 #scp-feedback-textarea:focus {
   box-shadow: none !important;
-}
-#scp-feedback-textarea::-moz-placeholder {
-  position: relative;
-  font-size: 26px;
-  left: 20px;
-  top: 35px;
-}
-#scp-feedback-textarea:focus::-moz-placeholder {
-  color: transparent;
-}
-#scp-feedback-textarea::-webkit-input-placeholder {
-  position: relative;
-  font-size: 26px;
-  left: 20px;
-  top: 35px;
-}
-#scp-feedback-textarea:focus::-webkit-input-placeholder {
-  color: transparent;
-}
-#scp-feedback-textarea:-ms-input-placeholder {
-  position: relative;
-  font-size: 26px;
-  left: 20px;
-  top: 35px;
-}
-#scp-feedback-textarea:focus:-ms-input-placeholder {
-  color: transparent;
 }
 .scp-rating-star {
   fill: #ccc;

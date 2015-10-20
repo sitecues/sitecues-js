@@ -51,7 +51,7 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
   function speakContentImpl($content, triggerType) {
     var text = builder.getText($content);
     if (text) {
-      speakText(text, getElementLang($content[0]), triggerType);
+      speakText(text, getElementAudioLang($content[0]), triggerType);
     }
   }
 
@@ -108,26 +108,26 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
 
   // Get language that applies to element (optional param)
   // Fallback on document and then browser default language
-  function getElementLang(element) {
+  function getElementAudioLang(element) {
     while (element) {
       var lang = element.getAttribute('lang') || element.getAttribute('xml:lang');
       if (lang) {
-        return lang;
+        return locale.getAudioLang(lang);
       }
       element = element.parentElement;
     }
 
-    return locale.getFullWebsiteLang();
+    return locale.getAudioLang();
   }
 
-  function getDocumentLang() {
-    return getElementLang(document.body);
+  function getDocumentAudioLang() {
+    return getElementAudioLang(document.body);
   }
 
   // Puts in delimiters on both sides of the parameter -- ? before and & after
   // lang is an optional parameter. If it doesn't exist, the document language will be used.
   function getLanguageParameter(lang) {
-    return '?l=' + (lang || getDocumentLang()) + '&';
+    return '?l=' + (lang || getDocumentAudioLang()) + '&';
   }
 
   function getAudioKeyUrl(key) {  // TODO why does an audio cue need the site id?
@@ -155,10 +155,10 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
     if (ttsOn !== isOn) {
       ttsOn = isOn;
       conf.set('ttsOn', ttsOn);
+      sitecues.emit('speech/did-change', ttsOn);
       if (!doSuppressAudioCue) {
         require(['audio/audio-cues'], function(audioCues) {
           audioCues.playSpeechCue(ttsOn);
-          sitecues.emit('speech/did-change', ttsOn);
         });
       }
     }

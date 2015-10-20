@@ -1,4 +1,4 @@
-define(['zoom/zoom', 'mouse-highlight/move-keys', 'core/conf/user/manager', 'core/conf/user/server', 'audio/audio', 'mouse-highlight/mouse-highlight'],
+define(['zoom/zoom', 'highlight/move-keys', 'core/conf/user/manager', 'core/conf/user/server', 'audio/audio', 'highlight/highlight'],
   function(zoomMod, moveKeys, conf, server, audio, mh) {
   return {
     decreaseZoom: function(event) {
@@ -15,16 +15,16 @@ define(['zoom/zoom', 'mouse-highlight/move-keys', 'core/conf/user/manager', 'cor
     },
     resetSitecues: function(event) {
       // 0 by itself -> reset zoom
-      // Shift+0 -> Also reset speech
+      // Alt+0 -> Also reset speech
       // Alt+Shift+0 -> Full reset for all of sitecues, including themes, cursors, cues ... everything
       // Turn off zoom
       zoomMod.resetZoom();
-      if (event.shiftKey) {
-        if (event.altKey) {
-          // Turn off speech
-          audio.setSpeechState(false, true);
-          audio.stopAudio();
+      if (event.altKey) {
+        // Turn off speech
+        audio.setSpeechState(false, true);
+        audio.stopAudio();
 
+        if (event.shiftKey) {
           server.reset();
           audio.playEarcon('quit-organ');
         }
@@ -40,6 +40,7 @@ define(['zoom/zoom', 'mouse-highlight/move-keys', 'core/conf/user/manager', 'cor
     toggleSpeech:  function() {
       audio.init();
       audio.toggleSpeech();
-    }
+    },
+    notImplemented: function() {}
   };
 });

@@ -19,7 +19,7 @@ define(['core/conf/user/manager', 'core/conf/site', 'core/locale', 'core/platfor
         session_id: UUIDv4,   // A random UUID v4 generated for this library session.
         page_url: location.href,
         browser_user_agent: navigator && navigator.userAgent ? navigator.userAgent : '',
-        client_language: locale.getFullWebsiteLang()
+        client_language: locale.getBrowserLang()
       };
 
       //if (SC_DEV) { console.log('Metric: ' + JSON.stringify(allData)); }
