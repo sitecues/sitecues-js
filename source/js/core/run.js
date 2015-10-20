@@ -218,7 +218,6 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
 
     conf.def('zoom', parseFloat); // Will further define it if zoom is turned on, in zoom.js
     userId.init();
-    console.log(locale);
     locale.init();
   };
 });
