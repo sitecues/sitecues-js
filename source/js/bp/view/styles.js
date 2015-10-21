@@ -405,12 +405,29 @@ define(['bp/helper', 'core/platform', 'bp/constants', 'core/conf/site'],
       },
 
       '#scp-focus-outline': {
-        'box-shadow': '0 0 4px 6px rgba(82, 168, 236, 0.8)',
+        'box-shadow': '0 0 4px 6px rgba(82,168,236,0.8)',
         'border-radius': '4px',
         'display': 'none',
         'position': 'absolute',
         'pointer-events': 'none',
         'z-index': 99999
+      },
+
+      /*** Firefox focus rules, since getBoundingClientRect() is broken for SVG */
+      // Firefox focus for SVG
+      '.scp-is-panel [data-show-focus="stroke-child"]:not([data-own-focus-ring]) rect,.scp-is-panel [data-show-focus="stroke-child"]:not([data-own-focus-ring])>.scp-hidden-target': {
+        'stroke': 'rgba(82,168,236,.8)',
+        'stroke-width': '8px',
+        'opacity': 1,
+        'display': 'block',
+        'pointer-events': 'none',
+        'fill': 'transparent',
+        'filter': 'url(#scp-focusblur)'
+      },
+
+      // Firefox focus for HTML
+      '.scp-is-panel [data-show-focus="box-shadow"]:not([data-own-focus-ring])': {
+        'box-shadow': '0 0 10px 3px rgb(82,168,236)'
       },
 
       '.scp-is-panel.scp-keyboard:not(.scp-secondary-expanding) > #scp-focus-outline[data-show]': {
@@ -432,7 +449,7 @@ define(['bp/helper', 'core/platform', 'bp/constants', 'core/conf/site'],
       // This rule undoes the placement.js clipping when the BP is not currently fully collapsed.
       '#scp-bp-container:not(.scp-is-badge)': {
         'clip': 'auto !important'
-      },
+      }
     },
 
     // The 'b' normal blue palette is the default

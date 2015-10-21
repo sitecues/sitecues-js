@@ -41,7 +41,7 @@ define(['bp/view/markup-finalizer'], function(finalizer) {
     <rect class="scp-hidden-target scp-hand-cursor" width="66" height="62"/>\
   </g>\
   <filter id="scp-focusblur">\
-    <feGaussianBlur in="SourceGraphic" stdDeviation="3"/>\
+    <feGaussianBlur in="SourceGraphic" stdDeviation="2.5"/>\
   </filter>\
   <path id="scp-arrow" d="m18,-1.9c-1.3,1.4 -15.6,15 -15.6,15c-.7,.7 -1.7,1.2 -2.7,1.2c-1,0 -1.89999,-.4 -2.7,-1.2c0,0 -14.2,-13.6 -15.6,-15c-1.3,-1.4 -1.4,-3.9 0,-5.3c1.4,-1.5 3.5,-1.6 5.2,0l13,12.5l13,-12.5c1.8,-1.6 3.8,-1.5 5.2,0c1.3,1.8 1.3,4 0,5.3l.2,0z"/>\
 </defs>\
@@ -83,6 +83,7 @@ define(['bp/view/markup-finalizer'], function(finalizer) {
       <circle fill="#FFF" stroke="#777" stroke-width="5" stroke-miterlimit="10" cx="0" cy="0" r="34"/>\
       <use id="scp-more-arrow" fill="#777" xlink:href="#scp-arrow"/>\
       <path id="scp-question" fill="#777" stroke="#777" stroke-width="2" d="M0,-16c-3.4 0-6 1-7.5 2.6-1.6 1.6-2.2 3.6-2.4 5.1l4 .5c.2-1 .5-2 1.2-2.8 .8-.8 2-1.5 4.6-1.5 2.6 0 4.1 .5 4 1.4 .8 .7 1.1 1.6 1.1 2.6 0 3.3-1.4 4.2-3.4 6-2 1.8-4.6 4.3-4.6 9v1h4v-1c0-3.3 1.2-4.2 3.2-6 2-1.8 4.8-4.3 4.8-9 0-2-.7-4.1-2.4-5.6-1.7-1.6-4.3-2.4-7.6-2.4zm-2.8 28v4h4v-4h-4z"></path>\
+      <circle cx="0" cy="0" r="36" class="scp-hidden-target"/>\
     </g>\
   </g>\
 </g>\

@@ -11,10 +11,22 @@ var isInitialized,
   <rect id="scp-secondary-fill" x="1" y="1" width="806" height="132" fill="white" stroke-width="0"/>\
   <g id="scp-bottom-secondary">\
     <use xlink:href="#scp-bottom-def"/>\
-    <text id="scp-tips-label" text-anchor="middle" class="scp-hand-cursor" role="button" aria-label="{{tips}}" data-feature="tips" x="75" y="178">{{tips}}</text>\
-    <text id="scp-settings-label" text-anchor="middle" class="scp-hand-cursor" role="button" aria-label="{{settings}}" data-feature="settings" x="285" y="178">{{settings}}</text>\
-    <text id="scp-feedback-label" text-anchor="middle" class="scp-hand-cursor" role="button" aria-label="{{rate_us}}" data-feature="feedback" x="517" y="178">{{rate_us}}</text>\
-    <text id="scp-about-label" text-anchor="middle" class="scp-hand-cursor" role="button" aria-label="{{about}}" data-feature="about" x="730" y="178">{{about}}</text>\
+    <g id="scp-tips-label" role="button" class="scp-hand-cursor" data-feature="tips" aria-label="{{tips}}">\
+      <text id="scp-tips-label" text-anchor="middle" x="75" y="178">{{tips}}</text>\
+      <rect x="5" y="148" height="40" width="150" class="scp-hidden-target"/>\
+    </g>\
+    <g id="scp-settings-label" role="button" class="scp-hand-cursor" data-feature="settings" aria-label="{{settings}}">\
+      <text text-anchor="middle" x="285" y="178">{{settings}}</text>\
+      <rect x="200" y="148" height="40" width="165" class="scp-hidden-target"/>\
+    </g>\
+    <g id="scp-feedback-label" role="button" class="scp-hand-cursor" data-feature="feedback" aria-label="{{rate_us}}">\
+      <text text-anchor="middle" x="517" y="178">{{rate_us}}</text>\
+      <rect x="432" y="148" height="40" width="165" class="scp-hidden-target"/>\
+    </g>\
+    <g id="scp-about-label" role="button" class="scp-hand-cursor" data-feature="about" aria-label="{{about}}">\
+      <text text-anchor="middle" x="730" y="178">{{about}}</text>\
+      <rect x="660" y="148" height="40" width="145" class="scp-hidden-target"/>\
+    </g>\
   </g>\
   <rect id="scp-card-header-bg" class="scp-secondary-feature-only" y="1" width="808" height="133" stroke="#C0BFBF" stroke-width="1" fill="#EEE"/>\
   <g>\

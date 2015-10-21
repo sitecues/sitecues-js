@@ -73,7 +73,7 @@ define(['core/conf/site'], function(site) {
       index;
 
     if (SC_DEV) {
-      allBrowserLangs.unshift(browserLang); // Make sure the one we're testing with is first
+      allBrowserLangs = allBrowserLangs.slice().unshift(browserLang); // Make sure the one we're testing with is first
     }
 
     for (index = 0; index < allBrowserLangs.length; index ++) {

@@ -3,24 +3,19 @@
  *   The core module of the sitecues library.
  */
 
-// User's favorite accent no longer chosen -- for example:
-// http://ts.dev.sitecues.com/pages/tired-fr-ca.html?branch=bp3-require  -- should speak in French Canadian, sounds same as
-// http://ts.dev.sitecues.com/pages/tired-fr.html?branch=bp3-require
-// http://ts.dev.sitecues.com/pages/tired-en-uk.html?branch=bp3-require  -- should speak in UK English, sounds same as
-// http://ts.dev.sitecues.com/pages/tired-en.html?branch=bp3-require
-// dealerEmail config option
+// Cursor: Win/Firefox: Cursor hotspot is way off. Win/Chrome: Cursor hotspot is a tiny bit off. (edited)
+// Firefox: keyboard navigation completely off
 // Safari:
 // - Super slow in Safari when theme used, especially with HLB. Also when changing themes.
 // - When highlighting not on normal theme in secondary panel highlighting is off, specifically reproduced in dropdown on eeoc.gov.
-// IE10 secondary bp arrow isn't showing up
-// IE9: Keyboard arrows don’t work to move highlight while in Help box.
-// UX: should tabbing move the highlight? Should focus and sync?
-// Cursor: Win/Firefox: Cursor hotspot is way off. Win/Chrome: Cursor hotspot is a tiny bit off. (edited)
+//
+// User's favorite accent no longer chosen
+// dealerEmail config option
+// ?FIXED? IE10 secondary bp arrow isn't showing up
 // Panel:
 // ? Cannot repro -- Sometimes 4 button panel plops down instead of animating
 // ? Cannot repro -- [Seth] Win/Firefox: Panel gets funky and shifts position after expanding from badge. Maybe due to drop shadow -- drop shadow didn’t match final position
 // - IE10 - more down arrow not showing up is because opacity=0 on #more-button-opacity
-// Firefox: keyboard navigation completely off
 // Weird: Graham managed to get badge to float out there in Safari while using +/-
 
 // Review
@@ -47,6 +42,8 @@
 // Later
 // Fix unit tests
 // About: Get it now
+// IE9: Keyboard arrows don’t work to move highlight while in Help box.
+// UX: should tabbing move the highlight? Should focus and sync?
 //
 
 
