@@ -1,8 +1,6 @@
 // Herein lies the base configuration for the testing framework.
 // Other files can use this as an AMD module.
 
-// TESTING COMMIT WEBHOOKS.
-
 define(
     [   // dependencies...
         'intern',   // public API for the test framework itself
