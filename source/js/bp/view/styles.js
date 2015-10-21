@@ -420,15 +420,15 @@ define(['bp/helper', 'core/platform', 'bp/constants', 'core/conf/site'],
         'stroke-width': '8px',
         'opacity': 1,
         'display': 'block',
-        'pointer-events': 'none !important',
         'fill': 'transparent',
+        'z-index': -1,
         'filter': 'url(#scp-focusblur)'
       },
 
       // Firefox focus for HTML
       '.scp-is-panel [data-show-focus="box-shadow"]:not([data-own-focus-ring])': {
         'box-shadow': '0 0 10px 3px rgb(82,168,236)',
-        'pointer-events': 'none !important'
+        'z-index': -1
       },
 
       '.scp-is-panel.scp-keyboard:not(.scp-secondary-expanding) > #scp-focus-outline[data-show]': {

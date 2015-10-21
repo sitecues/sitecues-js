@@ -32,8 +32,14 @@ define(['core/platform', 'zoom/zoom', 'util/color', 'core/conf/urls'], function 
       MAX_CURSOR_PIXELS_WIN = 71,
       CURSOR_ZOOM_MAX = platform.os.isWin? 3.15: 4,
       CURSOR_OFFSETS = {
-        _default : {x: 10,  y: 5, xStep: 0, yStep: 2.5},
-        _pointer : {x: 12, y: 5, xStep: 3.6, yStep: 1.7}
+        mac: {
+          _default: {x: 10, y: 5, xStep: 0, yStep: 2.5},
+          _pointer: {x: 12, y: 5, xStep: 3.6, yStep: 1.7}
+        },
+        win: {
+          _default: {x: 10, y: 5, xStep: 0, yStep: 2.5},
+          _pointer: {x: 12, y: 5, xStep: 3.6, yStep: 1.7}
+        }
       };
 
   /**
@@ -100,7 +106,7 @@ define(['core/platform', 'zoom/zoom', 'util/color', 'core/conf/urls'], function 
     }
 
     var zoomDiff = zl - 1,  // Lowest zoom level is 1, this is the difference from that
-      offset = CURSOR_OFFSETS['_' + type];
+      offset = CURSOR_OFFSETS[platform.os.is]['_' + type];
 
     return (offset.x + offset.xStep * zoomDiff).toFixed(0) + ' ' + (offset.y + offset.yStep * zoomDiff).toFixed(0);
   }
