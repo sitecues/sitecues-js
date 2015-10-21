@@ -3,12 +3,12 @@
  *   The core module of the sitecues library.
  */
 
+// Initial slider values for theme, mouse
 // Safari:
-// - Super slow in Safari when theme used, especially with HLB. Also when changing themes.
+// - Super slow in Safari when dark theme used, especially with HLB. Also when changing themes.
 // - When highlighting not on normal theme in secondary panel highlighting is off, specifically reproduced in dropdown on eeoc.gov.
 //
 // User's favorite accent no longer chosen
-// ?FIXED? IE10 secondary bp arrow isn't showing up
 // Panel:
 // ? Cannot repro -- Sometimes 4 button panel plops down instead of animating
 // ? Cannot repro -- [Seth] Win/Firefox: Panel gets funky and shifts position after expanding from badge. Maybe due to drop shadow -- drop shadow didn’t match final position
