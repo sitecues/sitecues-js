@@ -427,8 +427,7 @@ define(['bp/helper', 'core/platform', 'bp/constants', 'core/conf/site'],
 
       // Firefox focus for HTML
       '.scp-is-panel [data-show-focus="box-shadow"]:not([data-own-focus-ring])': {
-        'box-shadow': '0 0 10px 3px rgb(82,168,236)',
-        'z-index': -1
+        'box-shadow': '0 0 10px 3px rgb(82,168,236)'
       },
 
       '.scp-is-panel.scp-keyboard:not(.scp-secondary-expanding) > #scp-focus-outline[data-show]': {

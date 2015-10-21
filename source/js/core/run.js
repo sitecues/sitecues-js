@@ -3,18 +3,15 @@
  *   The core module of the sitecues library.
  */
 
-// Cursor: Win/Firefox: Cursor hotspot is way off. Win/Chrome: Cursor hotspot is a tiny bit off. (edited)
 // Safari:
 // - Super slow in Safari when theme used, especially with HLB. Also when changing themes.
 // - When highlighting not on normal theme in secondary panel highlighting is off, specifically reproduced in dropdown on eeoc.gov.
 //
 // User's favorite accent no longer chosen
-// dealerEmail config option
 // ?FIXED? IE10 secondary bp arrow isn't showing up
 // Panel:
 // ? Cannot repro -- Sometimes 4 button panel plops down instead of animating
 // ? Cannot repro -- [Seth] Win/Firefox: Panel gets funky and shifts position after expanding from badge. Maybe due to drop shadow -- drop shadow didn’t match final position
-// - IE10 - more down arrow not showing up is because opacity=0 on #more-button-opacity
 // Weird: Graham managed to get badge to float out there in Safari while using +/-
 
 // Review
@@ -47,6 +44,8 @@
 
 
 // Later
+// dealerEmail config option
+// ? Cursor: Win/Firefox: Cursor hotspot is way off. Win/Chrome: Cursor hotspot is a tiny bit off. (edited)
 // Settings: why do we ever set a cookie? I don't think we can keep it between pages, at least not currently. So why save/get settings from server at all?
 //           Cookie is set for metrics?
 
