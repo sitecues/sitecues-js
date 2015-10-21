@@ -4,7 +4,6 @@
  */
 
 // Cursor: Win/Firefox: Cursor hotspot is way off. Win/Chrome: Cursor hotspot is a tiny bit off. (edited)
-// Firefox: keyboard navigation completely off
 // Safari:
 // - Super slow in Safari when theme used, especially with HLB. Also when changing themes.
 // - When highlighting not on normal theme in secondary panel highlighting is off, specifically reproduced in dropdown on eeoc.gov.
