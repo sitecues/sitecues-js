@@ -45,6 +45,10 @@ define([], function() {
     return typeof document.documentElement.style[propName] === 'string';
   }
 
+  function getCssProp(propName) {
+    return isCssPropSupported(propName) ? propName : cssPrefix + propName;
+  }
+
   // Set globally accessible browser constants
   function getBrowser(agent) {
     var browserStr = getBrowserStr(agent),
@@ -197,7 +201,8 @@ define([], function() {
     transitionEndEvent: transitionEndEvent,
     nativeZoom: nativeZoom,
     isRetina: isRetina,
-    isCssPropSupported: isCssPropSupported
+    isCssPropSupported: isCssPropSupported,
+    getCssProp: getCssProp
   };
 
 });
