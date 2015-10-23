@@ -440,6 +440,8 @@ define(['bp/constants',
 
     HEIGHT_RELATED_ELEMS.forEach(function(elem) {
       transformUtil.setElemTransform(elem, {});
+      elem.style.willChange = 'transform';
+      elem.style.perspective = 999;
     });
 
     resetWebKitLayout(moreButton);
