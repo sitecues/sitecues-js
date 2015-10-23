@@ -9,7 +9,8 @@
     <sc-button data-setting-name="themeName" data-setting-value="increaseContrast" class="scp-hand-cursor scp-tabbable">
       {{{theme.Bold}}}
     </sc-button>
-    <sc-button data-setting-name="themeName" data-setting-value="dark" class="scp-hand-cursor scp-tabbable">
+    <!-- Not supporting dark themes in Safari, IE9-11 until filter: invert(1) no longer required -->
+    <sc-button data-setting-name="themeName" data-setting-value="dark" class="scp-hand-cursor scp-tabbable" data-no-ie11 data-no-safari>
       {{{theme.Dark}}}
     </sc-button>
   </sc-p>

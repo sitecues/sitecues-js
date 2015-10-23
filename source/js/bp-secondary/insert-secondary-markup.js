@@ -168,9 +168,6 @@ htmlSecondary =
     if (platform.cssPrefix) {
       insertSheet('secondary' + platform.cssPrefix);
     }
-    if (platform.browser.isSafari) {
-      insertSheet('secondary-safari-');
-    }
   }
 
   function init() {

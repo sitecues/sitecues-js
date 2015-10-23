@@ -100,6 +100,12 @@ define(['bp/constants', 'bp/helper', 'core/locale', 'bp/model/state', 'core/plat
     if (platform.browser.isIE && platform.browser.version <= 10) {
       removeAllElements(panelElement.querySelectorAll('[data-no-ie10]'));
     }
+    if (platform.browser.isIE && platform.browser.version <= 11) {
+      removeAllElements(panelElement.querySelectorAll('[data-no-ie11]'));
+    }
+    if (platform.browser.isSafari) {
+      removeAllElements(panelElement.querySelectorAll('[data-no-safari]'));
+    }
   }
 
   function onPanelUpdate() {

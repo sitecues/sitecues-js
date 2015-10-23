@@ -5,7 +5,7 @@ define(['bp/helper', 'core/platform', 'bp/constants', 'core/conf/site'],
     isAnimationDebuggingOn = false,
 
     doWebKitPrefix = platform.browser.isSafari,
-    doMsPrefix = platform.isIE9,
+    doMsPrefix = platform.browser.isIE9,
 
     idDelimiter = '#',
     classDelimiter = '.',

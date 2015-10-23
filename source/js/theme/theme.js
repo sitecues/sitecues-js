@@ -3,7 +3,7 @@
  */
 
 define(['$', 'core/conf/user/manager', 'style-service/style-service', 'core/platform',
-    'theme/color-choices', 'util/color', 'theme/img-classifier'],
+    'theme/color-choices', 'util/color', 'theme/img-classifier' ],
   function($, conf, styleService, platform, colorChoices, colorUtil, imgClassifier) {
   var $themeStyleSheet,
     THEME_STYLESHEET_NAME = 'sitecues-theme',
@@ -16,6 +16,7 @@ define(['$', 'core/conf/user/manager', 'style-service/style-service', 'core/plat
     originalBodyBackgroundColor,
     isOriginalThemeDark,
     transitionTimer,
+    inverter,
     MAX_USER_SPECIFIED_HUE = 1.03,   // If > 1.0 then use white
     TRANSITION_CLASS = 'sc-animate-theme',
     TRANSITION_MS_FAST = 300,
@@ -24,17 +25,6 @@ define(['$', 'core/conf/user/manager', 'style-service/style-service', 'core/plat
     URL_REGEXP = /url\((?:(?:[\'\" ])*([^\"\'\)]+)[\'\" ]*)/i,
     GRADIENT_REGEXP = /^\s*([\w-]+\s*gradient)\((.*)\).*$/i,
     BUTTON_REGEXP = /(?:^| |,)(?:(?:input\s*\[\s*type\s*=\s*\"(?:button|color|submit|reset)\"\s*\]\s*)|button)(?:$| |,|:)/,
-    VENDOR_FILTER_PROP = (function() {
-      if (platform.browser.isIE) {
-        return 'msFilter';
-      }
-      else if (platform.browser.isFirefox) {
-        return 'mozFilter';
-      }
-      else {
-        return 'webkitFilter';
-      }
-    })(),
     FILTER_VAL = {
       reversed: 'invert(100%)',
       mediumDark: 'brightness(.6)',
@@ -58,17 +48,15 @@ define(['$', 'core/conf/user/manager', 'style-service/style-service', 'core/plat
         willBeDark = isDarkTheme(colorMapFn),
         isReverseTheme = willBeDark !== isOriginalThemeDark,
         themeCss = colorMapFn ? getThemeCssText(colorMapFn, intensity || DEFAULT_INTENSITY, textHue, isReverseTheme) : '',
-        imgCss = getImageCssText(isReverseTheme),
-      // We want to animate quickly between light themes, but slowly when performing a drastic change
-      // such as going from light to dark or vice-versa
+        imgCss = '',
+        // We want to animate quickly between light themes, but slowly when performing a drastic change
+        // such as going from light to dark or vice-versa
         transitionMs = isDark !== willBeDark ? TRANSITION_MS_SLOW : TRANSITION_MS_FAST,
         transitionCss = initializeTransition(transitionMs);
 
-      if (isReverseTheme) {
-        imgClassifier.classify();
+      if (willBeDark) {
+        imgCss = handleDarkThemeInversions(isDark, willBeDark);
       }
-
-      refreshIframeStyles(willBeDark);
 
       getStyleSheet().text(transitionCss + themeCss + imgCss);
 
@@ -83,62 +71,39 @@ define(['$', 'core/conf/user/manager', 'style-service/style-service', 'core/plat
       }, transitionMs);
     }
 
+    function requireInverter() {
+      if (type === 'dark' && !inverter) {
+        require(['theme/inverter'], function (inverterModule) {
+          inverter = inverterModule;
+          applyThemeImpl();
+        });
+      }
+      else {
+        applyThemeImpl();
+      }
+    }
+
     var colorMapFn = colorChoices[type];
+
     if (colorMapFn || !type) {
-      initStyles(applyThemeImpl);
+      initStyles(requireInverter);
     }
   }
 
-  function getImageCssText(isReverseTheme) {
-    if (!isReverseTheme) {
+  function handleDarkThemeInversions(isDark, willBeDark) {
+    var doInversions = platform.browser.isSafari ||
+      platform.browser.isFirefox ||
+      (platform.browser.isIE && platform.browser.version >=12);
+
+    if (!doInversions) {
       return '';
     }
 
-    var selectors = [ 'img[src]', 'picture[srcset]', 'input[type="image"]', 'svg' ],
-      cssBuilder = '\n';
-
-    selectors.forEach(function(selector) {
-      cssBuilder += selector + '[data-sc-reversible="true"] { ' +
-        createRule('filter', FILTER_VAL.reversed) +
-        createRule(platform.cssPrefix + 'filter', FILTER_VAL.reversed) +
-      ' }\n';
-    });
-
-    return cssBuilder;
-  }
-
-  // Provide extra info on frames, and iframes which may need to be reversed in the dark theme
-  // since they cannot be darkened by the typical theme code which will not reach inside of them.
-  function refreshIframeStyles(isDarkTheme) {
-    var //NOT_REVERSIBLE_FRAME_REGEX = /.*youtube|.*\.vine\.|\.eplayer/,
-      REVERSIBLE_FRAME_REGEX = /twitter/,
-      docBg = colorUtil.getColorString(colorUtil.getDocumentBackgroundColor());
-
-    function setFilter(style, filterVal) {
-      style.filter = filterVal;
-      style[VENDOR_FILTER_PROP] = filterVal;
+    if (isDark !== willBeDark) {
+      inverter.toggle(willBeDark);
     }
 
-    $('frame,iframe').each(function() {
-      var isReversible = this.getAttribute('data-sc-reversible') === 'true' ||
-        this.getAttribute('allowtransparency') === 'true' ||
-        (this.src && this.src.match(REVERSIBLE_FRAME_REGEX)),
-        doReverse = isReversible && isDarkTheme,
-        savedBg = this.getAttribute('data-saved-bg');
-      if (doReverse) {
-        if (!savedBg) {
-          this.setAttribute('data-saved-bg', this.style.backgroundColor);
-        }
-        this.style.backgroundColor = docBg;
-        setFilter(this.style, FILTER_VAL.reversed);
-      }
-      else {
-        if (savedBg) {
-          this.style.backgroundColor = savedBg;
-        }
-        setFilter(this.style, '');
-      }
-    });
+    return getReverseSpriteCssText();
   }
 
   function isDarkTheme(colorMapFn) {
@@ -248,20 +213,21 @@ define(['$', 'core/conf/user/manager', 'style-service/style-service', 'core/plat
     return gradientType + '(' + newGradientParams.join(',') + ')';
   }
 
-  // Reverse background images
-  function getReverseSpriteCssText(bgInfo, selector) {
-    // Create a pseudo element selector for everything that matches the selector
-    function getSelector(pseudo) {
-      return (pseudo ? selector.replace(/(,|$)/g, pseudo + '$1')  : selector) + ' {\n';
-    }
+  function getReverseSpriteCssText() {
+    // Reverse background images
+    function getCssForOneSprite(bgInfo, selector) {
+      // Create a pseudo element selector for everything that matches the selector
+      function getSelector(pseudo) {
+        return (pseudo ? selector.replace(/(,|$)/g, pseudo + '$1') : selector) + ' {\n';
+      }
 
-    if (!bgInfo.hasImageUrl) {
-      return '';
-    }
+      if (!bgInfo.hasImageUrl) {
+        return '';
+      }
 
-    var needsEmpty = bgInfo.doRequireEmpty ? ':empty' : '',
-      finalSelector = getSelector(needsEmpty + ':not([data-sc-reversible="false"])');
-    return finalSelector +
+      var needsEmpty = bgInfo.doRequireEmpty ? ':empty' : '',
+        finalSelector = getSelector(needsEmpty + ':not([data-sc-reversible="false"])');
+      return finalSelector +
         createRule('filter', FILTER_VAL.reversed, true) +
         createRule(platform.cssPrefix + 'filter', FILTER_VAL.reversed, true) +
         // Since we are inverting, make sure the inverse of any text that comes with the bg image
@@ -269,7 +235,21 @@ define(['$', 'core/conf/user/manager', 'style-service/style-service', 'core/plat
         // TODO make this more sophisticated so that the true target colors are reached
         'background-color: #fff !important;\n' +
         'color: #000 !important;\n' +
-      '}\n';
+        '}\n';
+    }
+    var styleSheetText = '';
+
+    // Backgrounds
+    themeStyles.forEach(function(style) {
+      // Don't alter buttons -- it will change it from a native button and the appearance will break
+      // color, background-color
+      if (style.value.prop === 'background-image') {
+        styleSheetText += getCssForOneSprite(style.value, style.rule.selectorText);
+      }
+    });
+
+    return styleSheetText;
+
   }
 
   function createTextShadowRule(size, hue) {
@@ -296,33 +276,22 @@ define(['$', 'core/conf/user/manager', 'style-service/style-service', 'core/plat
    * @param intensity
    * @returns {string}
    */
-  function getThemeCssText(colorMapFn, intensity, textHue, isReverse) {
+  function getThemeCssText(colorMapFn, intensity, textHue) {
 
     var styleSheetText = '';
 
     // Backgrounds
     themeStyles.forEach(function(style) {
-      var newValue,
-        newRgba = {},
-        selector = style.rule.selectorText;
+      var newRgba,
+        newValue,
+        selector = style.rule.selectorText,
+        prop = style.value.prop;
 
-      if (style.value.prop === 'background-image') {
-        if (style.value.gradientVal) {
-          newValue = getThemedGradientCssText(style.value.gradientType, style.value.gradientVal, colorMapFn, intensity);
-        }
-        else if (isReverse) {
-          if (style.value.filter === 'reversed') {
-            styleSheetText += getReverseSpriteCssText(style.value, selector);
-          }
-          return;
-        }
-        else {
-          return;
-        }
+      if (prop === '-sc-gradient') {
+        newRgba = {};
+        newValue = getThemedGradientCssText(style.value.gradientType, style.value.gradientVal, colorMapFn, intensity);
       }
-      else {
-        // Don't alter buttons -- it will change it from a native button and the appearance will break
-        // color, background-color
+      else if (prop === 'color' || prop === 'background-color') {
         newRgba = colorMapFn(style.value, intensity, textHue);
         newValue = newRgba && newRgba.a && colorUtil.getColorString(newRgba);
       }
@@ -331,6 +300,8 @@ define(['$', 'core/conf/user/manager', 'style-service/style-service', 'core/plat
           formFixes = '',
           textShadow = '';
         if (isButtonRule(selector)) {
+          // Don't alter buttons -- it will change it from a native button and the appearance will break
+          // color, background-color
           formFixes = 'border:1px outset ButtonFace;border-radius:4px';
         }
         if (newRgba.textShadow) {
@@ -416,8 +387,7 @@ define(['$', 'core/conf/user/manager', 'style-service/style-service', 'core/plat
   }
 
   function getSignificantBgImageProperties(cssStyleDecl, selector) {
-    var bgPositionStyles = '',
-      bgImagePropVal = cssStyleDecl['background-image'],
+    var bgImagePropVal = cssStyleDecl['background-image'],
       imageUrl,
       gradient,
       cssText = cssStyleDecl.cssText,
@@ -426,6 +396,16 @@ define(['$', 'core/conf/user/manager', 'style-service/style-service', 'core/plat
 
     if (cssText.indexOf('background') < 0) {
       return;  // Need some background property
+    }
+
+    imageUrl = getCssUrl(bgImagePropVal);
+    gradient = !imageUrl && getBackgroundGradient(bgImagePropVal);
+    if (gradient) {
+      return {
+        prop: '-sc-gradient',
+        gradientType: gradient && gradient[1],
+        gradientVal: gradient && gradient[2]
+      };
     }
 
     function getBackgroundGradient(propVal) {
@@ -441,8 +421,6 @@ define(['$', 'core/conf/user/manager', 'style-service/style-service', 'core/plat
     }
 
     sampleElement = getSampleElement(selector);
-    imageUrl = getCssUrl(bgImagePropVal);
-    gradient = !imageUrl && getBackgroundGradient(bgImagePropVal);
     hasRepeat = cssStyleDecl.backgroundRepeat && cssStyleDecl.backgroundRepeat.indexOf('no-repeat') === -1;
 
 
@@ -479,17 +457,16 @@ define(['$', 'core/conf/user/manager', 'style-service/style-service', 'core/plat
       return 'mediumDark';
     }
 
-    if (imageUrl || gradient || bgPositionStyles) {
+    if (imageUrl) {
       var bgInfo = {
         prop: 'background-image',
         hasImageUrl: !!imageUrl,
-        gradientType: gradient && gradient[1],
-        gradientVal: gradient && gradient[2],
         doRequireEmpty: hasRepeat,
         backgroundColor: cssStyleDecl.backgroundColor
       };
-      bgInfo.filter = imageUrl && getBackgroundImageFilter(bgInfo, imageUrl, cssStyleDecl, sampleElement);
-      return bgInfo;
+      if (getBackgroundImageFilter(bgInfo, imageUrl, cssStyleDecl, sampleElement) === 'reversed') {
+        return bgInfo;
+      }
     }
   }
 

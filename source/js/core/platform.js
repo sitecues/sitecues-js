@@ -7,14 +7,13 @@ define([], function() {
   // Store the agent and platform variables for later use
   var agent = navigator.userAgent || '',
     browser = getBrowser(agent),
-    isIE9 = browser.isIE && browser.version === 9,   // Convenience method as IE9 is a common issue
     os = getOS(agent, getOSStr(navigator.platform.toLowerCase())),
     // platformModule.pixel is deprecated
     // use zoom.isRetina() to determine whether the current window is on a 2x pixel ratio or not
     // When a window moves to another display, it can change
     canUseRetinaCursors = browser.isChrome,
     cssPrefix = getCssPrefix(browser),
-    transformPropertyCss =  isIE9 ? '-ms-transform' : ((browser.isWebKit && !isCssPropSupported('transform'))? '-webkit-transform' : 'transform'),
+    transformPropertyCss =  browser.isIE9 ? '-ms-transform' : ((browser.isWebKit && !isCssPropSupported('transform'))? '-webkit-transform' : 'transform'),
     transformProperty = transformPropertyCss.replace('-t', 'T').replace('-', ''),
     transformOriginProperty = transformProperty + 'Origin',
     transitionEndEvent = browser.isWebKit ? 'webkitTransitionEnd' : 'transitionend',
@@ -52,20 +51,26 @@ define([], function() {
   // Set globally accessible browser constants
   function getBrowser(agent) {
     var browserStr = getBrowserStr(agent),
-      browser = {
-        zoom: 'zoom' in document.createElement('div').style,
-        is: browserStr,
-        isFirefox: browserStr === 'Firefox',
-        isIE: browserStr === 'IE',
-        isChrome: browserStr === 'Chrome',
-        isOpera: browserStr === 'Opera',
-        isSafari: browserStr === 'Safari',
-        isWebKit: browserStr === 'Chrome' || browserStr === 'Opera' || browserStr === 'Safari',
-        isUnknown: browserStr === 'Unknown'
-      };
-    browser.version = getVersion(agent, browser.isIE);
+      isIE = browserStr === 'IE',
+      version = getVersion(agent, isIE);
 
-    return browser;
+
+    return {
+      zoom: 'zoom' in document.createElement('div').style,
+      is: browserStr,
+      version: version,
+      isFirefox: browserStr === 'Firefox',
+      isIE: isIE,
+      isIE9: isIE && version === 9,
+      isIE10Plus: isIE && version >= 10,
+      isIE11Plus: isIE && version >= 11,
+      isIE12Plus: isIE && version >= 12,
+      isChrome: browserStr === 'Chrome',
+      isOpera: browserStr === 'Opera',
+      isSafari: browserStr === 'Safari',
+      isWebKit: browserStr === 'Chrome' || browserStr === 'Opera' || browserStr === 'Safari',
+      isUnknown: browserStr === 'Unknown'
+    };
   }
 
   // Set globally accessible version constants
@@ -192,7 +197,6 @@ define([], function() {
   return {
     browser: browser,
     os: os,
-    isIE9: isIE9,
     canUseRetinaCursors: canUseRetinaCursors,
     cssPrefix: cssPrefix,
     transformProperty: transformProperty,
