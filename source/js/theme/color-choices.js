@@ -143,7 +143,7 @@ define(['$', 'util/color'], function ($, colorUtil) {
 
       var isInDarkPara = isInDarkParagraph($sampleElements, luminosity);
       if (typeof isInDarkPara !== 'undefined') {
-        return isInDarkPara ? -1 : 1;
+        return isInDarkPara ? 1 : -1;
       }
 
       // Middle of the road foreground color -- analyze background
