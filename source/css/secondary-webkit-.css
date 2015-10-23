@@ -13,6 +13,7 @@ sc-button[data-setting-name="themeName"][aria-pressed="true"]:after {
   content: url('../images/settings/theme-indicator.svg');
   padding-left: 50%;
   margin-left: -10px;
+  pointer-events: none;
 }
 
 /* ------------- Textarea placeholder ------------ */
