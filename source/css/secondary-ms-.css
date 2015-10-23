@@ -19,6 +19,7 @@ sc-button[data-setting-name="themeName"][aria-pressed="true"]:after {
   left: 20px;
   top: 35px;
 }
+
 #scp-feedback-textarea:focus:-ms-input-placeholder {
   color: transparent;
 }
