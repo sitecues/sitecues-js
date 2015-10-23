@@ -1,5 +1,5 @@
-define(['bp/constants', 'bp/helper', 'core/conf/user/manager', 'bp/model/state', 'core/metric', 'core/platform'],
-  function (BP_CONST, helper, conf, state, metric, platform) {
+define(['bp/constants', 'bp/helper', 'core/conf/user/manager', 'bp/model/state', 'core/metric', 'core/platform', 'cursor/cursor'],
+  function (BP_CONST, helper, conf, state, metric, platform, cursor) {
 
   var byId = helper.byId,
     isActive = false,
@@ -18,6 +18,9 @@ define(['bp/constants', 'bp/helper', 'core/conf/user/manager', 'bp/model/state',
         if (!settingsPanel) {
           initContents();
         }
+
+        mouseSlidersInit();  // Always use current mouse size as starting point
+
         settingsCards.addEventListener('click', onSettingsClick);
         settingsCards.addEventListener('change', onSettingsNativeInputChange);
         settingsCards.addEventListener('input', onSettingsNativeInputChangeDrag);
@@ -79,6 +82,10 @@ define(['bp/constants', 'bp/helper', 'core/conf/user/manager', 'bp/model/state',
     return byId(BP_CONST.THEME_TEXT_HUE_ID);
   }
 
+  function getMouseSizeRange() {
+    return byId(BP_CONST.MOUSE_SIZE_ID);
+  }
+
   function initRangeListener(settingName, rangeElem) {
     conf.get(settingName, function(val) {
       rangeElem.value = val;
@@ -107,6 +114,17 @@ define(['bp/constants', 'bp/helper', 'core/conf/user/manager', 'bp/model/state',
       getThemePowerGroup().setAttribute('data-show', isThemePowerEnabled);
       getThemeTextHueGroup().setAttribute('data-show', isThemeTextHueEnabled);
     });
+  }
+
+  function mouseSlidersInit() {
+    var size = cursor.getSize(),
+      MIN_BP_CURSOR_SIZE = 1.9;
+
+    if (!conf.get('mouseSize')) {
+      // No setting, so start from current cursor size means using the BP cursor size as a minimum
+      size = Math.max(size, MIN_BP_CURSOR_SIZE);
+    }
+    getMouseSizeRange().value = size;
   }
 
 

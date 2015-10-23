@@ -21,7 +21,7 @@ define(['$', 'core/conf/user/manager', 'style-service/style-service', 'core/plat
     TRANSITION_CLASS = 'sc-animate-theme',
     TRANSITION_MS_FAST = 300,
     TRANSITION_MS_SLOW = 1400,
-    DEFAULT_INTENSITY = 0.5,
+    DEFAULT_INTENSITY = 0.7,
     URL_REGEXP = /url\((?:(?:[\'\" ])*([^\"\'\)]+)[\'\" ]*)/i,
     GRADIENT_REGEXP = /^\s*([\w-]+\s*gradient)\((.*)\).*$/i,
     BUTTON_REGEXP = /(?:^| |,)(?:(?:input\s*\[\s*type\s*=\s*\"(?:button|color|submit|reset)\"\s*\]\s*)|button)(?:$| |,|:)/,

@@ -30,8 +30,7 @@ define(['$', 'style-service/style-service', 'core/conf/user/manager', 'cursor/cu
       userSpecifiedHue,
       doAllowCursors = !platform.browser.isIE || platform.browser.version >= 11 || site.get('disableCursorEnhancement') === false,
       doUseAjaxCursors = platform.browser.isIE,
-      doDisableDuringZoom = platform.browser.isIE,
-      getAutoSize = cursorCss.getCursorZoom;
+      doDisableDuringZoom = platform.browser.isIE;
 
   /*
    * Change a style rule in the sitecues-cursor stylesheet to use the new cursor URL
@@ -341,13 +340,18 @@ define(['$', 'style-service/style-service', 'core/conf/user/manager', 'cursor/cu
     return userSpecifiedHue > 0 && userSpecifiedHue <= 1 ? userSpecifiedHue : 0;
   }
 
+  // Get the auto size for the cursor at the supplied page zoom level, or at the current page zoom if none supplied
+  function getSize(pageZoom) {
+    return userSpecifiedSize || cursorCss.getCursorZoom(pageZoom || conf.get('zoom') || 1);
+  }
+
   function onPageZoom(pageZoom) {
     if (userSpecifiedSize) {
       return;
     }
     // At page zoom level 1.0, the cursor is the default size (same as us being off).
     // After that, the cursor grows faster than the zoom level, maxing out at 4x at zoom level 3
-    var newCursorZoom = getAutoSize(pageZoom);
+    var newCursorZoom = cursorCss.getCursorZoom(pageZoom);
     if (autoSize !== newCursorZoom) {
       autoSize = newCursorZoom;
       refreshStylesheetsIfNecessary();
@@ -370,11 +374,12 @@ define(['$', 'style-service/style-service', 'core/conf/user/manager', 'cursor/cu
     }
 
     constructBPCursorStylesheet();
-    autoSize = getAutoSize(conf.get('zoom') || 1);
+    autoSize = getSize();
     refreshStylesheetsIfNecessary();
   }
 
   return {
-    init: init
+    init: init,
+    getSize: getSize
   };
 });
