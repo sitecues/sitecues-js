@@ -3,9 +3,6 @@
  *   The core module of the sitecues library.
  */
 
-// Safari:
-// - When highlighting not on normal theme in secondary panel highlighting is off, specifically reproduced in dropdown on eeoc.gov.
-//
 // User's favorite accent no longer chosen
 // Panel:
 // ? Cannot repro -- Sometimes 4 button panel plops down instead of animating
@@ -42,7 +39,9 @@
 
 
 // Later
-// Dark themes in Safari, IE11 via web service (for CSS, image analysis, image reversal)
+// Dark themes:
+// - In Safari, IE11 via web service (for CSS, image analysis, image reversal)
+// - In Safari, when highlighting dark theme and zooming highlighting is off, specifically reproduced in dropdown on eeoc.gov.
 // dealerEmail config option
 // ? Cursor: Win/Firefox: Cursor hotspot is way off. Win/Chrome: Cursor hotspot is a tiny bit off. (edited)
 // Settings: why do we ever set a cookie? I don't think we can keep it between pages, at least not currently. So why save/get settings from server at all?
