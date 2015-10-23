@@ -3,26 +3,18 @@
  */
 define(['keys/element-classifier', 'core/platform'], function (elemClassifier, platform) {
 
-  /*
-   * Check if two Javascript objects are equal.
-   * TODO this can be fooled by the order of properties, but we don't care for our uses
-   * @param {type} obj1
-   * @param {type} obj2
-   * @returns {unresolved}
-   */
-  function equals(obj1, obj2) {
-    return JSON.stringify(obj1) === JSON.stringify(obj2);
-  }
-
   /**
    * Checks if the text in a text node given is empty or not.
    */
+   //TODO: Clarify intended purpose of function: if non-empty strings containing punctuation characters
+  // should return true consider renaming
   function isEmpty(textNode) {
     var val = textNode.data;
     return !val || /^\W*$/.test(val);  // Only whitespace or punctuation
   }
 
   // Return true if there is a visual sub-box of content
+  //TODO: Consider refactoring signature to take just the element as a parameter
   function isVisualRegion(element, style, parentStyle) {
     if (element === document.documentElement || element === document.body) {
       return false; // False for entire document because we are looking for sub-boxes of content
@@ -40,11 +32,14 @@ define(['keys/element-classifier', 'core/platform'], function (elemClassifier, p
     return parseFloat(style.zIndex) > parseFloat(parentStyle.zIndex);
   }
 
+  //NOTE: backgroundPositionX and backgroundPositionY are unsupported in firefox and opera
+  //Consider using backgroundPosition
   function isSprite(style) {
     return style.backgroundImage !== 'none' && (style.backgroundRepeat === 'no-repeat' ||
       parseFloat(style.backgroundPositionX) === 0 || parseFloat(style.backgroundPositionY) === 0);
   }
 
+  //TODO: Consider refactoring signature to take just the element as a parameter
   function hasOwnBackground(elem, style, parentStyle) {
     if (!style) {
       return false;
@@ -58,6 +53,7 @@ define(['keys/element-classifier', 'core/platform'], function (elemClassifier, p
     return hasOwnBackgroundColor(elem, style, parentStyle);
   }
 
+  //TODO: Consider refactoring signature to take just the element as a parameter
   function hasOwnBackgroundColor(elem, style, parentStyle) {
     var bgColor = style.backgroundColor;
     if (parentStyle && !isTransparentColor(bgColor)) {
@@ -73,6 +69,7 @@ define(['keys/element-classifier', 'core/platform'], function (elemClassifier, p
       }
       return parentStyle.backgroundColor !== bgColor;
     }
+    return false;
   }
 
   function hasVisibleContent(current) {
@@ -172,6 +169,7 @@ define(['keys/element-classifier', 'core/platform'], function (elemClassifier, p
   }
 
   var MONOSPACE_BULLET_TYPES = { circle: 1, square: 1, disc: 1, none: 1 };
+
   function getBulletWidth(listElement, style) {
     var bulletType = style.listStyleType,
       ems = 2.5;  // Browsers seem use max of 2.5 em for bullet width -- use as a default
@@ -185,7 +183,9 @@ define(['keys/element-classifier', 'core/platform'], function (elemClassifier, p
     return getEmsToPx(style.fontSize, ems);
   }
 
-  /* ----------------------- PRIVATE ----------------------- */
+  /**
+   * @private
+   */
   function isNonEmptyTextNode(node) {
     return node.nodeType === 3 /* Text node */ && !isEmpty(node);
   }
@@ -220,7 +220,6 @@ define(['keys/element-classifier', 'core/platform'], function (elemClassifier, p
   }
 
   return {
-    equals: equals,
     isEmpty: isEmpty,
     isVisualRegion: isVisualRegion,
     hasRaisedZIndex: hasRaisedZIndex,

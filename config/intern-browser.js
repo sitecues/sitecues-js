@@ -84,15 +84,16 @@ define(
             // These are unit tests, which check the APIs of our application...
             suites: testSuites.unit,
             // These are functional tests, which check the user-facing behavior of our application...
-            functionalSuites: testSuites.functional,
+            //functionalSuites: testSuites.functional,
 
             // Any test IDs ("suite name - test name") which do NOT match this regex will be skipped...
             grep: /.*/,
 
             // The paths that match this regex will NOT be included in code coverage reports...
             excludeInstrumentation: /^(?:config|test|node_modules)\//
-            
-            *// How to display or save test run info.
+
+            //Disabled Node.js dependent reporter for running in the browser
+            /*// How to display or save test run info.
             reporters: [
                 // Test result reporters.
                 { id : 'Runner' }
@@ -101,6 +102,6 @@ define(
                 // { id : 'Cobertura', filename  : 'report/coverage/info/cobertura.info' },
                 // { id : 'Lcov',      filename  : 'report/coverage/info/lcov.info' },
                 // { id : 'LcovHtml',  directory : 'report/coverage/html' }
-            ]
+            ]*/
         };
     });
