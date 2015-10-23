@@ -3,9 +3,7 @@
  *   The core module of the sitecues library.
  */
 
-// Initial slider values for theme, mouse
 // Safari:
-// - Super slow in Safari when dark theme used, especially with HLB. Also when changing themes.
 // - When highlighting not on normal theme in secondary panel highlighting is off, specifically reproduced in dropdown on eeoc.gov.
 //
 // User's favorite accent no longer chosen
@@ -44,6 +42,7 @@
 
 
 // Later
+// Dark themes in Safari, IE11 via web service (for CSS, image analysis, image reversal)
 // dealerEmail config option
 // ? Cursor: Win/Firefox: Cursor hotspot is way off. Win/Chrome: Cursor hotspot is a tiny bit off. (edited)
 // Settings: why do we ever set a cookie? I don't think we can keep it between pages, at least not currently. So why save/get settings from server at all?
