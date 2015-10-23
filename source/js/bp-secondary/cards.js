@@ -1,8 +1,8 @@
 /**
  * Generic module for handling the cards used by tips and settings
  */
-define(['bp/constants', 'bp/helper', 'core/locale', 'bp/model/state', 'core/platform', 'core/util/xhr', 'core/conf/urls'],
-  function (BP_CONST, helper, locale, state, platform, xhr, urls) {
+define(['bp/constants', 'bp/helper', 'core/locale', 'bp/model/state', 'core/platform', 'core/util/xhr', 'core/conf/urls', 'core/conf/site'],
+  function (BP_CONST, helper, locale, state, platform, xhr, urls, site) {
 
   var
     PANELS_WITH_CARDS = { tips: 1, settings: 1},
@@ -89,16 +89,41 @@ define(['bp/constants', 'bp/helper', 'core/locale', 'bp/model/state', 'core/plat
     tabStrip.style.width = (parseFloat(tabStripStyle.width) + additionalSpaceLeft * 2) + 'px';
   }
 
-  function removeAllElements(elements) {
-    var index = elements.length;
-    while (index --) {
-      elements[index].parentNode.removeChild(elements[index]);
+  // Remove elements unless required by the site config
+  function removeAllElements(panelElement, elementsToRemoveSelector) {
+    function applyDisplayStyle(elements, display) {
+      var index = elements.length;
+      while (index--) {
+        elements[index].style.display = display;
+      }
     }
+
+    var remove = panelElement.querySelectorAll(elementsToRemoveSelector),
+      keepSelector = site.get('keepInPanel'),
+      keep = keepSelector && panelElement.querySelectorAll(keepSelector);
+
+    applyDisplayStyle(remove, 'none');
+    if (keep) {
+      applyDisplayStyle(keep, 'block');
+    }
+
   }
 
   function removeUnsupportedContent(panelElement) {
+    var removeElems;
+
     if (platform.browser.isIE && platform.browser.version <= 10) {
-      removeAllElements(panelElement.querySelectorAll('[data-no-ie10]'));
+      removeElems = '[data-no-ie10],[data-no-ie11]';
+    }
+    else if (platform.browser.isIE && platform.browser.version <= 11) {
+      removeElems = '[data-no-ie11]';
+    }
+    else if (platform.browser.isSafari) {
+      removeElems = '[data-no-safari]';
+    }
+
+    if (removeElems) {
+      removeAllElements(panelElement, removeElems);
     }
   }
 

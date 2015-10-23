@@ -89,6 +89,7 @@
         'util/common',
         'bp-expanded/view/transform-animate',
         'bp-expanded/view/transform-util',
+        'cursor/cursor',
         'core/metric',
         'core/conf/urls',
         'core/conf/user/manager'

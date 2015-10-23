@@ -106,6 +106,7 @@ define([], function() {
   // Settings panel gadgets
   constants.THEME_POWER_ID           = 'scp-theme-power-group';
   constants.THEME_TEXT_HUE_ID        = 'scp-theme-text-hue-group';
+  constants.MOUSE_SIZE_ID            = 'scp-mouse-size';
 
   constants.HOVER_DELAY_BADGE = 30;
   constants.HOVER_DELAY_TOOLBAR = 150;

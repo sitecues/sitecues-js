@@ -55,7 +55,7 @@ define(['bp/constants', 'bp/model/state', 'core/locale', 'bp/helper', 'core/conf
    Default bounding box object.
    */
   var
-    badgeElement,
+    badgeOrToolbarElement,
     getNumberFromString = helper.getNumberFromString,
     lastBgColor,
     isInitialized;
@@ -143,13 +143,13 @@ define(['bp/constants', 'bp/model/state', 'core/locale', 'bp/helper', 'core/conf
           i   = 0;
       for (; i < len; i++) {
         div.style[styles[i]] = getNumberFromString(badgeComputedStyles[styles[i]]) + 'px';
-        badgeElement.style[styles[i]] = 0;
+        badgeOrToolbarElement.style[styles[i]] = 0;
       }
     }
 
     var div                 = document.createElement('sc'),
-        badgeImgBoundingBox = helper.getRect(badgeElement),
-        badgeComputedStyles = window.getComputedStyle(badgeElement),
+        badgeImgBoundingBox = helper.getRect(badgeOrToolbarElement),
+        badgeComputedStyles = window.getComputedStyle(badgeOrToolbarElement),
         stylesToTransfer    = [
           'marginTop',
           'marginBottom',
@@ -162,7 +162,7 @@ define(['bp/constants', 'bp/model/state', 'core/locale', 'bp/helper', 'core/conf
         ];
 
     // Added to fix issue on ruhglobal.com
-    if (badgeElement.style.position === 'relative') {
+    if (badgeOrToolbarElement.style.position === 'relative') {
       stylesToTransfer.push('top');
       stylesToTransfer.push('left');
     }
@@ -175,19 +175,19 @@ define(['bp/constants', 'bp/model/state', 'core/locale', 'bp/helper', 'core/conf
     div.style.width   = badgeImgBoundingBox.width  - (badgeComputedStyles.paddingLeft + badgeComputedStyles.paddingRight)  + 'px';
     div.style.float   = badgeComputedStyles.float;
 
-    badgeElement.setAttribute('aria-hidden', true); // Existing badge is hidden from screen readers, because the new <div> parent will be the real badge
-    badgeElement.parentElement.insertBefore(div, badgeElement);
+    badgeOrToolbarElement.setAttribute('aria-hidden', true); // Existing badge is hidden from screen readers, because the new <div> parent will be the real badge
+    badgeOrToolbarElement.parentElement.insertBefore(div, badgeOrToolbarElement);
 
-    div.appendChild(badgeElement);
+    div.appendChild(badgeOrToolbarElement);
 
   }
 
   function removeExistingBadgeId() {
-    badgeElement.removeAttribute('id');
+    badgeOrToolbarElement.removeAttribute('id');
   }
 
   function setBadgeParentId() {
-    badgeElement.parentElement.id = BP_CONST.BADGE_ID;
+    badgeOrToolbarElement.parentElement.id = BP_CONST.BADGE_ID;
   }
 
   function checkBackgroundColorChange() {
@@ -295,14 +295,14 @@ define(['bp/constants', 'bp/model/state', 'core/locale', 'bp/helper', 'core/conf
     var badge = !isToolbarUIRequested() && helper.byId(BP_CONST.BADGE_ID);
 
     // Get site's in-page placeholder badge or create our own
-    badgeElement = badge || createToolbar();
+    badgeOrToolbarElement = badge || createToolbar();
 
-    setCustomPalette(badgeElement);
+    setCustomPalette(badgeOrToolbarElement);
 
     // If a customer uses the <img> placeholder...
-    if (badgeElement.localName === 'img') {
+    if (badgeOrToolbarElement.localName === 'img') {
 
-      badgeElement.setAttribute('data-sc-reversible', false); // Will use a different palette dark theme is used
+      badgeOrToolbarElement.setAttribute('data-sc-reversible', false); // Will use a different palette dark theme is used
 
       convertExistingBadge();
       removeExistingBadgeId();
@@ -312,16 +312,18 @@ define(['bp/constants', 'bp/model/state', 'core/locale', 'bp/helper', 'core/conf
       // from the <img> and set it on the <div>
       helper.invalidateId(BP_CONST.BADGE_ID);
 
-      badgeElement = badgeElement.parentElement;
+      badgeOrToolbarElement = badgeOrToolbarElement.parentElement;
 
     }
 
-    setCSSPositioningForBadge();
+    if (badge) {
+      setCSSPositioningForBadge();
+    }
 
-    helper.setAttributes(badgeElement, BP_CONST.BADGE_ATTRS);
-    badgeElement.setAttribute('aria-label', locale.translate(BP_CONST.STRINGS.BADGE_LABEL));
+    helper.setAttributes(badgeOrToolbarElement, BP_CONST.BADGE_ATTRS);
+    badgeOrToolbarElement.setAttribute('aria-label', locale.translate(BP_CONST.STRINGS.BADGE_LABEL));
 
-    return badgeElement;
+    return badgeOrToolbarElement;
 
   }
 
@@ -329,10 +331,10 @@ define(['bp/constants', 'bp/model/state', 'core/locale', 'bp/helper', 'core/conf
   // the position: absolute sc-bp-container inside of it
   function setCSSPositioningForBadge() {
 
-    var existingPositionCss = getComputedStyle(badgeElement).position;
+    var existingPositionCss = getComputedStyle(badgeOrToolbarElement).position;
 
     if (existingPositionCss === 'static') {
-      badgeElement.style.position = 'relative';
+      badgeOrToolbarElement.style.position = 'relative';
     }
   }
 

@@ -19,7 +19,7 @@ define(['bp/constants', 'bp/helper', 'bp-expanded/view/transform-util', 'bp-expa
       isInitialized;
 
   function getHelpOrSecondaryPanel(doToggle) {
-    if (platform.isIE9) {
+    if (platform.browser.isIE9) {
       require(['info/info'], function(info) {
         if (doToggle) {
           info.showHelp();

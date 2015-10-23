@@ -3,7 +3,7 @@
  */
 
 define(['$', 'core/conf/user/manager', 'style-service/style-service', 'core/platform',
-    'theme/color-choices', 'util/color', 'theme/img-classifier'],
+    'theme/color-choices', 'util/color', 'theme/img-classifier' ],
   function($, conf, styleService, platform, colorChoices, colorUtil, imgClassifier) {
   var $themeStyleSheet,
     THEME_STYLESHEET_NAME = 'sitecues-theme',
@@ -16,39 +16,20 @@ define(['$', 'core/conf/user/manager', 'style-service/style-service', 'core/plat
     originalBodyBackgroundColor,
     isOriginalThemeDark,
     transitionTimer,
+    inverter,
     MAX_USER_SPECIFIED_HUE = 1.03,   // If > 1.0 then use white
     TRANSITION_CLASS = 'sc-animate-theme',
     TRANSITION_MS_FAST = 300,
     TRANSITION_MS_SLOW = 1400,
-    DEFAULT_INTENSITY = 0.5,
+    DEFAULT_INTENSITY = 0.7,
     URL_REGEXP = /url\((?:(?:[\'\" ])*([^\"\'\)]+)[\'\" ]*)/i,
     GRADIENT_REGEXP = /^\s*([\w-]+\s*gradient)\((.*)\).*$/i,
     BUTTON_REGEXP = /(?:^| |,)(?:(?:input\s*\[\s*type\s*=\s*\"(?:button|color|submit|reset)\"\s*\]\s*)|button)(?:$| |,|:)/,
-    MOVE_BG_IMAGE_TO_PSEUDO = 'display:block;position:absolute;content:"";',
-    PSEUDO_FOR_BG_IMAGES = '::before',
-    FILTER_PROP = platform.cssPrefix + 'filter',
     FILTER_VAL = {
       reversed: 'invert(100%)',
       mediumDark: 'brightness(.6)',
       veryDark: 'brightness(.2)'
-    },
-    INVERT_FILTER = createRule(FILTER_PROP, FILTER_VAL.reversed),
-    BACKGROUND_IMG_POSITIONING_PROPS = [
-      'background-repeat',
-      'background-attachment',
-      'background-position-x',
-      'background-position-y',
-      'background-origin',
-      'background-size',
-      'background-clip'
-//          'vertical-align',
-//          'padding',
-//          'padding-top',
-//          'padding-left',
-//          'padding-bottom',
-//          'padding-right',
-//          'box-sizing'
-    ];
+    };
 
   // ---- PUBLIC ----
 
@@ -67,19 +48,20 @@ define(['$', 'core/conf/user/manager', 'style-service/style-service', 'core/plat
         willBeDark = isDarkTheme(colorMapFn),
         isReverseTheme = willBeDark !== isOriginalThemeDark,
         themeCss = colorMapFn ? getThemeCssText(colorMapFn, intensity || DEFAULT_INTENSITY, textHue, isReverseTheme) : '',
-      // We want to animate quickly between light themes, but slowly when performing a drastic change
-      // such as going from light to dark or vice-versa
+        imgCss = '',
+        // We want to animate quickly between light themes, but slowly when performing a drastic change
+        // such as going from light to dark or vice-versa
         transitionMs = isDark !== willBeDark ? TRANSITION_MS_SLOW : TRANSITION_MS_FAST,
-        transitionCss = initializeTransition(transitionMs),
-        reverseCss = isReverseTheme ? getReverseFramesCssText() : '';
+        transitionCss = initializeTransition(transitionMs);
 
-      getStyleSheet().text(transitionCss + themeCss + reverseCss);
+      if (willBeDark) {
+        imgCss = handleDarkThemeInversions(isDark, willBeDark);
+      }
+
+      getStyleSheet().text(transitionCss + themeCss + imgCss);
 
       // Allow web pages to create CSS rules that respond to reverse themes
       $('body').toggleClass('sitecues-reverse-theme', isReverseTheme);
-      if (isReverseTheme) {
-        imgClassifier.classify();
-      }
 
       setTimeout(function () {
         if (shouldRepaintToEnsureFullCoverage) {
@@ -89,10 +71,39 @@ define(['$', 'core/conf/user/manager', 'style-service/style-service', 'core/plat
       }, transitionMs);
     }
 
-    var colorMapFn = colorChoices[type];
-    if (colorMapFn || !type) {
-      initStyles(applyThemeImpl);
+    function requireInverter() {
+      if (type === 'dark' && !inverter) {
+        require(['theme/inverter'], function (inverterModule) {
+          inverter = inverterModule;
+          applyThemeImpl();
+        });
+      }
+      else {
+        applyThemeImpl();
+      }
     }
+
+    var colorMapFn = colorChoices[type];
+
+    if (colorMapFn || !type) {
+      initStyles(requireInverter);
+    }
+  }
+
+  function handleDarkThemeInversions(isDark, willBeDark) {
+    var doInversions = platform.browser.isSafari ||
+      platform.browser.isFirefox ||
+      (platform.browser.isIE && platform.browser.version >=12);
+
+    if (!doInversions) {
+      return '';
+    }
+
+    if (isDark !== willBeDark) {
+      inverter.toggle(willBeDark);
+    }
+
+    return getReverseSpriteCssText();
   }
 
   function isDarkTheme(colorMapFn) {
@@ -118,26 +129,23 @@ define(['$', 'core/conf/user/manager', 'style-service/style-service', 'core/plat
   }
 
   function getThemeTransitionCss(transitionMs) {
-    var ANIMATION_SELECTOR = 'html.' + TRANSITION_CLASS +', html.' +
-          TRANSITION_CLASS + '> body, html.' + TRANSITION_CLASS + '> body *',
-      TRANSITION_CSS = '{transition: background-color ' + transitionMs + 'ms;}\n\n';
+    var selectorBuilder = 'html.' + TRANSITION_CLASS +', html.' +
+          TRANSITION_CLASS + '> body',
+      transitionCss = '{transition: background-color ' + transitionMs + 'ms;}\n\n';
 
-    return ANIMATION_SELECTOR + TRANSITION_CSS;
-  }
+    // Set the transition for every selector in the page that targets a background color
+    themeStyles.forEach(function(themeStyle) {
+      var type = themeStyle.rule.value,
+        selectors;
+      if (type === 'background' || type === 'background-color') {
+        selectors = themeStyle.rule.selectorText.split(',');
+        selectors.forEach(function(bgSelector) {
+          selectorBuilder += ',.' + TRANSITION_CLASS + ' ' + bgSelector;
+        });
+      }
+    });
 
-  // Reverses iframes if we are in a reverse theme
-  // Should we reverse non-photo images as well?
-  // See http://stackoverflow.com/questions/9354744/how-to-detect-if-an-image-is-a-photo-clip-art-or-a-line-drawing
-  // Also see Jeff's image classifier code:
-  // - http://roc.cs.rochester.edu/e/ic/features.php?user=none
-  // - http://roc.cs.rochester.edu/e/ic/classify.php?user=none
-  // We should maybe just do stuff that looks like text -- this is usually 3x as long, and < 200px high
-  function getReverseFramesCssText() {
-    var REVERSIBLE = ':not([data-sc-reversible="false"])',
-      FRAME ='frame' + REVERSIBLE + ',iframe:not([src*="youtube"]:not([src*=".vine."])' + REVERSIBLE,
-      docBg = colorUtil.getColorString(colorUtil.getDocumentBackgroundColor());
-
-    return FRAME + '{' + createRule('background-color', docBg) + INVERT_FILTER + '};\n';
+    return selectorBuilder + transitionCss;
   }
 
   function createRule(prop, newValue, important) {
@@ -205,101 +213,43 @@ define(['$', 'core/conf/user/manager', 'style-service/style-service', 'core/plat
     return gradientType + '(' + newGradientParams.join(',') + ')';
   }
 
-  // Map background image related rules to something that can be reversed
-  // TODO clean this up
-  function getReverseSpriteCssText(bgInfo, selector) {
-    // Create a pseudo element selector for everything that matches the selector
-    function getSelector(pseudo) {
-      return (pseudo ? selector.replace(/(,|$)/g, pseudo + '$1')  : selector) + ' {\n';
-    }
-
-    function hasPseudoElement(selector) {
-      return !hasNoPseudoElement(selector);
-    }
-
-    function hasNoPseudoElement(selector) {
-      return selector.indexOf(':before') < 0 && selector.indexOf(':after') < 0;
-    }
-
-    // propName is width or height
-    function getSizeRule(propName, doProvideFallback) {
-      var value = bgInfo[propName],
-        important;
-      if (value) {
-        important = true;
+  function getReverseSpriteCssText() {
+    // Reverse background images
+    function getCssForOneSprite(bgInfo, selector) {
+      // Create a pseudo element selector for everything that matches the selector
+      function getSelector(pseudo) {
+        return (pseudo ? selector.replace(/(,|$)/g, pseudo + '$1') : selector) + ' {\n';
       }
-      else if (doProvideFallback) {
-        // If positioned '100%' will fill the space of the positioned element and no more
-        // If not positioned 'auto' will fill the available space and no less
-        // TODO Now I need to try 'inherit' instead of '100%' because of http://www.sfgate.com/crime/article/Man-beaten-up-at-Little-Caesars-after-calling-6313685.php
-        // TODO go and see what using 'inherit' breaks
-        if (bgInfo.doSetPositionRelative || bgInfo.isPositioned) {
-          value = '100%';
-        }
-        else {
-          value = bgInfo.isInline ? 'inherit' : 'auto';
-        }
+
+      if (!bgInfo.hasImageUrl) {
+        return '';
       }
-      return createRule(propName, value, important);
+
+      var needsEmpty = bgInfo.doRequireEmpty ? ':empty' : '',
+        finalSelector = getSelector(needsEmpty + ':not([data-sc-reversible="false"])');
+      return finalSelector +
+        createRule('filter', FILTER_VAL.reversed, true) +
+        createRule(platform.cssPrefix + 'filter', FILTER_VAL.reversed, true) +
+        // Since we are inverting, make sure the inverse of any text that comes with the bg image
+        // ends up reversed, which means that it needs to start as the opposite of what we want
+        // TODO make this more sophisticated so that the true target colors are reached
+        'background-color: #fff !important;\n' +
+        'color: #000 !important;\n' +
+        '}\n';
     }
+    var styleSheetText = '';
 
-    if (!bgInfo.doMoveToPseudo) {  // Definitely a sprite, only content will be background-image
-      return bgInfo.hasImageUrl ? getSelector(':not([data-sc-reversible])') + INVERT_FILTER + '}\n' : '';
-    }
+    // Backgrounds
+    themeStyles.forEach(function(style) {
+      // Don't alter buttons -- it will change it from a native button and the appearance will break
+      // color, background-color
+      if (style.value.prop === 'background-image') {
+        styleSheetText += getCssForOneSprite(style.value, style.rule.selectorText);
+      }
+    });
 
-    // Background already on a pseudo element are just inverted there
-    // See http://www.bbc.co.uk/newsbeat/article/32973341/british-tank-crushes-learner-drivers-car-in-germany
-    var invertExistingPseudoElemsCss = '',
-      items = selector.split(','),
-      pseudoElemsSelector = items.filter(hasPseudoElement).join(',').trim(),
-      nonPseudoElemsSelector =  items.filter(hasNoPseudoElement).join(',');
-    if (pseudoElemsSelector) {
-      invertExistingPseudoElemsCss = getSelector(pseudoElemsSelector) + INVERT_FILTER + '}\n';
-    }
+    return styleSheetText;
 
-    if (!nonPseudoElemsSelector) {
-      // Nothing left to do, everything was already in a ::before or ::after
-      return invertExistingPseudoElemsCss;
-    }
-
-    selector = nonPseudoElemsSelector;
-
-    // Move background to a new :before pseudo element so that we can invert it without affecting anything else
-    if (!bgInfo.hasImageUrl) {
-      return getSelector(PSEUDO_FOR_BG_IMAGES) + bgInfo.bgPositionStyles + getSizeRule('width') + getSizeRule('height') + '}\n';
-    }
-
-    var
-      removeBgFromMainElementCss =
-        getSelector() + createRule('background-image', 'none', true) +
-        '}\n',
-      positionRelativeCss =
-        bgInfo.doSetPositionRelative ?
-          getSelector(':not(:empty)') + createRule('position', 'relative') + '}\n' : // Help position the pseudo element, only add if we need it (not empty)
-          '',
-      sizePosCss =
-        getSelector(':not(:empty)' + PSEUDO_FOR_BG_IMAGES) +
-        'left:0;top:0;overflow:hidden;' +   // Size and position the pseudo element
-         '}\n',
-      filterCss =
-        getSelector(':not([data-sc-reversible])' + PSEUDO_FOR_BG_IMAGES) + // Only items that don't already have a filter rule (e.g. not images)
-        MOVE_BG_IMAGE_TO_PSEUDO +
-        bgInfo.bgPositionStyles +
-        createRule('background-color', bgInfo.backgroundColor) +
-        getSizeRule('width', true) +
-        getSizeRule('height', true) +
-        createRule('background-image', bgInfo.imageUrlProp) +
-        createRule(FILTER_PROP, FILTER_VAL[bgInfo.filter]) +
-        '}\n',
-      stackBelowCss =
-        getSelector(':not(:empty)' + PSEUDO_FOR_BG_IMAGES) + createRule('z-index', -99999) + '}\n',
-      ensureStackingContextCss =
-          bgInfo.isPlacedBeforeText && !bgInfo.hasStackingContext ?
-            getSelector(':not(:empty)') + createRule('opacity', 0.999) + '}\n' :
-            '';
-
-    return invertExistingPseudoElemsCss + removeBgFromMainElementCss + positionRelativeCss + filterCss +
-      sizePosCss + stackBelowCss + ensureStackingContextCss;
   }
 
   function createTextShadowRule(size, hue) {
@@ -326,31 +276,22 @@ define(['$', 'core/conf/user/manager', 'style-service/style-service', 'core/plat
    * @param intensity
    * @returns {string}
    */
-  function getThemeCssText(colorMapFn, intensity, textHue, isReverse) {
+  function getThemeCssText(colorMapFn, intensity, textHue) {
 
     var styleSheetText = '';
 
     // Backgrounds
     themeStyles.forEach(function(style) {
-      var newValue,
-        newRgba = {},
-        selector = style.rule.selectorText;
+      var newRgba,
+        newValue,
+        selector = style.rule.selectorText,
+        prop = style.value.prop;
 
-      if (style.value.prop === 'background-image') {
-        if (style.value.gradientVal) {
-          newValue = getThemedGradientCssText(style.value.gradientType, style.value.gradientVal, colorMapFn, intensity);
-        }
-        else if (isReverse) {
-          styleSheetText += getReverseSpriteCssText(style.value, selector);
-          return;
-        }
-        else {
-          return;
-        }
+      if (prop === '-sc-gradient') {
+        newRgba = {};
+        newValue = getThemedGradientCssText(style.value.gradientType, style.value.gradientVal, colorMapFn, intensity);
       }
-      else {
-        // Don't alter buttons -- it will change it from a native button and the appearance will break
-        // color, background-color
+      else if (prop === 'color' || prop === 'background-color') {
         newRgba = colorMapFn(style.value, intensity, textHue);
         newValue = newRgba && newRgba.a && colorUtil.getColorString(newRgba);
       }
@@ -359,6 +300,8 @@ define(['$', 'core/conf/user/manager', 'style-service/style-service', 'core/plat
           formFixes = '',
           textShadow = '';
         if (isButtonRule(selector)) {
+          // Don't alter buttons -- it will change it from a native button and the appearance will break
+          // color, background-color
           formFixes = 'border:1px outset ButtonFace;border-radius:4px';
         }
         if (newRgba.textShadow) {
@@ -444,29 +387,25 @@ define(['$', 'core/conf/user/manager', 'style-service/style-service', 'core/plat
   }
 
   function getSignificantBgImageProperties(cssStyleDecl, selector) {
-    var bgPositionStyles = '',
-      bgImagePropVal = cssStyleDecl['background-image'],
+    var bgImagePropVal = cssStyleDecl['background-image'],
       imageUrl,
       gradient,
       cssText = cssStyleDecl.cssText,
       sampleElement,
-      sampleElementCss,
-      position,
-      hasImage,
-      hasHiddenText;
+      hasRepeat;
 
     if (cssText.indexOf('background') < 0) {
       return;  // Need some background property
     }
 
-    function addPositioningProp(prop) {
-      var propVal = cssStyleDecl[prop];
-      if (propVal === 'auto' && (prop === 'width' || prop === 'height')) {
-        propVal = '100%'; // 'auto' won't properly apply to positioned:absolute
-      }
-      if (propVal && propVal !== 'initial') {
-        bgPositionStyles += prop + ':' + propVal + ';';
-      }
+    imageUrl = getCssUrl(bgImagePropVal);
+    gradient = !imageUrl && getBackgroundGradient(bgImagePropVal);
+    if (gradient) {
+      return {
+        prop: '-sc-gradient',
+        gradientType: gradient && gradient[1],
+        gradientVal: gradient && gradient[2]
+      };
     }
 
     function getBackgroundGradient(propVal) {
@@ -475,48 +414,59 @@ define(['$', 'core/conf/user/manager', 'style-service/style-service', 'core/plat
       }
     }
 
-    function isPlacedBeforeText() {
+    function isPlacedBeforeText(sampleElementCss) {
       // Content with text-indent is using inner text as alternative text but placing it offscreen
       var paddingLeft = cssStyleDecl.paddingLeft || sampleElementCss.paddingLeft;
       return parseFloat(paddingLeft) > 0;
     }
 
     sampleElement = getSampleElement(selector);
-    sampleElementCss = sampleElement ? getComputedStyle(sampleElement) : {};
-    position = cssStyleDecl.position || sampleElementCss.position;
-    BACKGROUND_IMG_POSITIONING_PROPS.forEach(addPositioningProp);
-    imageUrl = getCssUrl(bgImagePropVal);
-    gradient = !imageUrl && getBackgroundGradient(bgImagePropVal);
-    hasImage = imageUrl || (bgPositionStyles && sampleElementCss.backgroundImage !== 'none');
-    hasHiddenText = cssStyleDecl.textIndent || parseInt(sampleElementCss.textIndent) < 0 ||
-      parseInt(cssStyleDecl.fontSize) === 0 || parseInt(sampleElementCss.fontSize) === 0;
+    hasRepeat = cssStyleDecl.backgroundRepeat && cssStyleDecl.backgroundRepeat.indexOf('no-repeat') === -1;
 
-    if (imageUrl || gradient || bgPositionStyles) {
+
+    /**
+     * Retrieve information about background images the theme needs to care about.
+     * @param propVal
+     * @returns {boolean}
+     */
+    function getBackgroundImageFilter() {
+      var sampleElementCss = sampleElement ? getComputedStyle(sampleElement) : {},
+        hasHiddenText = cssStyleDecl.textIndent || parseInt(sampleElementCss.textIndent) < 0 ||
+          parseInt(cssStyleDecl.fontSize) === 0 || parseInt(sampleElementCss.fontSize) === 0;
+
+      if (hasRepeat) {
+        return 'veryDark';
+      }
+      if (cssStyleDecl.width === '100%') {
+        return 'mediumDark';
+      }
+
+      if (sampleElement && sampleElement.childElementCount) {
+        return 'none';
+      }
+
+      if (hasHiddenText || isPlacedBeforeText(sampleElementCss) ||
+        (cssStyleDecl.backgroundPosition && cssStyleDecl.backgroundPosition.indexOf('%') < 0)) {  // Clearly a sprite
+        return 'reversed';
+      }
+
+      if (shouldInvertBackground(cssStyleDecl, imageUrl, sampleElement)) {
+        return 'reversed';
+      }
+
+      return 'mediumDark';
+    }
+
+    if (imageUrl) {
       var bgInfo = {
         prop: 'background-image',
-        bgPositionStyles: bgPositionStyles,
-        backgroundPosition: cssStyleDecl.backgroundPosition,
-        hasRepeat: cssStyleDecl.backgroundRepeat &&
-          cssStyleDecl.backgroundRepeat.indexOf('no-repeat') === -1,
-        hasHiddenText: hasHiddenText,
         hasImageUrl: !!imageUrl,
-        imageUrlProp: cssStyleDecl.backgroundImage,
-        gradientType: gradient && gradient[1],
-        gradientVal: gradient && gradient[2],
-        isPositioned: position && position !== 'static',
-        hasStackingContext: cssStyleDecl.zIndex || parseInt(sampleElementCss.zIndex) > 0 ||
-          cssStyleDecl.opacity || parseFloat(sampleElementCss.opacity) < 1,
-        doMoveToPseudo: hasImage && !hasHiddenText,
-        isPlacedBeforeText: isPlacedBeforeText(),
-        isFullWidth: cssStyleDecl.width === '100%',
-        width: cssStyleDecl.width !== 'auto' && cssStyleDecl.width,
-        height: cssStyleDecl.height !== 'auto' && cssStyleDecl.height,
-        isInline: (cssStyleDecl.display || sampleElementCss.display) === 'inline',
+        doRequireEmpty: hasRepeat,
         backgroundColor: cssStyleDecl.backgroundColor
       };
-      bgInfo.filter = imageUrl && getBackgroundImageFilter(bgInfo, imageUrl, cssStyleDecl, sampleElement);
-      bgInfo.doSetPositionRelative = !bgInfo.isPositioned && !bgInfo.hasHiddenText && !bgInfo.isFullWidth && !bgInfo.hasRepeat;
-      return bgInfo;
+      if (getBackgroundImageFilter(bgInfo, imageUrl, cssStyleDecl, sampleElement) === 'reversed') {
+        return bgInfo;
+      }
     }
   }
 
@@ -525,31 +475,6 @@ define(['$', 'core/conf/user/manager', 'style-service/style-service', 'core/plat
       var match = propVal.match(URL_REGEXP);
       return match && match[1];
     }
-  }
-
-  /**
-   * Retrieve information about background images the theme needs to care about.
-   * @param propVal
-   * @returns {boolean}
-   */
-  function getBackgroundImageFilter(bgInfo, imageUrl, cssStyleDecl, sampleElement) {
-    if (bgInfo.hasRepeat) {
-      return 'veryDark';
-    }
-    if (cssStyleDecl.width === '100%') {
-      return 'mediumDark';
-    }
-
-    if (bgInfo.hasHiddenText || bgInfo.doMoveToPseudo || bgInfo.isPlacedBeforeText ||
-      bgInfo.backgroundPosition) {  // Clearly a sprite
-      return 'reversed';
-    }
-
-    if (shouldInvertBackground(cssStyleDecl, imageUrl, sampleElement)) {
-      return 'reversed';
-    }
-
-    return 'mediumDark';
   }
 
   function isButtonRule(selector) {

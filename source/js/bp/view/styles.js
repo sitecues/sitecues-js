@@ -5,7 +5,7 @@ define(['bp/helper', 'core/platform', 'bp/constants', 'core/conf/site'],
     isAnimationDebuggingOn = false,
 
     doWebKitPrefix = platform.browser.isSafari,
-    doMsPrefix = platform.isIE9,
+    doMsPrefix = platform.browser.isIE9,
 
     idDelimiter = '#',
     classDelimiter = '.',
@@ -269,12 +269,6 @@ define(['bp/helper', 'core/platform', 'bp/constants', 'core/conf/site'],
         'font-family': 'Arial',
         'font-size': '29px',
         'font-weight': 'bold'
-      },
-
-      'body.sitecues-reverse-theme [data-sc-reversible="true"],body.sitecues-reverse-theme svg:not([data-sc-reversible="false"])': {
-        'filter': 'invert(100%)',
-        '-webkit-filter': 'invert(100%)',
-        '-ms-filter': 'invert(100%)'
       },
 
       /* Text label animation for main panel labels */
