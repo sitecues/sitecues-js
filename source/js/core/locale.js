@@ -15,7 +15,7 @@ define(['core/conf/site'], function(site) {
     // Countries which have localization files that are different from the default for that language
     // For example, en-us files use 'color' instead of the worldwide standard 'colour'
     COUNTRY_EXCEPTIONS = { 'en-US': 1 },
-    mainBrowserLang = navigator.language || navigator.userLanguage || navigator.browserLanguage || DEFAULT_LANG;
+    mainBrowserLang = site.get('browserLang') || navigator.language || navigator.userLanguage || navigator.browserLanguage || DEFAULT_LANG;
 
   // Get the language but not the regional differences
   // For example, return just 'en' but not 'en-US'.
