@@ -14,8 +14,8 @@ define(['core/conf/site'], function(site) {
     SUPPORTED_LANGS = ['de', 'en', 'es', 'fr', 'pl'],
     // Countries which have localization files that are different from the default for that language
     // For example, en-us files use 'color' instead of the worldwide standard 'colour'
-    COUNTRY_EXCEPTIONS = { 'en-us': 1 },
-    browserLang = site.get('browserLang') || navigator.language || navigator.userLanguage || navigator.browserLanguage || DEFAULT_LANG;
+    COUNTRY_EXCEPTIONS = { 'en-US': 1 },
+    mainBrowserLang = navigator.language || navigator.userLanguage || navigator.browserLanguage || DEFAULT_LANG;
 
   // Get the language but not the regional differences
   // For example, return just 'en' but not 'en-US'.
@@ -26,7 +26,7 @@ define(['core/conf/site'], function(site) {
   // The the foll xx-XX code for the website
   function getFullWebsiteLang() {
     var docElem = document.documentElement,
-      lang = docElem.lang || docElem.getAttribute('xml:lang') || browserLang || DEFAULT_LANG;
+      lang = docElem.lang || docElem.getAttribute('xml:lang') || mainBrowserLang || DEFAULT_LANG;
     return lang;
   }
 
@@ -68,16 +68,16 @@ define(['core/conf/site'], function(site) {
     }
 
     var langPrefix = getLanguagePrefix(lang),
-      allBrowserLangs = (navigator.languages || [ ]),
+      prioritizedBrowserLangs = (function() {
+        var browserLangs = navigator.languages || [ ];
+        browserLangs.slice().reverse().shift(mainBrowserLang);
+        return browserLangs;
+      })(),
       langWithCountry,
-      index;
+      index = 0;
 
-    if (SC_DEV) {
-      allBrowserLangs = allBrowserLangs.slice().unshift(browserLang); // Make sure the one we're testing with is first
-    }
-
-    for (index = 0; index < allBrowserLangs.length; index ++) {
-      langWithCountry = extendLangWith(allBrowserLangs[index]);
+    for (; index < prioritizedBrowserLangs.length; index ++) {
+      langWithCountry = extendLangWith(prioritizedBrowserLangs[index]);
       if (langWithCountry) {
         return langWithCountry; // Matched one of the preferred accents
       }
@@ -125,11 +125,11 @@ define(['core/conf/site'], function(site) {
   function getTranslationLang() {
     var langOnly = getShortWebsiteLang();
 
-    return extendLangWithBrowserCountry(langOnly, COUNTRY_EXCEPTIONS);
+    return extendLangWithBrowserCountry(langOnly, COUNTRY_EXCEPTIONS).toLowerCase();
   }
 
   function getBrowserLang() {
-    return browserLang;
+    return mainBrowserLang;
   }
 
   function init() {
