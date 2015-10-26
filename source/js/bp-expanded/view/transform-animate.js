@@ -67,10 +67,16 @@ define(['bp-expanded/view/transform-util', 'core/platform'], function (transform
     this.onFinish           = onFinish;
     this.isRunning          = true;
     this.onTick             = tick;
+    this.setDuration        = setDuration;
     this.animationId        = tick(); // Start the animation automatically.
 
+    function setDuration(newDuration) {
+      duration = newDuration;
+    }
+
     function tick() {
-      var time = duration > 0 ? timingFn(Math.min(1, (Date.now() - animationStartTime) / duration)) : 1,
+      var
+        time = duration > 0 ? timingFn(Math.min(1, (Date.now() - animationStartTime) / duration)) : 1,
         index = elements.length,
         from,
         to,
@@ -105,7 +111,8 @@ define(['bp-expanded/view/transform-util', 'core/platform'], function (transform
   JsAnimation.prototype.finishNow = function () {
     if (this.isRunning) {
       if (this.onTick) {
-        this.onTick(1);
+        this.setDuration(0);
+        this.onTick();
       }
       if (this.onFinish) {
         this.onFinish();
@@ -131,11 +138,18 @@ define(['bp-expanded/view/transform-util', 'core/platform'], function (transform
       });
     }
 
-    function initTransforms() {
-      var index = elements.length;
+    // doTweak is used when we need to make sure to set a different value after a transition was removed
+    function initTransforms(doTweak) {
+      var index = elements.length,
+        toTransform;
       while (index --) {
         if (elements[index]) {
-          transformUtil.setElemTransform(elements[index], toTransforms[index]);
+          toTransform = toTransforms[index];
+          if (doTweak) {
+            toTransform = JSON.parse(JSON.stringify(toTransform));
+            toTransform.translateY = (toTransform.translateY || 0) + 0.001;
+          }
+          transformUtil.setElemTransform(elements[index], toTransform);
         }
       }
     }
@@ -159,6 +173,7 @@ define(['bp-expanded/view/transform-util', 'core/platform'], function (transform
     function finishNow() {
       removeTransitionEndListener();
       stopAnimation();
+      initTransforms(true);
       if (onCustomFinish) {
         onCustomFinish();
       }

@@ -355,10 +355,6 @@ define(['bp/constants',
       return;
     }
 
-    origOutlineHeight = origOutlineHeight || getCurrentOutlineHeight();
-    origFillHeight = origFillHeight || parseFloat(getOutlineFill().getAttribute('height'));
-    origPanelContentsRect = origPanelContentsRect || document.getElementById(BP_CONST.MAIN_CONTENT_FILL_ID).getBoundingClientRect();
-
     var ENABLED = BP_CONST.SECONDARY_PANEL_ENABLED,
       DISABLED = BP_CONST.SECONDARY_PANEL_DISABLED,
       willEnable = state.get('secondaryPanelTransitionTo') !== ENABLED;
@@ -483,7 +479,7 @@ define(['bp/constants',
     }
 
     finishAllAnimations();
-    resetStyles();  // TODO Reset all height-related styles
+    resetStyles();
 
     state.set('secondaryPanelTransitionTo', BP_CONST.SECONDARY_PANEL_DISABLED);
 
@@ -500,6 +496,10 @@ define(['bp/constants',
       markup.init();
       // Add mouse listeners once BP is ready
       resetStyles();
+
+      origOutlineHeight = getCurrentOutlineHeight();
+      origFillHeight = parseFloat(getOutlineFill().getAttribute('height'));
+      origPanelContentsRect = document.getElementById(BP_CONST.MAIN_CONTENT_FILL_ID).getBoundingClientRect();
 
       sitecues.on('bp/will-shrink', onPanelClose);
 
