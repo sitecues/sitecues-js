@@ -15,11 +15,11 @@ define(['bp/constants', 'bp/helper', 'core/conf/user/manager', 'bp/model/state',
 
     if (isActive !== willBeActive) {
       if (willBeActive) {
+        mouseSlidersInit();  // Always use current mouse size as starting point
+
         if (!settingsPanel) {
           initContents();
         }
-
-        mouseSlidersInit();  // Always use current mouse size as starting point
 
         settingsCards.addEventListener('click', onSettingsClick);
         settingsCards.addEventListener('change', onSettingsNativeInputChange);
