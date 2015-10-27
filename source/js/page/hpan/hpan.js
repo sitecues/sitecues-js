@@ -1,4 +1,4 @@
-define(['core/conf/user/manager', 'dollar/dollar-utils', 'zoom/zoom'], function (conf, jqUtils, zoomMod) {
+define(['core/conf/user/manager', 'page/dollar/dollar-utils', 'page/zoom/zoom'], function (conf, jqUtils, zoomMod) {
   var isOn = false,
     isHlbOn = false,
     isPanelOpen = false,

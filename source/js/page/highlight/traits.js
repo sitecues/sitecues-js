@@ -4,7 +4,7 @@
  *  bounding rectangle
  *  margin, padding, overall spacing
  */
-define(['$', 'highlight/traitcache', 'highlight/highlight-position', 'zoom/zoom', 'keys/element-classifier'],
+define(['$', 'page/highlight/traitcache', 'page/highlight/highlight-position', 'page/zoom/zoom', 'page/util/element-classifier'],
   function($, traitcache, mhpos, zoomMod, elemClassifier) {
 
     'use strict';

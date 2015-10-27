@@ -33,7 +33,7 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
     speakContentImpl(hlbContent, TRIGGER_TYPES.LENS);
   }
 
-  function speakContent(content, doAvoidInterruptions, doSuppressEarcon) {
+  function speakContent(content, doAvoidInterruptions) {
     if (doAvoidInterruptions && audioPlayer && audioPlayer.isBusy()) {
       return; // Already reading the highlight
     }
@@ -41,10 +41,7 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
       return; // Nothing to read
     }
     stopAudio();
-    // Play audio highlight earcon if highlight moved with shift key and speech being fetched
-    if (!doSuppressEarcon) {
-      playEarcon('audio-highlight');
-    }
+
     speakContentImpl(content, TRIGGER_TYPES.HIGHLIGHT);
   }
 
@@ -157,7 +154,7 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
       conf.set('ttsOn', ttsOn);
       sitecues.emit('speech/did-change', ttsOn);
       if (!doSuppressAudioCue) {
-        require(['audio/audio-cues'], function(audioCues) {
+        require(['audio-cues/audio-cues'], function(audioCues) {
           audioCues.playSpeechCue(ttsOn);
         });
       }

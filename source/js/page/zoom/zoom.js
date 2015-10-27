@@ -3,7 +3,7 @@
  * See docs at https://equinox.atlassian.net/wiki/display/EN/Smooth+Zoom
  */
 
-define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'util/common', 'core/metric'],
+define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'page/util/common', 'core/metric'],
   function ($, conf, site, platform, common, metric) {
 
   // Default zoom configuration
@@ -751,7 +751,7 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'util/
     if (platform.browser.isWebKit || platform.browser.isFirefox) {
       hasFormsToFix = hasFormsToFix || document.querySelector('select,body>input,button');
       if (hasFormsToFix) {
-        require(['zoom/zoom-forms'], function (zoomForms) {
+        require(['page/zoom/zoom-forms'], function (zoomForms) {
           zoomForms.applyZoomFixes(completedZoom);
         });
       }
@@ -766,7 +766,7 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'util/
 
     if (!isInitialLoadZoom) {
       conf.set('zoom', completedZoom);
-      require(['audio/audio-cues'], function (audioCues) {
+      require(['audio-cues/audio-cues'], function (audioCues) {
         audioCues.playZoomCue(completedZoom);
       });
       metric('zoom-changed', zoomInput);

@@ -2,7 +2,7 @@
   This module animates the HLB.  Depending on the browser, the mechanism
   of animation is either CSS3 Transitions or jQuery.animate.
  */
-define(['hlb/dimmer', 'util/common', 'hlb/positioning', 'core/platform'],
+define(['hlb/dimmer', 'page/util/common', 'hlb/positioning', 'core/platform'],
   function (dimmer, common, hlbPositioning, platform) {
 
   var INFLATION_SPEED = 400, // Default inflation duration

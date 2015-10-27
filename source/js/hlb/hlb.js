@@ -9,9 +9,9 @@ define([
     'hlb/positioning',
     'hlb/styling',
     'core/platform',
-    'keys//element-classifier',
+    'page/util/element-classifier',
     'hlb/animation',
-    'util/geo',
+    'page/util/geo',
     'core/metric'],
   function(
     $,

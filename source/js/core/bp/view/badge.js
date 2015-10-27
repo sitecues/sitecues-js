@@ -103,7 +103,7 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/locale', 'core/bp/help
   // - it's heavy in the page
   // - it causes us to load the page-features module just because we have a toolbar
   function adjustFixedElementsBelowToolbar(toolbarElement) {
-    require(['zoom/fixed-position-fixer'], function(fixer) {
+    require(['page/zoom/fixed-position-fixer'], function(fixer) {
       // However, in the case of the toolbar, we must always move fixed position elements
       // down. As this process requires the style-service, when the toolbar is inserted,
       // we will initialize the style service immediately.

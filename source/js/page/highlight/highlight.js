@@ -1,9 +1,9 @@
 // TODO Work in Firefox + EEOC menus
 // TODO Test! Especially in IE
-define(['$', 'core/conf/user/manager', 'zoom/zoom', 'highlight/pick', 'highlight/traitcache',
-    'highlight/highlight-position', 'util/common', 'util/color',
-    'audio/audio', 'util/geo', 'keys/element-classifier', 'core/platform'],
-  function($, conf, zoomMod, picker, traitcache, mhpos, common, colorUtil, audio, geo, elementClassifier, platform) {
+define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 'page/highlight/traitcache',
+    'page/highlight/highlight-position', 'page/util/common', 'page/util/color',
+    'page/util/geo', 'page/util/element-classifier', 'core/platform'],
+  function($, conf, zoomMod, picker, traitcache, mhpos, common, colorUtil, geo, elementClassifier, platform) {
 
   var
 
@@ -76,6 +76,7 @@ define(['$', 'core/conf/user/manager', 'zoom/zoom', 'highlight/pick', 'highlight
   isWindowFocused = document.hasFocus(),
   isSticky,
   isBPOpen,
+  isSpeechEnabled = false,
   isColorDebuggingOn,
   isHighlightRectDebuggingOn,
   $highlightStyleSheet,   // Style sheet for overlay via :after
@@ -196,7 +197,7 @@ define(['$', 'core/conf/user/manager', 'zoom/zoom', 'highlight/pick', 'highlight
   function getHighlightVisibilityFactor() {
     var MIN_VISIBILITY_FACTOR_WITH_TTS = 2.1,
         vizFactor = (state.zoom + 0.6) * 0.9;
-    if (audio.isSpeechEnabled() && vizFactor < MIN_VISIBILITY_FACTOR_WITH_TTS) {
+    if (isSpeechEnabled && vizFactor < MIN_VISIBILITY_FACTOR_WITH_TTS) {
       vizFactor = MIN_VISIBILITY_FACTOR_WITH_TTS;
     }
     return vizFactor;
@@ -1284,9 +1285,8 @@ define(['$', 'core/conf/user/manager', 'zoom/zoom', 'highlight/pick', 'highlight
 
     if (event.shiftKey && isOnlyShift) {
       // When shift held down, emit command to speak the newly highlighted text
-      require(['audio/audio'], function(audio) {
-        audio.init();
-        audio.speakContent(picked);
+      require(['page/keys/commands'], function(commands) {
+        commands.speakHighlight();
       });
     }
 
@@ -1602,9 +1602,13 @@ define(['$', 'core/conf/user/manager', 'zoom/zoom', 'highlight/pick', 'highlight
     // Turn mouse-tracking on or off
     sitecues.on('key/only-shift', setOnlyShift);
 
-    // Mosue highlighting not available while BP is open
+    // Mouse highlighting not available while BP is open
     sitecues.on('bp/will-expand', willExpand);
     sitecues.on('bp/did-shrink', didShrink);
+
+    sitecues.on('speech/did-change', function(isOn) {
+      isSpeechEnabled = isOn;
+    });
 
     sitecues.on('sitecues/did-toggle', function(isOn) {
       isSitecuesOn = isOn;

@@ -1,4 +1,4 @@
-define(['keys/element-classifier', 'keys/commands', 'core/metric'],
+define(['page/util/element-classifier', 'page/keys/commands', 'core/metric'],
   function(elemClassifier, commands, metric) {
 
   var
@@ -279,7 +279,7 @@ define(['keys/element-classifier', 'keys/commands', 'core/metric'],
     notifySitecuesKeyDown(true);
     if (event.keyCode === SHIFT) {
       if (isOnlyShift()) {
-        executeCommand(event, 'speakHighlight', 'shift');
+        commands.speakHighlight(false, true);
       }
     }
 

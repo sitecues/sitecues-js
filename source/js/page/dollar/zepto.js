@@ -59,7 +59,7 @@
 //     Zepto.js
 //     (c) 2010-2015 Thomas Fuchs
 //     Zepto.js may be freely distributed under the MIT license.
-define(['dollar/zepto'], function () {
+define(['page/dollar/zepto'], function () {
 
   var Zepto = (function () {
       var undefined, key, $, classList, emptyArray = [], concat = emptyArray.concat, filter = emptyArray.filter, slice = emptyArray.slice,

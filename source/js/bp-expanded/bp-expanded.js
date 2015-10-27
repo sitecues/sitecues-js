@@ -16,7 +16,7 @@ define(['bp-expanded/controller/slider-controller', 'bp-expanded/controller/shri
       focusController.init();
       ttsButton.init();
       moreButton.init();
-      require(['cursor/cursor'], function(cursor) {
+      require(['page/cursor/cursor'], function(cursor) {
         cursor.init();
       });
     }

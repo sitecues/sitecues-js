@@ -90,7 +90,7 @@ define(['core/bp/controller/bp-controller', 'core/bp/model/state','core/bp/view/
       callbackFn(BP_CONST.PALETTE_NAME_MAP.normal);
     }
     else if (state.get('isAdaptivePalette')) {
-      require(['util/color'], function(colorUtil) {
+      require(['page/util/color'], function(colorUtil) {
         var badgeElement = getBadgeElement();
         callbackFn(BP_CONST.PALETTE_NAME_MAP[colorUtil.isOnDarkBackground(badgeElement) ? 'reverse-blue' : 'normal']);
       });

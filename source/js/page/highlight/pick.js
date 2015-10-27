@@ -25,8 +25,8 @@
  * For more details see https://equinox.atlassian.net/wiki/display/EN/Picker+v2+Architecture
  */
 
-define(['$', 'util/common', 'dollar/dollar-utils', 'core/conf/user/manager', 'core/conf/site',
-    'highlight/traitcache', 'highlight/traits', 'highlight/judge', 'core/platform'],
+define(['$', 'page/util/common', 'page/dollar/dollar-utils', 'core/conf/user/manager', 'core/conf/site',
+    'page/highlight/traitcache', 'page/highlight/traits', 'page/highlight/judge', 'core/platform'],
   function($, common, $utils, conf, site, traitcache, traits, judge, platform) {
 
   var UNUSABLE_SCORE = -99999,       // A score so low there is no chance of picking the item
@@ -353,7 +353,7 @@ define(['$', 'util/common', 'dollar/dollar-utils', 'core/conf/user/manager', 'co
     function processResult(pickedIndex) {
       // Log the results if necessary for debugging
       if (SC_DEV && isDebuggingOn) {
-        require(['highlight/pick-debug'], function(pickDebug) {
+        require(['page/highlight/pick-debug'], function(pickDebug) {
           // Use sitecues.togglePickerDebugging() to turn on the logging
           pickDebug.logHeuristicResult(scoreObjs, bestIndex, candidates);
         });

@@ -2,8 +2,8 @@
  *  Used for dark themes.
  */
 
-  define(['$', 'core/conf/user/manager', 'style-service/style-service', 'core/platform',
-    'theme/color-choices', 'util/color', 'theme/img-classifier'],
+  define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core/platform',
+    'theme/color-choices', 'page/util/color', 'theme/img-classifier'],
   function($, conf, styleService, platform, colorChoices, colorUtil, imgClassifier) {
 
   var mutationObserver,

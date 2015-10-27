@@ -443,7 +443,7 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
   }
 
   function onZoomKeyUp() {
-    require(['zoom/zoom'], function(zoomMod) {
+    require(['page/zoom/zoom'], function(zoomMod) {
       zoomMod.zoomStopRequested();
     });
   }
@@ -451,7 +451,7 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
   function performZoomSliderCommand(keyCode, evt) {
     var deltaSliderCommand = DELTA_KEYS[keyCode];
     if (deltaSliderCommand) {
-      require(['zoom/zoom'], function(zoomMod) {
+      require(['page/zoom/zoom'], function(zoomMod) {
         window.removeEventListener('keyup', onZoomKeyUp); // Zoom module will listen from here
         zoomMod.init();
         if (deltaSliderCommand > 0) {

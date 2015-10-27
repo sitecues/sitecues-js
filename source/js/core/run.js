@@ -58,14 +58,21 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
     isSpeechOn,
     isSitecuesOn = false,
     wasSitecuesEverOn,
+    DASH     = 189,
+    NUMPAD_SUBTRACT = 109,
+    MINUS_ALTERNATE_1 = 173,
+    MINUS_ALTERNATE_2 = 45,
     EQUALS   = 187,
     NUMPAD_ADD = 107,
     PLUS_ALTERNATE_1 = 61,
     PLUS_ALTERNATE_2 = 43,
-    QUOTE = 222;
+    QUOTE = 222,
+    // Keys that can init sitecues
+    INIT_CODES = [ DASH, NUMPAD_SUBTRACT, MINUS_ALTERNATE_1, MINUS_ALTERNATE_2,
+      EQUALS, NUMPAD_ADD, PLUS_ALTERNATE_1, PLUS_ALTERNATE_2, QUOTE];
 
-  function initZoom() {
-    require([ 'hpan/hpan', 'zoom/fixed-position-fixer', 'focus/focus', 'cursor/cursor' ], function(hpan, fixer, focus, cursor) {
+    function initZoom() {
+    require([ 'page/hpan/hpan', 'page/zoom/fixed-position-fixer', 'page/focus/focus', 'page/cursor/cursor' ], function(hpan, fixer, focus, cursor) {
       hpan.init();
       fixer.init();
       focus.init();
@@ -81,7 +88,7 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
   }
 
   function initSitecuesOn() {
-    require([ 'highlight/highlight', 'keys/keys', 'highlight/move-keys' ], function(highlight, keys, moveKeys) {
+    require([ 'page/highlight/highlight', 'page/keys/keys', 'page/highlight/move-keys' ], function(highlight, keys, moveKeys) {
       highlight.init();
       keys.init();
       moveKeys.init();
@@ -89,14 +96,14 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
   }
 
   function initThemes() {
-    require([ 'theme/theme', 'focus/focus' ], function(themes, focus) {
+    require([ 'theme/theme', 'page/focus/focus' ], function(themes, focus) {
       themes.init();
       focus.init();
     });
   }
 
   function initMouse() {
-    require(['cursor/cursor'], function(cursor) {
+    require(['page/cursor/cursor'], function(cursor) {
       cursor.init();
     });
   }
@@ -138,7 +145,7 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
     // Initialize other features after bp
     var initialZoom = conf.get('zoom');
     if (initialZoom > 1) {
-      require(['zoom/zoom'], function (zoomMod) {
+      require(['page/zoom/zoom'], function (zoomMod) {
         zoomMod.init();
         zoomMod.performInitialLoadZoom(initialZoom);
       });
@@ -176,14 +183,13 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
     if ((initialZoom > 1) === false && !isSpeechOn) {
       window.addEventListener('keydown', function (event) {
         var keyCode = event.keyCode;
-        if (keyCode === EQUALS || keyCode === NUMPAD_ADD ||
-          keyCode === PLUS_ALTERNATE_1 || keyCode === PLUS_ALTERNATE_2 || keyCode === QUOTE) {
+        if (INIT_CODES.indexOf(keyCode) >= 0) {
           if (event.ctrlKey || event.metaKey || event.altKey) {
             // Don't allow default behavior of modified key, e.g. native zoom
             event.preventDefault();
             event.stopImmediatePropagation();
           }
-          require(['keys/keys'], function (keys) {
+          require(['page/keys/keys'], function (keys) {
             keys.init(event);
           });
         }

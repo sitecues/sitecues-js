@@ -1,7 +1,7 @@
 /**
  * This is module for common utilities that might need to be used across all of the different modules.
  */
-define(['keys/element-classifier', 'core/platform'], function (elemClassifier, platform) {
+define(['page/util/element-classifier', 'core/platform'], function (elemClassifier, platform) {
 
   /**
    * Checks if the text in a text node given is empty or not.

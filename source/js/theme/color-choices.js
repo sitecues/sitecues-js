@@ -9,7 +9,7 @@
 // - Bad photo reversal guesses:
 //   http://www.leadingage.org/ and // - http://www.leadingage.org/
 
-define(['$', 'util/color'], function ($, colorUtil) {
+define(['$', 'page/util/color'], function ($, colorUtil) {
   var hslToRgb = colorUtil.hslToRgb,
     rgbToHsl = colorUtil.rgbToHsl;
 

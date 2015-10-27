@@ -128,7 +128,7 @@ define(['core/bp/constants', 'core/bp/helper'], function (BP_CONST, helper) {
     function openThenCloseLens() {
       require(['audio/audio'], function(audio) {
         function speakIt() {
-          audio.speakContent(byId(BP_CONST.DEMO_PARA), true, true);
+          audio.speakContent(byId(BP_CONST.DEMO_PARA), true);
         }
 
         pushTimeout(pressSpacebar, 2000);

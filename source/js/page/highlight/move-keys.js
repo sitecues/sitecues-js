@@ -1,5 +1,5 @@
-define(['$', 'highlight/highlight', 'util/common',
-  'highlight/pick', 'zoom/zoom', 'util/geo', 'zoom/fixed-position-fixer'],
+define(['$', 'page/highlight/highlight', 'page/util/common',
+  'page/highlight/pick', 'page/zoom/zoom', 'page/util/geo', 'page/zoom/fixed-position-fixer'],
   function($, mh, common, picker, zoomMod, geo, fixedFixer) {
 
   var STEP_SIZE_VERT = 18,
@@ -296,8 +296,8 @@ define(['$', 'highlight/highlight', 'util/common',
   }
 
   function speakHighlight() {
-    require(['keys/commands'], function(commands) {
-      commands.speakHighlight();
+    require(['page/keys/commands'], function(commands) {
+      commands.speakHighlight(true);
     });
   }
 
@@ -307,7 +307,7 @@ define(['$', 'highlight/highlight', 'util/common',
     fixedFixer.setAllowMouseEvents(true);
 
     if (doSpeakText) {
-      speakHighlight();
+      speakHighlight();   // Shift+arrow
     }
 
     if (hlbElement) {
@@ -751,7 +751,7 @@ define(['$', 'highlight/highlight', 'util/common',
       mh.autoPick();
     }
     if (doSpeakText) {
-      speakHighlight();
+      speakHighlight(); // Shift+space
     }
   }
 
