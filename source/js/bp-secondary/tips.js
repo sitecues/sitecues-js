@@ -1,7 +1,7 @@
 /**
  * Tips cards, supporting demo animations
  */
-define(['bp/constants', 'bp/helper'], function (BP_CONST, helper) {
+define(['core/bp/constants', 'core/bp/helper'], function (BP_CONST, helper) {
 
   var byId = helper.byId,
     isInitialized,

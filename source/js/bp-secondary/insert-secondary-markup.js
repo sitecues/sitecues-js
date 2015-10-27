@@ -1,5 +1,5 @@
 // Markup for the secondary panel
-define(['bp/view/markup-finalizer', 'bp/helper', 'core/platform', 'bp-secondary/font-charset', 'core/conf/urls'],
+define(['core/bp/view/markup-finalizer', 'core/bp/helper', 'core/platform', 'bp-secondary/font-charset', 'core/conf/urls'],
   function(finalizer, helper, platform, fontCharset, urls) {
   /*jshint multistr: true */
 

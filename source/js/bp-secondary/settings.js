@@ -1,4 +1,4 @@
-define(['bp/constants', 'bp/helper', 'core/conf/user/manager', 'bp/model/state', 'core/metric', 'core/platform', 'cursor/cursor'],
+define(['core/bp/constants', 'core/bp/helper', 'core/conf/user/manager', 'core/bp/model/state', 'core/metric', 'core/platform', 'cursor/cursor'],
   function (BP_CONST, helper, conf, state, metric, platform, cursor) {
 
   var byId = helper.byId,

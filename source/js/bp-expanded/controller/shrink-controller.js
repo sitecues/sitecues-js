@@ -1,7 +1,7 @@
 /*
  Panel Controller
  */
-define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric'],
+define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metric'],
   function (BP_CONST, state, helper, metric) {
 
     var MIN_DISTANCE = 75, // Min distance before shrink

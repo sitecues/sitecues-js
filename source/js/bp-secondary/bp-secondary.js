@@ -6,9 +6,9 @@
 //Perkins wants faster access to colors – 3 levels deep is too much
 //
 
-define(['bp/constants',
-    'bp/model/state',
-    'bp/helper',
+define(['core/bp/constants',
+    'core/bp/model/state',
+    'core/bp/helper',
     'bp-expanded/view/transform-animate',
     'bp-expanded/view/transform-util',
     'core/locale',

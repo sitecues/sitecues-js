@@ -48,7 +48,7 @@
 //           Cookie is set for metrics?
 
 
-define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/conf/user/manager', 'core/metric', 'core/platform', 'bp/bp'],
+define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/conf/user/manager', 'core/metric', 'core/platform', 'core/bp/bp'],
   function (userId, userSettingsServer, locale, conf, metric, platform, bp) {
   var
     numPrereqsToComplete,

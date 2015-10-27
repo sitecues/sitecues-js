@@ -1,4 +1,4 @@
-define(['bp/helper', 'core/platform', 'bp/constants', 'core/conf/site'],
+define(['core/bp/helper', 'core/platform', 'core/bp/constants', 'core/conf/site'],
   function (helper, platform, BP_CONST, site) {
 
   var

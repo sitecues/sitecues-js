@@ -1,5 +1,5 @@
 /* Focus Controller */
-define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric', 'core/platform' ],
+define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metric', 'core/platform' ],
   function (BP_CONST, state, helper, metric, platform) {
 
   var savedDocumentFocus,

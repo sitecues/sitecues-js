@@ -1,7 +1,7 @@
 /**
  * Generic module for handling the cards used by tips and settings
  */
-define(['bp/constants', 'bp/helper', 'core/locale', 'bp/model/state', 'core/platform', 'core/util/xhr', 'core/conf/urls', 'core/conf/site'],
+define(['core/bp/constants', 'core/bp/helper', 'core/locale', 'core/bp/model/state', 'core/platform', 'core/util/xhr', 'core/conf/urls', 'core/conf/site'],
   function (BP_CONST, helper, locale, state, platform, xhr, urls, site) {
 
   var

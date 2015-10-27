@@ -1,7 +1,7 @@
 /**
  * Expand or contract the BP
  */
-define(['bp/model/state', 'bp/constants', 'bp/helper', 'core/platform'],
+define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/platform'],
   function(state, BP_CONST, helper, platform) {
   var requestFrameFn = window.requestAnimationFrame   ||
                        window.msRequestAnimationFrame ||
