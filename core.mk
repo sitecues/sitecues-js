@@ -63,10 +63,12 @@ build:
 	./finalize-loader-config.js $(build-dir)/js/sitecues.js target/build-config/sitecues-bundles.js $(allow-zepto) $(version)
 	#./finalize-loader-config.js $(build-dir)/js/sitecues-ie9.js target/build-config/sitecues-bundles-ie9.js false $(version)
 
-	@echo "---- sitecues core source --------------------------------"
+	@echo "---- sitecues core --------------------------------"
 	@./show-file-sizes.sh $(build-dir)/js "sitecues.js"
-	@echo "---- additional bundles source ---------------------------"
-	@./show-file-sizes.sh $(build-dir)/$(version)/js "*.js" | grep -v ".src.js"
+	@echo "---- bundles --------------------------------------"
+	@./show-file-sizes.sh $(build-dir)/$(version)/js "*.js" | grep -v ".src.js" | grep -v "/"
+	@echo "---- individual file modules ----------------------"
+	@./show-file-sizes.sh $(build-dir)/$(version)/js "*.js" | grep -v ".src.js" | grep "/" | cat
 
 	@echo
 	@echo "===== COMPLETE: Building sitecues library"
@@ -85,10 +87,12 @@ checksize:
   # Show file sizes but not for foo.src.bar -- those are built by r.js for sourcemaps
 	@echo "**** File sizes ******************************************"
 	@echo
-	@echo "---- sitecues core zipped --------------------------------"
+	@echo "---- sitecues core --------------------------------"
 	@./show-file-sizes.sh $(build-dir)/js "sitecues*.js.gz"
-	@echo "----- additional bundles zipped --------------------------"
-	@./show-file-sizes.sh $(build-dir)/$(version)/js "*.js.gz"
+	@echo "---- bundles --------------------------------------"
+	@./show-file-sizes.sh $(build-dir)/$(version)/js "*.js.gz" | grep -v "/"
+	@echo "---- individual file modules ----------------------"
+	@./show-file-sizes.sh $(build-dir)/$(version)/js "*.js.gz" | grep "/" | cat
 
 ################################################################################
 # TARGET: debug
@@ -112,10 +116,12 @@ debug:
 	#./finalize-loader-config.js $(build-dir)/js/sitecues-ie9.js target/build-config/sitecues-bundles-ie9.js false $(version)
 
 	@echo "**** File sizes ******************************************"
-	@echo "---- sitecues core source --------------------------------"
+	@echo "---- sitecues core --------------------------------"
 	@./show-file-sizes.sh $(build-dir)/js "sitecues*.js"
-	@echo "---- additional bundles source ---------------------------"
-	@./show-file-sizes.sh $(build-dir)/$(version)/js "*.js" | grep -v "sitecues"
+	@echo "---- bundles --------------------------------------"
+	@./show-file-sizes.sh $(build-dir)/$(version)/js "*.js" | grep -v ".src.js" | grep -v "/"
+	@echo "---- individual file modules ----------------------"
+	@./show-file-sizes.sh $(build-dir)/$(version)/js "*.js" | grep -v ".src.js" | grep "/" | cat
 
 	@echo
 	@echo "===== COMPLETE: Building sitecues library (DEBUG VER) ====="

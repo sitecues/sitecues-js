@@ -153,7 +153,7 @@
       ]
     },
     {
-      name: 'themes',
+      name: 'theme',
       create: true,
       include: [
         'theme/theme',
