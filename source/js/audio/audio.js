@@ -10,12 +10,12 @@
  * - Playing audio by key when requested by another module
  */
 
-define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder', 'core/platform', 'core/locale', 'core/metric', 'core/conf/urls'],
-  function(conf, site, $, builder, platform, locale, metric, urls) {
+define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder', 'core/platform',
+    'core/locale', 'core/metric', 'core/conf/urls', 'audio/html5-player'],
+  function(conf, site, $, builder, platform, locale, metric, urls, audioPlayer) {
 
   var ttsOn = false,
     isAudioPlaying,
-    audioPlayer,
     mediaTypeForTTS,  // For TTS only, not used for pre-recorded sounds such as verbal cues
     mediaTypeForPrerecordedAudio,
     isInitialized,
@@ -34,7 +34,7 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
   }
 
   function speakContent(content, doAvoidInterruptions) {
-    if (doAvoidInterruptions && audioPlayer && audioPlayer.isBusy()) {
+    if (doAvoidInterruptions && audioPlayer.isBusy()) {
       return; // Already reading the highlight
     }
     if (!content) {
@@ -55,7 +55,7 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
   // text and triggerType are optional
   function speakText(text, lang, triggerType) {
     stopAudio();  // Stop any currently playing audio and halt keydown listener until we're playing again
-    getAudioPlayer(function(player) {
+    getAudioPlayer(function() {
       var TTSUrl = getTTSUrl(text, lang),
         startRequestTime = new Date();
 
@@ -69,7 +69,7 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
         });
       }
 
-      player.playAudioSrc(TTSUrl, onSpeechComplete);
+      audioPlayer.playAudioSrc(TTSUrl, onSpeechComplete);
 
       isAudioPlaying = true;
       sitecues.emit('audio/speech-play', TTSUrl);
@@ -172,9 +172,9 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
     stopAudio();  // Stop any currently playing audio
 
     var url = getAudioKeyUrl(key);
-    getAudioPlayer(function(player) {
+    getAudioPlayer(function() {
       isAudioPlaying = true;
-      player.playAudioSrc(url);
+      audioPlayer.playAudioSrc(url);
       // Stop speech on any key down.
       addStopAudioHandlers();
     });
@@ -185,8 +185,8 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
 
     var url = urls.resolveResourceUrl('earcons/' + earconName + '.' + getMediaTypeForPrerecordedAudio());
 
-    getAudioPlayer(function(player) {
-      player.playAudioSrc(url);
+    getAudioPlayer(function() {
+      audioPlayer.playAudioSrc(url);
     });
   }
 
@@ -195,20 +195,9 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
   // For Ivona, audio formats are mp3 or ogg
   // For Lumenvox, audio formats are aac or ogg
   function getAudioPlayer(callbackFn) {
-    function onDependencyLoaded() {
-      if (audioPlayer && mediaTypeForTTS && callbackFn) {
-        callbackFn(audioPlayer);
-      }
-    }
-    function onAudioPlayerLoaded(player) {
-      player.init();
-      audioPlayer = player;
-      onDependencyLoaded();
-    }
-
-    if (audioPlayer && mediaTypeForTTS) {
+    if (mediaTypeForTTS) {
       // Already retrieved
-      onDependencyLoaded();
+      callbackFn();
       return;
     }
     if (isRetrievingAudioPlayer) {
@@ -217,13 +206,11 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
     }
 
     isRetrievingAudioPlayer = true;
-    if (platform.browser.isSafari) {
-      require(['audio/safari-player'], onAudioPlayerLoaded);
-    }
-    else {
-      require(['audio/html5-player'], onAudioPlayerLoaded);
-    }
-    getMediaTypeForTTS(onDependencyLoaded);
+
+    getMediaTypeForTTS(function() {
+      isRetrievingAudioPlayer = false;
+      callbackFn();
+    });
   }
 
   function getBrowserSupportedTypeFromList(listOfAvailableExtensions) {
