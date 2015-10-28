@@ -21,34 +21,6 @@
       create: true,
       insertRequire: ['core/core']
     },
-// -- For now, No special Alameda or jQuery stuff for IE9 --
-//    {
-//      name: 'sitecues-ie9',
-//      include : [
-//        '../../build-config/config.js',
-//        'core/core',
-//        '../../../node_modules/requirejs/require.js'
-//      ],
-//      create: true,
-//      namespace: 'sitecues',
-//      insertRequire: ['core/core']
-//    },
-//    {
-//      name: 'lib-jquery',
-//      create: true,
-//      include: [
-//        'page/dollar/jquery-private',
-//        'jquery'
-//      ]
-//    },
-//    {
-//      name: 'lib-zepto',
-//      create: true,
-//      include: [
-//        'page/dollar/zepto-private',
-//        'page/dollar/zepto'
-//      ]
-//    },
     {
       name: 'bp-expanded',
       create: true,
