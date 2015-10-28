@@ -77,6 +77,7 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
   isSticky,
   isBPOpen,
   isSpeechEnabled = false,
+  isLensEnabled,
   isColorDebuggingOn,
   isHighlightRectDebuggingOn,
   $highlightStyleSheet,   // Style sheet for overlay via :after
@@ -329,6 +330,12 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
 
     // Update state
     didToggleVisibility(true);
+
+    // Get Lens code loaded and ready so that it shows up quickly the first time
+    if (!isLensEnabled) {
+      isLensEnabled = true;
+      require(['hlb/hlb'], function() {});
+    }
   }
 
   // Choose an appropriate background color for the highlight
