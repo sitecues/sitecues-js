@@ -62,8 +62,7 @@ define(['hlb/dimmer', 'page/util/common', 'hlb/positioning', 'core/platform', '$
 
     $(hlbElement).css({
       transition: '',
-      transform: 'scale(' + startScale + ') ' + translateCSS,
-      willChange: platform.transformProperty
+      transform: 'scale(' + startScale + ') ' + translateCSS
     });
 
     function onComplete() {
@@ -71,12 +70,21 @@ define(['hlb/dimmer', 'page/util/common', 'hlb/positioning', 'core/platform', '$
       onCompleteFn();
     }
 
+    function addAnimationEndListener() {
+      if (platform.browser.isIE9) {
+        setTimeout(onCompleteFn, speed);
+      }
+      else {
+        hlbElement.addEventListener(platform.transitionEndEvent, onComplete);
+      }
+    }
+
     setTimeout(function() {
       $(hlbElement).css({
         transition: platform.transformProperty + ' ' + speed + 'ms ease-in-out',
         transform: 'scale(' + endScale + ') ' + translateCSS
       });
-      hlbElement.addEventListener(platform.transitionEndEvent, onComplete);
+      addAnimationEndListener();
     }, 0);
   }
 
