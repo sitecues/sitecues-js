@@ -9,7 +9,9 @@ define(['hlb/dimmer', 'page/util/common', 'hlb/positioning', 'core/platform', '$
       INFLATION_SPEED_FAST = 0, // Inflation duration when retargeting
       DEFLATION_SPEED = 150, // Default deflation duration
 
-      getStartingScale = hlbPositioning.getStartingScale;
+      getStartingScale = hlbPositioning.getStartingScale,
+
+      animate = platform.browser.isIE9 ? animateJs : animateCss;
 
   /**
    * [transitionInHLB animates the inflation of the HLB and background dimmer]
@@ -58,15 +60,27 @@ define(['hlb/dimmer', 'page/util/common', 'hlb/positioning', 'core/platform', '$
     animate($hlb[0], getCurrentScale($hlb), getStartingScale($hlb), DEFLATION_SPEED, data.translateCSS, data.onHLBClosed);
   }
 
-  function animate(hlbElement, startScale, endScale, speed, translateCSS, onCompleteFn) {
+  function animateJs(hlbElement, startScale, endScale, speed, translateCSS, onCompleteFn) {
+    function nextFrame() {
+      var timeElapsed = new Date() - startTime,
+        percentComplete = timeElapsed >= speed ? 1 : timeElapsed / speed,
+        currentScale = startScale + (endScale - startScale) * percentComplete,
+        transformValue = 'scale(' + currentScale + ') ' + translateCSS;
 
-    if (platform.browser.isIE9) {
-      $(hlbElement).css({
-        transform: 'scale(' + endScale + ') ' + translateCSS
-      });
-      onCompleteFn();
-      return;
+      hlbElement.style[platform.transformProperty] = transformValue;
+      if (percentComplete < 1) {
+        requestFrameFn(nextFrame);
+      }
+      else if (onCompleteFn) {
+        onCompleteFn();
+      }
     }
+
+    var startTime = new Date();
+    nextFrame();
+  }
+
+  function animateCss(hlbElement, startScale, endScale, speed, translateCSS, onCompleteFn) {
 
     $(hlbElement).css({
       transition: '',
