@@ -11,7 +11,9 @@ define(['hlb/dimmer', 'page/util/common', 'hlb/positioning', 'core/platform', '$
 
       getStartingScale = hlbPositioning.getStartingScale,
 
-      animate = platform.browser.isIE9 ? animateJs : animateCss;
+      animate = platform.browser.isIE9 ? animateJs : animateCss,
+
+      animationTimerIE9;
 
   /**
    * [transitionInHLB animates the inflation of the HLB and background dimmer]
@@ -43,6 +45,9 @@ define(['hlb/dimmer', 'page/util/common', 'hlb/positioning', 'core/platform', '$
     // Un-dim the background!
     dimmer.undimBackgroundContent(DEFLATION_SPEED);
 
+    // Stop any IE9 animations
+    clearTimeout(animationTimerIE9);
+
     // Do we bother animating the deflation?
 
     // Sometimes, if the user presses the spacebar extremely fast, the HLB is toggled
@@ -69,7 +74,7 @@ define(['hlb/dimmer', 'page/util/common', 'hlb/positioning', 'core/platform', '$
 
       hlbElement.style[platform.transformProperty] = transformValue;
       if (percentComplete < 1) {
-        requestFrameFn(nextFrame);
+        animationTimerIE9 = setTimeout(nextFrame, 16);
       }
       else if (onCompleteFn) {
         onCompleteFn();
