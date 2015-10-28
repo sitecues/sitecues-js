@@ -1,7 +1,6 @@
 ({
   preserveLicenseComments: false,
   removeCombined: true,
-  fileExclusionRegExp: /jquery/,
   namespace: 'sitecues',
   useStrict: true,
   uglify2: {
@@ -212,10 +211,6 @@
       '$': 'page/dollar/zepto'
     }
   },
-  paths: {
-//    '$': 'empty:',
-//    'jquery': 'page/dollar/jquery'
-  },
   onBuildRead: function(module, path, contents) {
     if (module.indexOf('/requirejs') > 0 || module.indexOf('/alameda') > 0) {
       var loaderConfig = fs.readFileSync('module-loader-config.js', 'utf8');
@@ -230,28 +225,19 @@
     // Check for dupes
     // TODO this should use require with a state module we build instead of a global
     global.scIncludedBy = global.scIncludedBy || {};
-    if (data.name.indexOf('sitecues-ie9') < 0) { // Don't check sitecues-ie9 -- it's almost the same as sitecues, on purpose (different loader)
-      var index = data.included.length;
-      while (index--) {
-        var includedItem = data.included[index];
-        if (global.scIncludedBy[includedItem]) {
-          throw new Error('The module ' + includedItem + ' was included both in ' + global.scIncludedBy[includedItem] + ' and ' + data.name + '.\n' +
-            'Modules must only be included once in order to avoid code duplication.');
-        }
-        global.scIncludedBy[includedItem] = data.name;
+    var index = data.included.length;
+    while (index--) {
+      var includedItem = data.included[index];
+      if (global.scIncludedBy[includedItem]) {
+        throw new Error('The module ' + includedItem + ' was included both in ' + global.scIncludedBy[includedItem] + ' and ' + data.name + '.\n' +
+          'Modules must only be included once in order to avoid code duplication.');
       }
+      global.scIncludedBy[includedItem] = data.name;
     }
 
     // Build loader config
-    var includedStr = data.included.join("','"),
-      excludeModernBrowsers = data.name === 'sitecues-ie9',
-      excludeIE9 = data.name === 'sitecues';
+    var includedStr = data.included.join("','");
     includedStr = includedStr.replace(/\.js/g, ''); // Remove .js
-    if (!excludeModernBrowsers) {  // Bundle config of modern browsers doesn't incldue sitecues-ie9.js bundle
-      fs.appendFileSync('target/build-config/sitecues-bundles.js', "'" + data.name + "':['" + includedStr + "'],");
-    }
-    if (!excludeIE9) {   // Bundle config of ie9 doesn't incldue sitecues.js bundle
-      fs.appendFileSync('target/build-config/sitecues-bundles-ie9.js', "'" + data.name + "':['" + includedStr + "'],");
-    }
+    fs.appendFileSync('target/build-config/sitecues-bundles.js', "'" + data.name + "':['" + includedStr + "'],");
   }
 })
