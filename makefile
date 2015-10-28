@@ -220,8 +220,6 @@ resources: html css earcons images
 ################################################################################
 html: mkdirs
 	node precompile/compile-html.js $(resource-dir)/html
-# TODO precompile help as well, for now just copy the files
-	cp -r source/html/help $(resource-dir)/html
 
 ################################################################################
 # TARGET: css
