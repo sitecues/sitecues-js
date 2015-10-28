@@ -52,7 +52,7 @@ build:
 
 	# Require.js build
 	# TODO not sure if we want use strict in production versions -- good temporarily though
-	node node_modules/.bin/r.js -o rjs-build-options.js baseUrl=source/js generateSourceMaps=$(sourcemaps) optimize=uglify2 uglify2.compress.global_defs.SC_DEV=false uglify2.compress.global_defs.SC_LOCAL=$(sc-local) uglify2.compress.global_defs.SC_UNIT=false dir=$(build-dir)/$(version)/js wrap.start="'use strict';"
+	node node_modules/.bin/r.js -o rjs-build-options.js baseUrl=source/js generateSourceMaps=$(sourcemaps) optimize=uglify2 uglify2.compress.global_defs.SC_DEV=false uglify2.compress.global_defs.SC_LOCAL=$(sc-local) dir=$(build-dir)/$(version)/js wrap.start="'use strict';"
 
 	# Move sitecues.js out of version-named subfolder into /js (up one directory)
 	# This is because sitcues.js is loaded by the load script, which knows nothing of versions
@@ -101,7 +101,7 @@ debug:
 	@echo "===== STARTING: Build for sitecues library (DEBUG VER) ====="
 	@echo
 
-	echo "sitecues.version='$(version)';var SC_LOCAL=$(sc-local),SC_DEV=true,SC_UNIT=false;" > target/build-config/config.js
+	echo "sitecues.version='$(version)';var SC_LOCAL=$(sc-local),SC_DEV=true;" > target/build-config/config.js
 
 	# Require.js build
 	node node_modules/.bin/r.js -o rjs-build-options.js baseUrl=source/js generateSourceMaps=$(sourcemaps) optimize=none dir=$(build-dir)/$(version)/js wrap.start='"use strict";'

@@ -7,8 +7,6 @@ SC_DEV = false;
 //        exports.something="Chikun";
 //      }
 
-SC_UNIT = true;
-
 
 
 // Override/mock sitecues object.
