@@ -72,7 +72,7 @@ define(['hlb/dimmer', 'page/util/common', 'hlb/positioning', 'core/platform', '$
 
     function addAnimationEndListener() {
       if (platform.browser.isIE9) {
-        setTimeout(onCompleteFn, speed);
+        setTimeout(onCompleteFn, speed); // No transitionend event in IE9
       }
       else {
         hlbElement.addEventListener(platform.transitionEndEvent, onComplete);
