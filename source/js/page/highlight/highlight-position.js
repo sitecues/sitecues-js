@@ -57,7 +57,6 @@ define(['$', 'page/util/common', 'page/util/element-classifier', 'page/zoom/zoom
     var range = document.createRange(),
       parent,
       // ********** Some browsers are fine **********
-      doFirefoxCorrections = platform.browser.isFirefox && platform.browser.version < 34,
       doIECorrections = platform.browser.isIE && platform.browser.version < 11,
       isElement = node.nodeType === 1;
 
@@ -76,10 +75,6 @@ define(['$', 'page/util/common', 'page/util/element-classifier', 'page/zoom/zoom
 
     if (doIECorrections) {
       contentsRangeRect = getOldIECorrectionsToRangeRect(contentsRangeRect);
-    }
-
-    if (doFirefoxCorrections) {
-      contentsRangeRect = getFirefoxCorrectionsToRangeRect(parent, contentsRangeRect);
     }
 
     if (!isElement) {
@@ -107,35 +102,6 @@ define(['$', 'page/util/common', 'page/util/element-classifier', 'page/zoom/zoom
     origRangeRect.height /= nativeZoom;
 
     return normalizeRect(origRangeRect);
-  }
-
-  function getFirefoxCorrectionsToRangeRect(parent, origRangeRect) {
-    // ********** Firefox has bugs with range rects in some versions **********
-    // https://bugzilla.mozilla.org/show_bug.cgi?id=863618
-    // This must be done for range.getBoundingClientRect(),
-    // but not for element.getBoundingClientRect()
-    // The Firefox range.getBoundingClientRect() doesn't adjust for CSS transform.
-
-    var parentRange = document.createRange();
-    parentRange.selectNode(parent);
-
-    var currZoom = zoomMod.getCompletedZoom(),
-      parentRangeRect = parentRange.getBoundingClientRect(),
-      parentElementRect = parent.getBoundingClientRect(),
-      // Additional content offsets from top,left of parentElementRect
-      contentLeftOffset = (origRangeRect.left - parentRangeRect.left) * currZoom,
-      contentTopOffset = (origRangeRect.top - parentRangeRect.top) * currZoom,
-      correctedRect = {
-        // 1. Multiply the width and height by the scale
-        width: origRangeRect.width * currZoom,
-        height: origRangeRect.height * currZoom,
-        // 2. Use the element's top,left, and use ranges to see what the delta is between
-        // the element's range rect and the content range rect. Add the delta * currZoom
-        left: parentElementRect.left + contentLeftOffset,
-        top: parentElementRect.top + contentTopOffset
-      };
-
-    return normalizeRect(correctedRect);
   }
 
   function getRectMinusPadding(rect, style) {
