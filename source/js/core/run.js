@@ -96,8 +96,8 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
   }
 
   function initThemes() {
-    require([ 'theme/theme', 'page/focus/focus' ], function(themes, focus) {
-      themes.init();
+    require([ 'theme/theme', 'page/focus/focus' ], function(theme, focus) {
+      theme.init();
       focus.init();
     });
   }

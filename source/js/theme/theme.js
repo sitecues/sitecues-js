@@ -9,7 +9,7 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
     THEME_STYLESHEET_NAME = 'sitecues-theme',
     REPAINT_MS = 40,
     themeStyles,
-    shouldRepaintToEnsureFullCoverage = platform.browser.isChrome,
+    shouldRepaintToEnsureFullCoverage = platform.browser.isChrome && platform.browser.version < 48,
     isPanelExpanded,
     isRepaintNeeded,
     isInitialized,
@@ -346,7 +346,7 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
 
   /**
    * The CSS background property is shorthand for applying many CSS background- related properties at once.
-   * This function extracts the color fro the background propery.
+   * This function extracts the color fro the background property.
    * @param bgShorthand The background property value
    * @returns {string}
    */
@@ -581,7 +581,11 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
     applyTheme(conf.get('themeName'), conf.get('themePower'), conf.get('themeTextHue'));
   }
 
-  function init() {
+  function init(isPanelOpen) {
+    if (isPanelOpen) {
+      isPanelExpanded = true;
+    }
+
     if (isInitialized) {
       return;
     }

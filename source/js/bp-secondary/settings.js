@@ -44,6 +44,10 @@ define(['core/bp/constants', 'core/bp/helper', 'core/conf/user/manager', 'core/b
     initRanges();
 
     themeSlidersInit();
+
+    require(['theme/theme'], function(theme) {
+      theme.init(true); // Preload theme code
+    });
   }
 
   // Set up setting synchronization
