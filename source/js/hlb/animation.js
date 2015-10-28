@@ -40,7 +40,7 @@ define(['hlb/dimmer', 'page/util/common', 'hlb/positioning', 'core/platform'],
 
     hlbStyle[platform.transformOriginProperty] = data.originCSS;
 
-    animate($hlb[0], startingScale, hlbPositioning.getFinalScale($hlb), speed, data.translateCSS, data.onHLBReeady);
+    animate($hlb[0], startingScale, hlbPositioning.getFinalScale($hlb), speed, data.translateCSS, data.onHLBReady);
   }
 
   /**
