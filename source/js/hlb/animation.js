@@ -62,7 +62,8 @@ define(['hlb/dimmer', 'page/util/common', 'hlb/positioning', 'core/platform', '$
 
     $(hlbElement).css({
       transition: '',
-      transform: 'scale(' + startScale + ') ' + translateCSS
+      transform: 'scale(' + startScale + ') ' + translateCSS,
+      willChange: platform.transformProperty
     });
 
     function onComplete() {
