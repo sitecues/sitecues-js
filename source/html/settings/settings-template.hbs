@@ -1,15 +1,16 @@
 <sc-card id="scp-theme-settings" aria-labelledby="scp-theme-settings-tab">
   <sc-p class="scp-color-theme-group">
-    <sc-button data-setting-name="themeName">
+    <sc-button data-setting-name="themeName" class="scp-hand-cursor scp-tabbable">
       {{{theme.None}}}
     </sc-button>
-    <sc-button data-setting-name="themeName" data-setting-value="blueReduction">
+    <sc-button data-setting-name="themeName" data-setting-value="blueReduction" class="scp-hand-cursor scp-tabbable">
       {{{theme.Warm}}}
     </sc-button>
-    <sc-button data-setting-name="themeName" data-setting-value="increaseContrast">
+    <sc-button data-setting-name="themeName" data-setting-value="increaseContrast" class="scp-hand-cursor scp-tabbable">
       {{{theme.Bold}}}
     </sc-button>
-    <sc-button data-setting-name="themeName" data-setting-value="dark">
+    <!-- Not supporting dark themes in Safari, IE9-11 until filter: invert(1) no longer required -->
+    <sc-button data-setting-name="themeName" data-setting-value="dark" class="scp-hand-cursor scp-tabbable" data-no-ie11 data-no-safari>
       {{{theme.Dark}}}
     </sc-button>
   </sc-p>
@@ -18,7 +19,7 @@
     <sc-span id="scp-theme-power-label">{{theme.intensity}}</sc-span>
   </sc-p>
   <sc-p  class="scp-range-group" id="scp-theme-text-hue-group">
-    <sc-hue-range id="scp-theme-text-hue" min=".01" max="1.091" step =".03" data-setting-name="themeTextHue" aria-labelledby="scp-theme-text-hue-label"></sc-hue-range>
+    <sc-hue-range id="scp-theme-text-hue" min=".01" max="1.031" step =".03" value="1.03" data-setting-name="themeTextHue" aria-labelledby="scp-theme-text-hue-label"></sc-hue-range>
     <sc-span id="scp-theme-text-hue-label">{{theme.text_color}}</sc-span>
   </sc-p>
 </sc-card>
@@ -30,7 +31,7 @@
       <sc-span id="scp-mouse-size-label">{{mouse.size}}</sc-span>
     </sc-p>
     <sc-p class="scp-range-group scp-no-ie" data-show="true">
-      <sc-hue-range id="scp-mouse-hue" min=".01" max="1.091" step =".03" data-setting-name="mouseHue" aria-labelledby="scp-mouse-hue-label"></sc-hue-range>
+      <sc-hue-range id="scp-mouse-hue" min=".01" max="1.031" step =".03" value="1.03" data-setting-name="mouseHue" aria-labelledby="scp-mouse-hue-label"></sc-hue-range>
       <sc-span id="scp-mouse-hue-label">{{mouse.color}}</sc-span>
     </sc-p>
   </sc>

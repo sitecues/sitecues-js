@@ -1,7 +1,7 @@
 var handlebars = require('handlebars'),
   targetDir = process.argv[2] + '/',
   fs = require('fs'),
-  sources = ['settings', 'tips']; // TODO 'help'
+  sources = ['settings', 'tips', 'help' ];
 
 sources.forEach(readTemplate);
 
@@ -53,8 +53,23 @@ function getLanguageData(templateName, langFileName) {
   if (langCountrySplitter) {
     // Is country-specific file:
     // Extend the language data with the country data
-    return getCountryData(langData, requireDir, langCountrySplitter[1] + '.json');
+    langData = getCountryData(langData, requireDir, langCountrySplitter[1] + '.json');
   }
+
+  // Convert @@includedFileName to the text from that file
+  function convertIncludes(obj) {
+    Object.keys(obj).forEach(function(key) {
+      var value = obj[key];
+      if (typeof value === 'object') {
+        convertIncludes(value);
+      }
+      else if (value.substring(0,2) === '@@') {
+        // Include content from another file
+        obj[key] = fs.readFileSync('precompile/' + requireDir + value.substring(2), 'utf8');
+      }
+    });
+  }
+  convertIncludes(langData);
 
   return langData;
 }
@@ -74,7 +89,7 @@ function getCountryData(countryData, requireDir, baseLangFileName) {
         copyInto(dest[key], value);
       }
       else {
-        throw('Only strings and objects allowed in ' + countryFileName);
+        throw('Only strings and objects allowed in ' + baseLangFileName);
       }
     });
   }

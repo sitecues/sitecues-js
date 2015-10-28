@@ -1,11 +1,12 @@
 /* Focus Controller */
-define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
-  function (BP_CONST, state, helper, metric) {
+define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metric', 'core/platform' ],
+  function (BP_CONST, state, helper, metric, platform) {
 
   var savedDocumentFocus,
     tabbedElement,
     isInitialized,
     isListeningToClicks,
+    renderFocusOutline = platform.browser.isFirefox ? renderFocusOutlineFirefox : renderFocusOutlineNotFirefox,
     byId = helper.byId,
     TAB   = 9,
     ENTER = 13,
@@ -251,7 +252,15 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
     }
   }
 
-  function renderFocusOutline() {
+  function renderFocusOutlineFirefox() {
+    // getBoundingClientRect() shows bad focus outlines in Firefox
+    var showFocusOn = getElementToShowFocusOn(),
+      type = showFocusOn instanceof SVGElement ? 'stroke-child': 'box-shadow';
+    showFocusOn.setAttribute('data-show-focus', type);
+  }
+
+
+  function renderFocusOutlineNotFirefox() {
     // @data-visible-focus-on = id of element to show focus on
     // @data-show-focus = focus to be shown on this element
     // @data-own-focus-ring = element will show it's own focus ring
@@ -267,8 +276,8 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
     if (!showFocusOn.hasAttribute('data-own-focus-ring')) {
       // Show focus outline
       var EXTRA_FOCUS_PADDING = 1,
-        clientFocusRect = helper.getRect(showFocusOn),
         clientPanelRect = helper.getRect(getPanelContainer()),  // Focus rect is positioned relative to this
+        clientFocusRect = helper.getRect(showFocusOn),
         focusOutline = byId(BP_CONST.OUTLINE_ID),
         focusOutlineStyle = focusOutline.style;
 
@@ -434,7 +443,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
   }
 
   function onZoomKeyUp() {
-    require(['zoom/zoom'], function(zoomMod) {
+    require(['page/zoom/zoom'], function(zoomMod) {
       zoomMod.zoomStopRequested();
     });
   }
@@ -442,7 +451,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
   function performZoomSliderCommand(keyCode, evt) {
     var deltaSliderCommand = DELTA_KEYS[keyCode];
     if (deltaSliderCommand) {
-      require(['zoom/zoom'], function(zoomMod) {
+      require(['page/zoom/zoom'], function(zoomMod) {
         window.removeEventListener('keyup', onZoomKeyUp); // Zoom module will listen from here
         zoomMod.init();
         if (deltaSliderCommand > 0) {
@@ -521,6 +530,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'core/metric' ],
       return;
     }
     isInitialized = true;
+
     sitecues.on('bp/will-toggle-feature', hideFocus);
     sitecues.on('bp/did-change', focusFirstItem);
     sitecues.on('bp/did-show-card', focusCard);

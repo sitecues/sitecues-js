@@ -12,8 +12,6 @@ define(['$'], function ($) {
   var audioElements    = [],
       HAVE_FUTURE_DATA = 3;
 
-  function init() { }
-
   /**
    * Play the audio src at the given url
    * @param url source of audio to play
@@ -63,7 +61,6 @@ define(['$'], function ($) {
   }
 
   return {
-    init: init,
     playAudioSrc: playAudioSrc,
     isBusy: isBusy,
     stop: stop

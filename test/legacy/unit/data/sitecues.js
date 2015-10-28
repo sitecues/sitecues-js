@@ -7,8 +7,6 @@ SC_DEV = false;
 //        exports.something="Chikun";
 //      }
 
-SC_UNIT = true;
-
 
 
 // Override/mock sitecues object.
@@ -43,7 +41,7 @@ var blankFunction = function() {},
             index = 0,
             callback;
 
-        // Look over the parameters. For ex., 'jquery', 'conf', 'cursor/style' etc.
+        // Look over the parameters. For ex., 'jquery', 'conf', 'page/cursor/style' etc.
         while (index < arguments.length - 1) {
 
             // Add the module if it is already loaded.

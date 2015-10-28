@@ -3,26 +3,10 @@
  *   The core module of the sitecues library.
  */
 
-// User's favorite accent no longer chosen -- for example:
-// http://ts.dev.sitecues.com/pages/tired-fr-ca.html?branch=bp3-require  -- should speak in French Canadian, sounds same as
-// http://ts.dev.sitecues.com/pages/tired-fr.html?branch=bp3-require
-// http://ts.dev.sitecues.com/pages/tired-en-uk.html?branch=bp3-require  -- should speak in UK English, sounds same as
-// http://ts.dev.sitecues.com/pages/tired-en.html?branch=bp3-require
-// dealerEmail config option
-// Proper caching
-// onReady call back missing?
-// Safari:
-// - Super slow in Safari when theme used, especially with HLB. Also when changing themes.
-// - When highlighting not on normal theme in secondary panel highlighting is off, specifically reproduced in dropdown on eeoc.gov.
-// IE10 secondary bp arrow isn't showing up
-// IE9: Keyboard arrows don’t work to move highlight while in Help box.
-// UX: should tabbing move the highlight? Should focus and sync?
-// Cursor: Win/Firefox: Cursor hotspot is way off. Win/Chrome: Cursor hotspot is a tiny bit off. (edited)
+// User's favorite accent no longer chosen
 // Panel:
 // ? Cannot repro -- Sometimes 4 button panel plops down instead of animating
 // ? Cannot repro -- [Seth] Win/Firefox: Panel gets funky and shifts position after expanding from badge. Maybe due to drop shadow -- drop shadow didn’t match final position
-// - IE10 - more down arrow not showing up is because opacity=0 on #more-button-opacity
-// Firefox: keyboard navigation completely off
 // Weird: Graham managed to get badge to float out there in Safari while using +/-
 
 // Review
@@ -49,15 +33,22 @@
 // Later
 // Fix unit tests
 // About: Get it now
+// IE9: Keyboard arrows don’t work to move highlight while in Help box.
+// UX: should tabbing move the highlight? Should focus and sync?
 //
 
 
 // Later
+// Dark themes:
+// - In Safari, IE11 via web service (for CSS, image analysis, image reversal)
+// - In Safari, when highlighting dark theme and zooming highlighting is off, specifically reproduced in dropdown on eeoc.gov.
+// dealerEmail config option
+// ? Cursor: Win/Firefox: Cursor hotspot is way off. Win/Chrome: Cursor hotspot is a tiny bit off. (edited)
 // Settings: why do we ever set a cookie? I don't think we can keep it between pages, at least not currently. So why save/get settings from server at all?
 //           Cookie is set for metrics?
 
 
-define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/conf/user/manager', 'core/metric', 'core/platform', 'bp/bp'],
+define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/conf/user/manager', 'core/metric', 'core/platform', 'core/bp/bp'],
   function (userId, userSettingsServer, locale, conf, metric, platform, bp) {
   var
     numPrereqsToComplete,
@@ -67,14 +58,21 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
     isSpeechOn,
     isSitecuesOn = false,
     wasSitecuesEverOn,
+    DASH     = 189,
+    NUMPAD_SUBTRACT = 109,
+    MINUS_ALTERNATE_1 = 173,
+    MINUS_ALTERNATE_2 = 45,
     EQUALS   = 187,
     NUMPAD_ADD = 107,
     PLUS_ALTERNATE_1 = 61,
     PLUS_ALTERNATE_2 = 43,
-    QUOTE = 222;
+    QUOTE = 222,
+    // Keys that can init sitecues
+    INIT_CODES = [ DASH, NUMPAD_SUBTRACT, MINUS_ALTERNATE_1, MINUS_ALTERNATE_2,
+      EQUALS, NUMPAD_ADD, PLUS_ALTERNATE_1, PLUS_ALTERNATE_2, QUOTE];
 
-  function initZoom() {
-    require([ 'hpan/hpan', 'zoom/fixed-position-fixer', 'focus/focus', 'cursor/cursor' ], function(hpan, fixer, focus, cursor) {
+    function initZoom() {
+    require([ 'page/hpan/hpan', 'page/zoom/fixed-position-fixer', 'page/focus/focus', 'page/cursor/cursor' ], function(hpan, fixer, focus, cursor) {
       hpan.init();
       fixer.init();
       focus.init();
@@ -90,7 +88,7 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
   }
 
   function initSitecuesOn() {
-    require([ 'highlight/highlight', 'keys/keys', 'highlight/move-keys' ], function(highlight, keys, moveKeys) {
+    require([ 'page/highlight/highlight', 'page/keys/keys', 'page/highlight/move-keys' ], function(highlight, keys, moveKeys) {
       highlight.init();
       keys.init();
       moveKeys.init();
@@ -98,14 +96,14 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
   }
 
   function initThemes() {
-    require([ 'theme/theme', 'focus/focus' ], function(themes, focus) {
-      themes.init();
+    require([ 'theme/theme', 'page/focus/focus' ], function(theme, focus) {
+      theme.init();
       focus.init();
     });
   }
 
   function initMouse() {
-    require(['cursor/cursor'], function(cursor) {
+    require(['page/cursor/cursor'], function(cursor) {
       cursor.init();
     });
   }
@@ -132,20 +130,22 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
     }
   }
 
-  function firePageLoadEvent() {
+  function onSitecuesReady() {
     metric('page-visited', {
       nativeZoom: platform.nativeZoom,
       isRetina  : platform.isRetina()
     });
+
+    if (typeof sitecues.config.onReady === 'function') {
+      sitecues.config.onReady.call(sitecues);
+    }
   }
 
   function onAllPrereqsComplete() {
-    firePageLoadEvent();
-
     // Initialize other features after bp
     var initialZoom = conf.get('zoom');
     if (initialZoom > 1) {
-      require(['zoom/zoom'], function (zoomMod) {
+      require(['page/zoom/zoom'], function (zoomMod) {
         zoomMod.init();
         zoomMod.performInitialLoadZoom(initialZoom);
       });
@@ -183,19 +183,20 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
     if ((initialZoom > 1) === false && !isSpeechOn) {
       window.addEventListener('keydown', function (event) {
         var keyCode = event.keyCode;
-        if (keyCode === EQUALS || keyCode === NUMPAD_ADD ||
-          keyCode === PLUS_ALTERNATE_1 || keyCode === PLUS_ALTERNATE_2 || keyCode === QUOTE) {
+        if (INIT_CODES.indexOf(keyCode) >= 0) {
           if (event.ctrlKey || event.metaKey || event.altKey) {
             // Don't allow default behavior of modified key, e.g. native zoom
             event.preventDefault();
             event.stopImmediatePropagation();
           }
-          require(['keys/keys'], function (keys) {
+          require(['page/keys/keys'], function (keys) {
             keys.init(event);
           });
         }
       });
     }
+
+      onSitecuesReady();
   }
 
   function onPrereqComplete() {
@@ -218,7 +219,6 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
 
     conf.def('zoom', parseFloat); // Will further define it if zoom is turned on, in zoom.js
     userId.init();
-    console.log(locale);
     locale.init();
   };
 });

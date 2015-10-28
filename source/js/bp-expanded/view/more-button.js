@@ -4,7 +4,7 @@
  *  keyboard commands.
  */
 
-define(['bp/constants', 'bp/helper', 'bp-expanded/view/transform-util', 'bp-expanded/view/transform-animate', 'bp-expanded/view/transform-hovers', 'core/platform'],
+define(['core/bp/constants', 'core/bp/helper', 'bp-expanded/view/transform-util', 'bp-expanded/view/transform-animate', 'bp-expanded/view/transform-hovers', 'core/platform'],
   function (BP_CONST, helper, transformUtil, animate, hovers, platform) {
 
   var BUTTON_ENTER_ANIMATION_DURATION = 800, // Milliseconds
@@ -19,7 +19,7 @@ define(['bp/constants', 'bp/helper', 'bp-expanded/view/transform-util', 'bp-expa
       isInitialized;
 
   function getHelpOrSecondaryPanel(doToggle) {
-    if (platform.isIE9) {
+    if (platform.browser.isIE9) {
       require(['info/info'], function(info) {
         if (doToggle) {
           info.showHelp();

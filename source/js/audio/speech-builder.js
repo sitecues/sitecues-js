@@ -4,10 +4,11 @@
  * Currently the speech dictionary resides here until we can move it to the server.
  */
 
-define(['keys/element-classifier', '$'], function(elemClassifier, $) {
+define(['$'], function($) {
   var textBuffer = '',
     TEXT_NODE = 3,
     ELEMENT_NODE = 1;
+
 
   /**
    * Get all the text to be spoken for a given selector, taking into account line breaks, form values and alternative text
@@ -96,8 +97,25 @@ define(['keys/element-classifier', '$'], function(elemClassifier, $) {
     return option.selected;
   }
 
+  function hasMatchingTag(tags, element) {
+    return tags.hasOwnProperty(element.localName);
+  }
+
+  /**
+   * Checks if the element has media contents which can be rendered.
+   * TODO Use element-classifier.isVisualMedia()
+   */
+  var VISUAL_MEDIA_ELEMENTS = { img:1, picture:1, canvas:1, video:1, embed:1, object:1, iframe:1, frame:1, audio:1 };
+  function isVisualMedia(element) {
+    return hasMatchingTag(VISUAL_MEDIA_ELEMENTS, element);
+  }
+
+  function getImageText(node) {
+    return node.getAttribute('alt') || node.getAttribute('title') || '';
+  }
+
   function isImage($node) {
-    return elemClassifier.isVisualMedia($node[0]) || $node.is('input[type="image"]');
+    return isVisualMedia($node[0]) || $node.is('input[type="image"]');
   }
 
   function appendNonLabelText(text, $node, styles) {
@@ -130,10 +148,6 @@ define(['keys/element-classifier', '$'], function(elemClassifier, $) {
 
   function getInputLabelAttributeText(node) {
     return node.getAttribute('placeholder') || node.getAttribute('title') || '';
-  }
-
-  function getImageText(node) {
-    return node.getAttribute('alt') || node.getAttribute('title') || '';
   }
 
   function appendTextEquivAndValue(node, $node, doWalkChildren, text) {

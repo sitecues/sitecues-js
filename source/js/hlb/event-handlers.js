@@ -5,7 +5,7 @@
  * Stop event bubble up to window/document object.
  */
 // TODO: Call this module scrolling.js
-define(['$', 'util/common', 'core/platform'], function($, common, platform) {
+define(['$', 'page/util/common', 'core/platform'], function($, common, platform) {
 
   /////////////////////////
   // PRIVATE VARIABLES

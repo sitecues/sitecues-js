@@ -9,9 +9,9 @@ define([
     'hlb/positioning',
     'hlb/styling',
     'core/platform',
-    'keys//element-classifier',
+    'page/util/element-classifier',
     'hlb/animation',
-    'util/geo',
+    'page/util/geo',
     'core/metric'],
   function(
     $,
@@ -371,7 +371,10 @@ define([
     // Create and append the HLB and DIMMER wrapper element to the DOM
     $hlbWrapper = getOrCreateHLBWrapper();
 
-    if (platform.browser.isIE && getEditableItems().length) {
+    if ((platform.browser.isIE && getEditableItems().length) || platform.browser.isSafari) {
+      // TODO try to remove these hacks
+      // Hack#1: IE + text fields -- avoid bug where textfield was locked
+      // Hack#2: Safari -- avoid bug where HLB is blurry, at least on tired.com (SC-3185)
 
       if (SC_DEV && loggingEnabled) {
         console.log('SPECIAL CASE: HLB inside <body>');

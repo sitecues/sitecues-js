@@ -37,7 +37,7 @@
 //      name: 'lib-jquery',
 //      create: true,
 //      include: [
-//        'dollar/jquery-private',
+//        'page/dollar/jquery-private',
 //        'jquery'
 //      ]
 //    },
@@ -45,8 +45,8 @@
 //      name: 'lib-zepto',
 //      create: true,
 //      include: [
-//        'dollar/zepto-private',
-//        'dollar/zepto'
+//        'page/dollar/zepto-private',
+//        'page/dollar/zepto'
 //      ]
 //    },
     {
@@ -58,17 +58,17 @@
       exclude: [
         'core/locale',
         'core/platform',
-        'bp/constants',
-        'bp/model/state',
-        'bp/helper',
+        'core/bp/constants',
+        'core/bp/model/state',
+        'core/bp/helper',
         'core/util/xhr',
-        'util/common',
-        'dollar/dollar-utils',
-        'dollar/zepto',
+        'page/util/common',
+        'page/dollar/dollar-utils',
+        'page/dollar/zepto',
         'core/metric',
         'core/conf/urls',
         'core/conf/user/manager',
-        'zoom/zoom'
+        'page/zoom/zoom'
       ]
     },
     {
@@ -81,44 +81,44 @@
         'core/locale',
         'core/platform',
         'bp-expanded/bp-expanded',
-        'bp/constants',
-        'bp/model/state',
-        'bp/helper',
-        'bp/view/markup-finalizer',
+        'core/bp/constants',
+        'core/bp/model/state',
+        'core/bp/helper',
+        'core/bp/view/markup-finalizer',
         'core/util/xhr',
-        'util/common',
+        'page/util/common',
         'bp-expanded/view/transform-animate',
         'bp-expanded/view/transform-util',
+        'page/cursor/cursor',
         'core/metric',
         'core/conf/urls',
         'core/conf/user/manager'
       ]
     },
     {  // We could split into audio and zoom features
-      name: 'enhance',
+      name: 'page',
       create: true,
       include: [
-        'keys/keys',
-        'keys/commands',
-        'keys/element-classifier',
-        'highlight/highlight',
-        'util/common',
-        'dollar/dollar-utils',
-        'dollar/zepto',
-        'audio/audio',
-        'highlight/move-keys',
-        'zoom/zoom',
-        'hpan/hpan',
-        'zoom/fixed-position-fixer',
-        'focus/focus',
-        'cursor/cursor'
+        'page/keys/keys',
+        'page/keys/commands',
+        'page/util/element-classifier',
+        'page/highlight/highlight',
+        'page/util/common',
+        'page/dollar/dollar-utils',
+        'page/dollar/zepto',
+        'page/highlight/move-keys',
+        'page/zoom/zoom',
+        'page/hpan/hpan',
+        'page/zoom/fixed-position-fixer',
+        'page/focus/focus',
+        'page/cursor/cursor'
       ],
       exclude: [
         'core/locale',
         'core/platform',
-        'bp/constants',
-        'bp/model/state',
-        'bp/helper',
+        'core/bp/constants',
+        'core/bp/model/state',
+        'core/bp/helper',
         'core/util/xhr',
         'core/metric',
         'core/conf/urls',
@@ -137,23 +137,23 @@
       exclude: [
         'core/locale',
         'core/platform',
-        'bp/constants',
-        'bp/model/state',
-        'bp/helper',
+        'core/bp/constants',
+        'core/bp/model/state',
+        'core/bp/helper',
         'core/util/xhr',
-        'util/common',
-        'dollar/dollar-utils',
-        'dollar/zepto',
+        'page/util/common',
+        'page/dollar/dollar-utils',
+        'page/dollar/zepto',
         'core/conf/site',
         'core/conf/user/manager',
         'core/metric',
         'core/conf/urls',
-        'keys/element-classifier',
-        'util/geo'
+        'page/util/element-classifier',
+        'page/util/geo'
       ]
     },
     {
-      name: 'themes',
+      name: 'theme',
       create: true,
       include: [
         'theme/theme',
@@ -163,42 +163,86 @@
       exclude: [
         'core/locale',
         'core/platform',
-        'util/color',
-        'bp/constants',
-        'bp/model/state',
-        'bp/helper',
+        'page/util/color',
+        'core/bp/constants',
+        'core/bp/model/state',
+        'core/bp/helper',
         'core/util/xhr',
-        'util/common',
-        'dollar/dollar-utils',
-        'dollar/zepto',
+        'page/util/common',
+        'page/dollar/dollar-utils',
+        'page/dollar/zepto',
         'core/conf/urls',
         'core/conf/site',
         'core/conf/user/manager',
-        'style-service/user-agent-css.js',
+        'page/style-service/user-agent-css.js',
         'core/conf/site.js',
-        'style-service/media-queries.js',
-        'style-service/css-aggregator.js',
-        'style-service/style-service.js',
+        'page/style-service/media-queries.js',
+        'page/style-service/css-aggregator.js',
+        'page/style-service/style-service.js',
         'core/metric',
-        'zoom/zoom-forms.js',
-        'zoom/zoom.js'
+        'page/zoom/zoom-forms.js',
+        'page/zoom/zoom.js'
       ]
     },
     {
-      name: 'audio/text-select',
+      name: 'audio',
+      create: true,
       include: [
+        'audio/audio',
         'audio/text-select'
+      ],
+      exclude: [
+        'core/metric',
+        'page/dollar/zepto'
+      ]
+    },
+    {
+      name: 'audio-cues',
+      create: true,
+      include: [
+        'audio-cues/audio-cues'
+      ],
+      exclude: [
+        'audio/audio',
+        'core/metric',
+        'core/conf/user/manager',
+        'page/dollar/zepto'
+      ]
+    },
+    {
+      name: 'status',
+      create: true,
+      include: [
+        'status/status'
+      ],
+      exclude: [
+        'core/conf/user/manager',
+        'core/util/xhr',
+        'core/conf/urls'
+      ]
+    },
+    {
+      name: 'info',
+      create: true,
+      include: [
+        'info/info'
+      ],
+      exclude: [
+        'page/util/color',
+        'core/locale',
+        'hlb/dimmer',
+        'core/conf/urls'
       ]
     }
   ],
   map: {
     '*': {
-      '$': 'dollar/zepto'
+      '$': 'page/dollar/zepto'
     }
   },
   paths: {
 //    '$': 'empty:',
-//    'jquery': 'dollar/jquery'
+//    'jquery': 'page/dollar/jquery'
   },
   onBuildRead: function(module, path, contents) {
     if (module.indexOf('/requirejs') > 0 || module.indexOf('/alameda') > 0) {

@@ -9,7 +9,7 @@
 // - Bad photo reversal guesses:
 //   http://www.leadingage.org/ and // - http://www.leadingage.org/
 
-define(['$', 'util/color'], function ($, colorUtil) {
+define(['$', 'page/util/color'], function ($, colorUtil) {
   var hslToRgb = colorUtil.hslToRgb,
     rgbToHsl = colorUtil.rgbToHsl;
 
@@ -143,7 +143,7 @@ define(['$', 'util/color'], function ($, colorUtil) {
 
       var isInDarkPara = isInDarkParagraph($sampleElements, luminosity);
       if (typeof isInDarkPara !== 'undefined') {
-        return isInDarkPara ? -1 : 1;
+        return isInDarkPara ? 1 : -1;
       }
 
       // Middle of the road foreground color -- analyze background

@@ -52,7 +52,7 @@ build:
 
 	# Require.js build
 	# TODO not sure if we want use strict in production versions -- good temporarily though
-	node node_modules/.bin/r.js -o rjs-build-options.js baseUrl=source/js generateSourceMaps=$(sourcemaps) optimize=uglify2 uglify2.compress.global_defs.SC_DEV=false uglify2.compress.global_defs.SC_LOCAL=$(sc-local) uglify2.compress.global_defs.SC_UNIT=false dir=$(build-dir)/$(version)/js wrap.start="'use strict';"
+	node node_modules/.bin/r.js -o rjs-build-options.js baseUrl=source/js generateSourceMaps=$(sourcemaps) optimize=uglify2 uglify2.compress.global_defs.SC_DEV=false uglify2.compress.global_defs.SC_LOCAL=$(sc-local) dir=$(build-dir)/$(version)/js wrap.start="'use strict';"
 
 	# Move sitecues.js out of version-named subfolder into /js (up one directory)
 	# This is because sitcues.js is loaded by the load script, which knows nothing of versions
@@ -63,10 +63,12 @@ build:
 	./finalize-loader-config.js $(build-dir)/js/sitecues.js target/build-config/sitecues-bundles.js $(allow-zepto) $(version)
 	#./finalize-loader-config.js $(build-dir)/js/sitecues-ie9.js target/build-config/sitecues-bundles-ie9.js false $(version)
 
-	@echo "---- sitecues core source --------------------------------"
+	@echo "---- sitecues core --------------------------------"
 	@./show-file-sizes.sh $(build-dir)/js "sitecues.js"
-	@echo "---- additional bundles source ---------------------------"
-	@./show-file-sizes.sh $(build-dir)/$(version)/js "*.js" | grep -v ".src.js"
+	@echo "---- bundles --------------------------------------"
+	@./show-file-sizes.sh $(build-dir)/$(version)/js "*.js" | grep -v ".src.js" | grep -v "/"
+	@echo "---- individual file modules ----------------------"
+	@./show-file-sizes.sh $(build-dir)/$(version)/js "*.js" | grep -v ".src.js" | grep "/" | cat
 
 	@echo
 	@echo "===== COMPLETE: Building sitecues library"
@@ -85,10 +87,12 @@ checksize:
   # Show file sizes but not for foo.src.bar -- those are built by r.js for sourcemaps
 	@echo "**** File sizes ******************************************"
 	@echo
-	@echo "---- sitecues core zipped --------------------------------"
+	@echo "---- sitecues core --------------------------------"
 	@./show-file-sizes.sh $(build-dir)/js "sitecues*.js.gz"
-	@echo "----- additional bundles zipped --------------------------"
-	@./show-file-sizes.sh $(build-dir)/$(version)/js "*.js.gz"
+	@echo "---- bundles --------------------------------------"
+	@./show-file-sizes.sh $(build-dir)/$(version)/js "*.js.gz" | grep -v "/"
+	@echo "---- individual file modules ----------------------"
+	@./show-file-sizes.sh $(build-dir)/$(version)/js "*.js.gz" | grep "/" | cat
 
 ################################################################################
 # TARGET: debug
@@ -97,7 +101,7 @@ debug:
 	@echo "===== STARTING: Build for sitecues library (DEBUG VER) ====="
 	@echo
 
-	echo "sitecues.version='$(version)';var SC_LOCAL=$(sc-local),SC_DEV=true,SC_UNIT=false;" > target/build-config/config.js
+	echo "sitecues.version='$(version)';var SC_LOCAL=$(sc-local),SC_DEV=true;" > target/build-config/config.js
 
 	# Require.js build
 	node node_modules/.bin/r.js -o rjs-build-options.js baseUrl=source/js generateSourceMaps=$(sourcemaps) optimize=none dir=$(build-dir)/$(version)/js wrap.start='"use strict";'
@@ -112,10 +116,12 @@ debug:
 	#./finalize-loader-config.js $(build-dir)/js/sitecues-ie9.js target/build-config/sitecues-bundles-ie9.js false $(version)
 
 	@echo "**** File sizes ******************************************"
-	@echo "---- sitecues core source --------------------------------"
+	@echo "---- sitecues core --------------------------------"
 	@./show-file-sizes.sh $(build-dir)/js "sitecues*.js"
-	@echo "---- additional bundles source ---------------------------"
-	@./show-file-sizes.sh $(build-dir)/$(version)/js "*.js" | grep -v "sitecues"
+	@echo "---- bundles --------------------------------------"
+	@./show-file-sizes.sh $(build-dir)/$(version)/js "*.js" | grep -v ".src.js" | grep -v "/"
+	@echo "---- individual file modules ----------------------"
+	@./show-file-sizes.sh $(build-dir)/$(version)/js "*.js" | grep -v ".src.js" | grep "/" | cat
 
 	@echo
 	@echo "===== COMPLETE: Building sitecues library (DEBUG VER) ====="

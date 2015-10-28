@@ -1,5 +1,5 @@
-define(['bp/constants', 'bp/helper', 'core/conf/user/manager', 'bp/model/state', 'core/metric', 'core/platform'],
-  function (BP_CONST, helper, conf, state, metric, platform) {
+define(['core/bp/constants', 'core/bp/helper', 'core/conf/user/manager', 'core/bp/model/state', 'core/metric', 'core/platform', 'page/cursor/cursor'],
+  function (BP_CONST, helper, conf, state, metric, platform, cursor) {
 
   var byId = helper.byId,
     isActive = false,
@@ -15,9 +15,12 @@ define(['bp/constants', 'bp/helper', 'core/conf/user/manager', 'bp/model/state',
 
     if (isActive !== willBeActive) {
       if (willBeActive) {
+        mouseSlidersInit();  // Always use current mouse size as starting point
+
         if (!settingsPanel) {
           initContents();
         }
+
         settingsCards.addEventListener('click', onSettingsClick);
         settingsCards.addEventListener('change', onSettingsNativeInputChange);
         settingsCards.addEventListener('input', onSettingsNativeInputChangeDrag);
@@ -41,6 +44,10 @@ define(['bp/constants', 'bp/helper', 'core/conf/user/manager', 'bp/model/state',
     initRanges();
 
     themeSlidersInit();
+
+    require(['theme/theme'], function(theme) {
+      theme.init(true); // Preload theme code
+    });
   }
 
   // Set up setting synchronization
@@ -79,6 +86,10 @@ define(['bp/constants', 'bp/helper', 'core/conf/user/manager', 'bp/model/state',
     return byId(BP_CONST.THEME_TEXT_HUE_ID);
   }
 
+  function getMouseSizeRange() {
+    return byId(BP_CONST.MOUSE_SIZE_ID);
+  }
+
   function initRangeListener(settingName, rangeElem) {
     conf.get(settingName, function(val) {
       rangeElem.value = val;
@@ -107,6 +118,17 @@ define(['bp/constants', 'bp/helper', 'core/conf/user/manager', 'bp/model/state',
       getThemePowerGroup().setAttribute('data-show', isThemePowerEnabled);
       getThemeTextHueGroup().setAttribute('data-show', isThemeTextHueEnabled);
     });
+  }
+
+  function mouseSlidersInit() {
+    var size = cursor.getSize(),
+      MIN_BP_CURSOR_SIZE = 1.9;
+
+    if (!conf.get('mouseSize')) {
+      // No setting, so start from current cursor size means using the BP cursor size as a minimum
+      size = Math.max(size, MIN_BP_CURSOR_SIZE);
+    }
+    getMouseSizeRange().value = size;
   }
 
 

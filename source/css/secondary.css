@@ -66,7 +66,7 @@ sc-h2 {
 }
 sc-center {
   text-align: center;
-  position: relative;
+  display: block;
 }
 sc-p {
   display: block;
@@ -464,7 +464,6 @@ sc-button[data-setting-name="themeName"][data-setting-value="blueReduction"] {
   background-color: #fffdde;
   border-width: 1px;
 }
-
 sc-button[data-setting-name="themeName"][data-setting-value="dark"] {
   color: #fff;
   background-color: #000;
@@ -487,16 +486,6 @@ sc-button[data-setting-name="themeName"][data-setting-value="dark"] {
 .scp-lens-size-group {
   padding-top: 14px;
 }
-sc-button[aria-pressed="true"]:after {
-  content: "";
-  position: absolute;
-  top: 85px;
-  left: 34px;
-  width: 24px;
-  height: 19px;
-  background-image: url('../images/settings/theme-indicator.svg')
-}
-
 #scp-feedback-header {
   opacity: 0;
   width: 0; /* Use width: 0 instead of display:none because IE wouldn't refresh the styles after sending feedback, clicking about, and coming back to feedback */

@@ -7,7 +7,6 @@ define(
         'test/all'
     ],
     function (intern, testSuites) {
-
         'use strict';
 
         var build = 'UNKNOWN',
@@ -41,8 +40,8 @@ define(
                 //     'phantomjs.page.settings.userAgent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.111 Safari/537.36'
                 // },
                 // { browserName: 'safari' },
-                // { browserName: 'firefox' },
-                { browserName: 'chrome' }
+                 { browserName: 'firefox' },
+             //   { browserName: 'chrome' }
                 // BrowserStack-style...
                 // { os: 'Windows', os_version: '10',       browser: 'edge',    browser_version: '12.0' },
                 // { os: 'Windows', os_version: '10',       browser: 'firefox', browser_version: '40.0' },
@@ -58,9 +57,9 @@ define(
             maxConcurrency: 3,  // how many browsers may be open at once
 
             // Specify which AMD module loader to use...
-            // loaders: {
-
-            // }
+          //   loaders: {
+            //    packages: ['node']
+             //},
             // Options to pass to the AMD module loader...
             loaderOptions: {
                 baseUrl: 'source/js',
@@ -91,9 +90,9 @@ define(
             grep: /.*/,
 
             // The paths that match this regex will NOT be included in code coverage reports...
-            excludeInstrumentation: /^(?:config|test|node_modules)\//,
-
-            // How to display or save test run info.
+            excludeInstrumentation: /^(?:config|test|node_modules)\//
+            
+            *// How to display or save test run info.
             reporters: [
                 // Test result reporters.
                 { id : 'Runner' }
@@ -104,5 +103,4 @@ define(
                 // { id : 'LcovHtml',  directory : 'report/coverage/html' }
             ]
         };
-    }
-);
+    });

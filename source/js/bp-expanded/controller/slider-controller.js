@@ -1,7 +1,7 @@
 /*
  Slider Controller
  */
-define(['bp/constants', 'bp/helper', 'core/platform', 'bp/model/state', 'bp-expanded/view/slider', 'zoom/zoom'],
+define(['core/bp/constants', 'core/bp/helper', 'core/platform', 'core/bp/model/state', 'bp-expanded/view/slider', 'page/zoom/zoom'],
   function (BP_CONST, helper, platform, state, sliderView, zoomMod) {
 
   var isListeningToWindowMouseEvents,

@@ -8,7 +8,7 @@
  *    }
  */
 
-define(['$', 'zoom/zoom', 'util/color', 'core/conf/site'], function($, zoomMod, colorUtil, site) {
+define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site'], function($, zoomMod, colorUtil, site) {
   var REVERSIBLE_ATTR = 'data-sc-reversible',
     customSelectors = site.get('themes') || { },
     DARK_BG_THRESHOLD = 0.3,
@@ -16,7 +16,8 @@ define(['$', 'zoom/zoom', 'util/color', 'core/conf/site'], function($, zoomMod, 
     SVG_BONUS = 999,
     BG_IMAGE_BONUS = 150,
     MAX_SCORE_CHECK_PIXELS = 120,
-    isDebuggingOn;
+    isDebuggingOn,
+    reverseCalbackFn;
 
   function getImageExtension(src) {
     var imageExtension = src.match(/\.png|\.jpg|\.jpeg|\.gif|\.svg/i);
@@ -231,31 +232,52 @@ define(['$', 'zoom/zoom', 'util/color', 'core/conf/site'], function($, zoomMod, 
    */
   // TODO cache results in localStorage based on URL?
   function classifyImage(index, img) {
-    function onImageLoad(event) {
-      classifyImage(0, event.target);
+    var isReversible,
+      $img = $(img);
+    if ($img.is(customSelectors.reversible)) {
+      isReversible = true;
     }
-
-    var isReversible;
-    if (colorUtil.isOnDarkBackground(img, DARK_BG_THRESHOLD)) {
-      // If already on a dark background, inverting won't help make it visible
+    else if ($img.is(customSelectors.nonReversible)) {
       isReversible = false;
     }
-    else if (img.localName === 'img' && !img.complete) {
-      // Too early to tell anything
-      img.addEventListener('load', onImageLoad);
-      return;
+    else if (colorUtil.isOnDarkBackground(img, DARK_BG_THRESHOLD)) {
+      // If already on a dark background, inverting won't help make it visible
+      isReversible = false;
     }
     else if (img.localName === 'svg') {
       isReversible = true;
     }
     else {
-      isReversible = shouldInvertElement(img);
+      // Too early to tell anything
+      if (img.complete === false) {
+        img.addEventListener('load', classifyLoadedImage);
+      }
+      else {
+        setTimeout(function() {
+          classifyLoadedImage(img);
+        }, 100);
+      }
+      return;
     }
+
+    onImageClassified(img, isReversible);
+  }
+
+  function onImageClassified(img, isReversible) {
+    img.setAttribute(REVERSIBLE_ATTR, isReversible);
+    if (isReversible) {
+      reverseCalbackFn(img);
+    }
+  }
+
+  function classifyLoadedImage(img) {
+    var isReversible = shouldInvertElement(img);
 
     if (SC_DEV && isDebuggingOn) {
       $(img).css('outline', '5px solid ' + (isReversible ? 'red' : 'green'));
     }
-    $(img).attr(REVERSIBLE_ATTR, isReversible);
+
+    onImageClassified(img, isReversible);
   }
 
   function getSource(img) {
@@ -320,19 +342,22 @@ define(['$', 'zoom/zoom', 'util/color', 'core/conf/site'], function($, zoomMod, 
     return finalScore > 0;
   }
 
-  function classify() {
+  function classify(root, reverseCallback) {
     var NOT_CLASSIFIED = ':not([' + REVERSIBLE_ATTR + '])',
-      selector = 'body img[src]' + NOT_CLASSIFIED +
-                 ',body picture[srcset]' + NOT_CLASSIFIED +
-                 ',body input[type="image"]' + NOT_CLASSIFIED +
-                 ',body svg' + NOT_CLASSIFIED;
-    if (customSelectors.reversible) {
-      $(customSelectors.reversible).attr(REVERSIBLE_ATTR, true);
+      selector = 'img[src]' + NOT_CLASSIFIED +
+                 ',picture[srcset]' + NOT_CLASSIFIED +
+                 ',input[type="image"]' + NOT_CLASSIFIED +
+                 ',svg' + NOT_CLASSIFIED,
+      $root = $(root);
+
+    reverseCalbackFn = reverseCallback;
+
+    if ($root.is(selector)) {
+      classifyImage(root);
     }
-    if (customSelectors.nonReversible) {
-      $(customSelectors.nonReversible).attr(REVERSIBLE_ATTR, false);
+    else {
+      $(root).find(selector).each(classifyImage);
     }
-    $(selector).each(classifyImage);
   }
 
   if (SC_DEV) {
