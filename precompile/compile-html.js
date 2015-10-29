@@ -1,54 +1,67 @@
-var handlebars = require('handlebars'),
-  targetDir = process.argv[2] + '/',
-  fs = require('fs'),
-  sources = ['settings', 'tips', 'help' ];
+'use strict';
 
-sources.forEach(readTemplate);
+const handlebars = require('handlebars'),
+  targetDir  = process.argv[2] + '/',
+  fs         = require('fs'),
+  sources    = ['settings', 'tips', 'help' ];
 
 function readTemplate(templateName) {
-
-  console.log('Compiling template: ' + templateName);
-  var sourceFileName = 'source/html/' + templateName + '/' + templateName + '-template.hbs';
-  fs.readFile(sourceFileName, compileTemplate);
 
   function compileTemplate(err, templateBuffer) {
 
     if (err) {
-      console.log('Error reading template: ' + err);
+      err.message = 'Error reading template:' + err.message;
+      throw err;
     }
 
     function compileTemplateForLang(langFileName) {
-      var data = getLanguageData(templateName, langFileName),
+      const data = getLanguageData(templateName, langFileName),
         targetFileName = targetDir + templateName + '/' + langFileName.split('.')[0] + '.html',
         templatedHtml = template(data);
 
       console.log('Created html: ' + targetFileName);
 
-      fs.writeFile(targetFileName, templatedHtml);
+      fs.writeFile(targetFileName, templatedHtml, function (err) {
+        if (err) {
+          throw err;
+        }
+      });
     }
 
-    var template = handlebars.compile(templateBuffer.toString()),
+    const template = handlebars.compile(templateBuffer.toString()),
       langFileNames = getLangsForTemplate(templateName);
 
     fs.mkdirSync(targetDir + templateName);
 
     langFileNames.forEach(compileTemplateForLang);
   }
+
+  const sourceFileName = 'source/html/' + templateName + '/' + templateName + '-template.hbs';
+  console.log('Compiling template: ' + templateName);
+  fs.readFile(sourceFileName, compileTemplate, function (err) {
+    if (err) {
+      throw err;
+    }
+  });
 }
 
 function getLangsForTemplate(name) {
+
   function isLanguageFile(name) {
     return !!name.match(/.*\.json$/);
   }
-  var files = fs.readdirSync('source/html/' + name);
+
+  const files = fs.readdirSync('source/html/' + name);
+
   return files.filter(isLanguageFile);
 }
 
 function getLanguageData(templateName, langFileName) {
-  var requireDir =  '../source/html/' + templateName + '/',
+  const requireDir =  '../source/html/' + templateName + '/',
     COUNTRY_REGEX = /^(.*-[a-z][a-z])(?:-[a-z][a-z]\.json$)/,
-    langCountrySplitter =  langFileName.match(COUNTRY_REGEX),
-    langData = require(requireDir + langFileName);
+    langCountrySplitter =  langFileName.match(COUNTRY_REGEX);
+
+  let langData = require(requireDir + langFileName);
 
   if (langCountrySplitter) {
     // Is country-specific file:
@@ -59,7 +72,7 @@ function getLanguageData(templateName, langFileName) {
   // Convert @@includedFileName to the text from that file
   function convertIncludes(obj) {
     Object.keys(obj).forEach(function(key) {
-      var value = obj[key];
+      const value = obj[key];
       if (typeof value === 'object') {
         convertIncludes(value);
       }
@@ -75,12 +88,12 @@ function getLanguageData(templateName, langFileName) {
 }
 
 function getCountryData(countryData, requireDir, baseLangFileName) {
-  var baseLangData = require(requireDir + baseLangFileName),
+  const baseLangData = require(requireDir + baseLangFileName),
     newData = JSON.parse(JSON.stringify(baseLangData));
 
   function copyInto(dest, source) {
     Object.keys(source).forEach(function(key) {
-      var value = source[key];
+      const value = source[key];
 
       if (typeof value === 'string') {
         dest[key] = value;
@@ -89,7 +102,7 @@ function getCountryData(countryData, requireDir, baseLangFileName) {
         copyInto(dest[key], value);
       }
       else {
-        throw('Only strings and objects allowed in ' + baseLangFileName);
+        throw new Error('Only strings and objects allowed in ' + baseLangFileName);
       }
     });
   }
@@ -98,3 +111,5 @@ function getCountryData(countryData, requireDir, baseLangFileName) {
 
   return newData;
 }
+
+sources.forEach(readTemplate);
