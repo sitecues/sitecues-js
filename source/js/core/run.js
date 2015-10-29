@@ -12,6 +12,7 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
   function (userId, confUserSettingsServer, locale, conf, metric, platform, bp) {
   var
     numPrereqsToComplete,
+    isZoomInitialized,
     isSpeechInitialized,
     isZoomOn,
     isSpeechOn,
@@ -31,7 +32,7 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
     INIT_CODES = [ DASH, NUMPAD_SUBTRACT, MINUS_ALTERNATE_1, MINUS_ALTERNATE_2,
       EQUALS, NUMPAD_ADD, PLUS_ALTERNATE_1, PLUS_ALTERNATE_2, QUOTE];
 
-  function initZoom() {
+  function initZoomEnhancingFeatures() {
     require([ 'page/hpan/hpan', 'page/zoom/fixed-position-fixer', 'page/focus/focus', 'page/cursor/cursor' ], function(hpan, fixer, focus, cursor) {
       hpan.init();
       fixer.init();
@@ -84,6 +85,10 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
   function onZoomChange(zoomLevel) {
     isZoomOn = zoomLevel > 1;
     onFeatureSettingChanged();
+    if (isZoomOn && !isZoomInitialized) {
+      initZoomEnhancingFeatures();
+      isZoomInitialized = true;
+    }
   }
 
   function onSitecuesReady() {
