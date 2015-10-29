@@ -1,3 +1,11 @@
+/**
+ * This is a build step used to compile all of the html files we used
+ * For each template (listed in sources), we need a version for each language.
+ *
+ * Example:
+ * tips-template.hbs (handlebars template) + tips-de.json (template data) -> tips-de.html
+ */
+
 'use strict';
 
 const handlebars = require('handlebars'),
