@@ -117,7 +117,7 @@ define(['core/conf/site', 'core/conf/urls', 'core/run'], function (site, urls, r
     /* jshint validthis: true */
     var event, node, calls, tail, args, rest;
     if (!(calls = this._events)) {
-        return this;
+      return this;
     }
 
     (events = events.split(/\s+/)).push(null);
@@ -143,7 +143,7 @@ define(['core/conf/site', 'core/conf/urls', 'core/run'], function (site, urls, r
       }
     }
 
-      return this;
+    return this;
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////

@@ -32,6 +32,13 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
     INIT_CODES = [ DASH, NUMPAD_SUBTRACT, MINUS_ALTERNATE_1, MINUS_ALTERNATE_2,
       EQUALS, NUMPAD_ADD, PLUS_ALTERNATE_1, PLUS_ALTERNATE_2, QUOTE];
 
+  function performInitialLoadZoom(initialZoom) {
+    require(['page/zoom/zoom'], function (zoomMod) {
+      zoomMod.init();
+      zoomMod.performInitialLoadZoom(initialZoom);
+    });
+  }
+
   function initZoomEnhancingFeatures() {
     require([ 'page/hpan/hpan', 'page/zoom/fixed-position-fixer', 'page/focus/focus', 'page/cursor/cursor' ], function(hpan, fixer, focus, cursor) {
       hpan.init();
@@ -109,12 +116,9 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
     // Previously saved values
     var initialZoom = conf.get('zoom');
     if (initialZoom > 1) {
-      require(['page/zoom/zoom'], function (zoomMod) {
-        zoomMod.init();
-        zoomMod.performInitialLoadZoom(initialZoom);
-      });
+      performInitialLoadZoom(initialZoom);
     }
-    // Runtime changes
+    // Monitor any runtime changes
     sitecues.on('zoom', onZoomChange);
 
     // -- Speech --
