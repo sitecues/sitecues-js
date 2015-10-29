@@ -85,7 +85,7 @@ define(
 
             });
             test('.isEmpty() checks if a text node is empty / has blank space/punctuation characters', function () {
-                var textNode = document.createTextNode('.')
+                var textNode = document.createTextNode('.');
                 assert.isTrue(
                     common.isEmpty(textNode),
                     "Non empty strings with only punctuation return true."
@@ -208,20 +208,24 @@ define(
                     style = element.style,
                     parentStyle = document.createElement('style');
 
-
+                /*
                 style.backgroundImage = null;
-                style.backgroundRepeat = 'no-repeat';
-                style.backgroundColor = 'red';
+                style.backgroundColor = 'transparent';
                 document.body.appendChild(element);
                 assert.isFalse(
                     common.hasOwnBackground(element, style, parentStyle),
                     'Null background images should return false'
                 );
+                */
 
-
-
-
-
+                style.backgroundImage = null;
+                style.backgroundColor = 'red';
+                parentStyle.backgroundColor = 'blue';
+                document.body.appendChild(element);
+                assert.isTrue(
+                    common.hasOwnBackground(element, style, parentStyle),
+                    'Element with its own background color has a background'
+                );
 
             });
             test('.hasOwnBackgroundColor()', function () {
