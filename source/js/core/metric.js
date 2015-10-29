@@ -13,13 +13,13 @@ define(['core/conf/user/manager', 'core/conf/site', 'core/locale', 'core/platfor
       var allData = {
         name: name,
         details: details,
-        client_time_ms: +new Date(),    // Epoch time in milliseconds  when the event occurred
-        zoom_level: conf.get('zoom') || 1,
-        tts_state: conf.get('ttsOn') || false,
-        session_id: UUIDv4,   // A random UUID v4 generated for this library session.
-        page_url: location.href,
-        browser_user_agent: navigator && navigator.userAgent ? navigator.userAgent : '',
-        client_language: locale.getBrowserLang()
+        clientTimeMs: +new Date(),    // Epoch time in milliseconds  when the event occurred
+        zoomLevel: conf.get('zoom') || 1,
+        ttsState: conf.get('ttsOn') || false,
+        sessionId: UUIDv4,   // A random UUID v4 generated for this library session.
+        pageUrl: location.href,
+        browserUserAgent: navigator.userAgent,
+        clientLanguage: locale.getBrowserLang()
       };
 
       //if (SC_DEV) { console.log('Metric: ' + JSON.stringify(allData)); }
