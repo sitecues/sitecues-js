@@ -114,25 +114,6 @@ define(['page/util/element-classifier', 'core/platform'], function (elemClassifi
   }
 
   /**
-   * Defines wheel scroll direction: if wheel is up.
-   * @param e Event Object
-   */
-  function wheelUp(e) {
-    var evt = e || window.event,
-        delta = evt.originalEvent.detail < 0 || evt.originalEvent.wheelDelta > 0 ? 1 : -1;
-
-    return delta > 0;
-  }
-
-   /**
-   * Defines wheel scroll direction: if wheel is down.
-   * @param e Event Object
-   */
-  function wheelDown(e) {
-    return !wheelUp(e);
-  }
-
-  /**
    * Create an SVG fragment for insertion into a web page -- ordinary methods don't work.
    * See http://stackoverflow.com/questions/3642035/jquerys-append-not-working-with-svg-element
    */
@@ -194,6 +175,7 @@ define(['page/util/element-classifier', 'core/platform'], function (elemClassifi
     return parseFloat(style.borderRightWidth) || parseFloat(style.borderBottomWidth);
   }
 
+    //Doesn't check HSLA colors for transparency
   function isTransparentColor(color) {
     return color === 'transparent' || color.match(/^rgba.*0\)$/);
   }
@@ -228,8 +210,6 @@ define(['page/util/element-classifier', 'core/platform'], function (elemClassifi
     hasOwnBackgroundColor: hasOwnBackgroundColor,
     hasVisibleContent: hasVisibleContent,
     isEmptyBgImage: isEmptyBgImage,
-    wheelUp: wheelUp,
-    wheelDown: wheelDown,
     createSVGFragment: createSVGFragment,
     elementFromPoint: elementFromPoint,
     hasVertScroll: hasVertScroll,
