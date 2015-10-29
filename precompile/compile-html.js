@@ -3,6 +3,7 @@
 const handlebars = require('handlebars'),
   targetDir  = process.argv[2] + '/',
   fs         = require('fs'),
+  path       = require('path'),
   sources    = ['settings', 'tips', 'help' ];
 
 function readTemplate(templateName) {
@@ -36,13 +37,9 @@ function readTemplate(templateName) {
     langFileNames.forEach(compileTemplateForLang);
   }
 
-  const sourceFileName = 'source/html/' + templateName + '/' + templateName + '-template.hbs';
+  const sourceFileName = path.join('source', 'html', templateName, templateName + '-template.hbs');
   console.log('Compiling template: ' + templateName);
-  fs.readFile(sourceFileName, compileTemplate, function (err) {
-    if (err) {
-      throw err;
-    }
-  });
+  fs.readFile(sourceFileName, compileTemplate);
 }
 
 function getLangsForTemplate(name) {
