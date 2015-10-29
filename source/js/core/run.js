@@ -12,11 +12,11 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
   function (userId, confUserSettingsServer, locale, conf, metric, platform, bp) {
   var
     numPrereqsToComplete,
-    isZoomInitialized,
     isSpeechInitialized,
     isZoomOn,
     isSpeechOn,
     isSitecuesOn = false,
+    isKeyHandlingInitialized,
     wasSitecuesEverOn,
     DASH     = 189,
     NUMPAD_SUBTRACT = 109,
@@ -84,10 +84,6 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
   function onZoomChange(zoomLevel) {
     isZoomOn = zoomLevel > 1;
     onFeatureSettingChanged();
-    if (isZoomOn && !isZoomInitialized) {
-      initZoom();
-      isZoomInitialized = true;
-    }
   }
 
   function onSitecuesReady() {
@@ -101,8 +97,11 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
     }
   }
 
-  function onBPComplete() {
-    // Initialize other features after bp
+  // Initialize page feature listeners
+  // This means: if a setting or event changes that requires some modules, we load and initialize the modules
+  function initPageFeatureListeners() {
+    // -- Zoom --
+    // Previously saved values
     var initialZoom = conf.get('zoom');
     if (initialZoom > 1) {
       require(['page/zoom/zoom'], function (zoomMod) {
@@ -110,11 +109,10 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
         zoomMod.performInitialLoadZoom(initialZoom);
       });
     }
-
-    // Init zoom if turned on
+    // Runtime changes
     sitecues.on('zoom', onZoomChange);
 
-    // Init speech if turned on
+    // -- Speech --
     conf.get('ttsOn', function(isOn) {
       isSpeechOn = isOn;
       onFeatureSettingChanged();
@@ -124,45 +122,56 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
       }
     });
 
-    // Init themes if turned on
+    // -- Themes --
     conf.get('themeName', function(themeName) {
       if (themeName) {
         initThemes();
       }
     });
 
-    // Init mouse settings if turned on
+    // -- Mouse --
     conf.get('mouseSize mouseHue', function(value) {
       if (value) {
         initMouse();
       }
     });
 
+    // -- Keys --
     // Init keys module if sitecues was off but key is pressed that might turn it on
-    // E.g. + or ' is pressed
-    if ((initialZoom > 1) === false && !isSpeechOn) {
-      window.addEventListener('keydown', function (event) {
-        var keyCode = event.keyCode;
-        if (INIT_CODES.indexOf(keyCode) >= 0) {
-          if (event.ctrlKey || event.metaKey || event.altKey) {
-            // Don't allow default behavior of modified key, e.g. native zoom
-            event.preventDefault();
-            event.stopImmediatePropagation();
-          }
-          require(['page/keys/keys'], function (keys) {
-            keys.init(event);
-          });
-        }
-      });
+    if (!isKeyHandlingInitialized) {
+      // Keys are not be initialized, therefore,
+      // we add our lightweight keyboard listener that only
+      // checks for a few keys like  +, - or alt+'
+      window.addEventListener('keydown', onPossibleTriggerKeyPress);
     }
 
     onSitecuesReady();
   }
 
+  // Check for keys that can trigger sitecues, such as cmd+, cmd-, alt+'
+  function onPossibleTriggerKeyPress(event) {
+    var keyCode = event.keyCode;
+    if (INIT_CODES.indexOf(keyCode) >= 0) {
+      if (event.ctrlKey || event.metaKey || event.altKey) {
+        // Don't allow default behavior of modified key, e.g. native zoom
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      }
+      require(['page/keys/keys'], function (keys) {
+        keys.init(event);
+      });
+    }
+  }
+
+  function onKeyHandlingInitialized() {
+    isKeyHandlingInitialized = true;
+    window.removeEventListener('keydown', onPossibleTriggerKeyPress);
+  }
+
   function onSettingsOrLocaleComplete() {
     if (--numPrereqsToComplete === 0) {
       // Both settings AND locale are now complete ... onto BP!!
-      bp.init(onBPComplete);
+      bp.init(initPageFeatureListeners);
     }
   }
 
@@ -180,6 +189,9 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
     });
     sitecues.on('locale/did-complete', onSettingsOrLocaleComplete); // Get locale data
     sitecues.on('conf/did-complete', onSettingsOrLocaleComplete); // User setting prereq: dependent on user id completion
+
+    // When keyboard listening is ready
+    sitecues.on('keys/did-init', onKeyHandlingInitialized);
 
     // Start initialization
     userId.init();

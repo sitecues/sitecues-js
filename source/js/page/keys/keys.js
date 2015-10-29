@@ -367,6 +367,8 @@ define(['page/util/element-classifier', 'page/keys/commands', 'core/metric'],
     if (keyEvent) {
       processKey(keyEvent);
     }
+
+    sitecues.emit('keys/did-init');
   }
 
   return {
