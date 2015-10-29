@@ -352,7 +352,7 @@ define(['page/util/element-classifier', 'page/keys/commands', 'core/metric'],
       isHighlightVisible = isVisible;
     });
 
-    sitecues.on('hlb/create', function() {
+    sitecues.on('hlb/did-create', function() {
       isLensVisible = true;
     });
 

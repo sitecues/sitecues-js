@@ -397,7 +397,7 @@ define([
     turnOnHLBEventListeners();
 
     // Listeners: speech.js
-    sitecues.emit('hlb/create', $hlb);
+    sitecues.emit('hlb/did-create', $hlb, highlight);
 
     metric('hlb-opened');
   }

@@ -26,11 +26,11 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
       HIGHLIGHT: 'shift'
     };
 
-  function onHlbOpened(hlbContent) {
+  function onHlbOpened(hlbContent, fromHighlight) {
     if (!ttsOn) {
       return;
     }
-    speakContentImpl(hlbContent, TRIGGER_TYPES.LENS);
+    speakContentImpl(fromHighlight.picked, TRIGGER_TYPES.LENS);
   }
 
   function speakContent(content, doAvoidInterruptions) {
@@ -321,7 +321,7 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
      * A highlight box has been requested.  This will create the player
      * if necessary, but will not play anything.
      */
-    sitecues.on('hlb/create', onHlbOpened);
+    sitecues.on('hlb/did-create', onHlbOpened);
 
     /*
      * A highlight box was closed.  Stop/abort/dispose of the player
