@@ -24,6 +24,11 @@ define(
                     common.isTransparentColor('rgba(4,4,4,0)'),
                     'using alpha transparency must return true'
                 );
+
+                assert.isFalse(
+                  common.isTransparentColor('rgba(4,4,4,.5)'),
+                  'using alpha transparency must return true'
+                );
             });
             test('.createSVGFragment() makes useful markup', function () {
                 var // Testing weird markup, since it should be agnostic.

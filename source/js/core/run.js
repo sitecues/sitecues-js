@@ -1,55 +1,15 @@
 /*
  * Sitecues: core.js
  *   The core module of the sitecues library.
+ *
+ *   1. Initialize settings and locale
+ *   2. Initialize BP
+ *   3. Listen to anything that should wake up sitecues features
+ *   4. Fire sitecues ready callback and metric
  */
 
-// User's favorite accent no longer chosen
-// Panel:
-// ? Cannot repro -- Sometimes 4 button panel plops down instead of animating
-// ? Cannot repro -- [Seth] Win/Firefox: Panel gets funky and shifts position after expanding from badge. Maybe due to drop shadow -- drop shadow didn’t match final position
-// Weird: Graham managed to get badge to float out there in Safari while using +/-
-
-// Review
-// - Send Chrome beta out -- Anton, Shelly
-// Accessibility
-// - Secret message for screen readers in highlighting tips
-// - JAWS 16 with IE 11 - tabbing, role announced as link. Arrowing, you don't discover it at all.
-// - JAWS activating buttons sometimes closes panel -- moving mouse?
-// - Window-Eyes speaking stuff in the first panel because it's not really hidden
-// Themes
-// - sitecues inversion color theme doesnt work well on this site: http://goodnowlibrary.org/
-// CSS improvements
-// - Slow CSS in styles.js: [data-sc-reversible]
-// - Slow CSS in styles.js: #scp-bp-container *
-// - Comment CSS to be more readable
-// Small
-// - cursor size/hue settings only -- be careful of mousehue 1.1 which means nothing
-// UX testing
-// Beta testing
-// Theme testing on customer sites
-// Applause testing
-// Provisional patents  -- who can help? Jeff? Ai2?
-//
-// Later
-// Fix unit tests
-// About: Get it now
-// IE9: Keyboard arrows don’t work to move highlight while in Help box.
-// UX: should tabbing move the highlight? Should focus and sync?
-//
-
-
-// Later
-// Dark themes:
-// - In Safari, IE11 via web service (for CSS, image analysis, image reversal)
-// - In Safari, when highlighting dark theme and zooming highlighting is off, specifically reproduced in dropdown on eeoc.gov.
-// dealerEmail config option
-// ? Cursor: Win/Firefox: Cursor hotspot is way off. Win/Chrome: Cursor hotspot is a tiny bit off. (edited)
-// Settings: why do we ever set a cookie? I don't think we can keep it between pages, at least not currently. So why save/get settings from server at all?
-//           Cookie is set for metrics?
-
-
 define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/conf/user/manager', 'core/metric', 'core/platform', 'core/bp/bp'],
-  function (userId, userSettingsServer, locale, conf, metric, platform, bp) {
+  function (userId, confUserSettingsServer, locale, conf, metric, platform, bp) {
   var
     numPrereqsToComplete,
     isZoomInitialized,
@@ -71,7 +31,7 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
     INIT_CODES = [ DASH, NUMPAD_SUBTRACT, MINUS_ALTERNATE_1, MINUS_ALTERNATE_2,
       EQUALS, NUMPAD_ADD, PLUS_ALTERNATE_1, PLUS_ALTERNATE_2, QUOTE];
 
-    function initZoom() {
+  function initZoom() {
     require([ 'page/hpan/hpan', 'page/zoom/fixed-position-fixer', 'page/focus/focus', 'page/cursor/cursor' ], function(hpan, fixer, focus, cursor) {
       hpan.init();
       fixer.init();
@@ -141,7 +101,7 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
     }
   }
 
-  function onAllPrereqsComplete() {
+  function onBPComplete() {
     // Initialize other features after bp
     var initialZoom = conf.get('zoom');
     if (initialZoom > 1) {
@@ -196,12 +156,13 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
       });
     }
 
-      onSitecuesReady();
+    onSitecuesReady();
   }
 
-  function onPrereqComplete() {
+  function onSettingsOrLocaleComplete() {
     if (--numPrereqsToComplete === 0) {
-      bp.init(onAllPrereqsComplete);
+      // Both settings AND locale are now complete ... onto BP!!
+      bp.init(onBPComplete);
     }
   }
 
@@ -210,14 +171,17 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
     // Load and initialize the prereqs before doing anything else
     numPrereqsToComplete = 2;  // User settings (conf) and locale
 
-    sitecues.on('user-id/did-complete', function() {  // TEMPORARY EXPERIMENT!!!! Why are broken in IE10?
-      sitecues.on('conf/did-complete', onPrereqComplete); // User setting prereq: dependent on user id completion
-      userSettingsServer.init();
+    // Listen to completion events (we will initialize the rest of sitecues after all of these events fire)
+    sitecues.on('user-id/did-complete', function() {
+      // Ensure that the zoom level is a number. We further define it if zoom is turned on, in zoom.js
+      conf.def('zoom', parseFloat);
+      // Get user settings
+      confUserSettingsServer.init();
     });
+    sitecues.on('locale/did-complete', onSettingsOrLocaleComplete); // Get locale data
+    sitecues.on('conf/did-complete', onSettingsOrLocaleComplete); // User setting prereq: dependent on user id completion
 
-    sitecues.on('locale/did-complete', onPrereqComplete); // Local prereq
-
-    conf.def('zoom', parseFloat); // Will further define it if zoom is turned on, in zoom.js
+    // Start initialization
     userId.init();
     locale.init();
   };

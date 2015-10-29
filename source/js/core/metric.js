@@ -14,7 +14,7 @@ define(['core/conf/user/manager', 'core/conf/site', 'core/locale', 'core/platfor
         name: name,
         details: details,
         client_time_ms: +new Date(),    // Epoch time in milliseconds  when the event occurred
-        zoom_level: parseFloat(conf.get('zoom')) || 1,
+        zoom_level: conf.get('zoom') || 1,
         tts_state: +conf.get('ttsOn') || 0,
         session_id: UUIDv4,   // A random UUID v4 generated for this library session.
         page_url: location.href,
