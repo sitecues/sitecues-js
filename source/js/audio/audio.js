@@ -341,7 +341,6 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
     speakContent: speakContent,
     speakText: speakText,
     playEarcon: playEarcon,
-    playHlbContent: onHlbOpened,
     getTTSUrl: getTTSUrl,
     init: init
   };
