@@ -98,12 +98,13 @@ function getCountryData(countryData, requireDir, baseLangFileName) {
 
   function copyInto(dest, source) {
     Object.keys(source).forEach(function(key) {
-      const value = source[key];
+      const value = source[key],
+        valueType = typeof value;
 
-      if (typeof value === 'string') {
+      if (valueType === 'string') {
         dest[key] = value;
       }
-      else if (typeof value === 'object') {
+      else if (valueType === 'object') {
         copyInto(dest[key], value);
       }
       else {
