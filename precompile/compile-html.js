@@ -23,7 +23,10 @@ function readTemplate(templateName) {
       throw err;
     }
 
-    function compileTemplateForLang(langFileName) {
+      const template = handlebars.compile(templateBuffer.toString()),
+          langFileNames = getLangsForTemplate(templateName);
+
+      function compileTemplateForLang(langFileName) {
       const data = getLanguageData(templateName, langFileName),
         targetFileName = targetDir + templateName + '/' + langFileName.split('.')[0] + '.html',
         templatedHtml = template(data);
@@ -36,9 +39,6 @@ function readTemplate(templateName) {
         }
       });
     }
-
-    const template = handlebars.compile(templateBuffer.toString()),
-      langFileNames = getLangsForTemplate(templateName);
 
     fs.mkdirSync(targetDir + templateName);
 
