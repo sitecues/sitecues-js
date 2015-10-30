@@ -8,12 +8,12 @@
 define(['core/conf/site'], function(site) {
   var translations = {},
     DEFAULT_LANG = 'en-us',
-    LANG_PREFIX = 'locale-data/',
+    LOCALE_DATA_MODULE_PREFIX = 'locale-data/',
     SUPPORTED_LANGS = ['de', 'en', 'es', 'fr', 'pl'],
     // Countries which have localization files that are different from the default for that language
     // For example, en-us files use 'color' instead of the worldwide standard 'colour'
     COUNTRY_EXCEPTIONS = { 'en-US': 1 },
-    mainBrowserLang = site.get('browserLang') || navigator.language || navigator.userLanguage || navigator.browserLanguage || DEFAULT_LANG;
+    mainBrowserLang;
 
   // Get the language but not the regional differences
   // For example, return just 'en' but not 'en-US'.
@@ -23,9 +23,9 @@ define(['core/conf/site'], function(site) {
 
   // The the full xx-XX code for the website
   function getFullWebsiteLang() {
-    var docElem = document.documentElement,
-      lang = docElem.lang || docElem.getAttribute('xml:lang') || mainBrowserLang || DEFAULT_LANG;
-    return lang;
+    var docElem = document.documentElement;
+
+    return docElem.lang || docElem.getAttribute('xml:lang') || mainBrowserLang || DEFAULT_LANG;
   }
 
   /**
@@ -131,10 +131,13 @@ define(['core/conf/site'], function(site) {
   }
 
   function init() {
+
+    mainBrowserLang = site.get('browserLang') || navigator.language || navigator.userLanguage || navigator.browserLanguage || DEFAULT_LANG;
+
     // On load fetch the translations only once
     var lang = getShortWebsiteLang(),
       sanitizedLang = SUPPORTED_LANGS.indexOf(lang) === -1 ? DEFAULT_LANG : lang,
-      langModuleName = LANG_PREFIX + sanitizedLang;
+      langModuleName = LOCALE_DATA_MODULE_PREFIX + sanitizedLang;
 
     // Hack: sitecues.require() is used instead of require() so that we can use it with a variable name
     sitecues.require([ langModuleName ], function(langEntries) {

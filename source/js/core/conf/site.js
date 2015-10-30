@@ -15,11 +15,10 @@
 define([], function() {
 
   var
-    providedSiteConfig = getSiteConfig(),
+    providedSiteConfig = getProvidedSiteConfig(),
     everywhereConfig = getEverywhereConfig();
 
-  // Simple get that denies direct access to the root data object. Root scalar properties can not be overwritten,
-  // but the contents of root object properties can be modified.
+  // Get the site configuration property
   function get(key) {
     return everywhereConfig[key] || providedSiteConfig[key];
   }
@@ -33,7 +32,8 @@ define([], function() {
     return everywhereConfig.siteId || providedSiteConfig.siteId || providedSiteConfig.site_id;
   }
 
-  function getSiteConfig() {
+  // Get the entire site config object
+  function getProvidedSiteConfig() {
     return sitecues.config || {};
   }
 
@@ -45,7 +45,7 @@ define([], function() {
   return {
     get: get,
     getSiteId: getSiteId,
-    getSiteConfig: getSiteConfig,
+    getSiteConfig: getProvidedSiteConfig,
     getEverywhereConfig: getEverywhereConfig
   };
 });

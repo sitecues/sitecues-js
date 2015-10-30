@@ -4,19 +4,23 @@ define(['core/conf/site'], function(site) {
     prefsDomain,  // Either up.sitecues.com/ or up.dev.sitecues.com/
     BASE_RESOURCE_URL = sitecues.requirejs.nameToUrl('').split('/js/')[0] + '/';
 
+  // URL string for API calls
   function getApiUrl(restOfUrl) {
     return '//' + apiDomain + 'sitecues/api/' + restOfUrl;
   }
 
+  // URL string for preferences server
   function getPrefsUrl(restOfUrl) {
     return '//' + prefsDomain + restOfUrl;
   }
 
+  // URL string for sitecues.js
   function getRawScriptUrl() {
     return site.get('scriptUrl') || site.get('script_url');
   }
 
-  function getLibraryUrl() {
+  // Parsed URL object for sitecues.js
+  function getParsedLibraryURL() {
     // Underscore names deprecated
     var url = getRawScriptUrl();
     return url && parseUrl(url);
@@ -28,7 +32,7 @@ define(['core/conf/site'], function(site) {
   //
   //////////////////////////////////////////////////////////////////////////////////////////
 
-  // Parse a URL query into key/value pairs.
+  // Parse a URL query (e.g '?x=1&y=2' into key/value pairs.
   function parseUrlQuery(queryStr) {
     var query = {};
     query.raw = queryStr;
@@ -150,11 +154,11 @@ define(['core/conf/site'], function(site) {
   }
 
   function resolveSitecuesUrl(urlStr) {
-    return getLibraryUrl() + '/' + urlStr;
+    return getParsedLibraryURL() + '/' + urlStr;
   }
 
   function isProduction() {
-    return getLibraryUrl().hostname === 'js.sitecues.com';
+    return getParsedLibraryURL().hostname === 'js.sitecues.com';
   }
 
   function init() {
@@ -167,7 +171,7 @@ define(['core/conf/site'], function(site) {
     init: init,
     getApiUrl: getApiUrl,
     getPrefsUrl: getPrefsUrl,
-    getLibraryUrl: getLibraryUrl,
+    getParsedLibraryURL: getParsedLibraryURL,
     resolveResourceUrl: resolveResourceUrl,
     resolveSitecuesUrl: resolveSitecuesUrl,
     parseUrl: parseUrl,
