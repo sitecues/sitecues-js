@@ -30,6 +30,7 @@ define([], function() {
       'Unknown';
   }
 
+  // If a vendor prefix is needed for a CSS property, what would it be?
   function getCssPrefix(currBrowser) {
     return currBrowser.isWebKit  ?
       '-webkit-'      :
@@ -40,10 +41,13 @@ define([], function() {
           '';
   }
 
+  // Is the given CSS property supported by the current browser?
   function isCssPropSupported(propName) {
     return typeof document.documentElement.style[propName] === 'string';
   }
 
+  // Get the name or vendor-prefixed property name, whichever is supported
+  // For example getCssProp('transform" returns 'transform', '-webkit-transform', '-moz-transform' or '-ms-transform' as appropriate
   function getCssProp(propName) {
     return isCssPropSupported(propName) ? propName : cssPrefix + propName;
   }
@@ -190,6 +194,7 @@ define([], function() {
   }
 
   // Invalidate cached retina info on window resize, as it may have moved to another display
+  // Kinda evil that we have a listener in this module, but it helps keep things efficient as we need this info cached.
   window.addEventListener('resize', function () {
     isRetinaDisplay = undefined;
   });
