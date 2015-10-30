@@ -23,10 +23,10 @@ function readTemplate(templateName) {
       throw err;
     }
 
-      const template = handlebars.compile(templateBuffer.toString()),
-          langFileNames = getLangsForTemplate(templateName);
+    const template = handlebars.compile(templateBuffer.toString()),
+      langFileNames = getLangsForTemplate(templateName);
 
-      function compileTemplateForLang(langFileName) {
+    function compileTemplateForLang(langFileName) {
       const data = getLanguageData(templateName, langFileName),
         targetFileName = targetDir + templateName + '/' + langFileName.split('.')[0] + '.html',
         templatedHtml = template(data);
