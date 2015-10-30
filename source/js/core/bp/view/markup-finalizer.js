@@ -1,5 +1,6 @@
 // Fix urls and localize strings in markup
-define(['core/locale', 'core/platform'], function(locale, platform) {
+define(['core/locale', 'core/platform', 'core/bp/view/styles'], function(locale, platform) {
+  // IMPORTANT: 'styles' included only to init styles
   // The original base URL for the current page regardless of <base> tag
   function removeEnd(loc) {
     var locString = '' + loc; // Convert to string
@@ -35,6 +36,7 @@ define(['core/locale', 'core/platform'], function(locale, platform) {
 
     return text;
   }
+
   return function(markup) {
     var withAllAbsoluteUrls = convertRelativeUrlsToAbsolute(markup),
       localized = locale.localizeStrings(withAllAbsoluteUrls);
