@@ -15,11 +15,11 @@ function strToBool(str) {
 }
 
 // Path join helper function that takes both strings and arrays.
-var pathJoin = function() {
+function pathJoin() {
   var i, pathComps, arg, len = arguments.length;
 
-  if (len == 0) {
-    return undefined;
+  if (!len) {
+    return;
   }
 
   pathComps = [];
@@ -31,7 +31,7 @@ var pathJoin = function() {
     } else if (typeof(arg) == 'string') {
       pathComps.push(arg);
     } else {
-      return undefined;
+      return;
     }
   }
 
@@ -261,7 +261,7 @@ app.use('/tools', express.static(pathJoin(projectRoot, 'tools', 'site')));
 
   // Process the inline JS file templates.
   if (prodMode) {
-    (function(){
+    (function () {
       var inlineV1JsFileTemplate = createInlineV1JsTemplate();
       getInlineV1JsTemplate = function() {
         return inlineV1JsFileTemplate;
@@ -274,7 +274,7 @@ app.use('/tools', express.static(pathJoin(projectRoot, 'tools', 'site')));
   }
 
   // Return the data regarding inserting the library JS into files.
-  var getInlineJSData = function(req) {
+  function getInlineJSData(req) {
     var data = null;
     // Is a URL is provided, then insert the
     if (req.query.scjsurl) {
