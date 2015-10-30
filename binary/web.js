@@ -311,24 +311,24 @@ app.use('/tools', express.static(pathJoin(projectRoot, 'tools', 'site')));
       if (fs.existsSync(filePath)) {
         var stats = fs.statSync(filePath);
         exists = true;
-  
+
         if (stats.isDirectory()) {
           filePath = path.normalize(pathJoin(filePath, 'index.html'));
           exists = fs.existsSync(filePath);
         }
       }
-  
+
       if (exists) {
         var inlineJsData = getInlineJSData(req);
-  
+
         if (inlineJsData) {
           var content = fs.readFileSync(filePath, { encoding: 'UTF-8' });
-  
+
           // Insert the markup.
           content = content.replace(/(<head[^>]*>)/i, function(match, headStart) {
             return headStart + inlineJsData.markup;
           });
-  
+
           res.writeHead(200, {"Content-Type": mime.lookup(filePath)});
           res.write(content);
           res.end();
@@ -359,7 +359,8 @@ app.use(express.static(pathJoin(projectRoot, 'target', 'common')));
 
 // Start the HTTP listener
 port = process.env.PORT || process.argv[2] || 8000;
-app.listen(port, function() {
+app.listen(port, function (err) {
+  throw err;
   console.log('Listening at "http://localhost:' + port + '/"');
 });
 
@@ -376,11 +377,14 @@ if (useHttps){
     fs.writeFileSync(portFile, ' -Dswdda.testSite.httpsPort=443 -Dswdda.sitecuesUrl.httpsPort=443', {flag:'a'});
   }
 
-  // Start the HTTPS server on port 443. 
+  // Start the HTTPS server on port 443.
   https.createServer({
     key:  fs.readFileSync('binary/cert/localhost.key'),
     cert: fs.readFileSync('binary/cert/localhost.cert')
-  }, app).listen(443, function(){
+  }, app).listen(443, function (err) {
+    if (err) {
+      throw err;
+    }
     console.log('Listening at "https://localhost:443/"');
   });
 }
