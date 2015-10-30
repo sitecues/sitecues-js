@@ -1,14 +1,12 @@
-// TODO sub-locales should provide things like 'colour' vs 'color'
-
 /**
- * Localization / language functons, such as:
+ * Localization / language functions, such as:
  * - Get the current language for the document or an element
  * - Provide localized strings for current language
  * - Translate text with {{keys}} in it
  * - Localize a number string
  */
 define(['core/conf/site'], function(site) {
-  var translations = {},  // TODO this is a workaround
+  var translations = {},
     DEFAULT_LANG = 'en-us',
     LANG_PREFIX = 'locale-data/',
     SUPPORTED_LANGS = ['de', 'en', 'es', 'fr', 'pl'],
@@ -23,7 +21,7 @@ define(['core/conf/site'], function(site) {
     return lang.split('-')[0];
   }
 
-  // The the foll xx-XX code for the website
+  // The the full xx-XX code for the website
   function getFullWebsiteLang() {
     var docElem = document.documentElement,
       lang = docElem.lang || docElem.getAttribute('xml:lang') || mainBrowserLang || DEFAULT_LANG;
@@ -33,7 +31,7 @@ define(['core/conf/site'], function(site) {
   /**
    * Represents website language.
    * For example, returns 'en', 'de'
-   * If there are country-specific translation exceptions, return the full string, e.g. 'en-us'
+   * If there are country-specific translation exceptions, such as 'en-US', we strip the last part and return only 'en'
    * @returns String
    */
   function getShortWebsiteLang() {
@@ -92,7 +90,6 @@ define(['core/conf/site'], function(site) {
       text = translations[key];
 
     if (typeof text === 'undefined') {
-      // todo: fallback to default?
       if (SC_DEV) { console.log('Unable to get translation for text code: "'+ key + '" and language: "' + lang + '".'); }
       return '-';
     }
@@ -100,7 +97,7 @@ define(['core/conf/site'], function(site) {
     return text;
   }
 
-  // Replace each {{keyname}} with the translation using that key
+  // Globally replace all instances of the pattern {{keyname}} with the translation using that key
   // Key names can container lower case letters, numbers and underscores
   function localizeStrings(text) {
     var MATCH_KEY = /\{\{([a-z0-9\_]+)\}\}/g;
@@ -128,6 +125,7 @@ define(['core/conf/site'], function(site) {
     return extendLangWithBrowserCountry(langOnly, COUNTRY_EXCEPTIONS).toLowerCase();
   }
 
+  // The preferred language of the current browser
   function getBrowserLang() {
     return mainBrowserLang;
   }
