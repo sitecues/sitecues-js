@@ -360,7 +360,9 @@ app.use(express.static(pathJoin(projectRoot, 'target', 'common')));
 // Start the HTTP listener
 port = process.env.PORT || process.argv[2] || 8000;
 app.listen(port, function (err) {
-  throw err;
+  if (err) {
+    throw err;
+  }
   console.log('Listening at "http://localhost:' + port + '/"');
 });
 
