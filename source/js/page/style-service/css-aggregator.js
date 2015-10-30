@@ -137,6 +137,31 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
     return urls.parseUrl(sheet.url);
   }
 
+  // The regular expression for an absolute URL. There is a capturing group for
+  // the protocol-relative portion of the URL.
+  var ABSOLUTE_URL_REGEXP = /^[a-zA-Z0-9-]+:(\/\/.*)$/i;
+
+  // Resolve a URL as relative to a base URL.
+  function resolveUrl(urlStr, baseUrl) {
+    var absRegExpResult = ABSOLUTE_URL_REGEXP.exec(urlStr);
+    if (absRegExpResult) {
+      // We have an absolute URL, with protocol. That's a no-no, so, convert to a
+      // protocol-relative URL.
+      urlStr = absRegExpResult[1];
+    } else if (urlStr.indexOf('//') === 0) {
+      // Protocol-relative No need to modify the URL,
+      // as we will inherit the containing page's protocol.
+    } else if (urlStr.indexOf('/') === 0) {
+      // Host-relative URL.
+      urlStr = '//' + baseUrl.host + urlStr;
+    } else {
+      // A directory-relative URL.
+      urlStr = '//' + baseUrl.host + baseUrl.path + urlStr;
+    }
+
+    return urlStr;
+  }
+
   /**
    * Replace all relatively defined style resources with their absolute counterparts. See SC-1302.
    * @param  {StyleSheet} sheet    A stylesheet object with text
@@ -180,7 +205,7 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
     return sheet.text.replace(RELATIVE_URL_REGEXP, function (totalMatch, actualUrl) {
       // totalMatch includes the prefix string  url("      - whereas actualUrl is just the url
       baseUrlObject = baseUrlObject || getParsedSheetUrl(sheet);
-      var newUrl = 'url(' + urls.resolveUrl(actualUrl, baseUrlObject);
+      var newUrl = 'url(' + resolveUrl(actualUrl, baseUrlObject);
       return newUrl;
     });
   }
@@ -205,7 +230,7 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
       }
       if (mediaQueries.isActiveMediaQuery(mediaQuery)) {
         baseUrlObject = baseUrlObject || getParsedSheetUrl(sheet);
-        insertNewSheetBefore(sheet, urls.resolveUrl(actualUrl, baseUrlObject));
+        insertNewSheetBefore(sheet, resolveUrl(actualUrl, baseUrlObject));
       }
       // Now remove @import line from CSS so that it does not get reprocessed
       return '';

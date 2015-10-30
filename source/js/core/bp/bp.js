@@ -202,7 +202,7 @@ define(['core/bp/controller/bp-controller', 'core/bp/model/state','core/bp/view/
                          ********  INITIALIZATION **********
 
     How the BP feature is initialized:
-      - Immediately initalize if the any of the following are true:
+      - Immediately initialize if the any of the following are true:
         - If the document is interactive and the customer does not use the <img>
         - If the document is complete
       - If we can't immediately initialize, add the appropriate event listener

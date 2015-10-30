@@ -61,29 +61,8 @@ define(['core/conf/site'], function(site) {
     };
   }
 
-  // The regular expression for an absolute URL. There is a capturing group for
-  // the protocol-relative portion of the URL.
-  var ABSOLUTE_URL_REQEXP = /^[a-zA-Z0-9-]+:(\/\/.*)$/i;
-
-  // Resolve a URL as relative to a base URL.
-  function resolveUrl(urlStr, baseUrl) {
-    var absRegExpResult = ABSOLUTE_URL_REQEXP.exec(urlStr);
-    if (absRegExpResult) {
-      // We have an absolute URL, with protocol. That's a no-no, so, convert to a
-      // protocol-relative URL.
-      urlStr = absRegExpResult[1];
-    } else if (urlStr.indexOf('//') === 0) {
-      // Protocol-relative No need to modify the URL,
-      // as we will inherit the containing page's protocol.
-    } else if (urlStr.indexOf('/') === 0) {
-      // Host-relative URL.
-      urlStr = '//' + baseUrl.host + urlStr;
-    } else {
-      // A directory-relative URL.
-      urlStr = '//' + baseUrl.host + baseUrl.path + urlStr;
-    }
-
-    return urlStr;
+  function isValidLibraryUrl() {
+    return !! getParsedLibraryURL().hostname;
   }
 
   // Resolve a URL as relative to the main script URL.
@@ -109,19 +88,19 @@ define(['core/conf/site'], function(site) {
   }
 
   function init() {
-    var domainEnding = isProduction() ? '.sitecues.com/' : '.dev.sitecues.com/';
-    apiDomain = 'ws' + domainEnding;
-    prefsDomain = 'up' + domainEnding;
+    var domainEnding = isProduction() ? '.sitecues.com' : '.dev.sitecues.com';
+    apiDomain = 'ws' + domainEnding + '/';
+    prefsDomain = 'up' + domainEnding + '/';
   }
 
   return {
     init: init,
     getApiUrl: getApiUrl,
     getPrefsUrl: getPrefsUrl,
-    getParsedLibraryURL: getParsedLibraryURL,
+    isValidLibraryUrl: isValidLibraryUrl,
+    getRawScriptUrl: getRawScriptUrl,
     resolveResourceUrl: resolveResourceUrl,
-    parseUrl: parseUrl,
-    resolveUrl: resolveUrl
+    parseUrl: parseUrl
   };
 
 });

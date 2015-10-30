@@ -176,8 +176,8 @@ define(['core/conf/site', 'core/conf/urls', 'core/run'], function (site, urls, r
     }
 
     // Library URL must be a valid URL
-    if (!urls.getParsedLibraryURL()) {
-      console.error('Unable to get sitecues script url. Library can not initialize.');
+    if (!urls.isValidLibraryUrl()) {
+      console.error('Unable to get valid sitecues script url. Library can not initialize.');
       return;
     }
 

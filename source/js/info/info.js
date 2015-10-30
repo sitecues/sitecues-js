@@ -101,7 +101,7 @@ define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 
 
     var
       localizedPageName = pageName + '-' + locale.getTranslationLang(),
-      sitecuesJsUrl = urls.getParsedLibraryURL().raw,
+      sitecuesJsUrl = urls.getRawScriptURL(),
       hostUrl = window.location,
       pageUrl = urls.resolveResourceUrl('html/help/' + localizedPageName + '.html',
         {
