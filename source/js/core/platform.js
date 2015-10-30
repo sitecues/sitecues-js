@@ -148,7 +148,7 @@ define([], function() {
   function getNativeZoom() {
     var computedNativeZoom = 1;
     if (browser.isWebKit) {
-      computedNativeZoom = window.outerWidth / window.innerWidth;
+      computedNativeZoom = outerWidth / innerWidth;
     }
     else if (browser.isIE) {
       // Note: on some systems the default zoom is > 100%. This happens on our Windows 7 + IE10 Dell Latitude laptop
@@ -195,7 +195,7 @@ define([], function() {
 
   // Invalidate cached retina info on window resize, as it may have moved to another display
   // Kinda evil that we have a listener in this module, but it helps keep things efficient as we need this info cached.
-  window.addEventListener('resize', function () {
+  addEventListener('resize', function () {
     isRetinaDisplay = undefined;
   });
 
