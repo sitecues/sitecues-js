@@ -111,6 +111,7 @@ define(['core/conf/site'], function(site) {
    */
   function translateNumber(number, numDigits) {
     var lang = getShortWebsiteLang();
+    //Number.toLocaleString locale parameter is unsupported in Safari
     var translated = number.toLocaleString(lang);
     return numDigits ? translated.slice(0, numDigits + 1) : translated;
   }
