@@ -32,83 +32,33 @@ define(['core/conf/site'], function(site) {
   //
   //////////////////////////////////////////////////////////////////////////////////////////
 
-  // Parse a URL query (e.g '?x=1&y=2' into key/value pairs.
-  function parseUrlQuery(queryStr) {
-    var query = {};
-    query.raw = queryStr;
-    query.parameters = {};
-
-    // Parse the query into key/value pairs.
-    var start = 0,
-      end = 0;
-
-    if (queryStr[start] === '?'){
-      start++;
-    }
-
-    while (start < queryStr.length) {
-      end = queryStr.indexOf('=', start);
-      if (end < 0) {
-        end = queryStr.length;
-      }
-
-      var key = decodeURIComponent(queryStr.substring(start, end));
-      start = end + 1;
-
-      var value = null;
-      if (start <= queryStr.length) {
-        end = queryStr.indexOf('&', start);
-        if (end < 0) {
-          end = queryStr.length;
-        }
-
-        value = decodeURIComponent(queryStr.substring(start, end));
-        start = end + 1;
-      }
-      query.parameters[key] = value;
-    }
-  }
-
-  // Parse a URL into its components.
+  // Parse a URL into { host, path }
   function parseUrl(urlStr) {
     if (typeof urlStr !== 'string') {
       return;
     }
-    // Ran across this in a Google search... loved the simplicity of the solution.
-    var url = {}, parser = document.createElement('a');
+
+    var parser = document.createElement('a'),
+      pathname,
+      lastSlashIndex;
+
+    // Set up parser
     parser.href = urlStr;
 
-    // No one ever wants the hash on a full URL...
-    if (parser.hash) {
-      url.raw = parser.href.substring(parser.href.length - parser.hash.length);
-    } else {
-      url.raw = parser.href;
-    }
+    // Extract the path of the pathname.
+    pathname = parser.pathname;
 
-    url.protocol = parser.protocol.substring(0, parser.protocol.length - 1).toLowerCase();
-    url.secure = (url.protocol === 'https');
-    url.hostname = parser.hostname;
-    url.host = parser.host;
-
-    if (parser.search) {
-      url.query = parseUrlQuery(parser.search);
-    } else {
-      url.query = null;
-    }
-    // Extract the path and file portion of the pathname.
-    var pathname = parser.pathname;
-
-    // IE < 10 versions pathname does not contains first slash whereas in other browsers it does.
+    // IE9 versions pathname does not contains first slash whereas in other browsers it does.
     // So let's unify pathnames. Since we need '/' anyway, just add it to pathname when needed.
     if (pathname.indexOf('/') > 0) {
       pathname = '/' + pathname;
     }
+    lastSlashIndex = pathname.lastIndexOf('/') + 1;
 
-    var index = pathname.lastIndexOf('/') + 1;
-    url.path = pathname.substring(0, index);
-    url.file = pathname.substring(index);
-
-    return url;
+    return {
+      path: pathname.substring(0, lastSlashIndex),
+      host: parser.host
+    };
   }
 
   // The regular expression for an absolute URL. There is a capturing group for
