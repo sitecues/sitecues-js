@@ -1,2 +1,2 @@
-source/js/page/dollar/jquery.js
-source/js/page/dollar/zepto.js
+source/js/page/zepto/jquery.js
+source/js/page/zepto/zepto.js

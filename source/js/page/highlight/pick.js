@@ -25,7 +25,7 @@
  * For more details see https://equinox.atlassian.net/wiki/display/EN/Picker+v2+Architecture
  */
 
-define(['$', 'page/util/common', 'page/dollar/dollar-utils', 'core/conf/user/manager', 'core/conf/site',
+define(['$', 'page/util/common', 'page/zepto/zepto-utils', 'core/conf/user/manager', 'core/conf/site',
     'page/highlight/traitcache', 'page/highlight/traits', 'page/highlight/judge', 'core/platform'],
   function($, common, $utils, conf, site, traitcache, traits, judge, platform) {
 

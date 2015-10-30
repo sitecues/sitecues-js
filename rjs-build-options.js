@@ -34,8 +34,8 @@
         'core/bp/helper',
         'core/util/xhr',
         'page/util/common',
-        'page/dollar/dollar-utils',
-        'page/dollar/zepto',
+        'page/zepto/zepto-utils',
+        'page/zepto/zepto',
         'core/metric',
         'core/conf/urls',
         'core/conf/user/manager',
@@ -75,8 +75,8 @@
         'page/util/element-classifier',
         'page/highlight/highlight',
         'page/util/common',
-        'page/dollar/dollar-utils',
-        'page/dollar/zepto',
+        'page/zepto/zepto-utils',
+        'page/zepto/zepto',
         'page/highlight/move-keys',
         'page/zoom/zoom',
         'page/hpan/hpan',
@@ -113,8 +113,8 @@
         'core/bp/helper',
         'core/util/xhr',
         'page/util/common',
-        'page/dollar/dollar-utils',
-        'page/dollar/zepto',
+        'page/zepto/zepto-utils',
+        'page/zepto/zepto',
         'core/conf/site',
         'core/conf/user/manager',
         'core/metric',
@@ -140,8 +140,8 @@
         'core/bp/helper',
         'core/util/xhr',
         'page/util/common',
-        'page/dollar/dollar-utils',
-        'page/dollar/zepto',
+        'page/zepto/zepto-utils',
+        'page/zepto/zepto',
         'core/conf/urls',
         'core/conf/site',
         'core/conf/user/manager',
@@ -164,7 +164,7 @@
       ],
       exclude: [
         'core/metric',
-        'page/dollar/zepto'
+        'page/zepto/zepto'
       ]
     },
     {
@@ -177,7 +177,7 @@
         'audio/audio',
         'core/metric',
         'core/conf/user/manager',
-        'page/dollar/zepto'
+        'page/zepto/zepto'
       ]
     },
     {
@@ -208,7 +208,7 @@
   ],
   map: {
     '*': {
-      '$': 'page/dollar/zepto'
+      '$': 'page/zepto/zepto'
     }
   },
   onBuildRead: function(module, path, contents) {

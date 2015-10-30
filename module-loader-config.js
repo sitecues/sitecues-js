@@ -22,13 +22,13 @@ var require = {
   map: {
     // All modules get 'zepto' when they ask for $
     '*': {
-      '$': 'page/dollar/zepto'
+      '$': 'page/zepto/zepto'
       // If we need to switch between Zepto and jQuery, do this:
       // IE9:
       // All modules get 'jquery-private' when they ask for '$',
       // so that we can secretly return a customized value which
       // implements .noConflict() to avoid puking on customers.
-      //'$': (!sitecues.config.preventZepto && sitecues.__ALLOW_ZEPTO__ && navigator.appVersion.indexOf('MSIE 9') < 0) ? 'page/dollar/zepto' : 'page/dollar/jquery-private'
+      //'$': (!sitecues.config.preventZepto && sitecues.__ALLOW_ZEPTO__ && navigator.appVersion.indexOf('MSIE 9') < 0) ? 'page/zepto/zepto' : 'page/zepto/jquery-private'
     }
   },
   // This will be replaced with actual module structure in core.mk via a call to finalize-loader-config.js
