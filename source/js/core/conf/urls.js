@@ -57,7 +57,7 @@ define(['core/conf/site'], function(site) {
 
     return {
       path: pathname.substring(0, lastSlashIndex),
-      host: parser.host
+      hostname: parser.hostname
     };
   }
 
@@ -103,10 +103,12 @@ define(['core/conf/site'], function(site) {
     return url;
   }
 
+  //
   function resolveSitecuesUrl(urlStr) {
-    return getParsedLibraryURL() + '/' + urlStr;
+    return getRawScriptUrl() + '/' + urlStr;
   }
 
+  // Is this production sitecues?
   function isProduction() {
     return getParsedLibraryURL().hostname === 'js.sitecues.com';
   }
