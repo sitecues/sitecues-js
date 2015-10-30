@@ -6,6 +6,7 @@ define([], function () {
 
   var wasOn = false;
 
+  // Speaking on a delay after mouseup avoids speaking the same thing twice
   function speakSelectedTextOnDelay() {
     setTimeout(speakSelectedText, 0);
   }
