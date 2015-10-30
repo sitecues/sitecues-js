@@ -5,22 +5,6 @@
 
 define(function () {
 
-  // -- PUBLIC ---
-  // Gets the JSON text and returns a JS object
-  function getJSON(requestObj) {
-    initRequest(null, requestObj, 'application/json', function(jsonText) {
-      requestObj.success(JSON.parse(jsonText));
-    });
-  }
-
-  function get(requestObj) {
-    initRequest(null, requestObj, null);
-  }
-
-  function post(requestObj) {
-    initRequest(JSON.stringify(requestObj.data), requestObj, 'application/json');
-  }
-
   // -- PRIVATE --
 
   // Cross-browser XHR requests (supports IE9)
@@ -64,6 +48,23 @@ define(function () {
     else {
       xhr.send();
     }
+  }
+
+  // -- PUBLIC ---
+
+  // Gets the JSON text and returns a JS object
+  function getJSON(requestObj) {
+    initRequest(null, requestObj, 'application/json', function(jsonText) {
+      requestObj.success(JSON.parse(jsonText));
+    });
+  }
+
+  function get(requestObj) {
+    initRequest(null, requestObj, null);
+  }
+
+  function post(requestObj) {
+    initRequest(JSON.stringify(requestObj.data), requestObj, 'application/json');
   }
 
   return {
