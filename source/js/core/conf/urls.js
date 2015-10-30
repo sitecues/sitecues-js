@@ -103,11 +103,6 @@ define(['core/conf/site'], function(site) {
     return url;
   }
 
-  //
-  function resolveSitecuesUrl(urlStr) {
-    return getRawScriptUrl() + '/' + urlStr;
-  }
-
   // Is this production sitecues?
   function isProduction() {
     return getParsedLibraryURL().hostname === 'js.sitecues.com';
@@ -125,7 +120,6 @@ define(['core/conf/site'], function(site) {
     getPrefsUrl: getPrefsUrl,
     getParsedLibraryURL: getParsedLibraryURL,
     resolveResourceUrl: resolveResourceUrl,
-    resolveSitecuesUrl: resolveSitecuesUrl,
     parseUrl: parseUrl,
     resolveUrl: resolveUrl
   };
