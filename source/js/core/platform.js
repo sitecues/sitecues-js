@@ -8,9 +8,6 @@ define([], function() {
   var agent = navigator.userAgent || '',
     browser = getBrowser(agent),
     os = getOS(agent, getOSStr(navigator.platform.toLowerCase())),
-    // platformModule.pixel is deprecated
-    // use zoom.isRetina() to determine whether the current window is on a 2x pixel ratio or not
-    // When a window moves to another display, it can change
     canUseRetinaCursors = browser.isChrome,
     cssPrefix = getCssPrefix(browser),
     transformPropertyCss =  browser.isIE9 ? '-ms-transform' : ((browser.isWebKit && !isCssPropSupported('transform'))? '-webkit-transform' : 'transform'),
@@ -193,7 +190,8 @@ define([], function() {
     return isRetinaDisplay;
   }
 
-  // Invalidate cached retina info on window resize, as it may have moved to another display
+  // Invalidate cached retina info on window resize, as it may have moved to another display.
+  // When a window moves to another display, it can change whether we're on a retina display.
   // Kinda evil that we have a listener in this module, but it helps keep things efficient as we need this info cached.
   addEventListener('resize', function () {
     isRetinaDisplay = undefined;
