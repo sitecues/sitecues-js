@@ -3,7 +3,7 @@
 
 
 
-define(function () {
+define([], function () {
 
   // -- PRIVATE --
 
