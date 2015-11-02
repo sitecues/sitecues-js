@@ -421,6 +421,7 @@ sc-kbd[data-demo="true"] {
 
 .scp-range-group > input {
   opacity: inherit;  /* Make sure also opacity: 0 when hidden so that it doesn't get focused */
+  padding: 0 !important; /* Avoid style pollution from Twitter bootstrap */
 }
 
 .scp-color-theme-group {
