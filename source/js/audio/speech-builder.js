@@ -207,7 +207,8 @@ define(['$'], function($) {
     var styles,
       $node = $(node),
       doWalkChildren = true,
-      hasNewline;
+      hasNewline,
+      hasExtraSpace;
 
     node = $node[0];
 
@@ -240,6 +241,9 @@ define(['$'], function($) {
       textBuffer = textBuffer.trim();
       appendBlockSeparator();
     }
+    else {
+      hasExtraSpace = parseFloat(styles.paddingRight) || parseFloat(styles.marginRight);
+    }
     doWalkChildren = appendTextEquivAndValue(node, $node, doWalkChildren);
 
     if (doWalkChildren) {
@@ -252,6 +256,9 @@ define(['$'], function($) {
     if (hasNewline) {
       textBuffer = textBuffer.trim();
       appendBlockSeparator(); // Add characters to break up paragraphs (after block)
+    }
+    else if (hasExtraSpace) {
+      appendText(' ');
     }
   }
 
