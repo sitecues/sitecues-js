@@ -117,7 +117,7 @@ htmlSecondary =
 <sc class="scp-about-teaser scp-if-about scp-transition-opacity scp-secondary-feature" role="group" aria-label="{{about}} sitecues">\
   <sc-p>\
     <sc-span id="scp-about-preamble">{{about_preamble}}</sc-span>\
-    <a id="scp-about-sitecues-link" aria-describedby="scp-about-preamble scp-about-sitecues-link" target="_blank" href="https://sitecues.com?utm_source=sitecues-badge-panel&utm_medium=bp3&utm_campaign=BP_redirect&utm_content=link">sitecues.com</a>.\
+    <a class="scp-link" id="scp-about-sitecues-link" aria-describedby="scp-about-preamble scp-about-sitecues-link" target="_blank" href="https://sitecues.com?utm_source=sitecues-badge-panel&utm_medium=bp3&utm_campaign=BP_redirect&utm_content=link">sitecues.com</a>.\
   </sc-p>\
   <sc-p id="scp-about-rate-footer">\
     <sc-span id="scp-rate-us-suggest" role="heading">{{about_rate_us}}</sc-span><br/>\
