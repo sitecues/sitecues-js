@@ -18,6 +18,9 @@ define(
         //     'selenium-version': '2.45.0',            // request a version, which may not always be respected
         //     'build': build                           // useful to log success history tied to code changes
         // };
+        // BrowserStack accepts this as a category for the build.
+        test.capabilities.project = 'sitecues-js';
+
         // Places where unit and/or functional tests will be run...
         test.environments = [
             // local-style...
@@ -33,22 +36,22 @@ define(
             // { os: "Windows", os_version: '7',        browser: 'ie',      browser_version: '9.0' },
             // { os: "Windows", os_version: '7',        browser: 'ie',      browser_version: '10.0' },
             // { os: "Windows", os_version: '8.1',      browser: 'ie',      browser_version: '11.0' },
-            // { os: 'Windows', os_version: '8.1',      browser: 'firefox', browser_version: '40.0' },
-            // { os: 'Windows', os_version: '8.1',      browser: 'chrome',  browser_version: '44.0' },
+            // { os: 'Windows', os_version: '8.1',      browser: 'firefox', browser_version: '41.0' },
+            // { os: 'Windows', os_version: '8.1',      browser: 'chrome',  browser_version: '46.0' },
             // { os: "Windows", os_version: '10',       browser: 'ie',      browser_version: '11.0' },
             // { os: 'Windows', os_version: '10',       browser: 'edge',    browser_version: '12.0' },
-            { os: 'Windows', os_version: '10',       browser: 'firefox', browser_version: '40.0' },
-            { os: 'Windows', os_version: '10',       browser: 'chrome',  browser_version: '44.0' },
+            { os: 'Windows', os_version: '10',       browser: 'firefox', browser_version: '41.0' },
+            { os: 'Windows', os_version: '10',       browser: 'chrome',  browser_version: '46.0' },
             // { os: 'OS X',    os_version: 'Yosemite', browser: 'safari',  browser_version: '8.0' },
-            { os: 'OS X',    os_version: 'Yosemite', browser: 'firefox', browser_version: '40.0' },
-            { os: 'OS X',    os_version: 'Yosemite', browser: 'chrome',  browser_version: '44.0' }
+            { os: 'OS X',    os_version: 'Yosemite', browser: 'firefox', browser_version: '41.0' },
+            { os: 'OS X',    os_version: 'Yosemite', browser: 'chrome',  browser_version: '46.0' }
             // SauceLabs-style...
             // { platform: 'Windows 10', browserName: 'internet explorer', version: '11' },
-            // { platform: 'Windows 10', browserName: 'firefox',           version: '40' },
-            // { platform: 'Windows 10', browserName: 'chrome',            version: '44' },
+            // { platform: 'Windows 10', browserName: 'firefox',           version: '41' },
+            // { platform: 'Windows 10', browserName: 'chrome',            version: '46' },
             // { platform: 'OS X 10.10', browserName: 'safari',            version: '8' },
-            // { platform: 'OS X 10.10', browserName: 'firefox',           version: '40' },
-            // { platform: 'OS X 10.10', browserName: 'chrome',            version: '44' }
+            // { platform: 'OS X 10.10', browserName: 'firefox',           version: '41' },
+            // { platform: 'OS X 10.10', browserName: 'chrome',            version: '46' }
         ];
 
         // test.maxConcurrency = 10;  // how many browsers may be open at once
