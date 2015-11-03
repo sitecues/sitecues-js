@@ -183,6 +183,7 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
       window[addOrRemoveFn]('mousemove', winMouseMove);
       window[addOrRemoveFn]('blur', winBlur);
       window[addOrRemoveFn]('mouseout', winMouseLeave);
+      window[addOrRemoveFn]('resize', shrinkPanel); // Don't allow user to resize window in middle of using panel, leads to layout issues
     }
 
     function refresh() {
