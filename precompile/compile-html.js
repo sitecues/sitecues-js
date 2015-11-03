@@ -66,7 +66,7 @@ function getLanguageData(templateName, langFileName) {
     COUNTRY_REGEX = /^(.*-[a-z][a-z])(?:-[a-z][a-z]\.json$)/,
     langCountrySplitter =  langFileName.match(COUNTRY_REGEX);
 
-  let langData = require(requireDir + langFileName);
+  var langData = require(requireDir + langFileName);
 
   if (langCountrySplitter) {
     // Is country-specific file:
@@ -77,7 +77,7 @@ function getLanguageData(templateName, langFileName) {
   // Convert @@includedFileName to the text from that file
   function convertIncludes(obj) {
     Object.keys(obj).forEach(function(key) {
-      const value = obj[key];
+      var value = obj[key];
       if (typeof value === 'object') {
         convertIncludes(value);
       }
@@ -93,12 +93,12 @@ function getLanguageData(templateName, langFileName) {
 }
 
 function getCountryData(countryData, requireDir, baseLangFileName) {
-  const baseLangData = require(requireDir + baseLangFileName),
+  var baseLangData = require(requireDir + baseLangFileName),
     newData = JSON.parse(JSON.stringify(baseLangData));
 
   function copyInto(dest, source) {
     Object.keys(source).forEach(function(key) {
-      const value = source[key],
+      var value = source[key],
         valueType = typeof value;
 
       if (valueType === 'string') {
