@@ -53,7 +53,7 @@ define(['$', 'page/util/common', 'core/platform'], function($, common, platform)
     wheelEventCallback = function (event) {
 
       // Get the deltaY value when the user scrolls (how fast the user is scrolling)
-      var deltaY = event.deltaY || -event.wheelDeltaY;
+      var deltaY = parseInt(event.deltaY || -event.wheelDeltaY);  // parseInt() sanitizes by converting strange -0 value to 0
 
       // Sometimes there is no deltaY number, or a deltaY of "0"
       // (when the user is scrolling horizontally along X)
