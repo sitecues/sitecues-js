@@ -481,6 +481,10 @@ define(['core/bp/constants',
     finishAllAnimations();
     resetStyles();
 
+    // Next time panel opens, it will be at the main panel;
+    // Therefore, the more button label for screen readers needs to indicate the secondary panel will open
+    updateMoreButtonLabel();
+
     state.set('secondaryPanelTransitionTo', BP_CONST.SECONDARY_PANEL_DISABLED);
 
     updateGlobalState();
