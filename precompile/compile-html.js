@@ -8,7 +8,7 @@
 
 'use strict';
 
-const handlebars = require('handlebars'),
+var handlebars = require('handlebars'),
   targetDir  = process.argv[2] + '/',
   fs         = require('fs'),
   path       = require('path'),
@@ -23,11 +23,11 @@ function readTemplate(templateName) {
       throw err;
     }
 
-    const template = handlebars.compile(templateBuffer.toString()),
+    var template = handlebars.compile(templateBuffer.toString()),
       langFileNames = getLangsForTemplate(templateName);
 
     function compileTemplateForLang(langFileName) {
-      const data = getLanguageData(templateName, langFileName),
+      var data = getLanguageData(templateName, langFileName),
         targetFileName = targetDir + templateName + '/' + langFileName.split('.')[0] + '.html',
         templatedHtml = template(data);
 
@@ -45,7 +45,7 @@ function readTemplate(templateName) {
     langFileNames.forEach(compileTemplateForLang);
   }
 
-  const sourceFileName = path.join('source', 'html', templateName, templateName + '-template.hbs');
+  var sourceFileName = path.join('source', 'html', templateName, templateName + '-template.hbs');
   console.log('Compiling template: ' + templateName);
   fs.readFile(sourceFileName, compileTemplate);
 }
@@ -56,13 +56,13 @@ function getLangsForTemplate(name) {
     return !!name.match(/.*\.json$/);
   }
 
-  const files = fs.readdirSync('source/html/' + name);
+  var files = fs.readdirSync('source/html/' + name);
 
   return files.filter(isLanguageFile);
 }
 
 function getLanguageData(templateName, langFileName) {
-  const requireDir =  '../source/html/' + templateName + '/',
+  var requireDir =  '../source/html/' + templateName + '/',
     COUNTRY_REGEX = /^(.*-[a-z][a-z])(?:-[a-z][a-z]\.json$)/,
     langCountrySplitter =  langFileName.match(COUNTRY_REGEX);
 
