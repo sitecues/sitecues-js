@@ -326,7 +326,7 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
 
     // Add event listeners to keep overlay view up-to-date
     addMouseWheelListener();
-    $(document).one('mouseleave', onLeaveWindow);
+    addEventListener('mouseout', onLeaveWindow);
 
     // Update state
     didToggleVisibility(true);
@@ -1417,13 +1417,23 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
   function onBlurWindow() {
     isWindowFocused = false;
     isAppropriateFocus = false;
-    onLeaveWindow();
+    // When the user blurs (unfocuses) the window, we should
+    // hide and forget the highlight (unless sticky highlight is on)
+    if (!isSticky) {
+      hide();
+    }
   }
 
-  // When the user blurs ours mouses out of the window, we should
+  // When the user mouses out of the window, we should
   // hide and forget the highlight (unless sticky highlight is on)
-  function onLeaveWindow() {
-    if (!isSticky) {
+  function onLeaveWindow(evt) {
+    function isRealLeaveEvent(evt) {
+      // Browsers firing spurious mouseout events when mouse moves over highlight edge
+      // This check seems to work to see if the user really exited the window
+      // Note, for mouseout events, relatedTarget is the event targt the pointing device exited to
+      return !evt.relatedTarget || evt.relatedTarget === document.documentElement;
+    }
+    if (isRealLeaveEvent(evt) && !isSticky) {
       hide();
     }
   }
@@ -1538,6 +1548,9 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
   // It's useful to call on it's own when the cursor goes outside of the highlight
   // but stays inside the same element.
   function hide(doRememberHighlight) {
+    // Now that highlight is hidden, we no longer need these
+    removeEventListener('mouseout', onLeaveWindow);
+
     if (state.picked && state.savedCss) {
       // Restore the previous CSS on the picked elements (remove highlight bg etc.)
       $(state.picked).css(state.savedCss);
@@ -1569,9 +1582,6 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
       // Forget highlight state, unless we need to keep it around temporarily
       forget();
     }
-
-    // Now that highlight is hidden, we no longer need these
-    $(document).off('mouseleave', onLeaveWindow);
   }
 
   function forget() {
