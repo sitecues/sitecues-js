@@ -4,14 +4,21 @@
 define(
     [   // dependencies...
         'intern',   // public API for the test framework itself
-        'test/all'
+        '../test/all-unit',
+        '../test/all-functional'
     ],
-    function (intern, testSuites) {
+    function (intern, allUnit, allFunctional) {
+
         'use strict';
 
         var build = 'UNKNOWN',
             proxyPort = 9000,
-            testDir = '../../test/';
+            // This path is relative to baseUrl.
+            testDir = '../../test/',
+            // Name of the alias to the unit suite directory.
+            UNIT_PKG = 'unit',
+            // Name of the alias to the functional suite directory.
+            FUNC_PKG = 'functional';
 
         if (intern.args.build) {
             build = intern.args.build;
@@ -39,9 +46,9 @@ define(
                 //     // pretend to be Chrome, to avoid fallbacks...
                 //     'phantomjs.page.settings.userAgent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.111 Safari/537.36'
                 // },
-                // { browserName: 'safari' },
-                 { browserName: 'firefox' },
-             //   { browserName: 'chrome' }
+                { browserName: 'firefox' }
+                // { browserName: 'chrome' }
+                // { browserName: 'safari' }
                 // BrowserStack-style...
                 // { os: 'Windows', os_version: '10',       browser: 'edge',    browser_version: '12.0' },
                 // { os: 'Windows', os_version: '10',       browser: 'firefox', browser_version: '40.0' },
@@ -57,15 +64,15 @@ define(
             maxConcurrency: 3,  // how many browsers may be open at once
 
             // Specify which AMD module loader to use...
-          //   loaders: {
-            //    packages: ['node']
-             //},
+            // loaders: {
+            //
+            // },
             // Options to pass to the AMD module loader...
             loaderOptions: {
                 baseUrl: 'source/js',
                 packages: [
-                    { name: 'unit', location: testDir + 'unit' },
-                    { name: 'functional', location: testDir + 'functional' },
+                    { name: UNIT_PKG, location: testDir + 'unit' },
+                    { name: FUNC_PKG, location: testDir + 'functional' },
                     { name: 'page-object', location: testDir + 'page-object', main: 'index' }
                 ]
             },
@@ -81,26 +88,35 @@ define(
                 // verbose: true           // more logging, only supported by BrowserStack
             },
 
-            // These are unit tests, which check the APIs of our application...
-            suites: testSuites.unit,
-            // These are functional tests, which check the user-facing behavior of our application...
-            functionalSuites: testSuites.functional,
+            // Which unit test suite files to load. These check our APIs.
+            suites: allUnit.map(function (suite) {
+                return UNIT_PKG + '/' + suite;
+            }),
+            // Which functional test suite files to load. These check our
+            // user-facing behavior.
+            functionalSuites: allFunctional.map(function (suite) {
+                return FUNC_PKG + '/' + suite;
+            }),
 
-            // Any test IDs ("suite name - test name") which do NOT match this regex will be skipped...
+            // Test whitelist regex. Any test IDs ('suite name - test name')
+            // which do NOT match this pattern will be skipped.
             grep: /.*/,
 
-            // The paths that match this regex will NOT be included in code coverage reports...
+            // Ignore some code from test coverage reports, even if it loads
+            // during testing. The paths that match this pattern will NOT
+            // count against coverage.
             excludeInstrumentation: /^(?:config|test|node_modules)\//
-            
-            *// How to display or save test run info.
-            reporters: [
-                // Test result reporters.
-                { id : 'Runner' }
-                // { id : 'JUnit',    filename : 'report/test/junit.xml' },
-                // // Code coverage reporters.
-                // { id : 'Cobertura', filename  : 'report/coverage/info/cobertura.info' },
-                // { id : 'Lcov',      filename  : 'report/coverage/info/lcov.info' },
-                // { id : 'LcovHtml',  directory : 'report/coverage/html' }
-            ]
+
+            // How to display or save test run info.
+            // reporters: [
+            //     // Test result reporters.
+            //     { id : 'Runner' }
+            //     // { id : 'JUnit',    filename : 'report/test/junit.xml' },
+            //     // // Code coverage reporters.
+            //     // { id : 'Cobertura', filename  : 'report/coverage/info/cobertura.info' },
+            //     // { id : 'Lcov',      filename  : 'report/coverage/info/lcov.info' },
+            //     // { id : 'LcovHtml',  directory : 'report/coverage/html' }
+            // ]
         };
-    });
+    }
+);

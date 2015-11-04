@@ -5,33 +5,23 @@
 
 define([], function () {
 
-  // Gets the JSON text and returns a JS object
-  function getJSON(requestObj) {
-    initRequest(null, requestObj, 'application/json', function(jsonText) {
-      requestObj.success(JSON.parse(jsonText));
-    });
-  }
+  // -- PRIVATE --
 
-  function get(requestObj) {
-    initRequest(null, requestObj, null);
-  }
-
-  function post(requestObj) {
-    initRequest(JSON.stringify(requestObj.data), requestObj, 'application/json');
-  }
-
+  // Cross-browser XHR requests (supports IE9)
   function initRequest(postData, requestObj, optionalContentTypeOverride, successFnOverride) {
     var xhr = new XMLHttpRequest(),
       type = postData ? 'POST' : 'GET',
       contentType = optionalContentTypeOverride || requestObj.contentType;
 
     if ('withCredentials' in xhr) {
+      // Everything except for IE9
       xhr.open(type, requestObj.url, true);
       if (contentType) {
         // If post, the content type is what we're sending, if get it's what we're receiving
         xhr.setRequestHeader(postData ? 'Content-Type' : 'Accept', contentType); // Can be set on XHR but not XDomainRequest
       }
     } else {
+      // IE9 only
       xhr = new XDomainRequest();
       xhr.open(type, requestObj.url);
     }
@@ -58,6 +48,23 @@ define([], function () {
     else {
       xhr.send();
     }
+  }
+
+  // -- PUBLIC ---
+
+  // Gets the JSON text and returns a JS object
+  function getJSON(requestObj) {
+    initRequest(null, requestObj, 'application/json', function(jsonText) {
+      requestObj.success(JSON.parse(jsonText));
+    });
+  }
+
+  function get(requestObj) {
+    initRequest(null, requestObj, null);
+  }
+
+  function post(requestObj) {
+    initRequest(JSON.stringify(requestObj.data), requestObj, 'application/json');
   }
 
   return {

@@ -1,4 +1,4 @@
-define(['core/conf/user/manager', 'page/dollar/dollar-utils', 'page/zoom/zoom'], function (conf, jqUtils, zoomMod) {
+define(['core/conf/user/manager', 'page/zoom/zoom'], function (conf, zoomMod) {
   var isOn = false,
     isHlbOn = false,
     isPanelOpen = false,
@@ -13,10 +13,6 @@ define(['core/conf/user/manager', 'page/dollar/dollar-utils', 'page/zoom/zoom'],
   // get dependencies
 
   function mousemove(evt) {
-
-    if (jqUtils.isInSitecuesUI(evt.target)) {
-      return; // Don't pan while interacting with sitecues UI
-    }
 
     var
       // Amount of horizontal mouse movement

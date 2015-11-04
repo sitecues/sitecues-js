@@ -17,7 +17,7 @@ testsite = new BgRunner({
 
 testsite.on('beforeStart', function(e) {
   // Start the command with node, and pass in the script as a parameter (Win compliance).
-  e.args.unshift(path.resolve(path.join(__dirname, 'web.js')));
+  e.args.unshift(path.resolve(__dirname, 'web.js'));
   var isWin = (os.type().toLowerCase().indexOf('win') >= 0);
 
   if (isWin) {
@@ -34,7 +34,7 @@ testsite.on('beforeStart', function(e) {
     // ... tail the log file to see if we get a "Listening at" in order
     // to determine the test site is indeed responsive.
     var tail = new Tail(e.config.outFile, os.EOL);
-    tail.on('line', function(line) {
+    tail.on('line', function (line) {
       if (line.indexOf('Listening at') >= 0) {
         e.writeReadyFile();
       }

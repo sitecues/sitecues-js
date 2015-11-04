@@ -15,11 +15,11 @@ function strToBool(str) {
 }
 
 // Path join helper function that takes both strings and arrays.
-var pathJoin = function() {
+function pathJoin() {
   var i, pathComps, arg, len = arguments.length;
 
-  if (len == 0) {
-    return undefined;
+  if (!len) {
+    return;
   }
 
   pathComps = [];
@@ -31,7 +31,7 @@ var pathJoin = function() {
     } else if (typeof(arg) == 'string') {
       pathComps.push(arg);
     } else {
-      return undefined;
+      return;
     }
   }
 
@@ -261,7 +261,7 @@ app.use('/tools', express.static(pathJoin(projectRoot, 'tools', 'site')));
 
   // Process the inline JS file templates.
   if (prodMode) {
-    (function(){
+    (function () {
       var inlineV1JsFileTemplate = createInlineV1JsTemplate();
       getInlineV1JsTemplate = function() {
         return inlineV1JsFileTemplate;
@@ -274,7 +274,7 @@ app.use('/tools', express.static(pathJoin(projectRoot, 'tools', 'site')));
   }
 
   // Return the data regarding inserting the library JS into files.
-  var getInlineJSData = function(req) {
+  function getInlineJSData(req) {
     var data = null;
     // Is a URL is provided, then insert the
     if (req.query.scjsurl) {
@@ -311,24 +311,24 @@ app.use('/tools', express.static(pathJoin(projectRoot, 'tools', 'site')));
       if (fs.existsSync(filePath)) {
         var stats = fs.statSync(filePath);
         exists = true;
-  
+
         if (stats.isDirectory()) {
           filePath = path.normalize(pathJoin(filePath, 'index.html'));
           exists = fs.existsSync(filePath);
         }
       }
-  
+
       if (exists) {
         var inlineJsData = getInlineJSData(req);
-  
+
         if (inlineJsData) {
           var content = fs.readFileSync(filePath, { encoding: 'UTF-8' });
-  
+
           // Insert the markup.
           content = content.replace(/(<head[^>]*>)/i, function(match, headStart) {
             return headStart + inlineJsData.markup;
           });
-  
+
           res.writeHead(200, {"Content-Type": mime.lookup(filePath)});
           res.write(content);
           res.end();
@@ -359,7 +359,10 @@ app.use(express.static(pathJoin(projectRoot, 'target', 'common')));
 
 // Start the HTTP listener
 port = process.env.PORT || process.argv[2] || 8000;
-app.listen(port, function() {
+app.listen(port, function (err) {
+  if (err) {
+    throw err;
+  }
   console.log('Listening at "http://localhost:' + port + '/"');
 });
 
@@ -376,11 +379,14 @@ if (useHttps){
     fs.writeFileSync(portFile, ' -Dswdda.testSite.httpsPort=443 -Dswdda.sitecuesUrl.httpsPort=443', {flag:'a'});
   }
 
-  // Start the HTTPS server on port 443. 
+  // Start the HTTPS server on port 443.
   https.createServer({
     key:  fs.readFileSync('binary/cert/localhost.key'),
     cert: fs.readFileSync('binary/cert/localhost.cert')
-  }, app).listen(443, function(){
+  }, app).listen(443, function (err) {
+    if (err) {
+      throw err;
+    }
     console.log('Listening at "https://localhost:443/"');
   });
 }

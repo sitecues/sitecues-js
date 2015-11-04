@@ -2,8 +2,8 @@
   This module animates the HLB.  Depending on the browser, the mechanism
   of animation is either CSS3 Transitions or jQuery.animate.
  */
-define(['hlb/dimmer', 'page/util/common', 'hlb/positioning', 'core/platform'],
-  function (dimmer, common, hlbPositioning, platform) {
+define(['hlb/dimmer', 'page/util/common', 'hlb/positioning', 'core/platform', '$'],
+  function (dimmer, common, hlbPositioning, platform, $) {
 
   var INFLATION_SPEED = 400, // Default inflation duration
       INFLATION_SPEED_FAST = 0, // Inflation duration when retargeting
@@ -11,18 +11,9 @@ define(['hlb/dimmer', 'page/util/common', 'hlb/positioning', 'core/platform'],
 
       getStartingScale = hlbPositioning.getStartingScale,
 
-      requestFrameFn = window.requestAnimationFrame   ||
-        window.msRequestAnimationFrame ||
-        function (fn) {
-          return setTimeout(fn, 16);
-        },
-      cancelFrameFn  = window.cancelAnimationFrame   ||
-        window.msCancelAnimationFrame ||
-        function (fn) {
-          clearTimeout(fn);
-        },
+      animate = platform.browser.isIE9 ? animateJs : animateCss,
 
-      animation;
+      animationTimerIE9;
 
   /**
    * [transitionInHLB animates the inflation of the HLB and background dimmer]
@@ -54,8 +45,8 @@ define(['hlb/dimmer', 'page/util/common', 'hlb/positioning', 'core/platform'],
     // Un-dim the background!
     dimmer.undimBackgroundContent(DEFLATION_SPEED);
 
-    // Stop the previous animation if it exists.
-    cancelFrameFn(animation);
+    // Stop any IE9 animations
+    clearTimeout(animationTimerIE9);
 
     // Do we bother animating the deflation?
 
@@ -74,7 +65,7 @@ define(['hlb/dimmer', 'page/util/common', 'hlb/positioning', 'core/platform'],
     animate($hlb[0], getCurrentScale($hlb), getStartingScale($hlb), DEFLATION_SPEED, data.translateCSS, data.onHLBClosed);
   }
 
-  function animate(hlbElement, startScale, endScale, speed, translateCSS, onCompleteFn) {
+  function animateJs(hlbElement, startScale, endScale, speed, translateCSS, onCompleteFn) {
     function nextFrame() {
       var timeElapsed = new Date() - startTime,
         percentComplete = timeElapsed >= speed ? 1 : timeElapsed / speed,
@@ -83,7 +74,7 @@ define(['hlb/dimmer', 'page/util/common', 'hlb/positioning', 'core/platform'],
 
       hlbElement.style[platform.transformProperty] = transformValue;
       if (percentComplete < 1) {
-        requestFrameFn(nextFrame);
+        animationTimerIE9 = setTimeout(nextFrame, 16);
       }
       else if (onCompleteFn) {
         onCompleteFn();
@@ -92,6 +83,27 @@ define(['hlb/dimmer', 'page/util/common', 'hlb/positioning', 'core/platform'],
 
     var startTime = new Date();
     nextFrame();
+  }
+
+  function animateCss(hlbElement, startScale, endScale, speed, translateCSS, onCompleteFn) {
+
+    $(hlbElement).css({
+      transition: '',
+      transform: 'scale(' + startScale + ') ' + translateCSS
+    });
+
+    function onComplete() {
+      hlbElement.removeEventListener(platform.transitionEndEvent, onComplete);
+      onCompleteFn();
+    }
+
+    setTimeout(function() {
+      $(hlbElement).css({
+        transition: platform.transformProperty + ' ' + speed + 'ms ease-in-out',
+        transform: 'scale(' + endScale + ') ' + translateCSS
+      });
+      hlbElement.addEventListener(platform.transitionEndEvent, onComplete);
+    }, 0);
   }
 
   function getCurrentScale($hlb) {

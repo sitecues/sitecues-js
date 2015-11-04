@@ -21,10 +21,16 @@ define(['core/conf/site', 'core/conf/urls', 'core/run'], function (site, urls, r
   // This function is called when we are sure that no other library already exists in the page. Otherwise,
   // we risk overwriting the methods of the live library.
   function exportPublicFields() {
-    sitecues.getVersion = getVersion;
-    sitecues.on = on;
-    sitecues.emit = emit;
+    // Events
+    sitecues.on = on;  // Listen to an event
+    sitecues.emit = emit;   // Emit an event
+
+    // Get info about the currently running sitecues client
     sitecues.status = getStatus;
+    sitecues.getVersion = getVersion;
+
+    // 'Plant our flag' on this page.
+    sitecues.exists = true;
   }
 
 
@@ -111,7 +117,7 @@ define(['core/conf/site', 'core/conf/urls', 'core/run'], function (site, urls, r
     /* jshint validthis: true */
     var event, node, calls, tail, args, rest;
     if (!(calls = this._events)) {
-        return this;
+      return this;
     }
 
     (events = events.split(/\s+/)).push(null);
@@ -137,7 +143,7 @@ define(['core/conf/site', 'core/conf/urls', 'core/run'], function (site, urls, r
       }
     }
 
-      return this;
+    return this;
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////
@@ -170,22 +176,14 @@ define(['core/conf/site', 'core/conf/urls', 'core/run'], function (site, urls, r
     }
 
     // Library URL must be a valid URL
-    if (!urls.getLibraryUrl()) {
-      console.error('Unable to get sitecues script url. Library can not initialize.');
+    if (!urls.isValidLibraryUrl()) {
+      console.error('Unable to get valid sitecues script url. Library can not initialize.');
       return;
     }
 
     // Continue loading sitecues
     return true;
   };
-
-  //////////////////////////////////////////////////////////////////////////////////////////
-  //
-  //  Library Configuration
-  //    This section loads the library configuration, whose absence will prevent the
-  //    library from loading.
-  //
-  //////////////////////////////////////////////////////////////////////////////////////////
 
   //////////////////////////////////////////////////////////////////////////////////////////
   //
@@ -206,14 +204,8 @@ define(['core/conf/site', 'core/conf/urls', 'core/run'], function (site, urls, r
     return;
   }
 
-  // 'Plant our flag' on this page.
-  sitecues.exists = true;
-
   // As we have now 'planted our flag', export the public fields.
   exportPublicFields();
-
-  // Initialize API and services URLs
-  urls.init();
 
   // Process the basic configuration needed for library initialization.
   if (!validateConfiguration()) {
@@ -226,6 +218,10 @@ define(['core/conf/site', 'core/conf/urls', 'core/run'], function (site, urls, r
       ' ... email support@sitecues.com for more information.');
   }
   else {
+    // Initialize API and services URLs
+    urls.init();
+
+    // Run sitecues
     run();
   }
 });

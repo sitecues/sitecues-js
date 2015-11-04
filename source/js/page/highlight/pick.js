@@ -25,9 +25,9 @@
  * For more details see https://equinox.atlassian.net/wiki/display/EN/Picker+v2+Architecture
  */
 
-define(['$', 'page/util/common', 'page/dollar/dollar-utils', 'core/conf/user/manager', 'core/conf/site',
+define(['$', 'page/util/common', 'core/conf/user/manager', 'core/conf/site',
     'page/highlight/traitcache', 'page/highlight/traits', 'page/highlight/judge', 'core/platform'],
-  function($, common, $utils, conf, site, traitcache, traits, judge, platform) {
+  function($, common, conf, site, traitcache, traits, judge, platform) {
 
   var UNUSABLE_SCORE = -99999,       // A score so low there is no chance of picking the item
     MAX_ANCESTORS_TO_ANALYZE = 14,   // Maximum ancestors to climb looking for start.
@@ -131,7 +131,7 @@ define(['$', 'page/util/common', 'page/dollar/dollar-utils', 'core/conf/user/man
     }
 
     // 1. Don't pick anything in the sitecues UI
-    if (!startElement || $(startElement).is('html,body') || $utils.isInSitecuesUI(startElement)) {
+    if (!startElement || $(startElement).is('html,body') || isInSitecuesUI(startElement)) {
       return null;
     }
 
@@ -775,6 +775,16 @@ define(['$', 'page/util/common', 'page/dollar/dollar-utils', 'core/conf/user/man
   // Pass in as { judgementName: weightValue, judgementName2: weightValue2, etc. }
   function provideCustomWeights(weights) {
     $.extend(judgementWeights, weights);
+  }
+
+  // Return true if the element is part of the sitecues user interface
+  // Everything inside the <body> other than the page-inserted badge
+  function isInSitecuesUI(node) {
+    // Check for nodeType of 1, which is an element
+    // If not, use the parent of the node
+    var element = node.nodeType === 1 ? node : node.parentNode;
+    return ! $.contains(document.body, element) || // Is not in the <body>
+      $(element).closest('#sitecues-badge,#scp-bp-container').length;
   }
 
   if (SC_DEV) {

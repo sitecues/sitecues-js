@@ -8,9 +8,6 @@ define([], function() {
   var agent = navigator.userAgent || '',
     browser = getBrowser(agent),
     os = getOS(agent, getOSStr(navigator.platform.toLowerCase())),
-    // platformModule.pixel is deprecated
-    // use zoom.isRetina() to determine whether the current window is on a 2x pixel ratio or not
-    // When a window moves to another display, it can change
     canUseRetinaCursors = browser.isChrome,
     cssPrefix = getCssPrefix(browser),
     transformPropertyCss =  browser.isIE9 ? '-ms-transform' : ((browser.isWebKit && !isCssPropSupported('transform'))? '-webkit-transform' : 'transform'),
@@ -30,6 +27,7 @@ define([], function() {
       'Unknown';
   }
 
+  // If a vendor prefix is needed for a CSS property, what would it be?
   function getCssPrefix(currBrowser) {
     return currBrowser.isWebKit  ?
       '-webkit-'      :
@@ -40,10 +38,13 @@ define([], function() {
           '';
   }
 
+  // Is the given CSS property supported by the current browser?
   function isCssPropSupported(propName) {
     return typeof document.documentElement.style[propName] === 'string';
   }
 
+  // Get the name or vendor-prefixed property name, whichever is supported
+  // For example getCssProp('transform" returns 'transform', '-webkit-transform', '-moz-transform' or '-ms-transform' as appropriate
   function getCssProp(propName) {
     return isCssPropSupported(propName) ? propName : cssPrefix + propName;
   }
@@ -144,7 +145,7 @@ define([], function() {
   function getNativeZoom() {
     var computedNativeZoom = 1;
     if (browser.isWebKit) {
-      computedNativeZoom = window.outerWidth / window.innerWidth;
+      computedNativeZoom = outerWidth / innerWidth;
     }
     else if (browser.isIE) {
       // Note: on some systems the default zoom is > 100%. This happens on our Windows 7 + IE10 Dell Latitude laptop
@@ -189,8 +190,10 @@ define([], function() {
     return isRetinaDisplay;
   }
 
-  // Invalidate cached retina info on window resize, as it may have moved to another display
-  window.addEventListener('resize', function () {
+  // Invalidate cached retina info on window resize, as it may have moved to another display.
+  // When a window moves to another display, it can change whether we're on a retina display.
+  // Kinda evil that we have a listener in this module, but it helps keep things efficient as we need this info cached.
+  addEventListener('resize', function () {
     isRetinaDisplay = undefined;
   });
 

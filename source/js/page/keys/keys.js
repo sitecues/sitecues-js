@@ -352,7 +352,7 @@ define(['page/util/element-classifier', 'page/keys/commands', 'core/metric'],
       isHighlightVisible = isVisible;
     });
 
-    sitecues.on('hlb/create', function() {
+    sitecues.on('hlb/did-create', function() {
       isLensVisible = true;
     });
 
@@ -367,6 +367,8 @@ define(['page/util/element-classifier', 'page/keys/commands', 'core/metric'],
     if (keyEvent) {
       processKey(keyEvent);
     }
+
+    sitecues.emit('keys/did-init');
   }
 
   return {

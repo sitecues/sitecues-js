@@ -1,21 +1,30 @@
-var handlebars = require('handlebars'),
-  targetDir = process.argv[2] + '/',
-  fs = require('fs'),
-  sources = ['settings', 'tips', 'help' ];
+/**
+ * This is a build step used to compile all of the html files we used
+ * For each template (listed in sources), we need a version for each language.
+ *
+ * Example:
+ * tips-template.hbs (handlebars template) + tips-de.json (template data) -> tips-de.html
+ */
 
-sources.forEach(readTemplate);
+'use strict';
+
+var handlebars = require('handlebars'),
+  targetDir  = process.argv[2] + '/',
+  fs         = require('fs'),
+  path       = require('path'),
+  sources    = ['settings', 'tips', 'help' ];
 
 function readTemplate(templateName) {
-
-  console.log('Compiling template: ' + templateName);
-  var sourceFileName = 'source/html/' + templateName + '/' + templateName + '-template.hbs';
-  fs.readFile(sourceFileName, compileTemplate);
 
   function compileTemplate(err, templateBuffer) {
 
     if (err) {
-      console.log('Error reading template: ' + err);
+      err.message = 'Error reading template:' + err.message;
+      throw err;
     }
+
+    var template = handlebars.compile(templateBuffer.toString()),
+      langFileNames = getLangsForTemplate(templateName);
 
     function compileTemplateForLang(langFileName) {
       var data = getLanguageData(templateName, langFileName),
@@ -24,31 +33,40 @@ function readTemplate(templateName) {
 
       console.log('Created html: ' + targetFileName);
 
-      fs.writeFile(targetFileName, templatedHtml);
+      fs.writeFile(targetFileName, templatedHtml, function (err) {
+        if (err) {
+          throw err;
+        }
+      });
     }
-
-    var template = handlebars.compile(templateBuffer.toString()),
-      langFileNames = getLangsForTemplate(templateName);
 
     fs.mkdirSync(targetDir + templateName);
 
     langFileNames.forEach(compileTemplateForLang);
   }
+
+  var sourceFileName = path.join('source', 'html', templateName, templateName + '-template.hbs');
+  console.log('Compiling template: ' + templateName);
+  fs.readFile(sourceFileName, compileTemplate);
 }
 
 function getLangsForTemplate(name) {
+
   function isLanguageFile(name) {
     return !!name.match(/.*\.json$/);
   }
+
   var files = fs.readdirSync('source/html/' + name);
+
   return files.filter(isLanguageFile);
 }
 
 function getLanguageData(templateName, langFileName) {
   var requireDir =  '../source/html/' + templateName + '/',
     COUNTRY_REGEX = /^(.*-[a-z][a-z])(?:-[a-z][a-z]\.json$)/,
-    langCountrySplitter =  langFileName.match(COUNTRY_REGEX),
-    langData = require(requireDir + langFileName);
+    langCountrySplitter =  langFileName.match(COUNTRY_REGEX);
+
+  var langData = require(requireDir + langFileName);
 
   if (langCountrySplitter) {
     // Is country-specific file:
@@ -80,16 +98,17 @@ function getCountryData(countryData, requireDir, baseLangFileName) {
 
   function copyInto(dest, source) {
     Object.keys(source).forEach(function(key) {
-      var value = source[key];
+      var value = source[key],
+        valueType = typeof value;
 
-      if (typeof value === 'string') {
+      if (valueType === 'string') {
         dest[key] = value;
       }
-      else if (typeof value === 'object') {
+      else if (valueType === 'object') {
         copyInto(dest[key], value);
       }
       else {
-        throw('Only strings and objects allowed in ' + baseLangFileName);
+        throw new Error('Only strings and objects allowed in ' + baseLangFileName);
       }
     });
   }
@@ -98,3 +117,5 @@ function getCountryData(countryData, requireDir, baseLangFileName) {
 
   return newData;
 }
+
+sources.forEach(readTemplate);

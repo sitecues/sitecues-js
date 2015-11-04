@@ -81,7 +81,7 @@ sitecues = {
       return '//abc/' + restOfUrl;
     },
 
-    'getLibraryUrl': function() {
+    "getParsedLibraryURL": function() {
       return {
         'raw': true
       }

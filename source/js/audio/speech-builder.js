@@ -66,8 +66,7 @@ define(['$'], function($) {
    * @param {string} original text
    */
   function appendBlockSeparator() {
-    textBuffer = textBuffer.trim();
-    if (textBuffer.length === 0) {
+    if (!textBuffer) {
       return;
     }
     var lastChar = textBuffer.slice(-1),
@@ -118,14 +117,15 @@ define(['$'], function($) {
     return isVisualMedia($node[0]) || $node.is('input[type="image"]');
   }
 
-  function appendNonLabelText(text, $node, styles) {
+  function appendNonLabelText($node, styles) {
     // CSS display: none -- hides entire subtree
     if (styles.display === 'none') {
       return; // Don't walk subtree, the entire thing is hidden
     }
 
     // CSS visibility -- child elements might still be visible, need to check each one
-    var isHidden = styles.visibility !== 'visible';
+    var isHidden = styles.visibility !== 'visible',
+      doWalkChildren;
     if (isHidden) {
       $node.children().each(function() {
         appendAccessibleTextFromSubtree(this);
@@ -133,29 +133,36 @@ define(['$'], function($) {
       return;
     }
 
-    // Check for label/description pointed to but only if not already in the middle of doing that
-    // isLabel prevents infinite recursion when getting label from elsewhere in document, potentially overlapping
-    text += appendFromIdListAttribute($node, 'aria-labelledby') +
-      appendFromIdListAttribute($node, 'aria-describedby');
+    doWalkChildren = true;
 
-    // If it has @usemap, add any alternative text from within the map
-    if ($node.is('img')) {
+    if ($node.attr('aria-labelledby')) {
+      // Check for label pointed to but only if not already in the middle of doing that
+      appendFromIdListAttribute($node, 'aria-labelledby');
+      doWalkChildren = false; // ARIA markup overrides the accessible name. We use that instead of creating the name via descendants.
+    }
+    else if ($node.is('img')) {
+      // If it has @usemap, add any alternative text from within the map
       appendFromIdListAttribute($node, 'usemap');
     }
 
-    return true;
+    // Append description
+    appendFromIdListAttribute($node, 'aria-describedby');
+
+    return doWalkChildren;
   }
 
   function getInputLabelAttributeText(node) {
     return node.getAttribute('placeholder') || node.getAttribute('title') || '';
   }
 
-  function appendTextEquivAndValue(node, $node, doWalkChildren, text) {
+  function appendTextEquivAndValue(node, $node, doWalkChildren) {
     // Process 'text equivalents' which are attributes that contain additional descriptive text
     // Note: unlike most text equivalent attributes, aria-label is supported on any element. It is different from
     // aria-labelledby in that it directly contains the necessary text rather than point to an element by id.
-    var textEquiv = node.getAttribute('aria-label'),
+    var ariaLabel = node.getAttribute('aria-label'),
+      textEquiv = ariaLabel,
       value;
+
     // alt or title on any image or visual media
     if (isImage($node)) {
       textEquiv = textEquiv || getImageText(node);
@@ -177,20 +184,31 @@ define(['$'], function($) {
       value = node.value;
     }
 
+    if (ariaLabel) {
+      // ARIA markup defined an accessible name, which overrides other labels.
+      // No need to keep adding to the accessible name via descendants or other attributes
+      textEquiv = ariaLabel;
+      doWalkChildren = false;
+    }
+
     if (textEquiv !== null) {
-      appendWithWordSeparation(textEquiv, text);
+      appendWithWordSeparation(textEquiv);
     }
     if (value) {
-      appendWithWordSeparation(value, text);
+      appendWithWordSeparation(value);
     }
+
     return doWalkChildren;
   }
 
+  // Add all the accessible text from the pointed-to subtree of elements
+  // isLabel prevents infinite recursion when getting label from elsewhere in document, potentially overlapping
   function appendAccessibleTextFromSubtree(node, isLabel) {
-    var text = '',
-      styles,
+    var styles,
       $node = $(node),
-      doWalkChildren = true;
+      doWalkChildren = true,
+      hasNewline,
+      hasExtraSpace;
 
     node = $node[0];
 
@@ -212,15 +230,21 @@ define(['$'], function($) {
     //    common technique to hide labels but have useful text for screen readers
     // 2) ARIA labels and descriptions: don't use if already inside a label, in order to avoid infinite recursion
     //    since labels could ultimately point in a circle.
-    if (!isLabel && !appendNonLabelText(text, $node, styles)) {
+    if (!isLabel && !appendNonLabelText($node, styles)) {
       return;
     }
 
     // Add characters to break up paragraphs (before block)
-    if (styles.display !== 'inline') {
-      appendBlockSeparator(text);
+
+    hasNewline = styles.display !== 'inline';
+    if (hasNewline) {
+      textBuffer = textBuffer.trim();
+      appendBlockSeparator();
     }
-    doWalkChildren = appendTextEquivAndValue(node, $node, doWalkChildren, text);
+    else {
+      hasExtraSpace = parseFloat(styles.paddingRight) || parseFloat(styles.marginRight);
+    }
+    doWalkChildren = appendTextEquivAndValue(node, $node, doWalkChildren);
 
     if (doWalkChildren) {
       // Recursively add text from children (both elements and text nodes)
@@ -229,8 +253,12 @@ define(['$'], function($) {
       });
     }
 
-    if (styles.display !== 'inline') {
-      appendBlockSeparator(text); // Add characters to break up paragraphs (after block)
+    if (hasNewline) {
+      textBuffer = textBuffer.trim();
+      appendBlockSeparator(); // Add characters to break up paragraphs (after block)
+    }
+    else if (hasExtraSpace) {
+      appendText(' ');
     }
   }
 

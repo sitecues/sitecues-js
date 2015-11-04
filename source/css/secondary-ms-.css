@@ -1,3 +1,6 @@
+/* ----------- Remove .scp-no-ie elements ------------*/
+.scp-no-ie { display: none; }
+
 /* ----------- Current theme indicator ---------------*/
 
 sc-button[data-setting-name="themeName"][aria-pressed="true"]:after {

@@ -1,55 +1,15 @@
 /*
  * Sitecues: core.js
  *   The core module of the sitecues library.
+ *
+ *   1. Initialize settings and locale
+ *   2. Initialize BP
+ *   3. Listen to anything that should wake up sitecues features
+ *   4. Fire sitecues ready callback and metric
  */
 
-// User's favorite accent no longer chosen
-// Panel:
-// ? Cannot repro -- Sometimes 4 button panel plops down instead of animating
-// ? Cannot repro -- [Seth] Win/Firefox: Panel gets funky and shifts position after expanding from badge. Maybe due to drop shadow -- drop shadow didn’t match final position
-// Weird: Graham managed to get badge to float out there in Safari while using +/-
-
-// Review
-// - Send Chrome beta out -- Anton, Shelly
-// Accessibility
-// - Secret message for screen readers in highlighting tips
-// - JAWS 16 with IE 11 - tabbing, role announced as link. Arrowing, you don't discover it at all.
-// - JAWS activating buttons sometimes closes panel -- moving mouse?
-// - Window-Eyes speaking stuff in the first panel because it's not really hidden
-// Themes
-// - sitecues inversion color theme doesnt work well on this site: http://goodnowlibrary.org/
-// CSS improvements
-// - Slow CSS in styles.js: [data-sc-reversible]
-// - Slow CSS in styles.js: #scp-bp-container *
-// - Comment CSS to be more readable
-// Small
-// - cursor size/hue settings only -- be careful of mousehue 1.1 which means nothing
-// UX testing
-// Beta testing
-// Theme testing on customer sites
-// Applause testing
-// Provisional patents  -- who can help? Jeff? Ai2?
-//
-// Later
-// Fix unit tests
-// About: Get it now
-// IE9: Keyboard arrows don’t work to move highlight while in Help box.
-// UX: should tabbing move the highlight? Should focus and sync?
-//
-
-
-// Later
-// Dark themes:
-// - In Safari, IE11 via web service (for CSS, image analysis, image reversal)
-// - In Safari, when highlighting dark theme and zooming highlighting is off, specifically reproduced in dropdown on eeoc.gov.
-// dealerEmail config option
-// ? Cursor: Win/Firefox: Cursor hotspot is way off. Win/Chrome: Cursor hotspot is a tiny bit off. (edited)
-// Settings: why do we ever set a cookie? I don't think we can keep it between pages, at least not currently. So why save/get settings from server at all?
-//           Cookie is set for metrics?
-
-
 define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/conf/user/manager', 'core/metric', 'core/platform', 'core/bp/bp'],
-  function (userId, userSettingsServer, locale, conf, metric, platform, bp) {
+  function (userId, confUserSettingsServer, locale, conf, metric, platform, bp) {
   var
     numPrereqsToComplete,
     isZoomInitialized,
@@ -57,6 +17,7 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
     isZoomOn,
     isSpeechOn,
     isSitecuesOn = false,
+    isKeyHandlingInitialized,
     wasSitecuesEverOn,
     DASH     = 189,
     NUMPAD_SUBTRACT = 109,
@@ -71,7 +32,14 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
     INIT_CODES = [ DASH, NUMPAD_SUBTRACT, MINUS_ALTERNATE_1, MINUS_ALTERNATE_2,
       EQUALS, NUMPAD_ADD, PLUS_ALTERNATE_1, PLUS_ALTERNATE_2, QUOTE];
 
-    function initZoom() {
+  function performInitialLoadZoom(initialZoom) {
+    require(['page/zoom/zoom'], function (zoomMod) {
+      zoomMod.init();
+      zoomMod.performInitialLoadZoom(initialZoom);
+    });
+  }
+
+  function initZoomEnhancingFeatures() {
     require([ 'page/hpan/hpan', 'page/zoom/fixed-position-fixer', 'page/focus/focus', 'page/cursor/cursor' ], function(hpan, fixer, focus, cursor) {
       hpan.init();
       fixer.init();
@@ -125,7 +93,7 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
     isZoomOn = zoomLevel > 1;
     onFeatureSettingChanged();
     if (isZoomOn && !isZoomInitialized) {
-      initZoom();
+      initZoomEnhancingFeatures();
       isZoomInitialized = true;
     }
   }
@@ -141,20 +109,19 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
     }
   }
 
-  function onAllPrereqsComplete() {
-    // Initialize other features after bp
+  // Initialize page feature listeners
+  // This means: if a setting or event changes that requires some modules, we load and initialize the modules
+  function initPageFeatureListeners() {
+    // -- Zoom --
+    // Previously saved values
     var initialZoom = conf.get('zoom');
     if (initialZoom > 1) {
-      require(['page/zoom/zoom'], function (zoomMod) {
-        zoomMod.init();
-        zoomMod.performInitialLoadZoom(initialZoom);
-      });
+      performInitialLoadZoom(initialZoom);
     }
-
-    // Init zoom if turned on
+    // Monitor any runtime changes
     sitecues.on('zoom', onZoomChange);
 
-    // Init speech if turned on
+    // -- Speech --
     conf.get('ttsOn', function(isOn) {
       isSpeechOn = isOn;
       onFeatureSettingChanged();
@@ -164,44 +131,61 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
       }
     });
 
-    // Init themes if turned on
+    // -- Themes --
     conf.get('themeName', function(themeName) {
       if (themeName) {
         initThemes();
       }
     });
 
-    // Init mouse settings if turned on
-    conf.get('mouseSize mouseHue', function(value) {
-      if (value) {
+    // -- Mouse --
+    conf.get('mouseSize', function(mouseSize) {
+      if (mouseSize) {   // If undefined we use the default as set by the zoom module
+        initMouse();
+      }
+    });
+    conf.get('mouseHue', function(mouseHue) {
+      if (mouseHue <= 1) {  // if undefined || > 1, mouse hue is ignored, and we keep the default mouse hue
         initMouse();
       }
     });
 
+    // -- Keys --
     // Init keys module if sitecues was off but key is pressed that might turn it on
-    // E.g. + or ' is pressed
-    if ((initialZoom > 1) === false && !isSpeechOn) {
-      window.addEventListener('keydown', function (event) {
-        var keyCode = event.keyCode;
-        if (INIT_CODES.indexOf(keyCode) >= 0) {
-          if (event.ctrlKey || event.metaKey || event.altKey) {
-            // Don't allow default behavior of modified key, e.g. native zoom
-            event.preventDefault();
-            event.stopImmediatePropagation();
-          }
-          require(['page/keys/keys'], function (keys) {
-            keys.init(event);
-          });
-        }
-      });
+    if (!isKeyHandlingInitialized) {
+      // Keys are not be initialized, therefore,
+      // we add our lightweight keyboard listener that only
+      // checks for a few keys like  +, - or alt+'
+      window.addEventListener('keydown', onPossibleTriggerKeyPress);
     }
 
-      onSitecuesReady();
+    onSitecuesReady();
   }
 
-  function onPrereqComplete() {
+  // Check for keys that can trigger sitecues, such as cmd+, cmd-, alt+'
+  function onPossibleTriggerKeyPress(event) {
+    var keyCode = event.keyCode;
+    if (INIT_CODES.indexOf(keyCode) >= 0) {
+      if (event.ctrlKey || event.metaKey || event.altKey) {
+        // Don't allow default behavior of modified key, e.g. native zoom
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      }
+      require(['page/keys/keys'], function (keys) {
+        keys.init(event);
+      });
+    }
+  }
+
+  function onKeyHandlingInitialized() {
+    isKeyHandlingInitialized = true;
+    window.removeEventListener('keydown', onPossibleTriggerKeyPress);
+  }
+
+  function onSettingsOrLocaleComplete() {
     if (--numPrereqsToComplete === 0) {
-      bp.init(onAllPrereqsComplete);
+      // Both settings AND locale are now complete ... onto BP!!
+      bp.init(initPageFeatureListeners);
     }
   }
 
@@ -210,14 +194,20 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
     // Load and initialize the prereqs before doing anything else
     numPrereqsToComplete = 2;  // User settings (conf) and locale
 
-    sitecues.on('user-id/did-complete', function() {  // TEMPORARY EXPERIMENT!!!! Why are broken in IE10?
-      sitecues.on('conf/did-complete', onPrereqComplete); // User setting prereq: dependent on user id completion
-      userSettingsServer.init();
+    // Listen to completion events (we will initialize the rest of sitecues after all of these events fire)
+    sitecues.on('user-id/did-complete', function() {
+      // Ensure that the zoom level is a number. We further define it if zoom is turned on, in zoom.js
+      conf.def('zoom', parseFloat);
+      // Get user settings
+      confUserSettingsServer.init();
     });
+    sitecues.on('locale/did-complete', onSettingsOrLocaleComplete); // Get locale data
+    sitecues.on('conf/did-complete', onSettingsOrLocaleComplete); // User setting prereq: dependent on user id completion
 
-    sitecues.on('locale/did-complete', onPrereqComplete); // Local prereq
+    // When keyboard listening is ready
+    sitecues.on('keys/did-init', onKeyHandlingInitialized);
 
-    conf.def('zoom', parseFloat); // Will further define it if zoom is turned on, in zoom.js
+    // Start initialization
     userId.init();
     locale.init();
   };

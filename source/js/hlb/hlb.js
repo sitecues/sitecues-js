@@ -36,7 +36,7 @@ define([
       // Value of 2 instead of 1 fixes wrapping text on this page for all headers:
       // http://www.windoweyesforoffice.com/sitecues/index.php
       EXTRA_HIGHLIGHT_PADDING = 2, // TODO: Figure out why this is needed and compute it.
-      MOUSE_SAFETY_ZONE       = 0, // Number of pixels the mouse is allowed to go outside the HLB, before it closes.
+      MOUSE_SAFETY_ZONE       = 50, // Number of pixels the mouse is allowed to go outside the HLB, before it closes.
 
       $picked,         // The object chosen by the picker.
       $foundation,     // The sanitized input, used as the basis for creating an $hlb.
@@ -397,7 +397,7 @@ define([
     turnOnHLBEventListeners();
 
     // Listeners: speech.js
-    sitecues.emit('hlb/create', $hlb);
+    sitecues.emit('hlb/did-create', $hlb, highlight);
 
     metric('hlb-opened');
   }

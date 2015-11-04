@@ -778,7 +778,7 @@ define(['$', 'page/highlight/highlight', 'page/util/common',
       isKeyRepeating = false;
     });
 
-    sitecues.on('hlb/create', function($hlb) {
+    sitecues.on('hlb/did-create', function($hlb) {
       hlbElement = $hlb[0];
     });
 

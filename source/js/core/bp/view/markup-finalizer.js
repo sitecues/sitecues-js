@@ -1,5 +1,6 @@
 // Fix urls and localize strings in markup
-define(['core/locale', 'core/platform', 'core/bp/view/styles', 'core/conf/urls'], function(locale, platform, styles, urls) {
+define(['core/locale', 'core/platform', 'core/bp/view/styles'], function(locale, platform) {
+  // IMPORTANT: 'styles' included only to init styles
   // The original base URL for the current page regardless of <base> tag
   function removeEnd(loc) {
     var locString = '' + loc; // Convert to string
@@ -20,16 +21,6 @@ define(['core/locale', 'core/platform', 'core/bp/view/styles', 'core/conf/urls']
     return removeEnd(getBaseURI()) !== removeEnd(document.location.href);
   }
 
-  // Sitecues URLs must be absolute.
-  // For example, change /images/foo.png to http://js.sitecues.com/images/foo.png
-  function convertSitecuesUrlsToAbsolute(text) {
-    var MATCH_URLS = /(href="|url\()(\/.*)"/g;
-
-    return text.replace(MATCH_URLS, function (totalMatch, attributeName, url) {
-      return attributeName + urls.resolveSitecuesUrl(url);
-    });
-  }
-
   // Relative URLs must be full URLS that <base> tag doesn't mess them up!
   // Without this fix, markup such as xlink:href="#foo" or filter="url(#foo)" will not work in Firefox
   // when the source document uses a <base> tag.
@@ -45,9 +36,9 @@ define(['core/locale', 'core/platform', 'core/bp/view/styles', 'core/conf/urls']
 
     return text;
   }
+
   return function(markup) {
-    var withCorrectSitecuesUrls = convertSitecuesUrlsToAbsolute(markup),
-      withAllAbsoluteUrls = convertRelativeUrlsToAbsolute(withCorrectSitecuesUrls),
+    var withAllAbsoluteUrls = convertRelativeUrlsToAbsolute(markup),
       localized = locale.localizeStrings(withAllAbsoluteUrls);
 
     return localized;

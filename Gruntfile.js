@@ -190,7 +190,7 @@ module.exports = function (grunt) {
             intern : {
                 options : {
                     config  : 'config/intern',  // path to the default, base configuration for the testing framework
-                    runType : 'runner'         // runner for remote browser control, client for unit testing
+                    runType : 'runner'          // runner for remote browser control, client for unit testing
                 },
                 normal : {
                     // empty target because it inherits task local options
