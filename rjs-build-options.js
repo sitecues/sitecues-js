@@ -207,7 +207,7 @@
   },
   onBuildRead: function(module, path, contents) {
     if (module.indexOf('/requirejs') > 0 || module.indexOf('/alameda') > 0) {
-      const loaderConfig = fs.readFileSync('module-loader-config.js', 'utf8');
+      var loaderConfig = fs.readFileSync('module-loader-config.js', 'utf8');
       // Prepend our runtime configuration to the loader itself,
       // so that we can use options like "skipDataMain" in it.
       return loaderConfig + contents;
@@ -219,9 +219,9 @@
     // Check for dupes
     // TODO this should use require with a state module we build instead of a global
     global.scIncludedBy = global.scIncludedBy || {};
-    let index = data.included.length;
+    var index = data.included.length;
     while (index--) {
-      const includedItem = data.included[index];
+      var includedItem = data.included[index];
       if (global.scIncludedBy[includedItem]) {
         throw new Error('The module ' + includedItem + ' was included both in ' + global.scIncludedBy[includedItem] + ' and ' + data.name + '.\n' +
           'Modules must only be included once in order to avoid code duplication.');
@@ -230,7 +230,7 @@
     }
 
     // Build loader config, removing .js
-    let includedStr = data.included.join("','").replace(/\.js/g, '');
+    var includedStr = data.included.join("','").replace(/\.js/g, '');
     fs.appendFileSync(
       'target/build-config/sitecues-bundles.js',
       "'" + data.name + "':['" + includedStr + "'],"
