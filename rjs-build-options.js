@@ -34,7 +34,6 @@
         'core/bp/helper',
         'core/util/xhr',
         'page/util/common',
-        'page/zepto/zepto-utils',
         'page/zepto/zepto',
         'core/metric',
         'core/conf/urls',
@@ -75,7 +74,6 @@
         'page/util/element-classifier',
         'page/highlight/highlight',
         'page/util/common',
-        'page/zepto/zepto-utils',
         'page/zepto/zepto',
         'page/highlight/move-keys',
         'page/zoom/zoom',
@@ -113,7 +111,6 @@
         'core/bp/helper',
         'core/util/xhr',
         'page/util/common',
-        'page/zepto/zepto-utils',
         'page/zepto/zepto',
         'core/conf/site',
         'core/conf/user/manager',
@@ -140,7 +137,6 @@
         'core/bp/helper',
         'core/util/xhr',
         'page/util/common',
-        'page/zepto/zepto-utils',
         'page/zepto/zepto',
         'core/conf/urls',
         'core/conf/site',
@@ -204,12 +200,10 @@
         'hlb/dimmer',
         'core/conf/urls'
       ]
-    }
+    },
   ],
-  map: {
-    '*': {
-      '$': 'page/zepto/zepto'
-    }
+  paths: {
+    '$': 'empty:'
   },
   onBuildRead: function(module, path, contents) {
     if (module.indexOf('/requirejs') > 0 || module.indexOf('/alameda') > 0) {

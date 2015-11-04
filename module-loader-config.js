@@ -18,17 +18,12 @@ var require = {
       withLatestReplaced = withVersionName.replace('/latest/', '/__VERSION__/');  // The /latest/ means the current version
     return withLatestReplaced;  // Includes version name so that cached resources are only used with the appropriately matching sitecues.js
   })(sitecues.everywhereConfig || sitecues.config),
-  // Make aliases to modules, for convenience.
   map: {
     // All modules get 'zepto' when they ask for $
     '*': {
-      '$': 'page/zepto/zepto'
-      // If we need to switch between Zepto and jQuery, do this:
-      // IE9:
-      // All modules get 'jquery-private' when they ask for '$',
-      // so that we can secretly return a customized value which
-      // implements .noConflict() to avoid puking on customers.
-      //'$': (!sitecues.config.preventZepto && sitecues.__ALLOW_ZEPTO__ && navigator.appVersion.indexOf('MSIE 9') < 0) ? 'page/zepto/zepto' : 'page/zepto/jquery-private'
+      // We use jQuery when the page has prototype.js, as it is fundamentally incompatible with Zepto
+      // This is just the tip of the iceberg: https://github.com/madrobby/zepto/issues/710
+      '$': window.Prototype ? 'jquery' : 'page/zepto/zepto'
     }
   },
   // This will be replaced with actual module structure in core.mk via a call to finalize-loader-config.js
