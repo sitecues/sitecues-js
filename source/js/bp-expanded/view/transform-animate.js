@@ -123,9 +123,7 @@ define(['bp-expanded/view/transform-util', 'core/platform'], function (transform
   };
 
   function CssAnimation(elements, fromTransforms, toTransforms, duration, onCustomFinish, timingFunctionName) {
-    function stopAnimation() {
-      initTransitionStyles('');
-    }
+    var isRunning = true;
 
     function initTransitionStyles(transition) {
       elements.forEach(function(elem) {
@@ -171,11 +169,14 @@ define(['bp-expanded/view/transform-util', 'core/platform'], function (transform
     }
 
     function finishNow() {
-      removeTransitionEndListener();
-      stopAnimation();
-      initTransforms(true);
-      if (onCustomFinish) {
-        onCustomFinish();
+      if (isRunning) {  // Don't finish twice
+        isRunning = false;
+        removeTransitionEndListener();
+        initTransitionStyles('');  // Disable the element transition by setting the style to ''
+        initTransforms(true);
+        if (onCustomFinish) {
+          onCustomFinish();
+        }
       }
     }
 
