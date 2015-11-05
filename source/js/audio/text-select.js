@@ -24,6 +24,7 @@ define([], function () {
 
   // Get selected text, if any...
   // TODO would be better to get the selected nodes if we want to speak alternative text, switch languages, etc.
+  // TODO this would also allow us to speak whole words (SC-3192)
   function getSelectedText() {
 
     var result = '';

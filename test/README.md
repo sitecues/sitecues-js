@@ -16,5 +16,5 @@ cd .. && npm install && grunt test
 1. Choose a feature to test.
 2. Choose a test type, unit or functional.
 3. Create a new file for it in the folder appropriate for that test type.
-4. Use a smoke test as a template to base your test off of.
-5. Add your new test file to the configuration.
+4. Use an existing test as a template to base your test off of.
+5. Add your new test file to all-unit.js or all-functional.js.

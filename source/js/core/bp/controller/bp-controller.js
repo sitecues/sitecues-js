@@ -90,17 +90,17 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
   /*
    Show panel according to settings.
    */
-  function expandPanel() {
+  function expandPanel(isOpenedWithHover) {
 
     if (state.isPanel()) {
       return; // Already expanded or in the middle of shrinking
     }
 
+    setPanelExpandedState(isOpenedWithHover);
+
     sitecues.emit('bp/will-expand');
 
     metric('badge-hovered');
-
-    setPanelExpandedState();
 
     didChange();
   }
@@ -109,16 +109,17 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
     state.set('isRealSettings', true);    // Always use real settings once expanded
   }
 
-  function setPanelExpandedState() {
+  function setPanelExpandedState(isOpenedWithHover) {
     state.set('wasMouseInPanel', false);
+    state.set('isOpenedWithHover', isOpenedWithHover);
     state.set('transitionTo', BP_CONST.PANEL_MODE);
     turnOnRealSettings();
   }
 
-  function changeModeToPanel() {
+  function changeModeToPanel(isOpenedWithKeyboard) {
     cancelHoverDelayTimer();
     if (!state.get('isShrinkingFromKeyboard')) { // Don't re-expand while trying to close via Escape key
-      expandPanel();
+      expandPanel(!isOpenedWithKeyboard);
     }
   }
 
@@ -135,7 +136,7 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
     var badgeElem = helper.byId(BP_CONST.BADGE_ID);
     if (document.activeElement === badgeElem && state.isBadge()) {
       // Click is in visible area and badge has focus -- go ahead and open the panel
-      changeModeToPanel();
+      changeModeToPanel(true); // Opened with click means opened with keyboard in screen reader
     }
   }
 
@@ -145,13 +146,33 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
       (evt.keyCode === ENTER || evt.keyCode === SPACE)) {
 
       evt.preventDefault();
-      changeModeToPanel();
+      changeModeToPanel(true); // Opened with keyboard
     }
   }
 
-  // Don't scroll while BP is open
+  // Document will be scrolled if the current element is already scrolled all the way in this direction
+  function willScrollDocument(event) {
+    var
+      elem = event.target,
+      deltaY = parseInt(event.deltaY || -event.wheelDeltaY),    // parseInt() sanitizes by converting strange -0 value to 0
+      scrollHeight     = elem.scrollHeight,    // The total height of the scrollable area
+      scrollTop        = elem.scrollTop,       // Pixel height of invisible area above element (what has been scrolled)
+      clientHeight     = elem.clientHeight,    // The height of the element in the window
+      scrollBottom     = scrollHeight-scrollTop-clientHeight, // The pixels height invisible area below element (what is left to scroll)
+      scrollingDown    = deltaY > 0,           // If the user is scrolling downwards
+      scrollingUp      = deltaY < 0;           // If the user is scrolling upwards
+
+    return (scrollingDown && deltaY > scrollBottom) ||   // Already at bottom
+      (scrollingUp && -deltaY > scrollTop) ||   // Already at top
+      !deltaY; // Horizontal scrolling will always scroll document
+  }
+
+  // Don't scroll document while BP is open
   function preventScroll(evt) {
-    return helper.cancelEvent(evt);
+    if (!evt.target.hasAttribute('data-allow-scroll') ||
+      willScrollDocument(evt)) { // Avoid scrolling the document
+      return helper.cancelEvent(evt);
+    }
   }
 
   function willExpand() {

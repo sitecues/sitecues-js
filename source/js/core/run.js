@@ -139,8 +139,13 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
     });
 
     // -- Mouse --
-    conf.get('mouseSize mouseHue', function(value) {
-      if (value) {
+    conf.get('mouseSize', function(mouseSize) {
+      if (mouseSize) {   // If undefined we use the default as set by the zoom module
+        initMouse();
+      }
+    });
+    conf.get('mouseHue', function(mouseHue) {
+      if (mouseHue <= 1) {  // if undefined || > 1, mouse hue is ignored, and we keep the default mouse hue
         initMouse();
       }
     });

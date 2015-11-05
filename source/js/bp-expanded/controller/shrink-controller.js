@@ -176,13 +176,17 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
     // These listeners are temporary – only bound when the panel is open.
     // Good for performance – it prevents extra code from being run on every mouse move/click when we don't need it
     function toggleListeners(doTurnOn) {
-      var addOrRemoveFn = doTurnOn ? 'addEventListener' : 'removeEventListener';
+      var addOrRemoveFn = window[doTurnOn ? 'addEventListener' : 'removeEventListener'];
 
       // Pressing tab or shift tab when panel is open switches it to keyboard mode
-      window[addOrRemoveFn]('mousedown', winMouseDown);
-      window[addOrRemoveFn]('mousemove', winMouseMove);
-      window[addOrRemoveFn]('blur', winBlur);
-      window[addOrRemoveFn]('mouseout', winMouseLeave);
+      addOrRemoveFn('mousedown', winMouseDown);
+      if (state.get('isOpenedWithHover')) {
+        // Only allow close from hover if opened from hover
+        addOrRemoveFn('mousemove', winMouseMove);
+      }
+      addOrRemoveFn('blur', winBlur);
+      addOrRemoveFn('mouseout', winMouseLeave);
+      addOrRemoveFn('resize', shrinkPanel); // Don't allow user to resize window in middle of using panel, leads to layout issues
     }
 
     function refresh() {

@@ -24,7 +24,7 @@ define(['core/bp/constants', 'core/bp/helper', 'core/conf/urls'], function (BP_C
       loadImage();
       byId('scp-about-rate-button').addEventListener('click', function() {
         require(['bp-secondary/bp-secondary'], function(secondaryPanel) {
-          secondaryPanel.toggleSecondaryFeature('feedback');
+          secondaryPanel.toggleFeature('feedback');
         });
       });
     }

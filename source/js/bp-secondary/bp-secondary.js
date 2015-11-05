@@ -226,11 +226,6 @@ define(['core/bp/constants',
   }
 
   function animateFeature(name, doEnable) {
-    if (doEnable && getFeaturePanelName()) {
-      // If we are switching from one panel to another, make sure buttons start from initial state
-      resetButtonStyles();
-    }
-
     var
       feature = features[name],
       animatedImageElem = byId(feature.animatedImageId),
@@ -315,6 +310,11 @@ define(['core/bp/constants',
     }
 
     finishAllAnimations();
+
+    if (doEnable && getFeaturePanelName()) {
+      // If we are switching from one panel to another, make sure buttons start from initial state
+      resetButtonStyles();
+    }
 
     updateGlobalState(doEnable && name, doEnable);
 
@@ -481,6 +481,10 @@ define(['core/bp/constants',
     finishAllAnimations();
     resetStyles();
 
+    // Next time panel opens, it will be at the main panel;
+    // Therefore, the more button label for screen readers needs to indicate the secondary panel will open
+    updateMoreButtonLabel();
+
     state.set('secondaryPanelTransitionTo', BP_CONST.SECONDARY_PANEL_DISABLED);
 
     updateGlobalState();
@@ -510,7 +514,7 @@ define(['core/bp/constants',
   return {
     init: init,
     toggleSecondaryPanel: toggleSecondaryPanel,
-    toggleSecondaryFeature: toggleFeature
+    toggleFeature: toggleFeature
   };
 
 });
