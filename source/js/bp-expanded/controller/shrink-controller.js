@@ -80,7 +80,7 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
         return;
       }
 
-      if (isMouseOutsidePanel(evt, 0)) { // Any click anywhere outside of visible contents, no safe-zone needed
+      if (isOpenedWithHover() && isMouseOutsidePanel(evt, 0)) { // Any click anywhere outside of visible contents, no safe-zone needed
         shrinkPanel();
       }
 
@@ -148,6 +148,10 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
       }
     }
 
+    function isOpenedWithHover() {
+      return state.get('isOpenedWithHover');
+    }
+
     function getVisiblePanelRect() {
       var mainOutline = byId(BP_CONST.MAIN_OUTLINE_ID),
         secondaryOutlineHeight,
@@ -180,7 +184,7 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
 
       // Pressing tab or shift tab when panel is open switches it to keyboard mode
       addOrRemoveFn('mousedown', winMouseDown);
-      if (state.get('isOpenedWithHover')) {
+      if (isOpenedWithHover()) {
         // Only allow close from hover if opened from hover
         addOrRemoveFn('mousemove', winMouseMove);
       }
