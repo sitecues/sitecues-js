@@ -93,28 +93,28 @@ define(
                 var textNode = document.createTextNode('.');
                 assert.isTrue(
                     common.isEmpty(textNode),
-                    "Non empty strings with only punctuation return true."
+                    'Non empty strings with only punctuation return true.'
                 );
 
-                textNode.data = "";
+                textNode.data = '';
 
                 assert.isTrue(
                     common.isEmpty(textNode),
-                    "Empty strings return true."
+                    'Empty strings return true.'
                 );
 
-                textNode.data = "abc123";
+                textNode.data = 'abc123';
 
                 assert.isFalse(
                     common.isEmpty(textNode),
-                    "Alphanumeric characters return false."
+                    'Alphanumeric characters return false.'
                 );
 
                 textNode.data = 0;
 
                 assert.isFalse(
                     common.isEmpty(textNode),
-                    "Zero is not empty"
+                    'Zero is not empty'
                 );
 
             });
@@ -123,13 +123,16 @@ define(
                     style = document.createElement('style'),
                     parentStyle = document.createElement('style');
 
+                // TODO: This seems incorrect. style is an element, why are we
+                //       setting these properties on it directly?
                 style.backgroundColor = 'red';
-                parentStyle.backgroundColor = 'red';
                 style.backgroundImage = 'none';
-                parentStyle.zIndex = 0;
                 style.zIndex = 0;
                 style.borderRightWidth = 0;
                 style.borderBottomWidth = 0;
+
+                parentStyle.backgroundColor = 'red';
+                parentStyle.zIndex = 0;
 
                 assert.isFalse(
                     common.isVisualRegion(element, style, parentStyle),
@@ -145,29 +148,28 @@ define(
                  style.backgroundImage = 'none';
                  */
 
-
                 style.zIndex = 1;
+
                 assert.isTrue(
                     common.isVisualRegion(element, style, parentStyle),
                     'Element has an elevated z index, should return true'
                 );
-                style.zIndex = 0;
 
+                style.zIndex = 0;
                 style.borderRightWidth = 1;
+
                 assert.isTrue(
                     common.isVisualRegion(element, style, parentStyle),
                     'Element has non-zero border width, should return true'
                 );
+                // TODO: What is the purpose of this? The test is over?
                 style.borderRightWidth = 0;
-
-
             });
             test('.isSprite()', function () {
-                var element = document.createElement('div');
-                var style = element.style;
+                var element = document.createElement('div'),
+                    style = element.style;
                 style.backgroundImage = 'initial';
                 style.backgroundRepeat = 'no-repeat';
-
 
                 assert.isTrue(
                     common.isSprite(style),
@@ -231,7 +233,6 @@ define(
                     common.hasOwnBackground(element, style, parentStyle),
                     'Element with its own background color has a background'
                 );
-
             });
             test('.hasOwnBackgroundColor()', function () {
                 var element = document.createElement('div'),
@@ -277,14 +278,13 @@ define(
                 parentStyle.backgroundColor = 'red';
                 style.backgroundColor = 'red';
                 parent.removeChild(element);
-
-
             });
             test('.hasVisibleContent()', function () {
-                //Checks for size of media content box
-                //Checks if (max 10?) text node children are empty
-                var element = document.createElement("keygen");
-                var element2;
+                // Checks for size of media content box
+                // Checks if (max 10?) text node children are empty
+                var element = document.createElement('keygen'),
+                    // TODO: this never gets used
+                    element2;
 
                 /* breaks isFormControl
                  assert.isTrue(
@@ -313,30 +313,32 @@ define(
 
             });
             test('.isEmptyBgImage()', function () {
-                var imgSrc = "http://js.sitecues.com/f/s;id=s-17d1c25f/img/no-sitecues-support-warning.png";
+                // TODO: This uses our "fallbacks" system, which is deprecated.
+                //       Its use should be removed.
+                var imgSrc = 'http://js.sitecues.com/f/s;id=s-17d1c25f/img/no-sitecues-support-warning.png';
 
                 assert.isFalse(
                     common.isEmptyBgImage(imgSrc),
-                    "Non-empty src string should return true"
+                    'Non-empty src string should return true'
                 );
 
                 assert.isTrue(
                     common.isEmptyBgImage(null),
-                    "Null value should return true"
+                    'Null value should return true'
                 );
 
-                /**What should the method return if it is an invalid uri?
+                /**What should the method return if it is an invalid URL?
                  assert.isTrue(
                  common.isEmptyBgImage('0'),
-                 "Non-uri value returns false"
+                 'Non-URL value returns false'
                  );
                  */
 
             });
             test('.elementFromPoint()', function () {
-                //element.innerWidth/height is unsupported in IE8 and before
-                //nearestElement, nearestElementInViewport, safeElementFromPoint, elementFromOnscreenPoint
-                //Coordinates outside of viewport are corrected
+                // element.innerWidth/height is unsupported in IE8 and before
+                // nearestElement, nearestElementInViewport, safeElementFromPoint, elementFromOnscreenPoint
+                // Coordinates outside of viewport are corrected
                 assert.strictEqual(
                     common.elementFromPoint(-1, -1),
                     document.documentElement
@@ -365,7 +367,7 @@ define(
             });
             test('.getBulletWidth()', function () {
                 this.skip('Unwritten test.');
-                //Only checks for decimal, could check for decimal-leading-zero, lower latin, initial (decimal), etc.
+                // Only checks for decimal, could check for decimal-leading-zero, lower latin, initial (decimal), etc.
 
             });
             test('.getComputedScale()', function () {
@@ -374,7 +376,7 @@ define(
                 div.style[platform.transformProperty] += 'scale(6,5) ';
                 div.style[platform.transformProperty] += 'rotate(10deg)';
                 console.log(JSON.stringify(getComputedStyle(div)[platform.transformProperty]));
-                //If an asymmetrical scale has been applied, only returns x scaling factor
+                // If an asymmetrical scale has been applied, only returns x scaling factor
             });
         });
     }
