@@ -13,6 +13,7 @@ define(
             test = tdd.test;
 
         suite('common', function () {
+            /**
             test('.isTransparentColor() cares about colors', function () {
                 this.skip('This method is not currently exported.');
                 assert.isTrue(
@@ -30,6 +31,7 @@ define(
                   'using alpha transparency must return true'
                 );
             });
+            */
             test('.createSVGFragment() makes useful markup', function () {
                 var // Testing weird markup, since it should be agnostic.
                     content = '!,2.y+',
@@ -123,6 +125,10 @@ define(
                     style = document.createElement('style'),
                     parentStyle = document.createElement('style');
 
+                //Creating an element that does not have its own visual region
+                //i.e. it shares a background color with its parent element, it doesn't have a background image
+                //it's z index is not greater than its parent
+                //and it isn't media with a width and height greater than five
                 style.backgroundColor = 'red';
                 parentStyle.backgroundColor = 'red';
                 style.backgroundImage = 'none';
@@ -165,7 +171,7 @@ define(
             test('.isSprite()', function () {
                 var element = document.createElement('div');
                 var style = element.style;
-                style.backgroundImage = 'initial';
+                style.backgroundImage = 'http://js.sitecues.com/f/s;id=s-0000ee0c/img/no-sitecues-support-warning.png';
                 style.backgroundRepeat = 'no-repeat';
 
 
@@ -282,7 +288,7 @@ define(
             });
             test('.hasVisibleContent()', function () {
                 //Checks for size of media content box
-                //Checks if (max 10?) text node children are empty
+                //Checks if (max 10) text node children are empty
                 var element = document.createElement("keygen");
                 var element2;
 
@@ -304,10 +310,17 @@ define(
                  */
 
                 element = document.createElement('img');
-                element.setAttribute('src', 'null');
+                element.setAttribute('src', null);
                 assert.isFalse(
                     common.hasVisibleContent(element),
                     'Image element with null source doesn\'t have visible content'
+                );
+                console.log('element: '+document.createElement('style').setAttribute);
+                element = document.createElement('img');
+                element.style.display = 'none';
+                assert.isFalse(
+                    common.hasVisibleContent(element),
+                    'Element with display set to none has no visible content'
                 );
 
 
@@ -339,7 +352,8 @@ define(
                 //Coordinates outside of viewport are corrected
                 assert.strictEqual(
                     common.elementFromPoint(-1, -1),
-                    document.documentElement
+                    document.elementFromPoint(0, 0),
+                    'Should return element within viewport'
                 );
 
             });
@@ -374,6 +388,7 @@ define(
                 div.style[platform.transformProperty] += 'scale(6,5) ';
                 div.style[platform.transformProperty] += 'rotate(10deg)';
                 console.log(JSON.stringify(getComputedStyle(div)[platform.transformProperty]));
+                assert.strictEqual
                 //If an asymmetrical scale has been applied, only returns x scaling factor
             });
         });
