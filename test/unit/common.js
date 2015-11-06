@@ -251,6 +251,7 @@ define(
                 );
 
                 //breaks isTransparentColor
+                //check for visibility = hidden?
                 style.opacity = '.5';
                 style.backgroundColor = 'red';
                 assert.isFalse(
@@ -351,9 +352,23 @@ define(
 
             });
             test('.getBulletWidth()', function () {
-                this.skip('Unwritten test.');
                 // Only checks for decimal, could check for decimal-leading-zero, lower latin, initial (decimal), etc.
+                //getClientWidth returns an integer value, getBoundingClientRect gets a fractional value
+                var list = document.createElement('ul');
+                list.appendChild(document.createElement('li'));
+                document.body.appendChild(list);
+                assert.strictEqual(
+                    common.getBulletWidth(list, getComputedStyle(list)),
+                    common.getEmsToPx(list.style.fontSize, 1.6)
+                );
 
+                var list = document.createElement('ol');
+                list.appendChild(document.createElement('li'));
+                list.setAttribute('start', '10');
+                assert.strictEqual(
+                    common.getBulletWidth(list, getComputedStyle(list)),
+                    common.getEmsToPx(list.style.fontSize, 1.9)
+                );
             });
             test('.getComputedScale()', function () {
                 var div = document.createElement('div');

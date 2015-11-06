@@ -73,7 +73,6 @@ define(['page/util/element-classifier', 'core/platform'], function (elemClassifi
   }
 
   function hasVisibleContent(current) {
-    console.log('check1');
     var children,
       index,
       MAX_CHILDREN_TO_CHECK = 10,
@@ -153,6 +152,7 @@ define(['page/util/element-classifier', 'core/platform'], function (elemClassifi
   function getBulletWidth(listElement, style) {
     var bulletType = style.listStyleType,
       ems = 2.5;  // Browsers seem use max of 2.5 em for bullet width -- use as a default
+      console.log('bullet type '+bulletType);
     if (MONOSPACE_BULLET_TYPES.hasOwnProperty(bulletType)) {
       ems = 1.6; // Simple bullet
     } else if (bulletType === 'decimal') {
@@ -160,6 +160,7 @@ define(['page/util/element-classifier', 'core/platform'], function (elemClassifi
         end = (start || 1) + listElement.childElementCount - 1;
       ems = (0.9 + 0.5 * end.toString().length);
     }
+    console.log('ems '+ems);
     return getEmsToPx(style.fontSize, ems);
   }
 
@@ -201,6 +202,7 @@ define(['page/util/element-classifier', 'core/platform'], function (elemClassifi
   }
 
   return {
+    getEmsToPx: getEmsToPx,
     isEmpty: isEmpty,
     isVisualRegion: isVisualRegion,
     hasRaisedZIndex: hasRaisedZIndex,
