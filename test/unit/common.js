@@ -90,56 +90,71 @@ define(
             });
             test('.isEmpty() checks if a text node is empty / has blank space/punctuation characters', function () {
                 var textNode = document.createTextNode('.');
+
                 assert.isTrue(
                     common.isEmpty(textNode),
                     'Non empty strings with only punctuation return true.'
                 );
 
                 textNode.data = '';
-
                 assert.isTrue(
                     common.isEmpty(textNode),
                     'Empty strings return true.'
                 );
 
                 textNode.data = 'abc123';
-
                 assert.isFalse(
                     common.isEmpty(textNode),
                     'Alphanumeric characters return false.'
                 );
 
                 textNode.data = 0;
-
                 assert.isFalse(
                     common.isEmpty(textNode),
                     'Zero is not empty'
                 );
-
             });
             test('.isVisualRegion()', function () {
-                var element = document.createElement('canvas'),
+                var element = {},
                     style = {},
                     parentStyle = {};
 
-                //Creating an element that does not have its own visual region
-                //i.e. it shares a background color with its parent element, it doesn't have a background image
+                //An element is a visual region if it doesn't share a background color with its parent element, 
+                //it doesn't have a background image
                 //it's z index is not greater than its parent
                 //and it isn't media with a width and height greater than five
                 style.backgroundColor = 'red';
+                parentStyle.backgroundColor = 'red';
                 style.backgroundImage = 'none';
                 style.zIndex = 0;
                 style.borderRightWidth = 0;
                 style.borderBottomWidth = 0;
-
-                parentStyle.backgroundColor = 'red';
                 parentStyle.zIndex = 0;
 
                 assert.isFalse(
                     common.isVisualRegion(element, style, parentStyle),
-                    'Style is not a visual region'
+                    'Element is not a visual region'
                 );
-                 
+
+                style.backgroundColor = 'blue';
+                assert.isTrue(
+                    common.isVisualRegion(element, style, parentStyle),
+                    'Element has its own background color, therefore it is a visual region'
+                );
+
+                style.visibility = 'hidden';
+                assert.isFalse(
+                    common.isVisualRegion(element, style, parentStyle),
+                    'Elements\'s visibility attribute is set to hidden, therefore it is not a visual region'
+                );
+
+                style.display = 'none';
+                assert.isFalse(
+                    common.isVisualRegion(element, style, parentStyle),
+                    'Element\'s display attribute is set to none, therefore it is not a visual region'
+                );
+                style.display = 'inline';
+                style.backgroundColor = 'red';
 
                 style.zIndex = 1;
                 assert.isTrue(
@@ -153,82 +168,66 @@ define(
                     common.isVisualRegion(element, style, parentStyle),
                     'Element has non-zero border width, should return true'
                 );
-                style.borderRightWidth = 0;
             });
             test('.isSprite()', function () {
-                var element = document.createElement('div');
+                var element = {};
                 var style = {};
-                style.backgroundImage = 'http://js.sitecues.com/f/s;id=s-0000ee0c/img/no-sitecues-support-warning.png';
+                //Element is a sprite if its backgroundImage != none,
+                //and backgroundRepeat is 'no-repeat'
+                //or backgroundPosition is 0 for x or y coors
+                style.backgroundImage = 'url("test.com/test.png")';
                 style.backgroundRepeat = 'no-repeat';
 
                 assert.isTrue(
                     common.isSprite(style),
-                    ''
+                    'Element is a sprite, non-repeating background img'
                 );
 
-                
-                 style.backgroundRepeat = null;
-                 style.backgroundPosition = '-50px 0px';
-                 assert.isTrue(
-                 common.isSprite(style),
-                 'Background position y coordinate is equal to zero,' +
-                 'should evaluate to true'
-                 );
-                 style.backgroundRepeat = 'no-repeat';
-                 style.backgroundPosition = 'initial';
+                style.backgroundRepeat = 'repeat';
+                style.backgroundPosition = '1px 0px';
+                assert.isTrue(
+                    common.isSprite(style),
+                   'Background position y coordinate is equal to zero,' +
+                   'should evaluate to true'
+                );
                  
-
-                
-                 style.backgroundRepeat = null;
-                 style.backgroundPosition = '0px -50px';
-                 assert.isTrue(
-                 common.isSprite(style),
-                 'Background position x coordinate is equal to zero,' +
-                 'should evaluate to true'
-                 );
-                 style.backgroundRepeat = 'no-repeat';
-                 style.backgroundPosition = 'initial';
-                 
-
-                
-                 style.backgroundImage = null;
-                 assert.isFalse(
-                 common.isSprite(style),
-                 'Background image is null, should evaluate to false.'
-                 );
-                 style.backgroundImage = 'none';
-                 
+                style.backgroundPosition = '0px 1px';
+                assert.isTrue(
+                common.isSprite(style),
+                    'Background position x coordinate is equal to zero,' +
+                    'should evaluate to true'
+                );
+                style.backgroundRepeat = 'no-repeat';
+                style.backgroundPosition = '1px 1px';
 
             });
             test('.hasOwnBackground()', function () {
-                var element = document.createElement('div'),
-                    style = element.style,
-                    parentStyle = document.createElement('style');
+                //TODO: remove style.backgroundImage != none check from isSprite check, redundant
+                var element = {},
+                    style = {},
+                    parentStyle = {};
 
-                /*
-                style.backgroundImage = null;
-                style.backgroundColor = 'transparent';
-                document.body.appendChild(element);
+                
+                style.backgroundImage = 'none';
+                style.backgroundColor = 'red';
+                parentStyle.backgroundColor = 'red';
                 assert.isFalse(
                     common.hasOwnBackground(element, style, parentStyle),
-                    'Null background images should return false'
+                    'Empty background images and identical background colors should return false'
                 );
-                */
-
-                style.backgroundImage = null;
-                style.backgroundColor = 'red';
+                
                 parentStyle.backgroundColor = 'blue';
-                document.body.appendChild(element);
                 assert.isTrue(
                     common.hasOwnBackground(element, style, parentStyle),
                     'Element with its own background color has a background'
                 );
+
             });
             test('.hasOwnBackgroundColor()', function () {
-                var element = document.createElement('div'),
-                    style = document.createElement('style'),
-                    parentStyle = document.createElement('style'),
-                    parent = document.documentElement;
+                var element = {},
+                    style = {},
+                    parentStyle = {};
+                    element.parentNode = document.documentElement;
 
                 style.backgroundColor = 'red';
                 parentStyle.backgroundColor = 'red';
@@ -237,106 +236,97 @@ define(
                     'Parent and child share background color'
                 );
 
-                style.backgroundColor = 'red';
                 parentStyle.backgroundColor = 'blue';
                 assert.isTrue(
                     common.hasOwnBackgroundColor(element, style, parentStyle),
                     'Parent and child have different background colors'
                 );
-                parentStyle.backgroundColor = 'red';
 
-                /*
-                 parentStyle.backgroundColor = 'hsla(120, 100%, 50%, 0.0)';
-                 parent.appendChild(element);
-                 assert.isFalse(
-                 common.hasOwnBackgroundColor(element, style, parentStyle),
-                 'Document element (parent) style\'s background color is transparent,' +
-                 ' child element\'s bg color is not white, should return true'
-                 );
-                 parentStyle.backgroundColor = 'red';
-                 parent.removeChild(element);
-                 */
-
-                parentStyle.backgroundColor = 'red';
-                style.backgroundColor = 'transparent';
-                parent.appendChild(element);
+                parentStyle.backgroundColor = 'rgba(0, 0, 0, 0)';
+                style.backgroundColor = 'rgb(255, 255, 255)';
                 assert.isFalse(
                     common.hasOwnBackgroundColor(element, style, parentStyle),
                     'Document element (parent) style\'s background color is transparent,' +
                     'child element\'s bg color is white, should return false'
                 );
-                parentStyle.backgroundColor = 'red';
+
+                //breaks isTransparentColor
+                style.opacity = '.5';
                 style.backgroundColor = 'red';
-                parent.removeChild(element);
+                assert.isFalse(
+                    common.hasOwnBackgroundColor(element, style, parentStyle),
+                    'Transparent element does not have its own background color'
+                );
+                style.opacity = '1';
+
             });
+            //transform scale 0 also hides content
             test('.hasVisibleContent()', function () {
                 //Checks for size of media content box
                 //Checks if (max 10) text node children are empty
-                var element = document.createElement("keygen");
-                var element2;
-
-                // breaks isFormControl
-                 assert.isTrue(
-                 common.hasVisibleContent(element),
-                 'Drop down keygen menu is visible content'
-                 );
-
-                // breaks isEmpty
-                 element = document.createElement('p1');
-                 element2 = document.createTextNode('//////////////');
-                 element.appendChild(element2);
-                 assert.isTrue(
-                 common.hasVisibleContent(element),
-                    'Element with non-empty text node children has visible content'
-                 );
-
-                element = document.createElement('img');
-                element.setAttribute('src', null);
-                assert.isFalse(
-                    common.hasVisibleContent(element),
-                    'Image element with null source doesn\'t have visible content'
-                );
-
-                element = document.createElement('img');
+                var element = document.createElement('textarea'),
+                    text = document.createTextNode('\n\n\n\n\n\n\n\n\n');
+                element.appendChild(text);
+                document.body.appendChild(element);
                 element.style.display = 'none';
                 assert.isFalse(
                     common.hasVisibleContent(element),
                     'Element with display set to none has no visible content'
                 );
 
+                element.style.display = 'inline';
+                element.style.visibility = 'hidden';
+                assert.isFalse(
+                    common.hasVisibleContent(element),
+                    'Element with visibility set to hidden has no visible content'
+                );
+
+                element = document.createElement("keygen");
+                document.body.appendChild(element);
+                // breaks isFormControl
+                assert.isTrue(
+                    common.hasVisibleContent(element),
+                    'Drop down keygen menu is visible content'
+                );
+
+                 element = document.createElement('p1');
+                 text = document.createTextNode('abc123');
+                 element.appendChild(text);
+                 assert.isTrue(
+                    common.hasVisibleContent(element),
+                    'Element with non-empty text node children has visible content'
+                );
 
             });
             test('.isEmptyBgImage()', function () {
                 // TODO: This uses our "fallbacks" system, which is deprecated.
                 //       Its use should be removed.
-                var imgSrc = 'http://js.sitecues.com/f/s;id=s-17d1c25f/img/no-sitecues-support-warning.png';
+                var imgSrc = 'url("test.com/test.png")';
 
                 assert.isFalse(
                     common.isEmptyBgImage(imgSrc),
-                    'Non-empty src string should return true'
+                    'Non-empty src string should return false'
                 );
 
                 assert.isTrue(
-                    common.isEmptyBgImage(null),
-                    'Null value should return true'
+                    common.isEmptyBgImage(""),
+                    'Empty string should return true'
                 );
-
-                /**What should the method return if it is an invalid URL?
-                 assert.isTrue(
-                 common.isEmptyBgImage('0'),
-                 'Non-URL value returns false'
-                 );
-                 */
 
             });
             test('.elementFromPoint()', function () {
                 // element.innerWidth/height is unsupported in IE8 and before
                 // nearestElement, nearestElementInViewport, safeElementFromPoint, elementFromOnscreenPoint
-                // Coordinates outside of viewport are corrected
                 assert.strictEqual(
                     common.elementFromPoint(-1, -1),
                     document.elementFromPoint(0, 0),
-                    'Should return element within viewport'
+                    'Should return element within viewport closest to point'
+                );
+
+                assert.strictEqual(
+                    common.elementFromPoint(1,1),
+                    document.elementFromPoint(1,1),
+                    'Should return element from point within viewport'
                 );
 
             });
@@ -366,12 +356,20 @@ define(
 
             });
             test('.getComputedScale()', function () {
-                this.skip();
                 var div = document.createElement('div');
                 document.body.appendChild(div);
-                div.style[platform.transformProperty] += 'scale(6,5) ';
-                div.style[platform.transformProperty] += 'rotate(10deg)';
-                console.log(JSON.stringify(getComputedStyle(div)[platform.transformProperty]));
+                div.style[platform.transformProperty] += 'scale(5,5) ';
+                assert.strictEqual(
+                    common.getComputedScale(div),
+                    5,
+                    'Should return inline scale if it is the only applied style'
+                );
+                div.style[platform.transformProperty] += 'scale(5,5) ';
+                assert.strictEqual(
+                    common.getComputedScale(div),
+                    25,
+                    'Should return the multiplied inline scale'
+                );
                 // If an asymmetrical scale has been applied, only returns x scaling factor
             });
         });

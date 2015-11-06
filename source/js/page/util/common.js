@@ -73,6 +73,7 @@ define(['page/util/element-classifier', 'core/platform'], function (elemClassifi
   }
 
   function hasVisibleContent(current) {
+    console.log('check1');
     var children,
       index,
       MAX_CHILDREN_TO_CHECK = 10,
@@ -83,11 +84,9 @@ define(['page/util/element-classifier', 'core/platform'], function (elemClassifi
         MIN_RECT_SIDE = 5;
       return (mediaRect.width >= MIN_RECT_SIDE && mediaRect.height >= MIN_RECT_SIDE);
     }
-
     // Check to see if there are non-empty child text nodes.
     // If there are, we say we're not over whitespace.
     children = current.childNodes;
-
     // Shortcut: could not have text children because all children are elements
     if (current.childElementCount === children.length) {
       return false;
