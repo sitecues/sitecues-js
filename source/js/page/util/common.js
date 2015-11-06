@@ -119,7 +119,7 @@ define(['page/util/element-classifier', 'core/platform'], function (elemClassifi
    */
   function createSVGFragment(svgMarkup, className) {
     var temp = document.createElementNS('http://www.w3.org/1999/xhtml', 'div');
-    temp.innerHTML= '<svg xmlns="http://www.w3.org/2000/svg" class="' + className + '">'+svgMarkup+'</svg>';
+    temp.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="' + className + '">'+svgMarkup+'</svg>';
     var frag = document.createDocumentFragment();
     var child = temp.firstChild;
     while (child) {
