@@ -1157,7 +1157,7 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'page/
   function initBodyInfo() {
     if (originalBodyInfo) {
       return; //Already initialized
-    }https://bitbucket.org/ai_squared/sitecues-js/commits/716231e8038261a0792666079830712ca5719a17
+    }
 
     body = document.body;
     $body = $(body);
