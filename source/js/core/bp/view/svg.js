@@ -6,7 +6,7 @@ The purpose of some elements:
 - #scpspeechtarget adds animation styles for speech icon waves
 -
  */
-define(['core/bp/view/markup-finalizer'], function(finalizer) {
+define(['core/bp/view/markup-finalizer', 'core/bp/view/styles'], function(finalizer, styles) {
   /*jshint multistr: true */
 
   var svg = '\
@@ -93,6 +93,7 @@ define(['core/bp/view/markup-finalizer'], function(finalizer) {
 <sc id="scp-html-secondary-anchor" style="display:none"></sc>'; // Hack to make sure innerHTML doesn't remove any important last element
 
   return function() {
+    styles.init();
     return finalizer(svg);
   };
 });
