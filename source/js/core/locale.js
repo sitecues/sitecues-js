@@ -67,7 +67,7 @@ define(['core/conf/site'], function(site) {
 
     var langPrefix = getLanguagePrefix(lang),
       prioritizedBrowserLangs = (function() {
-        var browserLangs = navigator.languages.slice() || [ ];
+        var browserLangs = (navigator.languages || [ ]).slice();
         // Put the mainBrowserLang at the start of the prioritized list of languages
         browserLangs.unshift(mainBrowserLang);
         return browserLangs;
