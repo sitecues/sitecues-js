@@ -978,7 +978,12 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'page/
 
   // Get the desired width of the body for the current level of zoom
   function getRestrictedWidth(currZoom) {
-    var winWidth = originalBodyInfo.width;
+    var winWidth = window.innerWidth;
+
+    // For a short period of time, we tried the following, in a commit that suggested it helped reduce horizontal panning.
+    // However, that change led to SC-3191
+    //var winWidth = originalBodyInfo.width;
+
     return winWidth / getZoomForWidthRestriction(currZoom, winWidth) + 'px';
   }
 
