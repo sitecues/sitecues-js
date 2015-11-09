@@ -2,7 +2,7 @@
 // 1. move this code to .svg file so it's easier to edit
 /*
 The purpose of some elements:
-- #scp-zoom-slider-target used for slider size manipulation while draging the slider thumb or other actions
+- #scp-zoom-slider-target used for slider size manipulation while dragging the slider thumb or other actions
 - #scpspeechtarget adds animation styles for speech icon waves
 -
  */

@@ -86,6 +86,7 @@ define(['core/bp/constants',
   function updateGlobalState(featureName, isSecondaryExpanding) {
     state.set('secondaryPanelName', featureName || 'button-menu');
     state.set('isSecondaryExpanding', isSecondaryExpanding);
+    state.set('isSecondaryExpanded', false);
     state.set('wasMouseInPanel', false); // When panel shrinks mouse needs to go back inside of it before mouseout closes again
     fireBpChanged();
   }
@@ -254,6 +255,11 @@ define(['core/bp/constants',
       }, heightAnimationDelay + heightAnimationDuration * 0.7);
     }
 
+    function onHeightAnimationComplete() {
+      state.set('isSecondaryExpanded', true);
+      fireBpChanged();
+    }
+
     function animateHeight() {
       var newPanelHeight = toGeo.outlineHeight,
         newTranslateY = currentBpContainerTransforms.translateY - toGeo.bpContainerTranslateY,
@@ -283,7 +289,9 @@ define(['core/bp/constants',
       createAnimation(
         [getMoreButton(), getBottom(), getOutlineFill(), getSecondaryOutline(), getShadow(), bpContainer],
         [moreButtonTransform, bottomTransform, outlineFillTransform, secondaryOutlineTransform, shadowTransform, bpContainerTransform ],
-        heightAnimationDuration);
+        heightAnimationDuration,
+        onHeightAnimationComplete
+      );
     }
 
     function openFeatureAnimation() {
