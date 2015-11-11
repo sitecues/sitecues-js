@@ -10,7 +10,7 @@ define(['core/bp/constants', 'core/bp/helper', 'core/conf/user/manager', 'core/b
 
   function onPanelUpdate() {
 
-    var willBeActive = state.getSecondaryPanelName() === 'settings',
+    var willBeActive = state.getSecondaryPanelName() === 'settings' && state.get('isSecondaryExpanded'),
       settingsCards = byId(BP_CONST.SETTINGS_CONTENT_ID);
 
     if (isActive !== willBeActive) {

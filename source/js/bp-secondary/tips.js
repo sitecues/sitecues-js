@@ -77,7 +77,7 @@ define(['core/bp/constants', 'core/bp/helper'], function (BP_CONST, helper) {
     }
   }
 
-  // Optional -- howLongMs is how logn to wait before doing it
+  // Optional -- howLongMs is how long to wait before doing it
   function toggleElementDemo(id, isOn, howLongMs) {
     function toggle() {
       byId(id).setAttribute('data-demo', isOn || false);

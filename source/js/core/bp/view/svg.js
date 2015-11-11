@@ -2,14 +2,15 @@
 // 1. move this code to .svg file so it's easier to edit
 /*
 The purpose of some elements:
-- #scp-zoom-slider-target used for slider size manipulation while draging the slider thumb or other actions
+- #scp-zoom-slider-target used for slider size manipulation while dragging the slider thumb or other actions
 - #scpspeechtarget adds animation styles for speech icon waves
 -
  */
-define(['core/bp/view/markup-finalizer'], function(finalizer) {
+define(['core/bp/view/markup-finalizer', 'core/bp/view/styles'], function(finalizer, styles) {
   /*jshint multistr: true */
 
   var svg = '\
+<sc id="scp-description" style="display:none">{{badge_desc}}</sc>\
 <sc id="scp-focus-outline" role="presentation"></sc>\
 <sc id="scp-shadow-container" style="position:absolute;width:513px;height:630px;overflow:hidden">\
   <sc id="scp-shadow" style="will-change: transform; perspective: 999;"></sc>\
@@ -93,6 +94,7 @@ define(['core/bp/view/markup-finalizer'], function(finalizer) {
 <sc id="scp-html-secondary-anchor" style="display:none"></sc>'; // Hack to make sure innerHTML doesn't remove any important last element
 
   return function() {
+    styles.init();
     return finalizer(svg);
   };
 });

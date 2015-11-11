@@ -191,13 +191,6 @@ define(['core/bp/controller/bp-controller', 'core/bp/model/state','core/bp/view/
 
   }
 
-  // Initialize the BP feature if any of the following are true:
-  //    * document.readyState is 'complete'
-  //    * document.readyState is 'interactive' AND the site does not have an <img> placeholder.
-  function isDocumentReadyForBP (badgeElement) {
-    return (document.readyState === 'interactive' && !isBadgeAnImage(badgeElement)) || document.readyState === 'complete';
-  }
-
   /*
                          ********  INITIALIZATION **********
 
@@ -210,55 +203,100 @@ define(['core/bp/controller/bp-controller', 'core/bp/model/state','core/bp/view/
         - If the customer does NOT use the <img>, attach a readystatechange event listener to the document.
   */
 
-  function initBPIfDocumentComplete() {
-    if (document.readyState === 'complete') {
+  function initBPWhenDocumentReady(acceptedStates) {
+    function initIfReady() {
+      if (acceptedStates.indexOf(document.readyState) >= 0) {
+        initBPFeature();
+        return true;
+      }
+    }
+
+    if (!initIfReady()) {
+      document.addEventListener('readystatechange', initIfReady);
+    }
+  }
+
+  // The toolbar gets to init earlier than a site-provided badge
+  // It's safe to init as soon as the <body> is available
+  function initToolbarWhenBodyAvailable() {
+    if (document.body) {
       initBPFeature();
-      return true;
+    }
+    else {
+      setTimeout(initToolbarWhenBodyAvailable, 50);
     }
   }
 
-  function initBPWhenDocumentComplete() {
-    if (!initBPIfDocumentComplete()) {
-      document.addEventListener('readystatechange', initBPIfDocumentComplete);
-    }
-  }
-
+  /**
+   * init(bpCompleteCallbackFn)
+   *
+   * Looks for the badge element, or wait for it to load, and insert and display the BP based on it's position.
+   *    When this is called:
+   * There are many cases for badge markup or config, and we also can't be sure exactly when this function is called
+   * in the lifetime of the document.
+   *
+   * Conditions required before we create and display BP -- any of the following:
+   *   1. conf.uiMode = 'toolbar' AND document.body is available
+   *   2. Page readyState is 'interactive' AND badge element is found (also loaded if it was an <img>)
+   *   3. Page readyState is 'complete' (will use a toolbar if no badge element is found at this point)
+   *
+   * BP config/setup cases:
+   *   1. Toolbar config (e.g. sitecues everywhere) -- allowed to load early
+   *   2. Badge image present <img id="sitecues-badge"> (old-school, these are deprecated)
+   *     a) Already loaded
+   *     b) Need to wait for <img>
+   *   3. Empty badge placeholder <div id="sitecues-badge"> (normal in-page customer case)
+   *   4. Missing badge and document not complete -- need to wait to see if badge shows up
+   *   5. Missing badge and document complete (causes toolbar)
+   *
+   * @param bpCompleteCallbackFn called after BP is created and displayed
+   */
   function init(bpCompleteCallbackFn) {
 
     pendingCompletionCallbackFn = bpCompleteCallbackFn;
 
+    // ---- Look for toolbar config ----
     if (site.get('uiMode') === 'toolbar') {
-      setTimeout(initBPFeature, 0);
+      // Case 1: toolbar config
+      if (SC_DEV) { console.log('Early initialization of toolbar.'); }
+      initToolbarWhenBodyAvailable();
       return;
     }
+
+    // ---- Look for badge, fall back to toolbar if necessary ----
 
     // Page may still be loading -- check if the badge is available
     var earlyBadgeElement = getBadgeElement();
 
-    if (earlyBadgeElement && isDocumentReadyForBP(earlyBadgeElement)) {
-
-      if (SC_DEV) { console.log('Document ready to initialize BP.'); }
-
-      setTimeout(initBPFeature, 0);
-
-    } else {
-
-      if (isBadgeAnImage(earlyBadgeElement) && !earlyBadgeElement.complete) {
-
-        if (SC_DEV) { console.log('Initialize BP when <img> loads.'); }
-
-        // Loading of badge image is enough -- once it's ready we can initialize
-        // because we now have the desired dimensions of the badge
-        earlyBadgeElement.addEventListener('load', initBPFeature);
-
-        // Because IE does not reliably fire load events for badge, we
-        // will also listen for document complete events and make  sure we are initialized then
+    if (earlyBadgeElement) {
+      if (!isBadgeAnImage(earlyBadgeElement) || earlyBadgeElement.complete) {
+        // Cases 2a, 3 -- some kind if badge element is present AND ready to use
+        if (SC_DEV) { console.log('Badge is ready: initialize BP.'); }
+        setTimeout(initBPFeature, 0);
+        return;
       }
 
-      if (SC_DEV) { console.log('Initialize BP when document.readyState === complete.'); }
+      // Case 2b: need to wait for img
+      if (SC_DEV) { console.log('Initialize BP when <img> loads.'); }
 
-      initBPWhenDocumentComplete();
+      // Loading of badge image is enough -- once it's ready we can initialize
+      // because we now have the desired dimensions of the badge
+      earlyBadgeElement.addEventListener('load', initBPFeature);
+
+      // Because IE does not reliably fire load events for badge, we
+      // will also fall through and listen for document complete events and make doubly
+      // sure we are initialized then (at that point, we know for sure the badge img has loaded).
+      if (platform.browser.isIE) {
+        initBPWhenDocumentReady(['complete']);
+      }
+      return;
     }
+
+    // Cases 4, 5 -- missing badge. Wait for document to complete.
+    // If badge element never shows up at that point, a toolbar will be used
+    if (SC_DEV) { console.log('Initialize BP when document.readyState === interactive|complete.'); }
+
+    initBPWhenDocumentReady(['interactive', 'complete']);
   }
 
   return {

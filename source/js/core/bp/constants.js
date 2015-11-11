@@ -14,7 +14,6 @@ define([], function() {
 
   constants.SMALL_A_ID               = 'scp-small-A';
   constants.LARGE_A_ID               = 'scp-large-A';
-  constants.A_CLASS                  = 'scp-A-button';
 
   constants.SPEECH_ID                = 'scp-speech';
   constants.SPEECH_STATE_ID          = 'scp-speech-state';
@@ -38,7 +37,6 @@ define([], function() {
   constants.WAVE_3_ID                = 'scp-wave3';
 
   constants.VERT_DIVIDER_ID          = 'scp-vert-divider';
-  constants.BOTTOM_DEF_ID            = 'scp-bottom-def';
   constants.BOTTOM_TEXT_ID           = 'scp-bottom-text';
   constants.BOTTOM_MOUSETARGET_ID    = 'scp-bottom-mousetarget';
   constants.BOTTOM_MORE_ID           = 'scp-bottom-secondary';
@@ -170,6 +168,7 @@ define([], function() {
   constants.BADGE_ATTRS = {
     'ROLE'      : 'button',
     'TABINDEX'  : 0,
+    'ARIA_DESCRIBEDBY': 'scp-description',
     'ARIA-BUSY' : 'false',
     'DATA-SC-REVERSIBLE': 'false'
   };

@@ -842,8 +842,8 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'page/
       hScrollNow = window.pageXOffset,
       vScrollNow = window.pageYOffset,
       // How much do we need to scroll by to pull content to the bottom-right corner
-      hScrollDesired = Math.max(0, winWidth - bodyRight), // Amount to pull right as a postive number
-      vScrollDesired = Math.max(0, winHeight - bodyHeight), // Amount to pull down as a postive number
+      hScrollDesired = Math.max(0, winWidth - bodyRight), // Amount to pull right as a positive number
+      vScrollDesired = Math.max(0, winHeight - bodyHeight), // Amount to pull down as a positive number
       // Don't scroll more than we actually can
       hScroll = Math.min(hScrollNow, hScrollDesired),
       vScroll = Math.min(vScrollNow, vScrollDesired);
@@ -917,7 +917,7 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'page/
     });
   }
 
-  // Cancel any currently reequested animation frame
+  // Cancel any currently requested animation frame
   function cancelFrame(id) {
     var cancel = window.cancelAnimationFrame || window.msCancelRequestAnimationFrame;
     if (cancel) {
@@ -978,14 +978,19 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'page/
 
   // Get the desired width of the body for the current level of zoom
   function getRestrictedWidth(currZoom) {
-    var winWidth = originalBodyInfo.width;
+    var winWidth = window.innerWidth;
+
+    // For a short period of time, we tried the following, in a commit that suggested it helped reduce horizontal panning.
+    // However, that change led to SC-3191
+    //var winWidth = originalBodyInfo.width;
+
     return winWidth / getZoomForWidthRestriction(currZoom, winWidth) + 'px';
   }
 
   // Return a formatted string for translateX as required by CSS
   function getFormattedTranslateX(targetZoom) {
     if (shouldRestrictWidth()) {
-      return '';  // For fluid layouts, we use an transforim-origin of 0% 0%, so we don't need this
+      return '';  // For fluid layouts, we use an transform-origin of 0% 0%, so we don't need this
     }
     var zoomOriginX = Math.max(window.innerWidth, originalBodyInfo.transformOriginX) / 2, // X-coordinate origin of transform
       bodyLeft = originalBodyInfo.left,

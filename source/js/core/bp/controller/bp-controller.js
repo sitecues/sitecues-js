@@ -110,7 +110,7 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
   }
 
   function setPanelExpandedState(isOpenedWithHover) {
-    state.set('wasMouseInPanel', false);
+    state.set('wasMouseInPanel', isOpenedWithHover);
     state.set('isOpenedWithHover', isOpenedWithHover);
     state.set('transitionTo', BP_CONST.PANEL_MODE);
     turnOnRealSettings();
