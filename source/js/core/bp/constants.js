@@ -168,7 +168,7 @@ define([], function() {
   constants.BADGE_ATTRS = {
     'ROLE'      : 'button',
     'TABINDEX'  : 0,
-    'ARIA_DESCRIBEDBY': 'scp-description',
+    'ARIA-DESCRIBEDBY': 'scp-description',
     'ARIA-BUSY' : 'false',
     'DATA-SC-REVERSIBLE': 'false'
   };
