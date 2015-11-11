@@ -10,6 +10,7 @@ define(['core/bp/view/markup-finalizer', 'core/bp/view/styles'], function(finali
   /*jshint multistr: true */
 
   var svg = '\
+<sc id="scp-description" style="display:none">{{badge_desc}}</sc>\
 <sc id="scp-focus-outline" role="presentation"></sc>\
 <sc id="scp-shadow-container" style="position:absolute;width:513px;height:630px;overflow:hidden">\
   <sc id="scp-shadow" style="will-change: transform; perspective: 999;"></sc>\
