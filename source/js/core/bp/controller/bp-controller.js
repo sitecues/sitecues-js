@@ -132,11 +132,26 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
   // - A fake click event pushed by a screen reader when the user presses Enter -- in this case we should expand the panel
   // - An actual click in the whitespace around the panel (before they moused over the visible area) -- we should ignore these
   //   so that clicks around the panel don't accidentally open it.
-  function clickToOpenPanel() {
-    var badgeElem = helper.byId(BP_CONST.BADGE_ID);
-    if (document.activeElement === badgeElem && state.isBadge()) {
-      // Click is in visible area and badge has focus -- go ahead and open the panel
-      changeModeToPanel(true); // Opened with click means opened with keyboard in screen reader
+  function clickToOpenPanel(evt) {
+    if (state.isBadge()) {
+      var badgeElem = helper.byId(BP_CONST.BADGE_ID),
+        isBadgeFocused = document.activeElement === badgeElem,
+        target = evt.target,
+        isChildClicked = target && (target.parentNode === badgeElem);
+      if (isBadgeFocused || isChildClicked) {
+        // Click is in visible area and badge has focus --
+        // * or *
+        // Click in invisible child -- only screen readers can do this -- NVDA does it
+        // Go ahead and open the panel
+
+        // First ensure it has focus (it didn't in second case)
+        badgeElem.focus();
+
+        // Opened with click means opened with keyboard in screen reader
+        setTimeout(function() {
+          changeModeToPanel(true);
+        }, 0);
+      }
     }
   }
 
