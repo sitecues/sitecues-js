@@ -12,7 +12,7 @@
     "purpose": "Podświetlenie wybiera obszary do odczytania.",
     "step1": "1. Wybierz interesujący Cię obszar.",
     "step2": "2. Przesuń mysz aby go podświetlić.",
-    "keys": ""
+    "keys": "Możesz też użyć spacji, aby rozpocząć podświetlanie, klawiszy kursora, aby je przesuwać i Escape aby zakończyć."
   },
   "lens": {
     "purpose": "Lupa powiększa.",

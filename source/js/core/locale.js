@@ -9,7 +9,7 @@ define(['core/conf/site'], function(site) {
   var translations = {},
     DEFAULT_LANG = 'en-us',
     LOCALE_DATA_MODULE_PREFIX = 'locale-data/',
-    SUPPORTED_LANGS = ['de', 'en', 'es', 'fr', 'pl'],
+    SUPPORTED_UI_LANGS = ['de', 'en', 'es', 'fr', 'pl'],
     // Countries which have localization files that are different from the default for that language
     // For example, en-us files use 'color' instead of the worldwide standard 'colour'
     COUNTRY_EXCEPTIONS = { 'en-US': 1 },
@@ -37,6 +37,12 @@ define(['core/conf/site'], function(site) {
   function getShortWebsiteLang() {
     var websiteLanguage = getFullWebsiteLang();
     return getLanguagePrefix(websiteLanguage);
+  }
+
+  function getSupportedWebsiteLang() {
+    var lang = getShortWebsiteLang();
+
+    return SUPPORTED_UI_LANGS.indexOf(lang) === -1 ? DEFAULT_LANG : lang;
   }
 
   // The language for audio
@@ -67,8 +73,9 @@ define(['core/conf/site'], function(site) {
 
     var langPrefix = getLanguagePrefix(lang),
       prioritizedBrowserLangs = (function() {
-        var browserLangs = navigator.languages || [ ];
-        browserLangs.slice().reverse().shift(mainBrowserLang);
+        var browserLangs = (navigator.languages || [ ]).slice();
+        // Put the mainBrowserLang at the start of the prioritized list of languages
+        browserLangs.unshift(mainBrowserLang);
         return browserLangs;
       })(),
       langWithCountry,
@@ -121,7 +128,7 @@ define(['core/conf/site'], function(site) {
   // However, when there are special files for a country translation, returns a longer name like 'en-us' for the U.S.
   // The language is based on the page, but the country is based on the browser (if the lang is the same)
   function getTranslationLang() {
-    var langOnly = getShortWebsiteLang();
+    var langOnly = getSupportedWebsiteLang();
 
     return extendLangWithBrowserCountry(langOnly, COUNTRY_EXCEPTIONS).toLowerCase();
   }
@@ -136,9 +143,8 @@ define(['core/conf/site'], function(site) {
     mainBrowserLang = site.get('browserLang') || navigator.language || navigator.userLanguage || navigator.browserLanguage || DEFAULT_LANG;
 
     // On load fetch the translations only once
-    var lang = getShortWebsiteLang(),
-      sanitizedLang = SUPPORTED_LANGS.indexOf(lang) === -1 ? DEFAULT_LANG : lang,
-      langModuleName = LOCALE_DATA_MODULE_PREFIX + sanitizedLang;
+    var lang = getSupportedWebsiteLang(),
+      langModuleName = LOCALE_DATA_MODULE_PREFIX + lang;
 
     // Hack: sitecues.require() is used instead of require() so that we can use it with a variable name
     sitecues.require([ langModuleName ], function(langEntries) {

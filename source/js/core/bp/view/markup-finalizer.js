@@ -1,6 +1,5 @@
 // Fix urls and localize strings in markup
-define(['core/locale', 'core/platform', 'core/bp/view/styles'], function(locale, platform) {
-  // IMPORTANT: 'styles' included only to init styles
+define(['core/locale', 'core/platform'], function(locale, platform) {
   // The original base URL for the current page regardless of <base> tag
   function removeEnd(loc) {
     var locString = '' + loc; // Convert to string

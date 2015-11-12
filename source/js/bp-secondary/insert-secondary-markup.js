@@ -3,8 +3,6 @@ define(['core/bp/view/markup-finalizer', 'core/bp/helper', 'core/platform', 'bp-
   function(finalizer, helper, platform, fontCharset, urls) {
   /*jshint multistr: true */
 
-    //<line x1="0" y1="0" x2="200" y2="200" style="stroke:rgb(255,0,0);stroke-width:2" />
-    // #C0BFBF
 var isInitialized,
   svgSecondary =
 '<g id="scp-secondary" class="scp-secondary-only" aria-label="{{more_features}}">\

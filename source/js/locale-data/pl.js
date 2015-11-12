@@ -6,7 +6,7 @@ define([], function() {
     // ARIA labels
     // - Main
     sitecues_main_panel: 'główny panel sitecues',
-    badge_label: 'narzędzia powiększania i mowy sitecues',
+    badge_label: 'narzędzia powiększania i mowy sitecues; sitecues pomaga słabowidzącym, którzy nie mają własnego programu czytającego czy powiększającego.',
     zoom_in: 'powiększ',
     zoom_out: 'pomniejsz',
     // - Secondary

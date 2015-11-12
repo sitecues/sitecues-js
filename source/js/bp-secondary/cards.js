@@ -60,7 +60,7 @@ define(['core/bp/constants', 'core/bp/helper', 'core/locale', 'core/bp/model/sta
       .replace(/(<sc-button )/g, '<sc-button role="button" ')
       .replace(/<sc-menuitem /g, '<sc-menuitem role="button"' + INTERACTIVE+ '" ')
       .replace(/<sc-card /g, '<sc-card role="tabpanel"')
-      .replace(/<sc-link /g, '<sc-link role="link"' + INTERACTIVE+ '" ')
+      .replace(/<sc-link /g, '<sc-link role="button"' + INTERACTIVE+ '" ')
       .replace(/<sc-tab /g, '<sc-link role="tab" aria-selected="false"' + INTERACTIVE+ '" ')
       .replace(/<\/sc-tab/g, '</sc-link')
       .replace(/<sc-normal-range /g, '<input type="range"' + INTERACTIVE + ' scp-normal-range" ')

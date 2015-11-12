@@ -162,7 +162,7 @@ define(['$', 'page/highlight/highlight', 'page/util/common',
     return seekEnd;
   }
 
-  // Scroll HLB and return truthy value if a significant scroll occured
+  // Scroll HLB and return truthy value if a significant scroll occurred
   function performHLBScroll(nextMove) {
     var SCROLL_KEYS =  // Map key codes to scroll direction
       { 'up': { dir: -1, type: 'line' }, /* up */
@@ -280,19 +280,39 @@ define(['$', 'page/highlight/highlight', 'page/util/common',
       hlbElement.style.display = 'none';
     }
     fixedFixer.setAllowMouseEvents(false);
+
+    // Pre-require audio
+    require(['audio/audio'], function(audio) {
+      audio.init();
+    });
   }
 
-  function fail() {
+  function fail(origPanX, origPanY) {
     if (SC_DEV) { console.log('Fail'); }
-    navQueue = [];  // Don't keep trying
-    mh.setScrollTracking(true);
 
+    // Don't process the rest of the command queue
+    navQueue = [];
+
+    // Restore mouse events and highlighting
+    mh.setScrollTracking(true);
     fixedFixer.setAllowMouseEvents(true);
 
+    // Make lens visible again
     if (hlbElement) {
-      if (SC_DEV) { console.log('Close HLB'); }
-      toggleHLB(); // Nothing found .. close HLB and enable highlight on last known item
+      hlbElement.style.display = 'block';
+      // Scroll back to original position if the lens is now offscreen
+      if (typeof origPanX === 'number') {
+        var lensRect = hlbElement.getBoundingClientRect();
+        if (lensRect.left < 0 && lensRect.right > window.innerWidth || lensRect.top < 0 || lensRect.bottom > window.innerHeight) {
+          window.scrollTo(origPanX, origPanY);  // Back to original place in document
+        }
+      }
     }
+
+    // Play bonk sound
+    require(['audio/audio'], function(audio) {
+      audio.playEarcon('bump');
+    });
   }
 
   function speakHighlight() {
@@ -514,7 +534,7 @@ define(['$', 'page/highlight/highlight', 'page/util/common',
         // THE TARGET HAS BEEN REACHED!
         if (doPickNewHighlight) {
           // Was not successful
-          fail();
+          fail(origPanX, origPanY);
         }
         else {
           // Successful -- already had a highlight
@@ -729,7 +749,6 @@ define(['$', 'page/highlight/highlight', 'page/util/common',
 
   function toggleHLB() {
     require(['hlb/hlb'], function(hlb) {
-      // Nothing found .. close HLB and enable highlight on last known item
       hlb.toggleHLB(getHighlight());
     });
   }

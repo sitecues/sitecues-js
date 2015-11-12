@@ -36,10 +36,8 @@ define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/plat
 
     feedbackTextareaStyle.width = width + 'px';
     feedbackTextareaStyle.height = height + 'px';
-    // Hide scrollbar in IE
-    if (platform.browser.isIE) {
-      feedbackTextareaStyle.clip = 'rect(0,' + (width - 20) + 'px,' + height + 'px,0)';
-    }
+    // Hide scrollbar by clipping horizontally - don't clip vertically (just large height of 999px for that)
+    feedbackTextareaStyle.clip = 'rect(0,' + (width - 20) + 'px,999px,0)';
   }
 
   function onPanelUpdate() {

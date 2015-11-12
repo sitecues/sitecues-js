@@ -321,10 +321,21 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/locale', 'core/bp/help
     }
 
     helper.setAttributes(badgeOrToolbarElement, BP_CONST.BADGE_ATTRS);
-    badgeOrToolbarElement.setAttribute('aria-label', locale.translate(BP_CONST.STRINGS.BADGE_LABEL));
+
+    labelBadge(badgeOrToolbarElement);
 
     return badgeOrToolbarElement;
+  }
 
+  function labelBadge() {
+    // Insert badge label into an element (using aria-label didn't work as NVDA cut off the label text at 100 characters)
+    // The badge label will be absolutely positioned offscreen in order to not affect layout
+    var badgeLabelElement = document.createElement('sc');
+    badgeLabelElement.innerHTML = locale.translate(BP_CONST.STRINGS.BADGE_LABEL);
+    badgeLabelElement.style.position = 'absolute';
+    badgeLabelElement.style.left = '-9999px';
+
+    badgeOrToolbarElement.appendChild(badgeLabelElement);
   }
 
   // Make sure the badge has non-static positioning to make it easy to place

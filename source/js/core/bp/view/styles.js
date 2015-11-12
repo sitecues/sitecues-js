@@ -1,119 +1,19 @@
-define(['core/bp/helper', 'core/platform', 'core/bp/constants', 'core/conf/site'],
-  function (helper, platform, BP_CONST, site) {
+define(['core/bp/helper', 'core/platform', 'core/conf/site'],
+  function (helper, platform, site) {
 
   var
+    isInitialized,
+
     isAnimationDebuggingOn = false,
+
+    palette = site.get('palette'),
+    hasCustomPalette = typeof palette === 'object',
+    customBadgePalette = (hasCustomPalette && palette.badge) || {},
 
     doWebKitPrefix = platform.browser.isSafari,
     doMsPrefix = platform.browser.isIE9,
 
-    idDelimiter = '#',
-    classDelimiter = '.',
-    hover = ':hover',
-
     BASE_SHEET_ID    = 'sitecues-bp-css',
-    PALETTE_SHEET_ID = 'sitecues-bp-palette-css',
-
-    WANT_BADGE = classDelimiter + BP_CONST.WANT_BADGE,
-    WANT_PANEL = classDelimiter + BP_CONST.WANT_PANEL,
-
-    A_CLASS = classDelimiter  + BP_CONST.A_CLASS,
-    SMALL_A = idDelimiter + BP_CONST.SMALL_A_ID,
-    LARGE_A = idDelimiter + BP_CONST.LARGE_A_ID,
-
-    A_CLASS_HOVER = A_CLASS + hover,
-    SMALL_A_HOVER = SMALL_A + hover,
-    LARGE_A_HOVER = LARGE_A + hover,
-
-    HEAD = idDelimiter+ BP_CONST.HEAD_ID,
-    WAVE_ON  = idDelimiter + BP_CONST.SPEECH_ID + '[aria-checked="true"] ',
-    WAVE_OFF = idDelimiter + BP_CONST.SPEECH_ID + '[aria-checked="false"] ',
-    WAVE_1_ON  = WAVE_ON  + idDelimiter + BP_CONST.WAVE_1_ID,
-    WAVE_2_ON  = WAVE_ON  + idDelimiter + BP_CONST.WAVE_2_ID,
-    WAVE_3_ON  = WAVE_ON  + idDelimiter + BP_CONST.WAVE_3_ID,
-    WAVE_1_OFF = WAVE_OFF + idDelimiter + BP_CONST.WAVE_1_ID,
-    WAVE_2_OFF = WAVE_OFF + idDelimiter + BP_CONST.WAVE_2_ID,
-    WAVE_3_OFF = WAVE_OFF + idDelimiter + BP_CONST.WAVE_3_ID,
-
-    SLIDER_BAR = idDelimiter + BP_CONST.ZOOM_SLIDER_BAR_ID,
-    SLIDER_THUMB = idDelimiter + BP_CONST.ZOOM_SLIDER_THUMB_ID,
-    SLIDER_THUMB_HOVER = SLIDER_THUMB + hover,
-
-    TEXT = idDelimiter + BP_CONST.SPEECH_LABEL_ID + ' ' + idDelimiter + BP_CONST.ZOOM_LABEL_ID,
-    VERTICAL_DIVIDER = idDelimiter + BP_CONST.VERT_DIVIDER_ID,
-    TEXT_BACKGROUND = idDelimiter + BP_CONST.BOTTOM_DEF_ID + '>path',
-    BACKGROUND = idDelimiter + BP_CONST.MAIN_OUTLINE_ID,
-    BORDER = idDelimiter + BP_CONST.MAIN_OUTLINE_BORDER_ID,
-
-  // Map the easy to understand elements of the SVG to CSS selectors.
-  // This is useful for creating custom palettes for the badge and panel.
-    CUSTOM_CSS_MAP = {
-      'panel': {
-        'largeA': WANT_PANEL + ' ' + LARGE_A,
-        'smallA': WANT_PANEL + ' ' + SMALL_A,
-        'A': WANT_PANEL + ' ' + A_CLASS,
-        'largeAHover': WANT_PANEL + ' ' + LARGE_A_HOVER,
-        'smallAHover': WANT_PANEL + ' ' + SMALL_A_HOVER,
-        'AHover': WANT_PANEL + ' ' + A_CLASS_HOVER,
-        'sliderBar': WANT_PANEL + ' ' + SLIDER_BAR,
-        'sliderThumb': WANT_PANEL + ' ' + SLIDER_THUMB,
-        'sliderThumbHover': WANT_PANEL + ' ' + SLIDER_THUMB_HOVER,
-        'head': WANT_PANEL + ' ' + HEAD,
-        'wave1Off': WANT_PANEL + ' ' + WAVE_1_OFF,
-        'wave2Off': WANT_PANEL + ' ' + WAVE_2_OFF,
-        'wave3Off': WANT_PANEL + ' ' + WAVE_3_OFF,
-        'wave1On': WANT_PANEL + ' ' + WAVE_1_ON,
-        'wave2On': WANT_PANEL + ' ' + WAVE_2_ON,
-        'wave3On': WANT_PANEL + ' ' + WAVE_3_ON,
-        'text': WANT_PANEL + ' ' + TEXT,
-        'textBackground': WANT_PANEL + ' ' + TEXT_BACKGROUND,
-        'background': WANT_PANEL + ' ' + BACKGROUND,
-        'border': WANT_PANEL + ' ' + BORDER,
-        'verticalDivider': WANT_PANEL + ' ' + VERTICAL_DIVIDER
-      },
-      'badge': {
-        'largeA': WANT_BADGE + ' ' + LARGE_A,
-        'smallA': WANT_BADGE + ' ' + SMALL_A,
-        'A': WANT_BADGE + ' ' + A_CLASS,
-        'sliderBar': WANT_BADGE + ' ' + SLIDER_BAR,
-        'sliderThumb': WANT_BADGE + ' ' + SLIDER_THUMB,
-        'head': WANT_BADGE + ' ' + HEAD,
-        'wave1Off': WANT_BADGE + ' ' + WAVE_1_OFF,
-        'wave2Off': WANT_BADGE + ' ' + WAVE_2_OFF,
-        'wave3Off': WANT_BADGE + ' ' + WAVE_3_OFF,
-        'wave1On': WANT_BADGE + ' ' + WAVE_1_ON,
-        'wave2On': WANT_BADGE + ' ' + WAVE_2_ON,
-        'wave3On': WANT_BADGE + ' ' + WAVE_3_ON,
-        'text': WANT_BADGE + ' ' + TEXT,
-        'textBackground': WANT_BADGE + ' ' + TEXT_BACKGROUND,
-        'background': WANT_BADGE + ' ' + BACKGROUND,
-        'border': WANT_BADGE + ' ' + BORDER,
-        'verticalDivider': WANT_BADGE + ' ' + VERTICAL_DIVIDER
-      },
-      'both': {
-        'largeA': LARGE_A,
-        'smallA': SMALL_A,
-        'A': A_CLASS,
-        'largeAHover': LARGE_A_HOVER,
-        'smallAHover': SMALL_A_HOVER,
-        'AHover': A_CLASS_HOVER,
-        'sliderBar': SLIDER_BAR,
-        'sliderThumb': SLIDER_THUMB,
-        'sliderThumbHover': SLIDER_THUMB_HOVER,
-        'head': HEAD,
-        'wave1Off': WAVE_1_OFF,
-        'wave2Off': WAVE_2_OFF,
-        'wave3Off': WAVE_3_OFF,
-        'wave1On': WAVE_1_ON,
-        'wave2On': WAVE_2_ON,
-        'wave3On': WAVE_3_ON,
-        'text': TEXT,
-        'textBackground': TEXT_BACKGROUND,
-        'background': BACKGROUND,
-        'border': BORDER,
-        'verticalDivider': VERTICAL_DIVIDER
-      }
-    },
 
     BASE_CSS = {
       /**
@@ -129,7 +29,7 @@ define(['core/bp/helper', 'core/platform', 'core/bp/constants', 'core/conf/site'
        #scp-zoom-slider
        #scp-speech›
        ...
-       <g #scp-secondaty>     // Secondary panel that slides down
+       <g #scp-secondary>     // Secondary panel that slides down
        <g .scp-feature-content>
        <g .scp-tips> etc.
        <sc-cards>
@@ -443,44 +343,47 @@ define(['core/bp/helper', 'core/platform', 'core/bp/constants', 'core/conf/site'
       // This rule undoes the placement.js clipping when the BP is not currently fully collapsed.
       '#scp-bp-container:not(.scp-is-badge)': {
         'clip': 'auto !important'
-      }
-    },
+      },
 
-    // The 'b' normal blue palette is the default
-    PALETTE_CSS = {
-
+      // ---- Badge colors (normal or object-based palette) ----
+      // For instructions on setting up a palette, see https://equinox.atlassian.net/wiki/display/EN/sitecues+config+options
       '#scp-head': {
-        'fill': '#000'
+        'fill': customBadgePalette.head || '#000'
       },
 
       '.scp-A-button': {
-        'fill': '#000'
+        'fill': customBadgePalette.A || '#000'
+      },
+
+      '#scp-zoom-slider-thumb': {
+        'fill': customBadgePalette.sliderThumb || '#447AC4'
       },
 
       '#scp-zoom-slider-bar': {
-        'fill': '#383838'
+        'fill': customBadgePalette.sliderBar || '#383838'
       },
 
       '#scp-wave1': {
-        'fill': '#80A9F8'
+        'fill': customBadgePalette.wave1On || '#80A9F8'
       },
 
       '#scp-wave2': {
-        'fill': '#6B9AE0'
+        'fill': customBadgePalette.wave2On || '#6B9AE0'
       },
 
       '#scp-wave3': {
-        'fill': '#447AC4'
+        'fill': customBadgePalette.wave3On || '#447AC4'
       },
 
-      /* Letter A buttons match slider thumb when hovered */
-      '#scp-zoom-slider-thumb': {
+      // ----- Pre-packaged palettes -----
+      // .scp-palette-n  = palette: 'normal'
+      // .scp-palette-rb = palette: 'reverse-blue'
+      // .scp-palette-ry = palette: 'reverse-yellow'
+
+      // -- Reverse blue ---
+      '.scp-palette-rb #scp-zoom-slider-thumb': {
         'fill': '#447AC4'
       },
-
-      // .scp-palette-n  = normal
-      // .scp-palette-rb = reverse-blue
-      // .scp-palette-ry = reverse-yellow
 
       '.scp-palette-rb #scp-wave1': {
         'fill': '#80A9F8'
@@ -494,39 +397,24 @@ define(['core/bp/helper', 'core/platform', 'core/bp/constants', 'core/conf/site'
         'fill': '#447AC4'
       },
 
-      '.scp-palette-rb #scp-zoom-slider-thumb': {
-        'fill': '#447AC4'
-      },
-
       '.scp-palette-rb .scp-A-button, .scp-palette-rb #scp-head, .scp-palette-rb #scp-zoom-slider-bar': {
         'fill': '#fff'
       },
 
-      '.scp-want-panel.scp-palette-rb .scp-A-button, .scp-want-panel.scp-palette-rb #scp-head, .scp-want-panel.scp-palette-rb #scp-zoom-slider-bar': {
-        'fill': '#000'
-      },
-
-      '.scp-is-panel.scp-palette-rb .scp-A-button:hover': {
-        'fill': '#447AC4'
-      },
-
-      '.scp-is-panel.scp-palette-rb #scp-zoom-slider-thumb:hover': {
-        'fill': '#6B9AE0'
-      },
-
-      '.scp-want-badge.scp-palette-ry #scp-wave1': {
+      // -- Reverse yellow ---
+      '.scp-palette-ry #scp-wave1': {
         'fill': '#FFE460'
       },
 
-      '.scp-want-badge.scp-palette-ry #scp-wave2': {
+      '.scp-palette-ry #scp-wave2': {
         'fill': '#FFCC00'
       },
 
-      '.scp-want-badge.scp-palette-ry #scp-wave3': {
+      '.scp-palette-ry #scp-wave3': {
         'fill': '#FDAC00'
       },
 
-      '.scp-want-badge.scp-palette-ry #scp-zoom-slider-thumb': {
+      '.scp-palette-ry #scp-zoom-slider-thumb': {
         'fill': '#FFCD00'
       },
 
@@ -534,8 +422,27 @@ define(['core/bp/helper', 'core/platform', 'core/bp/constants', 'core/conf/site'
         'fill': '#fff'
       },
 
-      '.scp-want-panel.scp-palette-ry .scp-A-button, .scp-want-panel.scp-palette-ry #scp-head, .scp-want-panel.scp-palette-ry #scp-zoom-slider-bar': {
+      // -- Expanded panel colors --
+      // Panel must go back to normal colors when expanded
+      // This is currently true for all palettes
+      '.scp-want-panel .scp-A-button, .scp-want-panel #scp-head, .scp-want-panel  #scp-zoom-slider-bar': {
         'fill': '#000'
+      },
+
+      '.scp-want-panel #scp-zoom-slider-thumb': {
+        'fill': '#447AC4'
+      },
+
+      '.scp-want-panel #scp-wave1': {
+        'fill': '#80A9F8'
+      },
+
+      '.scp-want-panel #scp-wave2': {
+        'fill': '#6B9AE0'
+      },
+
+      '.scp-want-panel #scp-wave3': {
+        'fill': '#447AC4'
       },
 
       '.scp-is-panel .scp-A-button:hover': {
@@ -546,72 +453,14 @@ define(['core/bp/helper', 'core/platform', 'core/bp/constants', 'core/conf/site'
         'fill': '#6B9AE0'
       },
 
-      // todo: maybe think of a more unique name for this class?
-      // General way of showing the content if sitecues-badge is shown.
+      // General way of showing the content only if sitecues-badge is also shown.
+      // Note: the page must also have the following rule:
+      // .sitecues-only { visibility: hidden; opacity: 0; }
       '.sitecues-only': {
         'visibility': 'visible',
         'opacity': 1
       }
     };
-
-  // Palette behavior is based on the type:
-  // - string: predefined palette name like 'reverse-blue'
-  // - object: custom palette
-  function isCustomPalette(palette) {
-    return typeof palette === 'object';
-  }
-
-  // This is used on leadingage.org, for example this works to create a green badge:
-//    sitecues.config.palette = {
-//      'badge': {
-//        'A': '#739600',
-//        'sliderThumb': '#739600',
-//        'wave1On':'#9db54c',
-//        'wave2On':'#739600',
-//        'wave3On':'#506900'
-//      }
-//    };
-
-    function provideCustomPalette (palette) {
-    var panelOnly         = 'panel',
-        badgeOnly         = 'badge',
-        both              = 'both',
-        customCSS         = {},
-        paletteStylesheet = document.getElementById(BP_CONST.PALETTE_SHEET_ID);
-
-    for (var prop in palette) {
-
-      if (palette.hasOwnProperty(prop)) {
-
-        if (prop === panelOnly) {
-          for (var panelProp in palette[panelOnly]) {
-            if (palette[panelOnly].hasOwnProperty(panelProp)) {
-              customCSS[CUSTOM_CSS_MAP[panelOnly][panelProp]] = {
-                'fill': palette[panelOnly][panelProp] + ' !important'
-              };
-            }
-          }
-        } else if (prop === badgeOnly) {
-          for (var badgeProp in palette[badgeOnly]) {
-            if (palette[badgeOnly].hasOwnProperty(badgeProp)) {
-              customCSS[CUSTOM_CSS_MAP[badgeOnly][badgeProp]] = {
-                'fill': palette[badgeOnly][badgeProp] + ' !important'
-              };
-            }
-          }
-        } else {
-          customCSS[CUSTOM_CSS_MAP[both][prop]] = {
-            'fill': palette[prop] + ' !important'
-          };
-        }
-      }
-    }
-
-    if (paletteStylesheet) {
-      paletteStylesheet.innerHTML += toCSS(customCSS);
-    }
-
-  }
 
   function toCSS(jsonObject) {
 
@@ -647,7 +496,6 @@ define(['core/bp/helper', 'core/platform', 'core/bp/constants', 'core/conf/site'
     }
 
     return styles;
-
   }
 
   function createStyleSheet(sheetId, cssDefs) {
@@ -657,15 +505,10 @@ define(['core/bp/helper', 'core/platform', 'core/bp/constants', 'core/conf/site'
     document.head.appendChild(sheet);
   }
 
-  createStyleSheet(BASE_SHEET_ID, BASE_CSS);
-  createStyleSheet(PALETTE_SHEET_ID, PALETTE_CSS);
-
-  if (site.get('uiMode') !== 'toolbar') {
-    // TODO Tony how does this work? We need docs
-    // TODO clean this up -- weird to be checking toolbar in this general code here
-    var palette = site.get('palette');
-    if (isCustomPalette(palette)) {
-      provideCustomPalette(palette);
+  function init() {
+    if (!isInitialized) {
+      isInitialized = true;
+      createStyleSheet(BASE_SHEET_ID, BASE_CSS);
     }
   }
 
@@ -676,4 +519,8 @@ define(['core/bp/helper', 'core/platform', 'core/bp/constants', 'core/conf/site'
       createStyleSheet(BASE_SHEET_ID, BASE_CSS);
     };
   }
+
+  return {
+    init: init
+  };
 });
