@@ -6,7 +6,7 @@ define([], function() {
     // ARIA labels
     // - Main
     sitecues_main_panel: 'Console d\'administration sitecues',
-    badge_label: 'Outils de zoom et diction sitecues',
+    badge_label: 'Outils de zoom et diction sitecues. sitecues aide les utilisateurs qui ne possèdent pas leur propre lecteur d\'écran ou agrandisseur d\'écran.',
     zoom_in: 'agrandir',
     zoom_out: 'réduire',
     // - Secondary
