@@ -218,12 +218,12 @@ define(['core/conf/site', 'core/conf/urls', 'core/run'], function (site, urls, r
       ' ... email support@sitecues.com for more information.');
   }
   else {
-    // Freeze sitecues.config -- do not allow it to be modified in any way
-    Object.freeze(sitecues.config); // Do not allow properties of sitecues.config to be changed, e.g. sitecues.config.siteId = 's-xxxx';
-    Object.defineProperty(sitecues, 'config', { writable: false }); // Do not allow reassignment, e.g. sitecues.config = {};
     // Do not allow the sitecues object to be wiped out or changed to something else,
     // but allow properties to be added to it, e.g. sitecues.$ = Zepto
     Object.defineProperty(window, 'sitecues', { writable: false });
+    // Freeze sitecues.config -- do not allow it to be modified in any way
+    Object.defineProperty(sitecues, 'config', { writable: false }); // Do not allow reassignment, e.g. sitecues.config = {};
+    Object.freeze(sitecues.config); // Do not allow properties of sitecues.config to be changed, e.g. sitecues.config.siteId = 's-xxxx';
 
     // Initialize API and services URLs
     urls.init();
