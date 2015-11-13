@@ -119,9 +119,9 @@ define(
                     style = {},
                     parentStyle = {};
 
-                //An element is a visual region if it doesn't share a background color with its parent element, 
-                //it doesn't have a background image
-                //it's z index is not greater than its parent
+                //An element is a visual region if it doesn't share a background color with its parent element,
+                //it has a background image and it's not a sprite
+                //it's z index is greater than its parent
                 //and it isn't media with a width and height greater than five
                 style.backgroundColor = 'red';
                 parentStyle.backgroundColor = 'red';
@@ -141,20 +141,6 @@ define(
                     common.isVisualRegion(element, style, parentStyle),
                     'Element has its own background color, therefore it is a visual region'
                 );
-
-                style.visibility = 'hidden';
-                assert.isFalse(
-                    common.isVisualRegion(element, style, parentStyle),
-                    'Elements\'s visibility attribute is set to hidden, therefore it is not a visual region'
-                );
-
-                style.display = 'none';
-                assert.isFalse(
-                    common.isVisualRegion(element, style, parentStyle),
-                    'Element\'s display attribute is set to none, therefore it is not a visual region'
-                );
-                style.display = 'inline';
-                style.backgroundColor = 'red';
 
                 style.zIndex = 1;
                 assert.isTrue(
@@ -177,6 +163,7 @@ define(
                 //or backgroundPosition is 0 for x or y coors
                 style.backgroundImage = 'url("test.com/test.png")';
                 style.backgroundRepeat = 'no-repeat';
+                style.backgroundPosition = '1px 1px';
 
                 assert.isTrue(
                     common.isSprite(style),
@@ -190,7 +177,7 @@ define(
                    'Background position y coordinate is equal to zero,' +
                    'should evaluate to true'
                 );
-                 
+
                 style.backgroundPosition = '0px 1px';
                 assert.isTrue(
                 common.isSprite(style),
@@ -207,7 +194,7 @@ define(
                     style = {},
                     parentStyle = {};
 
-                
+
                 style.backgroundImage = 'none';
                 style.backgroundColor = 'red';
                 parentStyle.backgroundColor = 'red';
@@ -215,7 +202,7 @@ define(
                     common.hasOwnBackground(element, style, parentStyle),
                     'Empty background images and identical background colors should return false'
                 );
-                
+
                 parentStyle.backgroundColor = 'blue';
                 assert.isTrue(
                     common.hasOwnBackground(element, style, parentStyle),
@@ -250,16 +237,6 @@ define(
                     'child element\'s bg color is white, should return false'
                 );
 
-                //breaks isTransparentColor
-                //check for visibility = hidden?
-                style.opacity = '.5';
-                style.backgroundColor = 'red';
-                assert.isFalse(
-                    common.hasOwnBackgroundColor(element, style, parentStyle),
-                    'Transparent element does not have its own background color'
-                );
-                style.opacity = '1';
-
             });
             //transform scale 0 also hides content
             test('.hasVisibleContent()', function () {
@@ -275,14 +252,7 @@ define(
                     'Element with display set to none has no visible content'
                 );
 
-                element.style.display = 'inline';
-                element.style.visibility = 'hidden';
-                assert.isFalse(
-                    common.hasVisibleContent(element),
-                    'Element with visibility set to hidden has no visible content'
-                );
-
-                element = document.createElement("keygen");
+                element = document.createElement('keygen');
                 document.body.appendChild(element);
                 // breaks isFormControl
                 assert.isTrue(
@@ -300,9 +270,7 @@ define(
 
             });
             test('.isEmptyBgImage()', function () {
-                // TODO: This uses our "fallbacks" system, which is deprecated.
-                //       Its use should be removed.
-                var imgSrc = 'url("test.com/test.png")';
+                var imgSrc = 'url(\"test.com/test.png\")';
 
                 assert.isFalse(
                     common.isEmptyBgImage(imgSrc),
@@ -355,16 +323,17 @@ define(
                 // Only checks for decimal, could check for decimal-leading-zero, lower latin, initial (decimal), etc.
                 //getClientWidth returns an integer value, getBoundingClientRect gets a fractional value
                 var list = document.createElement('ul');
-                list.appendChild(document.createElement('li'));
                 document.body.appendChild(list);
+                list.appendChild(document.createElement('li'));
+                list.style.fontSize = '12px';
                 assert.strictEqual(
                     common.getBulletWidth(list, getComputedStyle(list)),
                     common.getEmsToPx(list.style.fontSize, 1.6)
                 );
-
-                var list = document.createElement('ol');
+                list = document.createElement('ol');
                 list.appendChild(document.createElement('li'));
                 list.setAttribute('start', '10');
+                document.body.appendChild(list);
                 assert.strictEqual(
                     common.getBulletWidth(list, getComputedStyle(list)),
                     common.getEmsToPx(list.style.fontSize, 1.9)
