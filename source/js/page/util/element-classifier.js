@@ -18,7 +18,7 @@ define([], function () {
   /**
    * Checks if the element is a form control
    */
-  var FORM_ELEMENTS = { input:1, textarea:1, select:1, button: 1 };
+  var FORM_ELEMENTS = { input:1, textarea:1, select:1, button: 1, keygen: 1};
   function isFormControl(element) {
     return hasMatchingTag(FORM_ELEMENTS, element);
   }

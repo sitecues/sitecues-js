@@ -14,7 +14,6 @@ define(['page/util/element-classifier', 'core/platform'], function (elemClassifi
   }
 
   // Return true if there is a visual sub-box of content
-  //TODO: Consider refactoring signature to take just the element as a parameter
   function isVisualRegion(element, style, parentStyle) {
     if (element === document.documentElement || element === document.body) {
       return false; // False for entire document because we are looking for sub-boxes of content
@@ -32,11 +31,10 @@ define(['page/util/element-classifier', 'core/platform'], function (elemClassifi
     return parseFloat(style.zIndex) > parseFloat(parentStyle.zIndex);
   }
 
-  //NOTE: backgroundPositionX and backgroundPositionY are unsupported in firefox and opera
-  //Consider using backgroundPosition
   function isSprite(style) {
+    var coor = style.backgroundPosition.split(' ');
     return style.backgroundImage !== 'none' && (style.backgroundRepeat === 'no-repeat' ||
-      parseFloat(style.backgroundPositionX) === 0 || parseFloat(style.backgroundPositionY) === 0);
+      parseFloat(coor[0]) === 0 || parseFloat(coor[1]) === 0);
   }
 
   //TODO: Consider refactoring signature to take just the element as a parameter
@@ -53,7 +51,6 @@ define(['page/util/element-classifier', 'core/platform'], function (elemClassifi
     return hasOwnBackgroundColor(elem, style, parentStyle);
   }
 
-  //TODO: Consider refactoring signature to take just the element as a parameter
   function hasOwnBackgroundColor(elem, style, parentStyle) {
     var bgColor = style.backgroundColor;
     if (parentStyle && !isTransparentColor(bgColor)) {
@@ -83,11 +80,9 @@ define(['page/util/element-classifier', 'core/platform'], function (elemClassifi
         MIN_RECT_SIDE = 5;
       return (mediaRect.width >= MIN_RECT_SIDE && mediaRect.height >= MIN_RECT_SIDE);
     }
-
     // Check to see if there are non-empty child text nodes.
     // If there are, we say we're not over whitespace.
     children = current.childNodes;
-
     // Shortcut: could not have text children because all children are elements
     if (current.childElementCount === children.length) {
       return false;
@@ -150,7 +145,6 @@ define(['page/util/element-classifier', 'core/platform'], function (elemClassifi
   }
 
   var MONOSPACE_BULLET_TYPES = { circle: 1, square: 1, disc: 1, none: 1 };
-
   function getBulletWidth(listElement, style) {
     var bulletType = style.listStyleType,
       ems = 2.5;  // Browsers seem use max of 2.5 em for bullet width -- use as a default
@@ -202,6 +196,7 @@ define(['page/util/element-classifier', 'core/platform'], function (elemClassifi
   }
 
   return {
+    getEmsToPx: getEmsToPx,
     isEmpty: isEmpty,
     isVisualRegion: isVisualRegion,
     hasRaisedZIndex: hasRaisedZIndex,
