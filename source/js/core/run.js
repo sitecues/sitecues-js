@@ -17,6 +17,7 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
     isZoomOn,
     isSpeechOn,
     isSitecuesOn = false,
+    isKeyReleased,
     isKeyHandlingInitialized,
     wasSitecuesEverOn,
     DASH     = 189,
@@ -162,24 +163,37 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
     onSitecuesReady();
   }
 
+  function isInitializerKey(event) {
+    var keyCode = event.keyCode;
+    return (INIT_CODES.indexOf(keyCode) >= 0);
+  }
+
   // Check for keys that can trigger sitecues, such as cmd+, cmd-, alt+'
   function onPossibleTriggerKeyPress(event) {
-    var keyCode = event.keyCode;
-    if (INIT_CODES.indexOf(keyCode) >= 0) {
+    if (isInitializerKey(event)) {
       if (event.ctrlKey || event.metaKey || event.altKey) {
         // Don't allow default behavior of modified key, e.g. native zoom
         event.preventDefault();
         event.stopImmediatePropagation();
       }
+      isKeyReleased = false;
+      window.addEventListener('keyup', onKeyUp);
       require(['page/keys/keys'], function (keys) {
-        keys.init(event);
+        keys.init(event, isKeyReleased);
       });
+    }
+  }
+
+  function onKeyUp(event) {
+    if (isInitializerKey(event)) {
+      isKeyReleased = true;
     }
   }
 
   function onKeyHandlingInitialized() {
     isKeyHandlingInitialized = true;
     window.removeEventListener('keydown', onPossibleTriggerKeyPress);
+    window.removeEventListener('keyup', onKeyUp);
   }
 
   function onSettingsOrLocaleComplete() {

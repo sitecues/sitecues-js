@@ -264,7 +264,7 @@ define(['page/util/element-classifier', 'page/keys/commands', 'core/metric'],
       if (KEY_TESTS.hasOwnProperty(key) && KEY_TESTS[key](event)) {
         handle(KEY_EVENT_MAP[key] || KEY_EVENT_DEFAULT, event, key);
         notifySitecuesKeyDown(true);
-        return false;
+        return key;
       }
     }
 
@@ -331,7 +331,7 @@ define(['page/util/element-classifier', 'page/keys/commands', 'core/metric'],
     sitecues.emit('keys/sitecues-key-down', isFollowMouseEnabled);
   }
 
-  function init(keyEvent) {
+  function init(keyEvent, isKeyAlreadyReleased) {
     if (isInitialized) {
       return;
     }
@@ -365,7 +365,13 @@ define(['page/util/element-classifier', 'page/keys/commands', 'core/metric'],
     });
 
     if (keyEvent) {
-      processKey(keyEvent);
+      var executedKey = processKey(keyEvent);
+      if (isKeyAlreadyReleased && (executedKey === 'minus' || executedKey === 'plus')) {
+        // If zoom key was released before zoom module was listening for keyup, make sure we stop zoom
+        // This can happen when the key was captured before the keys/zoom module were requested,
+        // and released before they finished loading/initializing.
+        commands.stopZoom();
+      }
     }
 
     sitecues.emit('keys/did-init');
