@@ -13,13 +13,14 @@ define([], function () {
 
   function speakSelectedText() {
     var selectedText = getSelectedText();
-    if (selectedText) {
-      // Listeners: speech.js
-      require(['audio/audio'], function(audio) {
-        audio.init();
-        audio.speakText(selectedText, null, 'selection');
-      });
-    }
+    // Listeners: speech.js
+    require(['audio/audio'], function(audio) {
+      audio.init();
+      // Anything currently being spoken will be interrupted and the new text will be spoken instead.
+      // This means that if an empty string is sent, speech will simply shut up.
+      // As a result, clicking somewhere new in the page will quiet the current speech.
+      audio.speakText(selectedText || '', null, 'selection');
+    });
   }
 
   // Get selected text, if any...
