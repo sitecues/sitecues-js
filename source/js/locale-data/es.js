@@ -6,7 +6,7 @@ define([], function() {
     // ARIA labels
     // - Main
     sitecues_main_panel: 'Panel principal de sitecues',
-    badge_label: 'Herramientas de acercamiento y de voz de sitecues',
+    badge_label: 'Herramientas de acercamiento y de voz de sitecues. sitecues ayuda a los usuarios que no tienen su propio lector de pantalla o magnificador de pantalla.',
     zoom_in: 'aumentar acercamiento',
     zoom_out: 'aisminuir acercamiento',
     // - Secondary

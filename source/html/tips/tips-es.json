@@ -12,7 +12,7 @@
     "purpose": "El resaltador selecciona áreas para leer.",
     "step1": "1. Elija algo en qué concentrarse.",
     "step2": "2. Mueva su ratón para resaltarlo.",
-    "keys": ""
+    "keys": "O, utilizar la barra espaciadora para comenzar destacando, teclas de flecha para mover la selección, y Escape para detener destacando."
   },
   "lens": {
     "purpose": "Los lentes magnifican.",

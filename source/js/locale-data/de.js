@@ -6,7 +6,7 @@ define([], function() {
     // ARIA labels
     // - Main
     sitecues_main_panel: 'sitecues dialog',
-    badge_label: 'sitecues Vergrößerungs und Sprachausgabe Steuerung',
+    badge_label: 'sitecues Vergrößerungs und Sprachausgabe Steuerung. sitecues unterstützt Menschen, die kein eigenes Bildschirmausleseprogramm oder Vergrößerungssoftware haben.',
     zoom_in: 'Grösser',
     zoom_out: 'Kleiner',
     // - Secondary
