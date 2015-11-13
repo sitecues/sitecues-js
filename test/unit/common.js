@@ -86,7 +86,6 @@ define(
                     common.hasRaisedZIndex(childStyle, parentStyle),
                     'The parent element has a greater z index than its child'
                 );
-
             });
             test('.isEmpty() checks if a text node is empty / has blank space/punctuation characters', function () {
                 var textNode = document.createTextNode('.');
@@ -161,7 +160,7 @@ define(
                 //Element is a sprite if its backgroundImage != none,
                 //and backgroundRepeat is 'no-repeat'
                 //or backgroundPosition is 0 for x or y coors
-                style.backgroundImage = 'url("test.com/test.png")';
+                style.backgroundImage = 'url(\"test.com/test.png\")';
                 style.backgroundRepeat = 'no-repeat';
                 style.backgroundPosition = '1px 1px';
 
@@ -186,7 +185,6 @@ define(
                 );
                 style.backgroundRepeat = 'no-repeat';
                 style.backgroundPosition = '1px 1px';
-
             });
             test('.hasOwnBackground()', function () {
                 //TODO: remove style.backgroundImage != none check from isSprite check, redundant
@@ -208,7 +206,6 @@ define(
                     common.hasOwnBackground(element, style, parentStyle),
                     'Element with its own background color has a background'
                 );
-
             });
             test('.hasOwnBackgroundColor()', function () {
                 var element = {},
@@ -236,7 +233,6 @@ define(
                     'Document element (parent) style\'s background color is transparent,' +
                     'child element\'s bg color is white, should return false'
                 );
-
             });
             //transform scale 0 also hides content
             test('.hasVisibleContent()', function () {
@@ -267,7 +263,6 @@ define(
                     common.hasVisibleContent(element),
                     'Element with non-empty text node children has visible content'
                 );
-
             });
             test('.isEmptyBgImage()', function () {
                 var imgSrc = 'url(\"test.com/test.png\")';
@@ -278,10 +273,9 @@ define(
                 );
 
                 assert.isTrue(
-                    common.isEmptyBgImage(""),
+                    common.isEmptyBgImage(''),
                     'Empty string should return true'
                 );
-
             });
             test('.elementFromPoint()', function () {
                 // element.innerWidth/height is unsupported in IE8 and before
@@ -297,7 +291,6 @@ define(
                     document.elementFromPoint(1,1),
                     'Should return element from point within viewport'
                 );
-
             });
             test('.hasVertScroll()', function () {
                 var i,
