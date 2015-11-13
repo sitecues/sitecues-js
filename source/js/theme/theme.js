@@ -620,10 +620,6 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
     sitecues.on('bp/did-shrink', onPanelShrink);
   }
 
-  if (SC_DEV) {
-    sitecues.applyTheme  = applyTheme;
-  }
-
   return {
     init: init,
     applyTheme: applyTheme
