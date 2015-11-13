@@ -9,6 +9,9 @@ define(['page/zoom/zoom', 'page/highlight/move-keys', 'core/conf/user/manager', 
       zoomMod.init(true);
       zoomMod.beginZoomIncrease(event);
     },
+    stopZoom: function() {
+      zoomMod.zoomStopRequested();
+    },
     queueKey: function(event, keyName) {
       moveKeys.init();
       moveKeys.queueKey(event, keyName);
