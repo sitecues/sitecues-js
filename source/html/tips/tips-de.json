@@ -12,7 +12,7 @@
     "purpose": "Hervorgehobene Bereiche können gelesen werden.",
     "step1": "1. Wählen Sie einen Bereich aus.",
     "step2": "2. Bewegen Sie den Mauspfeil auf diesen Bereich um ihn hervorzuheben.",
-    "keys": ""
+    "keys": "Oder verwenden Sie die Leertaste um den Bereich hervorzuheben, die Pfeiltasten um einen anderen Bereich zu wählen und Escape um wieder zum Ausgangspunkt zurückzukehren."
   },
   "lens": {
     "purpose": "Das Vergrößerungsglas",
