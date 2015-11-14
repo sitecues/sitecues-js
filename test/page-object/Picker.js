@@ -14,14 +14,25 @@ define(
 
             highlight(selector) {
                 return this.remote
-                    .execute(                     // run a callback in the remote browser
-                        function (selector) {
-                            sitecues.highlight(selector);
+                    .executeAsync(
+                        // Code to run in the remote browser.
+                        function (moduleId, selector, done) {
+                            sitecues.require([moduleId], function (highlight) {
+                                highlight.init();
+                                highlight.highlight(selector);
+                                done();
+                            });
                         },
-                        [selector]                // list of arguments to pass to the remote code
+                        // List of arguments to pass to the remote code.
+                        [
+                            picker.MODULE_ID,
+                            selector
+                        ]
                     );
             }
         }
+
+        Picker.MODULE_ID = 'page/highlight/highlight';
 
         return Picker;
     }
