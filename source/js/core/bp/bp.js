@@ -185,16 +185,9 @@ define(['core/bp/controller/bp-controller', 'core/bp/model/state','core/bp/view/
     placement.init(badgeElement, bpContainer, svgElement);
   }
 
-  function isBadgeAnImage (badgeElement) {
-
-    return badgeElement && badgeElement.localName === 'img';
-
-  }
-
   /*
                          ********  INITIALIZATION **********
 
-    How the BP feature is initialized:
       - Immediately initialize if the any of the following are true:
         - If the document is interactive and the customer does not use the <img>
         - If the document is complete
@@ -203,17 +196,19 @@ define(['core/bp/controller/bp-controller', 'core/bp/model/state','core/bp/view/
         - If the customer does NOT use the <img>, attach a readystatechange event listener to the document.
   */
 
-  function initBPWhenDocumentReady(acceptedStates) {
-    function initIfReady() {
-      if (acceptedStates.indexOf(document.readyState) >= 0) {
-        initBPFeature();
-        return true;
-      }
+  // Init BP if the badge is ready and the document is 'interactive'|'complete'
+  // Return true if BP initialized
+  function initBPIfDocAndBadgeReady() {
+    var readyState = document.readyState;
+    if (readyState === 'complete' || (isBadgeReady() && readyState === 'interactive')) {
+      initBPFeature();
+      return true;
     }
+  }
 
-    if (!initIfReady()) {
-      document.addEventListener('readystatechange', initIfReady);
-    }
+  function isBadgeReady() {
+    var badgeElement = getBadgeElement();
+    return badgeElement && (badgeElement.localName !== 'img' || badgeElement.complete);
   }
 
   // The toolbar gets to init earlier than a site-provided badge
@@ -242,10 +237,10 @@ define(['core/bp/controller/bp-controller', 'core/bp/model/state','core/bp/view/
    *
    * BP config/setup cases:
    *   1. Toolbar config (e.g. sitecues everywhere) -- allowed to load early
-   *   2. Badge image present <img id="sitecues-badge"> (old-school, these are deprecated)
+   *   2. Empty badge placeholder <div id="sitecues-badge"> (normal in-page customer case)
+   *   3. Badge image present <img id="sitecues-badge"> (old-school, these are deprecated)
    *     a) Already loaded
    *     b) Need to wait for <img>
-   *   3. Empty badge placeholder <div id="sitecues-badge"> (normal in-page customer case)
    *   4. Missing badge and document not complete -- need to wait to see if badge shows up
    *   5. Missing badge and document complete (causes toolbar)
    *
@@ -266,37 +261,18 @@ define(['core/bp/controller/bp-controller', 'core/bp/model/state','core/bp/view/
     // ---- Look for badge, fall back to toolbar if necessary ----
 
     // Page may still be loading -- check if the badge is available
-    var earlyBadgeElement = getBadgeElement();
-
-    if (earlyBadgeElement) {
-      if (!isBadgeAnImage(earlyBadgeElement) || earlyBadgeElement.complete) {
-        // Cases 2a, 3 -- some kind if badge element is present AND ready to use
-        if (SC_DEV) { console.log('Badge is ready: initialize BP.'); }
-        setTimeout(initBPFeature, 0);
-        return;
+    if (!initBPIfDocAndBadgeReady()) {
+      // Could not init sitecues yet
+      var earlyBadgeElement = getBadgeElement();
+      if (earlyBadgeElement && !isBadgeReady()) {
+        // We have a badge <img> but it's not loaded yet
+        // Check document and badge after badge loads
+        earlyBadgeElement.addEventListener('load', initBPIfDocAndBadgeReady);
       }
 
-      // Case 2b: need to wait for img
-      if (SC_DEV) { console.log('Initialize BP when <img> loads.'); }
-
-      // Loading of badge image is enough -- once it's ready we can initialize
-      // because we now have the desired dimensions of the badge
-      earlyBadgeElement.addEventListener('load', initBPFeature);
-
-      // Because IE does not reliably fire load events for badge, we
-      // will also fall through and listen for document complete events and make doubly
-      // sure we are initialized then (at that point, we know for sure the badge img has loaded).
-      if (platform.browser.isIE) {
-        initBPWhenDocumentReady(['complete']);
-      }
-      return;
+      // Whenever document readyState changes, check to see if we can init sitecues
+      document.addEventListener('readystatechange', initBPIfDocAndBadgeReady);
     }
-
-    // Cases 4, 5 -- missing badge. Wait for document to complete.
-    // If badge element never shows up at that point, a toolbar will be used
-    if (SC_DEV) { console.log('Initialize BP when document.readyState === interactive|complete.'); }
-
-    initBPWhenDocumentReady(['interactive', 'complete']);
   }
 
   return {
