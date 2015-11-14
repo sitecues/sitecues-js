@@ -1,16 +1,20 @@
 #!/usr/bin/env node
 
+'use strict';
+
 // Dependencies
-var fs      = require('fs-extra'),
+const
+    fs    = require('fs-extra'),
     mime    = require('mime'),
     path    = require('path'),
     https   = require('https'),
     hogan   = require('hogan.js'),
-    express = require('express');
+    express = require('express'),
+    pkgDir  = require('pkg-dir');
 
 // Boolean deserialization helper function.
 function strToBool(str) {
-  var trueValues = ['yes', 'on', 'true'];
+  const trueValues = ['yes', 'on', 'true'];
   return trueValues.indexOf(str && str.toLowerCase()) >= 0;
 }
 
@@ -39,12 +43,13 @@ function pathJoin() {
 };
 
 // Determine the project root, so that paths may be correctly resolved.
-var projectRoot = path.normalize(path.resolve(pathJoin(path.dirname(module.filename), '..')));
+const projectRoot = pkgDir.sync(__dirname);
 
 // We may run this as root to bind to ports 80/443, so determine who the owner of this script is, and chown all
 // created dirs and files to that owner.
 function chown(file) {
-  var fileStat = fs.statSync(__filename),
+  const
+      fileStat = fs.statSync(__filename),
       uid      = fileStat.uid,
       gid      = fileStat.gid;
 
@@ -55,7 +60,7 @@ function chown(file) {
 function mkdirs(dir) {
   // Find the first existing dir.
   dir = path.resolve(dir);
-  var firstExisting = '' + dir;
+  let firstExisting = '' + dir;
   while (!fs.existsSync(firstExisting)) {
     firstExisting = path.dirname(firstExisting);
   }
@@ -70,7 +75,7 @@ function mkdirs(dir) {
 
 
 // Initialize the express application
-app = express();
+const app = express();
 
 // Set custom MIME types
 express.static.mime.define({
@@ -87,7 +92,7 @@ var useHttps = strToBool(process.argv[3]),
 
 // The fifth argument is the port file destination.
 if (process.argv.length > 5) {
-  var portFileComps = process.argv[5].split('/');
+  const portFileComps = process.argv[5].split('/');
   portFileComps.unshift(process.cwd());
   portFile = path.resolve(pathJoin(portFileComps));
   console.log("PORTSFILE: " + portFile);
@@ -114,7 +119,7 @@ app.all(/\/html\/|\/images\/cursors\//, function(req, res, next) {
 (function(){
   // Creates a build data instance
   function createBuildData(buildName) {
-    var buildData = {
+    const buildData = {
       name: buildName,
       searchPath: []
     };
@@ -179,7 +184,7 @@ app.all(/\/html\/|\/images\/cursors\//, function(req, res, next) {
 
     // Quick test to see if the requestor is trying to access files outside of the scope of this server
     // by using '..' notation.
-    var testPath = path.normalize(pathJoin(projectRoot, req.params[0].split('/')));
+    const testPath = path.normalize(pathJoin(projectRoot, req.params[0].split('/')));
     if ((testPath.length < projectRoot.length) || (testPath.substr(0, projectRoot.length) != projectRoot)) {
       res.send(403, 'Forbidden: ' + req.path);
     }
@@ -322,7 +327,7 @@ app.use('/tools', express.static(pathJoin(projectRoot, 'tools', 'site')));
         var inlineJsData = getInlineJSData(req);
 
         if (inlineJsData) {
-          var content = fs.readFileSync(filePath, { encoding: 'UTF-8' });
+          let content = fs.readFileSync(filePath, { encoding: 'UTF-8' });
 
           // Insert the markup.
           content = content.replace(/(<head[^>]*>)/i, function(match, headStart) {
@@ -358,7 +363,7 @@ app.use(express.static(pathJoin(projectRoot, 'target', 'common')));
 
 
 // Start the HTTP listener
-port = process.env.PORT || process.argv[2] || 8000;
+const port = process.env.PORT || process.argv[2] || 8000;
 app.listen(port, function (err) {
   if (err) {
     throw err;
