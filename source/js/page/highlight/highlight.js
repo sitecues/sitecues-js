@@ -1674,7 +1674,7 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
    * @param seed        -- desired element to highlight, or a CSS selector for one
    * @param doUsePicker -- if truthy will find the best item to highlight ... seed or an ancestor of seed
    *                       if falsey will just highlight seed exactly
-   * @param doKeepHidden -- if truthy will compute highlight but now display it
+   * @param doKeepHidden -- if truthy will compute highlight but not display it
    */
   function highlight(seed, doUsePicker, doSuppressVoting, doKeepHidden) {
 

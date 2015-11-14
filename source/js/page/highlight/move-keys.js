@@ -65,7 +65,7 @@ define(['$', 'page/highlight/highlight', 'page/util/common',
 
     if (navQueue.length === 1) {
       // Key was just pressed
-      dequeNextCommand();
+      dequeueNextCommand();
     }
     // else will wait until current move is finished
   }
@@ -77,7 +77,7 @@ define(['$', 'page/highlight/highlight', 'page/util/common',
   }
 
   // Execute the next navigation command off the front of the queue
-  function dequeNextCommand() {
+  function dequeueNextCommand() {
     var nextCommand = navQueue.shift();
     if (nextCommand) {
       lastMoveCommand = null;
@@ -204,7 +204,7 @@ define(['$', 'page/highlight/highlight', 'page/util/common',
         break;
       case 'doc':
         hlbElement.scrollTop = direction < 0 ? 0 : maxTop;
-        dequeNextCommand();
+        dequeueNextCommand();
         return true;  // Don't scroll smoothly
       // default: return; // can't happen
     }
@@ -347,7 +347,7 @@ define(['$', 'page/highlight/highlight', 'page/util/common',
       return;
     }
 
-    dequeNextCommand();
+    dequeueNextCommand();
   }
 
   function moveInDirection(horizDir, vertDir, isShifted) {
