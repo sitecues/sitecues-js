@@ -10,9 +10,10 @@ define(
         'intern/chai!assert',              // helps throw errors to fail tests, based on conditions
         'intern/dojo/node!leadfoot/keys',  // unicode string constants used to control the keyboard
         'intern/dojo/node!fs',             // Node's filesystem API, used to save screenshots
+        'page-object/Picker',
         'page-object'
     ],
-    function (tdd, assert, keys, fs, pageObject) {
+    function (tdd, assert, keys, fs, Picker, pageObject) {
 
         'use strict';
 
@@ -76,18 +77,25 @@ define(
                         },
                         [picked.selector]
                     )
-                    .pressKeys([keys.EQUALS, keys.EQUALS])       // zoom in to enable sitecues features
-                    .executeAsync(                // run an async callback in the remote browser
+                    .pressKeys([keys.EQUALS, keys.EQUALS])  // zoom in to enable sitecues features
+                    .executeAsync(                          // run an async callback in the remote browser
                         function (event, done) {
-                            sitecues.on(event, done);  // use our event system to know when zoom is done
+                            sitecues.on(event, done);       // use our event system to know when zoom is done
                         },
                         [events.zoom.changed]
                     )
-                    .execute(                     // run a callback in the remote browser
-                        function (selector) {
-                            sitecues.highlight(selector);
+                    .executeAsync(                          // run a callback in the remote browser
+                        function (moduleId, selector, done) {
+                            sitecues.require([moduleId], function (highlight) {
+                                highlight.highlight(selector);
+                                done();
+                            });
                         },
-                        [picked.selector]         // list of arguments to pass to the remote code
+                        // list of arguments to pass to the remote code
+                        [
+                            Picker.MODULE_ID,
+                            picked.selector
+                        ]
                     );
             });
 
@@ -313,14 +321,18 @@ define(
                     .findByCssSelector(selector)
                         .type(expected)
                         .end()
-                    .execute(                    // run the given code in the remote browser
+                    .execute(
+                        // Code to run in the remote browser.
                         function (selector) {
                             // Jump out of editing mode, so spacebar can open the Lens.
                             document.querySelector(selector).blur();
-                            sitecues.highlight(selector);
                         },
+                        // list of arguments to pass to the remote code.
                         [selector]
                     )
+                    .findByCssSelector(selector)
+                        .moveMouseTo()
+                        .end()
                     .pressKeys(keys.SPACE)       // hit the spacebar, to open the Lens
                     .findById('sitecues-hlb')    // get the Lens!
                     .getProperty('value')
@@ -333,9 +345,10 @@ define(
                     })
                     .pressKeys(keys.ESCAPE)
                     .executeAsync(
-                        function (done) {
-                            sitecues.on('hlb/closed', done);
-                        }
+                        function (event, done) {
+                            sitecues.on(event, done);
+                        },
+                        ['hlb/closed']
                     );
             });
 
