@@ -55,6 +55,10 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
   // text and triggerType are optional
   function speakText(text, lang, triggerType) {
     stopAudio();  // Stop any currently playing audio and halt keydown listener until we're playing again
+    if (!text.trim()) {
+      return; // Nothing to speak
+    }
+    
     getAudioPlayer(function() {
       var TTSUrl = getTTSUrl(text, lang),
         startRequestTime = new Date();
