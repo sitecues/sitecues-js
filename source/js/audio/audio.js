@@ -58,7 +58,7 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
     if (!text.trim()) {
       return; // Nothing to speak
     }
-    
+
     getAudioPlayer(function() {
       var TTSUrl = getTTSUrl(text, lang),
         startRequestTime = new Date();

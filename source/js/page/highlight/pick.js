@@ -39,6 +39,9 @@ define(['$', 'page/util/common', 'core/conf/user/manager', 'core/conf/site',
     PICK_RULE_DISABLE = 'disable', // don't pick this anything -- not this item, any ancestor, or any descendant
     PICK_RULE_PREFER = 'prefer',   // pick this item
     PICK_RULE_IGNORE = 'ignore',   // don't pick this item
+    // Use hack to avoid Edge bugs where HLB on inputs caused crashes
+    SHOULD_AVOID_INPUTS = platform.browser.isIE && platform.browser.version > 11,
+
     // The following weights are used to multiple each judgement of the same name, defined in judgements.js
     // The score is a sum of these weights * judgements
     // Public in order to allow customizations
@@ -239,13 +242,29 @@ define(['$', 'page/util/common', 'core/conf/user/manager', 'core/conf/site',
     return picked;
   }
 
+  // What elements should picking be disabled on?
+  function getPickingDisabledSelector() {
+    var selector = customSelectors.disable ? customSelectors.disable.slice() : '';
+    // TODO: Once HLB'd form controls no longer crashes MS Edge we can remove it, at least for those versions
+    // For now: make sure we don't pick those controls by adding them to the custom disabled selector
+    if (SHOULD_AVOID_INPUTS) {
+      if (selector) {
+        selector += ',';
+      }
+      selector += 'input,textarea,select';
+    }
+    return selector;
+  }
+
   // Return a jQuery object with a result determined from customizations,
   // or null if no customization applies.
   function getCustomizationResult(candidates) {
-    var picked, $candidates = $(candidates);
+    var picked,
+      $candidates = $(candidates),
+      pickingDisabledSelector = getPickingDisabledSelector();
 
     // 1. Customizations in picker.disable = "[selector]";
-    if (customSelectors.disable && $candidates.is(customSelectors.disable)) {
+    if (pickingDisabledSelector && $candidates.is(pickingDisabledSelector)) {
       return $(); // Customization result: pick nothing here
     }
 
