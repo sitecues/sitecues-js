@@ -86,7 +86,6 @@ define(['core/bp/constants',
   function updateGlobalState(featureName, isSecondaryExpanding) {
     state.set('secondaryPanelName', featureName || 'button-menu');
     state.set('isSecondaryExpanding', isSecondaryExpanding);
-    state.set('isSecondaryExpanded', false);
     state.set('wasMouseInPanel', false); // When panel shrinks mouse needs to go back inside of it before mouseout closes again
     fireBpChanged();
   }
@@ -256,7 +255,7 @@ define(['core/bp/constants',
     }
 
     function onHeightAnimationComplete() {
-      state.set('isSecondaryExpanded', true);
+      state.set('isSecondaryExpanded', doEnable);
       fireBpChanged();
     }
 
