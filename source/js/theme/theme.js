@@ -3,8 +3,8 @@
  */
 
 define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core/platform',
-    'theme/color-choices', 'page/util/color', 'theme/img-classifier' ],
-  function($, conf, styleService, platform, colorChoices, colorUtil, imgClassifier) {
+    'theme/color-choices', 'page/util/color', 'theme/img-classifier', 'theme/custom-site-theme' ],
+  function($, conf, styleService, platform, colorChoices, colorUtil, imgClassifier, customTheme) {
   var $themeStyleSheet,
     THEME_STYLESHEET_NAME = 'sitecues-theme',
     REPAINT_MS = 40,
@@ -48,6 +48,7 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
         willBeDark = isDarkTheme(colorMapFn),
         isReverseTheme = willBeDark !== isOriginalThemeDark,
         themeCss = colorMapFn ? getThemeCssText(colorMapFn, intensity || DEFAULT_INTENSITY, textHue, isReverseTheme) : '',
+
         imgCss = '',
         // We want to animate quickly between light themes, but slowly when performing a drastic change
         // such as going from light to dark or vice-versa
@@ -62,6 +63,10 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
 
       // Allow web pages to create CSS rules that respond to reverse themes
       $('body').toggleClass('sitecues-reverse-theme', isReverseTheme);
+      // Set class sitecues-[themename]-theme on <body> and clear other theme classes
+      Object.keys(colorChoices).forEach(function(checkType) {
+        $('body').toggleClass('sitecues-' + checkType + '-theme', type === checkType);
+      });
 
       setTimeout(function () {
         if (shouldRepaintToEnsureFullCoverage) {
@@ -603,6 +608,8 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
     if (typeof conf.get('themeTextHue') === 'undefined') {
       conf.set('themeTextHue', MAX_USER_SPECIFIED_HUE); // Use white text by default
     }
+
+    customTheme.init();
 
     function onPanelExpand() {
       isPanelExpanded = true;

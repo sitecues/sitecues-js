@@ -1,0 +1,36 @@
+/** texasat.net **/
+
+/* -------------- Dark theme --------------- */
+
+/* Foreground text was too dark */
+.sitecues-reverse-theme .story, .sitecues-reverse-theme .storynews {
+  color: #eee !important;
+}
+
+/* Content wrapper background image created white background in dark theme */
+.sitecues-reverse-theme #h_contentwrapper {
+  background-image: none !important;
+}
+
+/* Badge did not get auto-reversed */
+.sitecues-reverse-theme .scp-palette-rb #scp-zoom-slider-thumb {
+  fill: #447AC4
+}
+
+.sitecues-reverse-theme .scp-palette-rb #scp-wave1 {
+  fill: #80A9F8
+}
+
+.sitecues-reverse-theme .scp-palette-rb #scp-wave2 {
+  fill: #6B9AE0
+}
+
+.sitecues-reverse-theme .scp-palette-rb #scp-wave3 {
+  fill: #447AC4
+}
+
+.sitecues-reverse-theme .scp-palette-rb .scp-A-button, .scp-palette-rb #scp-head, .scp-palette-rb #scp-zoom-slider-bar {
+  fill: #fff
+}
+
+
