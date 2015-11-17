@@ -457,7 +457,7 @@ define(['core/bp/constants',
     // This forces WebKit to reflow the element's layout.
     elem.style.display = 'none';
     // jshint unused:false
-    var unused = elem.offsetHeight;
+    var unused = getBPContainer().offsetHeight; // Force layout refresh
     elem.style.display = 'block';
   }
 
