@@ -40,8 +40,6 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
    */
   function applyTheme(type, intensity, textHue) {
 
-    init();
-
     function applyThemeImpl() {
       var
         isDark = colorUtil.isDarkColor(colorUtil.getDocumentBackgroundColor()),
