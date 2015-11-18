@@ -292,6 +292,7 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
 
       if (prop === '-sc-gradient') {
         newRgba = {};
+        prop = 'background';
         newValue = getThemedGradientCssText(style.value.gradientType, style.value.gradientVal, colorMapFn, intensity);
       }
       else if (prop === 'color' || prop === 'background-color') {
@@ -312,7 +313,7 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
           textShadow = createTextShadowRule(newRgba.textShadow, newValue);
         }
         styleSheetText += selector +
-          '{' + createRule(style.value.prop, newValue, important) + formFixes + textShadow + '}\n';
+          '{' + createRule(prop, newValue, important) + formFixes + textShadow + '}\n';
       }
     });
 
