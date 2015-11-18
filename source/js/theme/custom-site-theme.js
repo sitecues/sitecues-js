@@ -6,7 +6,15 @@ define(['core/conf/site', 'core/conf/urls'], function(site, urls) {
   // TODO build system could create this variable based on the available themes
   // var SITES_WITH_CUSTOM_THEMES = '__SITES_WITH_CUSTOM_THEMES__';
 
-  var SITES_WITH_CUSTOM_THEMES = { 's-c27fa71d': 1 , 's-0000ee0c':1, 's-05fd6c66':1, 's-167ff09a':1, 's-25cecd79': 1 },
+  var SITES_WITH_CUSTOM_THEMES = {
+      's-0000ee0c': 1,
+      's-05fd6c66': 1,
+      's-167ff09a': 1,
+      's-2158b12a': 1,
+      's-25cecd79': 1,
+      's-570759e3': 1,
+      's-c27fa71d': 1
+    },
     isInitialized;
 
   function insertSheet(siteId) {
