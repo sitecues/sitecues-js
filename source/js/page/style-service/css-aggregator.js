@@ -109,6 +109,7 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
 
     if ('withCredentials' in xhr) {
       xhr.open('GET', url, true);
+      xhr.withCredentials = true;
     } else {
       xhr = new XDomainRequest();
       xhr.open('GET', url);
