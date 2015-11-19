@@ -234,7 +234,6 @@ define(
                     'child element\'s bg color is white, should return false'
                 );
             });
-            //transform scale 0 also hides content
             test('.hasVisibleContent()', function () {
                 //Checks for size of media content box
                 //Checks if (max 10) text node children are empty
@@ -246,14 +245,6 @@ define(
                 assert.isFalse(
                     common.hasVisibleContent(element),
                     'Element with display set to none has no visible content'
-                );
-
-                element = document.createElement('keygen');
-                document.body.appendChild(element);
-                // breaks isFormControl
-                assert.isTrue(
-                    common.hasVisibleContent(element),
-                    'Drop down keygen menu is visible content'
                 );
 
                  element = document.createElement('p1');
