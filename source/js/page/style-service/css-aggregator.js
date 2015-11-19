@@ -173,10 +173,10 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
       // as we will inherit the containing page's protocol.
     } else if (urlStr.indexOf('/') === 0) {
       // Host-relative URL.
-      urlStr = '//' + baseUrl.host + urlStr;
+      urlStr = '//' + baseUrl.hostname + urlStr;
     } else {
       // A directory-relative URL.
-      urlStr = '//' + baseUrl.host + baseUrl.path + urlStr;
+      urlStr = '//' + baseUrl.hostname + baseUrl.path + urlStr;
     }
 
     return urlStr;
@@ -239,7 +239,7 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
 
   // Convert @import into new stylesheet requests
   function processAtImports(sheet) {
-    var IMPORT_REGEXP = /\s*(?:\@import\s+url\((?:(?:[\'\" ])*([^\"\'\)]+)[\'\" ]*)\)\s*(.*))/gi,
+    var IMPORT_REGEXP = /\s*(?:@import\s+url\((?:(?:['" ])*([^"'\)]+)['" ]*)\)\s*([^;$]*))/gi,
       baseUrlObject;
 
     return sheet.text.replace(IMPORT_REGEXP, function(totalMatch, actualUrl, mediaQuery) {
