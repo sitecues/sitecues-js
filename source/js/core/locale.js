@@ -5,7 +5,7 @@
  * - Translate text with {{keys}} in it
  * - Localize a number string
  */
-define(['core/conf/site'], function(site) {
+define([], function() {
   var translations = {},
     DEFAULT_LANG = 'en-us',
     LOCALE_DATA_MODULE_PREFIX = 'locale-data/',
