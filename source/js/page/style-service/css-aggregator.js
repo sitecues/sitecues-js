@@ -38,10 +38,12 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
       var request = createGetRequest(url);
       request.url = url;
 
-      // Only apply the request if the response status is 200
+      // Only apply the request if the response status < 400 (>=400 means error but onerror not called!)
       request.onload = function(evt) {
         var request = evt.target || this;
-        currentSheet.text = request.responseText;
+        if (request.status < 400) {
+          currentSheet.text = request.responseText;
+        }
         markReady(currentSheet);
       };
       request.onerror = function() {

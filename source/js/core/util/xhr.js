@@ -27,7 +27,7 @@ define([], function () {
     }
 
     xhr.onload = function() {
-      if (!xhr.status || xhr.status === 200) {
+      if (xhr.status < 400) {
         var successFn = successFnOverride || requestObj.success;
         if (successFn) {
           successFn(xhr.responseText);
