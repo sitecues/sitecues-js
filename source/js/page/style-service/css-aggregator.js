@@ -111,6 +111,9 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
    */
   function createGetRequest(url) {
 
+    var withCredentials = true,
+      xhr;
+
     if (isOnDifferentDomain(url)) {
       if (SC_DEV) {
         console.log('Cross-Domain: ' + url);
@@ -119,15 +122,15 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
         return new ChromeExtHttpRequest(url);
       }
       // Use sitecues CSS proxy to bypass CORS restrictions on fetching CSS text for analysis
-      url = '//js.sitecues.com/css/proxy/' + url;
+      url = urls.getApiUrl('css-proxy/' + url);
     }
     // Credit to Nicholas Zakas
     // http://www.nczonline.net/blog/2010/05/25/cross-domain-ajax-with-cross-origin-resource-sharing/
-    var xhr = new XMLHttpRequest();
+    xhr = new XMLHttpRequest();
 
     if ('withCredentials' in xhr) {
       xhr.open('GET', url, true);
-      xhr.withCredentials = true;
+      xhr.withCredentials = withCredentials;
     } else {
       xhr = new XDomainRequest();
       xhr.open('GET', url);
