@@ -5,11 +5,11 @@
  * - Translate text with {{keys}} in it
  * - Localize a number string
  */
-define(['core/conf/site'], function(site) {
+define([], function() {
   var translations = {},
     DEFAULT_LANG = 'en-us',
     LOCALE_DATA_MODULE_PREFIX = 'locale-data/',
-    SUPPORTED_UI_LANGS = ['de', 'en', 'es', 'fr', 'pl'],
+    SUPPORTED_UI_LANGS = {'de':1, 'en':1, 'es':1, 'fr':1, 'pl':1},
     // Countries which have localization files that are different from the default for that language
     // For example, en-us files use 'color' instead of the worldwide standard 'colour'
     COUNTRY_EXCEPTIONS = { 'en-US': 1 },
@@ -42,7 +42,7 @@ define(['core/conf/site'], function(site) {
   function getSupportedWebsiteLang() {
     var lang = getShortWebsiteLang();
 
-    return SUPPORTED_UI_LANGS.indexOf(lang) === -1 ? DEFAULT_LANG : lang;
+    return SUPPORTED_UI_LANGS[lang] ? lang : DEFAULT_LANG;
   }
 
   // The language for audio
@@ -62,11 +62,17 @@ define(['core/conf/site'], function(site) {
   // we should prefer to use the browser's country-specific version of that language.
   // This helps make sure UK users get a UK accent on all English sites, for example.
   // We now check all the preferred languages of the browser.
-  function extendLangWithBrowserCountry(lang, acceptableCodes) {
+  // @param countriesWhiteList -- if provided, it is the list of acceptable fully country codes, e.g. en-US.
+  // If not provided, all countries and langs are acceptable
+  // @param langsWhiteList -- if provided, it is the list of acceptable languages.
+  function extendLangWithBrowserCountry(lang, countriesWhiteList, langsWhiteList) {
     function extendLangWith(extendCode) {
       if (extendCode.indexOf('-') > 0 && langPrefix === getLanguagePrefix(extendCode)) {
-        if (!acceptableCodes || acceptableCodes.hasOwnProperty(extendCode)) {
+        if (!countriesWhiteList || countriesWhiteList.hasOwnProperty(extendCode)) {
           return extendCode;
+        }
+        if (langsWhiteList[langPrefix]) {
+          return langPrefix;  // Use without a country
         }
       }
     }
@@ -75,7 +81,9 @@ define(['core/conf/site'], function(site) {
       prioritizedBrowserLangs = (function() {
         var browserLangs = (navigator.languages || [ ]).slice();
         // Put the mainBrowserLang at the start of the prioritized list of languages
-        browserLangs.unshift(mainBrowserLang);
+        if (!browserLangs.length) {
+          browserLangs = [ mainBrowserLang ];
+        }
         return browserLangs;
       })(),
       langWithCountry,
@@ -130,7 +138,7 @@ define(['core/conf/site'], function(site) {
   function getTranslationLang() {
     var langOnly = getSupportedWebsiteLang();
 
-    return extendLangWithBrowserCountry(langOnly, COUNTRY_EXCEPTIONS).toLowerCase();
+    return extendLangWithBrowserCountry(langOnly, COUNTRY_EXCEPTIONS, SUPPORTED_UI_LANGS).toLowerCase();
   }
 
   // The preferred language of the current browser
@@ -140,7 +148,7 @@ define(['core/conf/site'], function(site) {
 
   function init() {
 
-    mainBrowserLang = site.get('browserLang') || navigator.language || navigator.userLanguage || navigator.browserLanguage || DEFAULT_LANG;
+    mainBrowserLang = navigator.language || navigator.userLanguage || navigator.browserLanguage || DEFAULT_LANG;
 
     // On load fetch the translations only once
     var lang = getSupportedWebsiteLang(),
