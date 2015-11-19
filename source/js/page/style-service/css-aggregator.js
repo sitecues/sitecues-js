@@ -111,9 +111,6 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
    */
   function createGetRequest(url) {
 
-    var withCredentials = true,
-      xhr;
-
     if (isOnDifferentDomain(url)) {
       if (SC_DEV) {
         console.log('Cross-Domain: ' + url);
@@ -123,15 +120,13 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
       }
       // Use sitecues CSS proxy to bypass CORS restrictions on fetching CSS text for analysis
       url = urls.getApiUrl('css-proxy/' + url);
-      withCredentials = false;  // A wildcard '*' cannot be used in the 'Access-Control-Allow-Origin' header when the credentials flag is true
     }
     // Credit to Nicholas Zakas
     // http://www.nczonline.net/blog/2010/05/25/cross-domain-ajax-with-cross-origin-resource-sharing/
-    xhr = new XMLHttpRequest();
+    var xhr = new XMLHttpRequest();
 
     if ('withCredentials' in xhr) {
       xhr.open('GET', url, true);
-      xhr.withCredentials = withCredentials;
     } else {
       xhr = new XDomainRequest();
       xhr.open('GET', url);
