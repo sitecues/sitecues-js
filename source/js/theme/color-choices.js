@@ -181,7 +181,7 @@ define(['$', 'page/util/color'], function ($, colorUtil) {
     return 0.3 + saturation * 0.8;
   }
 
-  function increaseContrast(style, intensity) {
+  function bold(style, intensity) {
     var colorChangeIntensity = intensity / 1.6 + 0.1,
       textShadowIntensity = intensity / 3.5,
       rgba = style.parsedVal,
@@ -327,7 +327,7 @@ define(['$', 'page/util/color'], function ($, colorUtil) {
     };
   }
 
-  function blueReduction(style, intensity) {
+  function warm(style, intensity) {
     var rgba = $.extend({}, style.parsedVal);
 
     intensity = 1 - intensity / 3;
@@ -344,8 +344,8 @@ define(['$', 'page/util/color'], function ($, colorUtil) {
 
   return {
     dark: dark,
-    increaseContrast: increaseContrast,
-    blueReduction: blueReduction
+    bold: bold,
+    warm: warm
   };
 
 });

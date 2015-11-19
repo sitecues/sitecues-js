@@ -1,0 +1,7 @@
+/* http://ialvs.com/ */
+
+/* --- textfields were white on white --- */
+
+.sitecues-dark-theme #text-6 input[type="text"], .sitecues-dark-theme textarea {
+  color: #000 !important;
+}

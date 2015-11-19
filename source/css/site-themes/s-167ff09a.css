@@ -1,0 +1,7 @@
+/* http://atkratter.com/ */
+
+/* -------------- Dark theme --------------- */
+
+.sitecues-dark-theme .button_label { color: black !important; }
+.sitecues-dark-theme h3, .sitecues-dark-theme h4 {color:rgb(23,171,255) !important;}
+.sitecues-dark-theme .textwidget .button_label {color:white !important; }

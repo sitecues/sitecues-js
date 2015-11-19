@@ -110,6 +110,7 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
   }
 
   function setPanelExpandedState(isOpenedWithHover) {
+    state.set('isSecondaryExpanded', false); // Only main panel expanded, not secondary
     state.set('wasMouseInPanel', isOpenedWithHover);
     state.set('isOpenedWithHover', isOpenedWithHover);
     state.set('transitionTo', BP_CONST.PANEL_MODE);
