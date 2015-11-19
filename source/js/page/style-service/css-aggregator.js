@@ -123,6 +123,7 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
       }
       // Use sitecues CSS proxy to bypass CORS restrictions on fetching CSS text for analysis
       url = urls.getApiUrl('css-proxy/' + url);
+      withCredentials = false;  // A wildcard '*' cannot be used in the 'Access-Control-Allow-Origin' header when the credentials flag is true
     }
     // Credit to Nicholas Zakas
     // http://www.nczonline.net/blog/2010/05/25/cross-domain-ajax-with-cross-origin-resource-sharing/
