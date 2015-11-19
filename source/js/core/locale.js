@@ -62,16 +62,16 @@ define(['core/conf/site'], function(site) {
   // we should prefer to use the browser's country-specific version of that language.
   // This helps make sure UK users get a UK accent on all English sites, for example.
   // We now check all the preferred languages of the browser.
-  // If countryExceptions is provided, it is the list of codes such as en-US which are different from the base language
-  // (in this case different from 'en'). If the preferred language is in supportedBaseLanguages, just use the base language.
-  // If countryExceptions is not provided, then all country codes are potentially different from the base language
-  function extendLangWithBrowserCountry(lang, countryExceptions, supportedBaseLanguages) {
+  // @param countriesWhiteList -- if provided, it is the list of acceptable fully country codes, e.g. en-US.
+  // If not provided, all countries and langs are acceptable
+  // @param langsWhiteList -- if provided, it is the list of acceptable languages.
+  function extendLangWithBrowserCountry(lang, countriesWhiteList, langsWhiteList) {
     function extendLangWith(extendCode) {
       if (extendCode.indexOf('-') > 0 && langPrefix === getLanguagePrefix(extendCode)) {
-        if (!countryExceptions || countryExceptions.hasOwnProperty(extendCode)) {
+        if (!countriesWhiteList || countriesWhiteList.hasOwnProperty(extendCode)) {
           return extendCode;
         }
-        if (supportedBaseLanguages[langPrefix]) {
+        if (langsWhiteList[langPrefix]) {
           return langPrefix;  // Use without a country
         }
       }
