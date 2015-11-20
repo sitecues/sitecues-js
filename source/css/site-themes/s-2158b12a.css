@@ -1,0 +1,22 @@
+/* aroga.com */
+
+/* Badge should not get auto-reversed */
+.sitecues-dark-theme #scp-zoom-slider-thumb {
+  fill: #447AC4
+}
+
+.sitecues-dark-theme #scp-wave1 {
+  fill: #80A9F8
+}
+
+.sitecues-dark-theme #scp-wave2 {
+  fill: #6B9AE0
+}
+
+.sitecues-dark-theme #scp-wave3 {
+  fill: #447AC4
+}
+
+.sitecues-dark-theme .scp-A-button, .sitecues-dark-theme #scp-head, .sitecues-dark-theme #scp-zoom-slider-bar {
+  fill: #000
+}

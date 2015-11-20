@@ -38,10 +38,12 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
       var request = createGetRequest(url);
       request.url = url;
 
-      // Only apply the request if the response status is 200
+      // Only apply the request if the response status < 400 (>=400 means error but onerror not called!)
       request.onload = function(evt) {
         var request = evt.target || this;
-        currentSheet.text = request.responseText;
+        if (request.status < 400) {
+          currentSheet.text = request.responseText;
+        }
         markReady(currentSheet);
       };
       request.onerror = function() {
@@ -92,6 +94,16 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
     };
   }
 
+  // Will cross-domain restrictions possibly burn us?
+  function isOnDifferentDomain(cssUrl) {
+    function getHostName(url) {
+      return urls.parseUrl(url).hostname;
+    }
+
+    // For our purposes, hostname is the same as the domain
+    return getHostName(cssUrl) !== document.location.hostname;
+  }
+
   /**
    * Cross browser solution to initiating an XMLHTTPRequest
    * that supports the Origin HTTP header
@@ -100,8 +112,16 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
    * @return {Object}
    */
   function createGetRequest(url) {
-    if (doFetchCssFromChromeExtension) {
-      return new ChromeExtHttpRequest(url);
+
+    if (isOnDifferentDomain(url)) {
+      if (SC_DEV) {
+        console.log('Cross-Domain: ' + url);
+      }
+      if (doFetchCssFromChromeExtension) {
+        return new ChromeExtHttpRequest(url);
+      }
+      // Use sitecues CSS proxy to bypass CORS restrictions on fetching CSS text for analysis
+      url = urls.getApiUrl('css-proxy/' + url);
     }
     // Credit to Nicholas Zakas
     // http://www.nczonline.net/blog/2010/05/25/cross-domain-ajax-with-cross-origin-resource-sharing/
@@ -153,10 +173,10 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
       // as we will inherit the containing page's protocol.
     } else if (urlStr.indexOf('/') === 0) {
       // Host-relative URL.
-      urlStr = '//' + baseUrl.host + urlStr;
+      urlStr = '//' + baseUrl.hostname + urlStr;
     } else {
       // A directory-relative URL.
-      urlStr = '//' + baseUrl.host + baseUrl.path + urlStr;
+      urlStr = '//' + baseUrl.hostname + baseUrl.path + urlStr;
     }
 
     return urlStr;
@@ -219,7 +239,7 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
 
   // Convert @import into new stylesheet requests
   function processAtImports(sheet) {
-    var IMPORT_REGEXP = /\s*(?:\@import\s+url\((?:(?:[\'\" ])*([^\"\'\)]+)[\'\" ]*)\)\s*(.*))/gi,
+    var IMPORT_REGEXP = /\s*(?:@import\s+url\((?:(?:['" ])*([^"'\)]+)['" ]*)\)\s*([^;$]*))/gi,
       baseUrlObject;
 
     return sheet.text.replace(IMPORT_REGEXP, function(totalMatch, actualUrl, mediaQuery) {

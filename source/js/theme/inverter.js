@@ -3,8 +3,8 @@
  */
 
   define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core/platform',
-    'theme/color-choices', 'page/util/color', 'theme/img-classifier'],
-  function($, conf, styleService, platform, colorChoices, colorUtil, imgClassifier) {
+    /*, 'theme/img-classifier' */],
+  function($, conf, styleService, platform/* , imgClassifier */) {
 
   var mutationObserver,
     $allReversibleElems = $(),
@@ -34,7 +34,7 @@
 
   function start(doRefreshImages) {
     refresh(document.body, doRefreshImages);
-    
+
     if (doRefreshImages) {
       if (!mutationObserver) {
         try {
@@ -66,7 +66,7 @@
     }
 
     classifyIframes(root, onClassifiedAsReversible);
-    imgClassifier.classify(root, onClassifiedAsReversible);
+    // SMART-INVERT: imgClassifier.classify(root, onClassifiedAsReversible);
 
     if (doRefreshImages) {
       refreshBackgroundImageStyles(root);

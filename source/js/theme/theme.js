@@ -3,8 +3,8 @@
  */
 
 define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core/platform',
-    'theme/color-choices', 'page/util/color', 'theme/img-classifier', 'theme/custom-site-theme' ],
-  function($, conf, styleService, platform, colorChoices, colorUtil, imgClassifier, customTheme) {
+    'theme/color-choices', 'page/util/color', /* 'theme/img-classifier', */ 'theme/custom-site-theme' ],
+  function($, conf, styleService, platform, colorChoices, colorUtil, /* imgClassifier, */ customTheme) {
   var $themeStyleSheet,
     THEME_STYLESHEET_NAME = 'sitecues-theme',
     REPAINT_MS = 40,
@@ -40,8 +40,6 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
    */
   function applyTheme(type, intensity, textHue) {
 
-    init();
-
     function applyThemeImpl() {
       var
         isDark = colorUtil.isDarkColor(colorUtil.getDocumentBackgroundColor()),
@@ -72,7 +70,7 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
         if (shouldRepaintToEnsureFullCoverage) {
           repaintPage();
         }
-        sitecues.emit('theme/did-apply');
+        sitecues.emit('theme/did-apply', type);
       }, transitionMs);
     }
 
@@ -294,6 +292,7 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
 
       if (prop === '-sc-gradient') {
         newRgba = {};
+        prop = 'background';
         newValue = getThemedGradientCssText(style.value.gradientType, style.value.gradientVal, colorMapFn, intensity);
       }
       else if (prop === 'color' || prop === 'background-color') {
@@ -314,7 +313,7 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
           textShadow = createTextShadowRule(newRgba.textShadow, newValue);
         }
         styleSheetText += selector +
-          '{' + createRule(style.value.prop, newValue, important) + formFixes + textShadow + '}\n';
+          '{' + createRule(prop, newValue, important) + formFixes + textShadow + '}\n';
       }
     });
 
@@ -387,7 +386,7 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
       if (!sampleElement) {
         return true;
       }
-      return imgClassifier.shouldInvertBgImage(bgImage, sampleElement.getBoundingClientRect());
+      return false; // SMART-INVERT: imgClassifier.shouldInvertBgImage(bgImage, sampleElement.getBoundingClientRect());
     }
   }
 

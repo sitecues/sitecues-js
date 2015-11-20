@@ -1,0 +1,18 @@
+/* Perkins.org */
+
+/* Logo */
+.sitecues-dark-theme #logo {
+  background-color: #000;
+}
+
+/* Border around search box -- for any theme */
+#block-views-exp-search-page input[type="submit"] {
+  background-color: transparent !important;
+}
+
+/* Large carousel buttons */
+.sitecues-dark-theme .landing-page-carousel .views-slideshow-controls-bottom {
+  background-image: none !important;
+  background-color: rgba(0,0,0,.7);
+}
+

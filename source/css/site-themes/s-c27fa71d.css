@@ -13,23 +13,23 @@
 }
 
 /* Badge did not get auto-reversed */
-.sitecues-reverse-theme .scp-palette-rb #scp-zoom-slider-thumb {
+.sitecues-reverse-theme #scp-zoom-slider-thumb {
   fill: #447AC4
 }
 
-.sitecues-reverse-theme .scp-palette-rb #scp-wave1 {
+.sitecues-reverse-theme #scp-wave1 {
   fill: #80A9F8
 }
 
-.sitecues-reverse-theme .scp-palette-rb #scp-wave2 {
+.sitecues-reverse-theme #scp-wave2 {
   fill: #6B9AE0
 }
 
-.sitecues-reverse-theme .scp-palette-rb #scp-wave3 {
+.sitecues-reverse-theme #scp-wave3 {
   fill: #447AC4
 }
 
-.sitecues-reverse-theme .scp-palette-rb .scp-A-button, .scp-palette-rb #scp-head, .scp-palette-rb #scp-zoom-slider-bar {
+.sitecues-reverse-theme .scp-A-button, .sitecues-reverse-theme #scp-head, .sitecues-reverse-theme #scp-zoom-slider-bar {
   fill: #fff
 }
 

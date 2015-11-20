@@ -1,0 +1,8 @@
+/* Aisquared.com */
+
+/*------ Logo --------*/
+.sitecues-dark-theme #logo {
+  filter: invert(100%);
+  -webkit-filter: invert(100%);
+}
+
