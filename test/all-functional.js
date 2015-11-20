@@ -8,7 +8,7 @@ define(
     ],
     function () {
         return [
-            'simple'
+            'simple', 'zoom_fn'
         ];
     }
 );

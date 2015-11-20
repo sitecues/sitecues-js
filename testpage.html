@@ -1,0 +1,79 @@
+<html>
+<head>
+<style type="text/css">
+	div {
+		height: 100px;
+		width: 100px;
+	}
+	#box {
+		margin: 1em;
+		/*background: red;*/
+		/*display: none;*/
+	}
+	#innerbox {
+		margin: 2em;
+		/*background: rgba(0,0,255,.5);*/
+		/*background-image:*/
+	}
+	#bounding {
+		position: absolute;
+		border: 2px dotted black;
+	}
+	#list {
+		position: absolute;
+	}
+	span {
+		height: 200px;
+		width: 200px;
+	}
+	ul {
+		border: 5px solid black;
+	}
+	#hide {
+		border: 5px solid black;
+		visibility: hidden;
+	}
+	#show {
+		visibility: visible;
+	}
+	p2 {
+		border: 2px solid black;
+	}
+</style>
+
+</head>
+<body>
+<br></br>
+<br></br>
+<br></br>
+<p1 id="hide">test<img id="show" src="http://i.forbesimg.com/media/lists/companies/google_416x416.jpg"></img>this is p1</p1>
+<br></br>
+<div>this is a div</div>
+<p2>more text to select</p2>
+<div id="box"><div id="innerbox"></div></div>
+<ul id="list">
+<li>item8</li>
+<li>item9</li>
+<li>item4</li>
+<li id="elem">item5</li>
+<li>item6</li>
+<li>item7</li>
+<li>item8</li>
+<li>item9</li>
+<li>item9</li>
+<li>item4</li>
+<li>item5</li>
+<li>item6</li>
+<li>item7</li>
+<li>item8</li>
+<li>item9</li>
+</ul>
+<script type="text/javascript">
+console.dir(document.body.firstElementChild());
+var child = document.getElementById('box');
+console.dir('initial child width: '+child.getBoundingClientRect().width+ " height: "+child.getBoundingClientRect().height);
+document.body.style.transform = "scale(10,10)";
+console.dir('new child width: '+child.getBoundingClientRect().width+ " height: "+child.getBoundingClientRect().height);
+</script>
+</body>
+</html>

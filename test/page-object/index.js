@@ -3,9 +3,10 @@ define(
     [
         './Base',
         './Lens',
-        './Picker'
+        './Picker',
+        './Badge'
     ],
-    function (Base, Lens, Picker) {
+    function (Base, Lens, Picker, Badge) {
 
         'use strict';
 

@@ -9,9 +9,9 @@ define(
     'intern!tdd',                      // the testing interface - defines how we register suites and tests
     'intern/chai!assert',              // helps throw errors to fail tests, based on conditions
     'intern/dojo/node!leadfoot/keys',  // unicode string constants used to control the keyboard
-    'intern/dojo/node!fs',             // Node's filesystem API, used to save screenshot
+    'page-object/Badge'
   ],
-  function (tdd, assert, keys, fs, Picker, pageObject) {
+  function (tdd, assert, keys, Badge) {
 
     'use strict';
 
@@ -22,12 +22,7 @@ define(
       URL    = 'http://tools.qa.sitecues.com:9000/site/simple.html' +
         '?scjsurl=//js.dev.sitecues.com/l/s;id=s-00000005/dev/latest/js/sitecues.js' +
         '&scwsid=s-00000005' +
-        '&scuimode=badge',
-      events = {
-        zoom : {
-          changed : 'zoom'
-        }
-      };
+        '&scuimode=badge';
 
     suite('Zoom controls', function () {
       // Code to run when the suite starts, before any test.
@@ -38,353 +33,96 @@ define(
           //       However, we are not testing Safari at the moment.
           .setPageLoadTimeout(2000)
           .setFindTimeout(2000)
-          .setExecuteAsyncTimeout(2000);  // max ms for executeAsync calls to complete
+          .setExecuteAsyncTimeout(5000);  // max ms for executeAsync calls to complete
       });
 
       beforeEach(function () {
         return this.remote
           .get(URL)
-      });
-
-      test('Plus key', function () {
-
-        return this.remote
-          .pressKeys(keys.EQUALS)   //increases zoom
-          .executeAsync(                 // run an async callback in the remote browser
-            function (event, id, done) {
-              sitecues.on(event, function () {
-                done(
-
-                );
-              });  // use our event system to know when the Lens is ready
-            },
-            ['zoom']
-          )
-          .then(function (element) {
-            assert.isObject(element, 'Lens exists');
-          });
-      });
-
-      /////////////////////////////// ------- test boundary -------
-
-      test('Lens is Displayed', function () {
-
-        this.skip('This fails for some reason. Why?');
-
-        return this.remote
-          .findById('sitecues-hlb')
-          .isDisplayed()
-          .then(function (isDisplayed) {
-            assert.isTrue(
-              isDisplayed,
-              'Lens must be displayed to be useful'
-            );
-          });
-      });
-
-      /////////////////////////////// ------- test boundary -------
-
-      test('Lens is Inside Viewport', function () {
-
-        return this.remote               // represents the browser being tested
+          .clearCookies()
           .execute(
             function () {
-              return {
-                lens : document.getElementById('sitecues-hlb').getBoundingClientRect(),
-                viewport : {
-                  'left'  : 0,
-                  'top'   : 0,
-                  'right' : innerWidth,
-                  'bottom': innerHeight
-                }
-              };
+              localStorage.clear();
             }
           )
-          .then(function (data) {
-            assert.isAbove(
-              data.lens.left,
-              data.viewport.left,
-              'Lens must be inside the viewport to be seen'
-            );
-            assert.isAbove(
-              data.lens.top,
-              data.viewport.top,
-              'Lens must be inside the viewport to be seen'
-            );
-            assert.isBelow(
-              data.lens.right,
-              data.viewport.right,
-              'Lens must be inside the viewport to be seen'
-            );
-            assert.isBelow(
-              data.lens.bottom,
-              data.viewport.bottom,
-              'Lens must be inside the viewport to be seen'
-            );
-          });
       });
 
-      /////////////////////////////// ------- test boundary -------
+      test('Plus key held to zoom up', function () {
+        var oldRect;
 
-      test('Lens Respects Text', function () {
-
-        return this.remote               // represents the browser being tested
-          .findById('sitecues-hlb')    // get the Lens!
-          .getVisibleText()
-          .then(function (text) {
-            assert.strictEqual(
-              text,
-              picked.visibleText,
-              'The Lens must contain the same text as the picked element'
-            );
-          });
-      });
-
-      /////////////////////////////// ------- test boundary -------
-
-      test('Lens Has Good Computed Styles', function () {
-
-        return this.remote               // represents the browser being tested
-          .findById('sitecues-hlb')    // get the Lens!
-          .getComputedStyle('position')
-          .then(function (data) {
-            assert.strictEqual(
-              data,
-              'absolute',
-              'Lens must be positioned absolutely, so it does not affect the page'
-            );
-          })
-          .getComputedStyle('borderWidth')
-          .then(function (data) {
-            assert.strictEqual(
-              data,
-              '3px',
-              'Lens must have a specific border width, so it looks nice'
-            );
-          })
-          .getComputedStyle('zIndex')
-          .then(function (data) {
-            assert.strictEqual(
-              data,
-              '2147483644',
-              'Lens must have a high zIndex, so it\'s visible'
-            );
-          })
-          .getComputedStyle('boxSizing')
-          .then(function (data) {
-            assert.strictEqual(
-              data,
-              'content-box',
-              'Lens must consistently calculate its width and height'
-            );
-          });
-
-      });
-
-      /////////////////////////////// ------- test boundary -------
-
-      test('Lens Has No Class', function () {
-
-        return this.remote               // represents the browser being tested
-          .findById('sitecues-hlb')    // get the Lens!
-          .getAttribute('class')
-          .then(function (data) {
-            assert.isNull(data, 'Lens element does not have a class');
-          })
-          .end()
-          .execute(                    // run the given code in the remote browser
-            function (selector, className) {
-              document.querySelector(selector).className = className;
-            },
-            [picked.selector, picked.className]
-          );
-      });
-
-      /////////////////////////////// ------- test boundary -------
-
-      test('Spacebar Closes Lens', function () {
-
-        return lens.close()
-          .then(function (data) {
-            assert.isNull(data, 'Lens no longer exists');
-          });
-      });
-
-      /////////////////////////////// ------- test boundary -------
-
-      test('Lens is a <ul> if picked element is a <li>', function () {
-
-        return picker.highlight('li')
-          .pressKeys(keys.SPACE)       // open the Lens
-          .findById('sitecues-hlb')    // get the Lens!
-          .getProperty('tagName')
-          .then(function (data) {
-            assert.strictEqual(
-              data,
-              'UL',
-              'Lens must be a valid standalone DOM element, to make browsers happy'
-            );
-          });
-      });
-
-      /////////////////////////////// ------- test boundary -------
-
-      test('Escape Closes the Lens', function () {
-
-        return this.remote               // represents the browser being tested
-          .pressKeys(keys.ESCAPE)
-          .executeAsync(
-            function (event, id, done) {
-              sitecues.on(event, function () {
-                done(
-                  document.getElementById(id)
-                );
-              });
-            },
-            ['hlb/closed', 'sitecues-hlb']
-          )
-          .then(function (data) {
-            assert.isNull(data, 'Lens no longer exists.');
-          });
-      });
-
-      /////////////////////////////// ------- test boundary -------
-
-      test('Lens Copies <textarea> Value', function () {
-
-        const selector = 'textarea',
-          expected = 'Yipee!';
-
-        return this.remote               // represents the browser being tested
-          .findByCssSelector(selector)
-          .type(expected)
-          .end()
+        return this.remote
           .execute(
-            // Code to run in the remote browser.
-            function (selector) {
-              // Jump out of editing mode, so spacebar can open the Lens.
-              document.querySelector(selector).blur();
-            },
-            // list of arguments to pass to the remote code.
-            [selector]
-          )
-          .findByCssSelector(selector)
-          .moveMouseTo()
-          .end()
-          .pressKeys(keys.SPACE)       // hit the spacebar, to open the Lens
-          .findById('sitecues-hlb')    // get the Lens!
-          .getProperty('value')
-          .then(function (data) {
-            assert.strictEqual(
-              data,
-              expected,
-              'Lens copies <textarea> value'
-            );
-          })
-          .pressKeys(keys.ESCAPE)
-          .executeAsync(
-            function (event, done) {
-              sitecues.on(event, done);
-            },
-            ['hlb/closed']
-          );
-      });
-
-      /////////////////////////////// ------- test boundary -------
-
-      test('Lens Copies <input type="checkbox"> Value.', function () {
-
-        this.skip('WebDriver claims the checkbox is not visible. Why?');
-
-        const selector = 'input[type="checkbox"]';
-
-        return this.remote               // represents the browser being tested
-          .findByCssSelector(selector)
-          .click()
-          .end()
-          .execute(                    // run the given code in the remote browser
-            function (selector) {
-              sitecues.highlight(selector);
-            },
-            [selector]
-          )
-          .pressKeys(keys.SPACE)       // hit the spacebar, to open the Lens
-          .findById('sitecues-hlb')    // get the Lens!
-          .getProperty('checked')
-          .then(function (data) {
-            assert.isTrue(
-              data,
-              'Lens copies <input type="checkbox"> value'
-            );
-          })
-          .pressKeys(keys.ESCAPE)
-          .executeAsync(
-            function (done) {
-              sitecues.on('hlb/closed', done);
+            function () {
+              return document.body.children[0].getBoundingClientRect();
             }
-          );
+          )
+          .then(
+            function (rect) {
+              oldRect = rect;
+            }
+          )
+          .pressKeys(keys.EQUALS)
+          .pressKeys(keys.EQUALS)
+          .pressKeys(keys.EQUALS)
+          .pressKeys(keys.EQUALS)
+          .pressKeys(keys.EQUALS)
+          .pressKeys(keys.EQUALS)
+          .pressKeys(keys.EQUALS)
+          .pressKeys(keys.EQUALS)
+          .pressKeys(keys.EQUALS)
+          .pressKeys(keys.EQUALS)
+          .pressKeys(keys.EQUALS)
+          .pressKeys(keys.EQUALS)
+          .pressKeys(keys.EQUALS)
+          .pressKeys(keys.EQUALS)
+          .pressKeys(keys.EQUALS)
+          .pressKeys(keys.EQUALS)
+          .pressKeys(keys.EQUALS)
+          .pressKeys(keys.EQUALS)
+          .pressKeys(keys.EQUALS)
+          .pressKeys(keys.EQUALS)
+          .pressKeys(keys.EQUALS)
+          .pressKeys(keys.EQUALS)
+          .pressKeys(keys.EQUALS)
+          .pressKeys(keys.EQUALS)
+          .pressKeys(keys.EQUALS)
+          .pressKeys(keys.EQUALS)
+          .pressKeys(keys.EQUALS)
+          .pressKeys(keys.EQUALS)
+          .pressKeys(keys.EQUALS)
+          .pressKeys(keys.EQUALS)
+          .pressKeys(keys.EQUALS)
+          .pressKeys(keys.EQUALS)
+          .pressKeys(keys.EQUALS)
+          .pressKeys(keys.EQUALS)
+          .pressKeys(keys.EQUALS)
+          .pressKeys(keys.EQUALS)
+          .pressKeys(keys.EQUALS)
+          .pressKeys(keys.EQUALS)
+          .pressKeys(keys.EQUALS)
+          .pressKeys(keys.EQUALS)
+          .pressKeys(keys.EQUALS)
+          .execute(
+            function () {
+              return document.body.children[0].getBoundingClientRect();
+            }
+          )
+          .then(
+            function (newRect) {
+              console.log('old width: '+JSON.stringify(oldRect));
+              console.log('new width: '+JSON.stringify(newRect));
+              assert.isTrue(
+                oldRect.width * 3 >= newRect.width,
+                'Zoomed element width should not be more than 3 times the original width'
+              )
+            }
+          )
       });
 
-      /////////////////////////////// ------- test boundary -------
-
-      test('Outside Mouse Click Closes Lens.', function () {
-
-        return this.remote               // represents the browser being tested
-          .pressKeys(keys.SPACE)       // hit the spacebar, to open the Lens
-          .executeAsync(           // run an async callback in the remote browser
-            function (event, done) {
-              sitecues.on(event, done);  // use our event system to know when the Lens is ready
-            },
-            ['hlb/ready']
-          )
-          .findById('sitecues-hlb')
-          .end()
-          .findByCssSelector('body')
-          .moveMouseTo(undefined, 2, 3)
-          .click()
-          .executeAsync(
-            function (event, id, done) {
-              sitecues.on(event, function () {
-                done(
-                  document.getElementById(id)
-                );
-              });
-            },
-            ['hlb/closed', 'sitecues-hlb']
-          )
-          .then(function (data) {
-            assert.isNull(data, 'Lens no longer exists.');
-          })
-          .end();
+      test('Click on big A to zoom up', function () {
+        var badge = new Badge(this.remote);
+        return badge.expand();
       });
-
-      /////////////////////////////// ------- test boundary -------
-
-      // test('Screenshot experiment', function () {
-
-      //     const canDoScreenshot = this.remote.session.capabilities.takesScreenshot;
-
-      //     return this.remote               // represents the browser being tested
-      //         .then(
-      //             function () {
-      //                 if (canDoScreenshot) {
-      //                     this.takeScreenshot()
-      //                         .then(
-      //                             function (image) {
-      //                                 fs.writeFileSync(
-      //                                     '/Users/sholladay/Desktop/myfile' + Date.now() + '.png',
-      //                                     image
-      //                                 );
-      //                             }
-      //                         )
-      //                 }
-      //             }
-      //         )
-      //         .findById('sitecues-hlb')
-      //             .pressKeys(keys.SPACE)     // hit the spacebar, to close the Lens
-      //             .end()                   // get out of the current element context
-      //         .waitForDeletedById('sitecues-hlb')
-      // });
     });
   }
 );

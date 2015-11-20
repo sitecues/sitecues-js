@@ -100,7 +100,9 @@ define(
 
             // Test whitelist regex. Any test IDs ('suite name - test name')
             // which do NOT match this pattern will be skipped.
-            grep: /.*/,
+            grep: /Zoom controls - .*/,
+
+            leaveRemoteOpen: true,
 
             // Ignore some code from test coverage reports, even if it loads
             // during testing. The paths that match this pattern will NOT
