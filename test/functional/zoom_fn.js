@@ -9,9 +9,9 @@ define(
     'intern!tdd',                      // the testing interface - defines how we register suites and tests
     'intern/chai!assert',              // helps throw errors to fail tests, based on conditions
     'intern/dojo/node!leadfoot/keys',  // unicode string constants used to control the keyboard
-    'page-object/Badge'
+    'page-object'
   ],
-  function (tdd, assert, keys, Badge) {
+  function (tdd, assert, keys, pageObject) {
 
     'use strict';
 
@@ -120,9 +120,11 @@ define(
       });
 
       test('Click on big A to zoom up', function () {
-        var badge = new Badge(this.remote);
+        console.log('remote: '+this.remote);
+        var badge = pageObject.createBadge(this.remote);
         return badge.expand();
       });
+
     });
   }
 );

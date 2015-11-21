@@ -10,7 +10,7 @@ define(
     class Badge extends Base {
 
       constructor(remote) {
-        super(remote);
+        this.remote = remote;
       }
 
       expand() {
