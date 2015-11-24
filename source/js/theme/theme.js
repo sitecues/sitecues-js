@@ -70,7 +70,7 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
         if (shouldRepaintToEnsureFullCoverage) {
           repaintPage();
         }
-        sitecues.emit('theme/did-apply');
+        sitecues.emit('theme/did-apply', type);
       }, transitionMs);
     }
 

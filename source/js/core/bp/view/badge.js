@@ -190,13 +190,18 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/locale', 'core/bp/help
     badgeOrToolbarElement.parentElement.id = BP_CONST.BADGE_ID;
   }
 
-  function checkBackgroundColorChange() {
-    var newBgColor = getBackgroundColor();
+  function checkBackgroundColorChange(doForceBadgeUpdate) {
+    var newBgColor = getBackgroundColor(),
+      doBadgeUpdate = doForceBadgeUpdate;
 
     if (newBgColor !== lastBgColor) {
       lastBgColor = newBgColor;
+      doBadgeUpdate = true;
+    }
+
+    if (doBadgeUpdate) {
       sitecues.emit('bp/did-change');
-      if (SC_DEV) { console.log('Updating adaptive badge palette'); }
+      if (SC_DEV) { console.log('Updating badge palette'); }
     }
   }
 
@@ -204,7 +209,7 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/locale', 'core/bp/help
     return getComputedStyle(document.body).backgroundColor;
   }
 
-  // Input event has occured that may trigger a theme change produced from the website code
+  // Input event has occurred that may trigger a theme change produced from the website code
   // (as opposed to sitecues-based themes). For example, harpo.com, cnib.ca, lloydsbank have their own themes.
   function onPossibleWebpageThemeChange() {
     setTimeout(checkBackgroundColorChange, 0);
@@ -223,9 +228,10 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/locale', 'core/bp/help
     sitecues.on('theme/did-apply', onSitecuesThemeChange);
   }
 
-  function onSitecuesThemeChange() {
-    state.set('isAdaptivePalette', true); // If sitecues theme changes, force adaptive palette
-    checkBackgroundColorChange();
+  function onSitecuesThemeChange(newTheme) {
+    // If sitecues theme changes to dark, force adaptive palette. Otherwise use default palette.
+    state.set('isAdaptivePalette', newTheme === 'dark');
+    checkBackgroundColorChange(true);
   }
 
   function setCustomPalette (badgeElement) {
