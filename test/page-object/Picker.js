@@ -25,7 +25,7 @@ define(
                         },
                         // List of arguments to pass to the remote code.
                         [
-                            picker.MODULE_ID,
+                            Picker.MODULE_ID,
                             selector
                         ]
                     );
