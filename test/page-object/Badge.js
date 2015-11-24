@@ -4,32 +4,21 @@ define(
     'core/bp/constants'
   ],
   function (Base, constants) {
-
     'use strict';
 
     class Badge extends Base {
-
       constructor(remote) {
-        this.remote = remote;
+        super(remote);
       }
 
       expand() {
         return this.remote
-          .execute(
-            function (id) {
-              return document.getElementById(id);
-            },
-            [constants.BADGE_ID]
-          )
-          .then(
-            function (bdg) {
-              return remote.moveMouseTo(bdg);
-            }
-          )
+          .findById(constants.BADGE_ID)
+            .moveMouseTo()
+            .click()
+            .end();
       }
-
     }
-    console.log('return badge: '+JSON.stringify(Badge));
 
     return Badge;
   }

@@ -4,7 +4,8 @@ define(
         './Base',
         './Lens',
         './Picker',
-        './Badge'
+        './Badge',
+        './Panel'
     ],
     function (Base, Lens, Picker, Badge) {
 

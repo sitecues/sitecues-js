@@ -7,15 +7,17 @@
 define(
   [
     'intern!tdd',                      // the testing interface - defines how we register suites and tests
-    'intern/chai!assert',              // helps throw errors to fail tests, based on conditions
+    'intern/dojo/node!chai',              // helps throw errors to fail tests, based on conditions
     'intern/dojo/node!leadfoot/keys',  // unicode string constants used to control the keyboard
     'page-object'
   ],
-  function (tdd, assert, keys, pageObject) {
+  function (tdd, chai, keys, pageObject) {
 
     'use strict';
 
-    const suite  = tdd.suite,
+    const
+      assert = chai.assert,
+      suite  = tdd.suite,
       test   = tdd.test,
       before = tdd.before,
       beforeEach = tdd.beforeEach,
@@ -47,7 +49,7 @@ define(
           )
       });
 
-      test('Plus key held to zoom up', function () {
+      test('Plus key tapped to zoom up', function () {
         var oldRect;
 
         return this.remote
@@ -61,47 +63,10 @@ define(
               oldRect = rect;
             }
           )
-          .pressKeys(keys.EQUALS)
-          .pressKeys(keys.EQUALS)
-          .pressKeys(keys.EQUALS)
-          .pressKeys(keys.EQUALS)
-          .pressKeys(keys.EQUALS)
-          .pressKeys(keys.EQUALS)
-          .pressKeys(keys.EQUALS)
-          .pressKeys(keys.EQUALS)
-          .pressKeys(keys.EQUALS)
-          .pressKeys(keys.EQUALS)
-          .pressKeys(keys.EQUALS)
-          .pressKeys(keys.EQUALS)
-          .pressKeys(keys.EQUALS)
-          .pressKeys(keys.EQUALS)
-          .pressKeys(keys.EQUALS)
-          .pressKeys(keys.EQUALS)
-          .pressKeys(keys.EQUALS)
-          .pressKeys(keys.EQUALS)
-          .pressKeys(keys.EQUALS)
-          .pressKeys(keys.EQUALS)
-          .pressKeys(keys.EQUALS)
-          .pressKeys(keys.EQUALS)
-          .pressKeys(keys.EQUALS)
-          .pressKeys(keys.EQUALS)
-          .pressKeys(keys.EQUALS)
-          .pressKeys(keys.EQUALS)
-          .pressKeys(keys.EQUALS)
-          .pressKeys(keys.EQUALS)
-          .pressKeys(keys.EQUALS)
-          .pressKeys(keys.EQUALS)
-          .pressKeys(keys.EQUALS)
-          .pressKeys(keys.EQUALS)
-          .pressKeys(keys.EQUALS)
-          .pressKeys(keys.EQUALS)
-          .pressKeys(keys.EQUALS)
-          .pressKeys(keys.EQUALS)
-          .pressKeys(keys.EQUALS)
-          .pressKeys(keys.EQUALS)
-          .pressKeys(keys.EQUALS)
-          .pressKeys(keys.EQUALS)
-          .pressKeys(keys.EQUALS)
+          .execute(function () {
+            var evt = new KeyboardEvent('keydown', {key : '=', keyCode : 187});
+            document.documentElement.dispatchEvent(evt);
+          })
           .execute(
             function () {
               return document.body.children[0].getBoundingClientRect();
@@ -110,19 +75,34 @@ define(
           .then(
             function (newRect) {
               console.log('old width: '+JSON.stringify(oldRect));
-              console.log('new width: '+JSON.stringify(newRect));
-              assert.isTrue(
-                oldRect.width * 3 >= newRect.width,
+              assert.isAtMost(
+                newRect.width,
+                oldRect.width * 3,
                 'Zoomed element width should not be more than 3 times the original width'
-              )
+              );
+              assert.isAtMost(
+                newRect.height,
+                oldRect.height * 3,
+                'Zoomed element width should not be more than 3 times the original length'
+              );
             }
           )
       });
 
       test('Click on big A to zoom up', function () {
-        console.log('remote: '+this.remote);
-        var badge = pageObject.createBadge(this.remote);
-        return badge.expand();
+        const remote = this.remote,
+          badge = pageObject.createBadge(remote),
+          panel = pageObject.createPanel(remote);
+
+        return remote
+          .execute(function () {
+
+          })
+          .then(
+            function () {
+              return panel.clickBigARepeatedly();
+            }
+          )
       });
 
     });
