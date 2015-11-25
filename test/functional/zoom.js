@@ -6,12 +6,13 @@
 
 define(
   [
+    'intern',
     'intern!tdd',                      // the testing interface - defines how we register suites and tests
     'intern/dojo/node!chai',              // helps throw errors to fail tests, based on conditions
     'intern/dojo/node!leadfoot/keys',  // unicode string constants used to control the keyboard
     'page-object'
   ],
-  function (tdd, chai, keys, pageObject) {
+  function (intern, tdd, chai, keys, pageObject) {
 
     'use strict';
 
@@ -64,8 +65,15 @@ define(
             }
           )
           .execute(function () {
-            var evt = new KeyboardEvent('keydown', {key : '=', keyCode : 187});
-            document.documentElement.dispatchEvent(evt);
+            var evt = document.createEvent('Events');
+
+              = new KeyboardEvent('keydown',
+              {
+                key : '=',
+                keyCode : 187,
+                bubbles : true
+              });
+            document.body.dispatchEvent(evt);
           })
           .execute(
             function () {
