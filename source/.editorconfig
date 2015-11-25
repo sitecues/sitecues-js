@@ -1,14 +1,11 @@
 # Standardized configuration for your code editor.
 # See: http://EditorConfig.org
 
-# This is the default for the whole project.
-root = true
-
 # Unix-style newlines with a newline ending every file.
 [*]
 charset = utf-8
 indent_style = space
-indent_size = 4
+indent_size = 2
 trim_trailing_whitespace = true
 end_of_line = lf
 insert_final_newline = true
