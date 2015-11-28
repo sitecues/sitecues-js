@@ -1,25 +1,24 @@
 define(
-  [
-    './Base',
-    'core/bp/constants'
-  ],
-  function (Base, constants) {
-    'use strict';
+    [
+      './Base',
+      'core/bp/constants'
+    ],
+    function (Base, constants) {
+      'use strict';
 
-    class Badge extends Base {
-      constructor(remote) {
-        super(remote);
+      class Badge extends Base {
+        constructor(remote) {
+          super(remote);
+        }
+
+        expand() {
+          return this.remote
+              .findById(constants.BADGE_ID)
+              .moveMouseTo()
+              .end();
+        }
       }
 
-      expand() {
-        return this.remote
-          .findById(constants.BADGE_ID)
-            .moveMouseTo()
-            .click()
-            .end();
-      }
+      return Badge;
     }
-
-    return Badge;
-  }
 );

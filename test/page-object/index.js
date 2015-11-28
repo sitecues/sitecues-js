@@ -7,7 +7,7 @@ define(
         './Badge',
         './Panel'
     ],
-    function (Base, Lens, Picker, Badge) {
+    function (Base, Lens, Picker, Badge, Panel) {
 
         'use strict';
 
