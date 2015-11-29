@@ -7,13 +7,14 @@
 define(
     [
         'intern',
-        'intern/dojo/node!leadfoot/helpers/pollUntil',
+        'test/util/page-viewer',
         'intern!tdd',                      // the testing interface - defines how we register suites and tests
         'intern/dojo/node!chai',              // helps throw errors to fail tests, based on conditions
         'intern/dojo/node!leadfoot/keys',  // unicode string constants used to control the keyboard
-        'page-object'
+        'page-object',
+        'test/util/url'
     ],
-    function (intern, pollUntil, tdd, chai, keys, pageObject) {
+    function (intern, pageViewer, tdd, chai, keys, pageObject, testUrl) {
 
         'use strict';
 
@@ -22,11 +23,7 @@ define(
             suite  = tdd.suite,
             test   = tdd.test,
             before = tdd.before,
-            beforeEach = tdd.beforeEach,
-            URL    = 'http://tools.qa.sitecues.com:9000/site/simple.html' +
-                '?scjsurl=//js.dev.sitecues.com/l/s;id=s-00000005/dev/latest/js/sitecues.js' +
-                '&scwsid=s-00000005' +
-                '&scuimode=badge';
+            beforeEach = tdd.beforeEach;
 
         suite('Zoom controls', function () {
             let remote, capabilities, badge, panel;
@@ -49,7 +46,7 @@ define(
 
             beforeEach(function () {
                 return remote
-                    .get(URL)
+                    .get(testUrl('simple.html'))
                     .clearCookies()
                     .execute(function () {
                         localStorage.clear();
@@ -57,24 +54,13 @@ define(
             });
 
             test('Plus key held to zoom up', function () {
-                var oldRect, idx;
+                var oldRect, id;
 
-                return remote
-                    .execute(function () {
-                        var rect,
-                            children = document.body.children;
-                        for (var i = 0; i < children.length; i++) {
-                            rect = children[i].getBoundingClientRect();
-                            if (rect.height > 0 && rect.width > 0) {
-                                return [rect, i];
-                            }
-                        }
-                        throw new Error();
-                    })
+                return pageViewer
+                    .getRectAndIdOfVisibleElementInBody(remote)
                     .then(function (data) {
-                        console.log('data', data);
                         oldRect = data[0];
-                        idx     = data[1];
+                        id      = data[1];
                     })
                     .execute(function (browser) {
                         //keyCode property can not be set in chrome
@@ -100,55 +86,20 @@ define(
                         document.body.dispatchEvent(evt);
                     }, [capabilities.browserName])
                     .then(function () {
-                        return remote
-                            .then(pollUntil(function (idx) {
-                                var transitionRect,
-                                    element = document.body.children[idx],
-                                    currentRect = element.getBoundingClientRect();
-                                if (window.sitecuesTestingNamespace) {
-                                    transitionRect = window.sitecuesTestingNamespace.transRect;
-                                    window.sitecuesTestingNamespace.transRect = currentRect;
-                                    return (transitionRect.width === currentRect.width &&
-                                    transitionRect.height === currentRect.height) ? true : null;
-                                }
-                                else {
-                                    window.sitecuesTestingNamespace = { transRect : currentRect };
-                                    return null;
-                                }
-                            }, [idx], 8000, 200))
+                        return pageViewer.waitForElementToFinishAnimating(remote, id, 8000, 200);
                     })
                     .then(function () {
                         return remote
-                            .execute(function (idx) {
-                                window.sitecuesTestingNamespace = undefined;
-                                return document.body.children[idx].getBoundingClientRect();
-                            }, [idx]);
+                            .execute(function (id) {
+                                return document.getElementById(id).getBoundingClientRect();
+                            }, [id]);
                     })
-                    .then(function (newRect) {
-                        assert.isAtMost(
-                            newRect.width,
-                            oldRect.width * 3.1,
-                            'Zoomed element width should not be more than 3.1 times the original width'
-                        );
-                        assert.isAtMost(
-                            newRect.height,
-                            oldRect.height * 3.1,
-                            'Zoomed element height should not be more than 3.1 times the original height'
-                        );
-                        assert.isAtLeast(
-                            newRect.height,
-                            oldRect.height * 2,
-                            'Zoomed element height should be at least 2 times the original height'
-                        );
-                        assert.isAtLeast(
-                            newRect.width,
-                            oldRect.width * 2,
-                            'Zoomed element width should be at least 2 times the original height'
-                        );
+                    .then(function (zoomRect) {
+                        return pageViewer.compareOriginalAndZoomedDOMRects(remote, oldRect, zoomRect);
                     });
             });
 
-            test('Click on big A to zoom up', function () {
+            test('Click on big A to zoom in', function () {
                 return panel.clickLargeA(10);
             });
         });
