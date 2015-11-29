@@ -204,7 +204,7 @@ define(
                         return picker.highlight(picked.selector);
                     })
                     .then(function () {
-                        return lens.open()                  // get the Lens!
+                        return lens.open();       // get the Lens!
                     })
                     .findById(Lens.ID)
                         .getVisibleText()
@@ -310,14 +310,15 @@ define(
                 return picker.highlight('li')
                     .pressKeys(keys.SPACE)      // open the Lens
                     .findById(Lens.ID)          // get the Lens!
-                    .getProperty('tagName')
-                    .then(function (data) {
-                        assert.strictEqual(
-                            data,
-                            'UL',
-                            'Lens must be a valid standalone DOM element, to make browsers happy'
-                        );
-                    });
+                        .getProperty('tagName')
+                        .then(function (data) {
+                            assert.strictEqual(
+                                data,
+                                'UL',
+                                'Lens must be a valid standalone DOM element, to make browsers happy'
+                            );
+                        })
+                        .end();
             });
 
             //////// ------- test boundary ------- //////////////////////////////
@@ -414,7 +415,8 @@ define(
                                     'Lens copies <input type="checkbox"> value'
                                 );
                             })
-                            .end();
+                            .end()
+                        .end();
             });
 
             //////// ------- test boundary ------- //////////////////////////////
