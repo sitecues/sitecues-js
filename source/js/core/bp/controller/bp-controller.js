@@ -260,6 +260,14 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
       sitecues.on('bp/will-shrink', willShrink);
       sitecues.on('zoom', didZoom);
       sitecues.on('speech/did-change', didChangeSpeech);
+
+      if (SC_DEV) {
+        sitecues.toggleStickyPanel = function () {
+          var isSticky = !state.get('isStickyPanel');
+          state.set('isStickyPanel', isSticky);
+          return isSticky;
+        };
+      }
     }
   }
 
