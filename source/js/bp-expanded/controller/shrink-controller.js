@@ -10,8 +10,11 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
       isZooming,
       isExpandingOrExpanded = true,  // First time, we will already be expanded
       isInitialized,
-      isSticky,
       byId = helper.byId;
+
+    function isSticky() {
+      return state.get('isStickyPanel');
+    }
 
     function cancelMouseLeaveShrinkTimer() {
       clearTimeout(mouseLeaveShrinkTimer);
@@ -43,7 +46,7 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
       }
 
       if (isMouseOutsidePanel(evt, MIN_DISTANCE)) {
-        if (SC_DEV && isSticky) {
+        if (SC_DEV && isSticky()) {
           return;
         }
         if (state.get('wasMouseInPanel')) {
@@ -76,7 +79,7 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
 
 
     function winMouseDown(evt) {
-      if (SC_DEV && isSticky) {
+      if (SC_DEV && isSticky()) {
         return;
       }
 
@@ -87,8 +90,8 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
       fireClickMetric(evt);
     }
 
-    function winBlur() {
-      if (SC_DEV && isSticky) {
+    function maybeShrinkPanel() {
+      if (SC_DEV && isSticky()) {
         return;
       }
       shrinkPanel(true);
@@ -188,9 +191,9 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
         // Only allow close from hover if opened from hover
         addOrRemoveFn('mousemove', winMouseMove);
       }
-      addOrRemoveFn('blur', winBlur);
       addOrRemoveFn('mouseout', winMouseLeave);
-      addOrRemoveFn('resize', shrinkPanel); // Don't allow user to resize window in middle of using panel, leads to layout issues
+      addOrRemoveFn('blur', maybeShrinkPanel);
+      addOrRemoveFn('resize', maybeShrinkPanel); // Don't allow user to resize window in middle of using panel, leads to layout issues
     }
 
     function refresh() {
@@ -223,13 +226,6 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
 
     function didShrink() {
       state.set('isShrinkingFromKeyboard', false);
-    }
-
-    if (SC_DEV) {
-      sitecues.toggleStickyPanel = function () {
-        isSticky = !isSticky;
-        return isSticky;
-      };
     }
 
     function init() {

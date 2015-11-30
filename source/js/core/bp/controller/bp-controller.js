@@ -138,8 +138,20 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
       var badgeElem = helper.byId(BP_CONST.BADGE_ID),
         isBadgeFocused = document.activeElement === badgeElem,
         target = evt.target,
-        isChildClicked = target && (target.parentNode === badgeElem);
-      if (isBadgeFocused || isChildClicked) {
+        isChildClicked = target && target.parentNode === badgeElem,
+        badgeRect = getVisibleBadgeRect(),
+        isClickInVisibleBadgeRect = isInBadgeArea(evt, badgeRect);
+      if (!isClickInVisibleBadgeRect) {
+        // Click is in the toolbar, outside of visible badge
+        // Focus should be in the document, otherwise HLB won't work (confusing)
+        if (isBadgeFocused) {
+          document.body.focus();
+        }
+        // Don't focus badge
+        evt.preventDefault();
+        return false;
+      }
+      else if (isBadgeFocused || isChildClicked) {
         // Click is in visible area and badge has focus --
         // * or *
         // Click in invisible child -- only screen readers can do this -- NVDA does it
@@ -238,7 +250,7 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
 
       var badgeElement = getBadgeElement();
       badgeElement.addEventListener('keydown', processBadgeActivationKeys);
-      badgeElement.addEventListener('click', clickToOpenPanel);
+      badgeElement.addEventListener('mousedown', clickToOpenPanel);
       badgeElement.addEventListener('mousemove', onMouseMove);
       badgeElement.addEventListener('mouseout', cancelHoverDelayTimer);
 
@@ -248,6 +260,14 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
       sitecues.on('bp/will-shrink', willShrink);
       sitecues.on('zoom', didZoom);
       sitecues.on('speech/did-change', didChangeSpeech);
+
+      if (SC_DEV) {
+        sitecues.toggleStickyPanel = function () {
+          var isSticky = !state.get('isStickyPanel');
+          state.set('isStickyPanel', isSticky);
+          return isSticky;
+        };
+      }
     }
   }
 
