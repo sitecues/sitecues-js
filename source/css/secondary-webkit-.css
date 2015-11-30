@@ -30,7 +30,7 @@ sc-button[data-setting-name="themeName"][aria-pressed="true"]:after {
 
 /* --------------- General ranges ---------------- */
 
-.scp-normal-range {
+.scp-normal-range, .scp-normal-range:focus {
   -webkit-appearance: none;
   width: 442px;
   height: 27px;
