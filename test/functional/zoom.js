@@ -54,13 +54,13 @@ define(
             });
 
             test('Plus key held to zoom up', function () {
-                var oldRect, id;
+                var oldRect, selector;
 
                 return pageViewer
-                    .getRectAndIdOfVisibleElementInBody(remote)
+                    .getRectAndSelectorOfVisibleElementInBody(remote)
                     .then(function (data) {
-                        oldRect = data[0];
-                        id      = data[1];
+                        oldRect  = data[0];
+                        selector = data[1];
                     })
                     .execute(function (browser) {
                         //keyCode property can not be set in chrome
@@ -86,16 +86,37 @@ define(
                         document.body.dispatchEvent(evt);
                     }, [capabilities.browserName])
                     .then(function () {
-                        return pageViewer.waitForElementToFinishAnimating(remote, id, 8000, 200);
+                        return pageViewer.waitForElementToFinishAnimating(remote, selector, 8000, 200);
                     })
                     .then(function () {
                         return remote
-                            .execute(function (id) {
-                                return document.getElementById(id).getBoundingClientRect();
-                            }, [id]);
+                            .execute(function (selector) {
+                                return document.querySelector(selector).getBoundingClientRect();
+                            }, [selector]);
                     })
                     .then(function (zoomRect) {
-                        return pageViewer.compareOriginalAndZoomedDOMRects(remote, oldRect, zoomRect);
+                        const ARBITRARILY_LARGE_SCALE = 20;
+                        console.log('selector', selector);
+                        assert.isAtMost(
+                            zoomRect.height,
+                            oldRect.height * ARBITRARILY_LARGE_SCALE,
+                            'Zoomed element\'s bounding rect\'s height should be reasonably small'
+                        );
+                        assert.isAtMost(
+                            zoomRect.width,
+                            oldRect.width * ARBITRARILY_LARGE_SCALE,
+                            'Zoomed element\'s bounding rect\'s width should be reasonably small'
+                        );
+                        assert.isAbove(
+                            zoomRect.width,
+                            oldRect.width,
+                            'Zoomed element\'s bounding width must be greater than original bounding width'
+                        );
+                        assert.isAbove(
+                            zoomRect.height,
+                            oldRect.height,
+                            'Zoomed element\'s bounding height must be greater than original bounding height'
+                        );
                     });
             });
 

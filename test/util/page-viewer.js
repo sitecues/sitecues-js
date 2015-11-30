@@ -1,114 +1,120 @@
 define(
     [
-        'intern/dojo/node!leadfoot/helpers/pollUntil',
-        'intern/dojo/node!chai'
+        'intern/dojo/node!leadfoot/helpers/pollUntil'
     ],
-    function (pollUntil, chai) {
+    function (pollUntil) {
 
         'use strict';
-        const assert = chai.assert;
 
-        function getRectAndIdOfVisibleElementInBody(remote) {
+        function getRectAndSelectorOfVisibleElementInBody(remote) {
             return remote
                 .execute(function () {
-                    var visibleRect, visibleNode,
-                        defaultId = 'SITECUES_TEST_ID',
+                    var visibleNode, selector, currentElem, childIndex, rando = 15,
                         searching = true;
 
                     function walkTheDOM(node) {
-                        var sibling,
-                            rect = node.getBoundingClientRect();
-                        if (rect.height > 0 && rect.width > 0) {
-                            visibleRect = rect;
+                        var sibling, position,
+                            element = node.element;
+                            node.rect = element.getBoundingClientRect();
+
+                        if (node.rect.height > 0 && node.rect.width > 0) {
                             visibleNode = node;
-                            if (visibleNode.id) {
+                            rando--;
+                            if (rando === 0) {
                                 searching = false;
                             }
                         }
-                        sibling = node.nextElementSibling;
+                        else {
+                            node.rect = null;
+                        }
+
+                        position = node.treePosition;
+                        sibling  = element.nextElementSibling;
+
                         while (sibling && searching) {
-                            walkTheDOM(sibling);
+                            position = Object.create(position);
+                            position[position.length - 1]++;
+                            visitNode(sibling, position);
                             sibling = sibling.nextElementSibling;
                         }
-                        if (node.firstElementChild && searching) {
-                            walkTheDOM(node.firstElementChild);
+
+                        if (element.firstElementChild && searching) {
+                            position = Object.create(node.treePosition);
+                            position[position.length] = 0;
+                            visitNode(element.firstElementChild, position)
                         }
+
+                        function visitNode(elem, pos) {
+                            var newNode = {
+                                element: elem,
+                                treePosition: pos,
+                                rect: null
+                            };
+                            walkTheDOM(newNode);
+                        }
+
                     }
 
-                    walkTheDOM(document.body.firstElementChild);
+                    if (document.body.firstElementChild) {
+                        walkTheDOM({
+                            element: document.body.firstElementChild,
+                            treePosition: [0],
+                            rect: null
+                        });
+                    }
+                    else {
+                        throw new Error('Body must have children elements to test zoom functionality');
+                    }
 
-                    if (visibleNode && visibleRect) {
-                        if (visibleNode.id) {
-                            return [visibleNode.getBoundingClientRect(), visibleNode.id];
+                    if (visibleNode) {
+                        if (visibleNode.element.id) {
+                            return [visibleNode.rect, '#' + visibleNode.id];
                         }
                         else {
-                            while (document.getElementById(defaultId)) {
-                                defaultId += '_';
+                            currentElem = visibleNode.element;
+                            childIndex = visibleNode.treePosition.shift();
+                            selector = '';
+                            while (childIndex !== undefined) {
+                                selector = currentElem.tagName.toLowerCase()+':nth-child('+childIndex+') ' + selector;
+                                childIndex = visibleNode.treePosition.shift();
+                                currentElem = currentElem.parentElement;
                             }
-                            visibleNode.id = defaultId;
-                            return [visibleRect, defaultId];
+                            return [visibleNode.rect, 'body ' + selector.trim()];
+
                         }
                     }
                     else {
-                        throw new Error('There are no visible elements on the page, can\'t test zoom functionality');
+                        throw new Error('Body must have a visible child element to test zoom functionality');
                     }
+
                 });
         }
 
-        function waitForElementToFinishAnimating(remote, id, wait, pollInterval) {
+        function waitForElementToFinishAnimating(remote, selector, wait, pollInterval) {
             return remote
-                .then(pollUntil(function (id) {
+                .then(pollUntil(function (selector) {
                     var transitionRect,
-                        element = document.getElementById(id),
+                        element = document.querySelector(selector),
                         currentRect = element.getBoundingClientRect();
                     if (window.sitecuesTestingNamespace) {
                         transitionRect = window.sitecuesTestingNamespace.transRect;
                         window.sitecuesTestingNamespace.transRect = currentRect;
                         return (transitionRect.width === currentRect.width &&
-                        transitionRect.height === currentRect.height) ? true : null;
+                            transitionRect.height === currentRect.height) ? true : null;
                     }
                     else {
                         window.sitecuesTestingNamespace = { transRect : currentRect };
                         return null;
                     }
-                }, [id], wait, pollInterval))
+                }, [selector], wait, pollInterval))
                 .execute(function () {
                     window.sitecuesTestingNamespace = undefined;
                 })
         }
 
-        function compareOriginalAndZoomedDOMRects(remote, oldRect, zoomRect) {
-            console.log('oldRect', oldRect);
-            console.log('zoomRect', zoomRect);
-            return remote
-                .then(function () {
-                    assert.isAtMost(
-                        zoomRect.bottom,
-                        oldRect.bottom * 3.1,
-                        'Zoomed element\'s bounding rect\'s bottom property should be at most 3.1 times the original bottom value'
-                    );
-                    assert.isAtMost(
-                        zoomRect.right,
-                        oldRect.right * 3.1,
-                        'Zoomed element\'s bounding rect\'s right property should be at most 3.1 times the original right value'
-                    );
-                    assert.isAtLeast(
-                        zoomRect.bottom,
-                        oldRect.bottom * 1.5,
-                        'Zoomed element\'s bounding rect\'s bottom property should be at least 1.5 times the original bottom value'
-                    );
-                    assert.isAtLeast(
-                        zoomRect.right,
-                        oldRect.right * 1.5,
-                        'Zoomed element\'s bounding rect\'s right property should be at least 1.5 times the original value'
-                    );
-                });
-        }
-
         return {
             waitForElementToFinishAnimating: waitForElementToFinishAnimating,
-            getRectAndIdOfVisibleElementInBody: getRectAndIdOfVisibleElementInBody,
-            compareOriginalAndZoomedDOMRects: compareOriginalAndZoomedDOMRects
+            getRectAndSelectorOfVisibleElementInBody: getRectAndSelectorOfVisibleElementInBody
         };
     }
 );
