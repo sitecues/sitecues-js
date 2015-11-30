@@ -17,7 +17,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site'], function($,
     BG_IMAGE_BONUS = 150,
     MAX_SCORE_CHECK_PIXELS = 120,
     isDebuggingOn,
-    reverseCalbackFn;
+    reverseCallbackFn;
 
   function getImageExtension(src) {
     var imageExtension = src.match(/\.png|\.jpg|\.jpeg|\.gif|\.svg/i);
@@ -266,7 +266,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site'], function($,
   function onImageClassified(img, isReversible) {
     img.setAttribute(REVERSIBLE_ATTR, isReversible);
     if (isReversible) {
-      reverseCalbackFn(img);
+      reverseCallbackFn(img);
     }
   }
 
@@ -350,7 +350,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site'], function($,
                  ',svg' + NOT_CLASSIFIED,
       $root = $(root);
 
-    reverseCalbackFn = reverseCallback;
+    reverseCallbackFn = reverseCallback;
 
     if ($root.is(selector)) {
       classifyImage(root);
