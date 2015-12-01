@@ -24,7 +24,6 @@ define(
 
                         if (node.rect.height > 0 && node.rect.width > 0) {
                             visibleNode = node;
-                            rando--;
                             if (node.element.id) {
                                 searching = false;
                             }

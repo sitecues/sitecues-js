@@ -109,7 +109,7 @@ define(
             });
 
             test('Click on big A to zoom in', function () {
-                return panel.clickLargeA(20);
+                return panel.clickLargeA(100);
             });
         });
     }
