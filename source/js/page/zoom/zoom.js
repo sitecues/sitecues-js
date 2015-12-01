@@ -716,11 +716,14 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'page/
     var hash = document.location.hash,
       EXTRA_SPACE_SCROLL_TOP = 60;
     if (hash) {
-      var elem = document.querySelector(hash + ',[name="' + hash.substring(1) +'"]');
-      if (elem) {
-        elem.scrollIntoView(true);
-        window.scrollBy(0, - EXTRA_SPACE_SCROLL_TOP);
+      try {  // Not all ids are necessarily valid -- protect against that
+        var elem = document.querySelector(hash + ',[name="' + hash.substring(1) + '"]');
+        if (elem) {
+          elem.scrollIntoView(true);
+          window.scrollBy(0, -EXTRA_SPACE_SCROLL_TOP);
+        }
       }
+      catch(ex) {}
     }
   }
 
