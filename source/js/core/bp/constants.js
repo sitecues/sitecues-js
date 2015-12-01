@@ -157,24 +157,24 @@ define([], function() {
   // Elements that are only shown when panel is expanded
   // Attributes
   constants.PANEL_CONTAINER_ATTRS = {
-    'ID'       : constants.BP_CONTAINER_ID,
+    'id'       : constants.BP_CONTAINER_ID,
     // First role "application" tells screen reader to go into focus (not browse) mode
     // Second role "dialog" gives more detail
-    'ROLE'     : 'dialog',
-    'TABINDEX' : -1,
-    'CLASS'    : 'scp-loading'
+    'role'     : 'dialog',
+    'tabindex' : -1,
+    'class'    : 'scp-loading'
   };
 
   constants.BADGE_ATTRS = {
-    'ROLE'      : 'button',
-    'TABINDEX'  : 0,
-    'ARIA-BUSY' : 'false',
-    'DATA-SC-REVERSIBLE': 'false'
+    'role'      : 'button',
+    'tabindex'  : 0,
+    'aria-busy' : 'false',
+    'data-sc-reversible': 'false'
   };
 
   constants.DEFAULT_TOOLBAR_ATTRS = {
-    'ID'   : constants.BADGE_ID,
-    'CLASS': 'scp-toolbar'
+    'id'   : constants.BADGE_ID,
+    'class': 'scp-toolbar'
   };
 
   // Labels
