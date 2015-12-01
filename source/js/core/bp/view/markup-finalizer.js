@@ -4,11 +4,12 @@ define(['core/locale', 'core/platform'], function(locale, platform) {
     return loc.replace(/\#.*/, '');
   }
 
-  // Relative URLs must be full URLS that <base> tag doesn't mess them up!
+  // Relative URLs must be full URLS that a different base doesn't mess them up!
   // Without this fix, markup such as xlink:href="#foo" or filter="url(#foo)" will not work in Firefox
-  // when the source document uses a <base> tag.
-  // Even if the <base> tag points to the default base, we still need to convert hashes, otherwise a page
+  // or recent Chrome, when the source document uses a base.
+  // Even if the base points to the default base, we still need to convert hashes, otherwise a page
   // such as http://wokiss.pl/szkolenia.html will have an invisible badge in some browsers.
+  // Note: the base can be set via <base> tag or http header.
   function convertRelativeUrlsToAbsolute(text) {
     if (!platform.browser.isIE9) {
       var MATCH_URLS = /(href="|url\()(?:#)/g,
