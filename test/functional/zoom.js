@@ -8,13 +8,14 @@ define(
     [
         'intern',
         'test/util/page-viewer',
+        'test/util/keyboard',
         'intern!tdd',                      // the testing interface - defines how we register suites and tests
         'intern/dojo/node!chai',              // helps throw errors to fail tests, based on conditions
         'intern/dojo/node!leadfoot/keys',  // unicode string constants used to control the keyboard
         'page-object',
         'test/util/url'
     ],
-    function (intern, pageViewer, tdd, chai, keys, pageObject, testUrl) {
+    function (intern, pageViewer, keyboard, tdd, chai, keys, pageObject, testUrl) {
 
         'use strict';
 
@@ -59,32 +60,20 @@ define(
                 return pageViewer
                     .getRectAndSelectorOfVisibleElementInBody(remote)
                     .then(function (data) {
+                        assert.strictEqual(
+                            data.length,
+                            2,
+                            data[0]
+                        );
+                        console.log('selector and rect', data);
                         oldRect  = data[0];
                         selector = data[1];
                     })
-                    .execute(function (browser) {
-                        //keyCode property can not be set in chrome
-                        //So in that case we use a generic Event object to trigger keydown
-                        //TODO: Refactor code to avoid using deprecated keyCode property
-
-                        var evt,
-                            EQUALS = 187;
-
-                        if (browser === 'firefox') {
-                            evt = new KeyboardEvent('keydown',
-                                {
-                                    key : '=',
-                                    keyCode : EQUALS,
-                                    bubbles : true
-                                });
-                        }
-                        else {
-                            evt = document.createEvent('Events');
-                            evt.initEvent('keydown', true, true);
-                            evt.keyCode = EQUALS;
-                        }
-                        document.body.dispatchEvent(evt);
-                    }, [capabilities.browserName])
+                    .then(function () {
+                        const EQUALS_CODE = 187,
+                              EQUALS_CHAR = '=';
+                        return keyboard.holdKey(remote, EQUALS_CODE, EQUALS_CHAR);
+                    })
                     .then(function () {
                         return pageViewer.waitForElementToFinishAnimating(remote, selector, 8000, 200);
                     })
@@ -96,7 +85,6 @@ define(
                     })
                     .then(function (zoomRect) {
                         const ARBITRARILY_LARGE_SCALE = 20;
-                        console.log('selector', selector);
                         assert.isAtMost(
                             zoomRect.height,
                             oldRect.height * ARBITRARILY_LARGE_SCALE,

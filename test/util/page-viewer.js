@@ -9,7 +9,7 @@ define(
         function getRectAndSelectorOfVisibleElementInBody(remote) {
             return remote
                 .execute(function () {
-                    var visibleNode, selector, currentElem, childIndex, rando = 15,
+                    var visibleNode, selector, currentElem, childIndex, rando = 21,
                         searching = true;
 
                     function walkTheDOM(node) {
@@ -58,17 +58,17 @@ define(
                     if (document.body.firstElementChild) {
                         walkTheDOM({
                             element: document.body.firstElementChild,
-                            treePosition: [0],
+                            treePosition: [1],
                             rect: null
                         });
                     }
                     else {
-                        throw new Error('Body must have children elements to test zoom functionality');
+                        return ['Body must have children elements to test zoom functionality'];
                     }
 
                     if (visibleNode) {
                         if (visibleNode.element.id) {
-                            return [visibleNode.rect, '#' + visibleNode.id];
+                            return [visibleNode.rect, '#' + visibleNode.element.id];
                         }
                         else {
                             currentElem = visibleNode.element;
@@ -84,7 +84,7 @@ define(
                         }
                     }
                     else {
-                        throw new Error('Body must have a visible child element to test zoom functionality');
+                        return ['Body must have a visible child element to test zoom functionality'];
                     }
 
                 });
