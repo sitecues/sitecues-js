@@ -9,7 +9,12 @@ define(
         function getRectAndSelectorOfVisibleElementInBody(remote) {
             return remote
                 .execute(function () {
-                    var visibleNode, selector, currentElem, childIndex, rando = 21,
+                    //20 body button:nth-child(19)  ***BROKEN
+                    //19 #testId
+                    //18 body div:nth-child(17)
+                    //17 body span:nth-child(16)   ***BROKEN
+                    //16 body a:nth-child(15)      ***BROKEN
+                    var visibleNode, selector, currentElem, childIndex,
                         searching = true;
 
                     function walkTheDOM(node) {
@@ -20,7 +25,7 @@ define(
                         if (node.rect.height > 0 && node.rect.width > 0) {
                             visibleNode = node;
                             rando--;
-                            if (rando === 0) {
+                            if (node.element.id) {
                                 searching = false;
                             }
                         }
@@ -40,8 +45,8 @@ define(
 
                         if (element.firstElementChild && searching) {
                             position = Object.create(node.treePosition);
-                            position[position.length] = 0;
-                            visitNode(element.firstElementChild, position)
+                            position.push(1);
+                            visitNode(element.firstElementChild, position);
                         }
 
                         function visitNode(elem, pos) {
@@ -75,11 +80,11 @@ define(
                             childIndex = visibleNode.treePosition.shift();
                             selector = '';
                             while (childIndex !== undefined) {
-                                selector = currentElem.tagName.toLowerCase()+':nth-child('+childIndex+') ' + selector;
+                                selector = '>' + currentElem.tagName.toLowerCase()+':nth-child('+childIndex+')' + selector;
                                 childIndex = visibleNode.treePosition.shift();
                                 currentElem = currentElem.parentElement;
                             }
-                            return [visibleNode.rect, 'body ' + selector.trim()];
+                            return [visibleNode.rect, 'body' + selector];
 
                         }
                     }
