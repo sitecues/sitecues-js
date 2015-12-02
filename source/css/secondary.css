@@ -20,7 +20,7 @@
 
 /******************* Style pollution ***********************/
 
-.scp-link {
+.scp-link,.scp-link:visited,.scp-link:focus,.scp-link:hover {
   color: #447AC4 !important; /* Same as #scp-wave3 */
 }
 
