@@ -7,15 +7,14 @@
 define(
     [
         'intern',
-        'test/util/page-viewer',
-        'test/util/keyboard',
+        'utility',
         'intern!tdd',                      // the testing interface - defines how we register suites and tests
         'intern/dojo/node!chai',              // helps throw errors to fail tests, based on conditions
         'intern/dojo/node!leadfoot/keys',  // unicode string constants used to control the keyboard
         'page-object',
         'test/util/url'
     ],
-    function (intern, pageViewer, keyboard, tdd, chai, keys, pageObject, testUrl) {
+    function (intern, utility, tdd, chai, keys, pageObject, testUrl) {
 
         'use strict';
 
@@ -24,41 +23,53 @@ define(
             suite  = tdd.suite,
             test   = tdd.test,
             before = tdd.before,
+            afterEach = tdd.afterEach,
             beforeEach = tdd.beforeEach;
 
         suite('Zoom controls', function () {
-            let remote, capabilities, badge, panel;
+            let remote, capabilities, badge, panel, input, viewer, testCount;
 
             // Code to run when the suite starts, before any test.
             before(function () {
+                console.log('intern', intern);
                 remote       = this.remote;
                 capabilities = remote.session._capabilities;
-                badge = pageObject.createBadge(remote);
-                panel = pageObject.createPanel(remote);
+                badge  = pageObject.createBadge(remote);
+                panel  = pageObject.createPanel(remote);
+                input  = utility.createUserInput(remote);
+                viewer = utility.createPageViewer(remote);
+                testCount = 1;
 
                 return remote               // represents the browser being tested
                     .maximizeWindow()             // best effort to normalize window sizes (not every browser opens the same)
                     // NOTE: Page load timeouts are not yet supported in SafariDriver.
                     //       However, we are not testing Safari at the moment.
-                    .setPageLoadTimeout(2000)
+                    .setPageLoadTimeout(4000)
                     .setFindTimeout(2000)
                     .setExecuteAsyncTimeout(7000);  // max ms for executeAsync calls to complete
             });
 
             beforeEach(function () {
                 return remote
-                    .get(testUrl('simple.html'))
+                    //.get(testUrl('simple.html'))
+                    .get('http://www.ticc.com/')
                     .clearCookies()
-                    .execute(function () {
-                        localStorage.clear();
-                    })
+            });
+
+            afterEach(function () {
+                testCount++;
+                return remote
+                    .execute(function (testCount) {
+                        var id = 'SITECUES_TEST_ID_' + testCount;
+                        localStorage.sitecues = "{\"userId\":\"" + id + "\",\"" + id + "\":{}}";
+                    }, [testCount]);
             });
 
             test('Plus key held to zoom up', function () {
                 var oldRect, selector;
 
-                return pageViewer
-                    .getRectAndSelectorOfVisibleElementInBody(remote)
+                return viewer
+                    .getRectAndSelectorOfVisibleElementInBody()
                     .then(function (data) {
                         assert.strictEqual(
                             data.length,
@@ -72,10 +83,10 @@ define(
                     .then(function () {
                         const EQUALS_CODE = 187,
                               EQUALS_CHAR = '=';
-                        return keyboard.holdKey(remote, EQUALS_CODE, EQUALS_CHAR);
+                        return input.holdKey(EQUALS_CODE, EQUALS_CHAR);
                     })
                     .then(function () {
-                        return pageViewer.waitForElementToFinishAnimating(remote, selector, 8000, 200)
+                        return viewer.waitForElementToFinishAnimating(selector, 8000, 200)
                             .execute(function (selector) {
                                 return document.querySelector(selector).getBoundingClientRect();
                             }, [selector])

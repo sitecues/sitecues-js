@@ -74,7 +74,8 @@ define(
                     { name: 'test', location: testDir },
                     { name: UNIT_PKG, location: testDir + 'unit' },
                     { name: FUNC_PKG, location: testDir + 'functional' },
-                    { name: 'page-object', location: testDir + 'page-object', main: 'index' }
+                    { name: 'page-object', location: testDir + 'page-object', main: 'index' },
+                    { name: 'utility', location: testDir + 'util', main: 'index' }
                 ]
             },
 
@@ -103,7 +104,7 @@ define(
             // which do NOT match this pattern will be skipped.
             grep: /Zoom controls - .*/,
 
-            leaveRemoteOpen: true,
+            //leaveRemoteOpen: true,
 
             // Ignore some code from test coverage reports, even if it loads
             // during testing. The paths that match this pattern will NOT
