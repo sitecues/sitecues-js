@@ -6,7 +6,7 @@ define(['core/bp/view/markup-finalizer', 'core/bp/helper', 'core/platform', 'bp-
 var isInitialized,
   svgSecondary =
 '<g id="scp-secondary" class="scp-secondary-only" aria-label="{{more_features}}">\
-  <rect id="scp-secondary-fill" x="1" y="1" width="806" height="133" fill="#fff" stroke-width="0"/>\
+  <rect id="scp-secondary-fill" x="1" y="1" width="806" height="134" fill="#fff" stroke-width="0"/>\
   <g id="scp-bottom-secondary">\
     <use xlink:href="#scp-bottom-def"/>\
     <g id="scp-tips-label" role="button" class="scp-hand-cursor" data-feature="tips" aria-label="{{tips}}">\
