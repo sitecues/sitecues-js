@@ -2,9 +2,10 @@
 define(
     [
         './PageViewer',
-        './UserInput'
+        './UserInput',
+        './Browser'
     ],
-    function (PageViewer, UserInput) {
+    function (PageViewer, UserInput, Browser) {
 
         'use strict';
 
@@ -16,8 +17,8 @@ define(
         //       arbitrary arguments to the constructor.
         function getUtilityObjectCreator(constructor) {
 
-            function createUtilityObject(remote) {
-                return new constructor(remote);
+            function createUtilityObject() {
+                return new constructor(...arguments);
             }
 
             return createUtilityObject;

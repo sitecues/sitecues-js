@@ -11,10 +11,9 @@ define(
         'intern!tdd',                      // the testing interface - defines how we register suites and tests
         'intern/dojo/node!chai',              // helps throw errors to fail tests, based on conditions
         'intern/dojo/node!leadfoot/keys',  // unicode string constants used to control the keyboard
-        'page-object',
-        'test/util/url'
+        'page-object'
     ],
-    function (intern, utility, tdd, chai, keys, pageObject, testUrl) {
+    function (intern, utility, tdd, chai, keys, pageObject) {
 
         'use strict';
 
@@ -27,98 +26,250 @@ define(
             beforeEach = tdd.beforeEach;
 
         suite('Zoom controls', function () {
-            let remote, capabilities, badge, panel, input, viewer, testCount;
+            let remote, browser, badge, panel, input, viewer;
 
             // Code to run when the suite starts, before any test.
             before(function () {
-                console.log('intern', intern);
-                remote       = this.remote;
-                capabilities = remote.session._capabilities;
-                badge  = pageObject.createBadge(remote);
-                panel  = pageObject.createPanel(remote);
-                input  = utility.createUserInput(remote);
-                viewer = utility.createPageViewer(remote);
-                testCount = 1;
-
+                remote  = this.remote;
+                browser = utility.createBrowser(remote);
+                input   = utility.createUserInput(remote, browser);
+                viewer  = utility.createPageViewer(remote, browser);
+                badge   = pageObject.createBadge(remote);
+                panel   = pageObject.createPanel(remote, viewer, input, browser);
                 return remote               // represents the browser being tested
                     .maximizeWindow()             // best effort to normalize window sizes (not every browser opens the same)
                     // NOTE: Page load timeouts are not yet supported in SafariDriver.
                     //       However, we are not testing Safari at the moment.
-                    .setPageLoadTimeout(4000)
+                    .setPageLoadTimeout(6000)
                     .setFindTimeout(2000)
                     .setExecuteAsyncTimeout(7000);  // max ms for executeAsync calls to complete
             });
 
             beforeEach(function () {
                 return remote
-                    //.get(testUrl('simple.html'))
-                    .get('http://www.ticc.com/')
+                    .get('http://ws.sitecues.com')
                     .clearCookies()
+                    .get('http://js.sitecues.com')
+                    .clearCookies()
+                    .get('http://up.sitecues.com')
+                    .clearCookies()
+                    .get('http://www.ticc.com/')
             });
 
             afterEach(function () {
-                testCount++;
                 return remote
-                    .execute(function (testCount) {
-                        var id = 'SITECUES_TEST_ID_' + testCount;
-                        localStorage.sitecues = "{\"userId\":\"" + id + "\",\"" + id + "\":{}}";
-                    }, [testCount]);
+                    .execute(function () {
+                        localStorage.clear();
+                    })
             });
 
-            test('Plus key held to zoom up', function () {
-                var oldRect, selector;
+            test('Plus key held to zoom in', function () {
+                const EQUALS_CODE = 187,
+                      EQUALS_CHAR = '=';
 
-                return viewer
-                    .getRectAndSelectorOfVisibleElementInBody()
-                    .then(function (data) {
-                        assert.strictEqual(
-                            data.length,
-                            2,
-                            data[0]
-                        );
-                        console.log('selector and rect', data);
-                        oldRect  = data[0];
-                        selector = data[1];
-                    })
+                return input
+                    .holdKey(EQUALS_CODE, EQUALS_CHAR)
                     .then(function () {
-                        const EQUALS_CODE = 187,
-                              EQUALS_CHAR = '=';
-                        return input.holdKey(EQUALS_CODE, EQUALS_CHAR);
-                    })
-                    .then(function () {
-                        return viewer.waitForElementToFinishAnimating(selector, 8000, 200)
-                            .execute(function (selector) {
-                                return document.querySelector(selector).getBoundingClientRect();
-                            }, [selector])
-                            .then(function (zoomRect) {
-                                const ARBITRARILY_LARGE_SCALE = 20;
-                                assert.isAtMost(
-                                    zoomRect.height,
-                                    oldRect.height * ARBITRARILY_LARGE_SCALE,
-                                    'Zoomed element\'s bounding rect\'s height should be reasonably small'
-                                );
-                                assert.isAtMost(
-                                    zoomRect.width,
-                                    oldRect.width * ARBITRARILY_LARGE_SCALE,
-                                    'Zoomed element\'s bounding rect\'s width should be reasonably small'
-                                );
-                                assert.isAbove(
-                                    zoomRect.width,
-                                    oldRect.width,
-                                    'Zoomed element\'s bounding width must be greater than original bounding width'
-                                );
-                                assert.isAbove(
-                                    zoomRect.height,
-                                    oldRect.height,
-                                    'Zoomed element\'s bounding height must be greater than original bounding height'
-                                );
-                            });
+                        return viewer
+                            .waitForTransformToStabilize('body', 8000, 200)
+                            .then(function () {
+                                return browser.getTransformAttributeString();
+                            })
+                            .then(function (tform) {
+                                return remote
+                                    .execute(function (transform) {
+                                        return getComputedStyle(document.body)[transform];
+                                    }, [tform])
+                                    .then(function (transform) {
+                                        let matrix = transform.substring(7).split(','),
+                                            xTrans = Number(matrix[0]),
+                                            yTrans = Number(matrix[3]);
+                                        assert.strictEqual(
+                                            xTrans,
+                                            3,
+                                            'Body should be have an x transformation of 3'
+                                        );
+                                        assert.strictEqual(
+                                            yTrans,
+                                            3,
+                                            'Body should have a y transformation of 3'
+                                        );
+                                    })
+                            })
                     });
             });
 
-            test('Click on big A to zoom in', function () {
-                return panel.clickLargeA(100);
+
+            test('Plus key held to zoom in, minus key held to zoom out', function () {
+                return remote
+                    .then(function () {
+                        const EQUALS_CODE = 187,
+                            EQUALS_CHAR = '=';
+                        return input.holdKey(EQUALS_CODE, EQUALS_CHAR);
+                    })
+                    .then(function () {
+                        return viewer
+                            .waitForTransformToStabilize('body', 8000, 200)
+                    })
+                    .then(function () {
+                        const MINUS_CODE = 189,
+                            MINUS_CHAR = '-';
+                        return input
+                            .holdKey(MINUS_CODE, MINUS_CHAR)
+                            .then(function () {
+                                return browser.getTransformAttributeString();
+                            });
+                    })
+                    .then(function (tform) {
+                        return viewer
+                            .waitForTransformToStabilize('body', 8000, 200)
+                            .execute(function (transform) {
+                                return getComputedStyle(document.body)[transform];
+                            }, [tform])
+                            .then(function (transform) {
+                                let matrix = transform.substring(7).split(','),
+                                    xTrans = Number(matrix[0]),
+                                    yTrans = Number(matrix[3]);
+                                assert.strictEqual(
+                                    xTrans,
+                                    1,
+                                    'Body should be have an x transformation of 1'
+                                );
+                                assert.strictEqual(
+                                    yTrans,
+                                    1,
+                                    'Body should have a y transformation of 1'
+                                );
+                            })
+                    });
             });
+
+
+            test('Press big A to zoom in', function () {
+                return panel
+                    .pressLargeA()
+                    .then(function () {
+                        return browser.getTransformAttributeString();
+                    })
+                    .then(function (tform) {
+                        return remote
+                            .execute(function (transform) {
+                                return getComputedStyle(document.body)[transform];
+                            }, [tform])
+                            .then(function (transform) {
+                                let matrix = transform.substring(7).split(','),
+                                    xTrans = Number(matrix[0]),
+                                    yTrans = Number(matrix[3]);
+                                assert.strictEqual(
+                                    xTrans,
+                                    3,
+                                    'Body should be have an x transformation of 3'
+                                );
+                                assert.strictEqual(
+                                    yTrans,
+                                    3,
+                                    'Body should have a y transformation of 3'
+                                );
+                            })
+                    })
+            });
+
+            test('Click on big A to zoom in, click on small A to zoom out', function () {
+                return panel
+                    .pressLargeA()
+                    .then(function () {
+                        return browser.getTransformAttributeString();
+                    })
+                    .then(function (tform) {
+                        return panel
+                            .pressSmallA()
+                            .execute(function (transform) {
+                                return getComputedStyle(document.body)[transform];
+                            }, [tform])
+                            .then(function (transform) {
+                                let matrix = transform.substring(7).split(','),
+                                    xTrans = Number(matrix[0]),
+                                    yTrans = Number(matrix[3]);
+                                assert.strictEqual(
+                                    xTrans,
+                                    1,
+                                    'Body should be have an x transformation of 1'
+                                );
+                                assert.strictEqual(
+                                    yTrans,
+                                    1,
+                                    'Body should have a y transformation of 1'
+                                );
+                            })
+                    });
+            });
+
+            test('Drag slider to fully zoomed position', function () {
+
+                return panel
+                    .dragSlider(3)
+                    .then(function () {
+                        return browser.getTransformAttributeString();
+                    })
+                    .then(function (tform) {
+                        return remote
+                            .execute(function (transform) {
+                                return getComputedStyle(document.body)[transform];
+                            }, [tform])
+                            .then(function (transform) {
+                                let matrix = transform.substring(7).split(','),
+                                    xTrans = Number(matrix[0]),
+                                    yTrans = Number(matrix[3]);
+                                assert.strictEqual(
+                                    xTrans,
+                                    3,
+                                    'Body should be have an x transformation of 3'
+                                );
+                                assert.strictEqual(
+                                    yTrans,
+                                    3,
+                                    'Body should have a y transformation of 3'
+                                );
+                            })
+                    })
+            });
+
+            test('Drag slider to fully zoomed position, drag slider back to zoom 1', function () {
+                return panel
+                    .dragSlider(3)
+                    .then(function () {
+                        return panel
+                            .dragSlider(1);
+                    })
+                    .then(function () {
+                        return browser.getTransformAttributeString();
+                    })
+                    .then(function (tform) {
+                        return remote
+                            .execute(function (transform) {
+                                return getComputedStyle(document.body)[transform];
+                            }, [tform])
+                            .then(function (transform) {
+                                let matrix = transform.substring(7).split(','),
+                                    xTrans = Number(matrix[0]),
+                                    yTrans = Number(matrix[3]);
+                                assert.strictEqual(
+                                    xTrans,
+                                    1,
+                                    'Body should be have an x transformation of 1'
+                                );
+                                assert.strictEqual(
+                                    yTrans,
+                                    1,
+                                    'Body should have a y transformation of 1'
+                                );
+                            })
+                    })
+            })
+
+
+
+
         });
     }
 );

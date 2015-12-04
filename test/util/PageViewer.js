@@ -8,10 +8,12 @@ define(
         'use strict';
         class PageViewer extends Base {
 
-            constructor(remote) {
+            constructor(remote, browser) {
                 super(remote);
+                this.browser = browser;
             }
 
+            /* NOT FUNCTIONAL
             getRectAndSelectorOfVisibleElementInBody() {
                 return this.remote
                     .execute(function () {
@@ -94,8 +96,42 @@ define(
 
                     });
             }
+            */
 
-            waitForBodyToFinishTransforming(wait, pollInterval) {
+
+
+            waitForTransformToStabilize(selector, wait, pollInterval) {
+                const browser = this.browser,
+                      remote  = this.remote;
+
+                return remote
+                    .then(function () {
+                        return browser.getTransformAttributeString();
+                    })
+                    .then(function (tform) {
+                        return remote
+                            .then(pollUntil(function (selector, transform) {
+                                var transitionValue, currentValue,
+                                    element = document.querySelector(selector);
+                                currentValue = getComputedStyle(element)[transform];
+
+                                if (window.sitecuesTestingNamespace) {
+                                    transitionValue = window.sitecuesTestingNamespace.oldTransformValue;
+                                    window.sitecuesTestingNamespace.oldTransformValue = currentValue;
+                                    return (transitionValue && transitionValue === currentValue) ? true : null;
+                                }
+                                else if (currentValue) {
+                                    window.sitecuesTestingNamespace = { oldTransformValue : currentValue };
+                                    return null;
+                                }
+                                else {
+                                    return null;
+                                }
+                            }, [selector, tform], wait, pollInterval))
+                            .execute(function () {
+                                window.sitecuesTestingNamespace = undefined;
+                            })
+                    })
 
             }
 

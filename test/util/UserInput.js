@@ -10,36 +10,43 @@ define(
         'use strict';
 
         class UserInput extends Base {
-            constructor(remote) {
+            constructor(remote, browser) {
                 super(remote);
+                this.browser = browser;
             }
 
             holdKey(keyCode, key) {
-                let browser = this.remote.session._capabilities.browserName;
-
+                const browser = this.browser,
+                      remote  = this.remote;
                 return this.remote
-                    .execute(function (browser, keyCode, key) {
-                        //keyCode property can not be set in chrome
-                        //So in that case we use a generic Event object to trigger keydown
-                        //TODO: Refactor code to avoid using deprecated keyCode property
+                    .then(function () {
+                        return browser.getBrowser();
+                    })
+                    .then(function (browser) {
+                        return remote
+                            .execute(function (browser, keyCode, key) {
+                                //keyCode property can not be set in chrome
+                                //So in that case we use a generic Event object to trigger keydown
+                                //TODO: Refactor code to avoid relying on deprecated keyCode property
 
-                        var evt;
+                                var evt;
 
-                        if (browser === 'firefox') {
-                            evt = new KeyboardEvent('keydown',
-                                {
-                                    key : key,
-                                    keyCode : keyCode,
-                                    bubbles : true
-                                });
-                        }
-                        else {
-                            evt = document.createEvent('Events');
-                            evt.initEvent('keydown', true, true);
-                            evt.keyCode = keyCode;
-                        }
-                        document.body.dispatchEvent(evt);
-                    }, [browser, keyCode, key]);
+                                if (browser === 'firefox') {
+                                    evt = new KeyboardEvent('keydown',
+                                        {
+                                            key : key,
+                                            keyCode : keyCode,
+                                            bubbles : true
+                                        });
+                                }
+                                else {
+                                    evt = document.createEvent('Events');
+                                    evt.initEvent('keydown', true, true);
+                                    evt.keyCode = keyCode;
+                                }
+                                document.body.dispatchEvent(evt);
+                            }, [browser, keyCode, key]);
+                    })
             }
 
         }
