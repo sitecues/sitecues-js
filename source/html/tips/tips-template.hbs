@@ -1,88 +1,90 @@
-<sc-card id="scp-zoom-card" aria-labelledby="scp-zoom-tab">
-  <sc-center class="scp-tabbable" role="document">
-    <sc-h2 id="scp-use-slider-heading">
-      {{slider.howto}}
-    </sc-h2>
-    <sc-p>
-      <sc-span id="scp-demo-slider">
-        <sc-span id="scp-demo-slider-bar"></sc-span>
-        <sc-span id="scp-demo-slider-thumb"></sc-span>
-      </sc-span>
-    </sc-p>
-  </sc-center>
-</sc-card>
-
-<sc-card id="scp-zoom-keys-card" aria-labelledby="scp-zoom-keys-tab" data-advanced>
-  <sc class="scp-tabbable" role="document">
-    <sc-center style="padding:5px">
-      <sc-p>{{zoom_keys.long_press}}</sc-p>
-      <sc-h2>
-        <sc-span aria-label="{{zoom_keys.howto}}">
-          <sc-kbd id="scp-demo-zoom-minus">&#65293;</sc-kbd>
-          &nbsp;/&nbsp;
-          <sc-kbd id="scp-demo-zoom-plus">+</sc-kbd>
-        </sc-span>
+<sc-cards id="scp-tips" class="scp-if-tips scp-transition-opacity scp-secondary-feature">
+  <sc-card id="scp-zoom-card" aria-labelledby="scp-zoom-tab">
+    <sc-center class="scp-tabbable" role="document">
+      <sc-h2 id="scp-use-slider-heading">
+        {{slider.howto}}
       </sc-h2>
+      <sc-p>
+        <sc-span id="scp-demo-slider">
+          <sc-span id="scp-demo-slider-bar"></sc-span>
+          <sc-span id="scp-demo-slider-thumb"></sc-span>
+        </sc-span>
+      </sc-p>
     </sc-center>
+  </sc-card>
+
+  <sc-card id="scp-zoom-keys-card" aria-labelledby="scp-zoom-keys-tab" data-advanced="true">
+    <sc class="scp-tabbable" role="document">
+      <sc-center style="padding:5px">
+        <sc-p>{{zoom_keys.long_press}}</sc-p>
+        <sc-h2>
+          <sc-span aria-label="{{zoom_keys.howto}}">
+            <sc-kbd id="scp-demo-zoom-minus">&#65293;</sc-kbd>
+            &nbsp;/&nbsp;
+            <sc-kbd id="scp-demo-zoom-plus">+</sc-kbd>
+          </sc-span>
+        </sc-h2>
+      </sc-center>
+    </sc>
+  </sc-card>
+
+  <sc-card id="scp-highlight-card" aria-labelledby="scp-highlight-tab">
+    <sc class="scp-tabbable" role="document">
+      <sc-h2>{{highlight.purpose}}</sc-h2>
+      <sc-p>{{highlight.step1}}</sc-p>
+      <sc-p>{{highlight.step2}}</sc-p>
+      <sc-p class="scp-only-screenreaders">{{highlight.keys}}</sc-p>
+    </sc>
+  </sc-card>
+
+  <sc-card id="scp-lens-card" aria-labelledby="scp-lens-tab">
+    <sc class="scp-tabbable" role="document">
+      <sc-h2>{{lens.purpose}}</sc-h2>
+      <sc-p>{{lens.step1}}</sc-p>
+      <sc-p>{{lens.step2}} &nbsp;<sc-kbd class="scp-space" id="scp-demo-lens-spacebar">{{spacebar}}</sc-kbd></sc-p>
+    </sc>
+  </sc-card>
+
+  <sc-card id="scp-speech-card" aria-labelledby="scp-speech-tab">
+    <sc class="scp-tabbable" role="document">
+      <sc-h2>{{speech.purpose}}</sc-h2>
+      <sc-p>{{speech.step1}} &nbsp;<sc-span id="scp-speech-button-demo"></sc-span></sc-p>
+      <sc-p>{{speech.step2}} &nbsp;<sc-kbd class="scp-space" id="scp-demo-speech-spacebar">{{spacebar}}</sc-kbd> {{spech.step2-after}}</sc-p>
+    </sc>
+  </sc-card>
+
+  <sc-card id="scp-full-guide-card" aria-labelledby="scp-full-guide-tab">
+    <sc-h2 class="scp-icon-menuitem">
+      <sc-button id="scp-guide-icon" class="scp-hand-cursor" aria-labelledby="scp-guide-label" data-target="#"></sc-button>
+      <sc-link id="scp-guide-label" data-target="#">{{guide.full.label}}</sc-link>
+      <sc>{{guide.full.action}}</sc>
+    </sc-h2>
+    <sc-h2 class="scp-icon-menuitem">
+      <sc-button id="scp-kbd-icon" class="scp-hand-cursor" aria-labelledby="scp-kbd-label" data-target="##keyboard"></sc-button>
+      <sc-link id="scp-kbd-label" data-target="##keyboard">{{guide.keyboard.label}}</sc-link>
+      <sc>{{guide.keyboard.action}}</sc>
+    </sc-h2>
+  </sc-card>
+
+  <!-- Header -->
+  <sc-h1 class="scp-card-header">{{title}}</sc-h1>
+
+  <sc role="tablist" class="scp-card-chooser">
+    <sc-tab id="scp-zoom-tab" data-target="scp-zoom-card">{{cards.Zoom}}</sc-tab>
+    <sc-tab id="scp-highlight-tab" data-target="scp-highlight-card">{{cards.Highlight}}</sc-tab>
+    <sc-tab id="scp-lens-tab" data-target="scp-lens-card">{{cards.Lens}}</sc-tab>
+    <sc-tab id="scp-speech-tab" data-target="scp-speech-card">{{cards.Speech}}</sc-tab>
+    <sc-tab id="scp-full-guide-tab" data-target="scp-full-guide-card">{{cards.More}}</sc-tab>
   </sc>
-</sc-card>
 
-<sc-card id="scp-highlight-card" aria-labelledby="scp-highlight-tab">
-  <sc class="scp-tabbable" role="document">
-    <sc-h2>{{highlight.purpose}}</sc-h2>
-    <sc-p>{{highlight.step1}}</sc-p>
-    <sc-p>{{highlight.step2}}</sc-p>
-    <sc-p class="scp-only-screenreaders">{{highlight.keys}}</sc-p>
+  <sc class="scp-card-indicator"></sc>
+
+  <!-- Fake demo page -->
+  <sc id="scp-demo-page">
+    <sc id="scp-demo-page-contents">
+      <sc-p><sc-span id="scp-demo-para">{{demopage.welcome}}</sc-span></sc-p>
+      <sc-span id="scp-demo-mouse"></sc-span>
+      <sc-p>{{demopage.blurb}}</sc-p>
+    </sc>
   </sc>
-</sc-card>
-
-<sc-card id="scp-lens-card" aria-labelledby="scp-lens-tab">
-  <sc class="scp-tabbable" role="document">
-    <sc-h2>{{lens.purpose}}</sc-h2>
-    <sc-p>{{lens.step1}}</sc-p>
-    <sc-p>{{lens.step2}} &nbsp;<sc-kbd class="scp-space" id="scp-demo-lens-spacebar">{{spacebar}}</sc-kbd></sc-p>
-  </sc>
-</sc-card>
-
-<sc-card id="scp-speech-card" aria-labelledby="scp-speech-tab">
-  <sc class="scp-tabbable" role="document">
-    <sc-h2>{{speech.purpose}}</sc-h2>
-    <sc-p>{{speech.step1}} &nbsp;<sc-span id="scp-speech-button-demo"></sc-span></sc-p>
-    <sc-p>{{speech.step2}} &nbsp;<sc-kbd class="scp-space" id="scp-demo-speech-spacebar">{{spacebar}}</sc-kbd> {{spech.step2-after}}</sc-p>
-  </sc>
-</sc-card>
-
-<sc-card id="scp-full-guide-card" aria-labelledby="scp-full-guide-tab">
-  <sc-h2 class="scp-icon-menuitem">
-    <sc-button id="scp-guide-icon" class="scp-hand-cursor" aria-labelledby="scp-guide-label" data-target="#"></sc-button>
-    <sc-link id="scp-guide-label" data-target="#">{{guide.full.label}}</sc-link><br/>
-    <sc-span>{{guide.full.action}}</sc-span>
-  </sc-h2>
-  <sc-h2 class="scp-icon-menuitem">
-    <sc-button id="scp-kbd-icon" class="scp-hand-cursor" aria-labelledby="scp-kbd-label" data-target="##keyboard"></sc-button>
-    <sc-link id="scp-kbd-label" data-target="##keyboard">{{guide.keyboard.label}}</sc-link><br/>
-    <sc-span>{{guide.keyboard.action}}</sc-span>
-  </sc-h2>
-</sc-card>
-
-<!-- Header -->
-<sc-h1 class="scp-card-header">{{title}}</sc-h1>
-
-<sc role="tablist" class="scp-card-chooser">
-  <sc-tab id="scp-zoom-tab" data-target="scp-zoom-card">{{cards.Zoom}}</sc-tab>
-  <sc-tab id="scp-highlight-tab" data-target="scp-highlight-card">{{cards.Highlight}}</sc-tab>
-  <sc-tab id="scp-lens-tab" data-target="scp-lens-card">{{cards.Lens}}</sc-tab>
-  <sc-tab id="scp-speech-tab" data-target="scp-speech-card">{{cards.Speech}}</sc-tab>
-  <sc-tab id="scp-full-guide-tab" data-target="scp-full-guide-card">{{cards.More}}</sc-tab>
-</sc>
-
-<sc class="scp-card-indicator"></sc>
-
-<!-- Fake demo page -->
-<sc id="scp-demo-page">
-  <sc id="scp-demo-page-contents">
-    <sc-p><sc-span id="scp-demo-para">{{demopage.welcome}}</sc-span></sc-p>
-    <sc-span id="scp-demo-mouse"></sc-span>
-    <sc-p>{{demopage.blurb}}</sc-p>
-  </sc>
-</sc>
+</sc-cards>
