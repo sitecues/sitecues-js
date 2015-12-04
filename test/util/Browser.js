@@ -26,15 +26,15 @@ define(
             getTransformAttributeString() {
                 //TODO: Check the actual strings passed to capabilities object for IE, chrome, safari
                 switch (this.browser) {
-                    case 'firefox':
-                    case 'internet explorer':
-                    case 'edge':
-                        return 'transform';
+                    //case 'firefox':
+                    //case 'internet explorer':
+                    //case 'edge':
+                    //    return 'transform';
                     case 'chrome':
                     case 'safari':
                         return 'webkitTransform';
                     default:
-                        return 'UNRECOGNIZED BROWSER';
+                        return 'transform';
                 }
             }
 
