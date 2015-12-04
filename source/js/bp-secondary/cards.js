@@ -21,20 +21,20 @@ define(['core/bp/constants', 'core/bp/helper', 'core/locale', 'core/bp/model/sta
     xhr.get({
       url: panelUrl,
       success: function(html) {
-        var panelElement = document.createElement('sc-cards'),
-          tabStrip;
-        panelElement.id = 'scp-' + panelName;
-        panelElement.className = 'scp-if-' + panelName + ' scp-transition-opacity scp-secondary-feature';
-        panelElement.innerHTML = addSemanticSugar(html);
+        var tabStrip,
+          finalHTML = addSemanticSugar(html),
+          panelElement,
+          htmlContainer = document.createElement('div'); // Just a container where we can parse out the desired contents
 
-        getContainer().appendChild(panelElement);
+        htmlContainer.innerHTML = finalHTML;
+        panelElement = htmlContainer.firstElementChild;
         removeUnsupportedContent(panelElement);
+        getContainer().appendChild(panelElement);
 
         tabStrip = panelElement.querySelector('.scp-card-chooser');
         if (tabStrip.childElementCount > 3) {
           fixTabStripSpacing(tabStrip);
         }
-
 
         toggleCardActive(panelElement.firstElementChild, true);
 
@@ -59,7 +59,7 @@ define(['core/bp/constants', 'core/bp/helper', 'core/locale', 'core/bp/model/sta
     return html
       .replace(/(<sc-button )/g, '<sc-button role="button" ')
       .replace(/<sc-menuitem /g, '<sc-menuitem role="button"' + INTERACTIVE+ '" ')
-      .replace(/<sc-card /g, '<sc-card role="tabpanel"')
+      .replace(/<sc-card /g, '<sc-card role="tabpanel" ')
       .replace(/<sc-link /g, '<sc-link role="button"' + INTERACTIVE+ '" ')
       .replace(/<sc-tab /g, '<sc-link role="tab" aria-selected="false"' + INTERACTIVE+ '" ')
       .replace(/<\/sc-tab/g, '</sc-link')
