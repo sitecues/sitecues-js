@@ -68,7 +68,7 @@ define([], function() {
   }
 
   /**
-   * Set Local Storage data | siteues:userID namespace.
+   * Set Local Storage data | sitecues:userID namespace.
    * @param {Object} data
    * @returns {void}
    */
@@ -82,7 +82,7 @@ define([], function() {
   }
 
   /**
-   * Update LocalStorage data in key, value format | siteues:userID namespace.
+   * Update LocalStorage data in key, value format | sitecues:userID namespace.
    * @param {String} lsByUserId
    * @param {String} key
    * @param {String} value
@@ -100,7 +100,7 @@ define([], function() {
   }
 
   /**
-   * Get LocalStorage data | siteues:userID namespace.
+   * Get LocalStorage data | sitecues:userID namespace.
    * @returns {DOMString}
    */
   function getPrefs() {

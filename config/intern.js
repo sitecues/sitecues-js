@@ -74,7 +74,8 @@ define(
                     { name: 'test', location: testDir },
                     { name: UNIT_PKG, location: testDir + 'unit' },
                     { name: FUNC_PKG, location: testDir + 'functional' },
-                    { name: 'page-object', location: testDir + 'page-object', main: 'index' }
+                    { name: 'page-object', location: testDir + 'page-object', main: 'index' },
+                    { name: 'utility', location: testDir + 'util', main: 'index' }
                 ]
             },
 

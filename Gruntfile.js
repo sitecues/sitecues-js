@@ -9,7 +9,7 @@ module.exports = function (grunt) {
             // which can be used internally...
             pkg : grunt.file.readJSON('package.json'),
 
-            // Clean configuration, used to whipe out temporary build data,
+            // Clean configuration, used to wipe out temporary build data,
             // for more robust and reliable builds...
             clean : {
                 // options : {
