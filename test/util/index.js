@@ -1,4 +1,3 @@
-// API for creating any page object.
 define(
     [
         './PageViewer',

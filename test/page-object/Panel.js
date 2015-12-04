@@ -1,10 +1,9 @@
 define(
     [
         './Base',
-        'utility',
         'core/bp/constants'
     ],
-    function (Base, utility, constants) {
+    function (Base, constants) {
         'use strict';
 
         class Panel extends Base {
@@ -86,7 +85,7 @@ define(
             }
 
             pressZoomControl(selector) {
-                const viewer   = this.viewer;
+                const viewer = this.viewer;
                 return this.remote
                     .findByCssSelector(selector)
                     .moveMouseTo()

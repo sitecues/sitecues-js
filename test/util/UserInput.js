@@ -49,6 +49,10 @@ define(
                     })
             }
 
+            wheelUp() {
+
+            }
+
         }
 
         return UserInput;

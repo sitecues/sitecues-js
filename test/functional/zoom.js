@@ -104,7 +104,7 @@ define(
                 return remote
                     .then(function () {
                         const EQUALS_CODE = 187,
-                            EQUALS_CHAR = '=';
+                              EQUALS_CHAR = '=';
                         return input.holdKey(EQUALS_CODE, EQUALS_CHAR);
                     })
                     .then(function () {
