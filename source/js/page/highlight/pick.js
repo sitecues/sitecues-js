@@ -179,7 +179,11 @@ define(['$', 'page/util/common', 'core/conf/user/manager', 'core/conf/site',
 
   function getCandidates(startElement) {
     var allAncestors = $(startElement).parentsUntil('body'),
-      validAncestors = allAncestors.not(allAncestors.has('#sitecues-badge'));
+      visibleAncestors = getVisibleAncestors(allAncestors),
+      validAncestors = visibleAncestors.not(visibleAncestors.has('#sitecues-badge'));
+    if (validAncestors.length === 0) {
+      return null;
+    }
     if (lastPicked) {
       var isAncestorOfLastPicked = false;
       // Remove ancestors of the last picked item from possible selection
@@ -194,8 +198,20 @@ define(['$', 'page/util/common', 'core/conf/user/manager', 'core/conf/site',
         }
       });
     }
-
     return [startElement].concat($.makeArray(validAncestors));
+  }
+
+  function getVisibleAncestors (ancestors){
+    var opacity = null,
+      index = ancestors.length;
+    while (index --) {
+      opacity = traitcache.getStyleProp(ancestors[index], 'opacity');
+      if (opacity === '0') {
+        ancestors = ancestors.slice(index + 1, ancestors.length - 1);
+        break;
+      }
+    }
+    return ancestors;
   }
 
   function getImageForMapArea(element) {
