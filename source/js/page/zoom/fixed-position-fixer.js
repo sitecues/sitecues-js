@@ -3,15 +3,15 @@
  * for the current zoom and scroll position in the window.
  * It is used as little as possible because it runs code on scroll events, which can slow down scrolling significantly.
  */
-define(['$', 'page/zoom/zoom', 'core/platform', 'page/style-service/style-service' ],
-  function ($, zoomMod, platform, styleService) {
+define(['$', 'page/zoom/zoom', 'core/platform', 'core/conf/site', 'page/style-service/style-service' ],
+  function ($, zoomMod, platform, site, styleService) {
 
     var isOn = false,
       toolbarHeight = 0,
       fixedSelector            = null,   //CSS selectors & properties that specify position:fixed
       lastAdjustedElements     = $(),
       autoRefreshTimer,         // Refresh fixed elements every now and then even if no scroll, e.g. a user's click may have made a fixed lightbox appear
-      AUTO_REFRESH_MS = 500,   // How often to refresh the fixed elements even without a scroll
+      autoRefreshMs = site.get('fixedPositionRefreshMs'),   // How often to refresh the fixed elements even without a scroll (or falsey if not at all). Recommended setting is 500
       MAX_ZOOM_FIXED_CONTENT = 1.8,
       // These browsers need the position of fixed elements to be adjusted on the fly.
       // Note: we avoid this in Safari on Mac and Chrome on Windows because of general shakiness.
@@ -47,7 +47,13 @@ define(['$', 'page/zoom/zoom', 'core/platform', 'page/style-service/style-servic
           transform: ''
         };
 
-        if ($(element).css('position') === 'fixed') {
+        var computedStyle = getComputedStyle(element);
+
+        if (computedStyle.display === 'none') {
+          return; // Don't bother with hidden elements, we don't know their coordinates
+        }
+
+        if (computedStyle.position === 'fixed') {
           if (SHOULD_POSITION_FIXED_ELEMENTS_ON_SCROLL ||
             (SHOULD_POSITION_FIXED_ELEMENTS_ABOVE_TOOLBAR && toolbarHeight && element.offsetTop < toolbarHeight)) {
             css.transform = 'translate3d(' + offsetLeft + 'px, ' + offsetTop + 'px,0px) ';
@@ -119,7 +125,7 @@ define(['$', 'page/zoom/zoom', 'core/platform', 'page/style-service/style-servic
 
     function refreshTimer() {
       refresh();
-      autoRefreshTimer = setTimeout(refreshTimer, AUTO_REFRESH_MS);
+      autoRefreshTimer = setTimeout(refreshTimer, autoRefreshMs);
     }
 
     /**
@@ -177,7 +183,10 @@ define(['$', 'page/zoom/zoom', 'core/platform', 'page/style-service/style-servic
         if (SHOULD_POSITION_FIXED_ELEMENTS_ON_SCROLL) {
           $(window).on('scroll', refresh);
         }
-        autoRefreshTimer = setTimeout(refreshTimer, AUTO_REFRESH_MS);
+
+        if (autoRefreshMs) {
+          autoRefreshTimer = setTimeout(refreshTimer, autoRefreshMs);
+        }
       }
 
       refresh();
