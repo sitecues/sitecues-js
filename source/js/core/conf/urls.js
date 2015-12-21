@@ -1,17 +1,12 @@
 define(['core/conf/site'], function(site) {
 
   var apiDomain,  // Either ws.sitecues.com/ or ws.dev.sitecues.com/
-    prefsDomain,  // Either up.sitecues.com/ or up.dev.sitecues.com/
+    scriptOrigin,  // Either http[s]://js.sitecues.com/ or http[s]://js.dev.sitecues.com/
     BASE_RESOURCE_URL = sitecues.requirejs.nameToUrl('').split('/js/')[0] + '/';
 
   // URL string for API calls
   function getApiUrl(restOfUrl) {
     return '//' + apiDomain + 'sitecues/api/' + restOfUrl;
-  }
-
-  // URL string for preferences server
-  function getPrefsUrl(restOfUrl) {
-    return '//' + prefsDomain + restOfUrl;
   }
 
   // URL string for sitecues.js
@@ -48,7 +43,7 @@ define(['core/conf/site'], function(site) {
     // Extract the path of the pathname.
     pathname = parser.pathname;
 
-    // IE9 versions pathname does not contains first slash whereas in other browsers it does.
+    // IE9 versions pathname does not contain first slash whereas in other browsers it does.
     // So let's unify pathnames. Since we need '/' anyway, just add it to pathname when needed.
     if (pathname.indexOf('/') > 0) {
       pathname = '/' + pathname;
@@ -57,7 +52,8 @@ define(['core/conf/site'], function(site) {
 
     return {
       path: pathname.substring(0, lastSlashIndex),
-      hostname: parser.hostname
+      hostname: parser.hostname,
+      origin: parser.origin
     };
   }
 
@@ -87,16 +83,20 @@ define(['core/conf/site'], function(site) {
     return getParsedLibraryURL().hostname === 'js.sitecues.com';
   }
 
+  function getScriptOrigin() {
+    return scriptOrigin;
+  }
+
   function init() {
     var domainEnding = isProduction() ? '.sitecues.com' : '.dev.sitecues.com';
     apiDomain = 'ws' + domainEnding + '/';
-    prefsDomain = 'up' + domainEnding + '/';
+    scriptOrigin = getParsedLibraryURL().origin;
   }
 
   return {
     init: init,
     getApiUrl: getApiUrl,
-    getPrefsUrl: getPrefsUrl,
+    getScriptOrigin: getScriptOrigin,
     isValidLibraryUrl: isValidLibraryUrl,
     getRawScriptUrl: getRawScriptUrl,
     resolveResourceUrl: resolveResourceUrl,

@@ -45,7 +45,6 @@ define(
           confData = conf.data(),
           coordinates,
           ajaxUrls = {  // Set the server URLs for retrieving the status of our services (version info, etc.)
-            up : urls.getPrefsUrl('status'),
             ws : urls.getApiUrl('util/status')
           },
           setting,
@@ -60,7 +59,6 @@ define(
         userAgent  : navigator.userAgent,
         version    : {
           js : sitecues.version,
-          up : null,
           ws : null
         },
         config     : site.getSiteConfig(),
@@ -109,8 +107,7 @@ define(
 
       // Defer the ajax calls so we can respond when both are complete.
       function readyCheck() {
-        var ready = typeof info.version.up === 'string' &&
-                    typeof info.version.ws === 'string';
+        var ready = typeof info.version.ws === 'string';
 
         if (ready) {
           // Publish the status for later retrieval.
@@ -118,20 +115,6 @@ define(
           callback(info);
         }
       }
-
-      xhr.getJSON({
-        url:      ajaxUrls.up,
-        success: function (response) {
-          // Set the version based on the AJAX response object
-          info.version.up = response.version;
-          readyCheck();
-        },
-        error: function () {
-          // Set an error message if the AJAX object did not return
-          info.version.up = 'Error fetching UP version from service URL';
-          readyCheck();
-        }
-      });
 
       xhr.getJSON({
         type:     'GET',

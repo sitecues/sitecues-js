@@ -1,5 +1,5 @@
-define(['page/zoom/zoom', 'page/highlight/move-keys', 'core/conf/user/manager', 'core/conf/user/server', 'page/highlight/highlight'],
-  function(zoomMod, moveKeys, conf, server, mh) {
+define(['page/zoom/zoom', 'page/highlight/move-keys', 'core/conf/user/manager', 'page/highlight/highlight'],
+  function(zoomMod, moveKeys, conf, mh) {
   return {
     decreaseZoom: function(event) {
       zoomMod.init(true);
@@ -31,7 +31,7 @@ define(['page/zoom/zoom', 'page/highlight/move-keys', 'core/conf/user/manager', 
           audio.stopAudio();
 
           if (event.shiftKey) {
-            server.reset();
+            conf.reset();
             audio.playEarcon('quit-organ');
           }
         });

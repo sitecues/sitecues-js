@@ -146,7 +146,7 @@ define([], function() {
     return mainBrowserLang;
   }
 
-  function init() {
+  function init(onReadyCallback) {
 
     mainBrowserLang = navigator.language || navigator.userLanguage || navigator.browserLanguage || DEFAULT_LANG;
 
@@ -157,7 +157,7 @@ define([], function() {
     // Hack: sitecues.require() is used instead of require() so that we can use it with a variable name
     sitecues.require([ langModuleName ], function(langEntries) {
       translations = langEntries;
-      sitecues.emit('locale/did-complete');
+      onReadyCallback();
     });
 
   }
