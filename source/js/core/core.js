@@ -22,8 +22,9 @@ define(['core/conf/site', 'core/conf/urls', 'core/run'], function (site, urls, r
   // we risk overwriting the methods of the live library.
   function exportPublicFields() {
     // Events
-    sitecues.on = on;  // Listen to an event
-    sitecues.emit = emit;   // Emit an event
+    sitecues.on = on;      // Start listening for an event.
+    sitecues.emit = emit;  // Tell listeners about an event.
+    sitecues.off = off;    // Stop listening for an event.
 
     // Get info about the currently running sitecues client
     sitecues.status = getStatus;
