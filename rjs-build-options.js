@@ -93,8 +93,7 @@
         'core/conf/urls',
         'core/conf/site',
         'core/conf/user/manager',
-        'core/conf/user/server',
-        'core/conf/user/localstorage'
+        'core/conf/user/storage'
       ]
     },
     {

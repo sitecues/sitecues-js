@@ -15,7 +15,7 @@
  *    }
  * }
  */
-define([], function() {
+define(['core/conf/user/storage-backup', 'core/util/uuid'], function(storageBackup, uuid) {
 
   /*
    * Get value of Local Storage's "sitecues" key which is the outer namespace.
@@ -27,11 +27,16 @@ define([], function() {
 
   /*
    * Set value of Local Storage's "sitecues" key which is the outer namespace.
-   * @returns {DOMString}
    */
-  function setSitecuesLs(data) {
-    localStorage.setItem('sitecues', JSON.stringify(data || {}));
-    return getSitecuesLs();
+  function setSitecuesLs(data, doBackup) {
+    var dataString = JSON.stringify(data || {});
+    localStorage.setItem('sitecues', dataString);
+    if (doBackup) {
+      // Save in storage backup
+      storageBackup.init(function() {
+        storageBackup.save(dataString);
+      });
+    }
   }
 
   /*
@@ -40,6 +45,7 @@ define([], function() {
    */
   function clear() {
     localStorage.removeItem('sitecues');
+    storageBackup.clear();
   }
 
   /*
@@ -68,20 +74,6 @@ define([], function() {
   }
 
   /**
-   * Set Local Storage data | sitecues:userID namespace.
-   * @param {Object} data
-   * @returns {void}
-   */
-  function setPrefs(userPrefData) {
-    var sitecuesLs = JSON.parse(getSitecuesLs());
-    sitecuesLs[getUserId()] = userPrefData || '{}';
-
-    // Set the initial data under userId namespace.
-    setSitecuesLs(sitecuesLs);
-    if (SC_DEV) { console.log('Setting the data in LocalStorage: ' + JSON.stringify(sitecuesLs)); }
-  }
-
-  /**
    * Update LocalStorage data in key, value format | sitecues:userID namespace.
    * @param {String} lsByUserId
    * @param {String} key
@@ -95,8 +87,7 @@ define([], function() {
     userPrefData[key] = value;
     sitecuesLs[getUserId()] = userPrefData;
     // Save in LocalStorage.
-    setSitecuesLs(sitecuesLs);
-    //if (SC_DEV) { console.log('Updating the data in LocalStorage: ' + JSON.stringify(sitecuesLs)); }
+    setSitecuesLs(sitecuesLs, true);
   }
 
   /**
@@ -109,11 +100,35 @@ define([], function() {
     return typeof prefs === 'object' ? prefs : {};
   }
 
+  function init(onReadyCallbackFn) {
+    if (getUserId()) {
+      // Has local storage sitecues prefs for this website
+      onReadyCallbackFn(getPrefs());
+      return;
+    }
+
+    // Could not find local storage for sitecues prefs
+    // Try cross-domain backup storage
+    storageBackup.init(function() {
+      storageBackup.load(function(data) {
+        if (data) {
+          setSitecuesLs(data);
+        }
+        if (!getUserId()) {
+          // No user id: generate one
+          var userId = uuid();
+          setUserId(userId);
+        }
+        onReadyCallbackFn(getPrefs());
+      });
+    });
+  }
+
   return {
+    init: init,
     clear: clear,
     getUserId: getUserId,
     setUserId: setUserId,
-    setPrefs: setPrefs,
     setPref: setPref,
     getPrefs: getPrefs
   };

@@ -3,9 +3,9 @@
  * properties represent the state of the user session, and are
  * persisted in the user preferences data store.
  */
-define([], function () {
+define(['core/conf/user/storage'], function (storage) {
   // private variables
-  var storedData = {},
+  var storedData = {},   // We cache in prefs in storedData for speed -- getting from localStorage is slower
       handlers  = {},
       listeners = {};
 
@@ -55,14 +55,8 @@ define([], function () {
       }
     }
 
-    // notify each update listeners about changes
-    list = listeners['*'];
-    if (list) {
-      l = list.length;
-      for (i = 0; i < l; i++) {
-        list[i](key, value);
-      }
-    }
+    // Save the data from localStorage: User ID namespace.
+    storage.setPref(key, value);
   }
 
   // define key handler
@@ -81,10 +75,24 @@ define([], function () {
     return storedData;
   }
 
+  // Reset all settings as if it is a new user
+  function reset() {
+    storage.clear();
+  }
+
+  function init(onReadyCallbackFn) {
+    storage.init(function(settings) {
+      data(settings);
+      onReadyCallbackFn();
+    });
+  }
+
   return {
+    init: init,
     get: get,
     set: set,
     def: def,
-    data: data
+    data: data,
+    reset: reset
   };
 });

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<body>
+<script type="text/javascript">
+  (function() {
+    // If event.data is falsey, we are retrieving the data
+    // If event.data is defined, we are saving the data
+    function handleRequest(event) {
+      if (event.data) {
+        // Saving data
+        localStorage.setItem('sitecues', event.data);
+      }
+      else {
+        // Retrieving data
+        var value = localStorage.getItem('sitecues');
+        event.source.postMessage(value, event.origin);
+      }
+    }
+
+    window.addEventListener('message', handleRequest);
+  })();
+</script>
+</body>
+</html>

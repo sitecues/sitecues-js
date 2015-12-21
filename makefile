@@ -219,7 +219,10 @@ resources: html css earcons images
 #	Use handlebars to localize the html
 ################################################################################
 html: mkdirs
+# Compile localized html templates
 	node precompile/compile-html.js $(resource-dir)/html
+# Non-localized html (just copy)
+	cp source/html/*.html $(resource-dir)/html
 
 ################################################################################
 # TARGET: css

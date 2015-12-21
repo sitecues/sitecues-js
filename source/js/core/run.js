@@ -8,8 +8,8 @@
  *   4. Fire sitecues ready callback and metric
  */
 
-define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/conf/user/manager', 'core/metric', 'core/platform', 'core/bp/bp'],
-  function (userId, confUserSettingsServer, locale, conf, metric, platform, bp) {
+define(['core/conf/user/manager', 'core/locale', 'core/metric', 'core/platform', 'core/bp/bp'],
+  function (conf, locale, metric, platform, bp) {
   var
     numPrereqsToComplete,
     isZoomInitialized,
@@ -196,7 +196,7 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
     window.removeEventListener('keyup', onKeyUp);
   }
 
-  function onSettingsOrLocaleComplete() {
+  function onPrereqComplete() {
     if (--numPrereqsToComplete === 0) {
       // Both settings AND locale are now complete ... onto BP!!
       bp.init(initPageFeatureListeners);
@@ -205,25 +205,14 @@ define(['core/conf/user/user-id', 'core/conf/user/server', 'core/locale', 'core/
 
   return function() {
 
-    // Load and initialize the prereqs before doing anything else
-    numPrereqsToComplete = 2;  // User settings (conf) and locale
-
-    // Listen to completion events (we will initialize the rest of sitecues after all of these events fire)
-    sitecues.on('user-id/did-complete', function() {
-      // Ensure that the zoom level is a number. We further define it if zoom is turned on, in zoom.js
-      conf.def('zoom', parseFloat);
-      // Get user settings
-      confUserSettingsServer.init();
-    });
-    sitecues.on('locale/did-complete', onSettingsOrLocaleComplete); // Get locale data
-    sitecues.on('conf/did-complete', onSettingsOrLocaleComplete); // User setting prereq: dependent on user id completion
-
     // When keyboard listening is ready
     sitecues.on('keys/did-init', onKeyHandlingInitialized);
 
+    numPrereqsToComplete = 2;
+
     // Start initialization
-    userId.init();
-    locale.init();
+    conf.init(onPrereqComplete);
+    locale.init(onPrereqComplete);
   };
 });
 
