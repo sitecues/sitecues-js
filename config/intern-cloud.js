@@ -6,6 +6,8 @@ define(
     ],
     function (test) {
 
+        'use strict';
+
         // Setting properties on the test object here overrides the base configuration.
         // Best practice is to set only what needs to be different.
 
