@@ -2,7 +2,9 @@
 // jshint -W016
 define([], function() {
 
-  function getUUID(a, b) {     // Don't use parameters -- this is a micro-optimization to avoid using 'var a, b'
+  function getUUID() {
+    var a, b;
+
     for (
       b = a = '';              // b - result , a - numeric variable
       a++ < 36;
