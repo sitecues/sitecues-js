@@ -25,7 +25,6 @@ define(['$', 'core/conf/user/manager', 'core/platform'], function ($, conf, plat
         }
       })();
 
-
     // Add useful zoom fixes for forms that render incorrectly with CSS transform
     function applyZoomFixes(currZoom) {
       // **** Buttons ****

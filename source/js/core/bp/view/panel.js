@@ -1,4 +1,4 @@
-define(['core/bp/bp', 'core/bp/constants', 'core/bp/model/state'], function(bp, BP_CONST, state) {
+define(['core/bp/constants', 'core/bp/model/state'], function(BP_CONST, state) {
 
   /**
    *** Getters ***

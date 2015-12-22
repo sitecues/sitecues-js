@@ -17,7 +17,7 @@ define([], function() {
             4                  // otherwise 4
         ).toString(16)
       :
-        '-'                    // in other cases (if "a" is 9,14,19,24) insert "-"
+        '-'                    //  in other cases (if "a" is 9,14,19,24) insert "-"
     ) {}
 
     return b;

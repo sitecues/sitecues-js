@@ -13,10 +13,32 @@
 // build system is responsible for privately namespacing them. Here, we must undo that to avoid
 // erroneous re-definition errors.
 
-/* globals -define, -require */
+/* globals -define, -require, SC_DEBUG */
 
 /* jshint proto: true */
 
+var require = {
+  // Tell loader to never search for or execute a script with a "data-main"
+  // attribute, since this could have weird consequences on customer pages.
+  skipDataMain : true,
+  baseUrl: (function(config) {
+    var resourceFolderName = SC_DEV ? 'latest' : sitecues.version,
+      scriptUrl = config.scriptUrl || config.script_url, // Old load script sometimes used underscore names, which is deprecated but still supported
+      folderOnly = scriptUrl.substring(0, scriptUrl.lastIndexOf('/js/')),
+      withVersionName = folderOnly + '/' + resourceFolderName + '/js/',
+      withLatestReplaced = withVersionName.replace('/latest/', '/' + resourceFolderName + '/');  // The /latest/ means the current version
+
+    return withLatestReplaced;  // Includes version name so that cached resources are only used with the appropriately matching sitecues.js
+  })(sitecues.everywhereConfig || sitecues.config),
+  map: {
+    // All modules get 'zepto' when they ask for $
+    '*': {
+      // We use jQuery when the page has prototype.js, as it is fundamentally incompatible with Zepto
+      // This is just the tip of the iceberg: https://github.com/madrobby/zepto/issues/710
+      '$': window.Prototype ? 'jquery' : 'page/zepto/zepto'
+    }
+  }
+};
 
 var requirejs, require, define;
 (function (global, undef) {
@@ -255,8 +277,7 @@ var requirejs, require, define;
             loadCount = 0,
             startTime = (new Date()).getTime(),
             errCount = 0,
-            urlFetched = {},
-            bundlesMap = {};
+            urlFetched = {};
 
         /**
          * Given a relative module name, like ./something, normalize it to
@@ -360,12 +381,11 @@ var requirejs, require, define;
                 typeof navigator !== 'undefined';
 
             req.nameToUrl = function (moduleName, ext, skipExt) {
-                var syms, url, bundleId;
 
-                bundleId = getOwn(bundlesMap, moduleName);
+                var syms, url, bundleId = moduleName.split('/')[0];
 
-                if (bundleId) {
-                    return req.nameToUrl(bundleId, ext, skipExt);
+                if (bundleId && bundleId !== 'locale-data') {  // locale-data is all in one subfolder
+                    return config.baseUrl + bundleId + '.js';
                 }
 
                 //A module that needs to be converted to a path.
@@ -727,17 +747,6 @@ var requirejs, require, define;
                     config[prop] = value;
                 }
             });
-
-            //Reverse map the bundles
-            if (cfg.bundles) {
-                eachProp(cfg.bundles, function (value, prop) {
-                    value.forEach(function (v) {
-                        if (v !== prop) {
-                            bundlesMap[v] = prop;
-                        }
-                    });
-                });
-            }
 
             return req;
         };

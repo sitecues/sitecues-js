@@ -388,7 +388,7 @@ define(['$', 'page/util/common', 'core/conf/user/manager', 'core/conf/site',
     function processResult(pickedIndex) {
       // Log the results if necessary for debugging
       if (SC_DEV && isDebuggingOn) {
-        require(['page/highlight/pick-debug'], function(pickDebug) {
+        require(['pick-debug'], function(pickDebug) {
           // Use sitecues.togglePickerDebugging() to turn on the logging
           pickDebug.logHeuristicResult(scoreObjs, bestIndex, candidates);
         });

@@ -8,10 +8,13 @@
 
 'use strict';
 
-var handlebars = require('handlebars'),
-  targetDir  = process.argv[2] + '/',
+var config = require('./build-config'),
+  mkdirp = require('mkdirp'),
+  handlebars = require('handlebars'),
+  targetDir ,
   fs         = require('fs'),
   path       = require('path'),
+  htmlClean  = require('htmlclean'), // Non-gulp version, since this module has not been converted to using streams
   sources    = ['settings', 'tips', 'help' ];
 
 function readTemplate(templateName) {
@@ -29,20 +32,21 @@ function readTemplate(templateName) {
     function compileTemplateForLang(langFileName) {
       var data = getLanguageData(templateName, langFileName),
         targetFileName = targetDir + templateName + '/' + langFileName.split('.')[0] + '.html',
-        templatedHtml = template(data);
+        templatedHtml = template(data),
+        cleanedHtml = htmlClean(templatedHtml);
 
       console.log('Created html: ' + targetFileName);
 
-      fs.writeFile(targetFileName, templatedHtml, function (err) {
+      fs.writeFile(targetFileName, cleanedHtml, function (err) {
         if (err) {
           throw err;
         }
       });
     }
 
-    fs.mkdirSync(targetDir + templateName);
-
-    langFileNames.forEach(compileTemplateForLang);
+    mkdirp(targetDir + templateName, {}, function() {
+      langFileNames.forEach(compileTemplateForLang);
+    });
   }
 
   var sourceFileName = path.join('source', 'html', templateName, templateName + '-template.hbs');
@@ -83,7 +87,7 @@ function getLanguageData(templateName, langFileName) {
       }
       else if (value.substring(0,2) === '@@') {
         // Include content from another file
-        obj[key] = fs.readFileSync('precompile/' + requireDir + value.substring(2), 'utf8');
+        obj[key] = fs.readFileSync('task/' + requireDir + value.substring(2), 'utf8');
       }
     });
   }
@@ -94,7 +98,7 @@ function getLanguageData(templateName, langFileName) {
 
 function getCountryData(countryData, requireDir, baseLangFileName) {
   var baseLangData = require(requireDir + baseLangFileName),
-    newData = JSON.parse(JSON.stringify(baseLangData));
+    newData = Object.create(baseLangData);
 
   function copyInto(dest, source) {
     Object.keys(source).forEach(function(key) {
@@ -118,4 +122,10 @@ function getCountryData(countryData, requireDir, baseLangFileName) {
   return newData;
 }
 
-sources.forEach(readTemplate);
+function begin(callback) {
+  targetDir = config.resourceDir + '/html/';
+  sources.forEach(readTemplate);
+  callback();
+}
+
+module.exports = begin;

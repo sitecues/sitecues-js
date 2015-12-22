@@ -87,7 +87,6 @@ express.static.mime.define({
 
 // Process the command line args.
 var useHttps = strToBool(process.argv[3]),
-    prodMode = strToBool(process.argv[4]),
     portFile = null;
 
 // The fifth argument is the port file destination.
@@ -136,13 +135,6 @@ app.all(/\/html\/|\/images\/cursors\//, function(req, res, next) {
             urlPrefix : 'js/target/' + buildName + '/',
             pathRoot  : pathJoin(projectRoot, 'target', buildName)
         });
-
-        // In prod mode, skip the 'source' directory.
-        if (!prodMode) {
-            buildData.searchPath.push({
-                pathRoot : pathJoin(projectRoot, 'source')
-            });
-        }
 
         buildData.searchPath.push({
             pathRoot : pathJoin(projectRoot, 'target', buildName)
@@ -266,20 +258,6 @@ app.use('/tools', express.static(pathJoin(projectRoot, 'tools', 'site')));
     var getInlineV1JsTemplate = createInlineV1JsTemplate;
     var getInlineV2JsTemplate = createInlineV2JsTemplate;
 
-    // Process the inline JS file templates.
-    if (prodMode) {
-        (function () {
-            var inlineV1JsFileTemplate = createInlineV1JsTemplate();
-            getInlineV1JsTemplate = function() {
-                return inlineV1JsFileTemplate;
-            };
-            var inlineV2JsFileTemplate = createInlineV2JsTemplate();
-            getInlineV2JsTemplate = function() {
-                return inlineV2JsFileTemplate;
-            };
-        })();
-    }
-
     // Return the data regarding inserting the library JS into files.
     function getInlineJSData(req) {
         var data = null;
@@ -354,11 +332,6 @@ app.use('/tools', express.static(pathJoin(projectRoot, 'tools', 'site')));
 // Set listeners for all default (/) search paths.
 app.use('/js/source', express.static(pathJoin(projectRoot, 'source')));
 app.use('/js/target', express.static(pathJoin(projectRoot, 'target')));
-
-// In prod mode, skip the 'source' directory.
-if (!prodMode) {
-    app.use(express.static(pathJoin(projectRoot, 'source')));
-}
 
 // The common assets,
 app.use(express.static(pathJoin(projectRoot, 'target', 'common')));

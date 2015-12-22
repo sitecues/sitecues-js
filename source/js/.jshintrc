@@ -23,13 +23,6 @@
     // TODO: We should not be using escape(), it is non-standard and deprecated.
     "escape": false,
 
-    // TODO: Remove usage of `module` from the library. This was from an era of
-    //       faking the DOM in Node.js, which is bad practice. Future unit tests
-    //       should run in a real browser and use the same module system (AMD).
-    //       Before removing, please compile a list somewhere of the values
-    //       currently exported on module.exports
-    "module" : false,
-
     // TODO: Submit patch to JSHint to include these in `browser` vars:
     "webkitAudioContext"  : false,
     "CSSPrimitiveValue"   : false,

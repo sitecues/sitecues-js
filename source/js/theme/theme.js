@@ -76,7 +76,7 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
 
     function requireInverter() {
       if (type === 'dark' && !inverter) {
-        require(['theme/inverter'], function (inverterModule) {
+        require(['inverter/inverter'], function (inverterModule) {
           inverter = inverterModule;
           applyThemeImpl();
         });
