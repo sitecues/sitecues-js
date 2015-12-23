@@ -152,7 +152,7 @@ define(['$', 'page/util/common', 'core/conf/user/manager', 'core/conf/site',
 
     // 4. Don't pick anything when over whitespace
     //    Avoids slow, jumpy highlight, and selecting ridiculously large containers
-    if (!hasVisibleContent(candidates)) {
+    if (!candidates || !hasVisibleContent(candidates)) {
       return null;
     }
 
