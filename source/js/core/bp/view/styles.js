@@ -247,12 +247,12 @@ define(['core/bp/helper', 'core/platform', 'core/conf/site'],
 
       /******************* More **********************/
 
-      '.scp-ie9-true #scp-more-arrow': {
+      '.scp-classic-true #scp-more-arrow': {
         'display': 'none'
       },
 
-      '.scp-ie9-false #scp-question': {
-        'display': 'none'   // IE9 -- provide help only
+      '.scp-classic-false #scp-question': {
+        'display': 'none'   // IE9 and sites incompatible with themes -- provide help only
       },
 
       '#scp-more-button-opacity': {

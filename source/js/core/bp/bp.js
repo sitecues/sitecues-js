@@ -18,8 +18,8 @@
 // bp/did-shrink   -- BP has finished shrinking
 
 define(['core/bp/controller/bp-controller', 'core/bp/model/state','core/bp/view/badge', 'core/bp/view/panel', 'core/bp/helper', 'core/bp/view/svg', 'core/bp/constants',
-  'core/bp/view/placement', 'core/bp/view/size-animation', 'core/platform', 'core/conf/site', 'core/conf/user/manager'],
-  function (bpController, state, badge, panel, helper, bpSVG, BP_CONST, placement, sizeAnimation, platform, site, conf) {
+  'core/bp/view/placement', 'core/bp/view/size-animation', 'core/platform', 'core/conf/site', 'core/conf/user/manager', 'core/bp/model/classic-site'],
+  function (bpController, state, badge, panel, helper, bpSVG, BP_CONST, placement, sizeAnimation, platform, site, conf, classicSite) {
 
   /*
    *** Public methods ***
@@ -222,6 +222,14 @@ define(['core/bp/controller/bp-controller', 'core/bp/model/state','core/bp/view/
     }
   }
 
+  // Classic mode is where the ? shows up instead of the down pointing arrow
+  function initClassicMode() {
+    state.set('isClassicMode', !!(classicSite() || platform.isIE9));
+    sitecues.toggleClassicMode = function() {
+      state.set('isClassicMode', !state.get('isClassicMode'));
+    };
+  }
+
   /**
    * init(bpCompleteCallbackFn)
    *
@@ -249,6 +257,8 @@ define(['core/bp/controller/bp-controller', 'core/bp/model/state','core/bp/view/
   function init(bpCompleteCallbackFn) {
 
     pendingCompletionCallbackFn = bpCompleteCallbackFn;
+
+    initClassicMode();
 
     // ---- Look for toolbar config ----
     if (site.get('uiMode') === 'toolbar') {

@@ -36,6 +36,8 @@ define(['core/bp/constants', 'core/bp/model/state'], function(BP_CONST, state) {
       classBuilder += ' scp-keyboard';
     }
 
+    classBuilder += ' scp-classic-' + state.get('isClassicMode');
+
     return classBuilder + getSecondaryPanelClasses();
   }
 
