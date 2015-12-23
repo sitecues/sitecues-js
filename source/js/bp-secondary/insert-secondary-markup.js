@@ -103,13 +103,13 @@ var isInitialized,
   <line stroke="#999" stroke-width="1" x1="0" y1=".5" x2="808" y2=".5"/> <!-- outline top -->\
 </g>',
 htmlSecondary =
-'<sc-h1 id="scp-feedback-header" class="scp-card-header">{{rate_us}}</sc-h1>\
+'<sc-h1 id="scp-feedback-header" class="scp-card-header scp-secondary-feature">{{rate_us}}</sc-h1>\
 <sc class="scp-secondary-feature scp-transition-opacity scp-if-feedback" role="group" aria-labelledby="scp-feedback-header">\
   <sc-p id="scp-feedback-prompt">{{rate_us_suggest}} {{rate_us_prompt}}</sc-p>\
   <textarea id="scp-feedback-textarea" class="scp-hand-cursor" data-allow-scroll="true" \
     aria-describedby="scp-feedback-prompt" data-visible-focus-on="scp-feedback-input-rect" placeholder="{{tell_us_something}}"></textarea>\
 </sc>\
-<sc id="scp-feedback-thanks" class="scp-if-feedback-sent" role="note" aria-label="{{thank_you}}">\
+<sc id="scp-feedback-thanks" class="scp-if-feedback-sent scp-secondary-feature" role="note" aria-label="{{thank_you}}">\
   <sc-h1>{{thank_you}}</sc-h1>\
 </sc>\
 <sc class="scp-about-teaser scp-if-about scp-transition-opacity scp-secondary-feature" role="group" aria-label="{{about}} sitecues">\
