@@ -5,7 +5,7 @@ var gulp = require('gulp'),
 
 // CSS -- minify
 function css() {
-  var source = gulp.src(config.CSS_GLOB + '*.css'),
+  var source = gulp.src(config.CSS_GLOB),
     processedSource = config.isMinifying ? source.pipe(minifyCss()) : source;
   return processedSource.pipe(gulp.dest(config.resourceDir + '/css'));
 }
