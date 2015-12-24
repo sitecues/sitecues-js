@@ -11,8 +11,8 @@
  */
 
 define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder', 'core/platform',
-    'core/locale', 'core/metric', 'core/conf/urls', 'audio/html5-player'],
-  function(conf, site, $, builder, platform, locale, metric, urls, audioPlayer) {
+    'core/locale', 'core/metric', 'core/conf/urls', 'audio/html5-player', 'audio/text-select'],
+  function(conf, site, $, builder, platform, locale, metric, urls, audioPlayer, textSelect) {
 
   var ttsOn = false,
     isAudioPlaying,
@@ -320,6 +320,9 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
     }
 
     isInitialized = true;
+
+    // Speak on text selection
+    textSelect.init();
 
     /*
      * A highlight box has been requested.  This will create the player

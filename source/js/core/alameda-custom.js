@@ -13,7 +13,7 @@
 // build system is responsible for privately namespacing them. Here, we must undo that to avoid
 // erroneous re-definition errors.
 
-/* globals -define, -require, SC_DEBUG */
+/* globals -define, -require, SC_RESOURCE_FOLDER_NAME */
 
 /* jshint proto: true */
 
@@ -22,7 +22,7 @@ var require = {
   // attribute, since this could have weird consequences on customer pages.
   skipDataMain : true,
   baseUrl: (function(config) {
-    var resourceFolderName = SC_DEV ? 'latest' : sitecues.version,
+    var resourceFolderName = SC_RESOURCE_FOLDER_NAME,
       scriptUrl = config.scriptUrl || config.script_url, // Old load script sometimes used underscore names, which is deprecated but still supported
       folderOnly = scriptUrl.substring(0, scriptUrl.lastIndexOf('/js/')),
       withVersionName = folderOnly + '/' + resourceFolderName + '/js/',

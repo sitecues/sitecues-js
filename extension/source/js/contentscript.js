@@ -1,0 +1,47 @@
+/**
+ * sitecues everywhere script
+ * This needs to load before any web page sitecues script.
+ * We do this by inserting our <script> elements as early as possible in the DOM,
+ * and by using run_at="document_start"
+ **/
+
+// TODO feedback should probably be a mailto link (SC_LOCAL)
+// TODO style-service
+// TODO can anything be removed from permissions? Do we need 'tabs' ?
+// TODO TTS
+
+'use strict';
+
+if (!window.localStorage.getItem('sitecues-disabled')) {
+  document.documentElement.setAttribute('data-sitecues-everywhere', '');
+}
+
+chrome.extension.sendMessage(
+  {
+    action: 'closeSitecuesPopup'
+  }
+);
+
+chrome.runtime.sendMessage(
+  {
+    action: 'refreshDisabledState',
+    isDisabled: window.isDisabled
+  }
+);
+
+chrome.runtime.onMessage.addListener(
+  function (request, sender, sendResponse) {
+    if (request.action === 'isDisabled') {
+      sendResponse(
+        {
+          isDisabled: window.isDisabled
+        }
+      );
+    }
+    else if (request.action === 'toggleDisabled') {
+      window.isDisabled = !window.isDisabled;
+      window.localStorage.setItem('sitecues-disabled', window.isDisabled ? 'true' : 'false');
+      window.location.reload();
+    }
+  }
+);

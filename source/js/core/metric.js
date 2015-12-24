@@ -6,8 +6,13 @@ define(['core/conf/user/manager', 'core/util/uuid', 'core/conf/site', 'core/loca
 
     var sessionId = uuid();
 
-    return function (name, details) {
-      if (!SC_LOCAL && !site.get('suppressMetrics')) {
+    return function (name, details, doForceSend) {
+      if (SC_LOCAL && !doForceSend) {
+        // Don't send any metric events except for feedback
+        // TODO Is that safe to do in a Google extension? If not, use an email link.
+        return;
+      }
+      if (!site.get('suppressMetrics')) {
         var allData = {
           name: name,
           details: details,

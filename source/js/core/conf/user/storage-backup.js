@@ -3,7 +3,8 @@
  * By backing it up into a js.sitecues.com iframe, we can retrieve the user's global settings when local settings don't exist.
  */
 
-define(['core/conf/urls'], function(urls) {
+// IMPORTANT: The extension defines this module in order to override the mechanism
+define(['core/conf/urls'], function (urls) {
 
   var PATH = '/html/prefs.html',
     ID = 'sitecues-prefs',
@@ -22,7 +23,7 @@ define(['core/conf/urls'], function(urls) {
       try {
         return JSON.parse(data);
       }
-      catch(ex) {
+      catch (ex) {
         clear();
         if (SC_DEV) {
           console.log('Failed to parse backed-up prefs data');
@@ -83,7 +84,7 @@ define(['core/conf/urls'], function(urls) {
       document.documentElement.appendChild(iframe);
     }
 
-    iframe.addEventListener('load', function() {
+    iframe.addEventListener('load', function () {
       isLoaded = true;
       onReadyCallback();
     });

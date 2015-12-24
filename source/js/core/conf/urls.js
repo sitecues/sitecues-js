@@ -2,7 +2,12 @@ define(['core/conf/site'], function(site) {
 
   var apiDomain,  // Either ws.sitecues.com/ or ws.dev.sitecues.com/
     scriptOrigin,  // Either http[s]://js.sitecues.com/ or http[s]://js.dev.sitecues.com/
-    BASE_RESOURCE_URL = sitecues.requirejs.nameToUrl('').split('/js/')[0] + '/';
+    BASE_RESOURCE_URL = getBaseResourceUrl();
+
+  function getBaseResourceUrl() {
+    var basis = SC_EXTENSION ? getRawScriptUrl() : sitecues.requirejs.nameToUrl('');
+    return basis.split('/js/')[0] + '/';
+  }
 
   // URL string for API calls
   function getApiUrl(restOfUrl) {

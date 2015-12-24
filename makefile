@@ -132,53 +132,6 @@ clean:
 	export CLEAN=on
 
 ################################################################################
-# TARGET: resources
-#	Localize and copy resources
-################################################################################
-resources: html css earcons images
-
-################################################################################
-# TARGET: html
-#	Use handlebars to localize the html
-################################################################################
-html: mkdirs
-# Compile localized html templates
-	node precompile/compile-html.js $(resource-dir)/html
-# Non-localized html (just copy)
-	cp source/html/*.html $(resource-dir)/html
-
-################################################################################
-# TARGET: css
-################################################################################
-css: mkdirs
-	cp -r source/css $(resource-dir)
-
-################################################################################
-# TARGET: images
-#	TODO: minify the SVG
-################################################################################
-images: mkdirs
-	cp -r source/images $(resource-dir)
-
-################################################################################
-# TARGET: earcons
-################################################################################
-earcons: mkdirs
-	cp -r source/earcons $(resource-dir)
-
-################################################################################
-# TARGET: minify
-# Minify the CSS and SVG
-################################################################################
-minify:
-# CSS
-	find $(resource-dir)/css -type f -name '*.css' -execdir $(cleancss) {} -o {} \;
-# SVG
-	find $(resource-dir)/images -type f -name '*.svg' -execdir $(cleansvg) {} -o {} \;
-# HTML
-	find $(resource-dir)/html -type f -name '*.html' -execdir $(cleanhtml) {} -o {} \;
-
-################################################################################
 # TARGET: deps
 #	Set up the Node.js dependencies.
 ################################################################################

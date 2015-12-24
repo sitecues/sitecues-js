@@ -1,11 +1,12 @@
-var gulp = require('gulp'),
-  config = require('./build-config'),
+'use strict';
+
+var config = require('../build-config'),
   fs = require('fs'),
   exec = require('child_process').exec,
   mkdirp = require('mkdirp');
 
-function tarGzip(callback) {
-  var fileName = config.buildBaseDir + '/sitecues-js-' + config.version + '.tgz',
+function createPackage(callback) {
+  var fileName = config.baseBuildDir + '/sitecues-js-' + config.version + '.tgz',
     gzipCommand = 'tar -C ' + config.buildDir + ' -zcf ' + fileName + ' .';
   exec(gzipCommand, callback);
 }
@@ -24,11 +25,20 @@ function saveVersionTxt(callback) {
 // TODO this is possibly no longer necessary, and any references to it in CI should probably be removed. We don't use custom builds anymore
 function saveBuildTxt(callback) {
   mkdirp(config.buildDir, {}, function() {
-    fs.writeFile(config.buildDir + '/BUILD.TXT', 'SC_BUILD_NAME=' + config.buildName, callback);
+    fs.writeFile(config.buildDir + '/BUILD.TXT', 'SC_BUILD_NAME=' + config.buildType, callback);
   });
 }
 
-var packageMetaData = gulp.parallel(createVersionedSitecuesJsCopy, saveVersionTxt, saveBuildTxt);
+function createMetaData(callback) {
+  createVersionedSitecuesJsCopy(function() {
+    saveVersionTxt(function() {
+      saveBuildTxt(callback);
+    });
+  });
+}
 
-module.exports = gulp.series(packageMetaData, tarGzip);
+module.exports = {
+  createMetaData: createMetaData,
+  createPackage: createPackage
+};
 

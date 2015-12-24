@@ -6,34 +6,52 @@
 // LINT = 'on' or 'off' (force linting on or off, otherwise use resources for the target)
 // MINIFY = 'on' or 'off' (force minification on or off, otherwise use default for the target)
 
+'use strict';
+
 var dateFormat = require('dateformat'),
-  buildBaseDir = 'target',
-  buildDir = buildBaseDir + '/common',
+  buildType = process.env.TYPE || 'common',
+  baseBuildDir = 'target',
+  extendBuildConfig = require('./' + buildType + '/extend-build-config'),
   userName = (process.env.VAGRANT_USER || process.env.SUDO_USER || process.env.USER || process.env.LOGNAME || 'UNKNOWN').toUpperCase(),
   today = new Date(),
   defaultVersion = dateFormat(today, 'yyyymmddHHMMss', true) + '-LOCAL-' + userName,
   version = process.env.VERSION || defaultVersion,
-  isDebugOn = !process.env.DEBUG || process.env.DEBUG === 'on';
+  isDebugOn = process.env.DEBUG !== 'off', // Default is true
+  NODE_VERSION = parseFloat(process.versions.node),
+  LIBRARY_SOURCE = 'source',
+  EXTENSION_SOURCE = 'extension/source';
 
-module.exports = {
+var baseConfig = {
   version: version,
-  buildName: process.env.BUILD_NAME || 'common',
-  buildBaseDir: buildBaseDir,
-  buildDir: buildDir,
-  resourceDir: buildDir + '/' + (isDebugOn ? 'latest' : version),
+  buildType: buildType,
+  baseBuildDir: baseBuildDir,
+  buildDir: baseBuildDir + '/' + buildType,
+  resourceFolderName: '.',
   isLintingOn: process.env.LINT === 'on', // Default to false
-  isCleaningOn: !process.env.CLEAN || process.env.CLEAN === 'on', // Default to true
+  isCleaningOn: process.env.CLEAN !== 'off', // Default to true
   isMinifying: process.env.MINIFY === 'on', // Default to false
   isDebugOn: isDebugOn,  // Default to false
-  isShowingSizes: parseInt(process.versions.node) >= 4 && process.env.SHOW_SIZES !== 'off', // Don't show sizes for old versions of node that don't support gulp-size
+  nodeVersion: NODE_VERSION,
+  isShowingSizes: NODE_VERSION >= 4 && process.env.SHOW_SIZES !== 'off', // Don't show sizes for old versions of node that don't support gulp-size
   isGeneratingSourceMaps: process.env.SOURCEMAPS ? (process.env.SOURCEMAPS === 'on') : isDebugOn, // Default to same as debug state
   isShowingGzipSize: process.env.SHOW_GZIP_SIZE === 'on',
-  isLocal: process.env.LOCAL === 'on',
-  RASTER_GLOB: ['source/images/**/*', '!*.svg'],
-  EARCONS_GLOB: ['source/earcons/**/*.aac', 'source/earcons/**/*.mp3', 'source/earcons/**/*.ogg' ],
-  HTML_COMPILATION_GLOB: ['source/html/**/*.hbs', 'source/html/**/*.json'],  // Anything that may affect final html, including .hbs, .json
-  HTML_PLAIN_GLOB: 'source/html/*.html',
-  CSS_GLOB: 'source/css/**/*.css',
-  SVG_GLOB: 'source/images/**/*.svg'
+  librarySourceDir: LIBRARY_SOURCE,
+  extensionSourceDir: EXTENSION_SOURCE
 };
+
+// Add additional convenience properties
+function finalizeConfig(config) {
+  config.resourceDir = config.buildDir + '/' + config.resourceFolderName;
+  config.runtimeConfig = 'sitecues.version="' + version + '";' +
+    'SC_EXTENSION=' + !!config.isExtension +
+    ',SC_RESOURCE_FOLDER_NAME="' + config.resourceFolderName + '"' +
+    ',SC_LOCAL=' + !!config.isLocal +
+    ',SC_DEV=' + !!config.isDebugOn + ';\n';
+
+  return config;
+}
+
+var finalConfig = finalizeConfig(extendBuildConfig(baseConfig));
+
+module.exports = finalConfig;
 

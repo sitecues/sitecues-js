@@ -81,7 +81,6 @@ define(['core/conf/site', 'core/conf/urls', 'core/run'], function (site, urls, r
   // remove one or many callbacks. if `context` is null, removes all callbacks
   // with that function. if `callback` is null, removes all callbacks for the
   // event. if `events` is null, removes all bound callbacks for all events
-  //  Currently unused
   function off(events, callback, context) {
     /* jshint validthis: true */
     var ev,
@@ -90,8 +89,7 @@ define(['core/conf/site', 'core/conf/urls', 'core/run'], function (site, urls, r
 
     if (!events) {
       delete this._events;
-    }
-    else if (calls) {
+    } else if (calls) {
       events = events.split(/\s+/);
       while ((ev = events.shift())) {
         node = calls[ev];
@@ -197,6 +195,13 @@ define(['core/conf/site', 'core/conf/urls', 'core/run'], function (site, urls, r
   // If the sitecues global object does not exist, then there is no basic site configuration
   if (!sitecues || typeof sitecues !== 'object') {
     safe_production_msg('The base ' + window.sitecues + ' namespace was not found. The sitecues library will not load.');
+    return;
+  }
+
+  // Extension script: is extension allowed on this page?
+  var data = window.localStorage.getItem('sitecues-disabled');
+  if (data && data !== 'false') {
+    console.log('sitecues has been disabled on this page.');
     return;
   }
 

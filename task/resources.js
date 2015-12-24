@@ -1,3 +1,5 @@
+'use strict';
+
 var gulp = require('gulp'),
   cleanHtml = require('gulp-cleanhtml'),
   minifyCss = require('gulp-minify-css'),
@@ -5,14 +7,14 @@ var gulp = require('gulp'),
 
 // CSS -- minify
 function css() {
-  var source = gulp.src(config.CSS_GLOB),
+  var source = gulp.src(config.cssGlob),
     processedSource = config.isMinifying ? source.pipe(minifyCss()) : source;
   return processedSource.pipe(gulp.dest(config.resourceDir + '/css'));
 }
 
 // HTML -- minify (only plain .html files, not from html we create via templates)
 function html() {
-  var source = gulp.src(config.HTML_PLAIN_GLOB),
+  var source = gulp.src(config.htmlGlob),
     processedSource = config.isMinifying ? source.pipe(cleanHtml()) : source;
   return processedSource
     .pipe(gulp.dest(config.resourceDir + '/html'));
@@ -20,7 +22,7 @@ function html() {
 
 // Images that are SVG -- minify them
 function svg() {
-  var source = gulp.src(config.SVG_GLOB),
+  var source = gulp.src(config.svgGlob),
     processedSource = config.isMinifying ? source.pipe(cleanHtml()) : source;
   return processedSource
     .pipe(gulp.dest(config.resourceDir + '/images'));
@@ -28,13 +30,13 @@ function svg() {
 
 // Images that are not SVG -- just copy them
 function raster() {
-  return gulp.src(config.RASTER_GLOB)
+  return gulp.src(config.rasterGlob)
     .pipe(gulp.dest(config.resourceDir + '/images'));
 }
 
 // Earcons only get copied (in the future we may choose to auto-convert them to the different file types we need -- mp3 and ogg)
 function earcons() {
-  return gulp.src(config.EARCONS_GLOB)
+  return gulp.src(config.earconsGlob)
     .pipe(gulp.dest(config.resourceDir + '/earcons'));
 }
 

@@ -50,9 +50,8 @@ define(['core/conf/user/manager', 'core/locale', 'core/metric', 'core/platform',
   }
 
   function initSpeech() {
-    require([ 'audio/audio', 'audio/text-select' ], function(audio, textSelect) {
+    require([ 'audio/audio' ], function(audio) {
       audio.init();
-      textSelect.init();
     });
   }
 

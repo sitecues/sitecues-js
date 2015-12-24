@@ -60,22 +60,30 @@ function getLangsForTemplate(name) {
     return !!name.match(/.*\.json$/);
   }
 
-  var files = fs.readdirSync('source/html/' + name);
+  var files = fs.readdirSync(config.librarySourceDir + '/html/' + name);
 
   return files.filter(isLanguageFile);
 }
 
+function getRawLanguageData(fileName) {
+  var buffer = fs.readFileSync(fileName),
+    json = buffer.toString();
+
+  return JSON.parse(json);
+}
+
 function getLanguageData(templateName, langFileName) {
-  var requireDir =  '../source/html/' + templateName + '/',
+  var langDataDir =  config.librarySourceDir + '/html/' + templateName + '/',
     COUNTRY_REGEX = /^(.*-[a-z][a-z])(?:-[a-z][a-z]\.json$)/,
     langCountrySplitter =  langFileName.match(COUNTRY_REGEX);
 
-  var langData = require(requireDir + langFileName);
+
+  var langData = getRawLanguageData(langDataDir + langFileName);
 
   if (langCountrySplitter) {
     // Is country-specific file:
     // Extend the language data with the country data
-    langData = getCountryData(langData, requireDir, langCountrySplitter[1] + '.json');
+    langData = getCountryData(langData, langDataDir, langCountrySplitter[1] + '.json');
   }
 
   // Convert @@includedFileName to the text from that file
@@ -87,7 +95,7 @@ function getLanguageData(templateName, langFileName) {
       }
       else if (value.substring(0,2) === '@@') {
         // Include content from another file
-        obj[key] = fs.readFileSync('task/' + requireDir + value.substring(2), 'utf8');
+        obj[key] = fs.readFileSync(langDataDir + value.substring(2), 'utf8');
       }
     });
   }
@@ -96,8 +104,8 @@ function getLanguageData(templateName, langFileName) {
   return langData;
 }
 
-function getCountryData(countryData, requireDir, baseLangFileName) {
-  var baseLangData = require(requireDir + baseLangFileName),
+function getCountryData(countryData, dir, baseLangFileName) {
+  var baseLangData = getRawLanguageData(dir + baseLangFileName),
     newData = Object.create(baseLangData);
 
   function copyInto(dest, source) {

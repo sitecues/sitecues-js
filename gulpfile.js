@@ -1,49 +1,53 @@
-"use strict";
+'use strict';
 
 var gulp = require('gulp'),
-  compileHtmlTemplates = require('./task/compile-html'),
-  compileJs = require('./task/compile-js'), // Include compileJs task
+  lint = require('./task/lint'), // Include compileJs task
   config = require('./task/build-config'),
-  resources = require('./task/compile-resources'),
-  packageLibrary = require('./task/package-library'),
+  targetTaskFolder = './task/' + config.buildType,
+  js = require(targetTaskFolder + '/js'),
+  packaging = require(targetTaskFolder + '/packaging'),
+  templates = require('./task/templates'),
+  resources = require('./task/resources'),
   exec = require('child_process').exec,
   del = require('del'); // If we want to do clean
 
 function clean() {
   if (config.isCleaningOn) {
-    return del(config.buildBaseDir);
+    return del(config.baseBuildDir);
   }
   else {
     return Promise.resolve();
   }
 }
 
+// Report build configuration information, including versions
 function report(callback) {
-  // Report versions
-  console.log('sitecues version: ' + config.version);
-  console.log('node version: ' + process.version);
+  console.log('Build configuration:');
+  console.log(config);
   exec('echo npm version: `npm --version`', callback);
 }
 
 // JS tasks
-gulp.task('js-lint', compileJs.lint);
+gulp.task('js-lint', lint);
+
 function getAllSourceFolderCompilationFns() {
-  var sourceFolders = compileJs.sourceFolders;
-  return sourceFolders.map(function(sourceFolderName) {
-    return compileJs.compileSourceFolderMap[sourceFolderName];
+  var jsCompileFunctions = Object.keys(js.compileFunctionMap);
+  return jsCompileFunctions.map(function(compileFunctionName) {
+    return js.compileFunctionMap[compileFunctionName];
   });
 }
-var jsCompileAndLint = getAllSourceFolderCompilationFns().concat(config.isLintingOn ? compileJs.lint : []); // Compile all source folders
+
+var jsCompileAndLint = getAllSourceFolderCompilationFns().concat(config.isLintingOn ? js.lint : []); // Compile all source folders
 gulp.task('js-compile-lint', gulp.parallel.apply(gulp, jsCompileAndLint));
-gulp.task('js-validate', gulp.series(compileJs.prepareValidation, compileJs.validate));
-gulp.task('js-show-sizes', compileJs.showSizes);
+gulp.task('js-validate', gulp.series(js.prepareValidation, js.validate));
+gulp.task('js-show-sizes', js.showSizes);
 var jsDoAll = [ 'js-compile-lint', 'js-validate' ].concat(config.isShowingSizes ? 'js-show-sizes': []);
 gulp.task('js', gulp.series.apply(gulp, jsDoAll));
 
 // General build and package tasks
 var build =
   gulp.parallel(
-    compileHtmlTemplates,  // Localized html
+    templates,             // Localized html
     resources.html,        // Non-localized html
     resources.css,
     resources.svg,
@@ -54,18 +58,25 @@ var build =
 gulp.task(clean);
 gulp.task('build', build);
 gulp.task(report);
-gulp.task('default', gulp.series(clean, 'build', report));
-gulp.task('package', gulp.series('default', packageLibrary));
+gulp.task('default', gulp.series(clean, 'build', report, packaging.createMetaData));
+gulp.task('package', gulp.series('default', packaging.createPackage));
 
 // Watcher tasks
 gulp.task(function watch() {
-  compileJs.sourceFolders.forEach(function (bundleName) {
-    gulp.watch('source/js/' + bundleName + '/**/*', compileJs.compileSourceFolderMap[bundleName]);
+  // JS
+  var sourceFolders = Object.keys(js.compileFunctionMap);
+  sourceFolders.forEach(function(sourceFolder) {
+    gulp.watch(sourceFolder + '/**/*.js', js.compileFunctionMap[sourceFolder]);
   });
-  gulp.watch(config.CSS_GLOB, resources.css);
-  gulp.watch(config.HTML_COMPILATION_GLOB, compileHtmlTemplates);
-  gulp.watch(config.HTML_PLAIN_GLOB, resources.html);
-  gulp.watch(config.EARCONS_GLOB, resources.earcons);
-  gulp.watch(config.SVG_GLOB, resources.svg);
-  gulp.watch(config.RASTER_GLOB, resources.raster);
+
+  // Non-JS
+  gulp.watch(config.cssGlob, resources.css);
+  gulp.watch(config.templateGlob, templates);
+  gulp.watch(config.htmlGlob, resources.html);
+  gulp.watch(config.earconsGlob, resources.earcons);
+  gulp.watch(config.svgGlob, resources.svg);
+  gulp.watch(config.rasterGlob, resources.raster);
+  if (config.metaDataGlob) {
+    gulp.watch(config.metaDataGlob, packaging.createMetaData);
+  }
 });

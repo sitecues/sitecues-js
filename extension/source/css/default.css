@@ -1,0 +1,17 @@
+/* Move <body> down by height of the toolbar */
+/* This is redundant with code in the sitecues JS client but it acts faster so that content doesn't need to jump down after the fact */
+html[data-sitecues-everywhere] {
+  padding-top: 41px;
+}
+
+/* Make sure we don't print the toolbar or zoom effects on the page */ 
+@media print {
+  .scp-toolbar {
+    display: none;
+  }
+  body {
+    transform: none;
+    -webkit-transform: none;
+    width: auto;
+  }
+}

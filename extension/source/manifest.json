@@ -1,0 +1,57 @@
+{
+  "manifest_version" : 2,
+
+  "name"             : "sitecues® everywhere",
+  "short_name"       : "sitecues® everywhere",
+  "description"      : "sitecues zoom and speech for any website",
+  "version"          : "0.0.21",
+  "homepage_url"     : "http://sitecues.com/",
+
+  "icons" : {
+    "128" : "images/icon128.png",
+    "48"  : "images/icon48.png",
+    "16"  : "images/icon16.png"
+  },
+
+  "browser_action" : {
+    "default_icon"  : "images/icon16.png",
+    "default_title" : "sitecues settings",
+    "default_popup" : "html/popup.html"
+  },
+
+  "web_accessible_resources": [
+    "html/*.html",
+    "css/*.css",
+    "earcons/*.ogg",
+    "images/*.png",
+    "images/*.svg"
+  ],
+
+  "content_scripts" : [
+    {
+      "matches" : ["<all_urls>"],
+      "exclude_globs" : [
+        "*.google.com/maps/*",
+        "https://docs.google.com/*",
+        "proxy.sitecues.com/*",
+        "proxy.dev.sitecues.com/*"
+      ],
+      "js"      : [
+        "js/almond.js", // Minimal AMD loader for one giant file
+        "js/config.js",
+        "js/contentscript.js",
+        "js/util/fetch-css.js",
+        "js/sitecues.js"
+      ],
+      "css"     : [
+        "css/default.css"
+      ],
+      "run_at"  : "document_start"
+    }
+  ],
+
+  "permissions": [
+    "tabs",  // TODO Might be able to get rid of this if we use the extension to disable itself
+    "storage"
+  ]
+}
