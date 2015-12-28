@@ -1,12 +1,13 @@
 /* Extension config */
 'use strict';
 
-var extend = require('extend');
+var extend = require('extend'),
+  EXTENSION_SOURCE_DIR = 'extension/source';
 
 function getConfig(baseConfig) {
   // Fetch sources from common library and extension
   function getGlob(suffix) {
-    return [baseConfig.extensionSourceDir + '/' + suffix, baseConfig.librarySourceDir + '/' + suffix];
+    return [ EXTENSION_SOURCE_DIR + '/' + suffix, baseConfig.librarySourceDir + '/' + suffix ];
   }
 
   // Fetch sources only from common library
@@ -16,11 +17,12 @@ function getConfig(baseConfig) {
 
   // Fetch sources only from extension
   function getExtensionGlob(suffix) {
-    return baseConfig.extensionSourceDir + '/' + suffix;
+    return EXTENSION_SOURCE_DIR + '/' + suffix;
   }
 
   var config = extend({}, baseConfig, {
     isExtension: true,
+    extensionSourceDir: EXTENSION_SOURCE_DIR,
     isLocal: process.env.LOCAL !== 'off', // Extension: default is local because of Google security requirements
     jsGlob: getGlob('js/**/*.js'),
     rasterGlob: getGlob('images/**/*.png'),

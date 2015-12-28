@@ -18,8 +18,7 @@ var dateFormat = require('dateformat'),
   version = process.env.VERSION || defaultVersion,
   isDebugOn = process.env.DEBUG !== 'off', // Default is true
   NODE_VERSION = parseFloat(process.versions.node),
-  LIBRARY_SOURCE = 'source',
-  EXTENSION_SOURCE = 'extension/source';
+  LIBRARY_SOURCE = 'source';
 
 var baseConfig = {
   version: version,
@@ -35,8 +34,7 @@ var baseConfig = {
   isShowingSizes: NODE_VERSION >= 4 && process.env.SHOW_SIZES !== 'off', // Don't show sizes for old versions of node that don't support gulp-size
   isGeneratingSourceMaps: process.env.SOURCEMAPS ? (process.env.SOURCEMAPS === 'on') : isDebugOn, // Default to same as debug state
   isShowingGzipSize: process.env.SHOW_GZIP_SIZE === 'on',
-  librarySourceDir: LIBRARY_SOURCE,
-  extensionSourceDir: EXTENSION_SOURCE
+  librarySourceDir: LIBRARY_SOURCE
 };
 
 // Add additional convenience properties
