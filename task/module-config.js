@@ -57,6 +57,9 @@ var AMD_CONFIGS = {
     ]
   },
   'page': {
+    include: [
+      'page/zepto/zepto'
+    ],
     exclude: [
       'core/locale',
       'core/platform',
