@@ -1,0 +1,21 @@
+{
+  "bundleFolders": [
+    "core",
+    "bp-expanded",
+    "bp-secondary",
+    "page",
+    "hlb",
+    "theme",
+    "audio",
+    "audio-cues",
+    "status",
+    "info",
+    "pick-debug",
+    "labs",
+    "inverter",
+    "zoom-forms"
+  ],
+  "dataFolders": [
+    "locale-data"
+  ]
+}

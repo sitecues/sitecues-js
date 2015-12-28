@@ -13,42 +13,11 @@
 var gulp = require('gulp'),
   requirejs = require('requirejs'),
   config = require('../build-config'),
+  amdConfig = require('./amd-config'),
   size = config.isShowingSizes && require('gulp-size'),
   Promise_ = require('bluebird'),   // TODO update bamboo to use node 3+ and remove this polyfill dependency
-  sourceFolders = require('../module-config').sourceFolders,
   uglify = require('gulp-uglify'),
-  compileFunctionMap = getCompileFunctionMap(),
-  JS_SOURCE_DIR = config.librarySourceDir + '/js',
-  AMD_CONFIG = {
-    include: getAllModuleJs(),
-    exclude: [ 'page/zepto/zepto' ],  // Use jquery instead of zepto as it works in more cases (compatibility with pages that use Prototype.js)
-    wrap: {
-      start: config.runtimeConfig + "'use strict';"
-    },
-    optimize: config.isMinifying ? 'uglify2' : 'none',
-    baseUrl: JS_SOURCE_DIR,
-    out: config.buildDir + '/js/sitecues.js',
-    preserveLicenseComments: false,
-    generateSourceMaps: config.isGeneratingSourceMaps,
-    removeCombined: true,
-    useStrict: true,
-    paths: {
-      'core/conf/user/storage-backup': '../../extension/source/js/overrides/storage-backup'
-    },
-    map: {
-      '*': {
-        '$': 'jquery'
-      }
-    },
-    //logLevel: 4,
-    uglify2: {
-      compress: {
-        dead_code: true
-      },
-      mangle: true
-    },
-    insertRequire: [ 'core/core' ]
-  };
+  compileFunctionMap = getCompileFunctionMap();
 
 function getCompileFunctionMap() {
   var functionMap = {};
@@ -60,22 +29,11 @@ function getCompileFunctionMap() {
   return functionMap;
 }
 
-function getAllModuleJs() {
-  return sourceFolders.map(function(moduleName) {
-    if (moduleName === 'locale-data') {
-      return moduleName + '/en'; // TODO include all languages (for now assumes English)
-    }
-    else {
-      return moduleName + '/' + moduleName;
-    }
-  });
-}
-
 function optimizeLibrary() {
   return new Promise_(
     function(resolve, reject) {
       requirejs.optimize(
-        AMD_CONFIG,
+        amdConfig,
         resolve,
         reject
       );
