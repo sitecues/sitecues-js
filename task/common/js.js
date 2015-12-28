@@ -24,8 +24,8 @@ var gulp = require('gulp'),
   amdModuleConfigs = moduleConfig.amdConfigs,
   absoluteSourceFolder,
   absoluteSourceFolderStringLength,
-  compileFunctionMap = getCompileFunctionMap(),
   JS_SOURCE_DIR = config.librarySourceDir + '/js',
+  compileFunctionMap = getCompileFunctionMap(),
   AMD_BASE_CONFIG = {
     wrap: {
       start: "'use strict';"
@@ -137,7 +137,7 @@ function getCompileFunctionMap() {
       return optimize(sourceFolder, amdConfig);
     };
     fn.displayName = sourceFolder;
-    functionMap[config.librarySourceDir + '/' + sourceFolder] = fn;
+    functionMap[JS_SOURCE_DIR + '/' + sourceFolder] = fn;
   });
 
   return functionMap;
