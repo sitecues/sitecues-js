@@ -33,9 +33,9 @@ define(['core/conf/urls'], function (urls) {
   }
 
   function load(onDataAvailableFn) {
-    function onMessageReceived() {
+    function onMessageReceived(event) {
       var data = event.data,
-        parsedData;
+          parsedData;
 
       if (SC_DEV) {
         console.log('Backup prefs retrieved');
