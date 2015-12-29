@@ -8,8 +8,7 @@ window.sitecues = {
     siteId: SITE_ID, // TODO this should be meaningless in the extension since we don't communicate with the outside
     scriptUrl: url,
     uiMode: 'toolbar',
-    alwaysRealSettings: true,
-    fetchCss: 'chrome-extension'
+    alwaysRealSettings: true
   },
   require: require  // Expose sitecues.require -- needed for sitecues.require call in locale.js
 };

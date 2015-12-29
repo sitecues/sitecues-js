@@ -40,7 +40,6 @@
         "js/almond.js", // Minimal AMD loader for one giant file
         "js/config.js",
         "js/contentscript.js",
-        "js/util/fetch-css.js",
         "js/sitecues.js"
       ],
       "css"     : [

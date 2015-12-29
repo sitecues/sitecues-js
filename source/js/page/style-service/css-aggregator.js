@@ -8,8 +8,6 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
   var numPending = 0,
     sheets = [],
     onCssReadyFn,
-    chromeRequestId = 0,
-    doFetchCssFromChromeExtension = site.get('fetchCss') === 'chrome-extension',
     INLINE_ID_ATTR = 'data-sc-inline', // Allow each element with inline @style to have own ID for use with stylesheets
     TIMEOUT_MS = 2000;
 
@@ -67,33 +65,6 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
       }, 0);
     }
   }
-  /**
-   * Create a request object that proxies through the Chrome extension, in order to get around CORS
-   * @param url
-   * @constructor
-   */
-  function ChromeExtHttpRequest(url) {
-    ++ chromeRequestId;  // Each request gets a unique ID so that we can keep it's request events separate
-
-    this.url = url;
-    this.send = function () {
-      var chromeRequest = this;
-      $(window).one('ProcessCss-' + chromeRequestId, function (event) {
-        var responseText = event.detail,
-          responseEvent = { target: chromeRequest };
-        if (responseText) {  // We succeeded in getting the content and the response text is in the detail field
-          chromeRequest.responseText = responseText;
-          chromeRequest.onload(responseEvent);
-        }
-        else {
-          if (SC_DEV) { console.log('Error loading CSS: ' + chromeRequest.url); }
-          chromeRequest.onerror(responseEvent);
-        }
-      });
-      window.dispatchEvent(new CustomEvent('RequestCss', { detail: { url: this.url, id: chromeRequestId } }));
-    };
-  }
-
   // Will cross-domain restrictions possibly burn us?
   function isOnDifferentDomain(cssUrl) {
     function getHostName(url) {
@@ -112,17 +83,21 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
    * @return {Object}
    */
   function createGetRequest(url) {
+    function isUnsafeRequest() {
+      // Unsafe cross-origin request
+      // - Will run into cross-domain restrictions because URL is from different domain
+      // This is not an issue with the extension, because the content script doesn't have cross-domain restrictions
+      return !SC_EXTENSION && isOnDifferentDomain(url);
+    }
 
-    if (isOnDifferentDomain(url)) {
+    if (isUnsafeRequest()) {
       if (SC_DEV) {
         console.log('Cross-Domain: ' + url);
-      }
-      if (doFetchCssFromChromeExtension) {
-        return new ChromeExtHttpRequest(url);
       }
       // Use sitecues CSS proxy to bypass CORS restrictions on fetching CSS text for analysis
       url = urls.getApiUrl('css-proxy/' + url);
     }
+
     // Credit to Nicholas Zakas
     // http://www.nczonline.net/blog/2010/05/25/cross-domain-ajax-with-cross-origin-resource-sharing/
     var xhr = new XMLHttpRequest();
