@@ -224,7 +224,7 @@ define(['core/bp/controller/bp-controller', 'core/bp/model/state','core/bp/view/
 
   // Classic mode is where the ? shows up instead of the down pointing arrow
   function initClassicMode() {
-    state.set('isClassicMode', !!(classicSite() || platform.isIE9));
+    state.set('isClassicMode', !!(classicSite() || platform.browser.isIE9));
     sitecues.toggleClassicMode = function() {
       state.set('isClassicMode', !state.get('isClassicMode'));
     };
