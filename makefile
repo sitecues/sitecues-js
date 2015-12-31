@@ -12,20 +12,30 @@
 all: debug
 
 ################################################################################
-# Command line options.
+# Command line options -- defaults
 ################################################################################
 
 # If true, clean and update the Node.js package dependencies.
+# TODO this should use on/off instead of true/false for consistency
 clean-deps=false
 
 # Whether or not to enable HTTPS on the test server.
 https=off
 
 # Whether or not to lint the codebase before the build.
-lint=true
+lint=off
 
 # Node.js express test server HTTP port.
 port=8000
+
+# Default clean option is only clean the target/foo folder being built
+clean=build_target
+
+# Default local mode
+local=off
+
+# Default type (other type is extension)
+type=common
 
 ################################################################################
 # Tools
@@ -70,19 +80,7 @@ ifeq ($(https), on)
 	port:=80
 endif
 
-# If the 'local' option is on, set LOCAL=on
-# This is consumed by gulpfile.js
-ifeq ($(local), on)
-  export LOCAL=on
-endif
-
-# If the 'lint' option is on, set LINT=on
-# This is consumed by gulpfile.js
-ifeq ($(lint), on)
-  export LINT=on
-endif
-
-gulp:=node_modules/.bin/gulp
+gulp:=TYPE=$(type) LOCAL=$(local) CLEAN=$(clean) LINT=$(lint) node_modules/.bin/gulp
 
 ################################################################################
 # Determine if we need to force a deps update.
@@ -129,7 +127,7 @@ package: $(_force-deps-refresh)
 # TARGET: clean
 ################################################################################
 clean:
-	export CLEAN=on
+	node_modules/.bin/gulp cleanAll
 
 ################################################################################
 # TARGET: deps

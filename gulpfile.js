@@ -12,17 +12,22 @@ var gulp = require('gulp'),
   exec = require('child_process').exec,
   del = require('del'); // If we want to do clean
 
-function clean() {
-  if (config.isCleaningOn) {
-    return del(config.baseBuildDir);
-  }
-  else {
-    return Promise.resolve();
-  }
+function cleanAll() {
+  return del(config.baseBuildDir);
 }
 
+function cleanTarget() {
+  return del(config.baseBuildDir + '/' + config.buildType);
+}
+
+function noop(callback) {
+  callback();
+}
+
+var clean = config.isCleaningAll ? cleanAll : (config.isCleaningTarget ? cleanTarget : noop);
+
 // Report build configuration information, including versions
-function report(callback) {
+function reportConfig(callback) {
   console.log('Build configuration:');
   console.log(config);
   exec('echo npm version: `npm --version`', callback);
@@ -37,8 +42,7 @@ function getAllSourceFolderCompilationFns() {
     return js.compileFunctionMap[compileFunctionName];
   });
 }
-
-var jsCompileAndLint = getAllSourceFolderCompilationFns().concat(config.isLintingOn ? js.lint : []); // Compile all source folders
+var jsCompileAndLint = getAllSourceFolderCompilationFns().concat(config.isLintingOn ? 'js-lint' : []); // Compile all source folders
 gulp.task('js-compile-lint', gulp.parallel.apply(gulp, jsCompileAndLint));
 gulp.task('js-validate', gulp.series(js.prepareValidation, js.validate));
 gulp.task('js-show-sizes', js.showSizes);
@@ -59,10 +63,11 @@ var build =
     resources.earcons,
     'js'
   );
-gulp.task(clean);
+gulp.task(cleanAll);
+gulp.task(cleanTarget);
 gulp.task('build', build);
-gulp.task(report);
-gulp.task('default', gulp.series(clean, 'build', report, packaging.createMetaData));
+gulp.task(reportConfig);
+gulp.task('default', gulp.series(reportConfig, clean, 'build', packaging.createMetaData));
 gulp.task('package', gulp.series('default', packaging.createPackage));
 
 // Watcher tasks

@@ -27,7 +27,12 @@ var baseConfig = {
   buildDir: baseBuildDir + '/' + buildType,
   resourceFolderName: '.',
   isLintingOn: process.env.LINT === 'on', // Default to false
-  isCleaningOn: process.env.CLEAN !== 'off', // Default to true
+  // Three types of cleaning
+  // CLEAN=off -- no cleaning
+  // CLEAN=all -- clean everything
+  // CLEAN=build_target (default) -- clean specific target only (e.g. target/extension or target/common)
+  isCleaningTarget: process.env.CLEAN !== 'off', // Default to true
+  isCleaningAll: process.env.CLEAN === 'all', // Default to false
   isMinifying: process.env.MINIFY === 'on', // Default to false
   isDebugOn: isDebugOn,  // Default to false
   nodeVersion: NODE_VERSION,
