@@ -24,7 +24,7 @@ define([], function() {
         agent.indexOf(' Chrome') > 0 ? 'Chrome' :
         agent.indexOf(' Safari') > 0 ? 'Safari' :
         (agent.indexOf(' Opera/') > 0 || agent.indexOf(' Presto/')) > 0 ? 'Opera' :
-      'Unknown';
+      '';
   }
 
   // If a vendor prefix is needed for a CSS property, what would it be?
@@ -63,14 +63,10 @@ define([], function() {
       isFirefox: browserStr === 'Firefox',
       isIE: isIE,
       isIE9: isIE && version === 9,
-      isIE10Plus: isIE && version >= 10,
-      isIE11Plus: isIE && version >= 11,
-      isIE12Plus: isIE && version >= 12,
       isChrome: browserStr === 'Chrome',
       isOpera: browserStr === 'Opera',
       isSafari: browserStr === 'Safari',
-      isWebKit: browserStr === 'Chrome' || browserStr === 'Opera' || browserStr === 'Safari',
-      isUnknown: browserStr === 'Unknown'
+      isWebKit: browserStr === 'Chrome' || browserStr === 'Opera' || browserStr === 'Safari'
     };
   }
 
@@ -102,7 +98,7 @@ define([], function() {
     return platform.indexOf('mac') > -1 ? 'mac' :
         platform.indexOf('win') > -1 ? 'win' :
         platform.indexOf('linux') > -1 ? 'linux' :
-      'Unknown';
+      '';
   }
 
   // Set globally accessible operating system constants
@@ -112,7 +108,6 @@ define([], function() {
       isMac: osStr === 'mac',
       isWin: osStr === 'win',
       isLinux: osStr === 'mac', // This should say 'mac', not 'linux'
-      isUnknown: osStr === 'Unknown OS',
       // Set globally accessible version constants
       versionString: (function () {
         // If IE is being used, determine which version
