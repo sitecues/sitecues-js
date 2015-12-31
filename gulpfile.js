@@ -8,6 +8,7 @@ var gulp = require('gulp'),
   packaging = require(targetTaskFolder + '/packaging'),
   templates = require('./task/templates'),
   resources = require('./task/resources'),
+  removeAllDeadCode = require('./task/dead-code-removal'),
   exec = require('child_process').exec,
   del = require('del'); // If we want to do clean
 
@@ -41,7 +42,10 @@ var jsCompileAndLint = getAllSourceFolderCompilationFns().concat(config.isLintin
 gulp.task('js-compile-lint', gulp.parallel.apply(gulp, jsCompileAndLint));
 gulp.task('js-validate', gulp.series(js.prepareValidation, js.validate));
 gulp.task('js-show-sizes', js.showSizes);
-var jsDoAll = [ 'js-compile-lint', 'js-validate' ].concat(config.isShowingSizes ? 'js-show-sizes': []);
+var jsDoAll = [ 'js-compile-lint' ]
+  .concat(config.isMinifying ? removeAllDeadCode : [])
+  .concat('js-validate')
+  .concat(config.isShowingSizes ? 'js-show-sizes': []);
 gulp.task('js', gulp.series.apply(gulp, jsDoAll));
 
 // General build and package tasks

@@ -7862,7 +7862,6 @@
 //    window.jQuery = window.$ = jQuery;
 //  }
 
-  // For debbugging purposes
   sitecues.$ = jQuery;
 
   return jQuery;

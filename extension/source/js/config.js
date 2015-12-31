@@ -10,19 +10,5 @@ window.sitecues = {
     uiMode: 'toolbar',
     alwaysRealSettings: true
   },
-  require: require  // Expose sitecues.require -- needed for sitecues.require call in locale.js
 };
-
-require.config({
-  // Tell loader to never search for or execute a script with a "data-main"
-  // attribute, since this could have weird consequences on customer pages.
-  namespace: 'sitecues',
-  map: {
-    // Extension uses 'jquery' for $
-    // because Zepto has compatibility issues with pages that use prototype.js and we dont' want to package both
-    '*': {
-      '$': 'jquery'
-    }
-  }
-});
 

@@ -5,12 +5,16 @@
  * and by using run_at="document_start"
  **/
 
+// TODO better localization -- settings and tips don't load yet
 // TODO feedback should probably be a mailto link (SC_LOCAL)
-// TODO style-service
 // TODO can anything be removed from permissions? Do we need 'tabs' ?
 // TODO TTS
 
 'use strict';
+
+// Put jQuery $ in local scope for extension
+// jshint -W098
+var $ = sitecues.$;
 
 if (!window.localStorage.getItem('sitecues-disabled')) {
   document.documentElement.setAttribute('data-sitecues-everywhere', '');

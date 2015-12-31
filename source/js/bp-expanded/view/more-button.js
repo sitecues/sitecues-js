@@ -14,8 +14,8 @@ define(['core/bp/constants', 'core/bp/helper', 'bp-expanded/view/transform-util'
       isAfterUserInput,
       // Oft-used functions. Putting it in a variable helps minifier, convenience, brevity
       byId = helper.byId,
-      moreButtonContainer = byId(BP_CONST.MORE_BUTTON_CONTAINER_ID),
-      moreOpacityElem = byId('scp-more-button-opacity'),
+      moreButtonContainer,
+      moreOpacityElem,
       isInitialized;
 
   function getHelpOrSecondaryPanel(doToggle) {
@@ -143,6 +143,10 @@ define(['core/bp/constants', 'core/bp/helper', 'bp-expanded/view/transform-util'
     }
 
     isInitialized = true;
+
+    // Get elements
+    moreButtonContainer = byId(BP_CONST.MORE_BUTTON_CONTAINER_ID);
+    moreOpacityElem = byId('scp-more-button-opacity');
 
     // Add mouse listeners once BP is ready
     addMouseListeners();

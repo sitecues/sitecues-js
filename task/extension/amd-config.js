@@ -8,13 +8,15 @@ var config = require('../build-config.js'),
     include: getSourceFolders(),
     exclude: [ 'page/zepto/zepto' ],  // Use jquery instead of zepto as it works in more cases (compatibility with pages that use Prototype.js)
     wrap: {
-      start: config.runtimeConfig + "'use strict';"
+      start: 'sitecues.version="' + config.version + '";\n' +
+        '"use strict";\n'
     },
-    optimize: config.isMinifying ? 'uglify2' : 'none',
+    optimize: 'none',
     baseUrl: JS_SOURCE_DIR,
-    out: config.buildDir + '/js/sitecues.js',
+    out: config.tmpFile,
     preserveLicenseComments: false,
     generateSourceMaps: config.isGeneratingSourceMaps,
+    skipModuleInsertion: true, // Recommended by amdclean documentation when not using shims
     removeCombined: true,
     useStrict: true,
     paths: {
@@ -22,15 +24,8 @@ var config = require('../build-config.js'),
     },
     map: {
       '*': {
-        '$': 'jquery'  // Extension always uses jQuery in order to be compatible with pages that use Prototype.js
+        '$': 'empty:'  // Extension always uses jQuery in order to be compatible with pages that use Prototype.js
       }
-    },
-    //logLevel: 4,
-    uglify2: {
-      compress: {
-        dead_code: true
-      },
-      mangle: true
     },
     insertRequire: [ 'core/core' ]
   };
@@ -39,7 +34,7 @@ function getSourceFolders() {
   var mainModules = bundleFolders.map(function(folderName) {
     return folderName + '/' + folderName;
   });
-  return mainModules.concat('locale-data/en'); // TODO figure out how to include all languages
+  return ['locale-data/en'].concat(mainModules); // TODO figure out how to include all languages
 }
 
 module.exports = amdConfig;

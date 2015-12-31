@@ -1,14 +1,19 @@
 // Cheap, extremely minimal XHR for IE9+ and other browsers
 // Takes subset of $.ajax params -- data, contentType, headers, cache, dataType, url, success, error
 
-
-
 define([], function () {
 
   // -- PRIVATE --
 
   // Cross-browser XHR requests (supports IE9)
   function initRequest(postData, requestObj, optionalContentTypeOverride, successFnOverride) {
+    if (SC_LOCAL) {
+      if (SC_DEV) {
+        console.log('Error: XHR functionality is not provided in the extension');
+      }
+      return;
+    }
+
     var xhr = new XMLHttpRequest(),
       type = postData ? 'POST' : 'GET',
       contentType = optionalContentTypeOverride || requestObj.contentType;

@@ -28,9 +28,7 @@ define(['$', 'page/style-service/style-service', 'core/conf/user/manager', 'page
       autoSize,
       userSpecifiedSize,
       userSpecifiedHue,
-      doAllowCursors = !platform.browser.isIE || platform.browser.version >= 11 || site.get('disableCursorEnhancement') === false,
-      doUseAjaxCursors = platform.browser.isIE,
-      doDisableDuringZoom = platform.browser.isIE;
+      doAllowCursors = !platform.browser.isIE || platform.browser.version >= 11 || site.get('disableCursorEnhancement') === false;
 
   /*
    * Change a style rule in the sitecues-cursor stylesheet to use the new cursor URL
@@ -52,9 +50,6 @@ define(['$', 'page/style-service/style-service', 'core/conf/user/manager', 'page
   }
 
   function isCursorReadyToUse(url) {
-    if (!doUseAjaxCursors) {
-      return true;  // Use SVG cursors
-    }
     if (!ajaxCursors[url]) {
       return false;   // Has never been fetched, so isn't ready-to-use
     }
@@ -121,7 +116,7 @@ define(['$', 'page/style-service/style-service', 'core/conf/user/manager', 'page
 
     var url = getUrlFromCursorValue();
 
-    if (isCursorReadyToUse(url)) {
+    if (!platform.browser.isIE || isCursorReadyToUse(url)) {
       // No prefetch needed
       setCursorStyle(rule, cursorValue);
     }
@@ -203,7 +198,7 @@ define(['$', 'page/style-service/style-service', 'core/conf/user/manager', 'page
       callback();
     });
 
-    if (doDisableDuringZoom) {
+    if (platform.browser.isIE) {
       // While zooming, turn off our CSS rules so that the browser doesn't spend
       // CPU cycles recalculating the custom cursor rules to apply during each frame
       // This makes a difference in IE 9/10 -- doesn't seem to help in other browsers.
@@ -241,7 +236,7 @@ define(['$', 'page/style-service/style-service', 'core/conf/user/manager', 'page
     // Refresh document cursor stylesheet if we're using one
     if (cursorStylesheetObject) {
       refreshCursorStyles(cursorStylesheetObject, cursorTypeUrls);
-      if (doDisableDuringZoom) {
+      if (platform.browser.isIE) {
         setTimeout(function () {
           setCursorsDisabled(false);
         }, REENABLE_CURSOR_MS);
@@ -287,7 +282,7 @@ define(['$', 'page/style-service/style-service', 'core/conf/user/manager', 'page
   function getCursorTypeUrls(size) {
     var cursorTypeUrls = [],
       i = 0,
-      doUseIECursors = platform.browser.isIE || doUseAjaxCursors;
+      doUseIECursors = platform.browser.isIE;
 
     // Generate cursor images for every cursor type...
     for (; i < CURSOR_TYPES.length; i ++) {
@@ -306,12 +301,6 @@ define(['$', 'page/style-service/style-service', 'core/conf/user/manager', 'page
       doAllowCursors = !doAllowCursors;
       refreshStylesheetsIfNecessary();
       return doAllowCursors;
-    };
-
-    sitecues.toggleAjaxCursors = function() {
-      doUseAjaxCursors = !doUseAjaxCursors;
-      refreshStylesheetsIfNecessary();
-      return doUseAjaxCursors;
     };
   }
 

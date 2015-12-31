@@ -40,11 +40,12 @@ var baseConfig = {
 // Add additional convenience properties
 function finalizeConfig(config) {
   config.resourceDir = config.buildDir + '/' + config.resourceFolderName;
-  config.runtimeConfig = 'sitecues.version="' + version + '";' +
-    'SC_EXTENSION=' + !!config.isExtension +
-    ',SC_RESOURCE_FOLDER_NAME="' + config.resourceFolderName + '"' +
-    ',SC_LOCAL=' + !!config.isLocal +
-    ',SC_DEV=' + !!config.isDebugOn + ';\n';
+  config.globalDefs = {
+    SC_EXTENSION: config.isExtension,
+    SC_RESOURCE_FOLDER_NAME: config.resourceFolderName,
+    SC_LOCAL: config.isLocal,
+    SC_DEV: config.isDebugOn
+  };
 
   return config;
 }

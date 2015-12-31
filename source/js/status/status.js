@@ -116,20 +116,25 @@ define(
         }
       }
 
-      xhr.getJSON({
-        type:     'GET',
-        url:      ajaxUrls.ws,
-        success: function (response) {
-          // Set the version based on the AJAX response object
-          info.version.ws = response.version;
-          readyCheck();
-        },
-        error: function () {
-          // Set an error message if the AJAX object did not return
-          info.version.ws = 'Error fetching WS version from service URL';
-          readyCheck();
-        }
-      });
+      if (SC_LOCAL) {
+        callback(info); // Avoid xhr in local mode (including extension)
+      }
+      else {
+        xhr.getJSON({
+          type: 'GET',
+          url: ajaxUrls.ws,
+          success: function (response) {
+            // Set the version based on the AJAX response object
+            info.version.ws = response.version;
+            readyCheck();
+          },
+          error: function () {
+            // Set an error message if the AJAX object did not return
+            info.version.ws = 'Error fetching WS version from service URL';
+            readyCheck();
+          }
+        });
+      }
 
       return 'Fetching sitecues status...';
     }

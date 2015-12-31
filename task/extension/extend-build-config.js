@@ -20,9 +20,10 @@ function getConfig(baseConfig) {
     return EXTENSION_SOURCE_DIR + '/' + suffix;
   }
 
-  var config = extend({}, baseConfig, {
+  var config = extend(true, {}, baseConfig, {
     isExtension: true,
     extensionSourceDir: EXTENSION_SOURCE_DIR,
+    tmpFile: (process.env.TMPDIR || '/tmp/') + 'sitecues.js',
     isLocal: process.env.LOCAL !== 'off', // Extension: default is local because of Google security requirements
     jsGlob: getGlob('js/**/*.js'),
     rasterGlob: getGlob('images/**/*.png'),

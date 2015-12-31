@@ -6,10 +6,8 @@ define(['core/conf/user/manager', 'core/util/uuid', 'core/conf/site', 'core/loca
 
     var sessionId = uuid();
 
-    return function (name, details, doForceSend) {
-      if (SC_LOCAL && !doForceSend) {
-        // Don't send any metric events except for feedback
-        // TODO Is that safe to do in a Google extension? If not, use an email link.
+    return function (name, details) {
+      if (SC_LOCAL) {   // No metric events in local mode
         return;
       }
       if (!site.get('suppressMetrics')) {

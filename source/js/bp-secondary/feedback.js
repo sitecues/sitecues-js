@@ -112,7 +112,7 @@ define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/plat
         feedbackText: getFeedbackText(),
         rating: currRating  // 0 = no rating, otherwise 1-5 stars
       };
-      metric('feedback-sent', details, true);
+      metric('feedback-sent', details);
       toggleSendEnabled(false); // Disable feedback button after sent, so that feedback isn't accidentally clicked twice
       state.set('isFeedbackSent', true);
       sitecues.emit('bp/did-change', false, true);

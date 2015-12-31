@@ -11,29 +11,26 @@ var config = require('../build-config'),
   JS_SOURCE_DIR = config.librarySourceDir + '/js',
   AMD_BASE_CONFIG = {
     wrap: {
-      start: "'use strict';"
+      start: '"use strict";\n'
     },
     baseUrl: JS_SOURCE_DIR,
     preserveLicenseComments: false,
     generateSourceMaps: config.isGeneratingSourceMaps,
     removeCombined: false,
-    optimize: config.isMinifying ? 'uglify2' : 'none',
+    optimize: 'uglify2',
     namespace: 'sitecues',
     useStrict: true,
-    uglify2: {
-      compress: {
-        dead_code: true
-      },
-      mangle: true
-    }
   },
   AMD_SPECIAL_CONFIGS = {
     // Core module special treatment
     core: {
       // Rename core.js to sitecues.js
       out: config.buildDir + '/js/sitecues.js',
-      // Wrap core.js with the runtime configuration
-      wrap: { start: config.runtimeConfig + "'use strict';\n" },
+      // sitecues.js gets version number
+      wrap: {
+        start: 'sitecues.version="' + config.version + '";\n' +
+          '"use strict";\n'
+      },
       // Include alameda in core
       include: [ 'core/alameda-custom' ],
       // Make sure core initializes itself
@@ -89,9 +86,9 @@ function getBundleConfig(amdConfig, bundleName) {
 }
 
 // Configuration for a source folder, whether a bundle or data
-function getAmdConfig(sourceFolderName) {
+function getAmdConfig(sourceFolderName, uglifyOptions) {
 
-  var amdConfig = extend({}, AMD_BASE_CONFIG, AMD_SPECIAL_CONFIGS[sourceFolderName]);
+  var amdConfig = extend(true, { uglify2: uglifyOptions }, AMD_BASE_CONFIG, AMD_SPECIAL_CONFIGS[sourceFolderName]);
 
   if (isDataFolder(sourceFolderName)) {
     return getDataFolderConfig(amdConfig, sourceFolderName);

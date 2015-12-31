@@ -37,8 +37,8 @@
         "proxy.dev.sitecues.com/*"
       ],
       "js"      : [
-        "js/almond.js", // Minimal AMD loader for one giant file
         "js/config.js",
+        "js/jquery.js",
         "js/contentscript.js",
         "js/sitecues.js"
       ],

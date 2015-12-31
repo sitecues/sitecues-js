@@ -9,7 +9,7 @@ function getConfig(baseConfig) {
     return baseConfig.librarySourceDir + '/' + suffix;
   }
 
-  var config = extend({}, baseConfig, {
+  var config = extend(true, {}, baseConfig, {
     // Production versions have resources in a folder named by the version
     resourceFolderName: baseConfig.isDebugOn ? '.' : baseConfig.version,
     isLocal: process.env.LOCAL === 'on',  // Common library -- default is non-local
