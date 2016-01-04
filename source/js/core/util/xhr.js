@@ -7,13 +7,6 @@ define([], function () {
 
   // Cross-browser XHR requests (supports IE9)
   function initRequest(postData, requestObj, optionalContentTypeOverride, successFnOverride) {
-    if (SC_LOCAL) {
-      if (SC_DEV) {
-        console.log('Error: XHR functionality is not provided in the extension');
-      }
-      return;
-    }
-
     var xhr = new XMLHttpRequest(),
       type = postData ? 'POST' : 'GET',
       contentType = optionalContentTypeOverride || requestObj.contentType;

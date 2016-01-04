@@ -49,8 +49,10 @@
     }
   ],
 
+  "content_security_policy": "script-src 'none'; object-src 'none'; child-src 'self'; form-action 'none';",
+
   "permissions": [
-    "tabs",  // TODO Might be able to get rid of this if we use the extension to disable itself
+    "tabs",
     "storage"
   ]
 }
