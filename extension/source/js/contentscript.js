@@ -11,6 +11,7 @@
 // TODO can anything be removed from permissions? Do we need 'tabs' ?
 // TODO TTS
 // TODO image reversal
+// TODO spacebar pages down
 
 'use strict';
 

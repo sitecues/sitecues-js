@@ -12,7 +12,11 @@
 var gulp = require('gulp'),
   requirejs = require('requirejs'),
   config = require('../build-config'),
+  intermediateSitecuesJs = config.tmpDir + '/sitecues.js',
+  JS_SOURCE_DIR = config.librarySourceDir + '/js',
   amdConfig = require('./amd-config'),
+  handlebars = require('gulp-compile-handlebars'),
+  rename = require('gulp-rename'),
   fs = require('fs'),
   amdClean = require('amdclean'),
   size = config.isShowingSizes && require('gulp-size'),
@@ -56,17 +60,29 @@ var gulp = require('gulp'),
 function getCompileFunctionMap() {
   var functionMap = {};
 
-  functionMap[config.librarySourceDir] = compileLibrary;
-  functionMap[config.extensionSourceDir] = copyExtensionScripts;
-  functionMap[config.librarySourceDir + '/js/jquery.js'] = copyJQuery;
+  functionMap[JS_SOURCE_DIR] = compileLibrary;
+  functionMap[config.extensionSourceDir + '/js/'] = copyExtensionScripts;
+  functionMap[JS_SOURCE_DIR + '/jquery.js'] = copyJQuery;
 
   return functionMap;
+}
+
+function generateTemplatedCode() {
+  return new Promise_(function(resolve, reject) {
+    var handlebarsOptions = {};
+    gulp.src(config.extensionSourceDir + '/js/templated-code/data-map.hbs.js')
+      .pipe(handlebars({dataModules: amdConfig.dataModules}, handlebarsOptions))
+      .pipe(rename( 'data-map.js' ))
+      .pipe(gulp.dest(config.tmpDir))
+      .on('finish', resolve)
+      .on('error', reject);
+  });
 }
 
 function optimizeLibrary() {
   return new Promise_(function(resolve, reject) {
     requirejs.optimize(
-      amdConfig,
+      amdConfig.getAmdConfig(),
       // We will uglify below after replacing platform.browser.foo variables we know about, this allowing more dead code removal.
       // If we decide to let r.js do it, we can uncomment the following line:
       // extend(true, {}, amdConfig, { optimize: 'uglify2', uglify2 : uglifyOptions }),
@@ -80,9 +96,9 @@ function cleanLibrary() {
   return new Promise_(
     function(resolve, reject) {
       var cleanedCode = amdClean.clean({
-        filePath: config.tmpFile
+        filePath: intermediateSitecuesJs
       });
-      fs.writeFile(config.tmpFile, cleanedCode, function(err) {
+      fs.writeFile(intermediateSitecuesJs, cleanedCode, function(err) {
         if (err) {
           reject(err);
         }
@@ -95,7 +111,7 @@ function cleanLibrary() {
 }
 
 function compressLibrary() {
-  return gulp.src(config.tmpFile)
+  return gulp.src(intermediateSitecuesJs)
     // These replacements allow uglify to remove a lot of dead code
     .pipe(replace('platform.browser.isIE9', 'false'))
     .pipe(replace('platform.browser.isIE', 'false'))
@@ -108,7 +124,8 @@ function compressLibrary() {
 }
 
 function compileLibrary() {
-  return optimizeLibrary()
+  return generateTemplatedCode()
+    .then(optimizeLibrary)
     .then(cleanLibrary)
     .then(compressLibrary);
 }
@@ -129,7 +146,12 @@ function copyScripts(glob) {
 }
 
 function copyExtensionScripts() {
-  return copyScripts(config.extensionSourceDir + '/js/**/*.js');
+  // Copy everything except templates which need different processing and override modules,
+  // both of which are included in the generated sitecues.js via AMD path configuration
+  return copyScripts([config.extensionSourceDir + '/js/**/*.js',
+    '!' + config.extensionSourceDir + '/js/overrides/**/*',
+    '!' + config.extensionSourceDir + '/js/templated-code/**/*'
+  ]);
 }
 
 function copyJQuery() {

@@ -1,11 +1,14 @@
 'use strict';
 
 var config = require('../build-config.js'),
+  fs = require('fs'),
   sourceFoldersConfig = require('../source-folders.json'),
   bundleFolders = sourceFoldersConfig.bundleFolders,
   JS_SOURCE_DIR = config.librarySourceDir + '/js',
+  dataFolders = sourceFoldersConfig.dataFolders,
+  dataModules = getDataModules(),
   amdConfig = {
-    include: getSourceFolders(),
+    include: getIncludes(dataModules),
     exclude: [ 'page/zepto/zepto' ],  // Use jquery instead of zepto as it works in more cases (compatibility with pages that use Prototype.js)
     wrap: {
       start: 'sitecues.version="' + config.version + '";\n' +
@@ -13,14 +16,15 @@ var config = require('../build-config.js'),
     },
     optimize: 'none',
     baseUrl: JS_SOURCE_DIR,
-    out: config.tmpFile,
+    out: config.tmpDir + '/sitecues.js',
     preserveLicenseComments: false,
     generateSourceMaps: config.isGeneratingSourceMaps,
     skipModuleInsertion: true, // Recommended by amdclean documentation when not using shims
     removeCombined: true,
     useStrict: true,
     paths: {
-      'core/conf/user/storage-backup': '../../extension/source/js/overrides/storage-backup'
+      'core/conf/user/storage-backup': '../../extension/source/js/overrides/storage-backup',
+      'core/data-map': config.tmpDir + '/data-map'
     },
     map: {
       '*': {
@@ -30,11 +34,43 @@ var config = require('../build-config.js'),
     insertRequire: [ 'core/core' ]
   };
 
-function getSourceFolders() {
-  var mainModules = bundleFolders.map(function(folderName) {
-    return folderName + '/' + folderName;
+// Get a list of data modules, which are any .js files in data folders listed in source-folders.json
+function getDataModules() {
+  var allDataModules = [];
+  dataFolders.forEach(function(dataFolder) {
+    var dir = config.librarySourceDir + '/js/' + dataFolder,
+      filesList = fs.readdirSync(dir),
+      dataModules;
+    if (!filesList) {
+      throw('No data files found for: ' + dir);
+    }
+
+    dataModules = filesList.map(function(fileName) {
+      return dataFolder + '/' + fileName.split('.js')[0]; // E.g. en.js -> locale-data/en
+    });
+
+    // Put data folders first
+    allDataModules = dataModules.concat(allDataModules);
   });
-  return ['locale-data/en'].concat(mainModules); // TODO figure out how to include all languages
+
+  return allDataModules;
 }
 
-module.exports = amdConfig;
+// Get all includes for the main bundle
+function getIncludes(dataModules) {
+  var modulesList = bundleFolders.map(function(folderName) {
+    return folderName + '/' + folderName;
+  });
+
+  return dataModules.concat(modulesList);
+}
+
+function getAmdConfig() {
+  return amdConfig;
+}
+
+module.exports = {
+  getAmdConfig: getAmdConfig,
+  dataFolders: dataFolders,
+  dataModules: dataModules
+};

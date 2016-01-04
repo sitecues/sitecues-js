@@ -5,7 +5,7 @@
  * - Translate text with {{keys}} in it
  * - Localize a number string
  */
-define([], function() {
+define([ 'core/data-map' ], function(dataMap) {
   var translations = {},
     DEFAULT_LANG = 'en-us',
     LOCALE_DATA_MODULE_PREFIX = 'locale-data/',
@@ -154,21 +154,10 @@ define([], function() {
     var lang = getSupportedWebsiteLang(),
       langModuleName = LOCALE_DATA_MODULE_PREFIX + lang;
 
-    if (SC_EXTENSION) {
-      require(['locale-data/en'], function(langEntries) {
-        // Had to repeat this inline function because of AMD Clean issue -- removes requires using named functions
-        // https://github.com/gfranko/amdclean/issues/106
-        translations = langEntries;
-        onReadyCallback();
-      }); // TODO other languages for extensions
-    }
-    else {
-      // Hack: sitecues.require() is used instead of require() so that we can use it with a variable name
-      sitecues.require([langModuleName], function(langEntries) {
-        translations = langEntries;
-        onReadyCallback();
-      });
-    }
+    dataMap.get(langModuleName, function(data) {
+      translations = data;
+      onReadyCallback();
+    });
   }
 
   return {
