@@ -1,7 +1,5 @@
 /*
- * Sitecues: core.js
- *   The core module of the sitecues library.
- *
+ * Sitecues: run.js
  *   1. Initialize settings and locale
  *   2. Initialize BP
  *   3. Listen to anything that should wake up sitecues features
