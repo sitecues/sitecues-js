@@ -2,9 +2,9 @@
  *  Used for dark themes.
  */
 
-  define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core/platform', 'core/conf/urls',
+  define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core/platform',
     'theme/img-classifier'],
-  function($, conf, styleService, platform, urls, imgClassifier) {
+  function($, conf, styleService, platform, imgClassifier) {
 
   var mutationObserver,
     $allReversibleElems = $(),
@@ -102,7 +102,7 @@
       if (savedSrc === null) {
         $img.attr('data-sc-src', currentSrc);
       }
-      $img.css('src', urls.getApiUrl('image-proxy/' + currentSrc));
+      $img.css('src', imgClassifier.getInvertUrl(currentSrc));
     }
     else {
       // Clear proxied src

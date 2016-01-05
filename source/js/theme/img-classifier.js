@@ -17,11 +17,22 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
     BG_IMAGE_BONUS = 150,
     MAX_SCORE_CHECK_PIXELS = 120,
     isDebuggingOn,
-    reverseCallbackFn;
+    reverseCallbackFn,
+    CLASS_INVERT = 'i',
+    CLASS_NORMAL = 'n';
 
   function getImageExtension(src) {
     var imageExtension = src.match(/\.png|\.jpg|\.jpeg|\.gif|\.svg/i);
     return imageExtension && imageExtension[0];
+  }
+
+  function getInvertUrl(url) {
+    var newUrl = urls.getApiUrl('image/invert/' + url);
+
+    // TODO remove this line
+    newUrl = newUrl.replace('/ws.', '/wsbeta.');
+
+    return newUrl;
   }
 
   // Get <img> that can have its pixel data read
@@ -51,7 +62,9 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
       safeUrl = url;  // Image element was not an <img>. Will create an <img> based on the url
     }
     else {
-      safeUrl = urls.getApiUrl('image-proxy/' + url);
+      // Uses inverted image for analysis so that if we need to display it, it's already in users cache.
+      // The inverted image will show the same number of brightness values in the histogram so this won't effect classification
+      safeUrl = getInvertUrl(url);
     }
 
     safeImg = $('<img>').attr('src', safeUrl)[0];
@@ -243,7 +256,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
         score = 40;
       }
 
-      callback(score); // Add an average amount
+      callback(score, true); // Add an average amount
     });
   }
 
@@ -258,22 +271,46 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
     }
   }
 
+  // Uses a sitecues prefix to avoid namespace conflicts with underlying page
+  // Uses a hash function on the url to reduce the amount of storage required to save results for each url
+  function getStorageKey(img) {
+    var STORAGE_PREFIX = '-sc-img-';
+
+    // jshint -W016
+    function getHashCode(s) {
+      // From http://stackoverflow.com/questions/7616461/generate-a-hash-from-string-in-javascript-jquery
+      return s.split('').reduce(function (a, b) {
+        a = ((a << 5) - a) + b.charCodeAt(0);
+        return a & a;
+      }, 0);
+    }
+
+    return STORAGE_PREFIX + getHashCode(img.src);
+  }
+
   /**
    * Classifier function for images without missing features.
    * This formula came from a machine learning algorithm with the help of Jeffrey Bigham
    * @param img
    * @returns {*}
    */
-  // TODO cache results in localStorage based on URL?
   function classifyImage(index, img) {
     var isReversible,
-      $img = $(img);
+      $img = $(img),
+      storageKey = getStorageKey(img),
+      cachedResult = window.localStorage.getItem(storageKey);
 
     function classifyLoadedImage() {
-      shouldInvertElement(img, function(isReversible) {
+      shouldInvertElement(img, function(isReversible, didAnalyzePixels) {
 
         if (SC_DEV && isDebuggingOn) {
           $(img).css('outline', '5px solid ' + (isReversible ? 'red' : 'green'));
+        }
+
+        if (didAnalyzePixels) {
+          // Only cache for expensive operations, in order to save on storage space
+          var imageClass = isReversible ? CLASS_INVERT : CLASS_NORMAL;
+          window.localStorage.setItem(storageKey, imageClass);
         }
 
         onImageClassified(img, isReversible);
@@ -285,6 +322,9 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
     }
     else if ($img.is(customSelectors.nonReversible)) {
       isReversible = false;
+    }
+    else if (cachedResult) {
+      isReversible = cachedResult === CLASS_INVERT;
     }
     else if (colorUtil.isOnDarkBackground(img, DARK_BG_THRESHOLD)) {
       // If already on a dark background, inverting won't help make it visible
@@ -344,7 +384,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
     }
 
     // Pixel info takes longer to get: only do it if necessary
-    getPixelInfoScore(img, size, function (pixelInfoScore) {
+    getPixelInfoScore(img, size, function (pixelInfoScore, didAnalyzePixels) {
       finalScore += pixelInfoScore;
 
       if (SC_DEV && isDebuggingOn) {
@@ -361,7 +401,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
         );
       }
 
-      callback(finalScore > 0);
+      callback(finalScore > 0, didAnalyzePixels);
     });
   }
 
@@ -410,6 +450,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
 
   return {
     shouldInvertBgImage: shouldInvertBgImage,
-    classify: classify
+    classify: classify,
+    getInvertUrl: getInvertUrl
   };
 });
