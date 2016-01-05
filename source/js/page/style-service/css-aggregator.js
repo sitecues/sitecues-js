@@ -65,16 +65,6 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
       }, 0);
     }
   }
-  // Will cross-domain restrictions possibly burn us?
-  function isOnDifferentDomain(cssUrl) {
-    function getHostName(url) {
-      return urls.parseUrl(url).hostname;
-    }
-
-    // For our purposes, hostname is the same as the domain
-    return getHostName(cssUrl) !== document.location.hostname;
-  }
-
   /**
    * Cross browser solution to initiating an XMLHTTPRequest
    * that supports the Origin HTTP header
@@ -83,14 +73,12 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
    * @return {Object}
    */
   function createGetRequest(url) {
-    function isUnsafeRequest() {
-      // Unsafe cross-origin request
-      // - Will run into cross-domain restrictions because URL is from different domain
-      // This is not an issue with the extension, because the content script doesn't have cross-domain restrictions
-      return !SC_EXTENSION && isOnDifferentDomain(url);
-    }
+    // Unsafe cross-origin request
+    // - Will run into cross-domain restrictions because URL is from different domain
+    // This is not an issue with the extension, because the content script doesn't have cross-domain restrictions
+    var isUnsafeRequest = !SC_EXTENSION && urls.isOnDifferentDomain(url);
 
-    if (isUnsafeRequest()) {
+    if (isUnsafeRequest) {
       if (SC_DEV) {
         console.log('Cross-Domain: ' + url);
       }

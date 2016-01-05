@@ -2,9 +2,9 @@
  *  Used for dark themes.
  */
 
-  define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core/platform',
-    /*, 'theme/img-classifier' */],
-  function($, conf, styleService, platform/* , imgClassifier */) {
+  define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core/platform', 'core/conf/urls',
+    'theme/img-classifier'],
+  function($, conf, styleService, platform, urls, imgClassifier) {
 
   var mutationObserver,
     $allReversibleElems = $(),
@@ -12,7 +12,10 @@
       var div = document.createElement('div');
       div.style.filter = 'invert(1)';
       return div.style.filter ? 'filter': platform.cssPrefix + 'filter';
-    })();
+    })(),
+    // No css invert in IE -- extremely slow in Safari
+    SHOULD_USE_PROXY = platform.browser.isIE || platform.browser.isSafari,
+    reverseElem = SHOULD_USE_PROXY ? reverseElemProxy : reverseElemCss;
 
   function toggle(doStart, doRefreshImages) {
     if (doStart) {
@@ -66,28 +69,50 @@
     }
 
     classifyIframes(root, onClassifiedAsReversible);
-    // SMART-INVERT: imgClassifier.classify(root, onClassifiedAsReversible);
+    imgClassifier.classify(root, onClassifiedAsReversible);
 
     if (doRefreshImages) {
       refreshBackgroundImageStyles(root);
     }
   }
 
+  // Use CSS filter: invert(1)
+  function reverseElemCss($img, doReverse) {
+    var savedFilter = $img.attr('data-sc-filter');
+    if (doReverse) {
+      // Add filter
+      if (savedFilter === null) {
+        $img.attr('data-sc-filter', $img.css(filterProperty));
+      }
+      $img.css(filterProperty, 'invert(1)');
+    }
+    else {
+      // Clear filter
+      $img.css(filterProperty,  savedFilter || '');
+    }
+  }
+
+  // Use a proxied image through our reversal service
+  function reverseElemProxy($img, doReverse) {
+    var savedSrc = $img.attr('data-sc-src'),
+      currentSrc;
+    if (doReverse) {
+      currentSrc = $img.attr('src');
+      // Add proxied src
+      if (savedSrc === null) {
+        $img.attr('data-sc-src', currentSrc);
+      }
+      $img.css('src', urls.getApiUrl('image-proxy/' + currentSrc));
+    }
+    else {
+      // Clear proxied src
+      $img.attr('src',  savedSrc || '');
+    }
+  }
+
   function reverseElems($elems, doReverse) {
     $elems.each(function() {
-      var $this = $(this),
-        savedFilter = this.getAttribute('data-sc-filter');
-      if (doReverse) {
-        // Add filter
-        if (savedFilter === null) {
-          this.setAttribute('data-sc-filter', $this.css(filterProperty));
-        }
-        $this.css(filterProperty, 'invert(1)');
-      }
-      else {
-        // Clear filter
-        $this.css(filterProperty,  savedFilter || '');
-      }
+      reverseElem($(this), doReverse);
     });
   }
 

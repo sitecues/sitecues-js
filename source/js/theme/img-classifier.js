@@ -8,7 +8,7 @@
  *    }
  */
 
-define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site'], function($, zoomMod, colorUtil, site) {
+define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/urls'], function($, zoomMod, colorUtil, site, urls) {
   var REVERSIBLE_ATTR = 'data-sc-reversible',
     customSelectors = site.get('themes') || { },
     DARK_BG_THRESHOLD = 0.3,
@@ -24,42 +24,71 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site'], function($,
     return imageExtension && imageExtension[0];
   }
 
-  function getImageData(img, rect) {
+  // Get <img> that can have its pixel data read
+  function getReadableImage(img, callback) {
+    // Unsafe cross-origin request
+    // - Will run into cross-domain restrictions because URL is from different domain
+    // This is not an issue with the extension, because the content script doesn't have cross-domain restrictions
+    var url = img.src,
+      isSafeRequest = SC_EXTENSION || !urls.isOnDifferentDomain(url),
+      safeUrl,
+      safeImg;
+
+    function returnImageWhenComplete(img) {
+      if (img.complete) {
+        callback(img);
+      }
+      img.addEventListener('load', function() {
+        callback(img);
+      });
+    }
+
+    if (isSafeRequest) {
+      if (img.localName === 'img') {
+        returnImageWhenComplete(img); // The <img> in the DOM can have its pixels queried
+        return;
+      }
+      safeUrl = url;  // Image element was not an <img>. Will create an <img> based on the url
+    }
+    else {
+      safeUrl = urls.getApiUrl('image-proxy/' + url);
+    }
+
+    safeImg = $('<img>').attr('src', safeUrl)[0];
+    returnImageWhenComplete(safeImg);
+  }
+
+  function getImageData(img, rect, callback) {
     var canvas = document.createElement('canvas'),
       ctx,
       top = rect.top || 0,
       left = rect.left || 0,
       width = rect.width,
       height = rect.height,
-      oldCrossOrigin,
       imageData;
     canvas.width = width;
     canvas.height = height;
 
-    ctx = canvas.getContext('2d');
+    getReadableImage(img, function(readableImg) {
+      ctx = canvas.getContext('2d');
 
-    if (img.localName !== 'img') {
-      img = $('<img>').attr('src', img.src)[0];
-    }
-
-    try {
-      oldCrossOrigin = img.crossOrigin;
-      img.crossOrigin = 'anonymous';
-      ctx.drawImage(img, top, left, width, height);  // Works with img, canvas, video
-      imageData = ctx.getImageData(0, 0, width, height).data;
-    }
-    catch (ex) {
-      if (SC_DEV && isDebuggingOn) {
-        console.log('Could not get image data for %s: %s', img.src, ex);
+      try {
+        ctx.drawImage(readableImg, top, left, width, height);  // Works with img, canvas, video
+        imageData = readableImg.getImageData(0, 0, width, height).data;
       }
-    }
-    img.crossOrigin = oldCrossOrigin;
-    return imageData;
+      catch (ex) {
+        if (SC_DEV && isDebuggingOn) {
+          console.log('Could not get image data for %s: %s', readableImg.src, ex);
+        }
+      }
+      callback(imageData);
+    });
   }
 
-  function getPixelInfo(img, rect) {
-    var data = getImageData(img, rect);
-    return data && getPixelInfoImpl(data, rect.width, rect.height);
+  function getPixelInfo(img, rect, callback) {
+    getImageData(img, rect, function(data) {
+      callback(data && getPixelInfoImpl(data, rect.width, rect.height));
+    });
   }
 
   function getPixelInfoImpl(data, width, height) {
@@ -193,24 +222,29 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site'], function($,
     }
   }
 
-  function getPixelInfoScore(img, rect) {
+  function getPixelInfoScore(img, rect, callback) {
     if (rect.width <= 1 || rect.height <= 1) {
-      return 0; // It's possible that image simply isn't loaded yet, scroll down in brewhoop.com
+      callback(0); // It's possible that image simply isn't loaded yet, scroll down in brewhoop.com
+      return;
     }
 
-    var pixelInfo = getPixelInfo(img, rect);
-
-    // Image has full color information
-    if (pixelInfo) {
-      if (SC_DEV && isDebuggingOn) {
-        $(img).attr('pixel-info', JSON.stringify(pixelInfo));
+    getPixelInfo(img, rect, function(pixelInfo) {
+      var score;
+      if (pixelInfo) {
+        // Image has full color information
+        if (SC_DEV && isDebuggingOn) {
+          $(img).attr('pixel-info', JSON.stringify(pixelInfo));
+        }
+        score = 180 - Math.min(pixelInfo.numDiffGrayscaleVals, 150) -
+          pixelInfo.numMultiGrayscaleVals * 10 +
+          (pixelInfo.percentWithSameGrayscale > 0.3) * 50;
       }
-      return 180 - Math.min(pixelInfo.numDiffGrayscaleVals, 150) -
-        pixelInfo.numMultiGrayscaleVals * 10 +
-        (pixelInfo.percentWithSameGrayscale > 0.3) * 50;
-    }
+      else {
+        score = 40;
+      }
 
-    return 40; // Add an average amount
+      callback(score); // Add an average amount
+    });
   }
 
   function getElementTypeScore(img) {
@@ -234,6 +268,18 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site'], function($,
   function classifyImage(index, img) {
     var isReversible,
       $img = $(img);
+
+    function classifyLoadedImage() {
+      shouldInvertElement(img, function(isReversible) {
+
+        if (SC_DEV && isDebuggingOn) {
+          $(img).css('outline', '5px solid ' + (isReversible ? 'red' : 'green'));
+        }
+
+        onImageClassified(img, isReversible);
+      });
+    }
+
     if ($img.is(customSelectors.reversible)) {
       isReversible = true;
     }
@@ -253,9 +299,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site'], function($,
         img.addEventListener('load', classifyLoadedImage);
       }
       else {
-        setTimeout(function() {
-          classifyLoadedImage(img);
-        }, 100);
+        setTimeout(classifyLoadedImage, 100);
       }
       return;
     }
@@ -270,16 +314,6 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site'], function($,
     }
   }
 
-  function classifyLoadedImage(img) {
-    var isReversible = shouldInvertElement(img);
-
-    if (SC_DEV && isDebuggingOn) {
-      $(img).css('outline', '5px solid ' + (isReversible ? 'red' : 'green'));
-    }
-
-    onImageClassified(img, isReversible);
-  }
-
   function getSource(img) {
     var src = img.getAttribute('src'),
       srcSet;
@@ -292,7 +326,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site'], function($,
     return src;
   }
 
-  function shouldInvertElement(img) {
+  function shouldInvertElement(img, callback) {
     var src = getSource(img);
 
     if (!src) {
@@ -303,31 +337,32 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site'], function($,
       sizeScore = getSizeScore(size.height, size.width),
       elementTypeScore = getElementTypeScore(img),
       extensionScore = getExtensionScore(imageExt),
-      finalScore = sizeScore + elementTypeScore + extensionScore,
-      pixelInfoScore = 0;
+      finalScore = sizeScore + elementTypeScore + extensionScore;
 
-    if (finalScore > - MAX_SCORE_CHECK_PIXELS && finalScore < MAX_SCORE_CHECK_PIXELS) {
-      // Pixel info takes longer to get: only do it if necessary
-      pixelInfoScore = getPixelInfoScore(img, size);
+    if (finalScore < -MAX_SCORE_CHECK_PIXELS || finalScore > MAX_SCORE_CHECK_PIXELS) {
+      callback(finalScore > 0);
     }
 
-    finalScore += pixelInfoScore;
+    // Pixel info takes longer to get: only do it if necessary
+    getPixelInfoScore(img, size, function (pixelInfoScore) {
+      finalScore += pixelInfoScore;
 
-    if (SC_DEV && isDebuggingOn) {
-      $(img).attr(
-        'score',
-        sizeScore + ' (size) + ' +
-        (
-          elementTypeScore                    ?
+      if (SC_DEV && isDebuggingOn) {
+        $(img).attr(
+          'score',
+          sizeScore + ' (size) + ' +
+          (
+            elementTypeScore ?
             elementTypeScore + ' (button) + ' :
-            ''
-        ) +
-        extensionScore + ' (ext) + ' +
-        pixelInfoScore + ' (pixels) = ' + finalScore
-      );
-    }
+              ''
+          ) +
+          extensionScore + ' (ext) + ' +
+          pixelInfoScore + ' (pixels) = ' + finalScore
+        );
+      }
 
-    return finalScore > 0;
+      callback(finalScore > 0);
+    });
   }
 
   function shouldInvertBgImage(src, rect) {

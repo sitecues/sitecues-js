@@ -98,6 +98,13 @@ define(['core/conf/site'], function(site) {
     scriptOrigin = getParsedLibraryURL().origin;
   }
 
+  function isOnDifferentDomain(url) {
+    // Will cross-domain restrictions possibly burn us?
+    var hostName = parseUrl(url).hostname;
+    // For our purposes, hostname is the same as the domain
+    return hostName !== document.location.hostname;
+  }
+
   return {
     init: init,
     getApiUrl: getApiUrl,
@@ -105,7 +112,8 @@ define(['core/conf/site'], function(site) {
     isValidLibraryUrl: isValidLibraryUrl,
     getRawScriptUrl: getRawScriptUrl,
     resolveResourceUrl: resolveResourceUrl,
-    parseUrl: parseUrl
+    parseUrl: parseUrl,
+    isOnDifferentDomain: isOnDifferentDomain
   };
 
 });

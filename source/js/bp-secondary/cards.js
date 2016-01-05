@@ -110,20 +110,8 @@ define(['core/bp/constants', 'core/bp/helper', 'core/locale', 'core/bp/model/sta
   }
 
   function removeUnsupportedContent(panelElement) {
-    var removeElems;
-
     if (platform.browser.isIE && platform.browser.version <= 10) {
-      removeElems = '[data-no-ie10],[data-no-ie11]';
-    }
-    else if (platform.browser.isIE && platform.browser.version <= 11) {
-      removeElems = '[data-no-ie11]';
-    }
-    else if (platform.browser.isSafari) {
-      removeElems = '[data-no-safari]';
-    }
-
-    if (removeElems) {
-      removeAllElements(panelElement, removeElems);
+      removeAllElements(panelElement, '[data-no-ie10]');
     }
   }
 

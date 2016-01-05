@@ -3,8 +3,8 @@
  */
 
 define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core/platform',
-    'theme/color-choices', 'page/util/color', /* 'theme/img-classifier', */ 'theme/custom-site-theme' ],
-  function($, conf, styleService, platform, colorChoices, colorUtil, /* imgClassifier, */ customTheme) {
+    'theme/color-choices', 'page/util/color', 'theme/img-classifier', 'theme/custom-site-theme' ],
+  function($, conf, styleService, platform, colorChoices, colorUtil, imgClassifier, customTheme) {
   var $themeStyleSheet,
     THEME_STYLESHEET_NAME = 'sitecues-theme',
     REPAINT_MS = 40,
@@ -386,7 +386,7 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
       if (!sampleElement) {
         return true;
       }
-      return false; // SMART-INVERT: imgClassifier.shouldInvertBgImage(bgImage, sampleElement.getBoundingClientRect());
+      return imgClassifier.shouldInvertBgImage(bgImage, sampleElement.getBoundingClientRect());
     }
   }
 
