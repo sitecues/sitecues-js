@@ -94,14 +94,6 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
   }
 
   function handleDarkThemeInversions(isDark, willBeDark) {
-    var doInversions = platform.browser.isSafari ||
-      platform.browser.isFirefox ||
-      (platform.browser.isIE && platform.browser.version >=12);
-
-    if (!doInversions) {
-      return '';
-    }
-
     if (isDark !== willBeDark) {
       inverter.toggle(willBeDark);
     }
@@ -219,25 +211,12 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
   function getReverseSpriteCssText() {
     // Reverse background images
     function getCssForOneSprite(bgInfo, selector) {
-      // Create a pseudo element selector for everything that matches the selector
-      function getSelector(pseudo) {
-        return (pseudo ? selector.replace(/(,|$)/g, pseudo + '$1') : selector) + ' {\n';
-      }
-
-      if (!bgInfo.hasImageUrl) {
+      if (!bgInfo.imageUrl) {
         return '';
       }
 
-      var needsEmpty = bgInfo.doRequireEmpty ? ':empty' : '',
-        finalSelector = getSelector(needsEmpty + ':not([data-sc-reversible="false"])');
-      return finalSelector +
-        createRule('filter', FILTER_VAL.reversed, true) +
-        createRule(platform.cssPrefix + 'filter', FILTER_VAL.reversed, true) +
-        // Since we are inverting, make sure the inverse of any text that comes with the bg image
-        // ends up reversed, which means that it needs to start as the opposite of what we want
-        // TODO make this more sophisticated so that the true target colors are reached
-        'background-color: #fff !important;\n' +
-        'color: #000 !important;\n' +
+      return selector + '{\n' +
+        createRule('background-image', 'url(' + imgClassifier.getInvertUrl(bgInfo.imageUrl) +')', true) +
         '}\n';
     }
     var styleSheetText = '';
@@ -464,7 +443,7 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
     if (imageUrl) {
       var bgInfo = {
         prop: 'background-image',
-        hasImageUrl: !!imageUrl,
+        imageUrl: imageUrl,
         doRequireEmpty: hasRepeat,
         backgroundColor: cssStyleDecl.backgroundColor
       };
