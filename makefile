@@ -31,9 +31,6 @@ port=8000
 # Default clean option is only clean the target/foo folder being built
 clean=build_target
 
-# Default local mode
-local=off
-
 # Default type (other type is extension)
 type=common
 

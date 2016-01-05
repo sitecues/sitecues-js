@@ -51,10 +51,6 @@ var isInitialized,
         <use id="scp-stars-4" role="button" aria-pressed="false" aria-label="{{rating_4}}" class="scp-rating-star" xlink:href="#scp-rating-star-def" x="240" y="736"/>\
         <use id="scp-stars-5" role="button" aria-pressed="false" aria-label="{{rating_5}}" class="scp-rating-star" xlink:href="#scp-rating-star-def" x="306" y="736"/>\
       </g>\
-      <g id="scp-feedback-send" class="scp-hand-cursor" aria-disabled="true" role="button" aria-label="{{send}}">\
-        <rect x="595" width="165" y="740" height="50" rx="20" ry="20"/>\
-        <text x="678" y="775" text-anchor="middle" font-family="Arial" fill="white">{{send}}</text>\
-      </g>\
     </g>\
     <g id="scp-about" class="scp-if-about" transform="translate(805,16)">\
       <g id="scp-logo-text">\
@@ -108,6 +104,7 @@ htmlSecondary =
   <sc-p id="scp-feedback-prompt">{{rate_us_suggest}} {{rate_us_prompt}}</sc-p>\
   <textarea id="scp-feedback-textarea" class="scp-hand-cursor" data-allow-scroll="true" \
     aria-describedby="scp-feedback-prompt" data-visible-focus-on="scp-feedback-input-rect" placeholder="{{tell_us_something}}"></textarea>\
+  <sc-button id="scp-feedback-send-button"><a class="scp-button-link" id="scp-feedback-send" class="scp-hand-cursor" data-mailto="mailto:support@sitecues.com">{{send}}</a></sc-button>.\
 </sc>\
 <sc id="scp-feedback-thanks" class="scp-if-feedback-sent scp-secondary-feature" role="note" aria-label="{{thank_you}}">\
   <sc-h1>{{thank_you}}</sc-h1>\

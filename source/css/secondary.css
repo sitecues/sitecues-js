@@ -24,6 +24,11 @@
   color: #447AC4 !important; /* Same as #scp-wave3 */
 }
 
+.scp-button-link,.scp-button-link:visited,.scp-button-link:focus,.scp-button-link:hover {
+  color: #fff !important;
+  text-decoration: none !important;
+}
+
 /******************* Secondary content *********************/
 
 .scp-want-secondary #scp-secondary, .scp-is-secondary #scp-secondary {
@@ -129,6 +134,10 @@ sc-button {
   margin-right: 10px;
   transition: transform .5s;
   position: relative;
+}
+
+sc-button[aria-disabled="true"] {
+  background-color: #999;
 }
 
 sc-button:hover {
@@ -512,6 +521,15 @@ sc-button[data-setting-name="themeName"][data-setting-value="dark"] {
   visibility: hidden;
   opacity: 0;
 }
+
+#scp-feedback-send-button {
+  position: absolute;
+  top: 453px;
+  left: 335px;
+  width: 120px;
+  text-align: center;
+}
+
 .scp-feedback-sent .scp-if-feedback [role],
 .scp-feedback-sent .scp-if-feedback textarea
 {
@@ -570,12 +588,6 @@ sc-button[data-setting-name="themeName"][data-setting-value="dark"] {
   fill: #e4be62;
 }
 .scp-rating-star:hover ~ .scp-rating-star {
-  fill: #aaa !important;
-}
-#scp-feedback-send>rect {
-  fill: #6B9AE0;
-}
-#scp-feedback-send[aria-disabled="true"]>rect {
   fill: #aaa !important;
 }
 #scp-feedback-thanks {

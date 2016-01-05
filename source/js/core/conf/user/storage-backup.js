@@ -6,7 +6,7 @@
 // IMPORTANT: The extension defines this module in order to override the mechanism
 define(['core/conf/urls'], function (urls) {
 
-  var PATH = '/html/prefs.html',
+  var PATH = 'html/prefs.html',
     ID = 'sitecues-prefs',
     iframe,
     isLoaded;
