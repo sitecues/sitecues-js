@@ -23,7 +23,7 @@ clean-deps=false
 https=off
 
 # Whether or not to lint the codebase before the build.
-lint=off
+lint=on
 
 # Node.js express test server HTTP port.
 port=8000

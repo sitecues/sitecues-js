@@ -26,7 +26,7 @@ var baseConfig = {
   baseBuildDir: baseBuildDir,
   buildDir: baseBuildDir + '/' + buildType,
   resourceFolderName: '.',
-  isLintingOn: process.env.LINT === 'on', // Default to false
+  isLintingOn: process.env.LINT !== 'off', // Default to true
   // Three types of cleaning
   // CLEAN=off -- no cleaning
   // CLEAN=all -- clean everything
