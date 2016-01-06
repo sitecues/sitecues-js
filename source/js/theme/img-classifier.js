@@ -280,9 +280,8 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
     function getHashCode(s) {
       // From http://stackoverflow.com/questions/7616461/generate-a-hash-from-string-in-javascript-jquery
       return s.split('').reduce(function (a, b) {
-        a = ((a << 5) - a) + b.charCodeAt(0);
-        return a & a;
-      }, 0);
+        return ((a << 5) - a) + b.charCodeAt(0);
+      }, 0).toString(36);
     }
 
     return STORAGE_PREFIX + getHashCode(img.src);
@@ -298,7 +297,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
     var isReversible,
       $img = $(img),
       storageKey = getStorageKey(img),
-      cachedResult = window.localStorage.getItem(storageKey);
+      cachedResult = window.sessionStorage.getItem(storageKey);
 
     function classifyLoadedImage() {
       shouldInvertElement(img, function(isReversible, didAnalyzePixels) {
@@ -310,7 +309,8 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
         if (didAnalyzePixels) {
           // Only cache for expensive operations, in order to save on storage space
           var imageClass = isReversible ? CLASS_INVERT : CLASS_NORMAL;
-          window.localStorage.setItem(storageKey, imageClass);
+          // Use session storage instead of local storage so that we don't pollute too much
+          window.sessionStorage.setItem(storageKey, imageClass);
         }
 
         onImageClassified(img, isReversible);
