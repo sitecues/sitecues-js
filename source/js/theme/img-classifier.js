@@ -43,7 +43,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
     // Unsafe cross-origin request
     // - Will run into cross-domain restrictions because URL is from different domain
     // This is not an issue with the extension, because the content script doesn't have cross-domain restrictions
-    var url = img.src,
+    var url = img.getAttribute('src'),
       isSafeRequest = SC_EXTENSION || !urls.isOnDifferentDomain(url),
       safeUrl,
       safeImg;
