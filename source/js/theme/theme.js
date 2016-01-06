@@ -24,12 +24,7 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
     DEFAULT_INTENSITY = 0.7,
     URL_REGEXP = /url\((?:(?:[\'\" ])*([^\"\'\)]+)[\'\" ]*)/i,
     GRADIENT_REGEXP = /^\s*([\w-]+\s*gradient)\((.*)\).*$/i,
-    BUTTON_REGEXP = /(?:^| |,)(?:(?:input\s*\[\s*type\s*=\s*\"(?:button|color|submit|reset)\"\s*\]\s*)|button)(?:$| |,|:)/,
-    FILTER_VAL = {
-      reversed: 'invert(100%)',
-      mediumDark: 'brightness(.6)',
-      veryDark: 'brightness(.2)'
-    };
+    BUTTON_REGEXP = /(?:^| |,)(?:(?:input\s*\[\s*type\s*=\s*\"(?:button|color|submit|reset)\"\s*\]\s*)|button)(?:$| |,|:)/;
 
   // ---- PUBLIC ----
 
