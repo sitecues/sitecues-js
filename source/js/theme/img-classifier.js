@@ -287,6 +287,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
     return STORAGE_PREFIX + getHashCode(img.src);
   }
 
+  // Classify an image that is loaded/loading from a src
   function classifyLoadableImage(img) {
     function classifyLoadedImage() {
       shouldInvertElement(img, function(isReversible, didAnalyzePixels) {
