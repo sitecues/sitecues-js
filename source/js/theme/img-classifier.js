@@ -27,7 +27,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
   }
 
   function getInvertUrl(url) {
-    var newUrl = urls.getApiUrl('image/invert/' + url);
+    var newUrl = urls.getApiUrl('image/invert?imageUrl=' + url); // TODO should we use encodeURIComponent(url)) ?
 
     // TODO remove this line
     newUrl = newUrl.replace('/ws.', '/wsbeta.');
@@ -287,18 +287,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
     return STORAGE_PREFIX + getHashCode(img.src);
   }
 
-  /**
-   * Classifier function for images without missing features.
-   * This formula came from a machine learning algorithm with the help of Jeffrey Bigham
-   * @param img
-   * @returns {*}
-   */
-  function classifyImage(index, img) {
-    var isReversible,
-      $img = $(img),
-      storageKey = getStorageKey(img),
-      cachedResult = window.sessionStorage.getItem(storageKey);
-
+  function classifyLoadableImage(img) {
     function classifyLoadedImage() {
       shouldInvertElement(img, function(isReversible, didAnalyzePixels) {
 
@@ -317,14 +306,36 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
       });
     }
 
+    var storageKey = getStorageKey(img),
+      cachedResult = window.sessionStorage.getItem(storageKey);
+
+    if (cachedResult) {
+      onImageClassified(img, cachedResult === CLASS_INVERT);
+    }
+    // Too early to tell anything
+    if (img.complete === false) {
+      img.addEventListener('load', classifyLoadedImage);
+    }
+    else {
+      setTimeout(classifyLoadedImage, 100);
+    }
+  }
+
+  /**
+   * Classifier function for images without missing features.
+   * This formula came from a machine learning algorithm with the help of Jeffrey Bigham
+   * @param img
+   * @returns {*}
+   */
+  function classifyImage(index, img) {
+    var isReversible,
+      $img = $(img);
+
     if ($img.is(customSelectors.reversible)) {
       isReversible = true;
     }
     else if ($img.is(customSelectors.nonReversible)) {
       isReversible = false;
-    }
-    else if (cachedResult) {
-      isReversible = cachedResult === CLASS_INVERT;
     }
     else if (colorUtil.isOnDarkBackground(img, DARK_BG_THRESHOLD)) {
       // If already on a dark background, inverting won't help make it visible
@@ -333,14 +344,11 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
     else if (img.localName === 'svg') {
       isReversible = true;
     }
+    else if (!img.src) {
+      isReversible = false;
+    }
     else {
-      // Too early to tell anything
-      if (img.complete === false) {
-        img.addEventListener('load', classifyLoadedImage);
-      }
-      else {
-        setTimeout(classifyLoadedImage, 100);
-      }
+      classifyLoadableImage(img);
       return;
     }
 
