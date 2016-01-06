@@ -7,8 +7,9 @@ function lint() {
   var LINT_GLOB = [
     'source/js/**/*.js', '!source/js/**/jquery.js', '!source/js/**/zepto.js',
     'extension/source/js/**/*.js', '!extension/source/js/templated-code/**/*',
+    // TODO lint tests
+    //'test/**/*.js', '!test/legacy/**/*.js'.
     'gulpfile.js', 'task/**/*.js',
-    'test/**/*.js', '!test/legacy/**/*.js'
   ];
   return gulp.src(LINT_GLOB)
   .pipe(jshint())
