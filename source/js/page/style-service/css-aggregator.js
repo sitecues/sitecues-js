@@ -65,6 +65,12 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
       }, 0);
     }
   }
+
+  function getCssProxyUrl(url) {
+    var absoluteUrl = urls.resolveUrl(url);
+    return urls.getApiUrl('css-proxy/' + absoluteUrl);
+  }
+
   /**
    * Cross browser solution to initiating an XMLHTTPRequest
    * that supports the Origin HTTP header
@@ -83,7 +89,7 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
         console.log('Cross-Domain: ' + url);
       }
       // Use sitecues CSS proxy to bypass CORS restrictions on fetching CSS text for analysis
-      url = urls.getApiUrl('css-proxy/' + url);
+      url = getCssProxyUrl(url);
     }
 
     // Credit to Nicholas Zakas

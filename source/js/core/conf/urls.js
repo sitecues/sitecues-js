@@ -98,7 +98,10 @@ define(['core/conf/site'], function(site) {
   var ABSOLUTE_URL_REGEXP = /^[a-zA-Z0-9-]+:(\/\/.*)$/i;
 
   // Return an absolute URL. If the URL was relative, return an absolute URL that is relative to a base URL.
+  // @optional parsedBaseUrl If not provided, will use the current page.
   function resolveUrl(urlStr, parsedBaseUrl) {
+    parsedBaseUrl = parsedBaseUrl || parseUrl('.');
+
     var absRegExpResult = ABSOLUTE_URL_REGEXP.exec(urlStr);
     if (absRegExpResult) {
       // We have an absolute URL, with protocol. That's a no-no, so, convert to a

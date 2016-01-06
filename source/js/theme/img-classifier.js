@@ -28,8 +28,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
 
   function getInvertUrl(url) {
     var
-      parsedBaseUrl = urls.parseUrl('.'),
-      absoluteUrl = urls.resolveUrl(url, parsedBaseUrl),
+      absoluteUrl = urls.resolveUrl(url),
       apiUrl = urls.getApiUrl('image/invert?imageUrl=' + absoluteUrl); // TODO should we use encodeURIComponent(url)) ?
 
     // TODO remove this line
