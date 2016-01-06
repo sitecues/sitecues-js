@@ -32,7 +32,7 @@ define(['core/conf/site'], function(site) {
   //
   //////////////////////////////////////////////////////////////////////////////////////////
 
-  // Parse a URL into { host, path }
+  // Parse a URL into { protocol, hostname, origin, path }
   function parseUrl(urlStr) {
     if (typeof urlStr !== 'string') {
       return;
@@ -56,6 +56,7 @@ define(['core/conf/site'], function(site) {
     lastSlashIndex = pathname.lastIndexOf('/') + 1;
 
     return {
+      protocol: parser.protocol,
       path: pathname.substring(0, lastSlashIndex),
       hostname: parser.hostname,
       origin: parser.origin
@@ -92,10 +93,29 @@ define(['core/conf/site'], function(site) {
     return scriptOrigin;
   }
 
-  function init() {
-    var domainEnding = isProduction() ? '.sitecues.com' : '.dev.sitecues.com';
-    apiDomain = 'ws' + domainEnding + '/';
-    scriptOrigin = getParsedLibraryURL().origin;
+  // The regular expression for an absolute URL. There is a capturing group for
+  // the protocol-relative portion of the URL.
+  var ABSOLUTE_URL_REGEXP = /^[a-zA-Z0-9-]+:(\/\/.*)$/i;
+
+  // Return an absolute URL. If the URL was relative, return an absolute URL that is relative to a base URL.
+  function resolveUrl(urlStr, parsedBaseUrl) {
+    var absRegExpResult = ABSOLUTE_URL_REGEXP.exec(urlStr);
+    if (absRegExpResult) {
+      // We have an absolute URL, with protocol. That's a no-no, so, convert to a
+      // protocol-relative URL.
+      urlStr = urlStr;
+    } else if (urlStr.indexOf('//') === 0) {
+      // Protocol-relative. Add parsedBaseUrl's protocol.
+      urlStr = parsedBaseUrl.protocol + urlStr;
+    } else if (urlStr.indexOf('/') === 0) {
+      // Host-relative URL.
+      urlStr = parsedBaseUrl.origin + urlStr;
+    } else {
+      // A directory-relative URL.
+      urlStr = parsedBaseUrl.origin + parsedBaseUrl.path + urlStr;
+    }
+
+    return urlStr;
   }
 
   function isOnDifferentDomain(url) {
@@ -103,6 +123,12 @@ define(['core/conf/site'], function(site) {
     var hostName = parseUrl(url).hostname;
     // For our purposes, hostname is the same as the domain
     return hostName !== document.location.hostname;
+  }
+
+  function init() {
+    var domainEnding = isProduction() ? '.sitecues.com' : '.dev.sitecues.com';
+    apiDomain = 'ws' + domainEnding + '/';
+    scriptOrigin = getParsedLibraryURL().origin;
   }
 
   return {
@@ -113,7 +139,8 @@ define(['core/conf/site'], function(site) {
     getRawScriptUrl: getRawScriptUrl,
     resolveResourceUrl: resolveResourceUrl,
     parseUrl: parseUrl,
-    isOnDifferentDomain: isOnDifferentDomain
+    isOnDifferentDomain: isOnDifferentDomain,
+    resolveUrl: resolveUrl
   };
 
 });

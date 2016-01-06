@@ -10,6 +10,7 @@
 // TODO TTS
 // TODO image reversal
 // TODO spacebar pages down
+// TODO Weird badge issue
 
 'use strict';
 

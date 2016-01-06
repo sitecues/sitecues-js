@@ -27,12 +27,15 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
   }
 
   function getInvertUrl(url) {
-    var newUrl = urls.getApiUrl('image/invert?imageUrl=' + url); // TODO should we use encodeURIComponent(url)) ?
+    var
+      parsedBaseUrl = urls.parseUrl('.'),
+      absoluteUrl = urls.resolveUrl(url, parsedBaseUrl),
+      apiUrl = urls.getApiUrl('image/invert?imageUrl=' + absoluteUrl); // TODO should we use encodeURIComponent(url)) ?
 
     // TODO remove this line
-    newUrl = newUrl.replace('/ws.', '/wsbeta.');
+    apiUrl = apiUrl.replace('/ws.', '/wsbeta.');
 
-    return newUrl;
+    return apiUrl;
   }
 
   // Get <img> that can have its pixel data read
