@@ -5,13 +5,10 @@
  * and by using run_at="document_start"
  **/
 
-// TODO better localization -- settings and tips don't load yet
-// TODO feedback should probably be a mailto link (SC_LOCAL) or go to chrome web store
 // TODO better close button
 // TODO can anything be removed from permissions? Do we need 'tabs' ?
 // TODO TTS
 // TODO image reversal
-// TODO spacebar pages down
 
 'use strict';
 
