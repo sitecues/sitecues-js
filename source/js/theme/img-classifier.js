@@ -31,7 +31,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
       absoluteUrl = urls.resolveUrl(url),
       apiUrl = urls.getApiUrl('image/invert?imageUrl=' + absoluteUrl); // TODO should we use encodeURIComponent(url)) ?
 
-    // TODO remove this line
+    // TODO remove this line when real service is ready
     apiUrl = apiUrl.replace('/ws.', '/wsbeta.');
 
     return apiUrl;

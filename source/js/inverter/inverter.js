@@ -14,7 +14,7 @@
       return div.style.filter ? 'filter': platform.cssPrefix + 'filter';
     })(),
     // Use proxy in IE and Safari, because: no css invert in IE, and it's extremely slow in Safari
-    SHOULD_USE_PROXY = true; // TODO platform.browser.isIE || platform.browser.isSafari;
+    SHOULD_USE_PROXY = platform.browser.isIE || platform.browser.isSafari;
 
   function toggle(doStart, doRefreshImages) {
     if (doStart) {
@@ -75,7 +75,7 @@
     }
   }
 
-  // Use CSS filter: invert(1)
+  // Invert image or element via CSS filter: invert(1)
   function reverseElemCss($img, doReverse) {
     var savedFilter = $img.attr('data-sc-filter');
     if (doReverse) {
@@ -91,7 +91,7 @@
     }
   }
 
-  // Use a proxied image through our reversal service
+  // Invert image via our reversal proxy web service
   function reverseElemProxy($img, doReverse, currentSrc) {
     var savedSrc = $img.attr('data-sc-src');
     if (doReverse) {
