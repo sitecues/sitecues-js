@@ -819,10 +819,10 @@ define(['$', 'page/util/common', 'page/util/element-classifier', 'page/highlight
   // Also considered to have it's own background if the item before or after does,
   // because many times colors are alternated by even/odd row
   function hasSiblingBackground(element, parentStyle, tag) {
-    var sibling = element.previousElementSibling || element.nextElementSibling;
-    return !!(
-      sibling && $(sibling).is(tag + ':not(:empty)') &&
-      common.hasOwnBackground(sibling, traitcache.getStyle(sibling), parentStyle));
+    var sibling = element.previousElementSibling || element.nextElementSibling,
+      hasSiblingBg = sibling && $(sibling).is(tag + ':not(:empty)') &&
+      common.hasOwnBackground(sibling, traitcache.getStyle(sibling), parentStyle);
+    return !!hasSiblingBg;
   }
 
   // Get the traits of the first non-inline element as we go up ancestor chain, because
