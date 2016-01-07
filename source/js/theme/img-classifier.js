@@ -17,7 +17,6 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
     BG_IMAGE_BONUS = 150,
     MAX_SCORE_CHECK_PIXELS = 120,
     isDebuggingOn,
-    reverseCallbackFn,
     CLASS_INVERT = 'i',
     CLASS_NORMAL = 'n';
 
@@ -37,8 +36,10 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
     return apiUrl;
   }
 
-  // Get <img> that can have its pixel data read
-  function getReadableImage(img, callback) {
+  // Get <img> that can have its pixel data read --
+  // 1. Must be completely loaded
+  // 2. We have permission (either we're in the extension, the img is not cross-domain, or we can load it through the proxy)
+  function getReadableImage(img, onReadableImageAvailable) {
     // Unsafe cross-origin request
     // - Will run into cross-domain restrictions because URL is from different domain
     // This is not an issue with the extension, because the content script doesn't have cross-domain restrictions
@@ -49,11 +50,13 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
 
     function returnImageWhenComplete(img) {
       if (img.complete) {
-        callback(img);
+        onReadableImageAvailable(img); // Already loaded
       }
-      img.addEventListener('load', function() {
-        callback(img);
-      });
+      else {
+        img.addEventListener('load', function() {
+          onReadableImageAvailable(img);
+        });
+      }
     }
 
     if (isSafeRequest) {
@@ -73,7 +76,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
     returnImageWhenComplete(safeImg);
   }
 
-  function getImageData(img, rect, callback) {
+  function getImageData(img, rect, onImageDataAvailable) {
     var canvas = document.createElement('canvas'),
       ctx,
       top = rect.top || 0,
@@ -88,7 +91,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
       ctx = canvas.getContext('2d');
 
       try {
-        ctx.drawImage(readableImg, top, left, width, height);  // Works with img, canvas, video
+        ctx.drawImage(readableImg, top, left, width, height);
         imageData = readableImg.getImageData(0, 0, width, height).data;
       }
       catch (ex) {
@@ -96,13 +99,13 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
           console.log('Could not get image data for %s: %s', readableImg.src, ex);
         }
       }
-      callback(imageData);
+      onImageDataAvailable(imageData);
     });
   }
 
-  function getPixelInfo(img, rect, callback) {
+  function getPixelInfo(img, rect, onPixelInfoAvailable) {
     getImageData(img, rect, function(data) {
-      callback(data && getPixelInfoImpl(data, rect.width, rect.height));
+      onPixelInfoAvailable(data && getPixelInfoImpl(data, rect.width, rect.height));
     });
   }
 
@@ -237,9 +240,9 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
     }
   }
 
-  function getPixelInfoScore(img, rect, callback) {
+  function getPixelInfoScore(img, rect, onPixelScoreAvailable) {
     if (rect.width <= 1 || rect.height <= 1) {
-      callback(0); // It's possible that image simply isn't loaded yet, scroll down in brewhoop.com
+      onPixelScoreAvailable(0); // It's possible that image simply isn't loaded yet, scroll down in brewhoop.com
       return;
     }
 
@@ -255,10 +258,10 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
           (pixelInfo.percentWithSameGrayscale > 0.3) * 50;
       }
       else {
-        score = 40;
+        score = 40;  // No pixel infO: use an average amount
       }
 
-      callback(score, true); // Add an average amount
+      onPixelScoreAvailable(score, true);  // true -> this was an expensive operation so we should cache the result
     });
   }
 
@@ -290,7 +293,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
   }
 
   // Classify an image that is loaded/loading from a src
-  function classifyLoadableImage(img) {
+  function classifyLoadableImage(img, onShouldReverseImage) {
     function classifyLoadedImage() {
       shouldInvertElement(img, function(isReversible, didAnalyzePixels) {
 
@@ -305,7 +308,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
           window.sessionStorage.setItem(storageKey, imageClass);
         }
 
-        onImageClassified(img, isReversible);
+        onImageClassified(img, isReversible, onShouldReverseImage);
       });
     }
 
@@ -316,7 +319,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
       onImageClassified(img, cachedResult === CLASS_INVERT);
     }
     // Too early to tell anything
-    if (img.complete === false) {
+    if (!img.complete) {
       img.addEventListener('load', classifyLoadedImage);
     }
     else {
@@ -330,7 +333,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
    * @param img
    * @returns {*}
    */
-  function classifyImage(index, img) {
+  function classifyImage(img, onShouldReverseImage) {
     var isReversible,
       $img = $(img);
 
@@ -351,17 +354,17 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
       isReversible = false;
     }
     else {
-      classifyLoadableImage(img);
+      classifyLoadableImage(img, onShouldReverseImage);
       return;
     }
 
-    onImageClassified(img, isReversible);
+    onImageClassified(img, isReversible, onShouldReverseImage);
   }
 
-  function onImageClassified(img, isReversible) {
+  function onImageClassified(img, isReversible, onShouldReverseImage) {
     img.setAttribute(REVERSIBLE_ATTR, isReversible);
     if (isReversible) {
-      reverseCallbackFn(img);
+      onShouldReverseImage(img);
     }
   }
 
@@ -377,7 +380,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
     return src;
   }
 
-  function shouldInvertElement(img, callback) {
+  function shouldInvertElement(img, onInversionDecision) {
     var src = getSource(img);
 
     if (!src) {
@@ -391,7 +394,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
       finalScore = sizeScore + elementTypeScore + extensionScore;
 
     if (finalScore < -MAX_SCORE_CHECK_PIXELS || finalScore > MAX_SCORE_CHECK_PIXELS) {
-      callback(finalScore > 0);
+      onInversionDecision(finalScore > 0);
     }
 
     // Pixel info takes longer to get: only do it if necessary
@@ -412,7 +415,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
         );
       }
 
-      callback(finalScore > 0, didAnalyzePixels);
+      onInversionDecision(finalScore > 0, didAnalyzePixels);
     });
   }
 
@@ -428,7 +431,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
     return finalScore > 0;
   }
 
-  function classify(root, reverseCallback) {
+  function classify(root, onShouldReverseImage) {
     var NOT_CLASSIFIED = ':not([' + REVERSIBLE_ATTR + '])',
       selector = 'img[src]' + NOT_CLASSIFIED +
                  ',picture[srcset]' + NOT_CLASSIFIED +
@@ -436,13 +439,13 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
                  ',svg' + NOT_CLASSIFIED,
       $root = $(root);
 
-    reverseCallbackFn = reverseCallback;
-
-    if ($root.is(selector)) {
-      classifyImage(root);
+    if ($root.is(selector)) {  // Single image
+      classifyImage(root, onShouldReverseImage);
     }
-    else {
-      $(root).find(selector).each(classifyImage);
+    else {  // Subtree of potential images
+      $(root).find(selector).each(function() {
+        classifyImage(this, onShouldReverseImage);
+      });
     }
   }
 
