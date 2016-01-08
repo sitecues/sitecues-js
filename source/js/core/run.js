@@ -10,8 +10,6 @@ define(['core/conf/user/manager', 'core/locale', 'core/metric', 'core/platform',
   function (conf, locale, metric, platform, bp, constants) {
   var
     numPrereqsToComplete,
-    //panning, fixed position fixer, focus, cursor
-    areZoomEnhancementsInitialized,
     isZoomInitialized,
     isSpeechInitialized,
     isZoomOn,
@@ -94,9 +92,9 @@ define(['core/conf/user/manager', 'core/locale', 'core/metric', 'core/platform',
   function onZoomChange(zoomLevel) {
     isZoomOn = zoomLevel > 1;
     onFeatureSettingChange();
-    if (isZoomOn && !areZoomEnhancementsInitialized) {
+    if (isZoomOn && !isZoomInitialized) {
       initZoomEnhancingFeatures();
-      areZoomEnhancementsInitialized = true;
+      isZoomInitialized = true;
     }
   }
 
