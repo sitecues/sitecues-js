@@ -35,7 +35,7 @@
  *    - Parented by the badge when it's small (badge state) -- this allows it to scale and move with the page
  *      Special default badge case: always parented by badge (which is outside of the <body>) and doesn't switch on expansion.
  *      (Note: if the #sitecues-badge is an <img> we make it a previous sibling of that, because <img>s can't parent)
- *      TODO previous subling is breaking page layout
+ *      TODO previous sibling is breaking page layout
  *    - Parented by the <html> element when it's not small so that it doesn't change size or position while it's being used.
  *    Display type: block
  *    Accessibility: treated as application dialog; receives focus in keyboard mode
@@ -49,11 +49,14 @@
  */
 define(['core/bp/view/badge', 'core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/platform'],
   function(baseBadge, state, BP_CONST, helper, platform) {
+  'use strict';
+
   var BADGE_PARENT = BP_CONST.BADGE_MODE,
       HTML_PARENT  = BP_CONST.PANEL_MODE,
       currentBPParent,
       badgeElement,
       badgeRect = {},
+      cacheBadgeRect,
       bpElement,
       svgElement,
       ratioOfSVGToVisibleBadgeSize,
@@ -151,16 +154,23 @@ define(['core/bp/view/badge', 'core/bp/model/state', 'core/bp/constants', 'core/
     var newBadgeRect   = helper.getRect(badgeElement),
 
         // Get the amount of zoom being applied to the badge
-        appliedZoom = getAppliedBPZoom(),
+        appliedZoom = getAppliedBPZoom();
+
+
+        //If the badge is currently dimensionless, use the cached badge dimensions
+        if (!newBadgeRect.height || !newBadgeRect.width) {
+          //We saved the badge rect when it was a child of the documentElement, so we multiply by the current zoom
+          newBadgeRect.height = cachedBadgeRect.height * appliedZoom;
+          newBadgeRect.width  = cachedBadgeRect.width * appliedZoom;
+        }
+
+    var badgeComputedStyle = window.getComputedStyle(badgeElement),
 
         // Adjust for padding
-        badgeComputedStyle = window.getComputedStyle(badgeElement),
-
         paddingLeft = getPadding('Left'),
         paddingTop  = getPadding('Top'),
 
         isToolbarBadge = state.get('isToolbarBadge');
-
 
     if (currentBPParent === BADGE_PARENT) {
 
@@ -179,12 +189,12 @@ define(['core/bp/view/badge', 'core/bp/model/state', 'core/bp/constants', 'core/
     }
 
     badgeRect.left   = newBadgeRect.left + paddingLeft;
-    badgeRect.top    = newBadgeRect.top + paddingTop;
+    badgeRect.top    = newBadgeRect.top  + paddingTop;
 
     // A toolbar badge's size remains the same for the lifetime of the page, so we use the cached version of size in that case
     if (!badgeRect.width || !isToolbarBadge) {
-      badgeRect.width = newBadgeRect.width - paddingLeft - getPadding('Right');
-      badgeRect.height = newBadgeRect.height - paddingTop - getPadding('Bottom');
+      badgeRect.width  = newBadgeRect.width  - paddingLeft - getPadding('Right');
+      badgeRect.height = newBadgeRect.height - paddingTop  - getPadding('Bottom');
     }
 
     // Set left and top for positioning.
