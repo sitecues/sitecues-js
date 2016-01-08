@@ -17,9 +17,31 @@
 // bp/will-shrink  -- BP is about to shrink
 // bp/did-shrink   -- BP has finished shrinking
 
-define(['core/bp/controller/bp-controller', 'core/bp/model/state','core/bp/view/collapsed-mode', 'core/bp/view/panel', 'core/bp/helper', 'core/bp/view/svg', 'core/bp/constants',
-  'core/bp/view/placement', 'core/bp/view/size-animation', 'core/platform', 'core/conf/site', 'core/conf/user/manager', 'core/bp/model/classic-site'],
-  function (bpController, state, collapsedView, panel, helper, bpSVG, BP_CONST, placement, sizeAnimation, platform, site, conf, classicSite) {
+define([
+  'core/bp/controller/bp-controller',
+  'core/bp/model/state',
+  'core/bp/view/view',
+  'core/bp/view/badge/base-badge',
+  'core/bp/view/panel',
+  'core/bp/helper',
+  'core/bp/constants',
+  'core/bp/view/size-animation',
+  'core/platform',
+  'core/conf/site',
+  'core/conf/user/manager',
+  'core/bp/model/classic-site'],
+  function(bpController,
+           state,
+           view,
+           baseBadge,
+           panel,
+           helper,
+           BP_CONST,
+           sizeAnimation,
+           platform,
+           site,
+           conf,
+           classicSite) {
 
   /*
    *** Public methods ***
@@ -27,9 +49,10 @@ define(['core/bp/controller/bp-controller', 'core/bp/model/state','core/bp/view/
 
   // The htmlContainer has all of the SVG inside of it, and can take keyboard focus
   var bpContainer,
-      isInitComplete,
+      isBpInitializing,
       byId = helper.byId,
-      pendingCompletionCallbackFn;
+      pendingCompletionCallbackFn,
+      badgeView;
 
   /**
    *** Start point ***
@@ -50,8 +73,6 @@ define(['core/bp/controller/bp-controller', 'core/bp/model/state','core/bp/view/
 
       // 2. Suppress animations if necessary
       // This is done for the first view change
-      // TODO: Replace with JS animations, this is just setting a class for
-      //       opacity and fill transitions...
       if (!isFirstTime) {
         enableAnimations();
       }
@@ -75,7 +96,7 @@ define(['core/bp/controller/bp-controller', 'core/bp/model/state','core/bp/view/
   // Space delimited list of classes to set for view
   function getClasses(callbackFn) {
 
-    var classBuilder = state.isPanelRequested() ? panel.getViewClasses() : collapsedView.getViewClasses();
+    var classBuilder = state.isPanelRequested() ? panel.getViewClasses() : baseBadge.getViewClasses();
     classBuilder += ' scp-ie9-' + platform.browser.isIE9;
 
     getPalette(function(palette) {
@@ -100,18 +121,16 @@ define(['core/bp/controller/bp-controller', 'core/bp/model/state','core/bp/view/
     }
   }
 
-  // Can get SVG element whether currently attached to document or not
-  function getSVGElement() {
-    // Don't use helper.byId() because the element isn't inserted in DOM yet.
-    return bpContainer.querySelector('#' + BP_CONST.SVG_ID);
-  }
-
   function getBadgeElement() {
     return byId(BP_CONST.BADGE_ID);
   }
 
   function getBpContainerElement() {
     return byId(BP_CONST.BP_CONTAINER_ID);
+  }
+
+  function isToolbarUIRequested() {
+    return site.get('uiMode') === 'toolbar';
   }
 
   /**
@@ -121,13 +140,31 @@ define(['core/bp/controller/bp-controller', 'core/bp/model/state','core/bp/view/
    */
   function initBPFeature() {
 
-    if (isInitComplete) {
+    if (isBpInitializing) {
       return;
     }
 
-    // Initializes the 3 elements fundamental to the BP feature.
-    initBPElements();
+    isBpInitializing = true;
 
+    var badgePlaceholderElem = !isToolbarUIRequested() && helper.byId(BP_CONST.BADGE_ID);
+
+    // Get site's in-page placeholder badge or create our own
+    if (badgePlaceholderElem) {
+      require(['core/bp/view/badge/page-badge'], function(pageBadgeView) {
+        badgeView = pageBadgeView;
+        pageBadgeView.init(badgePlaceholderElem, onViewInitialized);
+      });
+    }
+    else {
+      // Toolbar mode requested or no badge (toolbar is default)
+      require(['bp-toolbar-badge/bp-toolbar-badge'], function(toolbarView) {
+        badgeView = toolbarView;
+        toolbarView.init(onViewInitialized);
+      });
+    }
+  }
+
+  function onViewInitialized() {
     // Use fake settings if undefined -- user never used sitecues before.
     // This will be turned off once user interacts with sitecues.
     state.set('isRealSettings', site.get('alwaysRealSettings') || hasSitecuesEverBeenOn());
@@ -144,8 +181,6 @@ define(['core/bp/controller/bp-controller', 'core/bp/model/state','core/bp/view/
       });
     }
 
-    isInitComplete = true;
-
     sitecues.on('bp/did-change', updateView);
 
     pendingCompletionCallbackFn();
@@ -154,35 +189,6 @@ define(['core/bp/controller/bp-controller', 'core/bp/model/state','core/bp/view/
   function hasSitecuesEverBeenOn() {
     return typeof conf.get('zoom') !== 'undefined' ||
       typeof conf.get('ttsOn') !== 'undefined';
-  }
-
-  // This function augments the customers placeholder if found, otherwise creates the floating badge.
-  // The "augmented placeholder", known as the badgeElement, contains the <div> container that contains
-  // the <svg> markup. It inserts the <svg> into the <div> and puts that <div> inside the badge element
-  // (determined by badge.init()).
-  //
-  // It binds the permanent event handlers. It positions the elements so they appear directly over
-  // the websites placeholder.  It sets the SVG height and width so that it visually covers the
-  // placeholder/badgeElement.  It binds event handlers to append the BPContainer to <html> or
-  // the badgeElement (switching parent).
-  function initBPElements() {
-
-    // This element contains bpContainer
-    var badgeElement = collapsedView.init();
-
-    // Create the svg container
-    bpContainer = document.createElement('sc');
-
-    // Set attributes
-    helper.setAttributes(bpContainer, BP_CONST.PANEL_CONTAINER_ATTRS);
-
-    bpContainer.innerHTML = bpSVG();
-
-    // Parent the badge appropriately
-    var svgElement = getSVGElement();
-
-    // Append the bpContainer to the badgeElement.  Also calls repositionBPOverBadge.
-    placement.init(badgeElement, bpContainer, svgElement);
   }
 
   /*
@@ -213,12 +219,12 @@ define(['core/bp/controller/bp-controller', 'core/bp/model/state','core/bp/view/
 
   // The toolbar gets to init earlier than a site-provided badge
   // It's safe to init as soon as the <body> is available
-  function initToolbarWhenBodyAvailable() {
+  function initWhenBodyAvailable() {
     if (document.body) {
       initBPFeature();
     }
     else {
-      setTimeout(initToolbarWhenBodyAvailable, 50);
+      setTimeout(initWhenBodyAvailable, 250);
     }
   }
 
@@ -260,11 +266,13 @@ define(['core/bp/controller/bp-controller', 'core/bp/model/state','core/bp/view/
 
     initClassicMode();
 
+    viewInit.init();
+
     // ---- Look for toolbar config ----
     if (site.get('uiMode') === 'toolbar') {
       // Case 1: toolbar config
       if (SC_DEV) { console.log('Early initialization of toolbar.'); }
-      initToolbarWhenBodyAvailable();
+      initWhenBodyAvailable();
       return;
     }
 
