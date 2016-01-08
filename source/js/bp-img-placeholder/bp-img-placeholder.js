@@ -1,11 +1,23 @@
 /*
  * Code to support the classic <img>-based placeholders. We ask customers to use <div display="inline-block"> now.
  * TODO Once these go away we can remove this code.
+ * TODO Don't include in extension, not used
+
+ If the customer uses an <img> as a placeholder:
+ We determine the color palette to be used based on the .src attribute.
+ We create a <div> and insert it into the DOM as the previous sibling of the <img>
+ We insert the <img> into the newly created <div>
+ We remove the id from the <img>
+ We set the id of the newly created <div> to BP_CONST.BADGE_ID
+
+ Badge will never be statically positioned.  It must be relative or absolute
+ so its contents can be absolutely positioned.
+
  */
 
 define(['core/bp/constants', 'core/bp/helper'], function(BP_CONST, helper) {
   var isInitialized,
-    palette;
+    fileName;
 
     // Create <div> and put the existing badge inside it.
   // Transfer necessary styles from the <img> to the <div>
@@ -73,8 +85,8 @@ define(['core/bp/constants', 'core/bp/helper'], function(BP_CONST, helper) {
     }
   }
 
-  function getPalette() {
-    return palette;
+  function getFileName() {
+    return fileName;
   }
 
   function init(badge) {
@@ -87,7 +99,7 @@ define(['core/bp/constants', 'core/bp/helper'], function(BP_CONST, helper) {
 
     badge.setAttribute('data-sc-reversible', false); // Will use a different palette dark theme is used
 
-    palette = badge.src;
+    fileName = badge.src;
 
     convertExistingBadge();
     moveBadgeIdToParent(badge);
@@ -105,6 +117,6 @@ define(['core/bp/constants', 'core/bp/helper'], function(BP_CONST, helper) {
 
   return {
     init: init,
-    getPalette: getPalette
+    getFileName: getFileName
   };
 });

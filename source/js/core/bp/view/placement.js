@@ -47,8 +47,8 @@
  *    Parent: #scp-bp-container
  *    Accessibility: uses ARIA to describe controls
  */
-define(['core/bp/view/badge', 'core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/platform'],
-  function(baseBadge, state, BP_CONST, helper, platform) {
+define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/platform'],
+  function(state, BP_CONST, helper, platform) {
   var BADGE_PARENT = BP_CONST.BADGE_MODE,
       HTML_PARENT  = BP_CONST.PANEL_MODE,
       currentBPParent,
