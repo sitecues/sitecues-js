@@ -1,6 +1,8 @@
-define(['core/conf/site', 'core/conf/urls', 'core/run'], function (site, urls, run) {
-   // Array's prototype
-  var arr = Array.prototype;
+define(['core/conf/site', 'core/conf/urls', 'core/run', 'core/constants'], function (site, urls, run, constants) {
+      // Array's prototype
+  var arr    = Array.prototype,
+      // Enums for sitecues loading state
+      state = constants.READY_STATE;
 
   function safe_production_msg (text) {
     if (window.navigator.userAgent.indexOf('MSIE ') > 0) {
@@ -29,6 +31,10 @@ define(['core/conf/site', 'core/conf/urls', 'core/run'], function (site, urls, r
     // Get info about the currently running sitecues client
     sitecues.status = getStatus;
     sitecues.getVersion = getVersion;
+    sitecues.isOn = run.isOn;
+
+    //Loading state enumerations
+    sitecues.readyStates = state;
 
     // 'Plant our flag' on this page.
     sitecues.exists = true;
@@ -51,6 +57,8 @@ define(['core/conf/site', 'core/conf/urls', 'core/run'], function (site, urls, r
       statusFn.apply(this, args);
     });
   }
+
+
 
   //////////////////////////////////////////////////////////////////////////////////////////
   //
@@ -112,7 +120,7 @@ define(['core/conf/site', 'core/conf/urls', 'core/run'], function (site, urls, r
   }
 
   // emit an event, firing all bound callbacks. callbacks are passed the
-  // same arguments as `trigger` is, apart from the event name.
+  // same arguments as `emit` is, apart from the event name.
   function emit(events) {
     /* jshint validthis: true */
     var event, node, calls, tail, args, rest;
@@ -235,8 +243,11 @@ define(['core/conf/site', 'core/conf/urls', 'core/run'], function (site, urls, r
     // Initialize API and services URLs
     urls.init();
 
+    //Set sitecues state to initializing
+    sitecues.readyState = state.INITIALIZING;
+
     // Run sitecues
-    run();
+    run.init();
   }
 });
 

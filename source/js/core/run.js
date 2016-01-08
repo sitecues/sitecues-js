@@ -6,10 +6,12 @@
  *   4. Fire sitecues ready callback and metric
  */
 
-define(['core/conf/user/manager', 'core/locale', 'core/metric', 'core/platform', 'core/bp/bp'],
-  function (conf, locale, metric, platform, bp) {
+define(['core/conf/user/manager', 'core/locale', 'core/metric', 'core/platform', 'core/bp/bp', 'core/constants'],
+  function (conf, locale, metric, platform, bp, constants) {
   var
     numPrereqsToComplete,
+    //panning, fixed position fixer, focus, cursor
+    areZoomEnhancementsInitialized,
     isZoomInitialized,
     isSpeechInitialized,
     isZoomOn,
@@ -29,17 +31,19 @@ define(['core/conf/user/manager', 'core/locale', 'core/metric', 'core/platform',
     QUOTE = 222,
     // Keys that can init sitecues
     INIT_CODES = [ DASH, NUMPAD_SUBTRACT, MINUS_ALTERNATE_1, MINUS_ALTERNATE_2,
-      EQUALS, NUMPAD_ADD, PLUS_ALTERNATE_1, PLUS_ALTERNATE_2, QUOTE];
+      EQUALS, NUMPAD_ADD, PLUS_ALTERNATE_1, PLUS_ALTERNATE_2, QUOTE],
+    // Enums for sitecues loading states
+    state = constants.READY_STATE;
 
   function performInitialLoadZoom(initialZoom) {
-    require(['page/zoom/zoom'], function (zoomMod) {
+    require([ 'page/zoom/zoom' ], function (zoomMod) {
       zoomMod.init();
       zoomMod.performInitialLoadZoom(initialZoom);
     });
   }
 
   function initZoomEnhancingFeatures() {
-    require([ 'page/hpan/hpan', 'page/zoom/fixed-position-fixer', 'page/focus/focus', 'page/cursor/cursor' ], function(hpan, fixer, focus, cursor) {
+    require([ 'page/hpan/hpan', 'page/zoom/fixed-position-fixer', 'page/focus/focus', 'page/cursor/cursor' ], function (hpan, fixer, focus, cursor) {
       hpan.init();
       fixer.init();
       focus.init();
@@ -48,13 +52,13 @@ define(['core/conf/user/manager', 'core/locale', 'core/metric', 'core/platform',
   }
 
   function initSpeech() {
-    require([ 'audio/audio' ], function(audio) {
+    require([ 'audio/audio' ], function (audio) {
       audio.init();
     });
   }
 
   function initSitecuesOn() {
-    require([ 'page/highlight/highlight', 'page/keys/keys', 'page/highlight/move-keys' ], function(highlight, keys, moveKeys) {
+    require([ 'page/highlight/highlight', 'page/keys/keys', 'page/highlight/move-keys' ], function (highlight, keys, moveKeys) {
       highlight.init();
       keys.init();
       moveKeys.init();
@@ -62,20 +66,20 @@ define(['core/conf/user/manager', 'core/locale', 'core/metric', 'core/platform',
   }
 
   function initThemes() {
-    require([ 'theme/theme', 'page/focus/focus' ], function(theme, focus) {
+    require([ 'theme/theme', 'page/focus/focus' ], function (theme, focus) {
       theme.init();
       focus.init();
     });
   }
 
   function initMouse() {
-    require(['page/cursor/cursor'], function(cursor) {
+    require([ 'page/cursor/cursor' ], function (cursor) {
       cursor.init();
     });
   }
 
   // Init features that require *either* zoom or speech to be on
-  function onFeatureSettingChanged() {
+  function onFeatureSettingChange() {
     var isOn = isZoomOn || isSpeechOn;
     if (isOn !== isSitecuesOn) {
       isSitecuesOn = isOn;
@@ -89,10 +93,10 @@ define(['core/conf/user/manager', 'core/locale', 'core/metric', 'core/platform',
 
   function onZoomChange(zoomLevel) {
     isZoomOn = zoomLevel > 1;
-    onFeatureSettingChanged();
-    if (isZoomOn && !isZoomInitialized) {
+    onFeatureSettingChange();
+    if (isZoomOn && !areZoomEnhancementsInitialized) {
       initZoomEnhancingFeatures();
-      isZoomInitialized = true;
+      areZoomEnhancementsInitialized = true;
     }
   }
 
@@ -102,9 +106,14 @@ define(['core/conf/user/manager', 'core/locale', 'core/metric', 'core/platform',
       isRetina  : platform.isRetina()
     });
 
-    if (typeof sitecues.config.onReady === 'function') {
-      sitecues.config.onReady.call(sitecues);
+    sitecues.readyState = state.COMPLETE;
+    //Freeze readyState on load
+    Object.defineProperty(sitecues, 'readyState', { writable : false });
+
+    if (typeof sitecues.onReady === 'function') {
+      sitecues.onReady.call(sitecues);
     }
+
   }
 
   // Initialize page feature listeners
@@ -122,7 +131,7 @@ define(['core/conf/user/manager', 'core/locale', 'core/metric', 'core/platform',
     // -- Speech --
     conf.get('ttsOn', function(isOn) {
       isSpeechOn = isOn;
-      onFeatureSettingChanged();
+      onFeatureSettingChange();
       if (isOn && !isSpeechInitialized) {
         initSpeech();
         isSpeechInitialized = true;
@@ -200,8 +209,11 @@ define(['core/conf/user/manager', 'core/locale', 'core/metric', 'core/platform',
     }
   }
 
-  return function() {
+  function isOn() {
+    return isSitecuesOn;
+  }
 
+  function init() {
     // When keyboard listening is ready
     sitecues.on('keys/did-init', onKeyHandlingInitialized);
 
@@ -210,6 +222,12 @@ define(['core/conf/user/manager', 'core/locale', 'core/metric', 'core/platform',
     // Start initialization
     conf.init(onPrereqComplete);
     locale.init(onPrereqComplete);
+  }
+
+  return {
+    isOn : isOn,
+    init : init
   };
+
 });
 
