@@ -231,8 +231,7 @@ define(['core/bp/view/badge', 'core/bp/model/state', 'core/bp/constants', 'core/
 
     // First get the height for the third wave in the speech button, useful for measurements
     // It is the tallest and rightmost element
-    var waveHeight       = helper.getRectById(BP_CONST.WAVE_3_ID).height,
-        svgStyle         = svgElement.style,
+    var svgStyle         = svgElement.style,
         badgeRectWidth   = badgeRect.width;
 
       // Set default height and width, because this normalizes cross browser inconsistencies
@@ -243,7 +242,7 @@ define(['core/bp/view/badge', 'core/bp/model/state', 'core/bp/constants', 'core/
       svgStyle.width  = badgeRectWidth + 'px';
       svgStyle.height = badgeRectWidth / svgAspectRatio + 'px';
 
-      ratioOfSVGToVisibleBadgeSize = badgeRect.height / waveHeight;
+      ratioOfSVGToVisibleBadgeSize = badgeRect.height / helper.getRectById(BP_CONST.WAVE_3_ID).height;
 
       state.set('ratioOfSVGToVisibleBadgeSize', ratioOfSVGToVisibleBadgeSize);
   }
@@ -285,6 +284,7 @@ define(['core/bp/view/badge', 'core/bp/model/state', 'core/bp/constants', 'core/
         badgeSibling    = badgeElement.nextSibling,
         badgeParent     = badgeElement.parentElement;
 
+    badgeElement.appendChild(bpElement);
     cachedBadgeRect = helper.getRect(badgeElement);
 
     //If the badge is not currently visible, most likely one of its ancestors is currently hidden
@@ -292,7 +292,6 @@ define(['core/bp/view/badge', 'core/bp/model/state', 'core/bp/constants', 'core/
       //Append the badge to the document and translate it out of viewport
       badgeElement.style[platform.transformProperty] = 'translate(-99999px,-99999px)';
       documentElement.appendChild(badgeElement);
-      badgeElement.appendChild(bpElement);
       //We can now be confident that a style hiding the badge is not being applied to one of its ancestors
       cachedBadgeRect = helper.getRect(badgeElement);
       reparentedBadge = true;
