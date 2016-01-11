@@ -71,7 +71,7 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
           repaintPage();
         }
         sitecues.require(['bp-adaptive/bp-adaptive'], function(bpAdaptive) {
-          bpAdaptive.adaptToNewTheme(type);
+          bpAdaptive.adaptToSitecuesThemeChange(type);
         });
       }, transitionMs);
     }

@@ -48,7 +48,7 @@ define([
       }
     }
 
-    classBuilder += ' scp-palette' + state.get('paletteName');
+    classBuilder += ' scp-palette' + state.get('paletteKey');
 
     return classBuilder;
   }

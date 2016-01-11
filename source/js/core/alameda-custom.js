@@ -510,7 +510,7 @@ var requirejs, require, define;
                         return;
                     }
                     if (SC_DEV) {
-                      console.log(id);
+                      console.log('New dependency: ' + id);
                     }
                     urlFetched[url] = true;
 

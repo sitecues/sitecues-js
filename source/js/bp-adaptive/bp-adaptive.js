@@ -40,7 +40,7 @@ define(['core/bp/model/state', 'core/bp/view/view', 'core/bp/constants'], functi
     return getComputedStyle(document.body).backgroundColor;
   }
 
-  function onSitecuesThemeChange(newTheme) {
+  function adaptToSitecuesThemeChange(newTheme) {
     // If sitecues theme changes to dark, force adaptive palette. Otherwise use default palette.
     state.set('isAdaptivePalette', newTheme === 'dark');
     checkBackgroundColorChange(bpView.update, true);
@@ -66,6 +66,6 @@ define(['core/bp/model/state', 'core/bp/view/view', 'core/bp/constants'], functi
 
   return {
     initAdaptivePalette: initAdaptivePalette,
-    onSitecuesThemeChange: onSitecuesThemeChange
+    adaptToSitecuesThemeChange: adaptToSitecuesThemeChange
   };
 });

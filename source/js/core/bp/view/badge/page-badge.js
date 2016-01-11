@@ -3,19 +3,31 @@
  */
 define(['core/bp/view/view', 'core/bp/view/badge/palette'], function(baseView, palette) {
 
-  function init(badge, onComplete) {
-    function onBadgeReady(badge, onComplete, badgeFileName) {
-      palette.init(badge, badgeFileName, function() {
-        baseView.init(badge, onComplete);
-      });
+  // Make sure the badge has non-static positioning to make it easy to place
+  // the position: absolute sc-bp-container inside of it
+  function ensureNonStaticPositioning(badge) {
+
+    var existingPositionCss = getComputedStyle(badge).position;
+
+    if (existingPositionCss === 'static') {
+      badge.style.position = 'relative';
     }
+  }
+
+  function onBadgeReady(badge, onComplete, badgeFileName) {
+    palette.init(badgeFileName, function() {
+      baseView.init(badge, onComplete);
+    });
+  }
+
+  function init(badge, onComplete) {
+    ensureNonStaticPositioning(badge);
 
     if (badge.localName === 'img') {
       // If a customer uses the <img> placeholder...
       require(['bp-img-placeholder/bp-img-placeholder'], function(imagePlaceHolder) {
-        var newBadge = imagePlaceHolder.init(badge),
-          badgeFileName = imagePlaceHolder.getFileName();
-        onBadgeReady(newBadge, onComplete, badgeFileName);
+        var newBadge = imagePlaceHolder.init(badge);
+        onBadgeReady(newBadge, onComplete, badge.src);
       });
     }
     else {
