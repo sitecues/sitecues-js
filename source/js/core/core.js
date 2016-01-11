@@ -1,6 +1,6 @@
 define(['core/conf/site', 'core/conf/urls', 'core/run', 'core/constants'], function (site, urls, run, constants) {
       // Array's prototype
-  var arr    = Array.prototype,
+  var arr   = Array.prototype,
       // Enums for sitecues loading state
       state = constants.READY_STATE;
 

@@ -159,22 +159,22 @@ define(['core/bp/view/badge', 'core/bp/model/state', 'core/bp/constants', 'core/
     var newBadgeRect   = helper.getRect(badgeElement),
 
         // Get the amount of zoom being applied to the badge
-        appliedZoom = getAppliedBPZoom();
+        appliedZoom = getAppliedBPZoom(),
 
-        //If the badge is currently dimensionless, use the cached badge dimensions
-        if (rectHasNoArea(newBadgeRect)) {
-          //We saved the badge rect when it was a child of the documentElement, so we multiply by the current zoom
-          newBadgeRect.height = badgeGeometry.cachedRect.height * appliedZoom;
-          newBadgeRect.width  = badgeGeometry.cachedRect.width  * appliedZoom;
-        }
-
-    var badgeComputedStyle = window.getComputedStyle(badgeElement),
+        badgeComputedStyle = window.getComputedStyle(badgeElement),
 
         // Adjust for padding
         paddingLeft = getPadding('Left'),
         paddingTop  = getPadding('Top'),
 
         isToolbarBadge = state.get('isToolbarBadge');
+
+    //If the badge is currently dimensionless, use the cached badge dimensions
+    if (rectHasNoArea(newBadgeRect)) {
+      //We saved the badge rect when it was a child of the documentElement, so we multiply by the current zoom
+      newBadgeRect.height = badgeGeometry.cachedRect.height * appliedZoom;
+      newBadgeRect.width  = badgeGeometry.cachedRect.width  * appliedZoom;
+    }
 
     if (currentBPParent === BADGE_PARENT) {
 
@@ -307,16 +307,17 @@ define(['core/bp/view/badge', 'core/bp/model/state', 'core/bp/constants', 'core/
   //Otherwise, if we collapse the panel when the badge element has no area
   //the panel will disappear entirely!
   function initBadgeGeometry() {
-    var ratioOfSVGToVisibleBadgeSize, cachedRect;
     badgeElement.appendChild(bpElement);
 
     executeWhileElementIsRendered(badgeElement, function () {
-      cachedRect = helper.getRect(badgeElement);
-      ratioOfSVGToVisibleBadgeSize = getRatioOfSVGToVisibleBadgeSize(cachedRect);
-      badgeGeometry =  {
+      var cachedRect = helper.getRect(badgeElement),
+          ratioOfSVGToVisibleBadgeSize = getRatioOfSVGToVisibleBadgeSize(cachedRect);
+
+      badgeGeometry = {
         ratioOfSVGToVisibleBadgeSize : ratioOfSVGToVisibleBadgeSize,
         cachedRect : cachedRect
       };
+
     });
 
     state.set('ratioOfSVGToVisibleBadgeSize', badgeGeometry.ratioOfSVGToVisibleBadgeSize);
