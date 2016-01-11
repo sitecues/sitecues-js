@@ -1,6 +1,9 @@
-// TODO do not incude in extension -- not used
+// TODO do not include in extension -- not used
 define(['core/bp/model/state', 'core/conf/site', 'core/bp/constants'], function(state, site, BP_CONST) {
-  function getBadgePalette(badgeFileName) {
+
+  var badgeElem;
+
+  function initBadgePalette(badgeFileName) {
     var paletteName = badgeFileName || site.get('palette') || '',
       paletteMap = BP_CONST.PALETTE_NAME_MAP,
       fullNames = Object.keys(paletteMap),
@@ -22,15 +25,19 @@ define(['core/bp/model/state', 'core/conf/site', 'core/bp/constants'], function(
 
   // initialize the badge color palette support
   // @badgeFileName is optional -- provided when the badge is from an <img>, which clues us into the palette
-  function init(badgeFileName) {
-    var paletteName = getBadgePalette(badgeFileName);
+  function init(badge, badgeFileName, onComplete) {
+    badgeElem = badge;
+
+    var paletteName = initBadgePalette(badgeFileName);
     if (paletteName === BP_CONST.PALETTE_NAME_MAP.adaptive) {
       require(['bp-adaptive/bp-adaptive'], function(bpAdaptive) {
-        bpAdaptive.initAdaptivePalette();
+        bpAdaptive.initAdaptivePalette(onComplete);
       });
     }
-
-    state.set('paletteName', paletteName);
+    else {
+      state.set('paletteName', paletteName);
+      onComplete();
+    }
   }
 
   return {

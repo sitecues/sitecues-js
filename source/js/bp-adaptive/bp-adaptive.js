@@ -9,10 +9,14 @@
  * - Get notification of theme change via onSitecuesThemeChange()
  * TODO Do not include in extension, not used
  */
-define(['core/bp/model/state'], function(state) {
+define(['core/bp/model/state', 'core/bp/view/view', 'core/bp/constants'], function(state, bpView, BP_CONST) {
   var lastBgColor;
 
-  function checkBackgroundColorChange(doForceBadgeUpdate) {
+  function getBadgeElem() {
+    return document.getElementById(BP_CONST.BADGE_ID);
+  }
+
+  function checkBackgroundColorChange(onPaletteUpdate, doForceBadgeUpdate) {
     var newBgColor = getBackgroundColor(),
       doBadgeUpdate = doForceBadgeUpdate;
 
@@ -22,8 +26,14 @@ define(['core/bp/model/state'], function(state) {
     }
 
     if (doBadgeUpdate) {
-      sitecues.emit('bp/did-change');
-      if (SC_DEV) { console.log('Updating badge palette'); }
+      require(['page/util/color'], function(colorUtil) {
+        if (SC_DEV) { console.log('Updating badge palette'); }
+        var badgeElem = getBadgeElem();
+        state.set('paletteName', BP_CONST.PALETTE_NAME_MAP[colorUtil.isOnDarkBackground(badgeElem) ? 'reverse-blue' : 'normal']);
+        if (onPaletteUpdate) {
+          onPaletteUpdate();
+        }
+      });
     }
   }
 
@@ -34,23 +44,25 @@ define(['core/bp/model/state'], function(state) {
   function onSitecuesThemeChange(newTheme) {
     // If sitecues theme changes to dark, force adaptive palette. Otherwise use default palette.
     state.set('isAdaptivePalette', newTheme === 'dark');
-    checkBackgroundColorChange(true);
+    checkBackgroundColorChange(bpView.update, true);
   }
 
   // Input event has occurred that may trigger a theme change produced from the website code
   // (as opposed to sitecues-based themes). For example, harpo.com, cnib.ca, lloydsbank have their own themes.
   function onPossibleWebpageThemeChange() {
-    setTimeout(checkBackgroundColorChange, 0);
+    setTimeout(function() {
+      checkBackgroundColorChange(bpView.update);
+    }, 0);
   }
 
   // Listen for change in the web page's custom theme (as opposed to the sitecues-based themes).
   // We don't know when they occur so we check shortly after a click or keypress.
-  function initAdaptivePalette() {
+  function initAdaptivePalette(onPaletteUpdate) {
     state.set('isAdaptivePalette', true);
 
     document.body.addEventListener('click', onPossibleWebpageThemeChange);
     document.body.addEventListener('keyup', onPossibleWebpageThemeChange);
-    lastBgColor = getBackgroundColor();
+    checkBackgroundColorChange(onPaletteUpdate, true);
   }
 
   return {

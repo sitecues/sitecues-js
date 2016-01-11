@@ -1,8 +1,8 @@
 /**
  * Expand or contract the BP
  */
-define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/platform'],
-  function(state, BP_CONST, helper, platform) {
+define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/platform', 'core/bp/view/view'],
+  function(state, BP_CONST, helper, platform, view) {
   var requestFrameFn = window.requestAnimationFrame   ||
                        window.msRequestAnimationFrame ||
                        function (fn) {
@@ -745,7 +745,7 @@ define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/plat
     currentlyTransitioningTo = null;
 
     sitecues.emit(isPanelRequested ? 'bp/did-expand' : 'bp/did-shrink');
-    sitecues.emit('bp/did-change');
+    view.update();
   }
 
   function cancelAnimation() {
@@ -756,21 +756,7 @@ define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/plat
     currentZoom = zoomLevel;
   }
 
-  function init(isFirstTime) {
-
-    if (isFirstTime) {
-      firstTimeRender();
-
-      sitecues.on('bp/will-expand bp/will-shrink', cancelAnimation);
-
-      sitecues.on('zoom/begin', function () {
-        animationStartTime = 0;
-      });
-
-      sitecues.on('zoom', onZoomChange);
-
-      return;
-    }
+  function animate() {
 
     if (currentlyTransitioningTo === state.get('transitionTo')) {
       // Already where we've been requested to be
@@ -788,8 +774,23 @@ define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/plat
   }
 
 
+  function init() {
+
+    firstTimeRender();
+
+    sitecues.on('bp/will-expand bp/will-shrink', cancelAnimation);
+
+    sitecues.on('zoom/begin', function () {
+      animationStartTime = 0;
+    });
+
+    sitecues.on('zoom', onZoomChange);
+
+  }
+
   return {
-    init: init
+    init: init,
+    animate: animate
   };
 
 });

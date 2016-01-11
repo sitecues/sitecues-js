@@ -1,8 +1,8 @@
 /*
 BP Controller
  */
-define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metric'],
-  function (BP_CONST, state, helper, metric) {
+define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metric', 'core/bp/view/view'],
+  function (BP_CONST, state, helper, metric, view) {
 
   // How long we wait before expanding BP
   var hoverDelayTimer,
@@ -214,7 +214,7 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
   }
 
   function didChange() {
-    sitecues.emit('bp/did-change');
+    view.update();
   }
 
   function didZoom() {

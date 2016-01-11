@@ -1,6 +1,6 @@
 /* Focus Controller */
-define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metric', 'core/platform' ],
-  function (BP_CONST, state, helper, metric, platform) {
+define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metric', 'core/platform', 'core/bp/view/view' ],
+  function (BP_CONST, state, helper, metric, platform, view) {
 
   var savedDocumentFocus,
     tabbedElement,
@@ -172,8 +172,8 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
     }
   }
 
-  function focusFirstItem(isFirstTime, isNewPanel) {
-    if (isNewPanel && isKeyboardMode()) {
+  function focusFirstItem() {
+    if (isKeyboardMode()) {
       setTimeout(function() {
         navigateInDirection(1, true);
       }, 0);
@@ -236,7 +236,7 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
   function turnOnKeyboardMode() {
     state.set('isKeyboardMode', true);
     listenToClicks();
-    sitecues.emit('bp/did-change');
+    view.update();
   }
 
   function getFocusedItem() {
@@ -532,7 +532,7 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
     isInitialized = true;
 
     sitecues.on('bp/will-toggle-feature', hideFocus);
-    sitecues.on('bp/did-change', focusFirstItem);
+    sitecues.on('bp/did-open-new-panel', focusFirstItem);
     sitecues.on('bp/did-show-card', focusCard);
     beginKeyHandling(); // First time badge expands
     sitecues.on('bp/will-expand', beginKeyHandling);

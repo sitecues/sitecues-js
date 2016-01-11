@@ -4,11 +4,15 @@
  */
 // TODO add a close button
 
-define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/bp/view/badge/base-badge'], function(BP_CONST, state, helper, baseBadge) {
+define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/bp/view/view'], function(BP_CONST, state, helper, baseView) {
   var isInitialized;
 
+  function getPalette(callbackFn) {
+    callbackFn(BP_CONST.PALETTE_NAME_MAP.normal);
+  }
+
   function adjustFixedElementsBelowToolbar(toolbarElement) {
-    // TODO Make this work better
+    // TODO Make this work better:
     // - it doesn't work that well across sites
     // - it's heavy in the page
     // - it causes us to load the page-features module just because we have a toolbar
@@ -43,26 +47,26 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/bp/v
     }
     isInitialized = true;
 
-    baseBadge.init(function() {
-      var toolbarElement = document.createElement('sc'),
-        docElem = document.documentElement;
+    var toolbarElement = document.createElement('sc'),
+      docElem = document.documentElement;
 
-      docElem.setAttribute('data-sitecues-toolbar', ''); // Enable default.css rules
-      docElem.insertBefore(toolbarElement, docElem.childNodes[0]);
+    docElem.setAttribute('data-sitecues-toolbar', ''); // Enable default.css rules
+    docElem.insertBefore(toolbarElement, docElem.childNodes[0]);
 
-      helper.setAttributes(toolbarElement, BP_CONST.DEFAULT_TOOLBAR_ATTRS);
-      ensureBodyBelowToolbar();
+    helper.setAttributes(toolbarElement, BP_CONST.DEFAULT_TOOLBAR_ATTRS);
 
-      state.set('isPageBadge', false);
-      state.set('isToolbarBadge', true);
+    ensureBodyBelowToolbar();
 
-      adjustFixedElementsBelowToolbar(toolbarElement);
+    state.set('isPageBadge', false);
+    state.set('isToolbarBadge', true);
 
-      onComplete();
-    });
+    adjustFixedElementsBelowToolbar(toolbarElement);
+
+    baseView.init(onComplete);
   }
 
   return {
-    init: init
+    init: init,
+    getPalette: getPalette
   };
 });

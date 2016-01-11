@@ -8,18 +8,18 @@
 
 define(['core/bp/constants',
     'core/bp/model/state',
+    'core/bp/view/view',
     'core/bp/helper',
     'bp-expanded/view/transform-animate',
     'bp-expanded/view/transform-util',
     'core/locale',
-    'core/platform',
     'bp-secondary/insert-secondary-markup',
     'bp-secondary/tips',
     'bp-secondary/settings',
     'bp-secondary/feedback',
     'bp-secondary/about',
     'bp-secondary/cards'],
-    function (BP_CONST, state, helper, animate, transformUtil, locale, platform, markup, tipsModule, settingsModule, feedbackModule, aboutModule, cardsModule) {
+    function(BP_CONST, state, view, helper, animate, transformUtil, locale, markup, tipsModule, settingsModule, feedbackModule, aboutModule, cardsModule) {
 
   var BUTTON_DROP_ANIMATION_MS = 800,
     ENABLED_PANEL_TRANSLATE_Y = 0,
@@ -90,8 +90,8 @@ define(['core/bp/constants',
     fireBpChanged();
   }
 
-  function fireBpChanged(isNewPanelReady) {
-    sitecues.emit('bp/did-change', false, isNewPanelReady);
+  function fireBpChanged(isOpeningNewPanel) {
+    view.update(isOpeningNewPanel);
   }
 
   function getBPContainer() {
