@@ -35,7 +35,7 @@
  *    - Parented by the badge when it's small (badge state) -- this allows it to scale and move with the page
  *      Special default badge case: always parented by badge (which is outside of the <body>) and doesn't switch on expansion.
  *      (Note: if the #sitecues-badge is an <img> we make it a previous sibling of that, because <img>s can't parent)
- *      TODO previous subling is breaking page layout
+ *      TODO previous sibling is breaking page layout
  *    - Parented by the <html> element when it's not small so that it doesn't change size or position while it's being used.
  *    Display type: block
  *    Accessibility: treated as application dialog; receives focus in keyboard mode
@@ -49,14 +49,22 @@
  */
 define(['core/bp/view/badge', 'core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/platform'],
   function(baseBadge, state, BP_CONST, helper, platform) {
+  'use strict';
+
   var BADGE_PARENT = BP_CONST.BADGE_MODE,
       HTML_PARENT  = BP_CONST.PANEL_MODE,
       currentBPParent,
       badgeElement,
       badgeRect = {},
+      badgeGeometry,//
+        // This is the ratio of the height allotted by the badge to the visible height.
+        // It is what we need to multiply the SVG height by to get the final desired height.
+        //ratioOfSVGToVisibleBadgeSize: undefined,
+        //
+        // This is the cached badge rect that we get when we temporarily force the badge to be visible
+        //cachedRect: undefined
       bpElement,
       svgElement,
-      ratioOfSVGToVisibleBadgeSize,
       currentZoom = 1,
       isInitialized,
 
@@ -64,7 +72,7 @@ define(['core/bp/view/badge', 'core/bp/model/state', 'core/bp/constants', 'core/
       // Note: this currently stays the same in badge vs panel sizes even though the panel stretches,
       // because of transparent space to the right/bottom of the visible BP
       svgAspectRatio,
-      documentElement   = document.documentElement,
+      documentElement = document.documentElement,
 
       SHOULD_FIX_USE_ELEMENTS = platform.browser.isIE && platform.browser.version >= 11 && platform.os.majorVersion >= 10;
 
@@ -153,14 +161,20 @@ define(['core/bp/view/badge', 'core/bp/model/state', 'core/bp/constants', 'core/
         // Get the amount of zoom being applied to the badge
         appliedZoom = getAppliedBPZoom(),
 
-        // Adjust for padding
         badgeComputedStyle = window.getComputedStyle(badgeElement),
 
+        // Adjust for padding
         paddingLeft = getPadding('Left'),
         paddingTop  = getPadding('Top'),
 
         isToolbarBadge = state.get('isToolbarBadge');
 
+    //If the badge is currently dimensionless, use the cached badge dimensions
+    if (rectHasNoArea(newBadgeRect)) {
+      //We saved the badge rect when it was a child of the documentElement, so we multiply by the current zoom
+      newBadgeRect.height = badgeGeometry.cachedRect.height * appliedZoom;
+      newBadgeRect.width  = badgeGeometry.cachedRect.width  * appliedZoom;
+    }
 
     if (currentBPParent === BADGE_PARENT) {
 
@@ -179,12 +193,12 @@ define(['core/bp/view/badge', 'core/bp/model/state', 'core/bp/constants', 'core/
     }
 
     badgeRect.left   = newBadgeRect.left + paddingLeft;
-    badgeRect.top    = newBadgeRect.top + paddingTop;
+    badgeRect.top    = newBadgeRect.top  + paddingTop;
 
     // A toolbar badge's size remains the same for the lifetime of the page, so we use the cached version of size in that case
     if (!badgeRect.width || !isToolbarBadge) {
-      badgeRect.width = newBadgeRect.width - paddingLeft - getPadding('Right');
-      badgeRect.height = newBadgeRect.height - paddingTop - getPadding('Bottom');
+      badgeRect.width  = newBadgeRect.width  - paddingLeft - getPadding('Right');
+      badgeRect.height = newBadgeRect.height - paddingTop  - getPadding('Bottom');
     }
 
     // Set left and top for positioning.
@@ -202,7 +216,7 @@ define(['core/bp/view/badge', 'core/bp/model/state', 'core/bp/constants', 'core/
   function fitSVGtoBadgeRect() {
 
     var svgStyle  = svgElement.style,
-        svgWidth  = badgeRect.width * getSVGScale(badgeRect) / getAppliedBPZoom(),
+        svgWidth  = badgeRect.width * badgeGeometry.ratioOfSVGToVisibleBadgeSize / getAppliedBPZoom(),
         svgHeight = svgWidth / svgAspectRatio;
 
     svgStyle.width  = svgWidth  + 'px';
@@ -216,35 +230,24 @@ define(['core/bp/view/badge', 'core/bp/model/state', 'core/bp/constants', 'core/
     fixUseElementsInIE();
   }
 
-  // This is the ratio of the height allotted by the badge to the visible height.
-  // It is what we need to multiply the SVG height by to get the final desired height.
-  function getSVGScale (badgeRect) {
-
+  function getRatioOfSVGToVisibleBadgeSize(badgeRect) {
     // First get the height for the third wave in the speech button, useful for measurements
     // It is the tallest and rightmost element
-    if (!ratioOfSVGToVisibleBadgeSize) { // Computed lazily and only once
+    var svgStyle         = svgElement.style,
+        badgeRectWidth   = badgeRect.width;
 
-      var svgStyle         = svgElement.style,
-          badgeRectWidth   = badgeRect.width;
+    // Set default height and width, because this normalizes cross browser inconsistencies
+    // for SVG sizing.  Basically, if no height or width are set explicitly, then the viewBox
+    // attribute effects the values of the boundingClient height and width of the SVG in Chrome,
+    // but not IE.  Therefore, setting these values allows getRatioOfSVGToVisibleBadgeSize() to return the proper
+    // values no matter the browser.
+    svgStyle.width  = badgeRectWidth + 'px';
+    svgStyle.height = badgeRectWidth / svgAspectRatio + 'px';
 
-      // Set default height and width, because this normalizes cross browser inconsistencies
-      // for SVG sizing.  Basically, if no height or width are set explicitly, then the viewBox
-      // attribute effects the values of the boundingClient height and width of the SVG in Chrome,
-      // but not IE.  Therefore, setting these values allows getSVGScale() to return the proper
-      // values no matter the browser.
-      svgStyle.width  = badgeRectWidth + 'px';
-      svgStyle.height = badgeRectWidth / svgAspectRatio + 'px';
-
-      ratioOfSVGToVisibleBadgeSize = badgeRect.height / helper.getRectById(BP_CONST.WAVE_3_ID).height;
-
-      state.set('ratioOfSVGToVisibleBadgeSize', ratioOfSVGToVisibleBadgeSize);
-    }
-
-    return ratioOfSVGToVisibleBadgeSize;
+    return badgeRect.height / helper.getRectById(BP_CONST.WAVE_3_ID).height;
   }
 
   function addClipRectStyleFix () {
-
     var badgeRect    = helper.getRect(badgeElement),
 
         // A magic number to fix SC-2759.  Underlying issue is probably
@@ -252,6 +255,10 @@ define(['core/bp/view/badge', 'core/bp/model/state', 'core/bp/constants', 'core/
         // TODO: Figure out why we are using magic numbers
         EXTRA_PIXELS_HEIGHT = 5,
         EXTRA_PIXELS_WIDTH  = 10;
+
+    if (rectHasNoArea(badgeRect)) {
+      badgeRect = badgeGeometry.cachedRect;
+    }
 
     bpElement.style.clip =  'rect(0,' + (badgeRect.width  + EXTRA_PIXELS_WIDTH) + 'px,' + (badgeRect.height + EXTRA_PIXELS_HEIGHT) + 'px,0)';
   }
@@ -263,6 +270,61 @@ define(['core/bp/view/badge', 'core/bp/model/state', 'core/bp/constants', 'core/
   function getAppliedBPZoom() {
     var isBPInBody  = state.get('isPageBadge') && currentBPParent === BADGE_PARENT;
     return isBPInBody ? currentZoom : 1;
+  }
+
+  function executeWhileElementIsRendered(element, fn) {
+    var isReparented,
+        inlineTransform = element.style[platform.transformProperty],
+        nextSibling     = element.nextSibling,
+        parent          = element.parentElement,
+        rect            = helper.getRect(element);
+
+    //If the element isn't displayed, translate it out of the viewport and attach it to the document element.
+    //This way we can be confident that an ancestor of the element isn't hiding it
+    //This doesn't guarantee that a stylesheet isn't hiding the element, but it is sufficient for our current purposes
+    if (rectHasNoArea(rect)) {
+      element.style[platform.transformProperty] = 'translate(-99999px,-99999px)';
+      documentElement.appendChild(element);
+      isReparented = true;
+    }
+
+    fn();
+
+    if (isReparented) {
+      element.style[platform.transformProperty] = inlineTransform;
+      if (nextSibling) {
+        parent.insertBefore(element, nextSibling);
+      }
+      else {
+        parent.appendChild(element);
+      }
+    }
+  }
+
+  //This method caches the dimensions of the badge, and if it is not currently visible
+  //temporarily appends the badge directly to the document element to prevent its ancestors from hiding it.
+  //This ensures that we have a fallback size reference when we need to reposition the bp SVG.
+  //Otherwise, if we collapse the panel when the badge element has no area
+  //the panel will disappear entirely!
+  function initBadgeGeometry() {
+    badgeElement.appendChild(bpElement);
+
+    executeWhileElementIsRendered(badgeElement, function () {
+      var cachedRect = helper.getRect(badgeElement),
+          ratioOfSVGToVisibleBadgeSize = getRatioOfSVGToVisibleBadgeSize(cachedRect);
+
+      badgeGeometry = {
+        ratioOfSVGToVisibleBadgeSize : ratioOfSVGToVisibleBadgeSize,
+        cachedRect : cachedRect
+      };
+
+    });
+
+    state.set('ratioOfSVGToVisibleBadgeSize', badgeGeometry.ratioOfSVGToVisibleBadgeSize);
+  }
+
+  function rectHasNoArea(rect) {
+    return !rect.width || !rect.height;
   }
 
     /**
@@ -288,6 +350,9 @@ define(['core/bp/view/badge', 'core/bp/model/state', 'core/bp/constants', 'core/
     svgElement   = svg;
 
     svgAspectRatio = viewBoxRect.width / viewBoxRect.height;
+
+    //Store initial badge dimensions and SVG scale while we know they're available
+    initBadgeGeometry();
 
     // Initially, BP must always be contained by #sitecues-badge
     switchToBadgeParent();
