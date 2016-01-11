@@ -176,7 +176,7 @@ define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/plat
   function init() {
     if (!isInitialized) {
       isInitialized = true;
-      sitecues.on('bp/did-open-view', onPanelUpdate);
+      sitecues.on('bp/did-open-subpanel', onPanelUpdate);
     }
   }
 

@@ -24,7 +24,12 @@ var config = require('../build-config.js'),
     useStrict: true,
     paths: {
       'core/conf/user/storage-backup': '../../extension/source/js/overrides/storage-backup',
-      'core/data-map': config.tmpDir + '/data-map'
+      'core/data-map': config.tmpDir + '/data-map',
+      // Unused in the extension
+      'core/bp/badge/page-badge': 'empty:',
+      'core/bp/badge/palette': 'empty:',
+      'bp-img-placeholder/bp-img-placeholder/': 'empty:',
+      'bp-adaptive/bp-adaptive': 'empty:'
     },
     map: {
       '*': {

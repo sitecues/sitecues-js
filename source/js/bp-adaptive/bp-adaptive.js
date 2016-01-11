@@ -7,7 +7,6 @@
  *
  * For theme changes implemented by sitecues:
  * - Get notification of theme change via onSitecuesThemeChange()
- * TODO Do not include in extension, not used
  */
 define(['core/bp/model/state', 'core/bp/view/view', 'core/bp/constants'], function(state, bpView, BP_CONST) {
   var lastBgColor;

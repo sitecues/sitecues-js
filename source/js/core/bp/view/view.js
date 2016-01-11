@@ -25,7 +25,8 @@ define([
 
   var byId = helper.byId,
     bpContainer,
-    badgeElement;
+    badgeElement,
+    svgElement;
 
   /*
    *** Private ***
@@ -37,8 +38,7 @@ define([
 
   // Allow animations just before panel expands
   function enableAnimations() {
-    // todo: take out the class to const
-    getSVGElement().setAttribute('class', 'scp-animate');
+    svgElement.setAttribute('class', BP_CONST.ALLOW_ANIMATIONS);
   }
 
   // Update accessibility attributes
@@ -52,12 +52,14 @@ define([
 
   function createBpContainer() {
     // Create the svg container
-    bpContainer = document.createElement('sc');
+    var bpContainer = document.createElement('sc');
 
     // Set attributes
     helper.setAttributes(bpContainer, BP_CONST.PANEL_CONTAINER_ATTRS);
 
     bpContainer.innerHTML = bpSVG();
+
+    return bpContainer;
   }
 
   // Can get SVG element whether currently attached to document or not
@@ -70,7 +72,7 @@ define([
    *** Public ***
    */
 
-  function update(isOpeningNewPanel) {
+  function update(isNewSubpanel) {
 
     var isOrWillBePanel = state.isPanelRequested(),
       classes = isOrWillBePanel ? panel.getViewClasses() : baseBadge.getViewClasses();
@@ -83,8 +85,8 @@ define([
 
     sizeAnimation.animate(); // Will animate to new size, bt only if new state requires a different size
 
-    if (isOpeningNewPanel) {
-      sitecues.emit('bp/did-open-view');
+    if (isNewSubpanel) {
+      sitecues.emit('bp/did-open-subpanel');
     }
   }
 
@@ -99,11 +101,10 @@ define([
   // the badgeElement (switching parent).
   function init(badgePlacementElem, onComplete) {
 
-    badgeElement = badgePlacementElem;
-
     // Create the container and insert the SVG
+    badgeElement = badgePlacementElem;
     bpContainer = createBpContainer();
-    var svgElement = getSVGElement(bpContainer);
+    svgElement = getSVGElement(bpContainer);
 
     // Append the container to the badgeElement and fit to the space available
     placement.init(badgeElement, bpContainer, svgElement);
@@ -113,7 +114,8 @@ define([
 
     // Set badge classes. Render the badge. Render slider.
     update();
-    // Enable animations for next updates
+
+    // Enable animations in future updates
     enableAnimations();
 
     // Turn on TTS button if the setting is on

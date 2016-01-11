@@ -62,7 +62,7 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/bp/v
 
     adjustFixedElementsBelowToolbar(toolbarElement);
 
-    baseView.init(onComplete);
+    baseView.init(toolbarElement, onComplete);
   }
 
   return {

@@ -1,7 +1,6 @@
 /*
  * Code to support the classic <img>-based placeholders. We ask customers to use <div display="inline-block"> now.
  * TODO Once these go away we can remove this code.
- * TODO Don't include in extension, not used
 
  If the customer uses an <img> as a placeholder:
  We determine the color palette to be used based on the .src attribute.

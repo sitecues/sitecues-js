@@ -1,8 +1,8 @@
 /**
  * Expand or contract the BP
  */
-define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/platform', 'core/bp/view/view'],
-  function(state, BP_CONST, helper, platform, view) {
+define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/platform' ],
+  function(state, BP_CONST, helper, platform) {
   var requestFrameFn = window.requestAnimationFrame   ||
                        window.msRequestAnimationFrame ||
                        function (fn) {
@@ -745,7 +745,10 @@ define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/plat
     currentlyTransitioningTo = null;
 
     sitecues.emit(isPanelRequested ? 'bp/did-expand' : 'bp/did-shrink');
-    view.update();
+
+    require([ 'core/bp/view/view' ], function(view) {
+      view.update();
+    });
   }
 
   function cancelAnimation() {

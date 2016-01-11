@@ -21,14 +21,16 @@ define([
   'core/bp/constants',
   'core/platform',
   'core/conf/site',
-  'core/bp/model/classic-site'
+  'core/bp/model/classic-site',
+  'core/bp/view/badge/page-badge'
 ], function(bpController,
            state,
            helper,
            BP_CONST,
            platform,
            site,
-           classicSite) {
+           classicSite,
+           pageBadgeView) {
 
   /*
    *** Public methods ***
@@ -65,22 +67,22 @@ define([
 
     isBpInitializing = true;
 
-    var badgePlaceholderElem = !isToolbarUIRequested() && helper.byId(BP_CONST.BADGE_ID);
+    if (!SC_EXTENSION && !isToolbarUIRequested()) {
+      var badgePlaceholderElem = helper.byId(BP_CONST.BADGE_ID);
 
-    // Get site's in-page placeholder badge or create our own
-    if (badgePlaceholderElem) {
-      require(['core/bp/view/badge/page-badge'], function(pageBadgeView) {
+      // Get site's in-page placeholder badge or create our own
+      if (badgePlaceholderElem) {
         badgeView = pageBadgeView;
         pageBadgeView.init(badgePlaceholderElem, onViewInitialized);
-      });
+        return;
+      }
     }
-    else {
-      // Toolbar mode requested or no badge (toolbar is default)
-      require(['bp-toolbar-badge/bp-toolbar-badge'], function(toolbarView) {
-        badgeView = toolbarView;
-        toolbarView.init(onViewInitialized);
-      });
-    }
+
+    // Toolbar mode requested or no badge (toolbar is default)
+    require(['bp-toolbar-badge/bp-toolbar-badge'], function(toolbarView) {
+      badgeView = toolbarView;
+      toolbarView.init(onViewInitialized);
+    });
   }
 
   function onViewInitialized() {

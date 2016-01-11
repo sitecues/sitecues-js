@@ -1,14 +1,12 @@
 /**
  * Badge view
  */
-define(['core/bp/view/view'], function(baseView) {
+define(['core/bp/view/view', 'core/bp/view/badge/palette'], function(baseView, palette) {
 
   function init(badge, onComplete) {
     function onBadgeReady(badge, onComplete, badgeFileName) {
-      require('core/bp/view/badge/palette', function(badgePalette) {
-        badgePalette.init(badge, badgeFileName, function() {
-          baseView.init(onComplete);
-        });
+      palette.init(badge, badgeFileName, function() {
+        baseView.init(badge, onComplete);
       });
     }
 
