@@ -281,7 +281,7 @@ define(['core/bp/view/badge', 'core/bp/model/state', 'core/bp/constants', 'core/
 
     //If the element isn't displayed, translate it out of the viewport and attach it to the document element.
     //This way we can be confident that an ancestor of the element isn't hiding it
-    //This doesn't guarantee that a style sheet isn't hiding the element, but it is sufficient for our current purposes
+    //This doesn't guarantee that a stylesheet isn't hiding the element, but it is sufficient for our current purposes
     if (rectHasNoArea(rect)) {
       element.style[platform.transformProperty] = 'translate(-99999px,-99999px)';
       documentElement.appendChild(element);
