@@ -307,25 +307,19 @@ define(['core/bp/view/badge', 'core/bp/model/state', 'core/bp/constants', 'core/
   //Otherwise, if we collapse the panel when the badge element has no area
   //the panel will disappear entirely!
   function initBadgeGeometry() {
+    var ratioOfSVGToVisibleBadgeSize, cachedRect;
     badgeElement.appendChild(bpElement);
 
     executeWhileElementIsRendered(badgeElement, function () {
-      computeBadgeGeometry();
-    });
-
-    state.set('ratioOfSVGToVisibleBadgeSize', badgeGeometry.ratioOfSVGToVisibleBadgeSize);
-  }
-
-  function computeBadgeGeometry() {
-    var ratioOfSVGToVisibleBadgeSize, cachedRect;
-    if (!badgeGeometry) {
       cachedRect = helper.getRect(badgeElement);
       ratioOfSVGToVisibleBadgeSize = getRatioOfSVGToVisibleBadgeSize(cachedRect);
-      badgeGeometry = {
+      badgeGeometry =  {
         ratioOfSVGToVisibleBadgeSize : ratioOfSVGToVisibleBadgeSize,
         cachedRect : cachedRect
       };
-    }
+    });
+
+    state.set('ratioOfSVGToVisibleBadgeSize', badgeGeometry.ratioOfSVGToVisibleBadgeSize);
   }
 
   function rectHasNoArea(rect) {
