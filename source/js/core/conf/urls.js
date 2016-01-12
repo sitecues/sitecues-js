@@ -33,6 +33,7 @@ define(['core/conf/site'], function(site) {
   //////////////////////////////////////////////////////////////////////////////////////////
 
   // Parse a URL into { host, path }
+  // Does not support mailto links (or anything where the protocol isn't followed by //)
   function parseUrl(urlStr) {
     if (typeof urlStr !== 'string') {
       return;
