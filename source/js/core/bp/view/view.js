@@ -40,15 +40,6 @@ define([
     return byId(BP_CONST.BP_CONTAINER_ID);
   }
 
-  // Update accessibility attributes
-  function updateAria(isPanel) {
-    // Let the user know that the button is expandable
-    badgeElement.setAttribute('aria-expanded',isPanel);
-
-    // Hide the inner contents of the button when it's just a button
-    getBpContainerElement().setAttribute('aria-hidden', !isPanel);
-  }
-
   function createBpContainer() {
     // Create the svg container
     var bpContainer = document.createElement('sc');
@@ -65,6 +56,31 @@ define([
   function getSVGElement(bpContainer) {
     // Don't use helper.byId() because the element isn't inserted in DOM yet.
     return bpContainer.querySelector('#' + BP_CONST.SVG_ID);
+  }
+
+  // Update accessibility attributes
+  function updateAria(isPanel) {
+    // Let the user know that the button is expandable
+    badgeElement.setAttribute('aria-expanded',isPanel);
+
+    // Hide the inner contents of the button when it's just a button
+    getBpContainerElement().setAttribute('aria-hidden', !isPanel);
+  }
+
+  function hasSitecuesEverBeenOn() {
+    return typeof conf.get('zoom') !== 'undefined' ||
+      typeof conf.get('ttsOn') !== 'undefined';
+  }
+
+  function addLabel(badgeOrToolbarElement) {
+    // Insert badge label into an element (using aria-label didn't work as NVDA cut off the label text at 100 characters)
+    // The badge label will be absolutely positioned offscreen in order to not affect layout
+    var badgeLabelElement = document.createElement('sc');
+    badgeLabelElement.innerHTML = locale.translate(BP_CONST.STRINGS.BADGE_LABEL);
+    badgeLabelElement.style.position = 'absolute';
+    badgeLabelElement.style.left = '-9999px';
+
+    badgeOrToolbarElement.appendChild(badgeLabelElement);
   }
 
   /**
@@ -87,22 +103,6 @@ define([
     if (isNewSubpanel) {
       sitecues.emit('bp/did-open-subpanel');
     }
-  }
-
-  function hasSitecuesEverBeenOn() {
-    return typeof conf.get('zoom') !== 'undefined' ||
-      typeof conf.get('ttsOn') !== 'undefined';
-  }
-
-  function addLabel(badgeOrToolbarElement) {
-    // Insert badge label into an element (using aria-label didn't work as NVDA cut off the label text at 100 characters)
-    // The badge label will be absolutely positioned offscreen in order to not affect layout
-    var badgeLabelElement = document.createElement('sc');
-    badgeLabelElement.innerHTML = locale.translate(BP_CONST.STRINGS.BADGE_LABEL);
-    badgeLabelElement.style.position = 'absolute';
-    badgeLabelElement.style.left = '-9999px';
-
-    badgeOrToolbarElement.appendChild(badgeLabelElement);
   }
 
   // This function augments the customers placeholder if found, otherwise creates the floating badge.
