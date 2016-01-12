@@ -41,6 +41,7 @@ define(['core/bp/constants',
 
   /********************** UTIL **************************/
 
+  // TODO code related to the individual features should move into bp-secondary-features.js
   function forEachFeature(fn) {
     for (var feature in features) {
       if (features.hasOwnProperty(feature)) {
