@@ -40,11 +40,6 @@ define([
     return byId(BP_CONST.BP_CONTAINER_ID);
   }
 
-  // Allow animations just before panel expands
-  function enableAnimations() {
-    svgElement.setAttribute('class', BP_CONST.ALLOW_ANIMATIONS);
-  }
-
   // Update accessibility attributes
   function updateAria(isPanel) {
     // Let the user know that the button is expandable
@@ -129,14 +124,15 @@ define([
     // Append the container to the badgeElement and fit to the space available
     placement.init(badgeElement, bpContainer, svgElement);
 
+    // Real settings or fake initial settings?
+    if (!SC_EXTENSION) {
+      // Use fake settings if undefined -- user never used sitecues before.
+      // This will be turned off once user interacts with sitecues.
+      state.set('isRealSettings', site.get('alwaysRealSettings') || hasSitecuesEverBeenOn());
+    }
+
     // Get size animations ready
     sizeAnimation.init();
-
-    // Set badge classes. Render the badge. Render slider.
-    update();
-
-    // Enable animations in future updates
-    enableAnimations();
 
     // Set attributes
     helper.setAttributes(badgeElement, BP_CONST.BADGE_ATTRS);
@@ -144,12 +140,8 @@ define([
     // Label it
     addLabel(badgeElement);
 
-    // Real settings or fake initial settings?
-    if (!SC_EXTENSION) {
-      // Use fake settings if undefined -- user never used sitecues before.
-      // This will be turned off once user interacts with sitecues.
-      state.set('isRealSettings', site.get('alwaysRealSettings') || hasSitecuesEverBeenOn());
-    }
+    // Set badge classes. Render the badge. Render slider.
+    update();
 
     // Completion
     onComplete();
