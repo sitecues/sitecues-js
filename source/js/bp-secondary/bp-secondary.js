@@ -61,10 +61,6 @@ define(['core/bp/constants',
     fireBpChanged();
   }
 
-  function fireBpChanged(isOpeningNewPanel) {
-    view.update(isOpeningNewPanel);
-  }
-
   function getBPContainer() {
     return byId(BP_CONST.BP_CONTAINER_ID);
   }
@@ -144,7 +140,7 @@ define(['core/bp/constants',
     function onFinish() {
       secondaryFeatures.init();
       state.set('isSecondaryPanel', willEnable);
-      fireBpChanged(true);
+      view.update(true);
       updateMoreButtonLabel(willEnable);
     }
 
@@ -216,13 +212,13 @@ define(['core/bp/constants',
     function fadeInTextContentWhenLargeEnough() {
       fadeInTimer = setTimeout(function () {
         state.set('isSecondaryExpanding', false);
-        fireBpChanged(true);
+        view.update(true);
       }, heightAnimationDelay + heightAnimationDuration * 0.7);
     }
 
     function onHeightAnimationComplete() {
       state.set('isSecondaryExpanded', doEnable);
-      fireBpChanged();
+      view.update();
     }
 
     function animateHeight() {
