@@ -64,7 +64,7 @@ define(['core/conf/site'], function(site) {
     origin = parser.origin;
     if (!origin) {
       origin = parser.protocol + '//' + hostname;
-      // Used to use parser.origin but this didn't work in IE -- not this doesn't include @username or password info
+      // Fallback approach for IE -- note this doesn't include @username or password info
       if (parser.port !== 80 || urlStr.indexOf(':80/') > 0) {
         origin += ':' + parser.port;  // Add :portnumber but only if it exists in urlstr
       }
