@@ -14,7 +14,7 @@
       return div.style.filter ? 'filter': platform.cssPrefix + 'filter';
     })(),
     // Use proxy in IE and Safari, because: no css invert in IE, and it's extremely slow in Safari
-    SHOULD_USE_PROXY = platform.browser.isIE || platform.browser.isSafari;
+    SHOULD_USE_PROXY = SC_DEV || platform.browser.isIE || platform.browser.isSafari;
 
   function toggle(doStart, doRefreshImages) {
     if (doStart) {
