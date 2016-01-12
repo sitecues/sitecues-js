@@ -28,7 +28,7 @@ define(['core/bp/model/state', 'core/bp/view/view', 'core/bp/constants'], functi
       require(['page/util/color'], function(colorUtil) {
         if (SC_DEV) { console.log('Updating badge palette'); }
         var badgeElem = getBadgeElem();
-        state.set('paletteName', BP_CONST.PALETTE_NAME_MAP[colorUtil.isOnDarkBackground(badgeElem) ? 'reverse-blue' : 'normal']);
+        state.set('paletteKey', BP_CONST.PALETTE_NAME_MAP[colorUtil.isOnDarkBackground(badgeElem) ? 'reverse-blue' : 'normal']);
         if (onPaletteUpdate) {
           onPaletteUpdate();
         }
