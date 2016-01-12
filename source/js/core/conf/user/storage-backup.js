@@ -14,8 +14,6 @@ define(['core/conf/urls'], function (urls) {
   // If data is defined, it is a set call, otherwise we are getting data
   function postMessageToIframe(optionalData) {
     if (iframe) {
-      console.log(optionalData);
-      console.log(urls.getScriptOrigin());
       iframe.contentWindow.postMessage(optionalData, urls.getScriptOrigin());
     }
   }
