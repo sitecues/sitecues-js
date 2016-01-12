@@ -33,6 +33,7 @@ define(['core/conf/site'], function(site) {
   //////////////////////////////////////////////////////////////////////////////////////////
 
   // Parse a URL into { host, path }
+  // Does not support mailto links (or anything where the protocol isn't followed by //)
   function parseUrl(urlStr) {
     if (typeof urlStr !== 'string') {
       return;
@@ -40,7 +41,10 @@ define(['core/conf/site'], function(site) {
 
     var parser = document.createElement('a'),
       pathname,
-      lastSlashIndex;
+      lastSlashIndex,
+      path,
+      hostname,
+      origin;
 
     // Set up parser
     parser.href = urlStr;
@@ -55,10 +59,21 @@ define(['core/conf/site'], function(site) {
     }
     lastSlashIndex = pathname.lastIndexOf('/') + 1;
 
+    path = pathname.substring(0, lastSlashIndex);
+    hostname = parser.hostname;
+    origin = parser.origin;
+    if (!origin) {
+      origin = parser.protocol + '//' + hostname;
+      // Fallback approach for IE -- note this doesn't include @username or password info
+      if (parser.port !== 80 || urlStr.indexOf(':80/') > 0) {
+        origin += ':' + parser.port;  // Add :portnumber but only if it exists in urlstr
+      }
+    }
+
     return {
-      path: pathname.substring(0, lastSlashIndex),
-      hostname: parser.hostname,
-      origin: parser.origin
+      path: path,
+      hostname: hostname,
+      origin: origin
     };
   }
 
