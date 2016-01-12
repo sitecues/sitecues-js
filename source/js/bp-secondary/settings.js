@@ -214,7 +214,7 @@ define(['core/bp/constants', 'core/bp/helper', 'core/conf/user/manager', 'core/b
 
     isInitialized = true;
 
-    sitecues.on('bp/did-open-subpanel', onPanelUpdate);  // TODO how do we do this?
+    sitecues.on('bp/did-open-subpanel', onPanelUpdate);
   }
 
   return {
