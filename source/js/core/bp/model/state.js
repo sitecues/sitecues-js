@@ -6,7 +6,7 @@ define([], function() {
     isSecondaryPanel        : false,  // Are we currently in the secondary panel
     secondaryPanelTransitionTo: 0,
     scale                   : 1, // How much transform scale used on expanded BP
-    isRealSettings          : false, // Are we currently showing the actual settings or fake settings?
+    isRealSettings          : true, // Are we currently showing the actual settings or fake settings?
     secondaryPanelName      : 'button-menu', // 'button-menu', 'tips', 'settings', 'feedback', 'about'
     isSecondaryExpanding    : false, // Is secondary panel currently expanding to accommodate new contents?
     isSecondaryExpanded     : false, // Is secondary panel fully expanded?
