@@ -1,5 +1,5 @@
 /**
- * Badge view
+ * Page badge view. Not included in the extension since that always uses the toolbar.
  */
 define(['core/bp/view/view', 'core/bp/view/badge/palette'], function(baseView, palette) {
 
