@@ -40,7 +40,10 @@ define(['core/conf/site'], function(site) {
 
     var parser = document.createElement('a'),
       pathname,
-      lastSlashIndex;
+      lastSlashIndex,
+      path,
+      hostname,
+      origin;
 
     // Set up parser
     parser.href = urlStr;
@@ -55,10 +58,17 @@ define(['core/conf/site'], function(site) {
     }
     lastSlashIndex = pathname.lastIndexOf('/') + 1;
 
+    path = pathname.substring(0, lastSlashIndex);
+    hostname = parser.hostname;
+    origin = parser.protocol + '//' + parser.hostname; // Used to use parser.origin but this didn't work in IE
+    if (parser.port !== 80 || urlStr.indexOf(':80/') > 0) {
+      origin += ':' + parser.port;  // Add :portnumber but only if it exists in urlstr
+    }
+
     return {
-      path: pathname.substring(0, lastSlashIndex),
-      hostname: parser.hostname,
-      origin: parser.protocol + '//' + parser.hostname // Used to use parser.origin but this didn't work in IE
+      path: path,
+      hostname: hostname,
+      origin: origin
     };
   }
 
