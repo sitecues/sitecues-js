@@ -10,8 +10,10 @@ define([
   'core/conf/user/manager',
   'core/bp/view/size-animation',
   'core/platform',
-  'core/bp/view/panel/panel',
-  'core/bp/view/badge/badge'
+  'core/locale',
+  'core/conf/site',
+  'core/bp/view/panel/panel-classes',
+  'core/bp/view/badge/badge-classes'
 ], function(BP_CONST,
             helper,
             bpSVG,
@@ -20,8 +22,10 @@ define([
             conf,
             sizeAnimation,
             platform,
-            panel,
-            baseBadge) {
+            locale,
+            site,
+            panelClasses,
+            badgeClasses) {
 
   var byId = helper.byId,
     bpContainer,
@@ -75,7 +79,7 @@ define([
   function update(isNewSubpanel) {
 
     var isOrWillBePanel = state.isPanelRequested(),
-      classes = isOrWillBePanel ? panel.getViewClasses() : baseBadge.getViewClasses();
+      classes = isOrWillBePanel ? panelClasses.getViewClasses() : badgeClasses.getViewClasses();
     classes += ' scp-ie9-' + platform.browser.isIE9;
 
     // If we are expanding or contracting, aria-expanded is true (enables CSS)
@@ -88,6 +92,22 @@ define([
     if (isNewSubpanel) {
       sitecues.emit('bp/did-open-subpanel');
     }
+  }
+
+  function hasSitecuesEverBeenOn() {
+    return typeof conf.get('zoom') !== 'undefined' ||
+      typeof conf.get('ttsOn') !== 'undefined';
+  }
+
+  function addLabel(badgeOrToolbarElement) {
+    // Insert badge label into an element (using aria-label didn't work as NVDA cut off the label text at 100 characters)
+    // The badge label will be absolutely positioned offscreen in order to not affect layout
+    var badgeLabelElement = document.createElement('sc');
+    badgeLabelElement.innerHTML = locale.translate(BP_CONST.STRINGS.BADGE_LABEL);
+    badgeLabelElement.style.position = 'absolute';
+    badgeLabelElement.style.left = '-9999px';
+
+    badgeOrToolbarElement.appendChild(badgeLabelElement);
   }
 
   // This function augments the customers placeholder if found, otherwise creates the floating badge.
@@ -118,14 +138,20 @@ define([
     // Enable animations in future updates
     enableAnimations();
 
-    // Turn on TTS button if the setting is on
-    if (conf.get('ttsOn')) {
-      require(['bp-expanded/view/tts-button'], function (ttsButton) {
-        ttsButton.init();
-      });
+    // Set attributes
+    helper.setAttributes(badgeElement, BP_CONST.BADGE_ATTRS);
+
+    // Label it
+    addLabel(badgeElement);
+
+    // Real settings or fake initial settings?
+    if (!SC_EXTENSION) {
+      // Use fake settings if undefined -- user never used sitecues before.
+      // This will be turned off once user interacts with sitecues.
+      state.set('isRealSettings', site.get('alwaysRealSettings') || hasSitecuesEverBeenOn());
     }
 
-    // Signal completion
+    // Completion
     onComplete();
   }
 

@@ -16,13 +16,12 @@ define(['core/bp/view/view', 'core/bp/view/badge/palette'], function(baseView, p
 
   function onBadgeReady(badge, onComplete, badgeFileName) {
     palette.init(badgeFileName, function() {
+      ensureNonStaticPositioning(badge);
       baseView.init(badge, onComplete);
     });
   }
 
   function init(badge, onComplete) {
-    ensureNonStaticPositioning(badge);
-
     if (badge.localName === 'img') {
       // If a customer uses the <img> placeholder...
       require(['bp-img-placeholder/bp-img-placeholder'], function(imagePlaceHolder) {

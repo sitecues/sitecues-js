@@ -19,7 +19,8 @@ define(['core/bp/constants',
     'bp-secondary/feedback',
     'bp-secondary/about',
     'bp-secondary/cards'],
-    function(BP_CONST, state, view, helper, animate, transformUtil, locale, markup, tipsModule, settingsModule, feedbackModule, aboutModule, cardsModule) {
+    function
+      (BP_CONST, state, view, helper, animate, transformUtil, locale, markup, tipsModule, settingsModule, feedbackModule, aboutModule, cardsModule) {
 
   var BUTTON_DROP_ANIMATION_MS = 800,
     ENABLED_PANEL_TRANSLATE_Y = 0,
