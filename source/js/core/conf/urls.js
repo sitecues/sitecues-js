@@ -58,7 +58,7 @@ define(['core/conf/site'], function(site) {
     return {
       path: pathname.substring(0, lastSlashIndex),
       hostname: parser.hostname,
-      origin: parser.origin
+      origin: parser.protocol + '//' + parser.hostname // Used to use parser.origin but this didn't work in IE
     };
   }
 

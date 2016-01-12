@@ -16,7 +16,7 @@ define(['core/conf/urls'], function (urls) {
     if (iframe) {
       console.log(optionalData);
       console.log(urls.getScriptOrigin());
-      iframe.contentWindow.postMessage(optionalData, '*');
+      iframe.contentWindow.postMessage(optionalData, urls.getScriptOrigin());
     }
   }
 
