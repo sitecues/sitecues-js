@@ -61,9 +61,13 @@ define(['core/conf/site'], function(site) {
 
     path = pathname.substring(0, lastSlashIndex);
     hostname = parser.hostname;
-    origin = parser.protocol + '//' + parser.hostname; // Used to use parser.origin but this didn't work in IE
-    if (parser.port !== 80 || urlStr.indexOf(':80/') > 0) {
-      origin += ':' + parser.port;  // Add :portnumber but only if it exists in urlstr
+    origin = parser.origin;
+    if (!origin) {
+      origin = parser.protocol + '//' + hostname;
+      // Used to use parser.origin but this didn't work in IE -- not this doesn't include @username or password info
+      if (parser.port !== 80 || urlStr.indexOf(':80/') > 0) {
+        origin += ':' + parser.port;  // Add :portnumber but only if it exists in urlstr
+      }
     }
 
     return {
