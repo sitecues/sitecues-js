@@ -57,17 +57,9 @@ define(['page/util/element-classifier', 'page/keys/commands', 'core/metric'],
 
     KEY_TESTS = {
       'space': function(event) {
-        // Space command occurs if:
-        return (
-          // The key is a space key, *and*
-          event.keyCode === SPACE &&
-          // It was not pressed with a modifier (we don't currently support cmd/ctrl/alt/shift with space), *and*
-          !hasCommandModifier(event) &&
-          // Lens is on or highlighting is enabled
-          isSitecuesOn &&
-          // It is not pressed when focus is on something that needs space (e.g. textfield, button or checkbox)
-          !elemClassifier.isSpacebarConsumer(event.target)
-        );
+        var isUnmodifiedSpace = event.keyCode === SPACE && !hasCommandModifier(event),
+          isNeededByPage = elemClassifier.isSpacebarConsumer(event.target);
+        return isUnmodifiedSpace && isSitecuesOn && !isNeededByPage;
       },
       'minus': function(event) {
         // Test all of the possible minus keycodes, including drom the numeric keypad
