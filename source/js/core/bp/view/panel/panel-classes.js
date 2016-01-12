@@ -4,10 +4,10 @@ define(['core/bp/constants', 'core/bp/model/state'], function(BP_CONST, state) {
    *** Getters ***
    */
 
-  // These classes add styles based on the current state of the
+  // These classes add styles based on the current state of the panel
   function getViewClasses() {
 
-    var classBuilder = '',  // Allow animations for growing or shrinking panel
+    var classBuilder = '',
       isSecondary = state.isSecondaryPanelRequested(); // Is or will be secondary panel
 
     // Choose the 'settings' icon look (we can probably remove this choice after we settle one)

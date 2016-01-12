@@ -114,7 +114,7 @@ define([
 
     metric('badge-hovered');
 
-    didChange();
+    view.update();
   }
 
   function turnOnRealSettings() {
@@ -225,15 +225,11 @@ define([
     });
   }
 
-  function didChange() {
-    view.update();
-  }
-
   function didZoom() {
     require(['bp-expanded/controller/slider-controller'], function (sliderController) {
       turnOnRealSettings();
       sliderController.init();
-      didChange();
+      view.update();
     });
   }
 
@@ -243,7 +239,7 @@ define([
       turnOnRealSettings();
       ttsButton.init();
       ttsButton.updateTTSStateView(isOn);
-      didChange();
+      view.update();
     });
   }
 
