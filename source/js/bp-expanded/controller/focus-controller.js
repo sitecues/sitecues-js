@@ -532,7 +532,7 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
     isInitialized = true;
 
     sitecues.on('bp/will-toggle-feature', hideFocus);
-    sitecues.on('bp/did-open-new-panel', focusFirstItem);
+    sitecues.on('bp/did-open-subpanel', focusFirstItem);
     sitecues.on('bp/did-show-card', focusCard);
     beginKeyHandling(); // First time badge expands
     sitecues.on('bp/will-expand', beginKeyHandling);
