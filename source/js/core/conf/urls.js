@@ -65,7 +65,8 @@ define(['core/conf/site'], function(site) {
     if (!origin) {
       origin = parser.protocol + '//' + hostname;
       // Fallback approach for IE -- note this doesn't include @username or password info
-      if (parser.port !== 80 || urlStr.indexOf(':80/') > 0) {
+      // Add the port if it's specified in the url (80 is the default port, so only add that if it's really present in the url)
+      if (parser.port !== '80' || urlStr.indexOf(':80/') > 0) {
         origin += ':' + parser.port;  // Add :portnumber but only if it exists in urlstr
       }
     }
