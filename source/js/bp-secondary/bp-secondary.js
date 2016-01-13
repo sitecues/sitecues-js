@@ -58,7 +58,7 @@ define(['core/bp/constants',
     state.set('secondaryPanelName', featureName || 'button-menu');
     state.set('isSecondaryExpanding', isSecondaryExpanding);
     state.set('wasMouseInPanel', false); // When panel shrinks mouse needs to go back inside of it before mouseout closes again
-    fireBpChanged();
+    view.update();
   }
 
   function getBPContainer() {
