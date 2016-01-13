@@ -212,13 +212,13 @@ define(['core/bp/constants',
     function fadeInTextContentWhenLargeEnough() {
       fadeInTimer = setTimeout(function () {
         state.set('isSecondaryExpanding', false);
-        view.update(true);
+        view.update();
       }, heightAnimationDelay + heightAnimationDuration * 0.7);
     }
 
     function onHeightAnimationComplete() {
       state.set('isSecondaryExpanded', doEnable);
-      view.update();
+      view.update(true);
     }
 
     function animateHeight() {
