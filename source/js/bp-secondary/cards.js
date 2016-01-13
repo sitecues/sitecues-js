@@ -317,7 +317,7 @@ define(['core/bp/constants', 'core/bp/helper', 'core/locale', 'core/bp/model/sta
     loadPanelContents('settings');
     loadPanelContents('tips');
 
-    sitecues.on('bp/did-change', onPanelUpdate);
+    sitecues.on('bp/did-open-subpanel', onPanelUpdate);
   }
 
   return {

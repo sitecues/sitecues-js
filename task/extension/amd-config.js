@@ -23,8 +23,14 @@ var config = require('../build-config.js'),
     removeCombined: true,
     useStrict: true,
     paths: {
+      // DIFFERENT in the extension
       'core/conf/user/storage-backup': '../../extension/source/js/overrides/storage-backup',
-      'core/data-map': config.tmpDir + '/data-map'
+      'core/data-map': config.tmpDir + '/data-map',
+      // UNUSED in the extension
+      'core/bp/badge/page-badge': 'empty:',
+      'core/bp/badge/palette': 'empty:',
+      'bp-img-placeholder/bp-img-placeholder/': 'empty:',
+      'bp-adaptive/bp-adaptive': 'empty:'
     },
     map: {
       '*': {

@@ -1,8 +1,20 @@
 /*
 BP Controller
  */
-define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metric'],
-  function (BP_CONST, state, helper, metric) {
+define([
+  'core/bp/constants',
+  'core/bp/model/state',
+  'core/bp/helper',
+  'core/metric',
+  'core/conf/user/manager',
+  'core/bp/view/view'
+],
+  function (BP_CONST,
+            state,
+            helper,
+            metric,
+            conf,
+            view) {
 
   // How long we wait before expanding BP
   var hoverDelayTimer,
@@ -102,7 +114,7 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
 
     metric('badge-hovered');
 
-    didChange();
+    view.update();
   }
 
   function turnOnRealSettings() {
@@ -213,15 +225,11 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
     });
   }
 
-  function didChange() {
-    sitecues.emit('bp/did-change');
-  }
-
   function didZoom() {
     require(['bp-expanded/controller/slider-controller'], function (sliderController) {
       turnOnRealSettings();
       sliderController.init();
-      didChange();
+      view.update();
     });
   }
 
@@ -231,7 +239,7 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
       turnOnRealSettings();
       ttsButton.init();
       ttsButton.updateTTSStateView(isOn);
-      didChange();
+      view.update();
     });
   }
 
@@ -260,6 +268,11 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
       sitecues.on('bp/will-shrink', willShrink);
       sitecues.on('zoom', didZoom);
       sitecues.on('speech/did-change', didChangeSpeech);
+
+      // Turn on TTS button if the setting is on
+      if (conf.get('ttsOn')) {
+        didChangeSpeech(true);
+      }
 
       if (SC_DEV) {
         sitecues.toggleStickyPanel = function () {

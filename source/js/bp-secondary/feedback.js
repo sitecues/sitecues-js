@@ -1,5 +1,5 @@
-define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/platform', 'core/metric'],
-  function (BP_CONST, helper, state, platform, metric) {
+define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/platform', 'core/metric', 'core/bp/view/view' ],
+  function (BP_CONST, helper, state, platform, metric, view) {
   var byId = helper.byId,
     isActive = false,
     isInitialized,
@@ -164,7 +164,7 @@ define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/plat
       metric('feedback-sent', details);
       toggleSendEnabled(false); // Disable feedback button after sent, so that feedback isn't accidentally clicked twice
       state.set('isFeedbackSent', true);
-      sitecues.emit('bp/did-change', false, true);
+      view.update(true);
     }
   }
 
@@ -176,7 +176,7 @@ define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/plat
   function init() {
     if (!isInitialized) {
       isInitialized = true;
-      sitecues.on('bp/did-change', onPanelUpdate);
+      sitecues.on('bp/did-open-subpanel', onPanelUpdate);
     }
   }
 
