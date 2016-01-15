@@ -20,7 +20,12 @@ define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/plat
   }
 
   function getFeedbackSendButton() {
-    return byId(BP_CONST.FEEDBACK_SEND);
+    return byId(BP_CONST.FEEDBACK_SEND_BUTTON);
+  }
+
+  // Child of button: handles clicks
+  function getFeedbackSendLink() {
+    return byId(BP_CONST.FEEDBACK_SEND_LINK);
   }
 
   function getBPContainer() {
@@ -50,7 +55,7 @@ define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/plat
       getRating()[addOrRemoveFn]('click', onRatingClick);
 
       if (!SC_LOCAL) {
-        getFeedbackSendButton()[addOrRemoveFn]('click', onSendFeedbackClick);
+        getFeedbackSendLink()[addOrRemoveFn]('click', onSendFeedbackClick);
       }
 
       if (willBeActive) {
@@ -59,19 +64,15 @@ define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/plat
             currentStatus = statusObj;
           });
         });
+        if (!isAutoSized) {
+          autoSizeTextarea();
+          isAutoSized = true;
+        }
       }
       else {
         currentStatus = null;
+        state.set('isFeedbackSent', false);
       }
-
-      if (willBeActive && !isAutoSized) {
-        autoSizeTextarea();
-        isAutoSized = true;
-      }
-    }
-
-    if (!willBeActive) {
-      state.set('isFeedbackSent', false);
     }
 
     isActive = willBeActive;
@@ -130,7 +131,7 @@ define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/plat
   // Need to use mailto link instead of xhr in local (e.g. extension) mode
   function updateMailtoLink() {
     if (SC_LOCAL) {
-      var sendButton = getFeedbackSendButton(),
+      var sendButton = getFeedbackSendLink(),
         mailto = sendButton.getAttribute('data-mailto') +
           '?subject=' + encodeURIComponent(getCurrentRatingText()) +
           '&body=' + encodeURIComponent(getFeedbackTextToSend());
@@ -141,9 +142,8 @@ define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/plat
 
   function updateSendButton() {
     updateMailtoLink();
-    if (getFeedbackText().length) {
-      toggleSendEnabled(true);
-    }
+    var isEnabled = getFeedbackText().length > 0 || currentRating > 0;
+    toggleSendEnabled(isEnabled);
   }
 
   function toggleSendEnabled(doEnable) {
