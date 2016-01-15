@@ -5,7 +5,10 @@ define(['core/conf/user/manager', 'core/util/uuid', 'core/conf/site', 'core/loca
   function (conf, uuid, site, locale, platform, xhr, urls) {
 
     var sessionId = uuid(),
-      METRICS_VERSION = 1; // Please increment this every time metrics change in any way
+      METRICS_VERSION = 1;
+
+    // IMPORTANT! Increment METRICS_VERSION this every time metrics change in any way
+    // IMPORTANT! Have the backend team review all metrics changes!!!
 
     return function (name, details) {
       if (SC_LOCAL) {   // No metric events in local mode
