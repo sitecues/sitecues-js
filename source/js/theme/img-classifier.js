@@ -15,6 +15,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
     BUTTON_BONUS = 50,
     SVG_BONUS = 999,
     BG_IMAGE_BONUS = 150,
+    DONT_USE_IMAGE = -9999,
     MAX_SCORE_CHECK_PIXELS = 120,
     isDebuggingOn,
     CLASS_INVERT = 'i',
@@ -384,10 +385,16 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
     var src = getSource(img);
 
     if (!src) {
-      return true;
+      return false; // Image has no source -- don't invert
     }
+
+    var imageExt = getImageExtension(src);
+
+    if (!imageExt) {
+      return false;  // Not a normal image extension -- don't invert
+    }
+
     var size = getImageSize(img),
-      imageExt = getImageExtension(src),
       sizeScore = getSizeScore(size.height, size.width),
       elementTypeScore = getElementTypeScore(img),
       extensionScore = getExtensionScore(imageExt),
