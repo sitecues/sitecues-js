@@ -161,6 +161,9 @@ define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/plat
         rating: currentRating,  // 0 = no rating, otherwise 1-5 stars
         status: currentStatus
       };
+      if (SC_DEV) {
+        console.log('Sending feedback: %o', details);
+      }
       metric('feedback-sent', details);
       toggleSendEnabled(false); // Disable feedback button after sent, so that feedback isn't accidentally clicked twice
       state.set('isFeedbackSent', true);
