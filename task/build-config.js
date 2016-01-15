@@ -26,6 +26,7 @@ var baseConfig = {
   baseBuildDir: baseBuildDir,
   buildDir: baseBuildDir + '/' + buildType,
   resourceFolderName: '.',
+  postBuildCommand: process.env.POST_BUILD_COMMAND,  // Optional post build shell command to run
   isLintingOn: process.env.LINT !== 'off', // Default to true
   // Three types of cleaning
   // CLEAN=off -- no cleaning

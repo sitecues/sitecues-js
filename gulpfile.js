@@ -52,6 +52,12 @@ var jsDoAll = [ 'js-compile-lint' ]
   .concat(config.isShowingSizes ? 'js-show-sizes': []);
 gulp.task('js', gulp.series.apply(gulp, jsDoAll));
 
+// Run an optional post build shell command specified via environment variable POST_BUILD_COMMAND
+// TODO Use websockets once SC-3377 is fixed. See code in the post-build-command branch.
+function runPostBuildCommand(callback) {
+  exec(config.postBuildCommand, callback);
+}
+
 // General build and package tasks
 var build =
   gulp.parallel(
@@ -67,7 +73,9 @@ gulp.task(cleanAll);
 gulp.task(cleanTarget);
 gulp.task('build', build);
 gulp.task(reportConfig);
-gulp.task('default', gulp.series(reportConfig, clean, 'build', packaging.createMetaData));
+var defaultSeries = [reportConfig, clean, 'build', packaging.createMetaData]
+  .concat(config.postBuildCommand ? runPostBuildCommand : []);
+gulp.task('default', gulp.series.apply(gulp, defaultSeries));
 gulp.task('package', gulp.series('default', packaging.createPackage));
 
 // Watcher tasks
@@ -87,5 +95,9 @@ gulp.task(function watch() {
   gulp.watch(config.rasterGlob, resources.raster);
   if (config.metaDataGlob) {
     gulp.watch(config.metaDataGlob, packaging.createMetaData);
+  }
+
+  if (config.postBuildCommand) {
+    gulp.watch(config.buildDir + '/**/*', { name: 'postBuildCommand' }, runPostBuildCommand);
   }
 });
