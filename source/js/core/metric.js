@@ -4,7 +4,8 @@
 define(['core/conf/user/manager', 'core/util/uuid', 'core/conf/site', 'core/locale', 'core/platform', 'core/util/xhr', 'core/conf/urls'],
   function (conf, uuid, site, locale, platform, xhr, urls) {
 
-    var sessionId = uuid();
+    var sessionId = uuid(),
+      METRICS_VERSION = 1; // Please increment this every time metrics change in any way
 
     return function (name, details) {
       if (SC_LOCAL) {   // No metric events in local mode
@@ -14,6 +15,8 @@ define(['core/conf/user/manager', 'core/util/uuid', 'core/conf/site', 'core/loca
         var allData = {
           name: name,
           details: details,
+          scVersion: sitecues.getVersion(),
+          metricsVersion: METRICS_VERSION,
           clientTimeMs: +new Date(),    // Epoch time in milliseconds  when the event occurred
           zoomLevel: conf.get('zoom') || 1,
           ttsState: conf.get('ttsOn') || false,
