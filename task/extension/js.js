@@ -27,7 +27,7 @@ var gulp = require('gulp'),
   uglifyOptions = {
     // Compressor options always remove dead code, but provide readable code in non-minified versions
     compress: {
-      dead_code     : isMin, // Remove dead code
+      dead_code     : true,  // Remove dead code whether minifying or not
       sequences     : isMin, // join consecutive statements with the “comma operator”
       properties    : isMin, // optimize property access: a["foo"] → a.foo
       drop_debugger : isMin, // discard “debugger” statements
@@ -43,8 +43,8 @@ var gulp = require('gulp'),
       if_return     : isMin, // optimize if-s followed by return/continue
       join_vars     : isMin, // join var declarations
       cascade       : isMin, // try to cascade `right` into `left` in sequences
-      side_effects  : isMin, // drop side-effect-free statements
-      screw_ie8     : isMin,
+      side_effects  : true,  // drop side-effect-free statements
+      screw_ie8: true,
       global_defs: config.globalDefs
     },
     output: {
@@ -111,20 +111,16 @@ function cleanLibrary() {
 }
 
 function compressLibrary() {
-  var library = gulp.src(intermediateSitecuesJs)
+  return gulp.src(intermediateSitecuesJs)
     // These replacements allow uglify to remove a lot of dead code
     .pipe(replace('platform.browser.isIE9', 'false'))
     .pipe(replace('platform.browser.isIE', 'false'))
     .pipe(replace('platform.browser.isFirefox', 'false'))
     .pipe(replace('platform.browser.isSafari', 'false'))
     .pipe(replace('platform.browser.isChrome', 'true'))
-    .pipe(replace('platform.browser.isWebKit', 'true'));
-
-  if (isMin) {
-    library = library.pipe(uglify(uglifyOptions));
-  }
-
-  return library.pipe(gulp.dest(config.buildDir + '/js'));
+    .pipe(replace('platform.browser.isWebKit', 'true'))
+    .pipe(uglify(uglifyOptions))
+    .pipe(gulp.dest(config.buildDir + '/js'));
 }
 
 function compileLibrary() {
