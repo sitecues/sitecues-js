@@ -48,6 +48,7 @@ define(['core/conf/user/manager', 'core/util/uuid', 'core/conf/site', 'core/loca
 
           // Where
           pageUrl: location.href,
+          siteId: site.getSiteId(),
 
           // Specifics
           details: details
