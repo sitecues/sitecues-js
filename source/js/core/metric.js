@@ -13,7 +13,7 @@ define(['core/conf/user/manager', 'core/util/uuid', 'core/conf/site', 'core/loca
         id = window.sessionStorage.getItem(SESSION_ID_KEY);
       if (!id) {
         id = uuid();
-        window.sessionStorage.setItem(SESSION_ID_KEY);
+        window.sessionStorage.setItem(SESSION_ID_KEY, id);
       }
       return id;
     }
