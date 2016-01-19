@@ -10,7 +10,7 @@ define(['core/conf/user/storage'], function (storage) {
       listeners = {};
 
   function getUserId() {
-    return storage.getUserId;
+    return storage.getUserId();
   }
 
   // get configuration value
