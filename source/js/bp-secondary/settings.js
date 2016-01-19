@@ -155,7 +155,7 @@ define(['core/bp/constants', 'core/bp/helper', 'core/conf/user/manager', 'core/b
     var oldValue = conf.get(settingName);
     metric('slider-setting-changed', {
       id: id.split('scp-')[1] || id,  // Trim off scp- prefix
-      name: settingName,
+      settingName: settingName,
       old: oldValue,
       new: newValue
     });
