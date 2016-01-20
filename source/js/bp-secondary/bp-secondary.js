@@ -299,7 +299,7 @@ define(['core/bp/constants',
 
     fadeInTextContentWhenLargeEnough();
 
-    sitecues.emit('bp/will-show-secondary-feature');
+    sitecues.emit('bp/will-show-secondary-feature', name);
   }
 
   /********************** INTERACTIONS **************************/

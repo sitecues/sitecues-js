@@ -3,7 +3,6 @@ define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/plat
   var byId = helper.byId,
     isActive = false,
     isInitialized,
-    isAutoSized,
     currentRating = 0,  // Zero = no rating defined
     currentStatus;
 
@@ -37,13 +36,14 @@ define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/plat
       feedbackInputRect = getFeedbackInputRect().getBoundingClientRect(),
       scale = state.get('scale'),
       ROOM_FOR_ROUNDED_OUTLINE = 22,
+      ROOM_FOR_SCROLLBAR = 20,  // Scrollbar will be hidden via css clip
       width = (feedbackInputRect.width - ROOM_FOR_ROUNDED_OUTLINE) / scale,
       height = (feedbackInputRect.height - ROOM_FOR_ROUNDED_OUTLINE) / scale;
 
     feedbackTextareaStyle.width = width + 'px';
     feedbackTextareaStyle.height = height + 'px';
     // Hide scrollbar by clipping horizontally - don't clip vertically (just large height of 999px for that)
-    feedbackTextareaStyle.clip = 'rect(0,' + (width - 20) + 'px,999px,0)';
+    feedbackTextareaStyle.clip = 'rect(0,' + (width - ROOM_FOR_SCROLLBAR) + 'px,999px,0)';
   }
 
   function onPanelUpdate() {
@@ -64,10 +64,6 @@ define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/plat
             currentStatus = statusObj;
           });
         });
-        if (!isAutoSized) {
-          autoSizeTextarea();
-          isAutoSized = true;
-        }
       }
       else {
         currentStatus = null;
@@ -180,6 +176,11 @@ define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/plat
     if (!isInitialized) {
       isInitialized = true;
       sitecues.on('bp/did-open-subpanel', onPanelUpdate);
+      sitecues.on('bp/will-show-secondary-feature', function(name) {
+        if (name === 'feedback') {
+          autoSizeTextarea();
+        }
+      });
     }
   }
 
