@@ -33,6 +33,7 @@ define(['core/bp/constants',
     isInitialized,
     fadeInTimer,
     animateHeightTimer,
+    animationsCompleteTimer,
     features = secondaryFeatures.featureDefs,
 
     // Oft-used functions. Putting it in a variable helps minifier, convenience, brevity
@@ -98,6 +99,7 @@ define(['core/bp/constants',
     });
     clearTimeout(fadeInTimer);
     clearTimeout(animateHeightTimer);
+    clearTimeout(animationsCompleteTimer);
     runningAnimations.length = 0;
   }
 
@@ -207,7 +209,8 @@ define(['core/bp/constants',
       percentRemaining = (wasEnabled === doEnable) ? 0 : 1,
       heightAnimationDuration = (doEnable ? ENABLE_ANIMATION_MS : DISABLE_ANIMATION_MS) * percentRemaining,
       heightAnimationDelay = (doEnable  && feature.heightAnimationDelay) || 0,
-      openFeatureDuration = doEnable && feature.heightAnimationDelay ? ENABLE_ANIMATION_MS : heightAnimationDuration;
+      openFeatureDuration = doEnable && feature.heightAnimationDelay ? ENABLE_ANIMATION_MS : heightAnimationDuration,
+      animationsCompleteMs = Math.max(openFeatureDuration, heightAnimationDelay + heightAnimationDuration);  // When is feature fully visible
 
     function fadeInTextContentWhenLargeEnough() {
       fadeInTimer = setTimeout(function () {
@@ -216,7 +219,7 @@ define(['core/bp/constants',
       }, heightAnimationDelay + heightAnimationDuration * 0.7);
     }
 
-    function onHeightAnimationComplete() {
+    function onAnimationsComplete() {
       state.set('isSecondaryExpanded', doEnable);
       view.update(true);
     }
@@ -250,8 +253,7 @@ define(['core/bp/constants',
       createAnimation(
         [getMoreButton(), getBottom(), getOutlineFill(), getSecondaryOutline(), getShadow(), bpContainer],
         [moreButtonTransform, bottomTransform, outlineFillTransform, secondaryOutlineTransform, shadowTransform, bpContainerTransform ],
-        heightAnimationDuration,
-        onHeightAnimationComplete
+        heightAnimationDuration
       );
     }
 
@@ -292,6 +294,8 @@ define(['core/bp/constants',
 
     // Animate the height at the right time
     animateHeightTimer = setTimeout(animateHeight, heightAnimationDelay);
+
+    animationsCompleteTimer = setTimeout(onAnimationsComplete, animationsCompleteMs);
 
     fadeInTextContentWhenLargeEnough();
 
