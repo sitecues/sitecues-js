@@ -127,9 +127,6 @@ define([
     bpContainer = createBpContainer();
     svgElement = getSVGElement(bpContainer);
 
-    // Append the container to the badgeElement and fit to the space available
-    placement.init(badgeElement, bpContainer, svgElement);
-
     // Real settings or fake initial settings?
     if (!SC_EXTENSION) {
       // Use fake settings if undefined -- user never used sitecues before.
@@ -142,6 +139,9 @@ define([
 
     // Label it
     addLabel(badgeElement);
+
+    // Append the container to the badgeElement and fit to the space available
+    placement.init(badgeElement, bpContainer, svgElement);
 
     // Get size animations ready so that the badge can gracefully grow into a panel
     sizeAnimation.init();
