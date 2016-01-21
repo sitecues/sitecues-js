@@ -9,6 +9,10 @@ define(['core/conf/user/storage'], function (storage) {
       handlers  = {},
       listeners = {};
 
+  function getUserId() {
+    return storage.getUserId();
+  }
+
   // get configuration value
   function get(key, callback) {
 
@@ -89,6 +93,7 @@ define(['core/conf/user/storage'], function (storage) {
 
   return {
     init: init,
+    getUserId: getUserId,
     get: get,
     set: set,
     def: def,

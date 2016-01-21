@@ -11,6 +11,7 @@
 var config = require('./build-config'),
   mkdirp = require('mkdirp'),
   handlebars = require('handlebars'),
+  extend = require('extend'),
   targetDir ,
   fs         = require('fs'),
   path       = require('path'),
@@ -105,29 +106,9 @@ function getLanguageData(templateName, langFileName) {
 }
 
 function getCountryData(countryData, dir, baseLangFileName) {
-  var baseLangData = getRawLanguageData(dir + baseLangFileName),
-    newData = Object.create(baseLangData);
+  var baseLangData = getRawLanguageData(dir + baseLangFileName);
 
-  function copyInto(dest, source) {
-    Object.keys(source).forEach(function(key) {
-      var value = source[key],
-        valueType = typeof value;
-
-      if (valueType === 'string') {
-        dest[key] = value;
-      }
-      else if (valueType === 'object') {
-        copyInto(dest[key], value);
-      }
-      else {
-        throw new Error('Only strings and objects allowed in ' + baseLangFileName);
-      }
-    });
-  }
-
-  copyInto(newData, countryData);
-
-  return newData;
+  return extend(true, {}, baseLangData, countryData);
 }
 
 function begin(callback) {

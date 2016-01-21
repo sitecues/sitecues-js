@@ -77,7 +77,8 @@ define([], function() {
   constants.FEEDBACK_CONTENT_ID      = 'scp-feedback';
   constants.FEEDBACK_INPUT_RECT      = 'scp-feedback-input-rect';
   constants.FEEDBACK_TEXTAREA        = 'scp-feedback-textarea';
-  constants.FEEDBACK_SEND            = 'scp-feedback-send';
+  constants.FEEDBACK_SEND_BUTTON     = 'scp-feedback-send-button'; // Looks like a button
+  constants.FEEDBACK_SEND_LINK       = 'scp-feedback-send-link';  // Actual active link child with click handler
   constants.RATING                   = 'scp-rating';
   constants.RATING_STAR_CLASS        = 'scp-rating-star';
 

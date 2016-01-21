@@ -4,10 +4,11 @@ define(['core/bp/constants', 'core/bp/model/state'], function(BP_CONST, state) {
    *** Getters ***
    */
 
-  // These classes add styles based on the current state of the
+  // These classes add styles based on the current state of the panel
   function getViewClasses() {
 
-    var classBuilder = '';  // Allow animations for growing or shrinking panel
+    var classBuilder = '',
+      isSecondary = state.isSecondaryPanelRequested(); // Is or will be secondary panel
 
     // Choose the 'settings' icon look (we can probably remove this choice after we settle one)
     classBuilder += ' scp-btn-choice-settings' + state.get('settingsIconVersion');
@@ -28,7 +29,7 @@ define(['core/bp/constants', 'core/bp/model/state'], function(BP_CONST, state) {
     // *** scp-want-panel ***
     // Sets larger panel sizes on everything.
     // It can take time to take effect because of the animation properties.
-    classBuilder += ' ' + BP_CONST.WANT_PANEL + (state.isSecondaryPanelRequested() ? ' scp-want-secondary' : ' ' + BP_CONST.MAIN_ID);
+    classBuilder += ' ' + BP_CONST.WANT_PANEL + (isSecondary ? ' scp-want-secondary' : ' ' + BP_CONST.MAIN_ID);
 
     if (state.get('isKeyboardMode')) {
       // *** scp-keyboard ***
@@ -51,6 +52,7 @@ define(['core/bp/constants', 'core/bp/model/state'], function(BP_CONST, state) {
    These can only be shown when the panel is large.
    */
 
+  // TODO Ideally this belongs in the bp-secondary/ folder only if isSecondaryPanel, but since require() is async it wouldn't really be worth it
   function getSecondaryPanelClasses() {
     var panelName = state.getSecondaryPanelName(),
       className =' scp-panel-' + panelName;

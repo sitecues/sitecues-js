@@ -27,6 +27,10 @@
 .scp-button-link,.scp-button-link:visited,.scp-button-link:focus,.scp-button-link:hover {
   color: #fff !important;
   text-decoration: none !important;
+  width: 100%;
+  height: 100%;
+  display: inline-block;
+  padding: 9px 0;
 }
 
 /******************* Secondary content *********************/
@@ -525,9 +529,10 @@ sc-button[data-setting-name="themeName"][data-setting-value="dark"] {
 #scp-feedback-send-button {
   position: absolute;
   top: 453px;
-  left: 335px;
+  left: 354px;
   width: 120px;
   text-align: center;
+  padding: 0;
 }
 
 .scp-feedback-sent .scp-if-feedback [role],

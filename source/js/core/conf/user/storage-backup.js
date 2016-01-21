@@ -35,19 +35,16 @@ define(['core/conf/urls'], function (urls) {
   function load(onDataAvailableFn) {
     function onMessageReceived(event) {
       var data = event.data,
-          parsedData;
+          parsedData = {};
 
-      if (SC_DEV) {
-        console.log('Backup prefs retrieved');
-      }
-      if (event.origin === urls.getScriptOrigin()) {
-        window.removeEventListener('message', onMessageReceived);
+      if (event.origin === urls.getScriptOrigin()) {  // Best practice: check if message is from the expected origin
         if (SC_DEV) {
-          console.log('Retrieving backed-up prefs: ' + data);
+          console.log('Backup prefs retrieved');
         }
         parsedData = parseData(data);
-        onDataAvailableFn(parsedData);
       }
+      window.removeEventListener('message', onMessageReceived);
+      onDataAvailableFn(parsedData);  // Use callback even if we don't use the data -- otherwise sitecues won't load
     }
 
     window.addEventListener('message', onMessageReceived);

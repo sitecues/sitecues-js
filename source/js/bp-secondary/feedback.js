@@ -1,9 +1,8 @@
-define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/platform', 'core/metric'],
-  function (BP_CONST, helper, state, platform, metric) {
+define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/platform', 'core/metric', 'core/bp/view/view' ],
+  function (BP_CONST, helper, state, platform, metric, view) {
   var byId = helper.byId,
     isActive = false,
     isInitialized,
-    isAutoSized,
     currentRating = 0,  // Zero = no rating defined
     currentStatus;
 
@@ -20,7 +19,12 @@ define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/plat
   }
 
   function getFeedbackSendButton() {
-    return byId(BP_CONST.FEEDBACK_SEND);
+    return byId(BP_CONST.FEEDBACK_SEND_BUTTON);
+  }
+
+  // Child of button: handles clicks
+  function getFeedbackSendLink() {
+    return byId(BP_CONST.FEEDBACK_SEND_LINK);
   }
 
   function getBPContainer() {
@@ -32,13 +36,14 @@ define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/plat
       feedbackInputRect = getFeedbackInputRect().getBoundingClientRect(),
       scale = state.get('scale'),
       ROOM_FOR_ROUNDED_OUTLINE = 22,
+      ROOM_FOR_SCROLLBAR = 20,  // Scrollbar will be hidden via css clip
       width = (feedbackInputRect.width - ROOM_FOR_ROUNDED_OUTLINE) / scale,
       height = (feedbackInputRect.height - ROOM_FOR_ROUNDED_OUTLINE) / scale;
 
     feedbackTextareaStyle.width = width + 'px';
     feedbackTextareaStyle.height = height + 'px';
     // Hide scrollbar by clipping horizontally - don't clip vertically (just large height of 999px for that)
-    feedbackTextareaStyle.clip = 'rect(0,' + (width - 20) + 'px,999px,0)';
+    feedbackTextareaStyle.clip = 'rect(0,' + (width - ROOM_FOR_SCROLLBAR) + 'px,999px,0)';
   }
 
   function onPanelUpdate() {
@@ -50,7 +55,7 @@ define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/plat
       getRating()[addOrRemoveFn]('click', onRatingClick);
 
       if (!SC_LOCAL) {
-        getFeedbackSendButton()[addOrRemoveFn]('click', onSendFeedbackClick);
+        getFeedbackSendLink()[addOrRemoveFn]('click', onSendFeedbackClick);
       }
 
       if (willBeActive) {
@@ -62,16 +67,8 @@ define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/plat
       }
       else {
         currentStatus = null;
+        state.set('isFeedbackSent', false);
       }
-
-      if (willBeActive && !isAutoSized) {
-        autoSizeTextarea();
-        isAutoSized = true;
-      }
-    }
-
-    if (!willBeActive) {
-      state.set('isFeedbackSent', false);
     }
 
     isActive = willBeActive;
@@ -130,7 +127,7 @@ define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/plat
   // Need to use mailto link instead of xhr in local (e.g. extension) mode
   function updateMailtoLink() {
     if (SC_LOCAL) {
-      var sendButton = getFeedbackSendButton(),
+      var sendButton = getFeedbackSendLink(),
         mailto = sendButton.getAttribute('data-mailto') +
           '?subject=' + encodeURIComponent(getCurrentRatingText()) +
           '&body=' + encodeURIComponent(getFeedbackTextToSend());
@@ -141,9 +138,8 @@ define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/plat
 
   function updateSendButton() {
     updateMailtoLink();
-    if (getFeedbackText().length) {
-      toggleSendEnabled(true);
-    }
+    var isEnabled = getFeedbackText().length > 0 || currentRating > 0;
+    toggleSendEnabled(isEnabled);
   }
 
   function toggleSendEnabled(doEnable) {
@@ -161,10 +157,13 @@ define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/plat
         rating: currentRating,  // 0 = no rating, otherwise 1-5 stars
         status: currentStatus
       };
+      if (SC_DEV) {
+        console.log('Sending feedback: %o', details);
+      }
       metric('feedback-sent', details);
       toggleSendEnabled(false); // Disable feedback button after sent, so that feedback isn't accidentally clicked twice
       state.set('isFeedbackSent', true);
-      sitecues.emit('bp/did-change', false, true);
+      view.update(true);
     }
   }
 
@@ -176,7 +175,12 @@ define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/plat
   function init() {
     if (!isInitialized) {
       isInitialized = true;
-      sitecues.on('bp/did-change', onPanelUpdate);
+      sitecues.on('bp/did-open-subpanel', onPanelUpdate);
+      sitecues.on('bp/will-show-secondary-feature', function(name) {
+        if (name === 'feedback') {
+          autoSizeTextarea();
+        }
+      });
     }
   }
 

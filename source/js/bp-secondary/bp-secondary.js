@@ -1,25 +1,25 @@
-// TODO
-//1.) The 'Welcome' example box run really close to the bottom menu items. I have highlighted this in the attached screenshot.  Would it be possible to reduce the height of this box by about 20-30px to give more padding between the bottom of the box and the menu items?
-//2.) The line and arrow below the breadcrumbs appears a little thick. That may be because of the screenshot or just because a thinner line is to hard to see. Can this be reduced in thickness, maybe by about 1px - or does it become to thin and lost?
-// Design polish
-//Marc wants reset
-//Perkins wants faster access to colors – 3 levels deep is too much
-//
-
+/**
+ * Secondary panel including animations
+ */
 define(['core/bp/constants',
     'core/bp/model/state',
+    'core/bp/view/view',
     'core/bp/helper',
     'bp-expanded/view/transform-animate',
     'bp-expanded/view/transform-util',
     'core/locale',
-    'core/platform',
     'bp-secondary/insert-secondary-markup',
-    'bp-secondary/tips',
-    'bp-secondary/settings',
-    'bp-secondary/feedback',
-    'bp-secondary/about',
-    'bp-secondary/cards'],
-    function (BP_CONST, state, helper, animate, transformUtil, locale, platform, markup, tipsModule, settingsModule, feedbackModule, aboutModule, cardsModule) {
+    'bp-secondary/bp-secondary-features'
+],
+  function (BP_CONST,
+            state,
+            view,
+            helper,
+            animate,
+            transformUtil,
+            locale,
+            markup,
+            secondaryFeatures) {
 
   var BUTTON_DROP_ANIMATION_MS = 800,
     ENABLED_PANEL_TRANSLATE_Y = 0,
@@ -33,44 +33,16 @@ define(['core/bp/constants',
     isInitialized,
     fadeInTimer,
     animateHeightTimer,
+    animationsCompleteTimer,
+    features = secondaryFeatures.featureDefs,
 
     // Oft-used functions. Putting it in a variable helps minifier, convenience, brevity
     byId = helper.byId,
-    CONTENTS_HEIGHT = 780,
-
-    features = {
-      tips: {
-        module: tipsModule,
-        menuButtonId: BP_CONST.TIPS_BUTTON_ID,
-        labelId: BP_CONST.TIPS_LABEL_ID,
-        panelId: BP_CONST.TIPS_CONTENT_ID
-      },
-      settings: {
-        module: settingsModule,
-        menuButtonId: BP_CONST.SETTINGS_BUTTON_ID,
-        labelId: BP_CONST.SETTINGS_LABEL_ID,
-        panelId: BP_CONST.SETTINGS_CONTENT_ID
-      },
-      feedback: {
-        module: feedbackModule,
-        menuButtonId: BP_CONST.FEEDBACK_BUTTON_ID,
-        labelId: BP_CONST.FEEDBACK_LABEL_ID,
-        panelId: BP_CONST.FEEDBACK_CONTENT_ID
-      },
-      about: {
-        module: aboutModule,
-        menuButtonId: BP_CONST.ABOUT_BUTTON_ID,
-        menuButtonHelperId: BP_CONST.ABOUT_ROTATE_HELPER_ID,
-        animatedImageId: BP_CONST.ABOUT_CONTENT_IMAGE_ID,
-        labelId: BP_CONST.ABOUT_LABEL_ID,
-        panelId: BP_CONST.ABOUT_CONTENT_ID,
-        heightAnimationDelay: 1200
-      }
-    };
-
+    CONTENTS_HEIGHT = 780;
 
   /********************** UTIL **************************/
 
+  // TODO code related to the individual features should move into bp-secondary-features.js
   function forEachFeature(fn) {
     for (var feature in features) {
       if (features.hasOwnProperty(feature)) {
@@ -87,11 +59,7 @@ define(['core/bp/constants',
     state.set('secondaryPanelName', featureName || 'button-menu');
     state.set('isSecondaryExpanding', isSecondaryExpanding);
     state.set('wasMouseInPanel', false); // When panel shrinks mouse needs to go back inside of it before mouseout closes again
-    fireBpChanged();
-  }
-
-  function fireBpChanged(isNewPanelReady) {
-    sitecues.emit('bp/did-change', false, isNewPanelReady);
+    view.update();
   }
 
   function getBPContainer() {
@@ -131,6 +99,7 @@ define(['core/bp/constants',
     });
     clearTimeout(fadeInTimer);
     clearTimeout(animateHeightTimer);
+    clearTimeout(animationsCompleteTimer);
     runningAnimations.length = 0;
   }
 
@@ -171,14 +140,9 @@ define(['core/bp/constants',
 
 
     function onFinish() {
-      aboutModule.init();
-      feedbackModule.init();
-      settingsModule.init();
-      tipsModule.init();
-      cardsModule.init();
-
+      secondaryFeatures.init();
       state.set('isSecondaryPanel', willEnable);
-      fireBpChanged(true);
+      view.update(true);
       updateMoreButtonLabel(willEnable);
     }
 
@@ -245,18 +209,19 @@ define(['core/bp/constants',
       percentRemaining = (wasEnabled === doEnable) ? 0 : 1,
       heightAnimationDuration = (doEnable ? ENABLE_ANIMATION_MS : DISABLE_ANIMATION_MS) * percentRemaining,
       heightAnimationDelay = (doEnable  && feature.heightAnimationDelay) || 0,
-      openFeatureDuration = doEnable && feature.heightAnimationDelay ? ENABLE_ANIMATION_MS : heightAnimationDuration;
+      openFeatureDuration = doEnable && feature.heightAnimationDelay ? ENABLE_ANIMATION_MS : heightAnimationDuration,
+      animationsCompleteMs = Math.max(openFeatureDuration, heightAnimationDelay + heightAnimationDuration);  // When is feature fully visible
 
     function fadeInTextContentWhenLargeEnough() {
       fadeInTimer = setTimeout(function () {
         state.set('isSecondaryExpanding', false);
-        fireBpChanged(true);
+        view.update();
       }, heightAnimationDelay + heightAnimationDuration * 0.7);
     }
 
-    function onHeightAnimationComplete() {
+    function onAnimationsComplete() {
       state.set('isSecondaryExpanded', doEnable);
-      fireBpChanged();
+      view.update(true);
     }
 
     function animateHeight() {
@@ -288,8 +253,7 @@ define(['core/bp/constants',
       createAnimation(
         [getMoreButton(), getBottom(), getOutlineFill(), getSecondaryOutline(), getShadow(), bpContainer],
         [moreButtonTransform, bottomTransform, outlineFillTransform, secondaryOutlineTransform, shadowTransform, bpContainerTransform ],
-        heightAnimationDuration,
-        onHeightAnimationComplete
+        heightAnimationDuration
       );
     }
 
@@ -331,9 +295,11 @@ define(['core/bp/constants',
     // Animate the height at the right time
     animateHeightTimer = setTimeout(animateHeight, heightAnimationDelay);
 
+    animationsCompleteTimer = setTimeout(onAnimationsComplete, animationsCompleteMs);
+
     fadeInTextContentWhenLargeEnough();
 
-    sitecues.emit('bp/will-show-secondary-feature');
+    sitecues.emit('bp/will-show-secondary-feature', name);
   }
 
   /********************** INTERACTIONS **************************/

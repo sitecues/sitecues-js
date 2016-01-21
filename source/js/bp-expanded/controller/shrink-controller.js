@@ -1,8 +1,8 @@
 /*
  Panel Controller
  */
-define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metric'],
-  function (BP_CONST, state, helper, metric) {
+define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metric', 'core/bp/view/view'],
+  function (BP_CONST, state, helper, metric, view) {
 
     var MIN_DISTANCE = 75, // Min distance before shrink
       mouseLeaveShrinkTimer,  // How long we wait before shrinking BP from any mouseout (even only just barely outside panel)
@@ -123,7 +123,7 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
       }
 
       // Finally, begin the shrinking animation.
-      sitecues.emit('bp/did-change');
+      view.update();
 
       metric('panel-closed');
     }

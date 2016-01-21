@@ -44,7 +44,6 @@ define(['core/bp/helper', 'core/platform', 'core/conf/site'],
        .scp-want-badge: BP is badge or shrinking into one
        .scp-want-panel: BP is panel or expanding into one
        .scp-is-panel-only  // Only display in panel mode or when becoming panel
-       .scp-animate: Enable CSS animations (e.g. do not enable when first showing badge)
        .scp-keyboard: Keyboard mode
        - Elsewhere:
        .scp-secondary-only   // Only display in more panel
@@ -156,7 +155,7 @@ define(['core/bp/helper', 'core/platform', 'core/conf/site'],
 
       // TODO: Transitions are pretty efficient for opacity, but it may be worth trading
       //       that for simplicity (using JS animations for EVERYTHING).
-      '.scp-animate #scp-main > *, .scp-animate .scp-wave': {
+      '#scp-main > *, .scp-wave': {
         'transition': 'fill .2s, opacity .2s'
       },
 
