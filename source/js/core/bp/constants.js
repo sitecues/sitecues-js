@@ -224,6 +224,11 @@ define([], function() {
   // (This whitespace exists for a reason -- it turns into the top border when the panel opens)
   constants.BADGE_VERTICAL_OFFSET = 2;
 
+  // Common palettes
+  constants.PALETTE_NAME_ADAPTIVE = 'adaptive';
+  constants.PALETTE_NAME_NORMAL = 'normal';
+  constants.PALETTE_NAME_REVERSE_BLUE = 'reverse-blue';
+
   // Map legal full palette names to short names, used to create a class e.g. .scp-palette-rb
   constants.PALETTE_NAME_MAP = {
     'normal': '-n',

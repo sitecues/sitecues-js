@@ -19,7 +19,7 @@ define(['core/bp/model/state', 'core/conf/site', 'core/bp/constants'], function(
       for (; index < fullNames.length; index ++) {
         var fullName = fullNames[index];
         if (paletteName.indexOf(fullName) >= 0) {
-          return paletteMap[fullName];
+          return fullNames[index];
         }
       }
     }
@@ -32,12 +32,14 @@ define(['core/bp/model/state', 'core/conf/site', 'core/bp/constants'], function(
   function init(badgeFileName, onComplete) {
 
     var paletteKey = getSimplePaletteType(badgeFileName);
-    if (paletteKey === BP_CONST.PALETTE_NAME_MAP.adaptive) {
+    if (paletteKey === BP_CONST.PALETTE_NAME_ADAPTIVE) {
       require(['bp-adaptive/bp-adaptive'], function(bpAdaptive) {
+        state.set('defaultPaletteKey', BP_CONST.PALETTE_NAME_NORMAL);
         bpAdaptive.initAdaptivePalette(onComplete);
       });
     }
     else {
+      state.set('defaultPaletteKey', paletteKey);
       state.set('paletteKey', paletteKey);
       onComplete();
     }

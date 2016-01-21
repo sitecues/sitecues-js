@@ -28,12 +28,16 @@ define(['core/bp/model/state', 'core/bp/view/view', 'core/bp/constants'], functi
       require(['page/util/color'], function(colorUtil) {
         if (SC_DEV) { console.log('Updating badge palette'); }
         var badgeElem = getBadgeElem();
-        state.set('paletteKey', BP_CONST.PALETTE_NAME_MAP[colorUtil.isOnDarkBackground(badgeElem) ? 'reverse-blue' : 'normal']);
+        state.set('paletteKey', colorUtil.isOnDarkBackground(badgeElem) ? BP_CONST.PALETTE_NAME_REVERSE_BLUE : getDefaultPalette());
         if (onPaletteUpdate) {
           onPaletteUpdate();
         }
       });
     }
+  }
+
+  function getDefaultPalette() {
+    return state.get('defaultPaletteKey');
   }
 
   function getBackgroundColor() {

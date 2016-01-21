@@ -31,7 +31,7 @@ define([
       }
     }
 
-    classBuilder += ' scp-palette' + state.get('paletteKey');
+    classBuilder += ' scp-palette' + BP_CONST.PALETTE_NAME_MAP[state.get('paletteKey')];
 
     return classBuilder;
   }

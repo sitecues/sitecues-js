@@ -19,7 +19,8 @@ define([], function() {
     isPageBadge             : true,  // Is set to false if default badge is inserted
     isToolbarBadge          : false, // Set to true if using a badge toolbar. This may eventually become redundant with isPageBadge (the opposite of it) if we only use toolbar default badges.
     wasMouseInPanel         : false, // Was the mouse inside the panel since last expansion
-    paletteKey              : 'b',   // Currently either 'b' for basic or 'r' for red
+    paletteKey              : '',    // Current palette See BP_CONST.PALETTE_NAME_MAP for possible keys.
+    defaultPaletteKey       : '',    // Palette to use if sitecues theme determines that default palette should be used based on the background behind the badge.
     isAdaptivePalette       : false, // Is an adaptive palette name
     settingsIconVersion     : 1,     // Which settings icon to use?
     aboutIconVersion        : 1,     // Which about icon to use?
