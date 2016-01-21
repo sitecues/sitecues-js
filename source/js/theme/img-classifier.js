@@ -15,7 +15,6 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
     BUTTON_BONUS = 50,
     SVG_BONUS = 999,
     BG_IMAGE_BONUS = 150,
-    DONT_USE_IMAGE = -9999,
     MAX_SCORE_CHECK_PIXELS = 120,
     isDebuggingOn,
     CLASS_INVERT = 'i',
@@ -29,7 +28,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
   function getInvertUrl(url) {
     var
       absoluteUrl = urls.resolveUrl(url),
-      apiUrl = urls.getApiUrl('image/invert?imageUrl=' + absoluteUrl); // TODO should we use encodeURIComponent(url)) ?
+      apiUrl = urls.getApiUrl('image/invert?url=' + absoluteUrl); // TODO should we use encodeURIComponent(url)) ?
 
     // TODO remove this line when real service is ready
     apiUrl = apiUrl.replace('/ws.', '/wsbeta.');
