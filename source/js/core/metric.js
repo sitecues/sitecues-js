@@ -6,7 +6,7 @@ define(['core/conf/user/manager', 'core/util/uuid', 'core/conf/site', 'core/loca
 
     var pageViewId = uuid(),
       sessionId = getSessionId(),
-      METRICS_VERSION = 3;
+      METRICS_VERSION = 4;
 
     function getSessionId() {
       var SESSION_ID_KEY = '-sc-session-id',
@@ -56,9 +56,9 @@ define(['core/conf/user/manager', 'core/util/uuid', 'core/conf/site', 'core/loca
 
         //if (SC_DEV) { console.log('Metric: ' + JSON.stringify(allData)); }
 
-        // TODO see if we can avoid CORS preflight by using "simple" CORS request
+        // Adding the name after the ? is to make events easier to debug in the event log
         xhr.post({
-          url: urls.getApiUrl('metrics/site/' + site.getSiteId() + '/notify.json'),
+          url: urls.getApiUrl('metrics/site/' + site.getSiteId() + '/notify.json?name=' + name),
           data: allData
         });
       }

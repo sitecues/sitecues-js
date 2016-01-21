@@ -62,7 +62,10 @@ define([], function () {
   }
 
   function post(requestObj) {
-    initRequest(JSON.stringify(requestObj.data), requestObj, 'application/json');
+    // Sending with text/plain instead of application/json avoids the extra CORS preflight requests
+    // This is called a "Simple CORS Request" and has a number of requirements.
+    // https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS#Simple_requests
+    initRequest(JSON.stringify(requestObj.data), requestObj, 'text/plain');
   }
 
   return {
