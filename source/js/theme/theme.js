@@ -2,6 +2,8 @@
  *  Support color themes in page
  */
 
+// TODO perhaps move dark stuff to inverter.js. Also img-classifier
+
 define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core/platform',
     'theme/color-choices', 'page/util/color', 'theme/img-classifier', 'theme/custom-site-theme' ],
   function($, conf, styleService, platform, colorChoices, colorUtil, imgClassifier, customTheme) {
@@ -424,10 +426,6 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
         return 'mediumDark';
       }
 
-      if (sampleElement && sampleElement.childElementCount) {
-        return 'none';
-      }
-
       if (hasHiddenText || isPlacedBeforeText(sampleElementCss) ||
         (cssStyleDecl.backgroundPosition && cssStyleDecl.backgroundPosition.indexOf('%') < 0)) {  // Clearly a sprite
         return 'reversed';
@@ -440,11 +438,10 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
       return 'mediumDark';
     }
 
-    if (imageUrl) {
+    if (imageUrl && currentThemeName === 'dark') {
       var bgInfo = {
         prop: 'background-image',
         imageUrl: imageUrl,
-        doRequireEmpty: hasRepeat,
         backgroundColor: cssStyleDecl.backgroundColor
       };
       if (getBackgroundImageFilter(bgInfo, imageUrl, cssStyleDecl, sampleElement) === 'reversed') {
