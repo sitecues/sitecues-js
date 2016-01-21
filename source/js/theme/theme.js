@@ -17,6 +17,9 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
     isOriginalThemeDark,
     transitionTimer,
     inverter,
+    currentThemeName,
+    currentThemePower,
+    currentThemeTextHue,
     MAX_USER_SPECIFIED_HUE = 1.03,   // If > 1.0 then use white
     TRANSITION_CLASS = 'sc-animate-theme',
     TRANSITION_MS_FAST = 300,
@@ -584,7 +587,17 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
   }
 
   function onThemeChange() {
-    applyTheme(conf.get('themeName'), conf.get('themePower'), conf.get('themeTextHue'));
+    var newThemeName = conf.get('themeName'),
+      newThemePower = conf.get('themePower'),
+      newThemeTextHue = conf.get('themeTextHue');
+
+    if (newThemeName !== currentThemeName || newThemePower !== currentThemePower || newThemeTextHue !== currentThemeTextHue) {
+      // Only apply theme when new settings are different from previously applied theme
+      currentThemeName = newThemeName;
+      currentThemePower = newThemePower;
+      currentThemeTextHue = newThemeTextHue;
+      applyTheme(newThemeName, newThemePower, newThemeTextHue);
+    }
   }
 
   function init(isPanelOpen) {
