@@ -100,7 +100,7 @@
       if (savedSrc === null) {
         $img.attr('data-sc-src', currentSrc);
       }
-      $img.css('src', imgClassifier.getInvertUrl(currentSrc));
+      $img.attr('src', imgClassifier.getInvertUrl(currentSrc));
     }
     else {
       // Clear proxied src

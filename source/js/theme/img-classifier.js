@@ -316,7 +316,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
       cachedResult = window.sessionStorage.getItem(storageKey);
 
     if (cachedResult) {
-      onImageClassified(img, cachedResult === CLASS_INVERT);
+      onImageClassified(img, cachedResult === CLASS_INVERT, onShouldReverseImage);
     }
     // Too early to tell anything
     if (!img.complete) {
