@@ -1,12 +1,13 @@
 define(['page/util/color', 'dark-theme/img-classifier'], function(colorUtil, imgClassifier) {
-  var BG_IMAGE_BONUS = 50,
+  var BG_IMAGE_BONUS = 100,
     MAX_SCORE_CHECK_PIXELS = 120;
 
   function shouldInvertBackgroundImage(src, size, onInversionDecision) {
     var imageExt = imgClassifier.getImageExtension(src);
 
     if (!imageExt) {
-      return false;  // Not a normal image extension -- don't invert
+      onInversionDecision(false);  // Not a normal image extension -- don't invert
+      return;
     }
 
     var sizeScore = imgClassifier.getSizeScore(size.height, size.width),
@@ -15,12 +16,13 @@ define(['page/util/color', 'dark-theme/img-classifier'], function(colorUtil, img
 
     if (finalScore < -MAX_SCORE_CHECK_PIXELS || finalScore > MAX_SCORE_CHECK_PIXELS) {
       onInversionDecision(finalScore > 0);
+      return;
     }
 
     // Pixel info takes longer to get: only do it if necessary
-    imgClassifier.getPixelInfoScore(null, src, size, function (pixelInfoScore, didAnalyzePixels) {
+    imgClassifier.getPixelInfoScore(null, src, size, function (pixelInfoScore) {
       finalScore += pixelInfoScore;
-      onInversionDecision(finalScore > 0, didAnalyzePixels);
+      onInversionDecision(finalScore > 0);
     });
   }
 
