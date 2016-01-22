@@ -2,8 +2,7 @@
  *  Used for dark themes.
  */
 
-  define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core/platform',
-    'theme/img-classifier'],
+  define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core/platform', 'dark-theme/img-classifier'],
   function($, conf, styleService, platform, imgClassifier) {
 
   var mutationObserver,
@@ -14,7 +13,7 @@
       return div.style.filter ? 'filter': platform.cssPrefix + 'filter';
     })(),
     // Use proxy in IE and Safari, because: no css invert in IE, and it's extremely slow in Safari
-    SHOULD_USE_PROXY = SC_DEV || platform.browser.isIE || platform.browser.isSafari;
+    SHOULD_USE_PROXY = platform.browser.isIE || platform.browser.isSafari;
 
   function toggle(doStart, doRefreshImages) {
     if (doStart) {
@@ -95,12 +94,14 @@
   function reverseElemProxy($img, doReverse, currentSrc) {
     var savedSrc = $img.attr('data-sc-src');
     if (doReverse) {
-      currentSrc = $img.attr('src');
       // Add proxied src
       if (savedSrc === null) {
+        // First time
+        currentSrc = $img.attr('src');
         $img.attr('data-sc-src', currentSrc);
+        savedSrc = currentSrc;
       }
-      $img.attr('src', imgClassifier.getInvertUrl(currentSrc));
+      $img.attr('src', imgClassifier.getInvertUrl(savedSrc));
     }
     else {
       // Clear proxied src
@@ -143,9 +144,35 @@
     });
   }
 
+  function getReverseSpriteCssText(themeStyles) {
+    // Reverse background images
+    function getCssForOneSprite(bgInfo, selector) {
+      if (!bgInfo.imageUrl) {
+        return '';
+      }
+
+      return selector + '{\n' +
+        'background-image: url(' + imgClassifier.getInvertUrl(bgInfo.imageUrl) + ') !important;\n' +
+        '}\n';
+    }
+    var styleSheetText = '';
+
+    // Backgrounds
+    themeStyles.forEach(function(style) {
+      // Don't alter buttons -- it will change it from a native button and the appearance will break
+      // color, background-color
+      if (style.value.prop === 'background-image') {
+        styleSheetText += getCssForOneSprite(style.value, style.rule.selectorText);
+      }
+    });
+
+    return styleSheetText;
+
+  }
 
   return {
-    toggle: toggle
+    toggle: toggle,
+    getReverseSpriteCssText: getReverseSpriteCssText
   };
 
 });

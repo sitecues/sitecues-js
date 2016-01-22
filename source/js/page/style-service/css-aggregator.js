@@ -123,10 +123,6 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
     finalizeCssIfComplete();
   }
 
-  function getParsedSheetUrl(sheet) {
-    return urls.parseUrl(sheet.url);
-  }
-
   /**
    * Replace all relatively defined style resources with their absolute counterparts. See SC-1302.
    * @param  {StyleSheet} sheet    A stylesheet object with text
@@ -165,13 +161,10 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
      background: url(//int.nyt.com/applications/portals/assets/loader-t-logo-32x32-ecedeb-49955d7789658d80497f4f2b996577f6.gif)
      */
 
-    var RELATIVE_URL_REGEXP = /url\((?:(?:[\'\" ])*(?!data:|https?:\/\/|\/\/)([^\"\'\)]+)[\'\" ]*)/gi,
-      baseUrlObject;
+    var RELATIVE_URL_REGEXP = /url\((?:(?:[\'\" ])*(?!data:|https?:\/\/|\/\/)([^\"\'\)]+)[\'\" ]*)/gi;
     return sheet.text.replace(RELATIVE_URL_REGEXP, function (totalMatch, actualUrl) {
       // totalMatch includes the prefix string  url("      - whereas actualUrl is just the url
-      baseUrlObject = baseUrlObject || getParsedSheetUrl(sheet);
-      var newUrl = 'url(' + urls.resolveUrl(actualUrl, baseUrlObject);
-      return newUrl;
+      return 'url(' + urls.resolveUrl(actualUrl, sheet.url);
     });
   }
 
@@ -184,8 +177,7 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
 
   // Convert @import into new stylesheet requests
   function processAtImports(sheet) {
-    var IMPORT_REGEXP = /\s*(?:@import\s+url\((?:(?:['" ])*([^"'\)]+)['" ]*)\)\s*([^;$]*))/gi,
-      baseUrlObject;
+    var IMPORT_REGEXP = /\s*(?:@import\s+url\((?:(?:['" ])*([^"'\)]+)['" ]*)\)\s*([^;$]*))/gi;
 
     return sheet.text.replace(IMPORT_REGEXP, function(totalMatch, actualUrl, mediaQuery) {
       // Insert sheet for retrieval before this sheet, so that the order of precedence is preserved
@@ -194,8 +186,7 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
         console.log('@import media query: ' + mediaQuery);
       }
       if (mediaQueries.isActiveMediaQuery(mediaQuery)) {
-        baseUrlObject = baseUrlObject || getParsedSheetUrl(sheet);
-        insertNewSheetBefore(sheet, urls.resolveUrl(actualUrl, baseUrlObject));
+        insertNewSheetBefore(sheet, urls.resolveUrl(actualUrl, sheet.url));
       }
       // Now remove @import line from CSS so that it does not get reprocessed
       return '';

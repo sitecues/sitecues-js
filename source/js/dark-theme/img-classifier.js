@@ -14,7 +14,6 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
     DARK_BG_THRESHOLD = 0.3,
     BUTTON_BONUS = 50,
     SVG_BONUS = 999,
-    BG_IMAGE_BONUS = 150,
     MAX_SCORE_CHECK_PIXELS = 120,
     isDebuggingOn,
     CLASS_INVERT = 'i',
@@ -28,6 +27,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
   function getInvertUrl(url) {
     var
       absoluteUrl = urls.resolveUrl(url),
+      // TODO ?url=
       apiUrl = urls.getApiUrl('image/invert?url=' + absoluteUrl); // TODO should we use encodeURIComponent(url)) ?
 
     // TODO remove this line when real service is ready
@@ -240,6 +240,10 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
     }
   }
 
+  function getUrlScore(imageUrl) {
+    return getExtensionScore(getImageExtension(imageUrl));
+  }
+
   function getPixelInfoScore(img, rect, onPixelScoreAvailable) {
     if (rect.width <= 1 || rect.height <= 1) {
       onPixelScoreAvailable(0); // It's possible that image simply isn't loaded yet, scroll down in brewhoop.com
@@ -425,18 +429,6 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
     });
   }
 
-  function shouldInvertBgImage(src, rect) {
-    var imageExt = getImageExtension(src),
-      sizeScore = getSizeScore(rect.height, rect.width),
-      elementTypeScore = BG_IMAGE_BONUS,
-      extensionScore = getExtensionScore(imageExt),
-//        img = $('<img>').attr('src', src)[0],  // Would need to wait for load, or?
-//        pixelInfoScore = getPixelInfoScore(img, rect),
-      finalScore = sizeScore + elementTypeScore + extensionScore; // + pixelInfoScore;
-
-    return finalScore > 0;
-  }
-
   function classify(root, onShouldReverseImage) {
     var NOT_CLASSIFIED = ':not([' + REVERSIBLE_ATTR + '])',
       selector = 'img[src]' + NOT_CLASSIFIED +
@@ -469,8 +461,9 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
   }
 
   return {
-    shouldInvertBgImage: shouldInvertBgImage,
     classify: classify,
-    getInvertUrl: getInvertUrl
+    getInvertUrl: getInvertUrl,
+    getSizeScore: getSizeScore,
+    getUrlScore: getUrlScore
   };
 });

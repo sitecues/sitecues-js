@@ -34,6 +34,7 @@ define(['core/conf/site'], function(site) {
 
   // Parse a URL into { protocol, hostname, origin, path }
   // Does not support mailto links (or anything where the protocol isn't followed by //)
+  // TODO After we kill IE9, we can move to new URL(), but be careful of IE incompatibilities (e.g. port, origin, host)
   function parseUrl(urlStr) {
     if (typeof urlStr !== 'string') {
       return;
@@ -117,8 +118,16 @@ define(['core/conf/site'], function(site) {
 
   // Return an absolute URL. If the URL was relative, return an absolute URL that is relative to a base URL.
   // @optional parsedBaseUrl If not provided, will use the current page.
-  function resolveUrl(urlStr, parsedBaseUrl) {
-    parsedBaseUrl = parsedBaseUrl || parseUrl('.');
+  function resolveUrl(urlStr, baseUrl) {
+    try {
+      var parsedUrl = new URL(urlStr, baseUrl || document.location);
+      return parsedUrl.toString();
+    }
+    catch(ex) {
+    }
+
+    // TODO support for IE9 -- remove when re remove IE9 support
+    var parsedBaseUrl = parseUrl(baseUrl || '.');
 
     var absRegExpResult = ABSOLUTE_URL_REGEXP.exec(urlStr);
     if (absRegExpResult) {
@@ -135,6 +144,9 @@ define(['core/conf/site'], function(site) {
       // A directory-relative URL.
       urlStr = parsedBaseUrl.origin + parsedBaseUrl.path + urlStr;
     }
+
+    // Replace ../ at beginning of path with just / as there is no parent folder to go to
+    urlStr = urlStr.replace(/(^http[^\/]+\/\/[^\/]+\/)(?:\.\.\/)/, '$1', 'i');
 
     return urlStr;
   }
