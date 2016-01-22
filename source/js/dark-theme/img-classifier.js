@@ -39,28 +39,29 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
   // Get <img> that can have its pixel data read --
   // 1. Must be completely loaded
   // 2. We have permission (either we're in the extension, the img is not cross-domain, or we can load it through the proxy)
-  function getReadableImage(img, onReadableImageAvailable) {
+  // Either pass img or src, but not both
+  function getReadableImage(img, src, onReadableImageAvailable) {
     // Unsafe cross-origin request
     // - Will run into cross-domain restrictions because URL is from different domain
     // This is not an issue with the extension, because the content script doesn't have cross-domain restrictions
-    var url = img.getAttribute('src'),
+    var url = src || img.getAttribute('src'),
       isSafeRequest = SC_EXTENSION || !urls.isOnDifferentDomain(url),
       safeUrl,
       safeImg;
 
-    function returnImageWhenComplete(img) {
-      if (img.complete) {
-        onReadableImageAvailable(img); // Already loaded
+    function returnImageWhenComplete(loadableImg) {
+      if (loadableImg.complete) {
+        onReadableImageAvailable(loadableImg); // Already loaded
       }
       else {
-        img.addEventListener('load', function() {
-          onReadableImageAvailable(img);
+        loadableImg.addEventListener('load', function() {
+          onReadableImageAvailable(loadableImg);
         });
       }
     }
 
     if (isSafeRequest) {
-      if (img.localName === 'img') {
+      if (img && img.localName === 'img') {
         returnImageWhenComplete(img); // The <img> in the DOM can have its pixels queried
         return;
       }
@@ -76,7 +77,8 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
     returnImageWhenComplete(safeImg);
   }
 
-  function getImageData(img, rect, onImageDataAvailable) {
+  // Either pass img or src, but not both
+  function getImageData(img, src, rect, onImageDataAvailable) {
     var canvas = document.createElement('canvas'),
       ctx,
       top = rect.top || 0,
@@ -87,7 +89,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
     canvas.width = width;
     canvas.height = height;
 
-    getReadableImage(img, function(readableImg) {
+    getReadableImage(img, src, function(readableImg) {
       ctx = canvas.getContext('2d');
 
       try {
@@ -103,8 +105,9 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
     });
   }
 
-  function getPixelInfo(img, rect, onPixelInfoAvailable) {
-    getImageData(img, rect, function(data) {
+  // Either pass img or src, but not both
+  function getPixelInfo(img, src, rect, onPixelInfoAvailable) {
+    getImageData(img, src, rect, function(data) {
       onPixelInfoAvailable(data && getPixelInfoImpl(data, rect.width, rect.height));
     });
   }
@@ -240,17 +243,14 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
     }
   }
 
-  function getUrlScore(imageUrl) {
-    return getExtensionScore(getImageExtension(imageUrl));
-  }
-
-  function getPixelInfoScore(img, rect, onPixelScoreAvailable) {
+  // Either pass img or src, but not both
+  function getPixelInfoScore(img, src, rect, onPixelScoreAvailable) {
     if (rect.width <= 1 || rect.height <= 1) {
       onPixelScoreAvailable(0); // It's possible that image simply isn't loaded yet, scroll down in brewhoop.com
       return;
     }
 
-    getPixelInfo(img, rect, function(pixelInfo) {
+    getPixelInfo(img, src, rect, function(pixelInfo) {
       var score;
       if (pixelInfo) {
         // Image has full color information
@@ -408,7 +408,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
     }
 
     // Pixel info takes longer to get: only do it if necessary
-    getPixelInfoScore(img, size, function (pixelInfoScore, didAnalyzePixels) {
+    getPixelInfoScore(img, null, size, function (pixelInfoScore, didAnalyzePixels) {
       finalScore += pixelInfoScore;
 
       if (SC_DEV && isDebuggingOn) {
@@ -464,6 +464,8 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
     classify: classify,
     getInvertUrl: getInvertUrl,
     getSizeScore: getSizeScore,
-    getUrlScore: getUrlScore
+    getImageExtension: getImageExtension,
+    getExtensionScore: getExtensionScore,
+    getPixelInfoScore: getPixelInfoScore
   };
 });

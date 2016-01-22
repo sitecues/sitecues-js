@@ -66,6 +66,7 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
     }
   }
 
+  // TODO update to new URL format
   function getCssProxyUrl(url) {
     var absoluteUrl = urls.resolveUrl(url);
     return urls.getApiUrl('css-proxy/' + absoluteUrl);

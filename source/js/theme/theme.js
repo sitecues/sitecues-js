@@ -17,6 +17,7 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
     originalBodyBackgroundColor,
     isOriginalThemeDark,
     darkTheme,
+    isDarkBgInfoInitialized,
     transitionTimer,
     currentThemeName,  // one of the theme names from color-choices.js
     currentThemePower,  // .01 - 1
@@ -334,15 +335,12 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
       }
     }
 
-    if (imageUrl && currentThemeName === 'dark') {
-      var bgInfo = {
+    if (imageUrl) {
+      return {
         prop: 'background-image',
         imageUrl: imageUrl,
         backgroundColor: cssStyleDecl.backgroundColor
       };
-      if (darkTheme.bgImgClassifier.classifyBackgroundImage(imageUrl, cssStyleDecl, selector) === darkTheme.bgImgClassifier.CLASS_REVERSE) {
-        return bgInfo;
-      }
     }
   }
 
@@ -414,7 +412,7 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
     styleService.init(function () {
       collectRelevantStyles(callbackFn);
     });
-    }
+  }
 
   function collectRelevantStyles(callbackFn) {
     if (!themeStyles) {
@@ -428,7 +426,33 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
       themeStyles = bgStyles.concat(fgStyles).concat(bgImageStyles);
     }
 
-    callbackFn();
+    if (currentThemeName === 'dark' && !isDarkBgInfoInitialized) {
+      classifyBgImagesForDarkTheme(themeStyles, callbackFn);
+    }
+    else {
+      callbackFn();
+    }
+  }
+
+  function classifyBgImagesForDarkTheme(themeStyles, callbackFn) {
+    var bgImageStyles = themeStyles.filter(isBgImageStyle),
+      numImagesRemainingToClassify = bgImageStyles.length;
+
+    function isBgImageStyle(info) {
+      return info.value.prop === 'background-image';
+    }
+
+    function nextImage() {
+      if (numImagesRemainingToClassify -- === 0) {
+        callbackFn();
+      }
+    }
+
+    nextImage();  // In case we started with zero images
+
+    bgImageStyles.forEach(function(bgImageInfo) {
+      darkTheme.bgImgClassifier.classifyBackgroundImage(bgImageInfo, nextImage);
+    });
   }
 
   // Theme name must exist in colorChoices

@@ -147,7 +147,7 @@
   function getReverseSpriteCssText(themeStyles) {
     // Reverse background images
     function getCssForOneSprite(bgInfo, selector) {
-      if (!bgInfo.imageUrl) {
+      if (!bgInfo.doReverse) {
         return '';
       }
 
