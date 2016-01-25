@@ -42,6 +42,7 @@ define(['core/conf/site'], function(site) {
     var parser = document.createElement('a'),
       pathname,
       lastSlashIndex,
+      protocol,
       path,
       hostname,
       origin;
@@ -59,11 +60,12 @@ define(['core/conf/site'], function(site) {
     }
     lastSlashIndex = pathname.lastIndexOf('/') + 1;
 
+    protocol = parser.protocol || document.location.protocol;  // IE does not include protocol unless it was specified. If not specified, get from current document.
     path = pathname.substring(0, lastSlashIndex);
     hostname = parser.hostname;
     origin = parser.origin;
     if (!origin) {
-      origin = parser.protocol + '//' + hostname;
+      origin = protocol + '//' + hostname;
       // Fallback approach for IE -- note this doesn't include @username or password info
       // Add the port if it's specified in the url (80 is the default port, so only add that if it's really present in the url)
       if (parser.port && parser.port !== '80' || urlStr.indexOf(':80/') > 0) {
@@ -72,6 +74,7 @@ define(['core/conf/site'], function(site) {
     }
 
     return {
+      protocol: protocol,
       path: path,
       hostname: hostname,
       origin: origin
@@ -105,13 +108,15 @@ define(['core/conf/site'], function(site) {
   }
 
   function getScriptOrigin() {
+    if (!scriptOrigin) {
+      scriptOrigin = getParsedLibraryURL().origin;
+    }
     return scriptOrigin;
   }
 
   function init() {
     var domainEnding = isProduction() ? '.sitecues.com' : '.dev.sitecues.com';
     apiDomain = 'ws' + domainEnding + '/';
-    scriptOrigin = getParsedLibraryURL().origin;
   }
 
   return {
