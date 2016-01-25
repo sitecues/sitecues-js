@@ -309,7 +309,7 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
     return bgShorthand.substr(lastIndexRgb).split(')')[0] + ')';
   }
 
-  function getSignificantBgImageProperties(cssStyleDecl, selector) {
+  function getSignificantBgImageProperties(cssStyleDecl) {
     var bgImagePropVal = cssStyleDecl['background-image'],
       imageUrl,
       gradient,
