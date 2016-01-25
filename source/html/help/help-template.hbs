@@ -11,15 +11,23 @@
             scriptUrl = getParam(0, 'scUrl'),
             siteId = getParam(1, 'siteId'),
             siteUrl = getParam(2, 'siteUrl'),
-            prefs = getParam(3, 'prefs');
+            sessionId = getParam(3, 'sessionId'),
+            pageViewId = getParam(4, 'pageViewId'),
+            prefs = getParam(5, 'prefs');
 
     // Site config
-    window.sitecues = {};
-    sitecues.config = {
+    window.sitecues = {
+      config: {
         siteId : siteId,
         iframe  : 1,
         isFluid : 1,
         maxRewrapZoom: 3
+      },
+      parentConfig: {
+        // Not in sitecues.config because we don't consider this normally configurable
+        sessionId: sessionId,
+        pageViewId: pageViewId
+      }
     };
 
     // User prefs
