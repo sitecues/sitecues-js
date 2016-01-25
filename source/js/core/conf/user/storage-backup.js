@@ -4,12 +4,13 @@
  */
 
 // IMPORTANT: The extension defines this module in order to override the mechanism
-define(['core/conf/urls'], function (urls) {
+define(['core/conf/urls', 'core/platform'], function (urls, platform) {
 
   var PATH = 'html/prefs.html',
     ID = 'sitecues-prefs',
     iframe,
-    isLoaded;
+    isLoaded,
+    IS_BACKUP_DISABLED = platform.browser.isIE9;
 
   // If data is defined, it is a set call, otherwise we are getting data
   function postMessageToIframe(optionalData) {
@@ -47,12 +48,21 @@ define(['core/conf/urls'], function (urls) {
       onDataAvailableFn(parsedData);  // Use callback even if we don't use the data -- otherwise sitecues won't load
     }
 
+    if (IS_BACKUP_DISABLED) {
+      onDataAvailableFn({});
+      return;
+    }
     window.addEventListener('message', onMessageReceived);
-    console.log('Retrieve backup prefs');
+    if (SC_DEV) {
+      console.log('Retrieve backup prefs');
+    }
     postMessageToIframe();
   }
 
   function save(data) {
+    if (IS_BACKUP_DISABLED) {
+      return;
+    }
     if (SC_DEV) {
       console.log('Backing up prefs: ' + data);
     }
@@ -66,7 +76,7 @@ define(['core/conf/urls'], function (urls) {
   // Optional callbacks
   function init(onReadyCallback) {
 
-    if (isLoaded) {
+    if (isLoaded || IS_BACKUP_DISABLED) {
       onReadyCallback();
       return;
     }
