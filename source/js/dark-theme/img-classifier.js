@@ -94,7 +94,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
 
       try {
         ctx.drawImage(readableImg, top, left, width, height);
-        imageData = readableImg.getImageData(0, 0, width, height).data;
+        imageData = ctx.getImageData(0, 0, width, height).data;
       }
       catch (ex) {
         if (SC_DEV && isDebuggingOn) {
@@ -170,8 +170,8 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
 
     return {
       hasTransparentPixels: hasTransparentPixels,
-      numDiffGrayscaleVals: numDifferentGrayscaleVals,
-      numMultiGrayscaleVals: numMultiUseGrayscaleVals,
+      numDifferentGrayscaleVals: numDifferentGrayscaleVals,
+      numMultiUseGrayscaleVals: numMultiUseGrayscaleVals,
       percentWithSameGrayscale: maxSameGrayscale / numPixelsToCheck
     };
   }
@@ -235,9 +235,11 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
         return 50;
       case '.svg':
         return SVG_BONUS;
-//        case '.jpg':
-//        case '.jpeg':
-//        case '.gif':
+      case '.gif':
+        return -35;
+      case '.jpg':
+      case '.jpeg':
+        return -50;
       default:
         return -70;
     }
@@ -251,18 +253,26 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
     }
 
     getPixelInfo(img, src, rect, function(pixelInfo) {
-      var score;
+      var score,
+        BASE_SCORE = 180,
+        DEFAULT_SCORE = 40,
+        manyValuesScore,
+        manyReusedValuesScore,
+        oneValueReusedOftenScore;
+
       if (pixelInfo) {
         // Image has full color information
         if (SC_DEV && isDebuggingOn) {
           $(img).attr('pixel-info', JSON.stringify(pixelInfo));
         }
-        score = 180 - Math.min(pixelInfo.numDiffGrayscaleVals, 150) -
-          pixelInfo.numMultiGrayscaleVals * 10 +
-          (pixelInfo.percentWithSameGrayscale > 0.3) * 50;
+
+        manyValuesScore = - Math.min(pixelInfo.numDifferentGrayscaleVals, 150); // More values -> less likely to be photo
+        manyReusedValuesScore = + pixelInfo.numMultiUseGrayscaleVals * 10; // Values reused -> less likely to be a photo
+        oneValueReusedOftenScore = (pixelInfo.percentWithSameGrayscale > 0.3) * -50;  // Large areas of same value -> less likely to be a photo
+        score = BASE_SCORE + manyValuesScore + manyReusedValuesScore + oneValueReusedOftenScore;
       }
       else {
-        score = 40;  // No pixel infO: use an average amount
+        score = DEFAULT_SCORE;  // No pixel info: use an average amount
       }
 
       onPixelScoreAvailable(score, true);  // true -> this was an expensive operation so we should cache the result
@@ -404,11 +414,14 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
       finalScore = sizeScore + elementTypeScore + extensionScore;
 
     if (finalScore < -MAX_SCORE_CHECK_PIXELS || finalScore > MAX_SCORE_CHECK_PIXELS) {
+      // Early return
       onInversionDecision(finalScore > 0);
+      return;
     }
 
     // Pixel info takes longer to get: only do it if necessary
     getPixelInfoScore(img, null, size, function (pixelInfoScore, didAnalyzePixels) {
+
       finalScore += pixelInfoScore;
 
       if (SC_DEV && isDebuggingOn) {
