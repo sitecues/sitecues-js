@@ -54,13 +54,7 @@ define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/plat
       currentBPParent,
       badgeElement,
       badgeRect = {},
-      badgeGeometry,//
-        // This is the ratio of the height allotted by the badge to the visible height.
-        // It is what we need to multiply the SVG height by to get the final desired height.
-        //ratioOfSVGToVisibleBadgeSize: undefined,
-        //
-        // This is the cached badge rect that we get when we temporarily force the badge to be visible
-        //cachedRect: undefined
+      badgeGeometry,
       bpElement,
       svgElement,
       currentZoom = 1,
@@ -229,15 +223,19 @@ define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/plat
   }
 
   function getRatioOfSVGToVisibleBadgeSize(badgeRect) {
+    // This is the ratio of the height allotted by the badge to the visible height.
+    // It is what we need to multiply the SVG height by to get the final desired height.
+    var ratioOfSVGToVisibleBadgeSize = state.get('ratioOfSVGToVisibleBadgeSize');
 
-    if (badgeGeometry.ratioOfSVGToVisibleBadgeSize) {
-      return badgeGeometry.ratioOfSVGToVisibleBadgeSize;
+    if (ratioOfSVGToVisibleBadgeSize) {
+      return ratioOfSVGToVisibleBadgeSize;
     }
 
     // First get the height for the third wave in the speech button, useful for measurements
     // It is the tallest and rightmost element
     var svgStyle         = svgElement.style,
-        badgeRectWidth   = badgeRect.width;
+        badgeRectWidth   = badgeRect.width,
+        waveHeight;
 
     // Set default height and width, because this normalizes cross browser inconsistencies
     // for SVG sizing.  Basically, if no height or width are set explicitly, then the viewBox
@@ -246,13 +244,17 @@ define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/plat
     // values no matter the browser.
     svgStyle.width  = badgeRectWidth + 'px';
     svgStyle.height = badgeRectWidth / svgAspectRatio + 'px';
+    waveHeight = helper.getRectById(BP_CONST.WAVE_3_ID).height;
 
-    badgeGeometry.ratioOfSVGToVisibleBadgeSize =
-      badgeRect.height / helper.getRectById(BP_CONST.WAVE_3_ID).height;
+    if (!waveHeight) {
+      waveHeight = badgeGeometry.waveHeight;
+    }
 
-    state.set('ratioOfSVGToVisibleBadgeSize', badgeGeometry.ratioOfSVGToVisibleBadgeSize);
+    ratioOfSVGToVisibleBadgeSize = badgeRect.height / waveHeight;
 
-    return badgeGeometry.ratioOfSVGToVisibleBadgeSize;
+    state.set('ratioOfSVGToVisibleBadgeSize', ratioOfSVGToVisibleBadgeSize);
+
+    return ratioOfSVGToVisibleBadgeSize;
   }
 
   function addClipRectStyleFix () {
@@ -318,10 +320,26 @@ define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/plat
     badgeElement.appendChild(bpElement);
 
     executeWhileElementIsRendered(badgeElement, function () {
-      var cachedRect = helper.getRect(badgeElement);
+      var cachedRect = helper.getRect(badgeElement),
+          contentBox = Object.create(cachedRect),
+          computedStyle = getComputedStyle(badgeElement),
+          paddingTop = Number.parseFloat(computedStyle.paddingTop),
+          paddingBottom = Number.parseFloat(computedStyle.paddingBottom),
+          paddingRight  = Number.parseFloat(computedStyle.paddingRight),
+          paddingLeft   = Number.parseFloat(computedStyle.paddingLeft);
+
+      contentBox.width  -= paddingLeft + paddingRight;
+      contentBox.height -= paddingTop  + paddingBottom;
+
+      bpElement.style.width   = contentBox.width;
+      bpElement.style.height  = contentBox.height;
+
+      svgElement.style.width  = contentBox.width + 'px';
+      svgElement.style.height = (contentBox.width / svgAspectRatio) + 'px';
 
       badgeGeometry = {
-        cachedRect : cachedRect
+        cachedRect : cachedRect,
+        waveHeight : helper.getRectById(BP_CONST.WAVE_3_ID).height
       };
 
     });
