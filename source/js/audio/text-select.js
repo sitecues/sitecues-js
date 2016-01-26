@@ -2,13 +2,19 @@
  * If speech is on, automatically speak newly selected regions in document.
  * Created by akhabibullina on 8/3/2015.
  */
-define([], function () {
+define(['$'], function ($) {
 
   var wasOn = false;
 
   // Speaking on a delay after mouseup avoids speaking the same thing twice
-  function speakSelectedTextOnDelay() {
-    setTimeout(speakSelectedText, 0);
+  function speakSelectedTextOnDelay(event) {
+    if (!isInPanel(event.target)) {
+      setTimeout(speakSelectedText, 0);
+    }
+  }
+
+  function isInPanel(element) {
+    return $(element).closest('#sitecues-badge').length > 0;
   }
 
   function speakSelectedText() {

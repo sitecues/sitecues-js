@@ -26,7 +26,7 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
     TRANSITION_CLASS = 'sc-animate-theme',
     TRANSITION_MS_FAST = 300,
     TRANSITION_MS_SLOW = 1400,
-    DEFAULT_INTENSITY = 0.7,
+    DEFAULT_INTENSITY = 0.61,  // Must match default slider position in settings-template.hbs #scp-theme-power
     URL_REGEXP = /url\((?:(?:[\'\" ])*([^\"\'\)]+)[\'\" ]*)/i,
     GRADIENT_REGEXP = /^\s*([\w-]+\s*gradient)\((.*)\).*$/i,
     BUTTON_REGEXP = /(?:^| |,)(?:(?:input\s*\[\s*type\s*=\s*\"(?:button|color|submit|reset)\"\s*\]\s*)|button)(?:$| |,|:)/;

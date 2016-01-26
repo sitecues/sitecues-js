@@ -61,7 +61,7 @@ define(['core/conf/site'], function(site) {
     }
     lastSlashIndex = pathname.lastIndexOf('/') + 1;
 
-    protocol = parser.protocol;
+    protocol = parser.protocol || document.location.protocol;  // IE does not include protocol unless it was specified. If not specified, get from current document.
     path = pathname.substring(0, lastSlashIndex);
     hostname = parser.hostname;
     origin = parser.origin;
@@ -109,6 +109,9 @@ define(['core/conf/site'], function(site) {
   }
 
   function getScriptOrigin() {
+    if (!scriptOrigin) {
+      scriptOrigin = getParsedLibraryURL().origin;
+    }
     return scriptOrigin;
   }
 
@@ -161,7 +164,6 @@ define(['core/conf/site'], function(site) {
   function init() {
     var domainEnding = isProduction() ? '.sitecues.com' : '.dev.sitecues.com';
     apiDomain = 'ws' + domainEnding + '/';
-    scriptOrigin = getParsedLibraryURL().origin;
   }
 
   return {
