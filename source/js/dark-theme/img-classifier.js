@@ -15,7 +15,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
     BUTTON_BONUS = 50,
     SVG_BONUS = 999,
     MAX_SCORE_CHECK_PIXELS = 210,
-    isDebuggingOn,
+    isDebuggingOn = true,
     CLASS_INVERT = 'i',
     CLASS_NORMAL = 'n';
 
@@ -27,11 +27,11 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
   function getInvertUrl(url) {
     var
       absoluteUrl = urls.resolveUrl(url),
-      // TODO ?url=
       apiUrl = urls.getApiUrl('image/invert?url=' + absoluteUrl); // TODO should we use encodeURIComponent(url)) ?
 
     // TODO remove this line when real service is ready
-    apiUrl = apiUrl.replace('/ws.', '/wsbeta.');
+    // TODO Getting CORS exceptions on http://www.cbssports.com/nba
+    apiUrl = apiUrl.replace('/ws.dev.', '/ws.');
 
     return apiUrl;
   }
@@ -118,8 +118,11 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
     // We may not be able to if the image is not from the same origin.
     //
     var grayscaleHistogram = [],
-      HISTOGRAM_SIZE = 500,
+      GRAYSCALE_HISTOGRAM_SIZE = 500,
       grayscaleVal,
+      hueHistogram = [],
+      HUE_HISTOGRAM_SIZE = 100,
+      hueIndex,
       byteIndex = 0,
       hasTransparentPixels = false,
       DWORD_SIZE = 4,
@@ -127,6 +130,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
       numDifferentGrayscaleVals = 0,
       numMultiUseGrayscaleVals = 0,
       numWithSameGrayscale,
+      numDifferentHues = 0,
       maxSameGrayscale = 0,
       MAX_PIXELS_TO_TEST = 523,
       area = height * width,
@@ -147,7 +151,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
       }
 
       grayscaleVal = colorUtil.getFastLuminance(rgba);
-      histogramIndex = Math.floor(grayscaleVal * HISTOGRAM_SIZE);
+      histogramIndex = Math.floor(grayscaleVal * GRAYSCALE_HISTOGRAM_SIZE);
 
       if (grayscaleHistogram[histogramIndex] > 0)  {
         numWithSameGrayscale = ++ grayscaleHistogram[histogramIndex];
@@ -162,6 +166,16 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
         grayscaleHistogram[histogramIndex] = 1;
         ++ numDifferentGrayscaleVals;
       }
+
+      hueIndex = Math.floor(colorUtil.rgbToHsl(rgba.r, rgba.g, rgba.b).h * HUE_HISTOGRAM_SIZE);
+      if (hueHistogram[hueIndex] > 0) {
+        ++ hueHistogram[hueIndex];
+      }
+      else {
+        hueHistogram[hueIndex] = 1;
+        ++ numDifferentHues;
+      }
+
     }
     if (SC_DEV && isDebuggingOn) {
       console.log('Histogram: %o', grayscaleHistogram);
@@ -172,7 +186,8 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
       hasTransparentPixels: hasTransparentPixels,
       numDifferentGrayscaleVals: numDifferentGrayscaleVals,
       numMultiUseGrayscaleVals: numMultiUseGrayscaleVals,
-      percentWithSameGrayscale: maxSameGrayscale / numPixelsToCheck
+      percentWithSameGrayscale: maxSameGrayscale / numPixelsToCheck,
+      numDifferentHues: numDifferentHues
     };
   }
 
@@ -253,29 +268,45 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
     }
 
     getPixelInfo(img, src, rect, function(pixelInfo) {
-      var score,
-        BASE_SCORE = 270,
-        DEFAULT_SCORE = 40,
+      var score = 0,
+        BASE_SCORE = 180,
         manyValuesScore,
         manyReusedValuesScore,
-        oneValueReusedOftenScore;
+        oneValueReusedOftenScore,
+        numHuesScore = 0;
 
       if (pixelInfo) {
-        // Image has full color information
-        if (SC_DEV && isDebuggingOn) {
-          $(img).attr('pixel-info', JSON.stringify(pixelInfo));
+        // Low score -> NO invert (probably photo)
+        // High score -> YES invert (probably logo, icon or image of text)
+
+        // More values -> more likely to be photo
+        manyValuesScore = -1.5 * Math.min(200, pixelInfo.numDifferentGrayscaleVals);
+
+        // Values reused -> less likely to be a photo
+        manyReusedValuesScore = 15 * pixelInfo.numMultiUseGrayscaleVals;
+
+        // One large swath of color -> less likely to be a photo. For example 30% -> +60 poitns
+        oneValueReusedOftenScore = Math.min(50, pixelInfo.percentWithSameGrayscale * 200);
+
+        // Many hues -> more likely to be a photo
+        if (pixelInfo.numDifferentHues < 8) {
+          // Few hues: probably not a photo -- YES invert
+          numHuesScore =  Math.pow(pixelInfo.numDifferentHues - 8, 2) * 1.5;
+        }
+        else if (pixelInfo.numDifferentHues > 35) {
+          // Many hues: probably a photo -- NO invert
+          numHuesScore =  pixelInfo.numDifferentHues * -2;
         }
 
-        // Low score -> invert (probably photo)
-        // High score -> invert (probably text or icon)
-
-        manyValuesScore = -1.5 * Math.min(pixelInfo.numDifferentGrayscaleVals, 200); // More values -> more likely to be photo
-        manyReusedValuesScore = 15 * pixelInfo.numMultiUseGrayscaleVals; // Values reused -> less likely to be a photo
-        oneValueReusedOftenScore = 75 * (pixelInfo.percentWithSameGrayscale > 0.35);  // Large areas of same value -> less likely to be a photo
-        score = BASE_SCORE + manyValuesScore + manyReusedValuesScore + oneValueReusedOftenScore;
+        score = BASE_SCORE + manyValuesScore + manyReusedValuesScore + oneValueReusedOftenScore + numHuesScore;
+        // Image has full color information
+        if (SC_DEV && isDebuggingOn) {
+          $(img).attr('data-sc-pixel-info', JSON.stringify(pixelInfo));
+          $(img).attr('data-sc-pixel-score', score);
+        }
       }
-      else {
-        score = DEFAULT_SCORE;  // No pixel info: use an average amount
+      else if (SC_DEV && isDebuggingOn) {
+        $(img).attr('data-sc-pixel-score', 'invalid');
       }
 
       onPixelScoreAvailable(score, true);  // true -> this was an expensive operation so we should cache the result
@@ -313,10 +344,6 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
   function classifyLoadableImage(img, onShouldReverseImage) {
     function classifyLoadedImage() {
       shouldInvertElement(img, function(isReversible, didAnalyzePixels) {
-
-        if (SC_DEV && isDebuggingOn) {
-          $(img).css('outline', '5px solid ' + (isReversible ? 'red' : 'green'));
-        }
 
         if (didAnalyzePixels) {
           // Only cache for expensive operations, in order to save on storage space
