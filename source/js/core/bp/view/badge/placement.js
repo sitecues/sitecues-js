@@ -214,7 +214,7 @@ define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/plat
   function fitSVGtoBadgeRect() {
 
     var svgStyle  = svgElement.style,
-        svgWidth  = badgeRect.width * badgeGeometry.ratioOfSVGToVisibleBadgeSize / getAppliedBPZoom(),
+        svgWidth  = badgeRect.width * getRatioOfSVGToVisibleBadgeSize(badgeRect) / getAppliedBPZoom(),
         svgHeight = svgWidth / svgAspectRatio;
 
     svgStyle.width  = svgWidth  + 'px';
@@ -229,6 +229,11 @@ define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/plat
   }
 
   function getRatioOfSVGToVisibleBadgeSize(badgeRect) {
+
+    if (badgeGeometry.ratioOfSVGToVisibleBadgeSize) {
+      return badgeGeometry.ratioOfSVGToVisibleBadgeSize;
+    }
+
     // First get the height for the third wave in the speech button, useful for measurements
     // It is the tallest and rightmost element
     var svgStyle         = svgElement.style,
@@ -242,7 +247,12 @@ define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/plat
     svgStyle.width  = badgeRectWidth + 'px';
     svgStyle.height = badgeRectWidth / svgAspectRatio + 'px';
 
-    return badgeRect.height / helper.getRectById(BP_CONST.WAVE_3_ID).height;
+    badgeGeometry.ratioOfSVGToVisibleBadgeSize =
+      badgeRect.height / helper.getRectById(BP_CONST.WAVE_3_ID).height;
+
+    state.set('ratioOfSVGToVisibleBadgeSize', badgeGeometry.ratioOfSVGToVisibleBadgeSize);
+
+    return badgeGeometry.ratioOfSVGToVisibleBadgeSize;
   }
 
   function addClipRectStyleFix () {
@@ -308,17 +318,14 @@ define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/plat
     badgeElement.appendChild(bpElement);
 
     executeWhileElementIsRendered(badgeElement, function () {
-      var cachedRect = helper.getRect(badgeElement),
-          ratioOfSVGToVisibleBadgeSize = getRatioOfSVGToVisibleBadgeSize(cachedRect);
+      var cachedRect = helper.getRect(badgeElement);
 
       badgeGeometry = {
-        ratioOfSVGToVisibleBadgeSize : ratioOfSVGToVisibleBadgeSize,
         cachedRect : cachedRect
       };
 
     });
 
-    state.set('ratioOfSVGToVisibleBadgeSize', badgeGeometry.ratioOfSVGToVisibleBadgeSize);
   }
 
   function rectHasNoArea(rect) {
