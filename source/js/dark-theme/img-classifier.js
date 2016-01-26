@@ -14,7 +14,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
     DARK_BG_THRESHOLD = 0.3,
     BUTTON_BONUS = 50,
     SVG_BONUS = 999,
-    MAX_SCORE_CHECK_PIXELS = 120,
+    MAX_SCORE_CHECK_PIXELS = 210,
     isDebuggingOn,
     CLASS_INVERT = 'i',
     CLASS_NORMAL = 'n';
@@ -254,7 +254,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
 
     getPixelInfo(img, src, rect, function(pixelInfo) {
       var score,
-        BASE_SCORE = 180,
+        BASE_SCORE = 270,
         DEFAULT_SCORE = 40,
         manyValuesScore,
         manyReusedValuesScore,
@@ -266,9 +266,12 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
           $(img).attr('pixel-info', JSON.stringify(pixelInfo));
         }
 
-        manyValuesScore = - Math.min(pixelInfo.numDifferentGrayscaleVals, 150); // More values -> less likely to be photo
-        manyReusedValuesScore = + pixelInfo.numMultiUseGrayscaleVals * 10; // Values reused -> less likely to be a photo
-        oneValueReusedOftenScore = (pixelInfo.percentWithSameGrayscale > 0.3) * -50;  // Large areas of same value -> less likely to be a photo
+        // Low score -> invert (probably photo)
+        // High score -> invert (probably text or icon)
+
+        manyValuesScore = -1.5 * Math.min(pixelInfo.numDifferentGrayscaleVals, 200); // More values -> more likely to be photo
+        manyReusedValuesScore = 15 * pixelInfo.numMultiUseGrayscaleVals; // Values reused -> less likely to be a photo
+        oneValueReusedOftenScore = 75 * (pixelInfo.percentWithSameGrayscale > 0.35);  // Large areas of same value -> less likely to be a photo
         score = BASE_SCORE + manyValuesScore + manyReusedValuesScore + oneValueReusedOftenScore;
       }
       else {
