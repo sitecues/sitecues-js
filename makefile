@@ -133,7 +133,7 @@ clean:
 deps: $(_clean_deps)
 	@echo "Dependency setup started."
 	@mkdir -p node_modules
-	@npm install
+	@npm install --progress=false
 	@echo $(node-package-checksum) > $(node-package-checksum-file)
 	@echo "Dependency setup completed."
 
