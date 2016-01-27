@@ -1,6 +1,6 @@
 define(['page/util/color', 'dark-theme/img-classifier'], function(colorUtil, imgClassifier) {
-  var BG_IMAGE_BONUS = 100,
-    MAX_SCORE_CHECK_PIXELS = 70;
+  var BG_IMAGE_BONUS = 40,
+    MAX_SCORE_CHECK_PIXELS = 200;
 
   function shouldInvertBackgroundImage(src, size, onInversionDecision) {
     var imageExt = imgClassifier.getImageExtension(src);

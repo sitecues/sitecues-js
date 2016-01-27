@@ -14,7 +14,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
     DARK_BG_THRESHOLD = 0.3,
     BUTTON_BONUS = 50,
     SVG_BONUS = 999,
-    MAX_SCORE_CHECK_PIXELS = 210,
+    MAX_SCORE_CHECK_PIXELS = 200,
     isDebuggingOn = true,
     CLASS_INVERT = 'i',
     CLASS_NORMAL = 'n';
@@ -45,7 +45,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
     // - Will run into cross-domain restrictions because URL is from different domain
     // This is not an issue with the extension, because the content script doesn't have cross-domain restrictions
     var url = src || img.getAttribute('src'),
-      isSafeRequest = SC_EXTENSION || !urls.isOnDifferentDomain(url),
+      isSafeRequest = !urls.isOnDifferentDomain(url),
       safeUrl;
 
     function returnImageWhenComplete(loadableImg) {
@@ -107,7 +107,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
       }
       catch (ex) {
         if (SC_DEV && isDebuggingOn) {
-          console.log('Could not get image data for %s: %s', readableImg.src, ex);
+          console.log('Could not get image data for %s: %o', readableImg.src, ex);
         }
       }
       onImageDataAvailable(imageData);
@@ -184,11 +184,6 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
         hueHistogram[hueIndex] = 1;
         ++ numDifferentHues;
       }
-
-    }
-    if (SC_DEV && isDebuggingOn) {
-      console.log('Histogram: %o', grayscaleHistogram);
-      console.log('numDiff = ' + numDifferentGrayscaleVals + ' numMulti = ' + numMultiUseGrayscaleVals);
     }
 
     return {
@@ -271,6 +266,8 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
 
   // Either pass img or src, but not both
   function getPixelInfoScore(img, src, rect, onPixelScoreAvailable) {
+    //if (src && src.indexOf('banner') >0 ) debugger;
+
     if (rect.width <= 1 || rect.height <= 1) {
       onPixelScoreAvailable(0); // It's possible that image simply isn't loaded yet, scroll down in brewhoop.com
       return;
