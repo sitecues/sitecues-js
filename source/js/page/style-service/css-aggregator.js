@@ -95,6 +95,8 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
         console.log('Cross-Domain: ' + url);
       }
       // Use sitecues CSS proxy to bypass CORS restrictions on fetching CSS text for analysis
+      // Example of page that needs this: http://www.dcmetrobln.org/about-us
+      // TODO update to new URL format
       url = urls.getApiUrl('css-proxy/' + url);
     }
 

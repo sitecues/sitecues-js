@@ -1,22 +1,10 @@
 /**
  * Basic metrics logger
  */
-define(['core/conf/user/manager', 'core/util/uuid', 'core/conf/site', 'core/locale', 'core/platform', 'core/util/xhr', 'core/conf/urls'],
-  function (conf, uuid, site, locale, platform, xhr, urls) {
+define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/locale', 'core/platform', 'core/util/xhr', 'core/conf/urls'],
+  function (conf, session, site, locale, platform, xhr, urls) {
 
-    var pageViewId = uuid(),
-      sessionId = getSessionId(),
-      METRICS_VERSION = 4;
-
-    function getSessionId() {
-      var SESSION_ID_KEY = '-sc-session-id',
-        id = window.sessionStorage.getItem(SESSION_ID_KEY);
-      if (!id) {
-        id = uuid();
-        window.sessionStorage.setItem(SESSION_ID_KEY, id);
-      }
-      return id;
-    }
+    var METRICS_VERSION = 5;
 
     // IMPORTANT! Increment METRICS_VERSION this every time metrics change in any way
     // IMPORTANT! Have the backend team review all metrics changes!!!
@@ -38,8 +26,8 @@ define(['core/conf/user/manager', 'core/util/uuid', 'core/conf/site', 'core/loca
           clientTimeMs: +new Date(),    // Epoch time in milliseconds  when the event occurred
 
           // Who (details about session and user)
-          sessionId: sessionId,   // A random UUID v4 for this session -- stable between page loads in the same tab
-          pageViewId: pageViewId,  // A random UUID v4 for this page view
+          sessionId: session.sessionId,   // A random UUID v4 for this session -- stable between page loads in the same tab
+          pageViewId: session.pageViewId,  // A random UUID v4 for this page view
           userId: conf.getUserId(),
           zoomLevel: conf.get('zoom') || 1,
           ttsState: conf.get('ttsOn') || false,

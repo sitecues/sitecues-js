@@ -118,7 +118,7 @@ debug: $(_force-deps-refresh)
 #	Build and package up the files into a deployable bundle
 ################################################################################
 package: $(_force-deps-refresh)
-	DEBUG=off MINIFY=off $(gulp) package
+	DEBUG=off MINIFY=on $(gulp) package
 
 ################################################################################
 # TARGET: clean
@@ -133,7 +133,7 @@ clean:
 deps: $(_clean_deps)
 	@echo "Dependency setup started."
 	@mkdir -p node_modules
-	@npm install
+	@npm install --progress=false
 	@echo $(node-package-checksum) > $(node-package-checksum-file)
 	@echo "Dependency setup completed."
 
