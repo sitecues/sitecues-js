@@ -65,14 +65,12 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
       }, 0);
     }
   }
-  // Will cross-domain restrictions possibly burn us?
-  function isOnDifferentDomain(cssUrl) {
-    function getHostName(url) {
-      return urls.parseUrl(url).hostname;
-    }
 
-    // For our purposes, hostname is the same as the domain
-    return getHostName(cssUrl) !== document.location.hostname;
+  // TODO update to new URL format
+  // Example of page that needs this: http://www.dcmetrobln.org/about-us
+  function getCssProxyUrl(url) {
+    var absoluteUrl = urls.resolveUrl(url);
+    return urls.getApiUrl('css-proxy/' + absoluteUrl);
   }
 
   /**
@@ -83,21 +81,17 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
    * @return {Object}
    */
   function createGetRequest(url) {
-    function isUnsafeRequest() {
-      // Unsafe cross-origin request
-      // - Will run into cross-domain restrictions because URL is from different domain
-      // This is not an issue with the extension, because the content script doesn't have cross-domain restrictions
-      return !SC_EXTENSION && isOnDifferentDomain(url);
-    }
+    // Unsafe cross-origin request
+    // - Will run into cross-domain restrictions because URL is from different domain
+    // This is not an issue with the extension, because the content script doesn't have cross-domain restrictions
+    var isUnsafeRequest = !SC_EXTENSION && urls.isOnDifferentDomain(url);
 
-    if (isUnsafeRequest()) {
+    if (isUnsafeRequest) {
       if (SC_DEV) {
         console.log('Cross-Domain: ' + url);
       }
       // Use sitecues CSS proxy to bypass CORS restrictions on fetching CSS text for analysis
-      // Example of page that needs this: http://www.dcmetrobln.org/about-us
-      // TODO update to new URL format
-      url = urls.getApiUrl('css-proxy/' + url);
+      url = getCssProxyUrl(url);
     }
 
     // Credit to Nicholas Zakas
@@ -129,35 +123,6 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
     processSheetCss(sheet);
 
     finalizeCssIfComplete();
-  }
-
-  function getParsedSheetUrl(sheet) {
-    return urls.parseUrl(sheet.url);
-  }
-
-  // The regular expression for an absolute URL. There is a capturing group for
-  // the protocol-relative portion of the URL.
-  var ABSOLUTE_URL_REGEXP = /^[a-zA-Z0-9-]+:(\/\/.*)$/i;
-
-  // Resolve a URL as relative to a base URL.
-  function resolveUrl(urlStr, baseUrl) {
-    var absRegExpResult = ABSOLUTE_URL_REGEXP.exec(urlStr);
-    if (absRegExpResult) {
-      // We have an absolute URL, with protocol. That's a no-no, so, convert to a
-      // protocol-relative URL.
-      urlStr = absRegExpResult[1];
-    } else if (urlStr.indexOf('//') === 0) {
-      // Protocol-relative No need to modify the URL,
-      // as we will inherit the containing page's protocol.
-    } else if (urlStr.indexOf('/') === 0) {
-      // Host-relative URL.
-      urlStr = '//' + baseUrl.hostname + urlStr;
-    } else {
-      // A directory-relative URL.
-      urlStr = '//' + baseUrl.hostname + baseUrl.path + urlStr;
-    }
-
-    return urlStr;
   }
 
   /**
@@ -198,13 +163,10 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
      background: url(//int.nyt.com/applications/portals/assets/loader-t-logo-32x32-ecedeb-49955d7789658d80497f4f2b996577f6.gif)
      */
 
-    var RELATIVE_URL_REGEXP = /url\((?:(?:[\'\" ])*(?!data:|https?:\/\/|\/\/)([^\"\'\)]+)[\'\" ]*)/gi,
-      baseUrlObject;
+    var RELATIVE_URL_REGEXP = /url\((?:(?:[\'\" ])*(?!data:|https?:\/\/|\/\/)([^\"\'\)]+)[\'\" ]*)/gi;
     return sheet.text.replace(RELATIVE_URL_REGEXP, function (totalMatch, actualUrl) {
       // totalMatch includes the prefix string  url("      - whereas actualUrl is just the url
-      baseUrlObject = baseUrlObject || getParsedSheetUrl(sheet);
-      var newUrl = 'url(' + resolveUrl(actualUrl, baseUrlObject);
-      return newUrl;
+      return 'url(' + urls.resolveUrl(actualUrl, sheet.url);
     });
   }
 
@@ -217,8 +179,7 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
 
   // Convert @import into new stylesheet requests
   function processAtImports(sheet) {
-    var IMPORT_REGEXP = /\s*(?:@import\s+url\((?:(?:['" ])*([^"'\)]+)['" ]*)\)\s*([^;$]*))/gi,
-      baseUrlObject;
+    var IMPORT_REGEXP = /\s*(?:@import\s+url\((?:(?:['" ])*([^"'\)]+)['" ]*)\)\s*([^;$]*))/gi;
 
     return sheet.text.replace(IMPORT_REGEXP, function(totalMatch, actualUrl, mediaQuery) {
       // Insert sheet for retrieval before this sheet, so that the order of precedence is preserved
@@ -227,8 +188,7 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
         console.log('@import media query: ' + mediaQuery);
       }
       if (mediaQueries.isActiveMediaQuery(mediaQuery)) {
-        baseUrlObject = baseUrlObject || getParsedSheetUrl(sheet);
-        insertNewSheetBefore(sheet, resolveUrl(actualUrl, baseUrlObject));
+        insertNewSheetBefore(sheet, urls.resolveUrl(actualUrl, sheet.url));
       }
       // Now remove @import line from CSS so that it does not get reprocessed
       return '';
