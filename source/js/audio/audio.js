@@ -11,8 +11,8 @@
  */
 
 define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder', 'core/platform',
-    'core/locale', 'core/metric', 'core/conf/urls', 'audio/html5-player', 'audio/text-select'],
-  function(conf, site, $, builder, platform, locale, metric, urls, audioPlayer, textSelect) {
+    'core/locale', 'core/metric', 'core/conf/urls', 'audio/network-player', 'audio/text-select'],
+  function(conf, site, $, builder, platform, locale, metric, urls, networkPlayer, textSelect) {
 
   var ttsOn = false,
     isAudioPlaying,
@@ -26,7 +26,7 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
       HIGHLIGHT: 'shift'
     };
 
-  function onHlbOpened(hlbContent, fromHighlight) {
+  function onLensOpened(lensContent, fromHighlight) {
     if (!ttsOn) {
       return;
     }
@@ -34,7 +34,7 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
   }
 
   function speakContent(content, doAvoidInterruptions) {
-    if (doAvoidInterruptions && audioPlayer.isBusy()) {
+    if (doAvoidInterruptions && networkPlayer.isBusy()) {
       return; // Already reading the highlight
     }
     if (!content) {
@@ -73,7 +73,7 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
         });
       }
 
-      audioPlayer.playAudioSrc(TTSUrl, onSpeechComplete);
+      networkPlayer.playAudioSrc(TTSUrl, onSpeechComplete);
 
       isAudioPlaying = true;
       sitecues.emit('audio/speech-play', TTSUrl);
@@ -84,14 +84,14 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
   function addStopAudioHandlers() {
     // Stop speech on any key down.
     // Wait a moment, in case it was a keystroke that just got us here,
-    // for example down arrow to read next HLB or a hotkey to toggle speech
+    // for example down arrow to read next Lens or a hotkey to toggle speech
     removeBlurHandler();
     $(window).one('blur', stopAudio);
   }
 
-    // Remove handler that stops speech on any key down.
+  // Remove handler that stops speech on any key down.
   function removeBlurHandler() {
-    $(window).off('blur', stopAudio);
+    removeEventListener('blur', stopAudio);
   }
 
   /*
@@ -101,7 +101,7 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
    */
   function stopAudio() {
     if (isAudioPlaying) {
-      audioPlayer.stop();
+      networkPlayer.stop();
       removeBlurHandler();
       isAudioPlaying = false;
     }
@@ -178,7 +178,7 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
     var url = getAudioKeyUrl(key);
     getAudioPlayer(function() {
       isAudioPlaying = true;
-      audioPlayer.playAudioSrc(url);
+      networkPlayer.playAudioSrc(url);
       // Stop speech on any key down.
       addStopAudioHandlers();
     });
@@ -190,7 +190,7 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
     var url = urls.resolveResourceUrl('earcons/' + earconName + '.' + getMediaTypeForPrerecordedAudio());
 
     getAudioPlayer(function() {
-      audioPlayer.playAudioSrc(url);
+      networkPlayer.playAudioSrc(url);
     });
   }
 
@@ -328,7 +328,7 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
      * A highlight box has been requested.  This will create the player
      * if necessary, but will not play anything.
      */
-    sitecues.on('hlb/did-create', onHlbOpened);
+    sitecues.on('hlb/did-create', onLensOpened);
 
     /*
      * A highlight box was closed.  Stop/abort/dispose of the player
