@@ -16,6 +16,7 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
     isInitialized,
     originalBodyBackgroundColor,
     isOriginalThemeDark,
+    isDark,   // Is dark theme currently applied
     darkTheme,
     isDarkBgInfoInitialized,
     transitionTimer,
@@ -41,11 +42,9 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
 
     function applyThemeImpl() {
       var
-        isDark = colorUtil.isDarkColor(colorUtil.getDocumentBackgroundColor()),
         willBeDark = isDarkTheme(colorMapFn),
         isReverseTheme = willBeDark !== isOriginalThemeDark,
         themeCss = colorMapFn ? getThemeCssText(colorMapFn, currentThemePower, currentThemeTextHue) : '',
-
         imgCss = '',
         // We want to animate quickly between light themes, but slowly when performing a drastic change
         // such as going from light to dark or vice-versa
@@ -79,6 +78,8 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
           bpAdaptive.adaptToSitecuesThemeChange(currentThemeName);
         });
       }, transitionMs);
+
+      isDark = willBeDark;
     }
 
     var colorMapFn = colorChoices[currentThemeName];

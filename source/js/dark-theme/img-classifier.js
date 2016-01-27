@@ -80,7 +80,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
   function createSafeImage(url) {
     var $safeImg = $('<img>')
       .attr('src', url)
-      .attr('crossorigin', 'anonymous'); // Allows use of cross-origin image ata
+      .attr('crossorigin', 'anonymous'); // Allows use of cross-origin image data
 
     return $safeImg[0];
 
