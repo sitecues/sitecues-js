@@ -118,7 +118,7 @@ debug: $(_force-deps-refresh)
 #	Build and package up the files into a deployable bundle
 ################################################################################
 package: $(_force-deps-refresh)
-	DEBUG=off MINIFY=off $(gulp) package
+	DEBUG=off MINIFY=on $(gulp) package
 
 ################################################################################
 # TARGET: clean
