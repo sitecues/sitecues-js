@@ -222,6 +222,10 @@ define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/plat
     fixUseElementsInIE();
   }
 
+  function getWaveHeight() {
+    return helper.getRectById(BP_CONST.WAVE_3_ID).height;
+  }
+
   function getRatioOfSVGToVisibleBadgeSize(badgeRect) {
     // This is the ratio of the height allotted by the badge to the visible height.
     // It is what we need to multiply the SVG height by to get the final desired height.
@@ -244,11 +248,7 @@ define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/plat
     // values no matter the browser.
     svgStyle.width  = badgeRectWidth + 'px';
     svgStyle.height = badgeRectWidth / svgAspectRatio + 'px';
-    waveHeight = helper.getRectById(BP_CONST.WAVE_3_ID).height;
-
-    if (!waveHeight) {
-      waveHeight = badgeGeometry.waveHeight;
-    }
+    waveHeight = getWaveHeight() || badgeGeometry.waveHeight;
 
     ratioOfSVGToVisibleBadgeSize = badgeRect.height / waveHeight;
 
@@ -323,7 +323,7 @@ define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/plat
       var cachedRect = helper.getRect(badgeElement),
           contentBox = Object.create(cachedRect),
           computedStyle = getComputedStyle(badgeElement),
-          paddingTop = Number.parseFloat(computedStyle.paddingTop),
+          paddingTop    = Number.parseFloat(computedStyle.paddingTop),
           paddingBottom = Number.parseFloat(computedStyle.paddingBottom),
           paddingRight  = Number.parseFloat(computedStyle.paddingRight),
           paddingLeft   = Number.parseFloat(computedStyle.paddingLeft);
@@ -339,7 +339,7 @@ define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/plat
 
       badgeGeometry = {
         cachedRect : cachedRect,
-        waveHeight : helper.getRectById(BP_CONST.WAVE_3_ID).height
+        waveHeight : getWaveHeight()
       };
 
     });
