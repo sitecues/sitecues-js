@@ -129,7 +129,7 @@ define(['core/conf/site'], function(site) {
     catch(ex) {
     }
 
-    // TODO support for IE9 -- remove when re remove IE9 support
+    // TODO support for IE9 -- remove when we remove IE9 support
     var parsedBaseUrl = parseUrl(baseUrl || '.');
 
     var absRegExpResult = ABSOLUTE_URL_REGEXP.exec(urlStr);
