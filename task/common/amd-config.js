@@ -9,6 +9,10 @@ var config = require('../build-config'),
   sourceFolders = bundleFolders.concat(dataFolders),
   extend = require('extend'),
   JS_SOURCE_DIR = config.librarySourceDir + '/js',
+  PATHS = {
+    '$': 'empty:', // Allows runtime config to switch between jQuery and Zepto as necessary
+    'Promise': 'empty:'   // In runtime config, via definePrim : 'Promise' to allow use of alameda's built-in Prim library
+  },
   AMD_BASE_CONFIG = {
     wrap: {
       start: '"use strict";\n'
@@ -19,7 +23,7 @@ var config = require('../build-config'),
     removeCombined: false,
     optimize: 'uglify2',
     namespace: 'sitecues',
-    useStrict: true,
+    useStrict: true
   },
   AMD_SPECIAL_CONFIGS = {
     // Core module special treatment
@@ -72,7 +76,7 @@ function getBundleConfig(amdConfig, bundleName) {
   amdConfig.fileExclusionRegExp = new RegExp('^' + bundleName + '$');
   includeMainModule(amdConfig, bundleName);
 
-  var paths = { '$': 'empty:' }; // Determine location of $ at runtime (jquery vs zepto)
+  var paths = extend({}, PATHS); // Determine location of $ at runtime (jquery vs zepto)
 
   bundleFolders.forEach(function(otherBundle) {
     if (otherBundle !== bundleName) {
