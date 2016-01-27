@@ -46,8 +46,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
     // This is not an issue with the extension, because the content script doesn't have cross-domain restrictions
     var url = src || img.getAttribute('src'),
       isSafeRequest = SC_EXTENSION || !urls.isOnDifferentDomain(url),
-      safeUrl,
-      safeImg;
+      safeUrl;
 
     function returnImageWhenComplete(loadableImg) {
       if (loadableImg.complete) {
@@ -65,7 +64,9 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
         returnImageWhenComplete(img); // The <img> in the DOM can have its pixels queried
         return;
       }
-      safeUrl = url;  // Image element was not an <img>. Will create an <img> based on the url
+      // Element we want to read is not an <img> -- for example, <input type="image">
+      // Create an <img> with the same url so we can apply it to the cancvas
+      safeUrl = url;
     }
     else {
       // Uses inverted image for analysis so that if we need to display it, it's already in users cache.
@@ -73,8 +74,16 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
       safeUrl = getInvertUrl(url);
     }
 
-    safeImg = $('<img>').attr('src', safeUrl)[0];
-    returnImageWhenComplete(safeImg);
+    returnImageWhenComplete(createSafeImage(safeUrl));
+  }
+
+  function createSafeImage(url) {
+    var $safeImg = $('<img>')
+      .attr('src', url)
+      .attr('crossorigin', 'anonymous'); // Allows use of cross-origin image ata
+
+    return $safeImg[0];
+
   }
 
   // Either pass img or src, but not both
