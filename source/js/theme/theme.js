@@ -74,7 +74,7 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
         if (shouldRepaintToEnsureFullCoverage) {
           repaintPage();
         }
-        sitecues.require(['bp-adaptive/bp-adaptive'], function(bpAdaptive) {
+        require(['bp-adaptive/bp-adaptive'], function(bpAdaptive) {
           bpAdaptive.adaptToSitecuesThemeChange(currentThemeName);
         });
       }, transitionMs);
