@@ -21,6 +21,7 @@ var require = {
   // Tell loader to never search for or execute a script with a "data-main"
   // attribute, since this could have weird consequences on customer pages.
   skipDataMain : true,
+  definePrim : 'Promise',  // Defines the module id that we want to expose prim as
   baseUrl: (function(config) {
     var resourceFolderName = SC_RESOURCE_FOLDER_NAME,
       scriptUrl = config.scriptUrl || config.script_url, // Old load script sometimes used underscore names, which is deprecated but still supported
@@ -735,7 +736,8 @@ var requirejs, require, define;
                     bundles: true,
                     config: true,
                     map: true
-                };
+                },
+              primId;
 
             eachProp(cfg, function (value, prop) {
                 if (objs[prop]) {
@@ -747,6 +749,12 @@ var requirejs, require, define;
                     config[prop] = value;
                 }
             });
+
+            // If want prim injected, inject it now.
+            primId = config.definePrim;
+            if (primId) {
+              waiting[primId] = [primId, [], function () { return prim; }];
+            }
 
             return req;
         };
