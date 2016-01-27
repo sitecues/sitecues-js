@@ -79,11 +79,13 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
 
   function createSafeImage(url) {
     var $safeImg = $('<img>')
-      .attr('src', url)
-      .attr('crossorigin', 'anonymous'); // Allows use of cross-origin image data
+      // Allows use of cross-origin image data
+      .attr('crossorigin', 'anonymous')
+      // Set after crossorigin is set! The order matters.
+      // See http://stackoverflow.com/questions/23123237/drawing-images-to-canvas-with-img-crossorigin-anonymous-doesnt-work
+      .attr('src', url);
 
     return $safeImg[0];
-
   }
 
   // Either pass img or src, but not both
