@@ -74,9 +74,12 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
         if (shouldRepaintToEnsureFullCoverage) {
           repaintPage();
         }
-        require(['bp-adaptive/bp-adaptive'], function(bpAdaptive) {
-          bpAdaptive.adaptToSitecuesThemeChange(currentThemeName);
-        });
+        if (!SC_EXTENSION) {
+          // Don't do this in extension -- there is no badge
+          require(['bp-adaptive/bp-adaptive'], function (bpAdaptive) {
+            bpAdaptive.adaptToSitecuesThemeChange(currentThemeName);
+          });
+        }
       }, transitionMs);
 
       isDark = willBeDark;
