@@ -268,7 +268,6 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
 
   // Either pass img or src, but not both
   function getPixelInfoScore(img, src, rect, onPixelScoreAvailable) {
-    //if (src && src.indexOf('banner') >0 ) debugger;
 
     if (rect.width <= 1 || rect.height <= 1) {
       onPixelScoreAvailable(0); // It's possible that image simply isn't loaded yet, scroll down in brewhoop.com
