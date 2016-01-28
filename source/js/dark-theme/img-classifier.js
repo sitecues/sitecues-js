@@ -27,10 +27,9 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
   function getInvertUrl(url) {
     var
       absoluteUrl = urls.resolveUrl(url),
-      apiUrl = urls.getApiUrl('image/invert?url=' + absoluteUrl); // TODO should we use encodeURIComponent(url)) ?
+      apiUrl = urls.getApiUrl('image/invert?url=' + encodeURIComponent(absoluteUrl));
 
-    // TODO remove this line when real service is ready
-    // TODO Getting CORS exceptions on http://www.cbssports.com/nba
+    // TODO remove this line when dev servers are updated
     apiUrl = apiUrl.replace('/ws.dev.', '/ws.');
 
     return apiUrl;

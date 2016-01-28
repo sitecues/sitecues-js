@@ -66,11 +66,11 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
     }
   }
 
-  // TODO update to new URL format
+  // TODO update to new URL format? Or is this fine as it is?
   // Example of page that needs this: http://www.dcmetrobln.org/about-us
   function getCssProxyUrl(url) {
     var absoluteUrl = urls.resolveUrl(url);
-    return urls.getApiUrl('css-proxy/' + absoluteUrl);
+    return urls.getApiUrl('css-proxy/' + encodeURIComponent(absoluteUrl));
   }
 
   /**
