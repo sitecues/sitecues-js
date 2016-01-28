@@ -32,8 +32,9 @@ define(['core/conf/site'], function(site) {
   //
   //////////////////////////////////////////////////////////////////////////////////////////
 
-  // Parse a URL into { host, path }
+  // Parse a URL into { protocol, hostname, origin, path }
   // Does not support mailto links (or anything where the protocol isn't followed by //)
+  // TODO After we kill IE9, we can move to new URL(), but be careful of IE incompatibilities (e.g. port, origin, host)
   function parseUrl(urlStr) {
     if (typeof urlStr !== 'string') {
       return;
@@ -114,6 +115,52 @@ define(['core/conf/site'], function(site) {
     return scriptOrigin;
   }
 
+  // The regular expression for an absolute URL. There is a capturing group for
+  // the protocol-relative portion of the URL.
+  var ABSOLUTE_URL_REGEXP = /^[a-zA-Z0-9-]+:(\/\/.*)$/i;
+
+  // Return an absolute URL. If the URL was relative, return an absolute URL that is relative to a base URL.
+  // @optional parsedBaseUrl If not provided, will use the current page.
+  function resolveUrl(urlStr, baseUrl) {
+    try {
+      var parsedUrl = new URL(urlStr, baseUrl || document.location);
+      return parsedUrl.toString();
+    }
+    catch(ex) {
+    }
+
+    // TODO support for IE9 -- remove when we remove IE9 support
+    var parsedBaseUrl = parseUrl(baseUrl || '.');
+
+    var absRegExpResult = ABSOLUTE_URL_REGEXP.exec(urlStr);
+    if (absRegExpResult) {
+      // We have an absolute URL, with protocol. That's a no-no, so, convert to a
+      // protocol-relative URL.
+      urlStr = urlStr;
+    } else if (urlStr.indexOf('//') === 0) {
+      // Protocol-relative. Add parsedBaseUrl's protocol.
+      urlStr = parsedBaseUrl.protocol + urlStr;
+    } else if (urlStr.indexOf('/') === 0) {
+      // Host-relative URL.
+      urlStr = parsedBaseUrl.origin + urlStr;
+    } else {
+      // A directory-relative URL.
+      urlStr = parsedBaseUrl.origin + parsedBaseUrl.path + urlStr;
+    }
+
+    // Replace ../ at beginning of path with just / as there is no parent folder to go to
+    urlStr = urlStr.replace(/(^http[^\/]+\/\/[^\/]+\/)(?:\.\.\/)/, '$1', 'i');
+
+    return urlStr;
+  }
+
+  function isOnDifferentDomain(url) {
+    // Will cross-domain restrictions possibly burn us?
+    var hostName = parseUrl(url).hostname;
+    // For our purposes, hostname is the same as the domain
+    return hostName !== document.location.hostname;
+  }
+
   function init() {
     var domainEnding = isProduction() ? '.sitecues.com' : '.dev.sitecues.com';
     apiDomain = 'ws' + domainEnding + '/';
@@ -126,7 +173,9 @@ define(['core/conf/site'], function(site) {
     isValidLibraryUrl: isValidLibraryUrl,
     getRawScriptUrl: getRawScriptUrl,
     resolveResourceUrl: resolveResourceUrl,
-    parseUrl: parseUrl
+    parseUrl: parseUrl,
+    isOnDifferentDomain: isOnDifferentDomain,
+    resolveUrl: resolveUrl
   };
 
 });

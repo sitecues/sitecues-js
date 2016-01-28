@@ -188,15 +188,12 @@ var requirejs, require, define;
                     }
                     called = true;
 
-                    try {
-                        var then = v && v.then;
-                        if (!isFunObj(v) || typeof then !== 'function') {
-                            p[prop] = v;
-                            notify(listeners, v);
-                        }
-                    } catch (e) {
-                        called = false;
-                        f.reject(e);
+                    var then = v && v.then;
+                    // Do not catch exceptions -- it makes debugging easier when they fall through.
+                    // After all, sitecues will fail either way
+                    if (!isFunObj(v) || typeof then !== 'function') {
+                        p[prop] = v;
+                        notify(listeners, v);
                     }
                 }
 
@@ -218,15 +215,15 @@ var requirejs, require, define;
                     var next = prim(function (nextResolve, nextReject) {
 
                         function finish(fn, nextFn, v) {
-                            try {
-                                if (fn && typeof fn === 'function') {
-                                    v = fn(v);
-                                    nextResolve(v);
-                                } else {
-                                    nextFn(v);
-                                }
-                            } catch (e) {
-                                nextReject(e);
+                            // Unlike standard alameda, which tries to swallow errors,
+                            // we want to actually throw on errors so we can find and debug.
+                            // After all, sitecues won't function either way.
+                            // Makes debugging so much easier!!!!
+                            if (fn && typeof fn === 'function') {
+                                v = fn(v);
+                                nextResolve(v);
+                            } else {
+                                nextFn(v);
                             }
                         }
 
@@ -242,11 +239,7 @@ var requirejs, require, define;
                 }
             };
 
-            try {
-                fn(f.resolve, f.reject);
-            } catch (e) {
-                f.reject(e);
-            }
+            fn(f.resolve, f.reject);  // Throw errors on exceptions to make failures easier to debug. sitecues won't work either way
 
             return promise;
         };
@@ -517,6 +510,9 @@ var requirejs, require, define;
                     if (urlFetched[url]) {
                         return;
                     }
+                    if (SC_DEV) {
+                      console.log('New dependency: ' + id);
+                    }
                     urlFetched[url] = true;
 
                     script = document.createElement('script');
@@ -685,6 +681,10 @@ var requirejs, require, define;
             var d = getDefer(name);
 
             d.promise.catch(errback);
+
+            if (SC_DEV && name) {
+              console.log('Loading module: ' + name);
+            }
 
             //Use name if no relName
             relName = relName || name;
