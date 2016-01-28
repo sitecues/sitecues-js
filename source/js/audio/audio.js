@@ -6,13 +6,25 @@
  * Specifically, it is responsible for:
  * - Playing speech when HLB opens, if speech is on. In this case it must request
  *   a media type supported both by the server (provided via site preferences)
- * - Stopping speech when a key is pressed or HLB closes
+ * - Stopping speech when a key is pressed or the Lens closes
  * - Playing audio by key when requested by another module
  */
 
-define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder', 'core/platform',
-    'core/locale', 'core/metric', 'core/conf/urls', 'audio/network-player', 'audio/text-select'],
-  function(conf, site, $, builder, platform, locale, metric, urls, networkPlayer, textSelect) {
+define(
+  [
+    'core/conf/user/manager',
+    'core/conf/site',
+    '$',
+    'audio/speech-builder',
+    'core/platform',
+    'core/locale',
+    'core/metric',
+    'core/conf/urls',
+    'audio/network-player',
+    'audio/local-player',
+    'audio/text-select'
+  ],
+  function(conf, site, $, builder, platform, locale, metric, urls, networkPlayer, localPlayer, textSelect) {
 
   var ttsOn = false,
     isAudioPlaying,
