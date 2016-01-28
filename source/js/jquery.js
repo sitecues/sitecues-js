@@ -7848,11 +7848,10 @@
 // AMD loader is present. jQuery is a special case. For more information, see
 // https://github.com/jrburke/requirejs/wiki/Updating-existing-libraries#wiki-anon
 
-  if ( typeof define === "function" && define.amd ) {
-    define( "jquery", [], function() {
-      return jQuery;
-    });
-  }
+  // TODO this should not hardcode sitecues.define as this is incompatible with the extension -- pass it through r.js
+  sitecues.define( 'jquery', [], function() {
+    return jQuery;
+  });
 
 // Don't bother with this -- it just makes it difficult to have our own private sitecues jQuery
 // Expose jQuery and $ identifiers, even in
