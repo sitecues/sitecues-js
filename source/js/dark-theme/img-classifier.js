@@ -109,7 +109,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
       }
       catch (ex) {
         if (SC_DEV && isDebuggingOn) {
-          console.log('Could not get image data for %s: %o', readableImg.src, ex);
+          console.log('Could not get image data for %s: %o', readableImg.getAttribute('src'), ex);
         }
       }
       onImageDataAvailable(imageData);
@@ -344,7 +344,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
       }, 0).toString(36);
     }
 
-    return STORAGE_PREFIX + getHashCode(img.src);
+    return STORAGE_PREFIX + getHashCode(img.getAttribute('src'));
   }
 
   // Classify an image that is loaded/loading from a src
@@ -367,14 +367,17 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
       cachedResult = window.sessionStorage.getItem(storageKey);
 
     if (cachedResult) {
+      // Use cached result if available
       onImageClassified(img, cachedResult === CLASS_INVERT, onShouldReverseImage);
     }
-    // Too early to tell anything
-    if (!img.complete) {
+    else if (!img.complete) {
+      // Too early to tell anything
+      // Wait until image loaded
       img.addEventListener('load', classifyLoadedImage);
     }
     else {
-      setTimeout(classifyLoadedImage, 100);
+      //Image is loaded and ready for processing -- after slight delay
+      setTimeout(classifyLoadedImage, 0);
     }
   }
 
