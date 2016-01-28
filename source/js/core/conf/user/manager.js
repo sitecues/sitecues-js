@@ -102,7 +102,6 @@ define(['core/conf/user/storage', 'core/conf/user/storage-backup', 'core/util/uu
       // Could not find local storage for sitecues prefs
       // Try cross-domain backup storage
       storageBackup.init(function () {
-        console.log('INITIALIZE BACK UP STORAGE');
         storageBackup.load(function (data) {
           if (data) {
             storage.setSitecuesLs(data);

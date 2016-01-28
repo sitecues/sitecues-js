@@ -22,7 +22,6 @@ define([], function() {
    * @returns {DOMString}
    */
   function getSitecuesLs() {
-    console.log('LOAD FROM LOCAL STORAGE');
     return localStorage.getItem('sitecues') || setSitecuesLs();
   }
 
@@ -32,7 +31,6 @@ define([], function() {
   function setSitecuesLs(data) {
     var dataString = JSON.stringify(data || {});
     localStorage.setItem('sitecues', dataString);
-    console.log('SAVE LOCAL STORAGE:', data);
   }
 
   /*
@@ -51,7 +49,6 @@ define([], function() {
     var sitecuesLs = getSitecuesLs();
     if (sitecuesLs) {
       var internalLs = JSON.parse(sitecuesLs);
-      console.log('GET USER ID FROM LOCAL STORAGE:', (internalLs && internalLs.userId));
       return internalLs && internalLs.userId;
     }
   }
@@ -61,7 +58,6 @@ define([], function() {
    * @returns {JSON.parse.j|Array|Object}
    */
   function setUserId(value) {
-    console.log('SET NEW USER ID IN LOCAL STORAGE');
     var sitecuesLs = getSitecuesLs() || setSitecuesLs();
     if (sitecuesLs) {
       var internalLs = JSON.parse(sitecuesLs);
@@ -77,7 +73,6 @@ define([], function() {
    * @returns {void}
    */
   function setPref(key, value) {
-    console.log('SET LOCAL STORAGE PREFERENCE', key);
     var userPrefData = getPrefs();
     var sitecuesLs = JSON.parse(getSitecuesLs());
     // Update value.
@@ -94,7 +89,6 @@ define([], function() {
   function getPrefs() {
     var sitecuesLs = JSON.parse(getSitecuesLs()),
       prefs = sitecuesLs[getUserId()];
-    console.log('LOAD LOCAL STORAGE PREFERENCES:', prefs);
     return typeof prefs === 'object' ? prefs : {};
   }
 
