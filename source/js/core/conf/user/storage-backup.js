@@ -71,14 +71,9 @@ define(['core/conf/urls', 'core/platform'], function (urls, platform) {
   }
 
   function clear() {
-    if (isLoaded) {
+    init(function () {
       save('{}');
-    }
-    else {
-      init(function () {
-        save('{}');
-      });
-    }
+    });
   }
 
   // Optional callbacks

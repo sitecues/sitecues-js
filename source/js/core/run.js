@@ -122,7 +122,6 @@ define(['core/conf/user/manager', 'core/util/session', 'core/locale', 'core/metr
     // -- Zoom --
     // Previously saved values
     var initialZoom = conf.get('zoom');
-    console.log('INITIAL ZOOM', initialZoom);
     if (initialZoom > 1) {
       performInitialLoadZoom(initialZoom);
     }
