@@ -10,7 +10,8 @@ define(['core/conf/urls', 'core/platform'], function (urls, platform) {
     ID = 'sitecues-prefs',
     iframe,
     isLoaded,
-    IS_BACKUP_DISABLED = platform.browser.isIE9;
+    isInitialized,
+    IS_BACKUP_DISABLED;
 
   // If data is defined, it is a set call, otherwise we are getting data
   function postMessageToIframe(optionalData) {
@@ -36,7 +37,7 @@ define(['core/conf/urls', 'core/platform'], function (urls, platform) {
   function load(onDataAvailableFn) {
     function onMessageReceived(event) {
       var data = event.data,
-          parsedData = {};
+        parsedData = {};
 
       if (event.origin === urls.getScriptOrigin()) {  // Best practice: check if message is from the expected origin
         if (SC_DEV) {
@@ -70,16 +71,26 @@ define(['core/conf/urls', 'core/platform'], function (urls, platform) {
   }
 
   function clear() {
-    save('{}');
+    if (isLoaded) {
+      save('{}');
+    }
+    else {
+      init(function () {
+        save('{}');
+      });
+    }
   }
 
   // Optional callbacks
   function init(onReadyCallback) {
 
-    if (isLoaded || IS_BACKUP_DISABLED) {
+    IS_BACKUP_DISABLED = platform.browser.isIE9;
+
+    if (isInitialized || isLoaded || IS_BACKUP_DISABLED) {
       onReadyCallback();
       return;
     }
+    isInitialized = true;
 
     if (!iframe) {
       iframe = document.createElement('iframe');

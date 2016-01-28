@@ -15,7 +15,7 @@
  *    }
  * }
  */
-define(['core/conf/user/storage-backup', 'core/util/uuid'], function(storageBackup, uuid) {
+define(['core/util/uuid'], function(uuid) {
 
   /*
    * Get value of Local Storage's "sitecues" key which is the outer namespace.
@@ -28,15 +28,9 @@ define(['core/conf/user/storage-backup', 'core/util/uuid'], function(storageBack
   /*
    * Set value of Local Storage's "sitecues" key which is the outer namespace.
    */
-  function setSitecuesLs(data, doBackup) {
+  function setSitecuesLs(data) {
     var dataString = JSON.stringify(data || {});
     localStorage.setItem('sitecues', dataString);
-    if (doBackup) {
-      // Save in storage backup
-      storageBackup.init(function() {
-        storageBackup.save(dataString);
-      });
-    }
   }
 
   /*
@@ -45,7 +39,6 @@ define(['core/conf/user/storage-backup', 'core/util/uuid'], function(storageBack
    */
   function clear() {
     localStorage.removeItem('sitecues');
-    storageBackup.clear();
   }
 
   /*
@@ -75,7 +68,6 @@ define(['core/conf/user/storage-backup', 'core/util/uuid'], function(storageBack
 
   /**
    * Update LocalStorage data in key, value format | sitecues:userID namespace.
-   * @param {String} lsByUserId
    * @param {String} key
    * @param {String} value
    * @returns {void}
@@ -87,7 +79,7 @@ define(['core/conf/user/storage-backup', 'core/util/uuid'], function(storageBack
     userPrefData[key] = value;
     sitecuesLs[getUserId()] = userPrefData;
     // Save in LocalStorage.
-    setSitecuesLs(sitecuesLs, true);
+    setSitecuesLs(sitecuesLs);
   }
 
   /**
@@ -101,27 +93,19 @@ define(['core/conf/user/storage-backup', 'core/util/uuid'], function(storageBack
   }
 
   function init(onReadyCallbackFn) {
+
+    var userId;
+
     if (getUserId()) {
       // Has local storage sitecues prefs for this website
       onReadyCallbackFn(getPrefs());
-      return;
+    }
+    else {
+      userId = uuid();
+      setUserId(userId);
+      onReadyCallbackFn();
     }
 
-    // Could not find local storage for sitecues prefs
-    // Try cross-domain backup storage
-    storageBackup.init(function() {
-      storageBackup.load(function(data) {
-        if (data) {
-          setSitecuesLs(data);
-        }
-        if (!getUserId()) {
-          // No user id: generate one
-          var userId = uuid();
-          setUserId(userId);
-        }
-        onReadyCallbackFn(getPrefs());
-      });
-    });
   }
 
   return {
@@ -130,7 +114,8 @@ define(['core/conf/user/storage-backup', 'core/util/uuid'], function(storageBack
     getUserId: getUserId,
     setUserId: setUserId,
     setPref: setPref,
-    getPrefs: getPrefs
+    getPrefs: getPrefs,
+    setSitecuesLs: setSitecuesLs,
+    getSitecuesLs: getSitecuesLs
   };
 });
-

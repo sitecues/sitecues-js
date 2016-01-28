@@ -1,5 +1,5 @@
-define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 'core/locale', 'page/util/color', 'core/util/session'],
-  function($, site, urls, dimmer, platform, locale, colorUtil, session) {
+define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 'core/locale', 'page/util/color', 'core/events', 'core/util/session'],
+  function($, site, urls, dimmer, platform, locale, colorUtil, events, session) {
 
   var $iframe = $(),
     $closeButton = $(),
@@ -113,7 +113,7 @@ define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 
           prefs: window.localStorage.sitecues
         });
 
-    sitecues.emit('info/did-show');
+    events.emit('info/did-show');
 
     $iframe = $('<iframe>')
       .attr('src', pageUrl + anchor)

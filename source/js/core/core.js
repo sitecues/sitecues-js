@@ -1,8 +1,6 @@
-define(['core/conf/site', 'core/conf/urls', 'core/run', 'core/constants'], function (site, urls, run, constants) {
-      // Array's prototype
-  var arr   = Array.prototype,
-      // Enums for sitecues loading state
-      state = constants.READY_STATE;
+define(['core/conf/site', 'core/conf/urls', 'core/run', 'core/constants', 'core/events'], function (site, urls, run, constants, events) {
+  // Enums for sitecues loading state
+  var state = constants.READY_STATE;
 
   function safe_production_msg (text) {
     if (window.navigator.userAgent.indexOf('MSIE ') > 0) {
@@ -24,9 +22,9 @@ define(['core/conf/site', 'core/conf/urls', 'core/run', 'core/constants'], funct
   // we risk overwriting the methods of the live library.
   function exportPublicFields() {
     // Events
-    sitecues.on = on;      // Start listening for an event.
-    sitecues.emit = emit;  // Tell listeners about an event.
-    sitecues.off = off;    // Stop listening for an event.
+    sitecues.on   = events.on;     // Start listening for an event.
+    sitecues.emit = events.emit;   // Tell listeners about an event.
+    sitecues.off  = events.off;    // Stop listening for an event.
 
     // Get info about the currently running sitecues client
     sitecues.status = getStatus;
@@ -58,102 +56,6 @@ define(['core/conf/site', 'core/conf/urls', 'core/run', 'core/constants'], funct
     });
   }
 
-
-
-  //////////////////////////////////////////////////////////////////////////////////////////
-  //
-  //  Event Management
-  //
-  //////////////////////////////////////////////////////////////////////////////////////////
-
-  // bind an event, specified by a string name, `events`, to a `callback`
-  // function. passing `'*'` will bind the callback to all events fired
-  function on(events, callback, context) {
-    /* jshint validthis: true */
-    var ev, list, tail;
-    events = events.split(/\s+/);
-    var calls = this._events || (this._events = {});
-    while ((ev = events.shift())) {
-      // create an immutable callback list, allowing traversal during
-      // modification. the tail is an empty object that will always be used
-      // as the next node
-      list = calls[ev] || (calls[ev] = {});
-      tail = list.tail || (list.tail = list.next = {});
-      tail.callback = callback;
-      tail.context = context;
-      list.tail = tail.next = {};
-    }
-    return this;
-  }
-
-  // remove one or many callbacks. if `context` is null, removes all callbacks
-  // with that function. if `callback` is null, removes all callbacks for the
-  // event. if `events` is null, removes all bound callbacks for all events
-  function off(events, callback, context) {
-    /* jshint validthis: true */
-    var ev,
-      calls = this._events,
-      node;
-
-    if (!events) {
-      delete this._events;
-    } else if (calls) {
-      events = events.split(/\s+/);
-      while ((ev = events.shift())) {
-        node = calls[ev];
-        delete calls[ev];
-        if (!callback || !node) {
-          continue;
-        }
-
-        // create a new list, omitting the indicated event/context pairs
-        while ((node = node.next) && node.next) {
-          if (node.callback === callback && (!context || node.context === context)) {
-            continue;
-          }
-          this.on(ev, node.callback, node.context);
-        }
-      }
-    }
-
-    return this;
-  }
-
-  // emit an event, firing all bound callbacks. callbacks are passed the
-  // same arguments as `emit` is, apart from the event name.
-  function emit(events) {
-    /* jshint validthis: true */
-    var event, node, calls, tail, args, rest;
-    if (!(calls = this._events)) {
-      return this;
-    }
-
-    (events = events.split(/\s+/)).push(null);
-
-    // save references to the current heads & tails
-    while ((event = events.shift())) {
-      if (!(node = calls[event])) {
-        continue;
-      }
-      events.push({
-        next: node.next,
-        tail: node.tail
-      });
-    }
-
-    // traverse each list, stopping when the saved tail is reached.
-    rest = arr.slice.call(arguments, 1);
-    while ((node = events.pop())) {
-      tail = node.tail;
-      args = node.event ? [node.event].concat(rest) : rest;
-      while ((node = node.next) !== tail) {
-        node.callback.apply(node.context || this, args);
-      }
-    }
-
-    return this;
-  }
-
   //////////////////////////////////////////////////////////////////////////////////////////
   //
   //  Basic Site Configuration
@@ -163,6 +65,12 @@ define(['core/conf/site', 'core/conf/urls', 'core/run', 'core/constants'], funct
   //////////////////////////////////////////////////////////////////////////////////////////
 
   var validateConfiguration = function() {
+
+    //Initialize configuration module
+    site.init();
+    // Initialize API and services URLs
+    urls.init();
+
     if (!sitecues.config) {
       console.error('The ' + sitecues.config + ' object was not provided.');
       return;
@@ -236,18 +144,13 @@ define(['core/conf/site', 'core/conf/urls', 'core/run', 'core/constants'], funct
     // Do not allow the sitecues object to be wiped out or changed to something else,
     // but allow properties to be added to it, e.g. sitecues.$ = Zepto
     Object.defineProperty(window, 'sitecues', { writable: false });
-    // Freeze sitecues.config -- do not allow it to be modified in any way
     Object.defineProperty(sitecues, 'config', { writable: false }); // Do not allow reassignment, e.g. sitecues.config = {};
     Object.freeze(sitecues.config); // Do not allow properties of sitecues.config to be changed, e.g. sitecues.config.siteId = 's-xxxx';
 
-    // Initialize API and services URLs
-    urls.init();
-
-    //Set sitecues state to initializing
+    //Set sitecues state flag to initializing
     sitecues.readyState = state.INITIALIZING;
 
     // Run sitecues
     run.init();
   }
 });
-

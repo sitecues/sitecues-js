@@ -1,8 +1,8 @@
 /*
  Slider Controller
  */
-define(['core/bp/constants', 'core/bp/helper', 'core/platform', 'core/bp/model/state', 'bp-expanded/view/slider', 'page/zoom/zoom'],
-  function (BP_CONST, helper, platform, state, sliderView, zoomMod) {
+define(['core/bp/constants', 'core/bp/helper', 'core/platform', 'core/bp/model/state', 'bp-expanded/view/slider', 'page/zoom/zoom', 'core/events'],
+  function (BP_CONST, helper, platform, state, sliderView, zoomMod, events) {
 
   var isListeningToWindowMouseEvents,
     isInitialized;
@@ -106,11 +106,11 @@ define(['core/bp/constants', 'core/bp/helper', 'core/platform', 'core/bp/model/s
     largeA.addEventListener('mousedown', handleAButtonsPress);
     zoomLabel.addEventListener('mousedown', handleAButtonsPress);
 
-    sitecues.on('bp/will-shrink', finishZoomChanges);
+    events.on('bp/will-shrink', finishZoomChanges);
 
     // A zoom operation has been completed
     // (We don't move the thumb here ... we do via setThumbChangeListener, because we get mid-animation changes that way)
-    sitecues.on('zoom', sliderView.updateZoomValue);
+    events.on('zoom', sliderView.updateZoomValue);
   }
 
   return {

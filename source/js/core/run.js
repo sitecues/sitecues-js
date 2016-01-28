@@ -6,10 +6,12 @@
  *   4. Fire sitecues ready callback and metric
  */
 
-define(['core/conf/user/manager', 'core/locale', 'core/metric', 'core/platform', 'core/bp/bp', 'core/constants'],
-  function (conf, locale, metric, platform, bp, constants) {
+define(['core/conf/user/manager', 'core/util/session', 'core/locale', 'core/metric', 'core/platform', 'core/bp/bp',
+        'core/constants', 'core/events'],
+  function (conf, session, locale, metric, platform, bp, constants, events) {
   var
     numPrereqsToComplete,
+    areZoomEnhancementsInitialized,
     isZoomInitialized,
     isSpeechInitialized,
     isZoomOn,
@@ -81,7 +83,7 @@ define(['core/conf/user/manager', 'core/locale', 'core/metric', 'core/platform',
     var isOn = isZoomOn || isSpeechOn;
     if (isOn !== isSitecuesOn) {
       isSitecuesOn = isOn;
-      sitecues.emit('sitecues/did-toggle', isSitecuesOn);
+      events.emit('sitecues/did-toggle', isSitecuesOn);
     }
     if (isOn && !wasSitecuesEverOn) {
       initSitecuesOn();
@@ -92,17 +94,17 @@ define(['core/conf/user/manager', 'core/locale', 'core/metric', 'core/platform',
   function onZoomChange(zoomLevel) {
     isZoomOn = zoomLevel > 1;
     onFeatureSettingChange();
-    if (isZoomOn && !isZoomInitialized) {
+    if (isZoomOn && !areZoomEnhancementsInitialized) {
       initZoomEnhancingFeatures();
-      isZoomInitialized = true;
+      areZoomEnhancementsInitialized = true;
     }
   }
 
   function onSitecuesReady() {
-    metric('page-visited', {
+    new metric.PageVisit({
       nativeZoom: platform.nativeZoom,
       isRetina  : platform.isRetina()
-    });
+    }).send();
 
     sitecues.readyState = state.COMPLETE;
     //Freeze readyState on load
@@ -111,7 +113,7 @@ define(['core/conf/user/manager', 'core/locale', 'core/metric', 'core/platform',
     if (typeof sitecues.onReady === 'function') {
       sitecues.onReady.call(sitecues);
     }
-
+    Object.defineProperty(sitecues, 'readyState', { writable: false }); // Do not allow reassignment, e.g. sitecues.readyState = 0;
   }
 
   // Initialize page feature listeners
@@ -124,7 +126,7 @@ define(['core/conf/user/manager', 'core/locale', 'core/metric', 'core/platform',
       performInitialLoadZoom(initialZoom);
     }
     // Monitor any runtime changes
-    sitecues.on('zoom', onZoomChange);
+    events.on('zoom', onZoomChange);
 
     // -- Speech --
     conf.get('ttsOn', function(isOn) {
@@ -163,6 +165,9 @@ define(['core/conf/user/manager', 'core/locale', 'core/metric', 'core/platform',
       // checks for a few keys like  +, - or alt+'
       window.addEventListener('keydown', onPossibleTriggerKeyPress);
     }
+    if (!isZoomInitialized) {
+      window.addEventListener('wheel', onPossibleScreenPinch);
+    }
 
     onSitecuesReady();
   }
@@ -188,10 +193,27 @@ define(['core/conf/user/manager', 'core/locale', 'core/metric', 'core/platform',
     }
   }
 
+  // Ctrl + wheel events (screen pinch) can trigger sitecues
+  function onPossibleScreenPinch(event) {
+    if (event.ctrlKey) {
+      // Don't allow default behavior of screen pinch, e.g. native zoom
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      require(['page/zoom/zoom'], function (zoomMod) {
+        zoomMod.init(event);
+      });
+    }
+  }
+
   function onKeyUp(event) {
     if (isInitializerKey(event)) {
       isKeyReleased = true;
     }
+  }
+
+  function onZoomInitialized() {
+    isZoomInitialized = true;
+    window.removeEventListener('wheel', onPossibleScreenPinch);
   }
 
   function onKeyHandlingInitialized() {
@@ -202,6 +224,8 @@ define(['core/conf/user/manager', 'core/locale', 'core/metric', 'core/platform',
 
   function onPrereqComplete() {
     if (--numPrereqsToComplete === 0) {
+      //Locale needs to be initialized before metric
+      metric.init();
       // Both settings AND locale are now complete ... onto BP!!
       bp.init(initPageFeatureListeners);
     }
@@ -213,11 +237,14 @@ define(['core/conf/user/manager', 'core/locale', 'core/metric', 'core/platform',
 
   function init() {
     // When keyboard listening is ready
-    sitecues.on('keys/did-init', onKeyHandlingInitialized);
+    events.on('keys/did-init', onKeyHandlingInitialized);
+    events.on('zoom/init', onZoomInitialized);
 
     numPrereqsToComplete = 2;
 
     // Start initialization
+    session.init();
+    platform.init();
     conf.init(onPrereqComplete);
     locale.init(onPrereqComplete);
   }
@@ -228,4 +255,3 @@ define(['core/conf/user/manager', 'core/locale', 'core/metric', 'core/platform',
   };
 
 });
-

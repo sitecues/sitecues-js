@@ -1,6 +1,6 @@
 define(['$', 'page/highlight/highlight', 'page/util/common',
-  'page/highlight/pick', 'page/zoom/zoom', 'page/util/geo', 'page/zoom/fixed-position-fixer'],
-  function($, mh, common, picker, zoomMod, geo, fixedFixer) {
+  'page/highlight/pick', 'page/zoom/zoom', 'page/util/geo', 'page/zoom/fixed-position-fixer', 'core/events'],
+  function($, mh, common, picker, zoomMod, geo, fixedFixer, events) {
 
   var STEP_SIZE_VERT = 18,
     STEP_SIZE_HORIZ = 24,  // Different step sizes because content tends to be wider than tall (lines of text)
@@ -797,11 +797,11 @@ define(['$', 'page/highlight/highlight', 'page/util/common',
       isKeyRepeating = false;
     });
 
-    sitecues.on('hlb/did-create', function($hlb) {
+    events.on('hlb/did-create', function($hlb) {
       hlbElement = $hlb[0];
     });
 
-    sitecues.on('hlb/closed', function() {
+    events.on('hlb/closed', function() {
       hlbElement = null;
     });
   }

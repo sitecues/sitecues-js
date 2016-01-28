@@ -6,8 +6,8 @@
  * - switches custom cursor image when hover over elements that demand certain - not default or auto - cursor;
  * - attaches correspondent window events so that handle custom cursor events.
  */
-define(['$', 'page/style-service/style-service', 'core/conf/user/manager', 'page/cursor/cursor-css', 'core/platform', 'core/conf/site'],
-  function ($, styleService, conf, cursorCss, platform, site) {
+define(['$', 'page/style-service/style-service', 'core/conf/user/manager', 'page/cursor/cursor-css', 'core/platform', 'core/conf/site', 'core/events'],
+  function ($, styleService, conf, cursorCss, platform, site, events) {
 
   var isInitialized,
       // Regexp is used to match URL in the string given(see below).
@@ -202,7 +202,7 @@ define(['$', 'page/style-service/style-service', 'core/conf/user/manager', 'page
       // While zooming, turn off our CSS rules so that the browser doesn't spend
       // CPU cycles recalculating the custom cursor rules to apply during each frame
       // This makes a difference in IE 9/10 -- doesn't seem to help in other browsers.
-      sitecues.on('zoom/begin', function() {setCursorsDisabled(true); });
+      events.on('zoom/begin', function() {setCursorsDisabled(true); });
     }
   }
 
@@ -359,7 +359,7 @@ define(['$', 'page/style-service/style-service', 'core/conf/user/manager', 'page
     conf.get('mouseHue', onMouseHueSetting);
 
     if (!userSpecifiedSize) {
-      sitecues.on('zoom', onPageZoom);
+      events.on('zoom', onPageZoom);
     }
 
     constructBPCursorStylesheet();

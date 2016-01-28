@@ -1,4 +1,4 @@
-define(['core/conf/user/manager', 'page/zoom/zoom'], function (conf, zoomMod) {
+define(['core/conf/user/manager', 'page/zoom/zoom', 'core/events'], function (conf, zoomMod, events) {
   var isOn = false,
     isHlbOn = false,
     isPanelOpen = false,
@@ -99,7 +99,7 @@ define(['core/conf/user/manager', 'page/zoom/zoom'], function (conf, zoomMod) {
   function onZoomChange(zoomLevel) {
     if (zoomLevel> 1 && !isListeningToResize) {
       isListeningToResize = true;
-      sitecues.on('resize', refresh);
+      events.on('resize', refresh);
     }
     isZooming = false;
     refresh();
@@ -129,32 +129,32 @@ define(['core/conf/user/manager', 'page/zoom/zoom'], function (conf, zoomMod) {
   }
 
   function init() {
-    sitecues.on('hlb/ready', function () {
+    events.on('hlb/ready', function () {
       isHlbOn = true;
       refresh();
     });
 
-    sitecues.on('hlb/closed', function () {
+    events.on('hlb/closed', function () {
       isHlbOn = false;
       refresh();
     });
 
     // Dont pan while the bp is expanded.
-    sitecues.on('bp/will-expand', function () {
+    events.on('bp/will-expand', function () {
       isPanelOpen = true;
       refresh();
     });
 
     // Allow panning while the bp is shrunk.
-    sitecues.on('bp/did-shrink', function () {
+    events.on('bp/did-shrink', function () {
       isPanelOpen = false;
       refresh();
     });
 
-    sitecues.on('zoom', onZoomBegin);
+    events.on('zoom', onZoomBegin);
 
     // react on any zoom change
-    sitecues.on('zoom', onZoomChange);
+    events.on('zoom', onZoomChange);
     onZoomChange(getZoom());
   }
 

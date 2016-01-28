@@ -8,13 +8,13 @@ define(
 
         class Panel extends Base {
 
-            constructor(remote, viewer, input, browser) {
+            constructor(remote, browserUtil, input, wait) {
                 super(remote);
-                this.viewer  = viewer;
+                this.wait    = wait;
                 this.input   = input;
-                this.browser = browser;
+                this.browserUtil = browserUtil;
             }
-
+            /*
             clickSmallA(clicks) {
                 return this.clickZoomControl('#' + constants.SMALL_A_ID, clicks);
             }
@@ -22,89 +22,115 @@ define(
             clickLargeA(clicks) {
                 return this.clickZoomControl('#' + constants.LARGE_A_ID, clicks);
             }
-
+            */
             pressSmallA() {
-                return this.pressZoomControl('#' + constants.SMALL_A_ID);
+                return this.pressZoomControl(Panel.SMALL_A_SELECTOR);
             }
 
             pressLargeA() {
-                return this.pressZoomControl('#' + constants.LARGE_A_ID);
+                return this.pressZoomControl(Panel.LARGE_A_SELECTOR);
             }
 
-            dragSlider(zoom) {
+            dragSliderThumb(zoom) {
                 const remote  = this.remote,
-                      viewer  = this.viewer,
-                      browser = this.browser,
-                      thumbSelector = '#' + constants.ZOOM_SLIDER_THUMB_ID;
-                return remote
-                    .findByCssSelector(thumbSelector)
-                    .moveMouseTo()
-                    .click()
+                      input   = this.input,
+                      browserUtil = this.browserUtil;
+
+                return input
+                    .clickElement(Panel.THUMB_SELECTOR)
                     .then(function () {
-                        return viewer
-                            .waitForElementToFinishAnimating(thumbSelector, 4000, 200)
-                            .moveMouseTo()
-                            .pressMouseButton(0)
-                            .then(function () {
-                                return browser.getTransformAttributeString();
-                            })
+                        return browserUtil.getTransformAttributeName();
                     })
                     .then(function (transform) {
-                        zoom = (zoom < 0) ? 0 : (zoom > 3) ? 3 : zoom;
-                        function moveSlider(distance) {
-                            return remote
-                                .moveMouseTo(distance, 0)
-                                .execute(function (transform, desiredScale) {
-                                    var matrix = getComputedStyle(document.body)[transform],
-                                        scale  = Number(matrix.substring(7).split(',')[0]),
-                                        diff   = desiredScale - scale;
-                                    if (diff > .05) {
-                                        return 2;
-                                    }
-                                    else if (diff < -.05) {
-                                        return -2;
-                                    }
-                                    else {
-                                        return false;
-                                    }
-                                }, [transform, zoom])
-                                .then(function (result) {
-                                    if (result) {
-                                        return moveSlider(result);
-                                    }
-                                    else {
-                                        return remote;
-                                    }
-                                })
-
-                        }
-                        return moveSlider(0);
+                        zoom = (zoom < 1) ? 1 : (zoom > 3) ? 3 : zoom;
+                        return remote
+                            .execute(function (selector, zoom, transform) {
+                                var matrix = getComputedStyle(document.body)[transform],
+                                    currentZoom  = Number(matrix.substring(7).split(',')[0]),
+                                    diff   = zoom - currentZoom,
+                                    slider  = document.querySelector(selector),
+                                    slideRect = slider.getBoundingClientRect();
+                                    return diff / 2 * slideRect.width;
+                            }, [Panel.SLIDER_SELECTOR, zoom, transform])
+                            .then(function (offset) {
+                                function moveSlider(distance) {
+                                    return remote
+                                        .moveMouseTo(distance, 0)
+                                        .execute(function (transform, zoom) {
+                                            var matrix = getComputedStyle(document.body)[transform],
+                                                currentZoom  = Number(matrix.substring(7).split(',')[0]),
+                                                diff   = zoom - currentZoom;
+                                            if (diff > .001) {
+                                                return 3;
+                                            }
+                                            else if (diff < -.001) {
+                                                return -3;
+                                            }
+                                            else {
+                                                return true;
+                                            }
+                                        }, [transform, zoom])
+                                        .then(function (result) {
+                                            if (result === true) {
+                                                return remote;
+                                            }
+                                            else {
+                                                return moveSlider(result);
+                                            }
+                                        });
+                                }
+                                return moveSlider(offset);
+                            })
                     })
-                    .releaseMouseButton(0)
-                    .end()
+                    .then(function () {
+                        return input
+                            .releaseElement(Panel.THUMB_SELECTOR);
+                    })
             }
 
             pressZoomControl(selector) {
-                const viewer = this.viewer;
-                return this.remote
-                    .findByCssSelector(selector)
-                    .moveMouseTo()
-                    .click()
+                const wait  = this.wait,
+                      input = this.input;
+
+                return input
+                    .clickElement(selector)
                     .then(function () {
-                        return viewer
-                            .waitForElementToFinishAnimating(selector, 4000, 200);
-                    })
-                    .moveMouseTo()
-                    .pressMouseButton(0)
-                    .then(function () {
-                        return viewer
-                            .waitForTransformToStabilize('body', 4000, 200)
-                            .releaseMouseButton(0)
-                            .end()
+                        return wait.forTransformToComplete('body', 4000, 25)
                     })
             }
 
-            clickZoomControl(selector, clicks) {
+            clickSliderBar(zoom) {
+                const remote = this.remote,
+                      wait   = this.wait;
+
+                zoom = (zoom < 1) ? 1 : (zoom > 3) ? 3 : zoom;
+
+                return remote
+                    .execute(function (selector, zoom) {
+                        var MAGIC_SHIFT_FACTOR = 5.2,
+                            slider  = document.querySelector(selector),
+                            slideRect = slider.getBoundingClientRect(),
+                            shift   = MAGIC_SHIFT_FACTOR * zoom, //Shifts the x position on the slider relative to the zoom parameter,
+                                                                 //it ensures that we don't press the big A at the end of the slider,
+                            xOffset = Math.max(0, (zoom - 1) / 2 * slideRect.width - shift),
+                            yOffset = slideRect.height / 2;
+                        return [xOffset, yOffset];
+                    }, [Panel.SLIDER_SELECTOR, zoom])
+                    .then(function (offset) {
+                        return remote
+                            .findByCssSelector(Panel.SLIDER_SELECTOR)
+                                .moveMouseTo(offset[0], offset[1])
+                                .clickMouseButton(0)
+                                .then(function () {
+                                    return wait
+                                        .forTransformToComplete('body', 8000, 25);
+                                })
+                                .end();
+                    })
+            }
+
+            /*
+            clickZoomControl(selector, totalClicks) {
                 const remote   = this.remote,
                       viewer   = this.viewer;
 
@@ -114,35 +140,39 @@ define(
                     .click()
                     .then(function () {
                         return viewer
-                            .waitForElementToFinishAnimating(selector, 4000, 200);
+                            .waitForElementToStopMoving(selector, 4000, 25);
                     })
                     .moveMouseTo()
                     .then(function () {
-                        return remote
-                            .then(function () {
-                                function click(clickCount, total) {
-                                    return remote
-                                        .clickMouseButton(0)
+                        function click(clickCount) {
+                            return remote
+                                .clickMouseButton(0)
+                                .then(function () {
+                                    return viewer
+                                        .waitForTransformToFinish('body', 4000, 25)
                                         .then(function () {
-                                            return viewer
-                                                .waitForTransformToStabilize('body', 4000, 200)
-                                                .then(function () {
-                                                    if (clickCount === total) {
-                                                        return remote;
-                                                    }
-                                                    else {
-                                                        clickCount++;
-                                                        return click(clickCount, total);
-                                                    }
-                                                })
+                                            if (clickCount === totalClicks) {
+                                                return remote;
+                                            }
+                                            else {
+                                                clickCount++;
+                                                return click(clickCount);
+                                            }
                                         })
-                                }
-                                return click(0, clicks);
-                            })
+                                })
+                        }
+                        return click(1);
                     })
                     .end();
             }
+            */
+
         }
+
+        Panel.THUMB_SELECTOR   = '#' + constants.ZOOM_SLIDER_THUMB_ID;
+        Panel.SLIDER_SELECTOR  = '#' + constants.ZOOM_SLIDER_ID;
+        Panel.SMALL_A_SELECTOR = '#' + constants.SMALL_A_ID;
+        Panel.LARGE_A_SELECTOR = '#' + constants.LARGE_A_ID;
 
         return Panel;
     }

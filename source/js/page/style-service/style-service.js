@@ -163,7 +163,7 @@ define(['$', 'page/style-service/css-aggregator', 'page/style-service/media-quer
     getStyleSheet();
   }
 
-  /*
+  /**
    * Get the CSS text that would be needed to create a new stylesheet from these styles
    */
   function getStyleText(styles, propertyName) {

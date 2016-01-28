@@ -2,58 +2,47 @@ define(
     [
         './Base',
         'intern/dojo/node!leadfoot/keys',  // unicode string constants used to control the keyboard
-    ],
-    function (Base, keys) {
+        'hlb/constants'
 
+    ],
+    function (Base, keys, constants) {
         'use strict';
 
         class Lens extends Base {
 
-            constructor(remote) {
+            constructor(remote, wait) {
                 super(remote);
+                this.wait = wait;
             }
 
             // Open the Lens and wait for its animation to finish.
             open() {
+                const wait = this.wait;
                 return this.remote
                     .setExecuteAsyncTimeout(4000)  // the Lens has this many milliseconds to come into existence
+                    .then(function () {
+                        return wait
+                            .bindEventListener(Lens.events.READY)
+                    })
                     .pressKeys(keys.SPACE)         // open the Lens
-                    .executeAsync(                 // run an async callback in the remote browser
-                        function (event, done) {
-                            sitecues.on(event, function () {
-                                done();
-                            });
-                        },
-                        [Lens.events.READY]
-                    );
+                    .then(function () {
+                        return wait
+                            .forEvent(Lens.events.READY, 4000)
+                    })
             }
 
             // Destroy the Lens and wait for its animation to finish.
             close() {
                 return this.remote
                     .setExecuteAsyncTimeout(4000)  // the Lens has this many milliseconds to disappear from the DOM
-                    .pressKeys(keys.SPACE)         // close the Lens
-                    .executeAsync(
-                        function (event, done) {
-                            sitecues.on(event, function () {
-                                done();
-                            });
-                        },
-                        [Lens.events.CLOSED]
-                    );
+                    .pressKeys(keys.SPACE)          // close the Lens
+                    .waitForDeletedById(Lens.ID);
             }
 
-            // Open the Lens without waiting for any animation.
-            instantOpen() {
-                return this.remote
-                    .setFindTimeout(400)    // the Lens has this many milliseconds to come into existence
-                    .pressKeys(keys.SPACE)  // open the Lens
-                    .findById(Lens.ID)      // get the Lens!
-                        .end();
-            }
         }
 
-        Lens.ID     = 'sitecues-hlb';
+        Lens.ID = constants.HLB_ID;
+
         Lens.events = {
             READY  : 'hlb/ready',
             CLOSED : 'hlb/closed'

@@ -1,8 +1,8 @@
 /*
  Panel Controller
  */
-define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metric', 'core/bp/view/view'],
-  function (BP_CONST, state, helper, metric, view) {
+define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metric', 'core/bp/view/view', 'core/events'],
+  function (BP_CONST, state, helper, metric, view, events) {
 
     var MIN_DISTANCE = 75, // Min distance before shrink
       mouseLeaveShrinkTimer,  // How long we wait before shrinking BP from any mouseout (even only just barely outside panel)
@@ -74,7 +74,7 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
         return id.split('scp-')[1] || id;
       }
 
-      metric('panel-clicked', { target: id ? getTrimmedId(id) : 'window' });
+      new metric.PanelClick({ target: id ? getTrimmedId(id) : 'window' }).send();
     }
 
 
@@ -110,7 +110,7 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
        bp/will-shrink cancels badge->panel animation
        bp/will-shrink removes click handler for toggling speech
        */
-      sitecues.emit('bp/will-shrink');
+      events.emit('bp/will-shrink');
 
       state.set('transitionTo', BP_CONST.BADGE_MODE);
       state.set('isShrinkingFromKeyboard', isFromKeyboard);
@@ -125,7 +125,7 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
       // Finally, begin the shrinking animation.
       view.update();
 
-      metric('panel-closed');
+      new metric.PanelClose().send();
     }
 
     /*
@@ -234,12 +234,12 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
       }
       isInitialized = true;
 
-      sitecues.on('info/did-show', shrinkPanel);
-      sitecues.on('bp/will-expand', willExpand);
-      sitecues.on('bp/will-shrink', willShrink);
-      sitecues.on('bp/did-shrink', didShrink);
-      sitecues.on('zoom/begin', willZoom);
-      sitecues.on('zoom', didZoom);
+      events.on('info/did-show', shrinkPanel);
+      events.on('bp/will-expand', willExpand);
+      events.on('bp/will-shrink', willShrink);
+      events.on('bp/did-shrink', didShrink);
+      events.on('zoom/begin', willZoom);
+      events.on('zoom', didZoom);
 
       toggleListeners(true);
     }

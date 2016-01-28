@@ -1,7 +1,7 @@
 /**
  * Tips cards, supporting demo animations
  */
-define(['core/bp/constants', 'core/bp/helper'], function (BP_CONST, helper) {
+define(['core/bp/constants', 'core/bp/helper', 'core/events'], function (BP_CONST, helper, events) {
 
   var byId = helper.byId,
     isInitialized,
@@ -148,7 +148,7 @@ define(['core/bp/constants', 'core/bp/helper'], function (BP_CONST, helper) {
   function init() {
     if (!isInitialized) {
       isInitialized = true;
-      sitecues.on('bp/did-show-card', cardActivated);
+      events.on('bp/did-show-card', cardActivated);
     }
   }
 

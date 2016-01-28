@@ -1,8 +1,8 @@
 /**
  * Generic module for handling the cards used by tips and settings
  */
-define(['core/bp/constants', 'core/bp/helper', 'core/locale', 'core/bp/model/state', 'core/platform', 'core/util/xhr', 'core/conf/urls', 'core/conf/site'],
-  function (BP_CONST, helper, locale, state, platform, xhr, urls, site) {
+define(['core/bp/constants', 'core/bp/helper', 'core/locale', 'core/bp/model/state', 'core/platform', 'core/util/xhr', 'core/conf/urls', 'core/conf/site', 'core/events'],
+  function (BP_CONST, helper, locale, state, platform, xhr, urls, site, events) {
 
   var
     PANELS_WITH_CARDS = { tips: 1, settings: 1},
@@ -39,7 +39,7 @@ define(['core/bp/constants', 'core/bp/helper', 'core/locale', 'core/bp/model/sta
         toggleCardActive(panelElement.firstElementChild, true);
 
         if (-- panelsToLoad === 0) {
-          sitecues.emit('bp/content-loaded');
+          events.emit('bp/content-loaded');
         }
       }
     });
@@ -194,7 +194,7 @@ define(['core/bp/constants', 'core/bp/helper', 'core/locale', 'core/bp/model/sta
   }
 
   function newCardNotification(isFromLink) {
-    sitecues.emit('bp/did-show-card', getActiveCard().id, getActiveTab(), isFromLink);
+    events.emit('bp/did-show-card', getActiveCard().id, getActiveTab(), isFromLink);
   }
 
 
@@ -317,7 +317,7 @@ define(['core/bp/constants', 'core/bp/helper', 'core/locale', 'core/bp/model/sta
     loadPanelContents('settings');
     loadPanelContents('tips');
 
-    sitecues.on('bp/did-open-subpanel', onPanelUpdate);
+    events.on('bp/did-open-subpanel', onPanelUpdate);
   }
 
   return {

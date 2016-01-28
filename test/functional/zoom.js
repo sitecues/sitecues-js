@@ -7,13 +7,17 @@
 define(
     [
         'intern',
-        'utility',
         'intern!tdd',                      // the testing interface - defines how we register suites and tests
         'intern/dojo/node!chai',              // helps throw errors to fail tests, based on conditions
-        'intern/dojo/node!leadfoot/keys',  // unicode string constants used to control the keyboard
-        'page-object'
+        'page-object/Panel',
+        'page-object/Badge',
+        'utility/BrowserUtility',
+        'utility/Wait',
+        'utility/UserInput',
+        'utility/url'
+
     ],
-    function (intern, utility, tdd, chai, keys, pageObject) {
+    function (intern, tdd, chai, Panel, Badge, BrowserUtility, Wait, UserInput, url) {
 
         'use strict';
 
@@ -22,107 +26,115 @@ define(
             suite  = tdd.suite,
             test   = tdd.test,
             before = tdd.before,
-            afterEach = tdd.afterEach,
+            afterEach  = tdd.afterEach,
             beforeEach = tdd.beforeEach;
 
         suite('Zoom controls', function () {
-            let remote, browser, badge, panel, input, viewer;
+
+            const testUrl = url('simple.html', 9999);
+
+            let remote,
+                browserUtil,
+                badge,
+                panel,
+                input,
+                wait;
 
             // Code to run when the suite starts, before any test.
             before(function () {
+                //Browser interface
                 remote  = this.remote;
-                browser = utility.createBrowser(remote);
-                input   = utility.createUserInput(remote, browser);
-                viewer  = utility.createPageViewer(remote, browser);
-                badge   = pageObject.createBadge(remote);
-                panel   = pageObject.createPanel(remote, viewer, input, browser);
-                return remote               // represents the browser being tested
+                //Test utilities
+                browserUtil = new BrowserUtility(remote);  //Browser utilities
+                wait    = new Wait(remote, browserUtil);  //Waits for page transformations & events
+                input   = new UserInput(remote, browserUtil, wait);
+                //UI abstractions
+                badge   = new Badge(remote, input, wait);
+                panel   = new Panel(remote, browserUtil, input, wait);
+
+                return remote
                     .maximizeWindow()             // best effort to normalize window sizes (not every browser opens the same)
-                    // NOTE: Page load timeouts are not yet supported in SafariDriver.
-                    //       However, we are not testing Safari at the moment.
-                    .setPageLoadTimeout(6000)
-                    .setFindTimeout(2000)
-                    .setExecuteAsyncTimeout(7000);  // max ms for executeAsync calls to complete
+                    .get(testUrl)
+                    .then(function () {
+                        return wait.forSitecuesToInitialize();
+                    })
+                    .then(function () {
+                        return browserUtil.resetEnvironment();
+                    });
             });
 
             beforeEach(function () {
                 return remote
-                    .get('http://ws.sitecues.com')
-                    .clearCookies()
-                    .get('http://js.sitecues.com')
-                    .clearCookies()
-                    .get('http://up.sitecues.com')
-                    .clearCookies()
-                    .get('http://www.ticc.com/')
+                    // NOTE: Page load timeouts are not yet supported in SafariDriver.
+                    //       However, we are not testing Safari at the moment.
+                    .setPageLoadTimeout(9000)
+                    .setFindTimeout(2000)
+                    .setExecuteAsyncTimeout(7000) // max ms for executeAsync calls to complete
+                    .get(testUrl)
+                    .then(function () {
+                        return wait.forSitecuesToInitialize();
+                    });
             });
 
             afterEach(function () {
-                return remote
-                    .execute(function () {
-                        localStorage.clear();
-                    })
+                return browserUtil.resetEnvironment();
             });
 
             test('Plus key held to zoom in', function () {
-                const EQUALS_CODE = 187,
-                      EQUALS_CHAR = '=';
-
                 return input
-                    .holdKey(EQUALS_CODE, EQUALS_CHAR)
+                    .holdKey('=')
                     .then(function () {
-                        return viewer
-                            .waitForTransformToStabilize('body', 8000, 200)
-                            .then(function () {
-                                return browser.getTransformAttributeString();
+                        return wait
+                            .forTransformToComplete('body', 8000, 25);
+                    })
+                    .then(function () {
+                        return browserUtil.getTransformAttributeName();
+                    })
+                    .then(function (tform) {
+                        return remote
+                            .execute(function (transform) {
+                                return getComputedStyle(document.body)[transform];
+                            }, [tform])
+                            .then(function (transform) {
+                                let matrix = transform.substring(7).split(','),
+                                    xTrans = Number(matrix[0]),
+                                    yTrans = Number(matrix[3]);
+                                assert.strictEqual(
+                                    xTrans,
+                                    3,
+                                    'Body should be have an x transformation of 3'
+                                );
+                                assert.strictEqual(
+                                    yTrans,
+                                    3,
+                                    'Body should have a y transformation of 3'
+                                );
                             })
-                            .then(function (tform) {
-                                return remote
-                                    .execute(function (transform) {
-                                        return getComputedStyle(document.body)[transform];
-                                    }, [tform])
-                                    .then(function (transform) {
-                                        let matrix = transform.substring(7).split(','),
-                                            xTrans = Number(matrix[0]),
-                                            yTrans = Number(matrix[3]);
-                                        assert.strictEqual(
-                                            xTrans,
-                                            3,
-                                            'Body should be have an x transformation of 3'
-                                        );
-                                        assert.strictEqual(
-                                            yTrans,
-                                            3,
-                                            'Body should have a y transformation of 3'
-                                        );
-                                    })
-                            })
-                    });
+                    })
             });
 
 
             test('Plus key held to zoom in, minus key held to zoom out', function () {
-                return remote
+                return input
+                    .holdKey('=')
                     .then(function () {
-                        const EQUALS_CODE = 187,
-                              EQUALS_CHAR = '=';
-                        return input.holdKey(EQUALS_CODE, EQUALS_CHAR);
+                        return wait
+                            .forTransformToComplete('body', 8000, 25);
                     })
                     .then(function () {
-                        return viewer
-                            .waitForTransformToStabilize('body', 8000, 200)
-                    })
-                    .then(function () {
-                        const MINUS_CODE = 189,
-                            MINUS_CHAR = '-';
                         return input
-                            .holdKey(MINUS_CODE, MINUS_CHAR)
-                            .then(function () {
-                                return browser.getTransformAttributeString();
-                            });
+                            .holdKey('-')
+                    })
+                    .then(function () {
+                        return wait
+                            .forTransformToComplete('body', 8000, 25);
+                    })
+                    .then(function () {
+                        return browserUtil
+                            .getTransformAttributeName();
                     })
                     .then(function (tform) {
-                        return viewer
-                            .waitForTransformToStabilize('body', 8000, 200)
+                        return remote
                             .execute(function (transform) {
                                 return getComputedStyle(document.body)[transform];
                             }, [tform])
@@ -145,11 +157,15 @@ define(
             });
 
 
-            test('Press big A to zoom in', function () {
-                return panel
-                    .pressLargeA()
+            test('Click on big A to zoom in', function () {
+                return badge
+                    .expandPanel()
                     .then(function () {
-                        return browser.getTransformAttributeString();
+                        return panel
+                            .pressLargeA()
+                            .then(function () {
+                                return browserUtil.getTransformAttributeName();
+                            })
                     })
                     .then(function (tform) {
                         return remote
@@ -175,10 +191,14 @@ define(
             });
 
             test('Click on big A to zoom in, click on small A to zoom out', function () {
-                return panel
-                    .pressLargeA()
+                return badge
+                    .expandPanel()
                     .then(function () {
-                        return browser.getTransformAttributeString();
+                        return panel
+                            .pressLargeA()
+                            .then(function () {
+                                return browserUtil.getTransformAttributeName();
+                            })
                     })
                     .then(function (tform) {
                         return panel
@@ -205,11 +225,14 @@ define(
             });
 
             test('Drag slider to fully zoomed position', function () {
-
-                return panel
-                    .dragSlider(3)
+                return badge
+                    .expandPanel()
                     .then(function () {
-                        return browser.getTransformAttributeString();
+                        return panel
+                            .dragSliderThumb(3)
+                            .then(function () {
+                                return browserUtil.getTransformAttributeName();
+                            })
                     })
                     .then(function (tform) {
                         return remote
@@ -220,29 +243,90 @@ define(
                                 let matrix = transform.substring(7).split(','),
                                     xTrans = Number(matrix[0]),
                                     yTrans = Number(matrix[3]);
-                                assert.strictEqual(
+                                assert.closeTo(
                                     xTrans,
                                     3,
+                                    .2,
                                     'Body should be have an x transformation of 3'
                                 );
-                                assert.strictEqual(
+                                assert.closeTo(
                                     yTrans,
                                     3,
+                                    .2,
                                     'Body should have a y transformation of 3'
+                                );
+                                assert.isAtMost(
+                                    xTrans,
+                                    3,
+                                    'Body should be have an x transformation less than or equal to 3'
+                                );
+                                assert.isAtMost(
+                                    yTrans,
+                                    3,
+                                    'Body should have a y transformation less than or equal to 3'
                                 );
                             })
                     })
             });
 
             test('Drag slider to fully zoomed position, drag slider back to zoom 1', function () {
-                return panel
-                    .dragSlider(3)
+                return badge
+                    .expandPanel()
                     .then(function () {
                         return panel
-                            .dragSlider(1);
+                            .dragSliderThumb(3)
+                            .then(function () {
+                                return panel
+                                    .dragSliderThumb(1);
+                            })
                     })
                     .then(function () {
-                        return browser.getTransformAttributeString();
+                        return browserUtil.getTransformAttributeName()
+                    })
+                    .then(function (tform) {
+                        return remote
+                            .execute(function (transform) {
+                                return getComputedStyle(document.body)[transform];
+                            }, [tform])
+                    })
+                    .then(function (transform) {
+                        let matrix = transform.substring(7).split(','),
+                            xTrans = Number(matrix[0]),
+                            yTrans = Number(matrix[3]);
+                        assert.closeTo(
+                            xTrans,
+                            1,
+                            .2,
+                            'Body should be have an x transformation close to 1'
+                        );
+                        assert.closeTo(
+                            yTrans,
+                            1,
+                            .2,
+                            'Body should have a y transformation close to 1'
+                        );
+                        assert.isAtLeast(
+                            xTrans,
+                            1,
+                            'Body should be have an x transformation greater than or equal to 1'
+                        );
+                        assert.isAtLeast(
+                            yTrans,
+                            1,
+                            'Body should have a y transformation greater than or equal to 1'
+                        );
+                    })
+            });
+
+            test('Click in the middle of slider to zoom', function () {
+                return badge
+                    .expandPanel()
+                    .then(function () {
+                        return panel
+                            .clickSliderBar(2)
+                            .then(function () {
+                                return browserUtil.getTransformAttributeName();
+                            })
                     })
                     .then(function (tform) {
                         return remote
@@ -253,22 +337,105 @@ define(
                                 let matrix = transform.substring(7).split(','),
                                     xTrans = Number(matrix[0]),
                                     yTrans = Number(matrix[3]);
-                                assert.strictEqual(
+                                assert.isAbove(
                                     xTrans,
                                     1,
-                                    'Body should be have an x transformation of 1'
+                                    'Body should be have an x transformation greater than 1'
                                 );
-                                assert.strictEqual(
+                                assert.isAbove(
                                     yTrans,
                                     1,
-                                    'Body should have a y transformation of 1'
+                                    'Body should have a y transformation greater than 1'
+                                );
+                            })
+                    })
+            });
+
+            test('Ctrl + wheel up to zoom in', function () {
+                return input
+                    .ctrlWheel('up', 10)
+                    .then(function () {
+                        return browserUtil.getTransformAttributeName();
+                    })
+                    .then(function (tform) {
+                        return remote
+                            .execute(function (transform) {
+                                return getComputedStyle(document.body)[transform];
+                            }, [tform])
+                            .then(function (transform) {
+                                let matrix = transform.substring(7).split(','),
+                                    xTrans = Number(matrix[0]),
+                                    yTrans = Number(matrix[3]);
+                                assert.closeTo(
+                                    xTrans,
+                                    3,
+                                    .2,
+                                    'Body should be have an x transformation close to 3'
+                                );
+                                assert.closeTo(
+                                    yTrans,
+                                    3,
+                                    .2,
+                                    'Body should have a y transformation close to 3'
+                                );
+                                assert.isAtMost(
+                                    yTrans,
+                                    3,
+                                    'Body can\'t have a y transformation greater than 3'
+                                );
+                                assert.isAtMost(
+                                    xTrans,
+                                    3,
+                                    'Body can\'t have a x transformation greater than 3'
+                                );
+                            })
+                    })
+            });
+
+            test('Ctrl + wheel up to zoom in, Ctrl + wheel down to zoom out', function () {
+                return input
+                    .ctrlWheel('up', 10)
+                    .then(function () {
+                        return input
+                            .ctrlWheel('down', 10);
+                    })
+                    .then(function () {
+                        return browserUtil.getTransformAttributeName();
+                    })
+                    .then(function (tform) {
+                        return remote
+                            .execute(function (transform) {
+                                return getComputedStyle(document.body)[transform];
+                            }, [tform])
+                            .then(function (transform) {
+                                let matrix = transform.substring(7).split(','),
+                                    xTrans = Number(matrix[0]),
+                                    yTrans = Number(matrix[3]);
+                                assert.closeTo(
+                                    xTrans,
+                                    1,
+                                    .2,
+                                    'Body should be have an x transformation close to 1'
+                                );
+                                assert.closeTo(
+                                    yTrans,
+                                    1,
+                                    .2,
+                                    'Body should have a y transformation close to 1'
+                                );
+                                assert.isAtLeast(
+                                    yTrans,
+                                    1,
+                                    'Body can\'t have a y transformation less than 1'
+                                );
+                                assert.isAtLeast(
+                                    xTrans,
+                                    1,
+                                    'Body can\'t have a x transformation less than 1'
                                 );
                             })
                     })
             })
-
-
-
 
         });
     }

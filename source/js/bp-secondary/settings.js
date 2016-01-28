@@ -1,5 +1,6 @@
-define(['core/bp/constants', 'core/bp/helper', 'core/conf/user/manager', 'core/bp/model/state', 'core/metric', 'core/platform', 'page/cursor/cursor'],
-  function (BP_CONST, helper, conf, state, metric, platform, cursor) {
+define(['core/bp/constants', 'core/bp/helper', 'core/conf/user/manager', 'core/bp/model/state', 'core/metric', 'core/platform',
+        'page/cursor/cursor', 'core/events'],
+  function (BP_CONST, helper, conf, state, metric, platform, cursor, events) {
 
   var byId = helper.byId,
     isActive = false,
@@ -153,12 +154,12 @@ define(['core/bp/constants', 'core/bp/helper', 'core/conf/user/manager', 'core/b
 
   function fireInputRangeMetric(id, settingName, newValue) {
     var oldValue = conf.get(settingName);
-    metric('slider-setting-changed', {
+    new metric.SliderSettingChange({
       id: id.split('scp-')[1] || id,  // Trim off scp- prefix
       settingName: settingName,
       old: oldValue,
       new: newValue
-    });
+    }).send();
   }
 
   // Use native value for things like <input type="range">
@@ -214,7 +215,7 @@ define(['core/bp/constants', 'core/bp/helper', 'core/conf/user/manager', 'core/b
 
     isInitialized = true;
 
-    sitecues.on('bp/did-open-subpanel', onPanelUpdate);
+    events.on('bp/did-open-subpanel', onPanelUpdate);
   }
 
   return {
