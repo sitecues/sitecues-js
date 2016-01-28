@@ -7848,10 +7848,12 @@
 // AMD loader is present. jQuery is a special case. For more information, see
 // https://github.com/jrburke/requirejs/wiki/Updating-existing-libraries#wiki-anon
 
-  // TODO this should not hardcode sitecues.define as this is incompatible with the extension -- pass it through r.js
-  sitecues.define( 'jquery', [], function() {
-    return jQuery;
-  });
+  // TODO ideally this should not hardcode sitecues.define -- pass it through r.js. However, it works for now.
+  if ( !SC_EXTENSION ) {
+    sitecues.define( "jquery", [], function() {
+      return jQuery;
+    });
+  }
 
 // Don't bother with this -- it just makes it difficult to have our own private sitecues jQuery
 // Expose jQuery and $ identifiers, even in
