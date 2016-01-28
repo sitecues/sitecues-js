@@ -323,10 +323,10 @@ define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/plat
       var cachedRect = helper.getRect(badgeElement),
           contentBox = Object.create(cachedRect),
           computedStyle = getComputedStyle(badgeElement),
-          paddingTop    = Number.parseFloat(computedStyle.paddingTop),
-          paddingBottom = Number.parseFloat(computedStyle.paddingBottom),
-          paddingRight  = Number.parseFloat(computedStyle.paddingRight),
-          paddingLeft   = Number.parseFloat(computedStyle.paddingLeft);
+          paddingTop    = parseFloat(computedStyle.paddingTop),
+          paddingBottom = parseFloat(computedStyle.paddingBottom),
+          paddingRight  = parseFloat(computedStyle.paddingRight),
+          paddingLeft   = parseFloat(computedStyle.paddingLeft);
 
       contentBox.width  -= paddingLeft + paddingRight;
       contentBox.height -= paddingTop  + paddingBottom;
