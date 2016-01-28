@@ -16,7 +16,7 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
     isInitialized,
     originalBodyBackgroundColor,
     isOriginalThemeDark,
-    isDark,   // Is dark theme currently applied
+    isDark = false,   // Is dark theme currently applied
     darkTheme,
     isDarkBgInfoInitialized,
     transitionTimer,
@@ -42,6 +42,7 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
 
     function applyThemeImpl() {
       var
+        colorMapFn = colorChoices[currentThemeName],
         willBeDark = isDarkTheme(colorMapFn),
         isReverseTheme = willBeDark !== isOriginalThemeDark,
         themeCss = colorMapFn ? getThemeCssText(colorMapFn, currentThemePower, currentThemeTextHue) : '',
@@ -85,11 +86,7 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
       isDark = willBeDark;
     }
 
-    var colorMapFn = colorChoices[currentThemeName];
-
-    if (colorMapFn || !currentThemeName) {
-      initStyles(applyThemeImpl);
-    }
+    initStyles(applyThemeImpl);
   }
 
   function isDarkTheme(colorMapFn) {
