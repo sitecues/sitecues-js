@@ -208,9 +208,11 @@ define(
       speak(options);
     }
 
-    exports.stop          = stop;
-    exports.speak         = speak;
-    exports.speakPolitely = speakPolitely;
+    exports = {
+      stop          : stop,
+      speak         : speak,
+      speakPolitely : speakPolitely
+    };
 
     return exports;
   }
