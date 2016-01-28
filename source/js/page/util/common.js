@@ -195,6 +195,13 @@ define(['page/util/element-classifier', 'core/platform'], function (elemClassifi
     return parseFloat(transform.substring(7)) || 1;
   }
 
+  function isNonNegativeFiniteNumber(number) {
+    return typeof number === 'number'
+      && !Number.isNaN(number)
+      && Number.isFinite(number)
+      && number >= 0;
+  }
+
   return {
     getEmsToPx: getEmsToPx,
     isEmpty: isEmpty,
@@ -209,7 +216,8 @@ define(['page/util/element-classifier', 'core/platform'], function (elemClassifi
     elementFromPoint: elementFromPoint,
     hasVertScroll: hasVertScroll,
     getBulletWidth: getBulletWidth,
-    getComputedScale: getComputedScale
+    getComputedScale: getComputedScale,
+    isNonNegativeFiniteNumber: isNonNegativeFiniteNumber
   };
 
 });
