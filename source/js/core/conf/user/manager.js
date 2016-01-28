@@ -3,7 +3,7 @@
  * properties represent the state of the user session, and are
  * persisted in the user preferences data store.
  */
-define(['core/conf/user/storage', 'core/conf/user/storage-backup'], function (storage, storageBackup) {
+define(['core/conf/user/storage', 'core/conf/user/storage-backup', 'core/util/uuid'], function (storage, storageBackup, uuid) {
   // private variables
   var cachedSettings = {},   // We cache prefs in cachedSettings for speed -- getting from localStorage is slower
       handlers       = {},
@@ -102,18 +102,25 @@ define(['core/conf/user/storage', 'core/conf/user/storage-backup'], function (st
       // Could not find local storage for sitecues prefs
       // Try cross-domain backup storage
       storageBackup.init(function () {
+        console.log('INITIALIZE BACK UP STORAGE');
         storageBackup.load(function (data) {
           if (data) {
             storage.setSitecuesLs(data);
           }
+          if (!storage.getUserId()) {
+            // No user id: generate one
+            var userId = uuid();
+            storage.setUserId(userId);
+            storageBackup.save(storage.getSitecuesLs());
+          }
+          cache(storage.getPrefs());
+          onReadyCallbackFn();
         });
       });
-
-      cache(storage.getPrefs());
-
     }
-
-    onReadyCallbackFn();
+    else {
+      onReadyCallbackFn();
+    }
 
   }
 

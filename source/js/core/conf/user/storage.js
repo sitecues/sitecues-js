@@ -15,13 +15,14 @@
  *    }
  * }
  */
-define(['core/util/uuid'], function(uuid) {
+define([], function() {
 
   /*
    * Get value of Local Storage's "sitecues" key which is the outer namespace.
    * @returns {DOMString}
    */
   function getSitecuesLs() {
+    console.log('LOAD FROM LOCAL STORAGE');
     return localStorage.getItem('sitecues') || setSitecuesLs();
   }
 
@@ -31,6 +32,7 @@ define(['core/util/uuid'], function(uuid) {
   function setSitecuesLs(data) {
     var dataString = JSON.stringify(data || {});
     localStorage.setItem('sitecues', dataString);
+    console.log('SAVE LOCAL STORAGE:', data);
   }
 
   /*
@@ -49,6 +51,7 @@ define(['core/util/uuid'], function(uuid) {
     var sitecuesLs = getSitecuesLs();
     if (sitecuesLs) {
       var internalLs = JSON.parse(sitecuesLs);
+      console.log('GET USER ID FROM LOCAL STORAGE:', (internalLs && internalLs.userId));
       return internalLs && internalLs.userId;
     }
   }
@@ -58,6 +61,7 @@ define(['core/util/uuid'], function(uuid) {
    * @returns {JSON.parse.j|Array|Object}
    */
   function setUserId(value) {
+    console.log('SET NEW USER ID IN LOCAL STORAGE');
     var sitecuesLs = getSitecuesLs() || setSitecuesLs();
     if (sitecuesLs) {
       var internalLs = JSON.parse(sitecuesLs);
@@ -73,6 +77,7 @@ define(['core/util/uuid'], function(uuid) {
    * @returns {void}
    */
   function setPref(key, value) {
+    console.log('SET LOCAL STORAGE PREFERENCE', key);
     var userPrefData = getPrefs();
     var sitecuesLs = JSON.parse(getSitecuesLs());
     // Update value.
@@ -89,20 +94,17 @@ define(['core/util/uuid'], function(uuid) {
   function getPrefs() {
     var sitecuesLs = JSON.parse(getSitecuesLs()),
       prefs = sitecuesLs[getUserId()];
+    console.log('LOAD LOCAL STORAGE PREFERENCES:', prefs);
     return typeof prefs === 'object' ? prefs : {};
   }
 
   function init(onReadyCallbackFn) {
-
-    var userId;
 
     if (getUserId()) {
       // Has local storage sitecues prefs for this website
       onReadyCallbackFn(getPrefs());
     }
     else {
-      userId = uuid();
-      setUserId(userId);
       onReadyCallbackFn();
     }
 

@@ -44,6 +44,7 @@ define(['core/conf/urls', 'core/platform'], function (urls, platform) {
           console.log('Backup prefs retrieved');
         }
         parsedData = parseData(data);
+        console.log('LOADED FROM BACKUP:', parsedData);
       }
       window.removeEventListener('message', onMessageReceived);
       onDataAvailableFn(parsedData);  // Use callback even if we don't use the data -- otherwise sitecues won't load
@@ -68,6 +69,7 @@ define(['core/conf/urls', 'core/platform'], function (urls, platform) {
       console.log('Backing up prefs: ' + data);
     }
     postMessageToIframe(data);
+    console.log('BACKUP SAVE:', data);
   }
 
   function clear() {
