@@ -14,7 +14,7 @@ function getConfig(baseConfig) {
     resourceFolderName: baseConfig.isDebugOn ? '.' : baseConfig.version,
     isLocal: process.env.LOCAL === 'on',  // Common library -- default is non-local
     jsGlob: getGlob('js/**/*.js'),
-    rasterGlob: getGlob('images/**/*.png'),
+    rasterGlob: [ getGlob('images/**/*.png'), getGlob('images/**/*.cur') ],
     svgGlob: getGlob('images/**/*.svg'),
     earconsGlob: [
       getGlob('/earcons/**/*.mp3'),
