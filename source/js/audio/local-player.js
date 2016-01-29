@@ -83,7 +83,7 @@ define(
       ));
     }
 
-    function getBestVoice(voices) {
+    function getBestVoice(options) {
 
       // At the moment, we assume the first voice in the list is the best
       // if we cannot find our favorite Google or OS X voices.
@@ -91,22 +91,27 @@ define(
       // In the future, the intention is to compute the best voice based
       // on more data, such as the current document language, etc.
 
-      var i, len, voice, voiceNum = 0;
+      var
+        voices = options.voices,
+        lang   = options.lang,
+        filteredVoices,
+        voice;
 
-      len = voices.length;
-      for (i = 0; i < len; i += 1) {
-        // We prefer Google US English above all else. So if we find it, no need to continue.
-        if (voices[i].name === 'Google US English') {
-          voiceNum = i;
-          break;
-        }
-        // Ava is our backup. So if we find it, assume we should use it. But keep searching.
-        if (voices[i].name === 'Ava') {
-          voiceNum = i;
-        }
+      // If no specific language is desired, it is best to
+      // let the browser decide intelligently, on its own.
+      if (!lang) {
+        return null;
       }
 
-      voice = voices[voiceNum];
+      filteredVoices = voices.filter(function (voice) {
+        return voice.lang.indexOf(lang) === 0;
+      });
+
+      if (filteredVoices.length < 1) {
+        return null;
+      }
+
+      voice = filteredVoices[0];
 
       return voice;
     }
@@ -127,7 +132,7 @@ define(
         polite = options.polite,
         prom   = Promise.resolve();
 
-      // TODO: Replace this poor execuse for a speech dictionary.
+      // TODO: Replace this poor excuse for a speech dictionary.
       text = options.text.replace(/sitecues/gi, 'sightcues').trim();
 
       if (!text) {
@@ -137,7 +142,10 @@ define(
       if (!voice) {
         prom = getVoices()
           .then(function (voices) {
-            return getBestVoice(voices);
+            return getBestVoice({
+              voices : voices,
+              lang   : lang
+            });
           })
           .then(function (bestVoice) {
             voice = bestVoice;
@@ -154,7 +162,7 @@ define(
       prom = prom.then(function () {
 
         var speech = new SpeechSynthesisUtterance(text);
-
+        console.log('Using voice:', voice && voice.name);
         speech.voice = voice;
         // Note: Some voices do not support altering these settings.
         speech.lang  = lang;
