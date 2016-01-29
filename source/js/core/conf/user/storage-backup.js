@@ -69,7 +69,7 @@ define(['core/conf/urls', 'core/platform'], function (urls, platform) {
         console.log('Backing up prefs: ' + data);
       }
       postMessageToIframe(data);
-    })
+    });
   }
 
   function clear() {
