@@ -95,25 +95,21 @@ define(
         voices = options.voices,
         lang   = options.lang,
         filteredVoices,
-        voice;
-
-      // If no specific language is desired, it is best to
-      // let the browser decide intelligently, on its own.
-      if (!lang) {
-        return null;
-      }
+        bestVoice;
 
       filteredVoices = voices.filter(function (voice) {
-        return voice.lang.indexOf(lang) === 0;
+        return voice.lang.indexOf(lang) === 0 && voice.localService;
       });
 
       if (filteredVoices.length < 1) {
-        return null;
+        throw new Error('No local voice available for ' + lang);
       }
 
-      voice = filteredVoices[0];
+      // Voices come in ordered from most preferred to least,
+      // so using the first voice chooses the user's favorite.
+      bestVoice = filteredVoices[0];
 
-      return voice;
+      return bestVoice;
     }
 
     function stop() {
