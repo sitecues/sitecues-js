@@ -10,7 +10,7 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
     REPAINT_MS = 40,
     themeStyles,
     // TODO remove once no longer necessary -- should be soon
-    shouldRepaintToEnsureFullCoverage = platform.browser.isChrome && platform.browser.version < 48,
+    shouldRepaintToEnsureFullCoverage,
     isPanelExpanded,
     isRepaintNeeded,
     isInitialized,
@@ -491,9 +491,10 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
       // Only include inverter and img-classifier modules if dark theme is ued
       if (currentThemeName === 'dark' && !darkTheme) {
         require(['dark-theme/dark-theme'], function (darkThemeModule) {
-            darkTheme = darkThemeModule;
-            applyTheme();
-          });
+          darkThemeModule.init();
+          darkTheme = darkThemeModule;
+          applyTheme();
+        });
       }
       else {
         applyTheme();
@@ -510,6 +511,9 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
       return;
     }
     isInitialized = true;
+
+    // TODO remove when no longer necessary
+    shouldRepaintToEnsureFullCoverage = platform.browser.isChrome && platform.browser.version < 48;
 
     conf.def('themeName', getSanitizedThemeName);
     conf.def('themePower', getSanitizedThemePower);

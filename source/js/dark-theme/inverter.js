@@ -2,18 +2,14 @@
  *  Used for dark themes.
  */
 
-  define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core/platform', 'dark-theme/img-classifier'],
+define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core/platform', 'dark-theme/img-classifier'],
   function($, conf, styleService, platform, imgClassifier) {
 
   var mutationObserver,
     $allReversibleElems = $(),
-    filterProperty = (function() {
-      var div = document.createElement('div');
-      div.style.filter = 'invert(1)';
-      return div.style.filter ? 'filter': platform.cssPrefix + 'filter';
-    })(),
+    filterProperty,
     // Use proxy in IE and Safari, because: no css invert in IE, and it's extremely slow in Safari
-    SHOULD_USE_PROXY = platform.browser.isIE || platform.browser.isSafari;
+    SHOULD_USE_PROXY;
 
   function toggle(doStart, doRefreshImages) {
     if (doStart) {
@@ -34,7 +30,7 @@
   }
 
   function start(doRefreshImages) {
-    refresh(document.body, doRefreshImages);
+    refresh(document.body);
 
     if (doRefreshImages) {
       if (!mutationObserver) {
@@ -54,12 +50,12 @@
         index = addedNodes.length;
 
       while (index--) {
-        refresh(addedNodes[index], true);
+        refresh(addedNodes[index]);
       }
     });
   }
 
-  function refresh(root, doRefreshImages) {
+  function refresh(root) {
 
     function onClassifiedAsReversible(elem) {
       $allReversibleElems.add(elem);
@@ -68,10 +64,6 @@
 
     classifyIframes(root, onClassifiedAsReversible);
     imgClassifier.classify(root, onClassifiedAsReversible);
-
-    if (doRefreshImages) {
-      refreshBackgroundImageStyles(root);
-    }
   }
 
   // Invert image or element via CSS filter: invert(1)
@@ -115,10 +107,6 @@
         reverseElem = (src && SHOULD_USE_PROXY) ? reverseElemProxy : reverseElemCss;
       reverseElem($(this), doReverse, src);
     });
-  }
-
-  function refreshBackgroundImageStyles() {
-
   }
 
   function classifyIframes(root, reverseCallbackFn) {
@@ -167,10 +155,22 @@
     });
 
     return styleSheetText;
+  }
 
+  function getFilterProperty() {
+    var div = document.createElement('div');
+    div.style.filter = 'invert(1)';
+    return div.style.filter ? 'filter': platform.cssPrefix + 'filter';
+  }
+
+  function init() {
+    SHOULD_USE_PROXY = platform.browser.isIE || platform.browser.isSafari;
+
+    filterProperty = getFilterProperty();
   }
 
   return {
+    init: init,
     toggle: toggle,
     getReverseSpriteCssText: getReverseSpriteCssText
   };

@@ -39,7 +39,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
   // 1. Must be completely loaded
   // 2. We have permission (either we're in the extension, the img is not cross-domain, or we can load it through the proxy)
   // Either pass img or src, but not both
-  function getReadableImage(img, src, onReadableImageAvailable) {
+  function getReadableImage(img, src, onReadableImageAvailable, onReadableImageError) {
     // Unsafe cross-origin request
     // - Will run into cross-domain restrictions because URL is from different domain
     // This is not an issue with the extension, because the content script doesn't have cross-domain restrictions
@@ -52,9 +52,11 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
         onReadableImageAvailable(loadableImg); // Already loaded
       }
       else {
-        loadableImg.addEventListener('load', function() {
-          onReadableImageAvailable(loadableImg);
-        });
+        $(loadableImg)
+          .on('load', function() {
+            onReadableImageAvailable(loadableImg);
+          })
+          .on('error', onReadableImageError);
       }
     }
 
@@ -64,7 +66,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
         return;
       }
       // Element we want to read is not an <img> -- for example, <input type="image">
-      // Create an <img> with the same url so we can apply it to the cancvas
+      // Create an <img> with the same url so we can apply it to the canvas
       safeUrl = url;
     }
     else {
@@ -88,7 +90,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
   }
 
   // Either pass img or src, but not both
-  function getImageData(img, src, rect, onImageDataAvailable) {
+  function getImageData(img, src, rect, processImageData) {
     var canvas = document.createElement('canvas'),
       ctx,
       top = rect.top || 0,
@@ -99,7 +101,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
     canvas.width = width;
     canvas.height = height;
 
-    getReadableImage(img, src, function(readableImg) {
+    function onReadableImageAvailable(readableImg) {
       ctx = canvas.getContext('2d');
 
       try {
@@ -111,14 +113,21 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
           console.log('Could not get image data for %s: %o', readableImg.getAttribute('src'), ex);
         }
       }
-      onImageDataAvailable(imageData);
-    });
+      processImageData(imageData);
+    }
+
+    function onImageError() {
+      processImageData(); // No data
+    }
+
+    getReadableImage(img, src, onReadableImageAvailable, onImageError);
+
   }
 
   // Either pass img or src, but not both
-  function getPixelInfo(img, src, rect, onPixelInfoAvailable) {
+  function getPixelInfo(img, src, rect, processPixelInfo) {
     getImageData(img, src, rect, function(data) {
-      onPixelInfoAvailable(data && getPixelInfoImpl(data, rect.width, rect.height));
+      processPixelInfo(data && getPixelInfoImpl(data, rect.width, rect.height));
     });
   }
 
@@ -203,6 +212,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
     };
   }
 
+  // These come from the original machine-learned algorithms
   function getSizeScore(height, width) {
     if (width <= 1 || height <= 1) {
       return 0; // It's possible that image simply isn't loaded yet, scroll down in brewhoop.com
@@ -273,6 +283,8 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
       return;
     }
 
+    // The magic values in here are taken from the original machine-learned algorithms
+    // from Jeff Bigham's work, and have been tweaked a bit.
     getPixelInfo(img, src, rect, function(pixelInfo) {
       var score = 0,
         BASE_SCORE = 180,
@@ -291,10 +303,10 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
         // Values reused -> less likely to be a photo
         manyReusedValuesScore = 15 * pixelInfo.numMultiUseGrayscaleVals;
 
-        // One large swath of color -> less likely to be a photo. For example 30% -> +60 poitns
+        // One large swath of color -> less likely to be a photo. For example 30% -> +60 points
         oneValueReusedOftenScore = Math.min(50, pixelInfo.percentWithSameGrayscale * 200);
 
-        // Many hues -> more likely to be a photo
+        // Many hues -> more likely to be a photo -- experimentation showed that 8 hues seemed to work as a threshold
         if (pixelInfo.numDifferentHues < 8) {
           // Few hues: probably not a photo -- YES invert
           numHuesScore =  Math.pow(pixelInfo.numDifferentHues - 8, 2) * 1.5;
@@ -306,12 +318,12 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
 
         score = BASE_SCORE + manyValuesScore + manyReusedValuesScore + oneValueReusedOftenScore + numHuesScore;
         // Image has full color information
-        if (SC_DEV && isDebuggingOn) {
+        if (SC_DEV && isDebuggingOn && img) {
           $(img).attr('data-sc-pixel-info', JSON.stringify(pixelInfo));
           $(img).attr('data-sc-pixel-score', score);
         }
       }
-      else if (SC_DEV && isDebuggingOn) {
+      else if (SC_DEV && isDebuggingOn && img) {
         $(img).attr('data-sc-pixel-score', 'invalid');
       }
 
@@ -338,6 +350,9 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
     // jshint -W016
     function getHashCode(s) {
       // From http://stackoverflow.com/questions/7616461/generate-a-hash-from-string-in-javascript-jquery
+      // but modified to reduce the number of collisions (by not confining the values to 32 bit)
+      // For 294 images on a site, the normal 32 bit hash algorithm has a 1/100,000 chance of collision, and we are better than that.
+      // For more info on hash collisions, see http://preshing.com/20110504/hash-collision-probabilities/
       return s.split('').reduce(function (a, b) {
         return ((a << 5) - a) + b.charCodeAt(0);
       }, 0).toString(36);
@@ -362,6 +377,10 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
       });
     }
 
+    function imageLoadError() {
+      onImageClassified(img, false);
+    }
+
     var storageKey = getStorageKey(img),
       cachedResult = window.sessionStorage.getItem(storageKey);
 
@@ -372,7 +391,9 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
     else if (!img.complete) {
       // Too early to tell anything
       // Wait until image loaded
-      img.addEventListener('load', classifyLoadedImage);
+      $(img)
+        .on('load', classifyLoadedImage)
+        .on('error', imageLoadError);
     }
     else {
       //Image is loaded and ready for processing -- after slight delay
