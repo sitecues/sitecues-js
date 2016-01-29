@@ -56,7 +56,8 @@ define([
         'li'       : getValidListElement,
         'fieldset' : getValidFieldsetElement,
         'input'    : getValidFormElement
-      };
+      },
+      state = {};
 
   if (SC_DEV) {
     // Boolean that determines if we log HLB information (only works in SC_DEV mode)
@@ -195,7 +196,7 @@ define([
 
     // Let the rest of the application know that the hlb is ready
     // Listeners: hpan.js, invert.js, highlight.js, speech.js
-    sitecues.emit('hlb/ready', $hlb);
+    sitecues.emit('hlb/ready', $hlb, state.highlight);
   }
 
   /**
@@ -243,6 +244,8 @@ define([
   }
 
   function targetHLB(highlight, isRetargeting) {
+
+    state.highlight = highlight;
 
     if (!highlight.fixedContentRect) {
       return;  // No highlight present -- nothing to open HLB on

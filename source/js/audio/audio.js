@@ -36,7 +36,8 @@ define(
     TRIGGER_TYPES = {
       LENS: 'space',
       HIGHLIGHT: 'shift'
-    };
+    },
+    player = true ? localPlayer : networkPlayer;
 
   function onLensOpened(lensContent, fromHighlight) {
     if (!ttsOn) {
@@ -85,7 +86,13 @@ define(
         });
       }
 
-      networkPlayer.playAudioSrc(TTSUrl, onSpeechComplete);
+      //networkPlayer.playAudioSrc(TTSUrl, onSpeechComplete);
+      // TODO: Figure out why lang comes in as en-US here...
+      // http://www.wolterskluwer.pl/
+      player.speak({
+        text : text,
+        lang : lang
+      });
 
       isAudioPlaying = true;
       sitecues.emit('audio/speech-play', TTSUrl);
@@ -113,7 +120,7 @@ define(
    */
   function stopAudio() {
     if (isAudioPlaying) {
-      networkPlayer.stop();
+      player.stop();
       removeBlurHandler();
       isAudioPlaying = false;
     }
@@ -233,9 +240,9 @@ define(
     var audioApi,
       index = 0,
       MEDIA_TYPES = {
-        ogg: 'audio/ogg',
-        mp3: 'audio/mpeg',
-        aac: 'audio/aac'
+        ogg : 'audio/ogg',
+        mp3 : 'audio/mpeg',
+        aac : 'audio/aac'
       };
 
     try {
@@ -243,7 +250,7 @@ define(
     } catch (e) {}
 
     if (audioApi) {
-      for (; index < listOfAvailableExtensions.length; index ++) {
+      for (; index < listOfAvailableExtensions.length; index++) {
         var extension = listOfAvailableExtensions[index];
         if (audioApi.canPlayType(MEDIA_TYPES[extension])) {
           return extension;
@@ -340,7 +347,7 @@ define(
      * A highlight box has been requested.  This will create the player
      * if necessary, but will not play anything.
      */
-    sitecues.on('hlb/did-create', onLensOpened);
+    sitecues.on('hlb/ready', onLensOpened);
 
     /*
      * A highlight box was closed.  Stop/abort/dispose of the player
