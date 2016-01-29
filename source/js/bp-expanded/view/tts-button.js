@@ -1,6 +1,6 @@
 // TODO wave animation broken except in default badge
-define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/locale', 'core/conf/user/manager'],
-  function (BP_CONST, helper, state, locale, conf) {
+define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/locale', 'core/conf/user/manager', 'core/events'],
+  function (BP_CONST, helper, state, locale, conf, events) {
   var
     waveAnimationTimer,
     waveAnimationStepNum,
@@ -175,8 +175,8 @@ define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/loca
 
     toggleListeners(true);
 
-    sitecues.on('bp/did-expand', function() { toggleListeners(true); });
-    sitecues.on('bp/will-shrink', function() { toggleListeners(false); });
+    events.on('bp/did-expand', function() { toggleListeners(true); });
+    events.on('bp/will-shrink', function() { toggleListeners(false); });
 
     updateTTSStateView(isSpeechEnabled);
 

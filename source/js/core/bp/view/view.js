@@ -13,8 +13,8 @@ define([
   'core/locale',
   'core/conf/site',
   'core/bp/view/panel/panel-classes',
-  'core/bp/view/badge/badge-classes'
-], function(BP_CONST,
+  'core/bp/view/badge/badge-classes',
+  'core/events'], function(BP_CONST,
             helper,
             bpSVG,
             placement,
@@ -25,7 +25,8 @@ define([
             locale,
             site,
             panelClasses,
-            badgeClasses) {
+            badgeClasses,
+            events) {
 
   var byId = helper.byId,
     bpContainer,
@@ -109,7 +110,7 @@ define([
 
     // Fire new panel event if appropriate
     if (isNewSubpanel) {
-      sitecues.emit('bp/did-open-subpanel');
+      events.emit('bp/did-open-subpanel');
     }
   }
 

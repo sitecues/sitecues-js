@@ -7,14 +7,15 @@ define([
   'core/bp/helper',
   'core/metric',
   'core/conf/user/manager',
-  'core/bp/view/view'
-],
+  'core/bp/view/view',
+  'core/events'],
   function (BP_CONST,
             state,
             helper,
             metric,
             conf,
-            view) {
+            view,
+            events) {
 
   // How long we wait before expanding BP
   var hoverDelayTimer,
@@ -110,9 +111,9 @@ define([
 
     setPanelExpandedState(isOpenedWithHover);
 
-    sitecues.emit('bp/will-expand');
+    events.emit('bp/will-expand');
 
-    metric('badge-hovered');
+    new metric.BadgeHover().send();
 
     view.update();
   }
@@ -263,11 +264,11 @@ define([
       badgeElement.addEventListener('mouseout', cancelHoverDelayTimer);
 
       window.addEventListener('focus', onWindowFocus);
-      sitecues.on('bp/will-expand', willExpand);
-      sitecues.on('bp/did-expand', didExpand);
-      sitecues.on('bp/will-shrink', willShrink);
-      sitecues.on('zoom', didZoom);
-      sitecues.on('speech/did-change', didChangeSpeech);
+      events.on('bp/will-expand', willExpand);
+      events.on('bp/did-expand', didExpand);
+      events.on('bp/will-shrink', willShrink);
+      events.on('zoom', didZoom);
+      events.on('speech/did-change', didChangeSpeech);
 
       // Turn on TTS button if the setting is on
       if (conf.get('ttsOn')) {

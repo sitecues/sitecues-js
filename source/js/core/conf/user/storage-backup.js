@@ -10,7 +10,8 @@ define(['core/conf/urls', 'core/platform'], function (urls, platform) {
     ID = 'sitecues-prefs',
     iframe,
     isLoaded,
-    IS_BACKUP_DISABLED = platform.browser.isIE9;
+    isInitialized,
+    IS_BACKUP_DISABLED;
 
   // If data is defined, it is a set call, otherwise we are getting data
   function postMessageToIframe(optionalData) {
@@ -36,7 +37,7 @@ define(['core/conf/urls', 'core/platform'], function (urls, platform) {
   function load(onDataAvailableFn) {
     function onMessageReceived(event) {
       var data = event.data,
-          parsedData = {};
+        parsedData = {};
 
       if (event.origin === urls.getScriptOrigin()) {  // Best practice: check if message is from the expected origin
         if (SC_DEV) {
@@ -49,7 +50,7 @@ define(['core/conf/urls', 'core/platform'], function (urls, platform) {
     }
 
     if (IS_BACKUP_DISABLED) {
-      onDataAvailableFn({});
+      onDataAvailableFn();
       return;
     }
     window.addEventListener('message', onMessageReceived);
@@ -60,13 +61,15 @@ define(['core/conf/urls', 'core/platform'], function (urls, platform) {
   }
 
   function save(data) {
-    if (IS_BACKUP_DISABLED) {
-      return;
-    }
-    if (SC_DEV) {
-      console.log('Backing up prefs: ' + data);
-    }
-    postMessageToIframe(data);
+    init(function () {
+      if (IS_BACKUP_DISABLED) {
+        return;
+      }
+      if (SC_DEV) {
+        console.log('Backing up prefs: ' + data);
+      }
+      postMessageToIframe(data);
+    })
   }
 
   function clear() {
@@ -76,10 +79,15 @@ define(['core/conf/urls', 'core/platform'], function (urls, platform) {
   // Optional callbacks
   function init(onReadyCallback) {
 
-    if (isLoaded || IS_BACKUP_DISABLED) {
+    if (!isInitialized) {
+      IS_BACKUP_DISABLED = platform.browser.isIE9;
+    }
+
+    if (isInitialized || isLoaded || IS_BACKUP_DISABLED) {
       onReadyCallback();
       return;
     }
+    isInitialized = true;
 
     if (!iframe) {
       iframe = document.createElement('iframe');

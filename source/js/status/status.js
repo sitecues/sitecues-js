@@ -42,7 +42,7 @@ define(
     function status(callback) {
 
       var html = document.documentElement,
-          confData = conf.data(),
+          prefData = conf.cache(),
           coordinates,
           ajaxUrls = {  // Set the server URLs for retrieving the status of our services (version info, etc.)
             ws : urls.getApiUrl('util/status')
@@ -61,7 +61,7 @@ define(
           js : sitecues.version,
           ws : null
         },
-        config     : site.getSiteConfig(),
+        config     : site.getSiteConfig()
       };
       // Measurements useful for reproducing bugs, because their state affects
       // the behavior of our CSS, animations, etc.
@@ -93,9 +93,9 @@ define(
       };
 
       // Add current settings (zoom level, etc) to the log.
-      for (setting in confData) {
-        if (confData.hasOwnProperty(setting)) {
-          info[setting] = confData[setting];
+      for (setting in prefData) {
+        if (prefData.hasOwnProperty(setting)) {
+          info[setting] = prefData[setting];
         }
       }
       // Add all measurements for bug reproduction to the log.

@@ -1,5 +1,5 @@
-define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/platform', 'core/metric', 'core/bp/view/view' ],
-  function (BP_CONST, helper, state, platform, metric, view) {
+define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/platform', 'core/metric', 'core/bp/view/view', 'core/events'],
+  function (BP_CONST, helper, state, platform, metric, view, events) {
   var byId = helper.byId,
     isActive = false,
     isInitialized,
@@ -157,10 +157,12 @@ define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/plat
         rating: currentRating,  // 0 = no rating, otherwise 1-5 stars
         status: currentStatus
       };
+
       if (SC_DEV) {
         console.log('Sending feedback: %o', details);
       }
-      metric('feedback-sent', details);
+      new metric.Feedback(details).send();
+
       toggleSendEnabled(false); // Disable feedback button after sent, so that feedback isn't accidentally clicked twice
       state.set('isFeedbackSent', true);
       view.update(true);
@@ -168,19 +170,20 @@ define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/plat
   }
 
   function getGeometryTargets(cssValues) {
-
     return cssValues;
   }
 
   function init() {
     if (!isInitialized) {
       isInitialized = true;
-      sitecues.on('bp/did-open-subpanel', onPanelUpdate);
-      sitecues.on('bp/will-show-secondary-feature', function(name) {
+      events.on('bp/did-open-subpanel', onPanelUpdate);
+
+      events.on('bp/will-show-secondary-feature', function(name) {
         if (name === 'feedback') {
           autoSizeTextarea();
         }
       });
+
     }
   }
 

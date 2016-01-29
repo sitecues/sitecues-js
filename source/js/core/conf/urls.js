@@ -2,7 +2,7 @@ define(['core/conf/site'], function(site) {
 
   var apiDomain,  // Either ws.sitecues.com/ or ws.dev.sitecues.com/
     scriptOrigin,  // Either http[s]://js.sitecues.com/ or http[s]://js.dev.sitecues.com/
-    BASE_RESOURCE_URL = getBaseResourceUrl();
+    BASE_RESOURCE_URL;
 
   function getBaseResourceUrl() {
     var basis = SC_EXTENSION ? getRawScriptUrl() : sitecues.requirejs.nameToUrl('');
@@ -100,6 +100,7 @@ define(['core/conf/site'], function(site) {
       url += '?';
       params.forEach(addParam);
     }
+
     return url;
   }
 
@@ -163,6 +164,7 @@ define(['core/conf/site'], function(site) {
 
   function init() {
     var domainEnding = isProduction() ? '.sitecues.com' : '.dev.sitecues.com';
+    BASE_RESOURCE_URL = getBaseResourceUrl();
     apiDomain = 'ws' + domainEnding + '/';
   }
 

@@ -6,7 +6,7 @@
  * NOTE: currently we are not using/building this
  */
 
-define(['core/conf/user/manager', '$'], function(conf, $) {
+define(['core/conf/user/manager', '$', 'core/events'], function(conf, $, events) {
   
 
 
@@ -16,11 +16,11 @@ define(['core/conf/user/manager', '$'], function(conf, $) {
     return labSettings[labName];
   }
 
-  sitecues.on('labs/get', function(labInfo) {
+  events.on('labs/get', function(labInfo) {
     $.extend(labInfo, labSettings);
   });
 
-  sitecues.on('labs/set', function(labInfo) {
+  events.on('labs/set', function(labInfo) {
     labSettings = $.extend({}, labInfo);
     conf.set('labs', labSettings);
   });

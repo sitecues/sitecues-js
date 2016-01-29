@@ -4,8 +4,9 @@
  *  keyboard commands.
  */
 
-define(['core/bp/constants', 'core/bp/helper', 'bp-expanded/view/transform-util', 'bp-expanded/view/transform-animate', 'bp-expanded/view/transform-hovers', 'core/bp/model/state'],
-  function (BP_CONST, helper, transformUtil, animate, hovers, state) {
+define(['core/bp/constants', 'core/bp/helper', 'bp-expanded/view/transform-util', 'bp-expanded/view/transform-animate',
+        'bp-expanded/view/transform-hovers', 'core/bp/model/state', 'core/events'],
+  function (BP_CONST, helper, transformUtil, animate, hovers, state, events) {
 
   var BUTTON_ENTER_ANIMATION_DURATION = 800, // Milliseconds
       NO_INPUT_TIMEOUT                = 7000,
@@ -153,15 +154,15 @@ define(['core/bp/constants', 'core/bp/helper', 'bp-expanded/view/transform-util'
 
     // After a complete expansion of the badge, determine if and when we will show
     // the "more" button.
-    sitecues.on('bp/did-expand', initButtonBehavior); // Future expansions
+    events.on('bp/did-expand', initButtonBehavior); // Future expansions
     initButtonBehavior(); // First expansion is now
 
     // Allows other modules to show the more button.  For example, pressing the
     // tab key to navigate and operate the panel.
-    sitecues.on('bp/did-focus-more-button', showMoreButtonInstantly);
+    events.on('bp/did-focus-more-button', showMoreButtonInstantly);
 
     // Always hide the more button when the panel is about to collapse.
-    sitecues.on('bp/will-shrink', hideHelpButton);
+    events.on('bp/will-shrink', hideHelpButton);
 
     hovers.init();
   }

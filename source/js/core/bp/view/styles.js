@@ -6,15 +6,54 @@ define(['core/bp/helper', 'core/platform', 'core/conf/site'],
 
     isAnimationDebuggingOn = false,
 
-    palette = site.get('palette'),
-    hasCustomPalette = typeof palette === 'object',
-    customBadgePalette = (hasCustomPalette && palette.badge) || {},
+    palette,
+    hasCustomPalette,
+    customBadgePalette,
 
-    doWebKitPrefix = platform.browser.isSafari,
-    doMsPrefix = platform.browser.isIE9,
+    doWebKitPrefix,
+    doMsPrefix,
 
     BASE_SHEET_ID    = 'sitecues-bp-css',
 
+    BASE_CSS;
+
+  function toCSS(jsonObject) {
+
+    var styles = '';
+    var isTransformPrefixNeeded = document.createElement('p').style.transform === undefined;
+
+    for (var selector in jsonObject) {
+      if (jsonObject.hasOwnProperty(selector)) {
+        styles += selector + ' {\n';
+        for (var attribute in jsonObject[selector]) {
+          if (jsonObject[selector].hasOwnProperty(attribute)) {
+            var value = jsonObject[selector][attribute];
+            if (isTransformPrefixNeeded) {
+              if (attribute === 'transform' || attribute === 'transition' ||
+                attribute === 'transform-origin') {
+                // TEMPORARY DEBUGGING CODE
+                if (SC_DEV && isAnimationDebuggingOn && attribute === 'transition') {
+                  value = value.replace('.', ''); // Slow down transition
+                }
+                if (doWebKitPrefix) {
+                  attribute = '-webkit-' + attribute;
+                  value = value.replace('transform', '-webkit-transform');
+                } else if (doMsPrefix && attribute !== 'transition') {
+                  attribute = '-ms-' + attribute;
+                }
+              }
+            }
+            styles += '  ' + attribute + ': ' + value + ';\n';
+          }
+        }
+        styles += '}\n';
+      }
+    }
+
+    return styles;
+  }
+
+  function initBaseCss() {
     BASE_CSS = {
       /**
        General CSS rules for panel
@@ -33,8 +72,8 @@ define(['core/bp/helper', 'core/platform', 'core/conf/site'],
        <g .scp-feature-content>
        <g .scp-tips> etc.
        <sc-cards>
-         <sc-card>
-         <sc-card>
+       <sc-card>
+       <sc-card>
        ...
 
        Classes important for CSS:
@@ -64,7 +103,7 @@ define(['core/bp/helper', 'core/platform', 'core/conf/site'],
         'box-sizing': 'content-box !important'  // In case the web page overrode it for anything
       },
 
-    /***************** Loading/badge  ****************/
+      /***************** Loading/badge  ****************/
 
       // If there is an old badge image, it will fade out
       '#sitecues-badge>img': {
@@ -460,41 +499,6 @@ define(['core/bp/helper', 'core/platform', 'core/conf/site'],
         'opacity': 1
       }
     };
-
-  function toCSS(jsonObject) {
-
-    var styles = '';
-    var isTransformPrefixNeeded = document.createElement('p').style.transform === undefined;
-
-    for (var selector in jsonObject) {
-      if (jsonObject.hasOwnProperty(selector)) {
-        styles += selector + ' {\n';
-        for (var attribute in jsonObject[selector]) {
-          if (jsonObject[selector].hasOwnProperty(attribute)) {
-            var value = jsonObject[selector][attribute];
-            if (isTransformPrefixNeeded) {
-              if (attribute === 'transform' || attribute === 'transition' ||
-                attribute === 'transform-origin') {
-                // TEMPORARY DEBUGGING CODE
-                if (SC_DEV && isAnimationDebuggingOn && attribute === 'transition') {
-                  value = value.replace('.', ''); // Slow down transition
-                }
-                if (doWebKitPrefix) {
-                  attribute = '-webkit-' + attribute;
-                  value = value.replace('transform', '-webkit-transform');
-                } else if (doMsPrefix && attribute !== 'transition') {
-                  attribute = '-ms-' + attribute;
-                }
-              }
-            }
-            styles += '  ' + attribute + ': ' + value + ';\n';
-          }
-        }
-        styles += '}\n';
-      }
-    }
-
-    return styles;
   }
 
   function createStyleSheet(sheetId, cssDefs) {
@@ -505,6 +509,13 @@ define(['core/bp/helper', 'core/platform', 'core/conf/site'],
   }
 
   function init() {
+    palette = site.get('palette');
+    hasCustomPalette = typeof palette === 'object';
+    customBadgePalette = (hasCustomPalette && palette.badge) || {};
+    doWebKitPrefix = platform.browser.isSafari;
+    doMsPrefix = platform.browser.isIE9;
+    initBaseCss();
+
     if (!isInitialized) {
       isInitialized = true;
       createStyleSheet(BASE_SHEET_ID, BASE_CSS);

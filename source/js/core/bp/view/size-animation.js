@@ -1,8 +1,8 @@
 /**
  * Expand or contract the BP
  */
-define([ 'core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/platform' ],
-  function(state, BP_CONST, helper, platform) {
+define([ 'core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/platform', 'core/events'],
+  function(state, BP_CONST, helper, platform, events) {
   var requestFrameFn = window.requestAnimationFrame   ||
                        window.msRequestAnimationFrame ||
                        function (fn) {
@@ -744,7 +744,7 @@ define([ 'core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/pla
     currentlyTransitioningFrom = currentlyTransitioningTo;
     currentlyTransitioningTo = null;
 
-    sitecues.emit(isPanelRequested ? 'bp/did-expand' : 'bp/did-shrink');
+    events.emit(isPanelRequested ? 'bp/did-expand' : 'bp/did-shrink');
 
     require([ 'core/bp/view/view' ], function(view) {
       view.update();
@@ -778,16 +778,15 @@ define([ 'core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/pla
 
 
   function init() {
-
     firstTimeRender();
 
-    sitecues.on('bp/will-expand bp/will-shrink', cancelAnimation);
+    events.on('bp/will-expand bp/will-shrink', cancelAnimation);
 
-    sitecues.on('zoom/begin', function () {
+    events.on('zoom/begin', function () {
       animationStartTime = 0;
     });
 
-    sitecues.on('zoom', onZoomChange);
+    events.on('zoom', onZoomChange);
 
   }
 

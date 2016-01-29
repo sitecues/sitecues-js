@@ -3,8 +3,8 @@
  * for the current zoom and scroll position in the window.
  * It is used as little as possible because it runs code on scroll events, which can slow down scrolling significantly.
  */
-define(['$', 'page/zoom/zoom', 'core/platform', 'core/conf/site', 'page/style-service/style-service' ],
-  function ($, zoomMod, platform, site, styleService) {
+define(['$', 'page/zoom/zoom', 'core/platform', 'core/conf/site', 'page/style-service/style-service', 'core/events'],
+  function ($, zoomMod, platform, site, styleService, events) {
 
     var isOn = false,
       toolbarHeight = 0,
@@ -148,12 +148,12 @@ define(['$', 'page/zoom/zoom', 'core/platform', 'core/conf/site', 'page/style-se
       /**
        * Now that the html element has a new level of scale and width, reposition fixed elements, badge, and panel
        */
-      sitecues.on('zoom resize', function () {
+      events.on('zoom resize', function () {
         lazyTurnOn();
         refresh(true);
       });
 
-      sitecues.on('zoom/begin', function () {
+      events.on('zoom/begin', function () {
         // Temporarily hide until smooth zooming ends
         // This is done because during smooth zoom, the fixed toolbars tend
         // to migrate into the middle of the page, which looks weird.

@@ -12,7 +12,9 @@ define([
     'page/util/element-classifier',
     'hlb/animation',
     'page/util/geo',
-    'core/metric'],
+    'core/metric',
+    'hlb/constants',
+    'core/events'],
   function(
     $,
     conf,
@@ -23,19 +25,19 @@ define([
     elemClassifier,
     hlbAnimation,
     geo,
-    metric) {
+    metric,
+    constants,
+    events) {
 
   /////////////////////////
   // PRIVATE VARIABLES
   ////////////////////////
 
-  var SITECUES_HLB_WRAPPER_ID = 'sitecues-hlb-wrapper', // ID for element which wraps HLB and Dimmer elements
-      SITECUES_HLB_ID         = 'sitecues-hlb',         // ID for $hlb
       // Magic. Fixes problems where mouse highlight was SO accurate, that a simple rounding of a pixel
       // would unnecessarily wrap text. Seemed to be more prevalent on IE, fixes stuff for EEOC.
       // Value of 2 instead of 1 fixes wrapping text on this page for all headers:
       // http://www.windoweyesforoffice.com/sitecues/index.php
-      EXTRA_HIGHLIGHT_PADDING = 2, // TODO: Figure out why this is needed and compute it.
+  var EXTRA_HIGHLIGHT_PADDING = 2, // TODO: Figure out why this is needed and compute it.
       MOUSE_SAFETY_ZONE       = 50, // Number of pixels the mouse is allowed to go outside the HLB, before it closes.
 
       $picked,         // The object chosen by the picker.
@@ -195,7 +197,7 @@ define([
 
     // Let the rest of the application know that the hlb is ready
     // Listeners: hpan.js, invert.js, highlight.js, speech.js
-    sitecues.emit('hlb/ready', $hlb);
+    events.emit('hlb/ready', $hlb);
   }
 
   /**
@@ -258,7 +260,7 @@ define([
 
     // Disable mouse highlighting so we don't copy over the highlighting styles from the picked element.
     // It MUST be called before getFoundation().
-    sitecues.emit('mh/pause');
+    events.emit('mh/pause');
 
     // Sanitize the input, by accounting for "lonely" elements.
     $foundation = getFoundation($picked);
@@ -316,7 +318,7 @@ define([
    */
   function createHLB(highlight, isRetargeting) {
 
-    // clone, style, filter, emit hlb/create,
+    // clone, style, filter, emit hlb/did-create,
     // prevent mousemove deflation, disable scroll wheel
     initializeHLB(highlight);
 
@@ -397,9 +399,8 @@ define([
     turnOnHLBEventListeners();
 
     // Listeners: speech.js
-    sitecues.emit('hlb/did-create', $hlb, highlight);
-
-    metric('hlb-opened');
+    events.emit('hlb/did-create', $hlb, highlight);
+    new metric.LensOpen().send();
   }
 
   /**
@@ -442,7 +443,7 @@ define([
     hlbStyling.setHLBChildTextColor($hlb);
 
     // Set the ID of the hlb.
-    $hlb[0].id = SITECUES_HLB_ID;
+    $hlb[0].id = constants.HLB_ID;
   }
 
   /**
@@ -647,7 +648,7 @@ define([
     isHLBClosing = false;
 
     // Listeners: hpan.js, highlight.js, speech.js
-    sitecues.emit('hlb/closed', event);
+    events.emit('hlb/closed', event);
 
     $foundation = undefined;
     $hlb        = undefined;
@@ -668,7 +669,7 @@ define([
 
     return $hlbWrapper ||
             $('<sc>', {
-              'id': SITECUES_HLB_WRAPPER_ID
+              'id': constants.HLB_WRAPPER_ID
             })
             .css({
               'padding' : 0,

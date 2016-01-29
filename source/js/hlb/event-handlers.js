@@ -1,8 +1,8 @@
 /**
- * In order to keep each module as clear as possible we take out some unrelevant code to the separate files.
+ * In order to keep each module as clear as possible we take out some irrelevant code to the separate files.
  * The module represents HLB event handlers.
- * For example, we want to onle allow scroll for HLB and its entities when HLB is open.
- * Stop event bubble up to window/document object.
+ * For example, we want to only allow scroll for HLB and its entities when HLB is open.
+ * Stop event from bubbling up to window/document object.
  */
 // TODO: Call this module scrolling.js
 define(['$', 'page/util/common', 'core/platform'], function($, common, platform) {
@@ -136,7 +136,7 @@ define(['$', 'page/util/common', 'core/platform'], function($, common, platform)
     };
 
 
-    // Trap the mousewheel events (wheel for all browsers except Safari, which uses mousehweel)
+    // Trap the mousewheel events (wheel for all browsers except Safari, which uses mousewheel)
     window.addEventListener(wheelEventName, wheelEventCallback);
   }
 

@@ -2,7 +2,7 @@
  * If speech is on, automatically speak newly selected regions in document.
  * Created by akhabibullina on 8/3/2015.
  */
-define(['$'], function ($) {
+define(['$', 'core/events'], function ($, events) {
 
   var wasOn = false;
 
@@ -63,7 +63,7 @@ define(['$'], function ($) {
 
   function init() {
     refresh(true);  // We only get init'd if TTS is turned on, so assume it's on
-    sitecues.on('speech/did-change', refresh);
+    events.on('speech/did-change', refresh);
   }
 
   return {
