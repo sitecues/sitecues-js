@@ -50,7 +50,7 @@ define(['core/conf/urls', 'core/platform'], function (urls, platform) {
     }
 
     if (IS_BACKUP_DISABLED) {
-      onDataAvailableFn({});
+      onDataAvailableFn();
       return;
     }
     window.addEventListener('message', onMessageReceived);
@@ -61,25 +61,27 @@ define(['core/conf/urls', 'core/platform'], function (urls, platform) {
   }
 
   function save(data) {
-    if (IS_BACKUP_DISABLED) {
-      return;
-    }
-    if (SC_DEV) {
-      console.log('Backing up prefs: ' + data);
-    }
-    postMessageToIframe(data);
+    init(function () {
+      if (IS_BACKUP_DISABLED) {
+        return;
+      }
+      if (SC_DEV) {
+        console.log('Backing up prefs: ' + data);
+      }
+      postMessageToIframe(data);
+    })
   }
 
   function clear() {
-    init(function () {
-      save('{}');
-    });
+    save('{}');
   }
 
   // Optional callbacks
   function init(onReadyCallback) {
 
-    IS_BACKUP_DISABLED = platform.browser.isIE9;
+    if (!isInitialized) {
+      IS_BACKUP_DISABLED = platform.browser.isIE9;
+    }
 
     if (isInitialized || isLoaded || IS_BACKUP_DISABLED) {
       onReadyCallback();

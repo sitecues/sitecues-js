@@ -3,10 +3,10 @@ define(
         './Base',
         'utility/Poll',
         'utility/Events',
-        'page/util/common',
+        'utility/math',
         'core/constants'
     ],
-    function (Base, Poll, Events, common, constants) {
+    function (Base, Poll, Events, math, constants) {
         'use strict';
 
         class Wait extends Base {
@@ -56,7 +56,7 @@ define(
 
             forEvent(event, args, wait) {
                 //If we aren't concerned with event arguments, you can call wait.forEvent with just the event name and timeout
-                if (!wait && common.isNonNegativeFiniteNumber(args)) {
+                if (!wait && math.isNonNegativeFiniteNumber(args)) {
                     wait = args;
                     args = null;
                 }
@@ -64,7 +64,7 @@ define(
                 //Allow the caller to pass a single argument outside of an array, but ensure that wait is valid
                 if ((args || args === 0)
                     && !Array.isArray(args)
-                    && common.isNonNegativeFiniteNumber(wait)
+                    && math.isNonNegativeFiniteNumber(wait)
                     && arguments.length === 3) {
                     args = [args];
                 }

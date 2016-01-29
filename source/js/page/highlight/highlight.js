@@ -7,7 +7,7 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
 
   var
 
-  moduleInitialized = false,
+  isInitialized,
 
   INIT_STATE = {
     isCreated: false, // Has highlight been created
@@ -1609,12 +1609,10 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
 
   function init() {
 
-    if (moduleInitialized) {
+    if (isInitialized) {
       return;
     }
-    else {
-      moduleInitialized = true;
-    }
+    isInitialized = true;
 
     forget();
 

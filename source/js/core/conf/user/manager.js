@@ -62,9 +62,7 @@ define(['core/conf/user/storage', 'core/conf/user/storage-backup', 'core/util/uu
     // Save the data from localStorage: User ID namespace.
     storage.setPref(key, value);
     //Save data to storage backup
-    storageBackup.init(function () {
-      storageBackup.save(storage.getSitecuesLs());
-    });
+    storageBackup.save(storage.getSitecuesLs());
   }
 
   // define key handler
@@ -91,14 +89,15 @@ define(['core/conf/user/storage', 'core/conf/user/storage-backup', 'core/util/uu
 
   function init(onReadyCallbackFn) {
 
-    var didRetrievePreferenceSettings;
+    var retrievedSettings;
 
-    storage.init(function (settings) {
-      cache(settings);
-      didRetrievePreferenceSettings = Boolean(settings);
-    });
+    retrievedSettings = storage.init();
 
-    if (!didRetrievePreferenceSettings) {
+    if (retrievedSettings) {
+      cache(retrievedSettings);
+      onReadyCallbackFn();
+    }
+    else {
       // Could not find local storage for sitecues prefs
       // Try cross-domain backup storage
       storageBackup.init(function () {
@@ -106,7 +105,7 @@ define(['core/conf/user/storage', 'core/conf/user/storage-backup', 'core/util/uu
           if (data) {
             storage.setSitecuesLs(data);
           }
-          if (!storage.getUserId()) {
+          else {
             // No user id: generate one
             var userId = uuid();
             storage.setUserId(userId);
@@ -116,9 +115,6 @@ define(['core/conf/user/storage', 'core/conf/user/storage-backup', 'core/util/uu
           onReadyCallbackFn();
         });
       });
-    }
-    else {
-      onReadyCallbackFn();
     }
 
   }

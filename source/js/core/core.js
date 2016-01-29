@@ -22,6 +22,8 @@ define(['core/conf/site', 'core/conf/urls', 'core/run', 'core/constants', 'core/
   // we risk overwriting the methods of the live library.
   function exportPublicFields() {
     // Events
+    //Currently used on Chicago Lighthouse, we should discourage customer use of public event API
+    //in preparation for changing it in the future
     sitecues.on   = events.on;     // Start listening for an event.
     sitecues.emit = events.emit;   // Tell listeners about an event.
     sitecues.off  = events.off;    // Stop listening for an event.

@@ -6,7 +6,6 @@ define([], function() {
 
   // Store the agent and platform variables for later use
   var exports = {
-    agent: null,
     browser: null,
     os: null,
     canUseRetinaCursors: null,
@@ -16,14 +15,16 @@ define([], function() {
     transformOriginProperty: null,
     transitionEndEvent: null,
     nativeZoom: null,
-    isRetinaDisplay: null,    // Is the current display a retina display?
     isRetina: isRetina,
     isCssPropSupported: isCssPropSupported,
     getCssProp: getCssProp,
     init: init
-  };
+  },
+  agent,
+  isRetinaDisplay;    // Is the current display a retina display?
 
-  // Determine which browser is being used
+
+    // Determine which browser is being used
   function getBrowserStr(agent) {
     return (agent.indexOf(' MSIE') > 0 || agent.indexOf(' Trident') > 0 || agent.indexOf(' Edge') > 0) ? 'IE' :
         agent.indexOf(' Firefox/') > 0 ? 'Firefox' :
@@ -168,21 +169,20 @@ define([], function() {
   // Retrieve and store whether the current window is on a Retina display
   function isRetina() {
     var browser         = exports.browser,
-        isRetinaDisplay = exports.isRetinaDisplay,
         nativeZoom      = exports.nativeZoom;
 
     if (typeof isRetinaDisplay !== 'undefined') {
       return isRetinaDisplay;
     }
 
-    exports.isRetinaDisplay = false;
+    isRetinaDisplay = false;
 
     // Safari doesn't alter devicePixelRatio for native zoom
     if (browser.isSafari) {
-      exports.isRetinaDisplay = devicePixelRatio === 2;
+      isRetinaDisplay = devicePixelRatio === 2;
     }
     else if (browser.isChrome) {
-      exports.isRetinaDisplay = Math.round(devicePixelRatio / nativeZoom) === 2;
+      isRetinaDisplay = Math.round(devicePixelRatio / nativeZoom) === 2;
     }
     else if (browser.isFirefox) {
       // This is only a guess, unfortunately
@@ -191,16 +191,16 @@ define([], function() {
       // Fortunately, these would correspond to a relatively high level of zoom on a non-Retina display,
       // so hopefully we're usually right (2x, 2.4x, 3x)
       // We can check the Firefox zoom metrics to see if they are drastically different from other browsers.
-      exports.isRetinaDisplay = devicePixelRatio >= 2;
+      isRetinaDisplay = devicePixelRatio >= 2;
     }
 
     return isRetinaDisplay;
   }
 
   function init() {
-    exports.agent = navigator.userAgent || '';
-    exports.browser = getBrowser(exports.agent);
-    exports.os = getOS(exports.agent, getOSStr(navigator.platform.toLowerCase()));
+    agent = navigator.userAgent || '';
+    exports.browser = getBrowser(agent);
+    exports.os = getOS(agent, getOSStr(navigator.platform.toLowerCase()));
     exports.canUseRetinaCursors = exports.browser.isChrome;
     exports.cssPrefix = getCssPrefix(exports.browser);
     exports.transformPropertyCss =  exports.browser.isIE9 ? '-ms-transform' : ((exports.browser.isWebKit && !isCssPropSupported('transform'))? '-webkit-transform' : 'transform');
@@ -213,7 +213,7 @@ define([], function() {
     // When a window moves to another display, it can change whether we're on a retina display.
     // Kinda evil that we have a listener in this module, but it helps keep things efficient as we need this info cached.
     addEventListener('resize', function () {
-      exports.isRetinaDisplay = undefined;
+      isRetinaDisplay = undefined;
     });
   }
 

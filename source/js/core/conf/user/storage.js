@@ -16,6 +16,7 @@
  * }
  */
 define([], function() {
+  var isInitialized;
 
   /*
    * Get value of Local Storage's "sitecues" key which is the outer namespace.
@@ -92,14 +93,15 @@ define([], function() {
     return typeof prefs === 'object' ? prefs : {};
   }
 
-  function init(onReadyCallbackFn) {
+  function init() {
+    if (isInitialized) {
+      return;
+    }
+    isInitialized = true;
 
     if (getUserId()) {
       // Has local storage sitecues prefs for this website
-      onReadyCallbackFn(getPrefs());
-    }
-    else {
-      onReadyCallbackFn();
+      return getPrefs();
     }
 
   }
