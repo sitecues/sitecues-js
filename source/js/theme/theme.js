@@ -16,7 +16,7 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
     isInitialized,
     originalBodyBackgroundColor,
     isOriginalThemeDark,
-    isDark = false,   // Is dark theme currently applied
+    isDark,   // Is dark theme currently applied
     darkTheme,
     isDarkBgInfoInitialized,
     transitionTimer,
@@ -55,11 +55,10 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
       if (isDark !== willBeDark) {
         // These are sticky because they use attributes, therefore we call this whenever darkness is toggled
         darkTheme.inverter.toggle(willBeDark);
-      }
-
-      if (willBeDark) {
-        // If won't be dark, then we don't need any special CSS for image sprites
-        imgCss = darkTheme.inverter.getReverseSpriteCssText(themeStyles);
+        if (willBeDark) {
+          // If will be dark but wasn't, then we may need special CSS for background images
+          imgCss = darkTheme.inverter.getReverseSpriteCssText(themeStyles);
+        }
       }
 
       getStyleSheet().text(transitionCss + themeCss + imgCss);
@@ -422,7 +421,7 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
         bgImageStyles = styleService.getAllMatchingStylesCustom(getSignificantBgImageProperties);
 
       originalBodyBackgroundColor = colorUtil.getDocumentBackgroundColor();
-      isOriginalThemeDark = colorUtil.isDarkColor(originalBodyBackgroundColor);
+      isDark = isOriginalThemeDark = colorUtil.isDarkColor(originalBodyBackgroundColor);
 
       themeStyles = bgStyles.concat(fgStyles).concat(bgImageStyles);
     }

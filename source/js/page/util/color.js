@@ -34,6 +34,7 @@ define([], function () {
 
       current = current.parentElement;
     }
+    return false;
   }
 
   // Convert color names such as 'white', 'black', 'transparent' to rgba object or TRANSPARENT
