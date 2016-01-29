@@ -60,7 +60,6 @@ define([
    * renders them, and emits events for the rest of the application to
    */
   function initBPFeature() {
-
     if (isBpInitializing) {
       return;
     }

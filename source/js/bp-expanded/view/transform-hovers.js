@@ -3,8 +3,8 @@
  * Currently this module implements data-hover="[transform attributes]"
  */
 
-define(['core/bp/helper', 'core/bp/constants', 'core/platform', 'bp-expanded/view/transform-util', 'bp-expanded/view/transform-animate'],
-  function(helper, BP_CONST, platform, transformUtil, animate) {
+define(['core/bp/helper', 'core/bp/constants', 'core/platform', 'bp-expanded/view/transform-util', 'bp-expanded/view/transform-animate', 'core/events'],
+  function(helper, BP_CONST, platform, transformUtil, animate, events) {
 
   var isActivePanel = false,
     byId = helper.byId,
@@ -120,10 +120,10 @@ define(['core/bp/helper', 'core/bp/constants', 'core/platform', 'bp-expanded/vie
 
   function init() {
     refreshHovers(); // Current expansion
-    sitecues.on('bp/did-expand zoom', hoversOn); // Future expansions
-    sitecues.on('bp/will-shrink zoom/begin', hoversOff);
-    sitecues.on('bp/did-init-secondary bp/content-loaded', refreshHovers);
-    sitecues.on('bp/will-show-secondary-feature', cancelHovers);
+    events.on('bp/did-expand zoom', hoversOn); // Future expansions
+    events.on('bp/will-shrink zoom/begin', hoversOff);
+    events.on('bp/did-init-secondary bp/content-loaded', refreshHovers);
+    events.on('bp/will-show-secondary-feature', cancelHovers);
   }
 
   return {

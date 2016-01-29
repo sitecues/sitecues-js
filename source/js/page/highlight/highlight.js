@@ -2,10 +2,12 @@
 // TODO Test! Especially in IE
 define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 'page/highlight/traitcache',
     'page/highlight/highlight-position', 'page/util/common', 'page/util/color',
-    'page/util/geo', 'page/util/element-classifier', 'core/platform'],
-  function($, conf, zoomMod, picker, traitcache, mhpos, common, colorUtil, geo, elementClassifier, platform) {
+    'page/util/geo', 'page/util/element-classifier', 'core/platform', 'page/highlight/constants', 'core/events'],
+  function($, conf, zoomMod, picker, traitcache, mhpos, common, colorUtil, geo, elementClassifier, platform, constants, events) {
 
   var
+
+  isInitialized,
 
   INIT_STATE = {
     isCreated: false, // Has highlight been created
@@ -35,9 +37,12 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
   },
 
   // class of highlight
-  HIGHLIGHT_OUTLINE_CLASS = 'sc-highlight',
-  HIGHLIGHT_OUTLINE_ATTR = 'data-sc-overlay',
-  HIGHLIGHT_STYLESHEET_NAME = 'sitecues-highlight',
+  HIGHLIGHT_OUTLINE_CLASS = constants.HIGHLIGHT_OUTLINE_CLASS,
+  HIGHLIGHT_OUTLINE_ATTR = constants.HIGHLIGHT_OUTLINE_ATTR,
+  HIGHLIGHT_STYLESHEET_NAME = constants.HIGHLIGHT_STYLESHEET_NAME,
+
+  //Highlight event
+  HIGHLIGHT_TOGGLE_EVENT = constants.HIGHLIGHT_TOGGLE_EVENT,
 
   // How many ms does mouse need to stop for before we highlight?
   MOUSE_STOP_MS = 30,
@@ -310,7 +315,7 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
 
   function didToggleVisibility(isVisible) {
     state.isVisible = isVisible;
-    sitecues.emit('mh/did-toggle-visibility', isVisible);
+    events.emit(HIGHLIGHT_TOGGLE_EVENT, isVisible);
   }
 
   function show() {
@@ -1604,30 +1609,35 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
 
   function init() {
 
+    if (isInitialized) {
+      return;
+    }
+    isInitialized = true;
+
     forget();
 
     // Temporarily hide and disable mouse highlight once highlight box appears. SC-1786
     // Also to this until zooming finished so that outline doesn't get out of place during zoom
-    sitecues.on('zoom/begin mh/pause', pause);
+    events.on('zoom/begin mh/pause', pause);
 
     // enable mouse highlight back once highlight box deflates or zoom finishes
-    sitecues.on('hlb/closed zoom', resumeAppropriately);
+    events.on('hlb/closed zoom', resumeAppropriately);
 
     // Turn mouse-tracking on or off
-    sitecues.on('keys/sitecues-key-down', setScrollTracking);
+    events.on('keys/sitecues-key-down', setScrollTracking);
 
     // Turn mouse-tracking on or off
-    sitecues.on('key/only-shift', setOnlyShift);
+    events.on('key/only-shift', setOnlyShift);
 
     // Mouse highlighting not available while BP is open
-    sitecues.on('bp/will-expand', willExpand);
-    sitecues.on('bp/did-shrink', didShrink);
+    events.on('bp/will-expand', willExpand);
+    events.on('bp/did-shrink', didShrink);
 
-    sitecues.on('speech/did-change', function(isOn) {
+    events.on('speech/did-change', function(isOn) {
       isSpeechEnabled = isOn;
     });
 
-    sitecues.on('sitecues/did-toggle', function(isOn) {
+    events.on('sitecues/did-toggle', function(isOn) {
       isSitecuesOn = isOn;
       refreshEventListeners();
     });

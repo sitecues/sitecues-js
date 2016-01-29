@@ -1,6 +1,6 @@
 /* Focus Controller */
-define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metric', 'core/platform', 'core/bp/view/view' ],
-  function (BP_CONST, state, helper, metric, platform, view) {
+define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metric', 'core/platform', 'core/bp/view/view', 'core/events'],
+  function (BP_CONST, state, helper, metric, platform, view, events) {
 
   var savedDocumentFocus,
     tabbedElement,
@@ -125,7 +125,7 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
 
   function showFocus() {
 
-    metric('panel-focus-moved'); // Keyboard focus moved in the panel
+    new metric.PanelFocusMove().send();
 
     updateDOMFocusState();
 
@@ -136,7 +136,7 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
     else {
       // Show focus
       if (tabbedElement.id === BP_CONST.MORE_BUTTON_GROUP_ID) {
-        sitecues.emit('bp/did-focus-more-button');
+        events.emit('bp/did-focus-more-button');
       }
 
       renderFocusOutline();
@@ -531,13 +531,13 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
     }
     isInitialized = true;
 
-    sitecues.on('bp/will-toggle-feature', hideFocus);
-    sitecues.on('bp/did-open-subpanel', focusFirstItem);
-    sitecues.on('bp/did-show-card', focusCard);
+    events.on('bp/will-toggle-feature', hideFocus);
+    events.on('bp/did-open-subpanel', focusFirstItem);
+    events.on('bp/did-show-card', focusCard);
     beginKeyHandling(); // First time badge expands
-    sitecues.on('bp/will-expand', beginKeyHandling);
-    sitecues.on('bp/will-shrink', endKeyHandling);
-    sitecues.on('bp/did-expand', showFocus);
+    events.on('bp/will-expand', beginKeyHandling);
+    events.on('bp/will-shrink', endKeyHandling);
+    events.on('bp/did-expand', showFocus);
 
   }
 

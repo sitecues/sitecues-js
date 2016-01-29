@@ -5,7 +5,9 @@ define(
     [],
     function () {
         return [
-            'common'
+            'common',
+            'events',
+            'storage'
         ];
     }
 );

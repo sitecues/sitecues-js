@@ -1,5 +1,5 @@
-define(['page/util/element-classifier', 'page/keys/commands', 'core/metric'],
-  function(elemClassifier, commands, metric) {
+define(['page/util/element-classifier', 'page/keys/commands', 'core/metric', 'page/highlight/constants', 'core/events'],
+  function(elemClassifier, commands, metric, constants, events) {
 
   var
     // KEY_TESTS defines keys used to bind actions to hotkeys.
@@ -47,6 +47,7 @@ define(['page/util/element-classifier', 'page/keys/commands', 'core/metric'],
     QUOTE = 222,
     SHIFT = 16,
     F8 = 119,
+    HIGHLIGHT_TOGGLE_EVENT = constants.HIGHLIGHT_TOGGLE_EVENT,
     isShiftKeyDown,
     isAnyNonShiftKeyDown,
     isHighlightVisible,
@@ -289,14 +290,14 @@ define(['page/util/element-classifier', 'page/keys/commands', 'core/metric'],
   function fireLastCommandMetric() {
     if (lastKeyInfo) {
       // Clear queue -- we do this here so that we don't repeat key events with key repeat presses
-      metric('key-command', lastKeyInfo );
+      new metric.KeyCommand(lastKeyInfo).send();
       lastKeyInfo = null;
     }
   }
 
   // Track to find out whether the shift key is pressed by itself
   function emitOnlyShiftStatus() {
-    sitecues.emit('key/only-shift', isOnlyShift());
+    events.emit('key/only-shift', isOnlyShift());
   }
 
   function isOnlyShift() {
@@ -309,7 +310,7 @@ define(['page/util/element-classifier', 'page/keys/commands', 'core/metric'],
     if (!isShift || !isShiftKeyDown) {
       // Key down stops speech/audio
       // Exception is repeated shift key, which also starts speech when shift is held down
-      sitecues.emit('keys/non-shift-key-pressed');
+      events.emit('keys/non-shift-key-pressed');
     }
 
     if (!isShift) {
@@ -320,7 +321,7 @@ define(['page/util/element-classifier', 'page/keys/commands', 'core/metric'],
   }
 
   function notifySitecuesKeyDown(isFollowMouseEnabled) {
-    sitecues.emit('keys/sitecues-key-down', isFollowMouseEnabled);
+    events.emit('keys/sitecues-key-down', isFollowMouseEnabled);
   }
 
   function init(keyEvent, isKeyAlreadyReleased) {
@@ -340,19 +341,19 @@ define(['page/util/element-classifier', 'page/keys/commands', 'core/metric'],
     // Will reenable highlight on mouse follow
     addEventListener('keyup', onKeyUp, true);
 
-    sitecues.on('mh/did-toggle-visibility', function(isVisible) {
+    events.on(HIGHLIGHT_TOGGLE_EVENT, function(isVisible) {
       isHighlightVisible = isVisible;
     });
 
-    sitecues.on('hlb/did-create', function() {
+    events.on('hlb/did-create', function() {
       isLensVisible = true;
     });
 
-    sitecues.on('hlb/closed', function() {
+    events.on('hlb/closed', function() {
       isLensVisible = false;
     });
 
-    sitecues.on('sitecues/did-toggle', function(isOn) {
+    events.on('sitecues/did-toggle', function(isOn) {
       isSitecuesOn = isOn;
     });
 
@@ -366,7 +367,7 @@ define(['page/util/element-classifier', 'page/keys/commands', 'core/metric'],
       }
     }
 
-    sitecues.emit('keys/did-init');
+    events.emit('keys/did-init');
   }
 
   return {

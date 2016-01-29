@@ -11,8 +11,8 @@
  */
 
 define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder', 'core/platform',
-    'core/locale', 'core/metric', 'core/conf/urls', 'audio/html5-player', 'audio/text-select'],
-  function(conf, site, $, builder, platform, locale, metric, urls, audioPlayer, textSelect) {
+    'core/locale', 'core/metric', 'core/conf/urls', 'audio/html5-player', 'audio/text-select', 'core/events'],
+  function(conf, site, $, builder, platform, locale, metric, urls, audioPlayer, textSelect, events) {
 
   var ttsOn = false,
     isAudioPlaying,
@@ -65,18 +65,18 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
 
       function onSpeechComplete() {
         var timeElapsed = new Date() - startRequestTime;
-        metric('tts-requested', {
+        new metric.TtsRequest({
           requestTime: timeElapsed,
           audioFormat: mediaTypeForTTS,
           charCount: text.length,
           trigger: triggerType
-        });
+        }).send();
       }
 
       audioPlayer.playAudioSrc(TTSUrl, onSpeechComplete);
 
       isAudioPlaying = true;
-      sitecues.emit('audio/speech-play', TTSUrl);
+      events.emit('audio/speech-play', TTSUrl);
       addStopAudioHandlers();
     });
   }
@@ -156,7 +156,7 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
     if (ttsOn !== isOn) {
       ttsOn = isOn;
       conf.set('ttsOn', ttsOn);
-      sitecues.emit('speech/did-change', ttsOn);
+      events.emit('speech/did-change', ttsOn);
       if (!doSuppressAudioCue) {
         require(['audio-cues/audio-cues'], function(audioCues) {
           audioCues.playSpeechCue(ttsOn);
@@ -328,13 +328,13 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
      * A highlight box has been requested.  This will create the player
      * if necessary, but will not play anything.
      */
-    sitecues.on('hlb/did-create', onHlbOpened);
+    events.on('hlb/did-create', onHlbOpened);
 
     /*
      * A highlight box was closed.  Stop/abort/dispose of the player
      * attached to it.
      */
-    sitecues.on('hlb/closed keys/non-shift-key-pressed', stopAudio);
+    events.on('hlb/closed keys/non-shift-key-pressed', stopAudio);
 
     ttsOn = conf.get('ttsOn');
   }

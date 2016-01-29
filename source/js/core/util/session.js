@@ -1,8 +1,11 @@
 define(['core/util/uuid'], function(uuid) {
-  var SESSION_ID_KEY = '-sc-session-id',
-    // Use session id and page view id from parent page if available
-    sessionId = getParentSessionId() || getPrevSessionId() || createSessionId(),
-    pageViewId = getParentPageViewId() || uuid();
+  var
+    exports = {
+      sessionId: null,
+      pageViewId: null,
+      init: init
+    },
+    SESSION_ID_KEY = '-sc-session-id';
 
   function isChildPage() {
     return window.top !== window && sitecues.parentConfig;
@@ -31,8 +34,11 @@ define(['core/util/uuid'], function(uuid) {
     return sessionId;
   }
 
-  return {
-    sessionId: sessionId,
-    pageViewId: pageViewId
-  };
+  function init() {
+    // Use session id and page view id from parent page if available
+    exports.sessionId  = getParentSessionId()  || getPrevSessionId() || createSessionId();
+    exports.pageViewId = getParentPageViewId() || uuid();
+  }
+
+  return exports;
 });

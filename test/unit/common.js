@@ -9,10 +9,16 @@ define(
 
         'use strict';
 
-        var suite = tdd.suite,
-            test = tdd.test;
+        var suite  = tdd.suite
+        ,   test   = tdd.test
+        ,   before = tdd.before;
 
-        suite('common', function () {
+        suite('Common module', function () {
+
+            before(function () {
+              platform.init();
+            });
+
             test('.isTransparentColor() cares about colors', function () {
                 this.skip('This method is not currently exported.');
                 assert.isTrue(
@@ -30,11 +36,12 @@ define(
                   'using alpha transparency must return true'
                 );
             });
+
             test('.createSVGFragment() makes useful markup', function () {
                 var // Testing weird markup, since it should be agnostic.
-                    content = '!,2.y+',
+                    content   = '!,2.y+',
                     className = 'blah',
-                    fragment = common.createSVGFragment(content, className),
+                    fragment  = common.createSVGFragment(content, className),
                 // Using .childNodes over .children because we specifically
                 // do not expect an immediate text node child.
                     svg = fragment.childNodes[0];
@@ -69,6 +76,7 @@ define(
                     'the fragment\'s SVG must have the requested inner markup'
                 );
             });
+
             test('.hasRaisedZIndex() checks if the child has a greater z index than its parent', function () {
                 var childStyle = {},
                     parentStyle = {};
@@ -87,12 +95,13 @@ define(
                     'The parent element has a greater z index than its child'
                 );
             });
-            test('.isEmpty() checks if a text node is empty / has blank space/punctuation characters', function () {
+
+            test('.isEmpty() checks if a text node is empty / has blank space / punctuation characters', function () {
                 var textNode = document.createTextNode('.');
 
                 assert.isTrue(
                     common.isEmpty(textNode),
-                    'Non empty strings with only punctuation return true.'
+                    'Non empty strings with punctuation return true.'
                 );
 
                 textNode.data = '';
@@ -110,9 +119,10 @@ define(
                 textNode.data = 0;
                 assert.isFalse(
                     common.isEmpty(textNode),
-                    'Zero is not empty'
+                    'Numeric zero is not an empty string'
                 );
             });
+
             test('.isVisualRegion()', function () {
                 var element = {},
                     style = {},
@@ -154,8 +164,8 @@ define(
                     'Element has non-zero border width, should return true'
                 );
             });
+
             test('.isSprite()', function () {
-                var element = {};
                 var style = {};
                 //Element is a sprite if its backgroundImage != none,
                 //and backgroundRepeat is 'no-repeat'
@@ -186,12 +196,12 @@ define(
                 style.backgroundRepeat = 'no-repeat';
                 style.backgroundPosition = '1px 1px';
             });
+
             test('.hasOwnBackground()', function () {
                 //TODO: remove style.backgroundImage != none check from isSprite check, redundant
                 var element = {},
                     style = {},
                     parentStyle = {};
-
 
                 style.backgroundImage = 'none';
                 style.backgroundColor = 'red';
@@ -207,6 +217,7 @@ define(
                     'Element with its own background color has a background'
                 );
             });
+
             test('.hasOwnBackgroundColor()', function () {
                 var element = {},
                     style = {},
@@ -234,6 +245,7 @@ define(
                     'child element\'s bg color is white, should return false'
                 );
             });
+
             test('.hasVisibleContent()', function () {
                 //Checks for size of media content box
                 //Checks if (max 10) text node children are empty
@@ -255,6 +267,7 @@ define(
                     'Element with non-empty text node children has visible content'
                 );
             });
+
             test('.isEmptyBgImage()', function () {
                 var imgSrc = 'url(\"test.com/test.png\")';
 
@@ -268,8 +281,9 @@ define(
                     'Empty string should return true'
                 );
             });
+
             test('.elementFromPoint()', function () {
-                // element.innerWidth/height is unsupported in IE8 and before
+                // potential alternative names considered
                 // nearestElement, nearestElementInViewport, safeElementFromPoint, elementFromOnscreenPoint
                 assert.strictEqual(
                     common.elementFromPoint(-1, -1),
@@ -283,9 +297,9 @@ define(
                     'Should return element from point within viewport'
                 );
             });
+
             test('.hasVertScroll()', function () {
-                var i,
-                    textArea = document.createElement('textarea');
+                var textArea = document.createElement('textarea');
 
                 assert.isFalse(
                     common.hasVertScroll(document.documentElement),
@@ -303,9 +317,10 @@ define(
                 document.body.removeChild(textArea);
 
             });
+
             test('.getBulletWidth()', function () {
                 // Only checks for decimal, could check for decimal-leading-zero, lower latin, initial (decimal), etc.
-                //getClientWidth returns an integer value, getBoundingClientRect gets a fractional value
+                //getClientWidth returns an integer value, getBoundingClientRect properties are not truncated
                 var list = document.createElement('ul');
                 document.body.appendChild(list);
                 list.appendChild(document.createElement('li'));
@@ -323,10 +338,11 @@ define(
                     common.getEmsToPx(list.style.fontSize, 1.9)
                 );
             });
+
             test('.getComputedScale()', function () {
                 var div = document.createElement('div');
                 document.body.appendChild(div);
-                div.style[platform.transformProperty] += 'scale(5,5) ';
+                div.style[platform.transformProperty] = 'scale(5,5) ';
                 assert.strictEqual(
                     common.getComputedScale(div),
                     5,
@@ -340,6 +356,7 @@ define(
                 );
                 // If an asymmetrical scale has been applied, only returns x scaling factor
             });
+
         });
     }
 );

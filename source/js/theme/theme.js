@@ -3,8 +3,8 @@
  */
 
 define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core/platform',
-    'theme/color-choices', 'page/util/color', 'theme/custom-site-theme' ],
-  function($, conf, styleService, platform, colorChoices, colorUtil, customTheme) {
+    'theme/color-choices', 'page/util/color', 'theme/custom-site-theme', 'core/events' ],
+  function($, conf, styleService, platform, colorChoices, colorUtil, customTheme, events) {
   var $themeStyleSheet,
     THEME_STYLESHEET_NAME = 'sitecues-theme',
     REPAINT_MS = 40,
@@ -541,8 +541,8 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
       }
     }
 
-    sitecues.on('bp/did-expand', onPanelExpand);
-    sitecues.on('bp/did-shrink', onPanelShrink);
+    events.on('bp/did-expand', onPanelExpand);
+    events.on('bp/did-shrink', onPanelShrink);
   }
 
   return {

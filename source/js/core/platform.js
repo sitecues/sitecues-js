@@ -5,19 +5,26 @@
 define([], function() {
 
   // Store the agent and platform variables for later use
-  var agent = navigator.userAgent || '',
-    browser = getBrowser(agent),
-    os = getOS(agent, getOSStr(navigator.platform.toLowerCase())),
-    canUseRetinaCursors = browser.isChrome,
-    cssPrefix = getCssPrefix(browser),
-    transformPropertyCss =  browser.isIE9 ? '-ms-transform' : ((browser.isWebKit && !isCssPropSupported('transform'))? '-webkit-transform' : 'transform'),
-    transformProperty = transformPropertyCss.replace('-t', 'T').replace('-', ''),
-    transformOriginProperty = transformProperty + 'Origin',
-    transitionEndEvent = browser.isWebKit ? 'webkitTransitionEnd' : 'transitionend',
-    nativeZoom = getNativeZoom(),
-    isRetinaDisplay;         // Is the current display a retina display?
+  var exports = {
+    browser: null,
+    os: null,
+    canUseRetinaCursors: null,
+    cssPrefix: null,
+    transformPropertyCss: null,
+    transformProperty: null,
+    transformOriginProperty: null,
+    transitionEndEvent: null,
+    nativeZoom: null,
+    isRetina: isRetina,
+    isCssPropSupported: isCssPropSupported,
+    getCssProp: getCssProp,
+    init: init
+  },
+  agent,
+  isRetinaDisplay;    // Is the current display a retina display?
 
-  // Determine which browser is being used
+
+    // Determine which browser is being used
   function getBrowserStr(agent) {
     return (agent.indexOf(' MSIE') > 0 || agent.indexOf(' Trident') > 0 || agent.indexOf(' Edge') > 0) ? 'IE' :
         agent.indexOf(' Firefox/') > 0 ? 'Firefox' :
@@ -46,7 +53,7 @@ define([], function() {
   // Get the name or vendor-prefixed property name, whichever is supported
   // For example getCssProp('transform" returns 'transform', '-webkit-transform', '-moz-transform' or '-ms-transform' as appropriate
   function getCssProp(propName) {
-    return isCssPropSupported(propName) ? propName : cssPrefix + propName;
+    return isCssPropSupported(propName) ? propName : exports.cssPrefix + propName;
   }
 
   // Set globally accessible browser constants
@@ -93,7 +100,7 @@ define([], function() {
     return charIndex < 0 ? 0 : parseInt(agent.substring(charIndex));  // Returns 0 for unknown version
   }
 
-  // Determine which opperating system is being used
+  // Determine which operating system is being used
   function getOSStr(platform) {
     return platform.indexOf('mac') > -1 ? 'mac' :
         platform.indexOf('win') > -1 ? 'win' :
@@ -138,7 +145,9 @@ define([], function() {
 
   // Retrieve and store the user's intentional amount of native browser zoom
   function getNativeZoom() {
-    var computedNativeZoom = 1;
+    var browser = exports.browser,
+        computedNativeZoom = 1;
+
     if (browser.isWebKit) {
       computedNativeZoom = outerWidth / innerWidth;
     }
@@ -159,6 +168,9 @@ define([], function() {
 
   // Retrieve and store whether the current window is on a Retina display
   function isRetina() {
+    var browser         = exports.browser,
+        nativeZoom      = exports.nativeZoom;
+
     if (typeof isRetinaDisplay !== 'undefined') {
       return isRetinaDisplay;
     }
@@ -185,26 +197,26 @@ define([], function() {
     return isRetinaDisplay;
   }
 
-  // Invalidate cached retina info on window resize, as it may have moved to another display.
-  // When a window moves to another display, it can change whether we're on a retina display.
-  // Kinda evil that we have a listener in this module, but it helps keep things efficient as we need this info cached.
-  addEventListener('resize', function () {
-    isRetinaDisplay = undefined;
-  });
+  function init() {
+    agent = navigator.userAgent || '';
+    exports.browser = getBrowser(agent);
+    exports.os = getOS(agent, getOSStr(navigator.platform.toLowerCase()));
+    exports.canUseRetinaCursors = exports.browser.isChrome;
+    exports.cssPrefix = getCssPrefix(exports.browser);
+    exports.transformPropertyCss =  exports.browser.isIE9 ? '-ms-transform' : ((exports.browser.isWebKit && !isCssPropSupported('transform'))? '-webkit-transform' : 'transform');
+    exports.transformProperty = exports.transformPropertyCss.replace('-t', 'T').replace('-', '');
+    exports.transformOriginProperty = exports.transformProperty + 'Origin';
+    exports.transitionEndEvent = exports.browser.isWebKit ? 'webkitTransitionEnd' : 'transitionend';
+    exports.nativeZoom = getNativeZoom();
 
-  return {
-    browser: browser,
-    os: os,
-    canUseRetinaCursors: canUseRetinaCursors,
-    cssPrefix: cssPrefix,
-    transformProperty: transformProperty,
-    transformPropertyCss: transformPropertyCss,
-    transformOriginProperty: transformOriginProperty,
-    transitionEndEvent: transitionEndEvent,
-    nativeZoom: nativeZoom,
-    isRetina: isRetina,
-    isCssPropSupported: isCssPropSupported,
-    getCssProp: getCssProp
-  };
+    // Invalidate cached retina info on window resize, as it may have moved to another display.
+    // When a window moves to another display, it can change whether we're on a retina display.
+    // Kinda evil that we have a listener in this module, but it helps keep things efficient as we need this info cached.
+    addEventListener('resize', function () {
+      isRetinaDisplay = undefined;
+    });
+  }
+
+  return exports;
 
 });

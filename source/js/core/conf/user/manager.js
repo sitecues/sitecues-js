@@ -1,24 +1,24 @@
 /**
- * This module manages all user configuration properties. These
+ * This module manages all user preferences. These
  * properties represent the state of the user session, and are
  * persisted in the user preferences data store.
  */
-define(['core/conf/user/storage'], function (storage) {
+define(['core/conf/user/storage', 'core/conf/user/storage-backup', 'core/util/uuid'], function (storage, storageBackup, uuid) {
   // private variables
-  var storedData = {},   // We cache in prefs in storedData for speed -- getting from localStorage is slower
-      handlers  = {},
-      listeners = {};
+  var cachedSettings = {},   // We cache prefs in cachedSettings for speed -- getting from localStorage is slower
+      handlers       = {},
+      listeners      = {};
 
   function getUserId() {
     return storage.getUserId();
   }
 
-  // get configuration value
+  // get preferences value
   function get(key, callback) {
 
     // handle sync getting of value
     if (!callback) {
-      return storedData[key];
+      return cachedSettings[key];
     }
 
     // private variables
@@ -27,13 +27,13 @@ define(['core/conf/user/storage'], function (storage) {
     // push callback to listeners list
     listeners[key].push(callback);
 
-    if (storedData.hasOwnProperty(key)) {
+    if (cachedSettings.hasOwnProperty(key)) {
       // call back if there is value for key
-      callback(storedData[key]);
+      callback(cachedSettings[key]);
     }
   }
 
-  // set configuration value
+  // set preferences value
   function set(key, value) {
     // private variables
     var list, i, l;
@@ -42,12 +42,12 @@ define(['core/conf/user/storage'], function (storage) {
     value = handlers[key] ? handlers[key](value) : value;
 
     // value isn't changed or is empty after handler
-    if (typeof value === 'undefined' || value === storedData[key]) {
+    if (typeof value === 'undefined' || value === cachedSettings[key]) {
       return;
     }
 
     // save value, use handler if needed
-    storedData[key] = value;
+    cachedSettings[key] = value;
 
     // if list isn't empty, call each listener
     // about new value
@@ -61,6 +61,8 @@ define(['core/conf/user/storage'], function (storage) {
 
     // Save the data from localStorage: User ID namespace.
     storage.setPref(key, value);
+    //Save data to storage backup
+    storageBackup.save(storage.getSitecuesLs());
   }
 
   // define key handler
@@ -72,23 +74,49 @@ define(['core/conf/user/storage'], function (storage) {
   }
 
   // get/update all stored values
-  function data(newData) {
-    if (newData) {
-      storedData = newData;
+  function cache(settings) {
+    if (settings) {
+      cachedSettings = settings;
     }
-    return storedData;
+    return cachedSettings;
   }
 
   // Reset all settings as if it is a new user
   function reset() {
     storage.clear();
+    storageBackup.clear();
   }
 
   function init(onReadyCallbackFn) {
-    storage.init(function(settings) {
-      data(settings);
+
+    var retrievedSettings;
+
+    retrievedSettings = storage.init();
+
+    if (retrievedSettings) {
+      cache(retrievedSettings);
       onReadyCallbackFn();
-    });
+    }
+    else {
+      // Could not find local storage for sitecues prefs
+      // Try cross-domain backup storage
+      storageBackup.init(function () {
+        storageBackup.load(function (data) {
+          if (data) {
+            storage.setSitecuesLs(data);
+          }
+          else {
+            // No user id: generate one
+            var userId = uuid();
+            storage.setUserId(userId);
+            storageBackup.save(storage.getSitecuesLs());
+          }
+          cache(storage.getPrefs());
+          onReadyCallbackFn();
+        });
+      });
+    }
+
   }
 
   return {
@@ -97,7 +125,7 @@ define(['core/conf/user/storage'], function (storage) {
     get: get,
     set: set,
     def: def,
-    data: data,
+    cache: cache,
     reset: reset
   };
 });
