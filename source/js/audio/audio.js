@@ -177,7 +177,7 @@ define(
       conf.set('ttsOn', ttsOn);
       sitecues.emit('speech/did-change', ttsOn);
       if (!doSuppressAudioCue) {
-        require(['audio-cues/audio-cues'], function(audioCues) {
+        require(['audio/cues'], function(audioCues) {
           audioCues.playSpeechCue(ttsOn);
         });
       }
