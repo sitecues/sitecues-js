@@ -128,6 +128,7 @@ define([
   }
 
   // Classic mode is where the ? shows up instead of the down pointing arrow
+  // TODO remove
   function initClassicMode() {
     state.set('isClassicMode', !!(classicSite() || platform.browser.isIE9));
     sitecues.toggleClassicMode = function() {
