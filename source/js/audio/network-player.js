@@ -1,16 +1,10 @@
 /**
- * This is the audio player we use for all modern browsers (even IE!)
+ * This is the audio player we use for remote speech and anything
+ * that is not speech.
  */
-// Represents the ready state of the audio/video element:
-// 0 = HAVE_NOTHING      - no information whether or not the audio/video is ready
-// 1 = HAVE_METADATA     - metadata for the audio/video is ready
-// 2 = HAVE_CURRENT_DATA - data for the current playback position is available, but not enough data to play next frame/millisecond
-// 3 = HAVE_FUTURE_DATA  - data for the current and at least the next frame is available
-// 4 = HAVE_ENOUGH_DATA  - enough data available to start playing
 define(['$'], function ($) {
 
-  var audioElements    = [],
-      HAVE_FUTURE_DATA = 3;
+  var audioElements    = [];
 
   /**
    * Play the audio src at the given url
@@ -53,7 +47,7 @@ define(['$'], function ($) {
       $(audioElement).off('ended');
       // We can only pause in IE9 if there is enough data
       // for the current and at least the next frame
-      if (audioElement.readyState >= HAVE_FUTURE_DATA) {
+      if (audioElement.readyState >= audioElement.HAVE_FUTURE_DATA) {
         audioElement.pause();
       }
     });
