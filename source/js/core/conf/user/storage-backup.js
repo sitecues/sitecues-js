@@ -36,17 +36,33 @@ define(['core/conf/urls', 'core/platform'], function (urls, platform) {
 
   function load(onDataAvailableFn) {
     function onMessageReceived(event) {
-      var data = event.data,
+      var key,
+        isEmpty = true,
+        data = event.data,
         parsedData = {};
 
       if (event.origin === urls.getScriptOrigin()) {  // Best practice: check if message is from the expected origin
         if (SC_DEV) {
           console.log('Backup prefs retrieved');
         }
+
         parsedData = parseData(data);
+
+        //Check if parsed back-up storage has saved preferences or a site ID
+        for (key in parsedData) {
+          if (parsedData[key]) {
+            isEmpty = false;
+          }
+        }
+
       }
       window.removeEventListener('message', onMessageReceived);
-      onDataAvailableFn(parsedData);  // Use callback even if we don't use the data -- otherwise sitecues won't load
+      if (isEmpty) {
+        onDataAvailableFn(); // Use callback even if we don't use the data -- otherwise sitecues won't load
+      }
+      else {
+        onDataAvailableFn(parsedData);
+      }
     }
 
     if (IS_BACKUP_DISABLED) {
