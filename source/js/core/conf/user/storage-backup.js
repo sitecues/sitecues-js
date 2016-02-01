@@ -50,9 +50,7 @@ define(['core/conf/urls', 'core/platform'], function (urls, platform) {
 
         //Check if parsed back-up storage has saved preferences or a site ID
         for (key in parsedData) {
-          if (parsedData[key]) {
-            isEmpty = false;
-          }
+          isEmpty = false;
         }
 
       }
