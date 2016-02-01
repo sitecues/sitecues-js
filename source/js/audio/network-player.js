@@ -10,11 +10,11 @@ define(['$'], function ($) {
    * Play the audio src at the given url
    * @param url source of audio to play
    */
-  function playAudioSrc(url, onCompleteFn) {
+  function playAudioSrc(url, onPlaying) {
     var audioElement = new Audio();
 
-    if (onCompleteFn) {
-      audioElement.addEventListener('playing', onCompleteFn);
+    if (onPlaying) {
+      audioElement.addEventListener('playing', onPlaying);
     }
 
     audioElement.src = ''; // Clean up
