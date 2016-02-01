@@ -71,11 +71,7 @@ define([], function () {
     constants.KEY_CODE.NUMPAD_ADD
   ];
 
-  constants.INIT_CODES = [
-    constants.KEY_CODE.QUOTE
-  ];
-
-  constants.INIT_CODES = constants.INIT_CODES
+  constants.INIT_CODES = [constants.KEY_CODE.QUOTE]
     .concat(constants.ZOOM_IN_CODES)
     .concat(constants.ZOOM_OUT_CODES);
 
