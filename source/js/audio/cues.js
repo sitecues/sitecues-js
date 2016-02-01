@@ -4,7 +4,7 @@
  */
 
 define(['core/conf/user/manager', 'audio/audio'], function(conf, audio) {
-  
+
   // The high zoom threshold for the zoom-based verbal cue
   var HIGH_ZOOM_THRESHOLD = 1.6,
     // Tracks if the user has heard the "descriptive high zoom" cue.
@@ -28,8 +28,8 @@ define(['core/conf/user/manager', 'audio/audio'], function(conf, audio) {
    * @return {boolean}
    */
   function shouldPlayDescriptiveSpeechOnCue() {
-    var fso = conf.get(DESCRIPTIVE_SPEECH_ON_PARAM);
-    return !fso || fso + CUE_RESET_MS < new Date().getTime();
+    var firstSpeechOn = conf.get(DESCRIPTIVE_SPEECH_ON_PARAM);
+    return !firstSpeechOn || firstSpeechOn + CUE_RESET_MS < new Date().getTime();
   }
 
   /**
