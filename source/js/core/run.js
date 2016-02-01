@@ -8,7 +8,7 @@
 
 define(['core/conf/user/manager', 'core/util/session', 'core/locale', 'core/metric', 'core/platform', 'core/bp/bp',
         'core/constants', 'core/events'],
-  function (conf, session, locale, metric, platform, bp, constants, events) {
+  function (conf, session, locale, metric, platform, bp, CORE_CONST, events) {
   var
     numPrereqsToComplete,
     areZoomEnhancementsInitialized,
@@ -20,20 +20,10 @@ define(['core/conf/user/manager', 'core/util/session', 'core/locale', 'core/metr
     isKeyReleased,
     isKeyHandlingInitialized,
     wasSitecuesEverOn,
-    DASH     = 189,
-    NUMPAD_SUBTRACT = 109,
-    MINUS_ALTERNATE_1 = 173,
-    MINUS_ALTERNATE_2 = 45,
-    EQUALS   = 187,
-    NUMPAD_ADD = 107,
-    PLUS_ALTERNATE_1 = 61,
-    PLUS_ALTERNATE_2 = 43,
-    QUOTE = 222,
     // Keys that can init sitecues
-    INIT_CODES = [ DASH, NUMPAD_SUBTRACT, MINUS_ALTERNATE_1, MINUS_ALTERNATE_2,
-      EQUALS, NUMPAD_ADD, PLUS_ALTERNATE_1, PLUS_ALTERNATE_2, QUOTE],
+    INIT_CODES = CORE_CONST.INIT_CODES,
     // Enums for sitecues loading states
-    state = constants.READY_STATE;
+    state      = CORE_CONST.READY_STATE;
 
   function performInitialLoadZoom(initialZoom) {
     require([ 'page/zoom/zoom' ], function (zoomMod) {

@@ -1,5 +1,6 @@
-define(['page/util/element-classifier', 'page/keys/commands', 'core/metric', 'page/highlight/constants', 'core/events'],
-  function(elemClassifier, commands, metric, constants, events) {
+define(['page/util/element-classifier', 'page/keys/commands', 'core/metric', 'core/events', 'page/highlight/constants',
+        'core/constants'],
+  function(elemClassifier, commands, metric, events, HIGHLIGHT_CONST, CORE_CONST) {
 
   var
     // KEY_TESTS defines keys used to bind actions to hotkeys.
@@ -16,38 +17,10 @@ define(['page/util/element-classifier', 'page/keys/commands', 'core/metric', 'pa
     // [4 Left ]  [ 5    ]  [6 Right ]
     // [1 End  ]  [ 2 Dn ]  [3 PgDn  ]
 
-    NUMPAD_0 = 48,
-    NUMPAD_1 = 97,
-    NUMPAD_2 = 98,
-    NUMPAD_3 = 99,
-    NUMPAD_4 = 100,
-    NUMPAD_6 = 102,
-    NUMPAD_7 = 103,
-    NUMPAD_8 = 104,
-    NUMPAD_9 = 105,
-    ESCAPE   = 27,
-    SPACE    = 32,
-    PAGE_UP  = 33,
-    PAGE_DN  = 34,
-    END      = 35,
-    HOME     = 36,
-    LEFT     = 37,
-    UP       = 38,
-    RIGHT    = 39,
-    DOWN     = 40,
-    DASH     = 189,
-    NUMPAD_SUBTRACT = 109,
-    MINUS_ALTERNATE_1 = 173,
-    MINUS_ALTERNATE_2 = 45,
-    EQUALS   = 187,
-    NUMPAD_ADD = 107,
-    PLUS_ALTERNATE_1 = 61,
-    PLUS_ALTERNATE_2 = 43,
-    LETTER_H = 72,
-    QUOTE = 222,
-    SHIFT = 16,
-    F8 = 119,
-    HIGHLIGHT_TOGGLE_EVENT = constants.HIGHLIGHT_TOGGLE_EVENT,
+    keyCode  = CORE_CONST.KEY_CODE,
+    ZOOM_IN_CODES = CORE_CONST.ZOOM_IN_CODES,
+    ZOOM_OUT_CODES = CORE_CONST.ZOOM_OUT_CODES,
+    HIGHLIGHT_TOGGLE_EVENT = HIGHLIGHT_CONST.HIGHLIGHT_TOGGLE_EVENT,
     isShiftKeyDown,
     isAnyNonShiftKeyDown,
     isHighlightVisible,
@@ -58,94 +31,86 @@ define(['page/util/element-classifier', 'page/keys/commands', 'core/metric', 'pa
 
     KEY_TESTS = {
       'space': function(event) {
-        var isUnmodifiedSpace = event.keyCode === SPACE && !hasCommandModifier(event),
+        var isUnmodifiedSpace = event.keyCode === keyCode.SPACE && !hasCommandModifier(event),
           isNeededByPage = elemClassifier.isSpacebarConsumer(event.target);
         return isUnmodifiedSpace && isSitecuesOn && !isNeededByPage;
       },
       'minus': function(event) {
-        // Test all of the possible minus keycodes, including drom the numeric keypad
-        if (event.keyCode === DASH || event.keyCode === NUMPAD_SUBTRACT ||
-          event.keyCode === MINUS_ALTERNATE_1 || event.keyCode === MINUS_ALTERNATE_2) {
-
+        // Test all of the possible minus keycodes, including from the numeric keypad
+        if (ZOOM_OUT_CODES.indexOf(event.keyCode) > -1) {
           return canUseZoomKey(event);
         }
       },
       'plus': function(event) {
         // Test all of the possible plus keycodes, including from the numeric keypad.
         // Also tests for equals (=) key, which is effectively an unmodified + key press
-        if (event.keyCode === EQUALS || event.keyCode === NUMPAD_ADD ||
-          event.keyCode === PLUS_ALTERNATE_1 || event.keyCode === PLUS_ALTERNATE_2) {
-
+        if (ZOOM_IN_CODES.indexOf(event.keyCode) > -1) {
           return canUseZoomKey(event);
         }
       },
       'hlbMinus': function(event) {
-        // Test all of the possible minus keycodes, including drom the numeric keypad
-        if (event.keyCode === DASH || event.keyCode === NUMPAD_SUBTRACT ||
-          event.keyCode === MINUS_ALTERNATE_1 || event.keyCode === MINUS_ALTERNATE_2) {
-
+        // Test all of the possible minus keycodes, including from the numeric keypad
+        if (ZOOM_OUT_CODES.indexOf(event.keyCode) > -1) {
           return isLensVisible && hasCommandModifier(event);
         }
       },
       'hlbPlus': function(event) {
         // Test all of the possible plus keycodes, including from the numeric keypad.
         // Also tests for equals (=) key, which is effectively an unmodified + key press
-        if (event.keyCode === EQUALS || event.keyCode === NUMPAD_ADD ||
-          event.keyCode === PLUS_ALTERNATE_1 || event.keyCode === PLUS_ALTERNATE_2) {
-
+        if (ZOOM_IN_CODES.indexOf(event.keyCode) > -1) {
           return isLensVisible && hasCommandModifier(event);
         }
       },
       'reset': function(event) {  // Ctrl+0, Cmd+0 or just 0 to reset zoom only, Alt+0 to reset zoom & speech, Alt+Shift+0 to reset all
-        return event.keyCode === NUMPAD_0 && (!elemClassifier.isEditable(event.target) || hasCommandModifier(event));
+        return event.keyCode === keyCode.NUMPAD_0 && (!elemClassifier.isEditable(event.target) || hasCommandModifier(event));
       },
       'speech': function(event) {
-        return event.keyCode === QUOTE && event.altKey && !elemClassifier.isEditable(event.target);
+        return event.keyCode === keyCode.QUOTE && event.altKey && !elemClassifier.isEditable(event.target);
       },
       'esc': function(event) {
          // Escape key is only valid if there is an lens to close
-         return event.keyCode === ESCAPE && (isHighlightVisible || isLensVisible);
+         return event.keyCode === keyCode.ESCAPE && (isHighlightVisible || isLensVisible);
       },
       // For arrow keys, allow number pad usage as well (2/4/6/8)
       'up': function(event) {
-        return (event.keyCode === UP || event.keyCode === NUMPAD_8) && canMoveHighlight(event);
+        return (event.keyCode === keyCode.UP || event.keyCode === keyCode.NUMPAD_8) && canMoveHighlight(event);
       },
       'down': function(event) {
-        return (event.keyCode === DOWN || event.keyCode === NUMPAD_2) && canMoveHighlight(event);
+        return (event.keyCode === keyCode.DOWN || event.keyCode === keyCode.NUMPAD_2) && canMoveHighlight(event);
       },
       'left': function(event) {
-        return (event.keyCode === LEFT || event.keyCode === NUMPAD_4) && canMoveHighlight(event);
+        return (event.keyCode === keyCode.LEFT || event.keyCode === keyCode.NUMPAD_4) && canMoveHighlight(event);
       },
       'right': function(event) {
-        return (event.keyCode === RIGHT || event.keyCode === NUMPAD_6) && canMoveHighlight(event);
+        return (event.keyCode === keyCode.RIGHT || event.keyCode === keyCode.NUMPAD_6) && canMoveHighlight(event);
       },
       'heading': function(event) {
-        return event.keyCode === LETTER_H && !elemClassifier.isEditable(event.target) && !event.altKey && !event.ctrlKey && !event.metaKey;
+        return event.keyCode === keyCode.LETTER_H && !elemClassifier.isEditable(event.target) && !event.altKey && !event.ctrlKey && !event.metaKey;
       },
       'pageup': function(event) {
-        return (event.keyCode === PAGE_UP || event.keyCode === NUMPAD_9) && canScrollLens(event);
+        return (event.keyCode === keyCode.PAGE_UP || event.keyCode === keyCode.NUMPAD_9) && canScrollLens(event);
       },
       'pagedn': function(event) {
-        return (event.keyCode === PAGE_DN || event.keyCode === NUMPAD_3) && canScrollLens(event);
+        return (event.keyCode === keyCode.PAGE_DN || event.keyCode === keyCode.NUMPAD_3) && canScrollLens(event);
       },
       'home': function(event) {  // Also support cmd+up on Mac
         if (!canScrollLens(event)) {
           return false;
         }
-        return (event.keyCode === HOME && !hasAnyModifier(event)) ||
-          event.keyCode === NUMPAD_7 ||
-          (event.keyCode === UP && event.metaKey);
+        return (event.keyCode === keyCode.HOME && !hasAnyModifier(event)) ||
+          event.keyCode === keyCode.NUMPAD_7 ||
+          (event.keyCode === keyCode.UP && event.metaKey);
       },
       'end': function(event) {  // Also support cmd+down on Mac
         if (!canScrollLens(event)) {
           return false;
         }
-        return (event.keyCode === END && !hasAnyModifier(event)) ||
-          event.keyCode === NUMPAD_1 ||
-          (event.keyCode === DOWN && event.metaKey);
+        return (event.keyCode === keyCode.END && !hasAnyModifier(event)) ||
+          event.keyCode === keyCode.NUMPAD_1 ||
+          (event.keyCode === keyCode.DOWN && event.metaKey);
       },
       'f8': function(event) {
-        return event.keyCode === F8 && !hasAnyModifier(event);
+        return event.keyCode === keyCode.F8 && !hasAnyModifier(event);
       }
     },
     // define keys map used to bind actions to hotkeys
@@ -270,7 +235,7 @@ define(['page/util/element-classifier', 'page/keys/commands', 'core/metric', 'pa
 
   function onKeyUp(event) {
     notifySitecuesKeyDown(true);
-    if (event.keyCode === SHIFT) {
+    if (event.keyCode === keyCode.SHIFT) {
       if (isOnlyShift()) {
         commands.speakHighlight(false, true);
       }
@@ -306,7 +271,7 @@ define(['page/util/element-classifier', 'page/keys/commands', 'core/metric', 'pa
 
   // If shift key down, process it
   function preProcessKeyDown(event) {
-    var isShift = event.keyCode === SHIFT;
+    var isShift = event.keyCode === keyCode.SHIFT;
     if (!isShift || !isShiftKeyDown) {
       // Key down stops speech/audio
       // Exception is repeated shift key, which also starts speech when shift is held down
