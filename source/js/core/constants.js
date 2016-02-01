@@ -52,7 +52,9 @@ define([], function () {
     DOWN: 40,
     LETTER_H: 72,
     SHIFT: 16,
-    F8: 119
+    F8: 119,
+    TAB: 9,
+    ENTER: 13
   };
 
   constants.ZOOM_OUT_CODES = [

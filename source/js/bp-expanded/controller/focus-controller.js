@@ -18,6 +18,16 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
     UP     = keyCode.UP,
     RIGHT  = keyCode.RIGHT,
     DOWN   = keyCode.DOWN,
+    arrows = [
+      UP,
+      DOWN,
+      LEFT,
+      RIGHT
+    ],
+    triggerKeys = [
+      ENTER,
+      SPACE
+    ],
 
     TABBABLE = {    // IMPORTANT: remove 'scp-' prefix -- it gets added in by the code
       'main': [
@@ -492,6 +502,7 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
       return;
     }
 
+
     // Perform widget-specific command
     // Can't use evt.target because in the case of SVG it sometimes only has fake focus (some browsers can't focus SVG elements)
     var item = getFocusedItem();
@@ -504,15 +515,23 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
         performZoomSliderCommand(keyCode, evt);
       }
       else {
-        if (keyCode === ENTER || keyCode === SPACE) {
+        if (triggerKeys.indexOf(keyCode) > -1) {
           simulateClick(item);
         }
       }
     }
-    if (keyCode === ENTER || keyCode === SPACE) {
+
+    if (triggerKeys.indexOf(keyCode) > -1) {
       //Don't allow default behavior for enter and space keys while the panel is open
       return;
     }
+
+    if (arrows.indexOf(keyCode) > -1) {
+      //Prevent window from scrolling on arrow keys
+      return;
+    }
+
+    // else fall through to native processing of keystroke
     return true;
   }
 
