@@ -9,23 +9,7 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
     // IMPORTANT! Have the backend team review all metrics changes!!!
     var METRICS_VERSION = 5,
         isInitialized,
-        name = constants.METRIC_NAME,
-        exports = {
-          init : init
-        },
-        metricConstructors = [
-          TtsRequest,
-          PanelFocusMove,
-          PanelClick,
-          PanelClose,
-          SliderSettingChange,
-          BadgeHover,
-          PageVisit,
-          LensOpen,
-          KeyCommand,
-          ZoomChange,
-          Feedback
-        ];
+        name = constants.METRIC_NAME;
 
 
     function Metric(name, details) {
@@ -64,48 +48,13 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
 
     };
 
-    function TtsRequest(details) {
-      Metric.call(this, name.TTS_REQUEST, details);
-    }
-
-    function PanelFocusMove(details) {
-      Metric.call(this, name.PANEL_FOCUS_MOVE, details);
-    }
-
-    function PanelClick(details) {
-      Metric.call(this, name.PANEL_CLICK, details);
-    }
-
-    function PanelClose(details) {
-      Metric.call(this, name.PANEL_CLOSE, details);
-    }
-
-    function SliderSettingChange(details) {
-      Metric.call(this, name.SLIDER_SETTING_CHANGE, details);
-    }
-
-    function BadgeHover(details) {
-      Metric.call(this, name.BADGE_HOVER, details);
-    }
-
-    function PageVisit(details) {
-      Metric.call(this, name.PAGE_VISIT, details);
-    }
-
-    function Feedback(details) {
-      Metric.call(this, name.FEEDBACK, details);
-    }
-
-    function LensOpen(details) {
-      Metric.call(this, name.LENS_OPEN, details);
-    }
-
-    function KeyCommand(details) {
-      Metric.call(this, name.KEY_COMMAND, details);
-    }
-
-    function ZoomChange(details) {
-      Metric.call(this, name.ZOOM_CHANGE, details);
+    function wrap(metricName) {
+      function metricFn(details) {
+        Metric.call(this, metricName, details);
+      }
+      metricFn.prototype = Object.create(Metric.prototype);
+      metricFn.prototype.constructor = metricFn;
+      return metricFn;
     }
 
     function init() {
@@ -126,18 +75,21 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
         browserUserAgent: navigator.userAgent,
         clientLanguage: locale.getBrowserLang()
       };
-
-      for (var i = 0; i < metricConstructors.length; i++) {
-        metricConstructors[i].prototype = Object.create(Metric.prototype);
-        metricConstructors[i].prototype.constructor = metricConstructors[i];
-      }
-
     }
 
-    metricConstructors.forEach(function (constructor) {
-      exports[constructor.name] = constructor;
-    });
+    return {
+      init: init,
+      TtsRequest: wrap(name.TTS_REQUEST),
+      PanelFocusMove: wrap(name.PANEL_FOCUS_MOVE),
+      PanelClick: wrap(name.PANEL_CLICK),
+      PanelClose: wrap(name.PANEL_CLOSE),
+      SliderSettingChange: wrap(name.SLIDER_SETTING_CHANGE),
+      BadgeHover: wrap(name.BADGE_HOVER),
+      PageVisit: wrap(name.PAGE_VISIT),
+      LensOpen: wrap(name.LENS_OPEN),
+      KeyCommand: wrap(name.KEY_COMMAND),
+      ZoomChange: wrap(name.ZOOM_CHANGE),
+      Feedback: wrap(name.FEEDBACK)
+    };
+  });
 
-    return exports;
-  }
-);
