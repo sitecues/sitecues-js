@@ -7,15 +7,17 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
     isInitialized,
     isListeningToClicks,
     renderFocusOutline = platform.browser.isFirefox ? renderFocusOutlineFirefox : renderFocusOutlineNotFirefox,
-    byId = helper.byId,
-    TAB   = 9,
-    ENTER = 13,
-    ESCAPE= 27,
-    SPACE = 32,
-    LEFT  = 37,
-    UP    = 38,
-    RIGHT = 39,
-    DOWN  = 40,
+    byId   = helper.byId,
+    TAB    = 9,
+    ENTER  = 13,
+    ESCAPE = 27,
+    SPACE  = 32,
+    LEFT   = 37,
+    UP     = 38,
+    RIGHT  = 39,
+    DOWN   = 40,
+    MINUS  = platform.browser.isFirefox ? 173 : 189,
+    EQUALS = platform.browser.isFirefox ? 61 : 187,
 
     TABBABLE = {    // IMPORTANT: remove 'scp-' prefix -- it gets added in by the code
       'main': [
@@ -506,7 +508,10 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
           simulateClick(item);
         }
       }
-      // else fall through to native processing of keystroke
+    }
+    if (keyCode === MINUS || keyCode === EQUALS) {
+      //Allow keys module to handle zoom keys
+      return true;
     }
   }
 
