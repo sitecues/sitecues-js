@@ -1,6 +1,7 @@
 /* Focus Controller */
-define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metric', 'core/platform', 'core/bp/view/view', 'core/events'],
-  function (BP_CONST, state, helper, metric, platform, view, events) {
+define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metric', 'core/platform', 'core/bp/view/view', 'core/events',
+        'core/constants'],
+  function (BP_CONST, state, helper, metric, platform, view, events, CORE_CONST) {
 
   var savedDocumentFocus,
     tabbedElement,
@@ -8,16 +9,15 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
     isListeningToClicks,
     renderFocusOutline = platform.browser.isFirefox ? renderFocusOutlineFirefox : renderFocusOutlineNotFirefox,
     byId   = helper.byId,
-    TAB    = 9,
-    ENTER  = 13,
-    ESCAPE = 27,
-    SPACE  = 32,
-    LEFT   = 37,
-    UP     = 38,
-    RIGHT  = 39,
-    DOWN   = 40,
-    MINUS  = platform.browser.isFirefox ? 173 : 189,
-    EQUALS = platform.browser.isFirefox ? 61 : 187,
+    keyCode = CORE_CONST.KEY_CODE,
+    TAB    = keyCode.TAB,
+    ENTER  = keyCode.ENTER,
+    ESCAPE = keyCode.ESCAPE,
+    SPACE  = keyCode.SPACE,
+    LEFT   = keyCode.LEFT,
+    UP     = keyCode.UP,
+    RIGHT  = keyCode.RIGHT,
+    DOWN   = keyCode.DOWN,
 
     TABBABLE = {    // IMPORTANT: remove 'scp-' prefix -- it gets added in by the code
       'main': [
@@ -509,10 +509,11 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
         }
       }
     }
-    if (keyCode === MINUS || keyCode === EQUALS) {
-      //Allow keys module to handle zoom keys
-      return true;
+    if (keyCode === ENTER || keyCode === SPACE) {
+      //Don't allow default behavior for enter and space keys while the panel is open
+      return;
     }
+    return true;
   }
 
   function isModifiedKey(evt) {
