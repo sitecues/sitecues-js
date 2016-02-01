@@ -11,7 +11,7 @@
 define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/urls'], function($, zoomMod, colorUtil, site, urls) {
   var REVERSIBLE_ATTR = 'data-sc-reversible',
     customSelectors = site.get('themes') || { },
-    DARK_BG_THRESHOLD = 0.3,
+    DARK_BG_THRESHOLD = 0.6,
     BUTTON_BONUS = 50,
     SVG_BONUS = 999,
     MAX_SCORE_CHECK_PIXELS = 200,
@@ -103,16 +103,8 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
 
     function onReadableImageAvailable(readableImg) {
       ctx = canvas.getContext('2d');
-
-      try {
-        ctx.drawImage(readableImg, top, left, width, height);
-        imageData = ctx.getImageData(0, 0, width, height).data;
-      }
-      catch (ex) {
-        if (SC_DEV && isDebuggingOn) {
-          console.log('Could not get image data for %s: %o', readableImg.getAttribute('src'), ex);
-        }
-      }
+      ctx.drawImage(readableImg, top, left, width, height);
+      imageData = ctx.getImageData(0, 0, width, height).data;
       processImageData(imageData);
     }
 
@@ -287,15 +279,20 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
     // from Jeff Bigham's work, and have been tweaked a bit.
     getPixelInfo(img, src, rect, function(pixelInfo) {
       var score = 0,
-        BASE_SCORE = 180,
+        BASE_SCORE = 130,
         manyValuesScore,
         manyReusedValuesScore,
         oneValueReusedOftenScore,
-        numHuesScore = 0;
+        numHuesScore = 0,
+        transparentPixelsScore;
 
       if (pixelInfo) {
         // Low score -> NO invert (probably photo)
         // High score -> YES invert (probably logo, icon or image of text)
+
+        // Transparent pixels -> more likely icon that needs inversion
+        // No transparent pixels -> rectangular shape that usually won't be problematic over any background
+        transparentPixelsScore = pixelInfo.hasTransparentPixels * 100;
 
         // More values -> more likely to be photo
         manyValuesScore = -1.5 * Math.min(200, pixelInfo.numDifferentGrayscaleVals);
@@ -316,7 +313,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
           numHuesScore =  pixelInfo.numDifferentHues * -2;
         }
 
-        score = BASE_SCORE + manyValuesScore + manyReusedValuesScore + oneValueReusedOftenScore + numHuesScore;
+        score = BASE_SCORE + transparentPixelsScore + manyValuesScore + manyReusedValuesScore + oneValueReusedOftenScore + numHuesScore;
         // Image has full color information
         if (SC_DEV && isDebuggingOn && img) {
           $(img).attr('data-sc-pixel-info', JSON.stringify(pixelInfo));

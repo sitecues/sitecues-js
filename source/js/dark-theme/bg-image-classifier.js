@@ -44,7 +44,7 @@ define(['page/util/color', 'dark-theme/img-classifier'], function(colorUtil, img
       if (index === 0 || (rect.width && rect.height)) {
         return {
           elem: elem,
-          rect: rect,
+          rect: { x: 0, y: 0, width: rect.width, height: rect.height },
           css: getComputedStyle(elem)
         };
       }
