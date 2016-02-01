@@ -74,9 +74,10 @@ define([], function () {
   constants.INIT_CODES = [
     constants.KEY_CODE.QUOTE
   ];
-  constants.INIT_CODES = constants.INIT_CODES.concat(constants.ZOOM_IN_CODES);
-  constants.INIT_CODES = constants.INIT_CODES.concat(constants.ZOOM_OUT_CODES);
 
+  constants.INIT_CODES = constants.INIT_CODES
+    .concat(constants.ZOOM_IN_CODES)
+    .concat(constants.ZOOM_OUT_CODES);
 
   return constants;
 
