@@ -19,7 +19,7 @@ define(
       var
         voices,
         errMessage = {
-          NO_VOICES : 'The system has no voices to speak with.',
+          NO_VOICES : 'Sitecues cannot find voices to speak with.',
           TIMEOUT   : 'Timed out getting voices. The system may not have any.'
         };
 

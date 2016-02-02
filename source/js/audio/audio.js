@@ -97,6 +97,7 @@ define(
         });
     }
 
+    // Network speech.
     getAudioPlayer(function() {
       var TTSUrl = getTTSUrl(text, lang);
 
