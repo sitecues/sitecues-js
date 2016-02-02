@@ -22,9 +22,10 @@ define(
     'core/conf/urls',
     'audio/network-player',
     'audio/local-player',
-    'audio/text-select'
+    'audio/text-select',
+    'audio/cue-text'
   ],
-  function(conf, site, $, builder, platform, locale, metric, urls, networkPlayer, localPlayer, textSelect) {
+  function(conf, site, $, builder, platform, locale, metric, urls, networkPlayer, localPlayer, textSelect, cueText) {
 
   var ttsOn = false,
     isAudioPlaying,
@@ -37,7 +38,7 @@ define(
       LENS: 'space',
       HIGHLIGHT: 'shift'
     },
-    player = true ? localPlayer : networkPlayer;
+    useLocalSpeech;
 
   function onLensOpened(lensContent, fromHighlight) {
     if (!ttsOn) {
@@ -72,30 +73,37 @@ define(
       return; // Nothing to speak
     }
 
-    getAudioPlayer(function() {
-      var TTSUrl = getTTSUrl(text, lang),
-        startRequestTime = new Date();
+    var startRequestTime = new Date();
 
-      function onSpeechComplete() {
-        var timeElapsed = new Date() - startRequestTime;
-        metric('tts-requested', {
-          requestTime: timeElapsed,
-          audioFormat: mediaTypeForTTS,
-          charCount: text.length,
-          trigger: triggerType
-        });
-      }
-
-      //networkPlayer.playAudioSrc(TTSUrl, onSpeechComplete);
-      // TODO: Figure out why lang comes in as en-US here...
-      // http://www.wolterskluwer.pl/
-      player.speak({
-        text : text,
-        lang : lang
+    function onSpeechPlaying(event) {
+      var timeElapsed = new Date() - startRequestTime;
+      sitecues.emit('audio/speech-play', event);
+      metric('tts-requested', {
+        requestTime : timeElapsed,
+        audioFormat : useLocalSpeech ? mediaTypeForTTS : null,
+        charCount   : text.length,
+        trigger     : triggerType,
+        isLocalTTS  : Boolean(useLocalSpeech)
       });
+    }
+
+    // TODO: Figure out why lang comes in as en-US here...
+    // http://www.wolterskluwer.pl/
+    if (useLocalSpeech) {
+      return localPlayer.speak({
+          text : text,
+          lang : lang,
+          onStart : onSpeechPlaying
+        });
+    }
+
+    getAudioPlayer(function() {
+      var TTSUrl = getTTSUrl(text, lang);
+
+      networkPlayer.playAudioSrc(TTSUrl, onSpeechPlaying.bind(TTSUrl));
 
       isAudioPlaying = true;
-      sitecues.emit('audio/speech-play', TTSUrl);
+
       addStopAudioHandlers();
     });
   }
@@ -120,7 +128,7 @@ define(
    */
   function stopAudio() {
     if (isAudioPlaying) {
-      player.stop();
+      getSpeechPlayer().stop();
       removeBlurHandler();
       isAudioPlaying = false;
     }
@@ -177,7 +185,7 @@ define(
       conf.set('ttsOn', ttsOn);
       sitecues.emit('speech/did-change', ttsOn);
       if (!doSuppressAudioCue) {
-        require(['audio/cues'], function(audioCues) {
+        require(['audio-cues/audio-cues'], function(audioCues) {
           audioCues.playSpeechCue(ttsOn);
         });
       }
@@ -193,6 +201,18 @@ define(
    */
   function playAudioByKey(key) {
     stopAudio();  // Stop any currently playing audio
+
+    if (useLocalSpeech) {
+      console.log('key:', key);
+      console.log('cue:', cueText[key]);
+      return localPlayer.speak({
+          text : cueText[key],
+          lang : 'en-US',
+          onStart : function () {
+            isAudioPlaying = true;
+          }
+        });
+    }
 
     var url = getAudioKeyUrl(key);
     getAudioPlayer(function() {
@@ -211,6 +231,10 @@ define(
     getAudioPlayer(function() {
       networkPlayer.playAudioSrc(url);
     });
+  }
+
+  function getSpeechPlayer() {
+    return useLocalSpeech ? localPlayer : networkPlayer;
   }
 
   // What audio format will we use?
@@ -332,6 +356,10 @@ define(
     });
   }
 
+  function toggleLocalSpeech() {
+    useLocalSpeech = !useLocalSpeech;
+  }
+
   function init() {
 
     if (isInitialized) {
@@ -355,7 +383,12 @@ define(
      */
     sitecues.on('hlb/closed keys/non-shift-key-pressed', stopAudio);
 
+    if (SC_DEV) {
+      sitecues.toggleLocalSpeech = toggleLocalSpeech;
+    }
+
     ttsOn = conf.get('ttsOn');
+    useLocalSpeech = site.get('localSpeech');
   }
 
   return {

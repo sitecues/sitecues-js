@@ -122,10 +122,11 @@ define(
     function speak(options) {
 
       var
-        text   = options.text,
-        lang   = options.lang,
-        voice  = options.voice,
-        polite = options.polite,
+        text    = options.text,
+        lang    = options.lang,
+        voice   = options.voice,
+        polite  = options.polite,
+        onStart = options.onStart,
         prom   = Promise.resolve();
 
       // TODO: Replace this poor excuse for a speech dictionary.
@@ -169,10 +170,10 @@ define(
 
         // Event listeners...
 
-        // speech.addEventListener('start', function onSpeechStart(event) {
-        //     log.info('Began speech.');
-        //     log.info(Object.getOwnPropertyNames(event));
-        // });
+        if (onStart) {
+          speech.addEventListener('start', onStart);
+        }
+
         // speech.addEventListener('end', function onSpeechEnd(event) {
         //     log.info('Finished in ' + event.elapsedTime + ' seconds.');
         //     log.info(Object.getOwnPropertyNames(event));
