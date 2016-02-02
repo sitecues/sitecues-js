@@ -177,29 +177,25 @@ define(
           speech.addEventListener('start', onStart);
         }
 
+        // Examples of other things we could do:
+
         // speech.addEventListener('end', function onSpeechEnd(event) {
-        //     log.info('Finished in ' + event.elapsedTime + ' seconds.');
-        //     log.info(Object.getOwnPropertyNames(event));
+        //     console.log('Finished in ' + event.elapsedTime + ' seconds.');
         // });
         // speech.addEventListener('error', function onSpeechError(event) {
-        //     log.info('Speech error.');
-        //     log.info(Object.getOwnPropertyNames(event));
+        //     console.log('Speech error.');
         // });
         // speech.addEventListener('pause', function onSpeechPause(event) {
-        //     log.info('Speech was paused.');
-        //     log.info(Object.getOwnPropertyNames(event));
+        //     console.log('Speech was paused.');
         // });
         // speech.addEventListener('resume', function onSpeechResume(event) {
-        //     log.info('Speech has resumed from a paused state.');
-        //     log.info(Object.getOwnPropertyNames(event));
+        //     console.log('Speech has resumed from a paused state.');
         // });
         // speech.addEventListener('boundary', function onSpeechBoundary(event) {
-        //     log.info('Encountered a word or sentence boundary.');
-        //     log.info(Object.getOwnPropertyNames(event));
+        //     console.log('Encountered a word or sentence boundary.');
         // });
         // speech.addEventListener('mark', function onSpeechMark(event) {
-        //     log.info('Encountered an SSML mark tag.');
-        //     log.info(Object.getOwnPropertyNames(event));
+        //     console.log('Encountered an SSML mark tag.');
         // });
 
         speechSynthesis.speak(speech);
