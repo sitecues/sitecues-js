@@ -371,11 +371,14 @@ define(
     // Speak on text selection
     textSelect.init();
 
+     //TODO: It would be better to listen for 'hlb/create' here so that
+     //      speech synthesis happens during the opening animation.
+     //      Unfortunately, this currently causes browsers to choke
+     //      on the animation. But that will likely improve in time.
     /*
-     * A highlight box has been requested.  This will create the player
-     * if necessary, but will not play anything.
+     * Speak whenever the lens is opened, if speech is on, etc.
      */
-    events.on('hlb/did-create', onLensOpened);
+    events.on('hlb/ready', onLensOpened);
 
     /*
      * A highlight box was closed.  Stop/abort/dispose of the player
