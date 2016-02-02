@@ -202,8 +202,6 @@ define(
     stopAudio();  // Stop any currently playing audio
 
     if (useLocalSpeech) {
-      console.log('key:', key);
-      console.log('cue:', cueText[key]);
       return localPlayer.speak({
           text : cueText[key],
           lang : 'en-US',
