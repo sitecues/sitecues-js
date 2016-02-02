@@ -77,7 +77,9 @@ define(
 
     function onSpeechPlaying(event) {
       var timeElapsed = new Date() - startRequestTime;
+      isAudioPlaying = true;
       sitecues.emit('audio/speech-play', event);
+      addStopAudioHandlers();
       metric('tts-requested', {
         requestTime : timeElapsed,
         audioFormat : useLocalSpeech ? mediaTypeForTTS : null,
@@ -101,10 +103,6 @@ define(
       var TTSUrl = getTTSUrl(text, lang);
 
       networkPlayer.playAudioSrc(TTSUrl, onSpeechPlaying.bind(TTSUrl));
-
-      isAudioPlaying = true;
-
-      addStopAudioHandlers();
     });
   }
 
@@ -210,6 +208,7 @@ define(
           lang : 'en-US',
           onStart : function () {
             isAudioPlaying = true;
+            addStopAudioHandlers();
           }
         });
     }
