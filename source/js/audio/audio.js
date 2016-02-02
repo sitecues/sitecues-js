@@ -49,7 +49,7 @@ define(
   }
 
   function speakContent(content, doAvoidInterruptions) {
-    if (doAvoidInterruptions && networkPlayer.isBusy()) {
+    if (doAvoidInterruptions && getSpeechPlayer().isBusy()) {
       return; // Already reading the highlight
     }
     if (!content) {
@@ -89,8 +89,6 @@ define(
       }).send();
     }
 
-    // TODO: Figure out why lang comes in as en-US here...
-    // http://www.wolterskluwer.pl/
     if (useLocalSpeech) {
       return localPlayer.speak({
           text : text,
@@ -215,7 +213,6 @@ define(
     getAudioPlayer(function() {
       isAudioPlaying = true;
       networkPlayer.playAudioSrc(url);
-      // Stop speech on any key down.
       addStopAudioHandlers();
     });
   }
@@ -388,7 +385,7 @@ define(
     }
 
     ttsOn = conf.get('ttsOn');
-    useLocalSpeech = site.get('localSpeech');
+    useLocalSpeech = SC_LOCAL || site.get('speech').local;
   }
 
   return {

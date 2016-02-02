@@ -212,10 +212,15 @@ define(
       speak(options);
     }
 
+    function isBusy() {
+      return speechSynthesis.pending || speechSynthesis.speaking;
+    }
+
     exports = {
       stop          : stop,
       speak         : speak,
-      speakPolitely : speakPolitely
+      speakPolitely : speakPolitely,
+      isBusy        : isBusy
     };
 
     return exports;
