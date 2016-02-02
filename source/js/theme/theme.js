@@ -17,7 +17,6 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
     originalBodyBackgroundColor,
     isOriginalThemeDark,
     isDark,   // Is dark theme currently applied
-    darkTheme,
     isDarkBgInfoInitialized,
     transitionTimer,
     currentThemeName,  // one of the theme names from color-choices.js
@@ -38,13 +37,10 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
    * Apply the current theme to the current document
    * Uses currentThemeName, currentThemePower and currentThemeTextHue for theme settings
    */
-  function applyTheme() {
+  function applyTheme(darkThemeSupport) {
 
     function applyThemeImpl() {
       var
-        colorMapFn = colorChoices[currentThemeName],
-        willBeDark = isDarkTheme(colorMapFn),
-        isReverseTheme = willBeDark !== isOriginalThemeDark,
         themeCss = colorMapFn ? getThemeCssText(colorMapFn, currentThemePower, currentThemeTextHue) : '',
         imgCss = '',
         // We want to animate quickly between light themes, but slowly when performing a drastic change
@@ -54,17 +50,17 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
 
       if (isDark !== willBeDark) {
         // These are sticky because they use attributes, therefore we call this whenever darkness is toggled
-        darkTheme.inverter.toggle(willBeDark);
+        darkThemeSupport.inverter.toggle(willBeDark);
         if (willBeDark) {
           // If will be dark but wasn't, then we may need special CSS for background images
-          imgCss = darkTheme.inverter.getReverseSpriteCssText(themeStyles);
+          imgCss = darkThemeSupport.inverter.getReverseSpriteCssText(themeStyles);
         }
       }
 
       getStyleSheet().text(transitionCss + themeCss + imgCss);
 
       // Allow web pages to create CSS rules that respond to reverse themes
-      $('body').toggleClass('sitecues-reverse-theme', isReverseTheme);
+      $('body').toggleClass('sitecues-reverse-theme', willBeDark !== isOriginalThemeDark);
       // Set class sitecues-[themename]-theme on <body> and clear other theme classes
       Object.keys(colorChoices).forEach(function(checkName) {
         $('body').toggleClass('sitecues-' + checkName + '-theme', currentThemeName === checkName);
@@ -85,7 +81,12 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
       isDark = willBeDark;
     }
 
-    initStyles(applyThemeImpl);
+    var colorMapFn = colorChoices[currentThemeName],
+      willBeDark = darkThemeSupport && isDarkTheme(colorMapFn);
+
+    styleService.init(function () {
+      collectRelevantStyles(applyThemeImpl, darkThemeSupport, willBeDark);
+    });
   }
 
   function isDarkTheme(colorMapFn) {
@@ -408,33 +409,24 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
     }
   }
 
-  function initStyles(callbackFn) {
-    styleService.init(function () {
-      collectRelevantStyles(callbackFn);
-    });
-  }
-
-  function collectRelevantStyles(callbackFn) {
+  function collectRelevantStyles(callbackFn, darkThemeSupport, willBeDark) {
     if (!themeStyles) {
       var bgStyles = styleService.getAllMatchingStylesCustom(getSignificantBgColor),
         fgStyles = styleService.getAllMatchingStylesCustom(getFgColor),
         bgImageStyles = styleService.getAllMatchingStylesCustom(getSignificantBgImageProperties);
 
-      originalBodyBackgroundColor = colorUtil.getDocumentBackgroundColor();
-      isDark = isOriginalThemeDark = colorUtil.isDarkColor(originalBodyBackgroundColor);
-
       themeStyles = bgStyles.concat(fgStyles).concat(bgImageStyles);
     }
 
-    if (currentThemeName === 'dark' && !isDarkBgInfoInitialized) {
-      classifyBgImagesForDarkTheme(themeStyles, callbackFn);
+    if (willBeDark && !isDarkBgInfoInitialized) {
+      classifyBgImagesForDarkTheme(themeStyles, darkThemeSupport, callbackFn);
     }
     else {
       callbackFn();
     }
   }
 
-  function classifyBgImagesForDarkTheme(themeStyles, callbackFn) {
+  function classifyBgImagesForDarkTheme(themeStyles, darkThemeSupport, callbackFn) {
     var bgImageStyles = themeStyles.filter(isBgImageStyle),
       numImagesRemainingToClassify = bgImageStyles.length;
 
@@ -451,7 +443,7 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
     nextImage();  // In case we started with zero images
 
     bgImageStyles.forEach(function(bgImageInfo) {
-      darkTheme.bgImgClassifier.classifyBackgroundImage(bgImageInfo, nextImage);
+      darkThemeSupport.bgImgClassifier.classifyBackgroundImage(bgImageInfo, nextImage);
     });
   }
 
@@ -488,11 +480,10 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
       currentThemePower = newThemePower || DEFAULT_INTENSITY;
       currentThemeTextHue = newThemeTextHue;
       // Only include inverter and img-classifier modules if dark theme is ued
-      if (currentThemeName === 'dark' && !darkTheme) {
-        require(['dark-theme/dark-theme'], function (darkThemeModule) {
-          darkThemeModule.init();
-          darkTheme = darkThemeModule;
-          applyTheme();
+      if (currentThemeName === 'dark') {
+        require(['dark-theme/dark-theme'], function (darkThemeSupport) {
+          darkThemeSupport.init();
+          applyTheme(darkThemeSupport);
         });
       }
       else {
@@ -510,6 +501,8 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
       return;
     }
     isInitialized = true;
+
+    originalBodyBackgroundColor = colorUtil.getDocumentBackgroundColor();
 
     // TODO remove when no longer necessary
     shouldRepaintToEnsureFullCoverage = platform.browser.isChrome && platform.browser.version < 48;

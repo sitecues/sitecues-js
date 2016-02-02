@@ -2,8 +2,13 @@
 // Ensure dependencies built
 define(['dark-theme/img-classifier', 'dark-theme/bg-image-classifier', 'dark-theme/inverter'],
   function(imgClassifier, bgImgClassifier, inverter) {
+    var isInitialized;
+
     function init() {
-      inverter.init();
+      if (!isInitialized) {
+        inverter.init();
+        isInitialized = true;
+      }
     }
 
     return {
