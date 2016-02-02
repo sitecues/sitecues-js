@@ -2,7 +2,7 @@
  *  Used for dark themes.
  */
 
-define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core/platform', 'dark-theme/img-classifier'],
+define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core/platform', 'inverse-theme/img-classifier'],
   function($, conf, styleService, platform, imgClassifier) {
 
   var mutationObserver,
