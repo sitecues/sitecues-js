@@ -769,8 +769,8 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'page/
 
     if (!isInitialLoadZoom) {
       conf.set('zoom', completedZoom);
-      require(['audio/cues'], function (cues) {
-        cues.playZoomCue(completedZoom);
+      require(['audio-cues/audio-cues'], function (audioCues) {
+        audioCues.playZoomCue(completedZoom);
       });
       metric('zoom-changed', zoomInput);
     }
