@@ -60,7 +60,6 @@ define([
    * renders them, and emits events for the rest of the application to
    */
   function initBPFeature() {
-
     if (isBpInitializing) {
       return;
     }
@@ -129,6 +128,7 @@ define([
   }
 
   // Classic mode is where the ? shows up instead of the down pointing arrow
+  // TODO remove
   function initClassicMode() {
     state.set('isClassicMode', !!(classicSite() || platform.browser.isIE9));
     sitecues.toggleClassicMode = function() {

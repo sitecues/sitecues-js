@@ -1,21 +1,33 @@
 /* Focus Controller */
-define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metric', 'core/platform', 'core/bp/view/view' ],
-  function (BP_CONST, state, helper, metric, platform, view) {
+define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metric', 'core/platform', 'core/bp/view/view', 'core/events',
+        'core/constants'],
+  function (BP_CONST, state, helper, metric, platform, view, events, CORE_CONST) {
 
   var savedDocumentFocus,
     tabbedElement,
     isInitialized,
     isListeningToClicks,
     renderFocusOutline = platform.browser.isFirefox ? renderFocusOutlineFirefox : renderFocusOutlineNotFirefox,
-    byId = helper.byId,
-    TAB   = 9,
-    ENTER = 13,
-    ESCAPE= 27,
-    SPACE = 32,
-    LEFT  = 37,
-    UP    = 38,
-    RIGHT = 39,
-    DOWN  = 40,
+    byId   = helper.byId,
+    keyCode = CORE_CONST.KEY_CODE,
+    TAB    = keyCode.TAB,
+    ENTER  = keyCode.ENTER,
+    ESCAPE = keyCode.ESCAPE,
+    SPACE  = keyCode.SPACE,
+    LEFT   = keyCode.LEFT,
+    UP     = keyCode.UP,
+    RIGHT  = keyCode.RIGHT,
+    DOWN   = keyCode.DOWN,
+    arrows = [
+      UP,
+      DOWN,
+      LEFT,
+      RIGHT
+    ],
+    triggerKeys = [
+      ENTER,
+      SPACE
+    ],
 
     TABBABLE = {    // IMPORTANT: remove 'scp-' prefix -- it gets added in by the code
       'main': [
@@ -125,7 +137,7 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
 
   function showFocus() {
 
-    metric('panel-focus-moved'); // Keyboard focus moved in the panel
+    new metric.PanelFocusMove().send();
 
     updateDOMFocusState();
 
@@ -136,7 +148,7 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
     else {
       // Show focus
       if (tabbedElement.id === BP_CONST.MORE_BUTTON_GROUP_ID) {
-        sitecues.emit('bp/did-focus-more-button');
+        events.emit('bp/did-focus-more-button');
       }
 
       renderFocusOutline();
@@ -490,6 +502,7 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
       return;
     }
 
+
     // Perform widget-specific command
     // Can't use evt.target because in the case of SVG it sometimes only has fake focus (some browsers can't focus SVG elements)
     var item = getFocusedItem();
@@ -502,12 +515,24 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
         performZoomSliderCommand(keyCode, evt);
       }
       else {
-        if (keyCode === ENTER || keyCode === SPACE) {
+        if (triggerKeys.indexOf(keyCode) > -1) {
           simulateClick(item);
         }
       }
-      // else fall through to native processing of keystroke
     }
+
+    if (triggerKeys.indexOf(keyCode) > -1) {
+      //Don't allow default behavior for enter and space keys while the panel is open
+      return;
+    }
+
+    if (arrows.indexOf(keyCode) > -1) {
+      //Prevent window from scrolling on arrow keys
+      return;
+    }
+
+    // else fall through to native processing of keystroke
+    return true;
   }
 
   function isModifiedKey(evt) {
@@ -531,13 +556,13 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
     }
     isInitialized = true;
 
-    sitecues.on('bp/will-toggle-feature', hideFocus);
-    sitecues.on('bp/did-open-subpanel', focusFirstItem);
-    sitecues.on('bp/did-show-card', focusCard);
+    events.on('bp/will-toggle-feature', hideFocus);
+    events.on('bp/did-open-subpanel', focusFirstItem);
+    events.on('bp/did-show-card', focusCard);
     beginKeyHandling(); // First time badge expands
-    sitecues.on('bp/will-expand', beginKeyHandling);
-    sitecues.on('bp/will-shrink', endKeyHandling);
-    sitecues.on('bp/did-expand', showFocus);
+    events.on('bp/will-expand', beginKeyHandling);
+    events.on('bp/will-shrink', endKeyHandling);
+    events.on('bp/did-expand', showFocus);
 
   }
 

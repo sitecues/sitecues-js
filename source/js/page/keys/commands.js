@@ -2,11 +2,11 @@ define(['page/zoom/zoom', 'page/highlight/move-keys', 'core/conf/user/manager', 
   function(zoomMod, moveKeys, conf, mh) {
   return {
     decreaseZoom: function(event) {
-      zoomMod.init(true);
+      zoomMod.init();
       zoomMod.beginZoomDecrease(event);
     },
     increaseZoom: function(event) {
-      zoomMod.init(true);
+      zoomMod.init();
       zoomMod.beginZoomIncrease(event);
     },
     stopZoom: function() {

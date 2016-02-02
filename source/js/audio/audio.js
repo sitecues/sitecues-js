@@ -23,9 +23,10 @@ define(
     'audio/network-player',
     'audio/local-player',
     'audio/text-select',
-    'audio/cue-text'
+    'audio/cue-text',
+    'core/events'
   ],
-  function(conf, site, $, builder, platform, locale, metric, urls, networkPlayer, localPlayer, textSelect, cueText) {
+  function(conf, site, $, builder, platform, locale, metric, urls, networkPlayer, localPlayer, textSelect, cueText, events) {
 
   var ttsOn = false,
     isAudioPlaying,
@@ -78,15 +79,15 @@ define(
     function onSpeechPlaying(event) {
       var timeElapsed = new Date() - startRequestTime;
       isAudioPlaying = true;
-      sitecues.emit('audio/speech-play', event);
+      events.emit('audio/speech-play', event);
       addStopAudioHandlers();
-      metric('tts-requested', {
+      new metric.TtsRequest({
         requestTime : timeElapsed,
         audioFormat : useLocalSpeech ? mediaTypeForTTS : null,
         charCount   : text.length,
         trigger     : triggerType,
         isLocalTTS  : Boolean(useLocalSpeech)
-      });
+      }).send();
     }
 
     // TODO: Figure out why lang comes in as en-US here...
@@ -181,7 +182,7 @@ define(
     if (ttsOn !== isOn) {
       ttsOn = isOn;
       conf.set('ttsOn', ttsOn);
-      sitecues.emit('speech/did-change', ttsOn);
+      events.emit('speech/did-change', ttsOn);
       if (!doSuppressAudioCue) {
         require(['audio-cues/audio-cues'], function(audioCues) {
           audioCues.playSpeechCue(ttsOn);
@@ -374,13 +375,13 @@ define(
      * A highlight box has been requested.  This will create the player
      * if necessary, but will not play anything.
      */
-    sitecues.on('hlb/ready', onLensOpened);
+    events.on('hlb/did-create', onLensOpened);
 
     /*
      * A highlight box was closed.  Stop/abort/dispose of the player
      * attached to it.
      */
-    sitecues.on('hlb/closed keys/non-shift-key-pressed', stopAudio);
+    events.on('hlb/closed keys/non-shift-key-pressed', stopAudio);
 
     if (SC_DEV) {
       sitecues.toggleLocalSpeech = toggleLocalSpeech;

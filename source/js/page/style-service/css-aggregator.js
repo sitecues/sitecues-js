@@ -72,7 +72,7 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
   // update to new URL format that passes url as a parameter ala css-proxy?url=foo
   function getCssProxyUrl(url) {
     var absoluteUrl = urls.resolveUrl(url);
-    return urls.getApiUrl('css-proxy/' + encodeURIComponent(absoluteUrl));
+    return urls.getApiUrl('css-proxy/' + absoluteUrl); // TODO encodeURIComponent(absoluteUrl));
   }
 
   /**

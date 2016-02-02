@@ -3,23 +3,26 @@
  */
 
 define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core/platform',
-    'theme/color-choices', 'page/util/color', /* 'theme/img-classifier', */ 'theme/custom-site-theme' ],
-  function($, conf, styleService, platform, colorChoices, colorUtil, /* imgClassifier, */ customTheme) {
+    'theme/color-choices', 'page/util/color', 'theme/custom-site-theme', 'core/events' ],
+  function($, conf, styleService, platform, colorChoices, colorUtil, customTheme, events) {
   var $themeStyleSheet,
     THEME_STYLESHEET_NAME = 'sitecues-theme',
     REPAINT_MS = 40,
     themeStyles,
-    shouldRepaintToEnsureFullCoverage = platform.browser.isChrome && platform.browser.version < 48,
+    // TODO remove once no longer necessary -- should be soon
+    shouldRepaintToEnsureFullCoverage,
     isPanelExpanded,
     isRepaintNeeded,
     isInitialized,
     originalBodyBackgroundColor,
     isOriginalThemeDark,
+    isDark,   // Is dark theme currently applied
+    darkTheme,
+    isDarkBgInfoInitialized,
     transitionTimer,
-    inverter,
-    currentThemeName,
-    currentThemePower,
-    currentThemeTextHue,
+    currentThemeName,  // one of the theme names from color-choices.js
+    currentThemePower,  // .01 - 1
+    currentThemeTextHue,  // 0 - 1
     MAX_USER_SPECIFIED_HUE = 1.03,   // If > 1.0 then use white
     TRANSITION_CLASS = 'sc-animate-theme',
     TRANSITION_MS_FAST = 300,
@@ -27,37 +30,35 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
     DEFAULT_INTENSITY = 0.61,  // Must match default slider position in settings-template.hbs #scp-theme-power
     URL_REGEXP = /url\((?:(?:[\'\" ])*([^\"\'\)]+)[\'\" ]*)/i,
     GRADIENT_REGEXP = /^\s*([\w-]+\s*gradient)\((.*)\).*$/i,
-    BUTTON_REGEXP = /(?:^| |,)(?:(?:input\s*\[\s*type\s*=\s*\"(?:button|color|submit|reset)\"\s*\]\s*)|button)(?:$| |,|:)/,
-    FILTER_VAL = {
-      reversed: 'invert(100%)',
-      mediumDark: 'brightness(.6)',
-      veryDark: 'brightness(.2)'
-    };
+    BUTTON_REGEXP = /(?:^| |,)(?:(?:input\s*\[\s*type\s*=\s*\"(?:button|color|submit|reset)\"\s*\]\s*)|button)(?:$| |,|:)/;
 
   // ---- PUBLIC ----
 
   /**
-   * Apply a theme to the current document
-   * @param {string} type one of the theme names from color-choices.js
-   * @param {number} intensity (optional) = .01-1
+   * Apply the current theme to the current document
+   * Uses currentThemeName, currentThemePower and currentThemeTextHue for theme settings
    */
-  function applyTheme(type, intensity, textHue) {
+  function applyTheme() {
 
     function applyThemeImpl() {
       var
-        isDark = colorUtil.isDarkColor(colorUtil.getDocumentBackgroundColor()),
+        colorMapFn = colorChoices[currentThemeName],
         willBeDark = isDarkTheme(colorMapFn),
         isReverseTheme = willBeDark !== isOriginalThemeDark,
-        themeCss = colorMapFn ? getThemeCssText(colorMapFn, intensity || DEFAULT_INTENSITY, textHue, isReverseTheme) : '',
-
+        themeCss = colorMapFn ? getThemeCssText(colorMapFn, currentThemePower, currentThemeTextHue) : '',
         imgCss = '',
         // We want to animate quickly between light themes, but slowly when performing a drastic change
         // such as going from light to dark or vice-versa
         transitionMs = isDark !== willBeDark ? TRANSITION_MS_SLOW : TRANSITION_MS_FAST,
         transitionCss = initializeTransition(transitionMs);
 
-      if (willBeDark) {
-        imgCss = handleDarkThemeInversions(isDark, willBeDark);
+      if (isDark !== willBeDark) {
+        // These are sticky because they use attributes, therefore we call this whenever darkness is toggled
+        darkTheme.inverter.toggle(willBeDark);
+        if (willBeDark) {
+          // If will be dark but wasn't, then we may need special CSS for background images
+          imgCss = darkTheme.inverter.getReverseSpriteCssText(themeStyles);
+        }
       }
 
       getStyleSheet().text(transitionCss + themeCss + imgCss);
@@ -65,53 +66,26 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
       // Allow web pages to create CSS rules that respond to reverse themes
       $('body').toggleClass('sitecues-reverse-theme', isReverseTheme);
       // Set class sitecues-[themename]-theme on <body> and clear other theme classes
-      Object.keys(colorChoices).forEach(function(checkType) {
-        $('body').toggleClass('sitecues-' + checkType + '-theme', type === checkType);
+      Object.keys(colorChoices).forEach(function(checkName) {
+        $('body').toggleClass('sitecues-' + checkName + '-theme', currentThemeName === checkName);
       });
 
       setTimeout(function () {
         if (shouldRepaintToEnsureFullCoverage) {
           repaintPage();
         }
-        require(['bp-adaptive/bp-adaptive'], function(bpAdaptive) {
-          bpAdaptive.adaptToSitecuesThemeChange(type);
-        });
+        if (!SC_EXTENSION) {
+          // Don't do this in extension -- there is no badge
+          require(['bp-adaptive/bp-adaptive'], function (bpAdaptive) {
+            bpAdaptive.adaptToSitecuesThemeChange(currentThemeName);
+          });
+        }
       }, transitionMs);
+
+      isDark = willBeDark;
     }
 
-    function requireInverter() {
-      if (type === 'dark' && !inverter) {
-        require(['inverter/inverter'], function (inverterModule) {
-          inverter = inverterModule;
-          applyThemeImpl();
-        });
-      }
-      else {
-        applyThemeImpl();
-      }
-    }
-
-    var colorMapFn = colorChoices[type];
-
-    if (colorMapFn || !type) {
-      initStyles(requireInverter);
-    }
-  }
-
-  function handleDarkThemeInversions(isDark, willBeDark) {
-    var doInversions = platform.browser.isSafari ||
-      platform.browser.isFirefox ||
-      (platform.browser.isIE && platform.browser.version >=12);
-
-    if (!doInversions) {
-      return '';
-    }
-
-    if (isDark !== willBeDark) {
-      inverter.toggle(willBeDark);
-    }
-
-    return getReverseSpriteCssText();
+    initStyles(applyThemeImpl);
   }
 
   function isDarkTheme(colorMapFn) {
@@ -219,45 +193,6 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
     }
 
     return gradientType + '(' + newGradientParams.join(',') + ')';
-  }
-
-  function getReverseSpriteCssText() {
-    // Reverse background images
-    function getCssForOneSprite(bgInfo, selector) {
-      // Create a pseudo element selector for everything that matches the selector
-      function getSelector(pseudo) {
-        return (pseudo ? selector.replace(/(,|$)/g, pseudo + '$1') : selector) + ' {\n';
-      }
-
-      if (!bgInfo.hasImageUrl) {
-        return '';
-      }
-
-      var needsEmpty = bgInfo.doRequireEmpty ? ':empty' : '',
-        finalSelector = getSelector(needsEmpty + ':not([data-sc-reversible="false"])');
-      return finalSelector +
-        createRule('filter', FILTER_VAL.reversed, true) +
-        createRule(platform.cssPrefix + 'filter', FILTER_VAL.reversed, true) +
-        // Since we are inverting, make sure the inverse of any text that comes with the bg image
-        // ends up reversed, which means that it needs to start as the opposite of what we want
-        // TODO make this more sophisticated so that the true target colors are reached
-        'background-color: #fff !important;\n' +
-        'color: #000 !important;\n' +
-        '}\n';
-    }
-    var styleSheetText = '';
-
-    // Backgrounds
-    themeStyles.forEach(function(style) {
-      // Don't alter buttons -- it will change it from a native button and the appearance will break
-      // color, background-color
-      if (style.value.prop === 'background-image') {
-        styleSheetText += getCssForOneSprite(style.value, style.rule.selectorText);
-      }
-    });
-
-    return styleSheetText;
-
   }
 
   function createTextShadowRule(size, hue) {
@@ -374,34 +309,11 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
     return bgShorthand.substr(lastIndexRgb).split(')')[0] + ')';
   }
 
-  function getSampleElement(selector) {
-    var REMOVE_PSEUDO_CLASSES_AND_ELEMENTS = /::?[^ ,:.]+/g,
-      result;
-    try { result = document.querySelector(selector.replace(REMOVE_PSEUDO_CLASSES_AND_ELEMENTS, '')); }
-    catch(ex) {}
-    return result;
-  }
-
-  function shouldInvertBackground(cssStyleDecl, bgImage, sampleElement) {
-    if (bgImage) {
-//        var rect = { top: 0, left: 0, width: 20, height: 20 }; // Default
-      if (colorUtil.isOnDarkBackground(sampleElement)) {
-        return false; // Already designed to show on a dark background
-      }
-      if (!sampleElement) {
-        return true;
-      }
-      return false; // SMART-INVERT: imgClassifier.shouldInvertBgImage(bgImage, sampleElement.getBoundingClientRect());
-    }
-  }
-
-  function getSignificantBgImageProperties(cssStyleDecl, selector) {
+  function getSignificantBgImageProperties(cssStyleDecl) {
     var bgImagePropVal = cssStyleDecl['background-image'],
       imageUrl,
       gradient,
-      cssText = cssStyleDecl.cssText,
-      sampleElement,
-      hasRepeat;
+      cssText = cssStyleDecl.cssText;
 
     if (cssText.indexOf('background') < 0) {
       return;  // Need some background property
@@ -423,59 +335,12 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
       }
     }
 
-    function isPlacedBeforeText(sampleElementCss) {
-      // Content with text-indent is using inner text as alternative text but placing it offscreen
-      var paddingLeft = cssStyleDecl.paddingLeft || sampleElementCss.paddingLeft;
-      return parseFloat(paddingLeft) > 0;
-    }
-
-    sampleElement = getSampleElement(selector);
-    hasRepeat = cssStyleDecl.backgroundRepeat && cssStyleDecl.backgroundRepeat.indexOf('no-repeat') === -1;
-
-
-    /**
-     * Retrieve information about background images the theme needs to care about.
-     * @param propVal
-     * @returns {boolean}
-     */
-    function getBackgroundImageFilter() {
-      var sampleElementCss = sampleElement ? getComputedStyle(sampleElement) : {},
-        hasHiddenText = cssStyleDecl.textIndent || parseInt(sampleElementCss.textIndent) < 0 ||
-          parseInt(cssStyleDecl.fontSize) === 0 || parseInt(sampleElementCss.fontSize) === 0;
-
-      if (hasRepeat) {
-        return 'veryDark';
-      }
-      if (cssStyleDecl.width === '100%') {
-        return 'mediumDark';
-      }
-
-      if (sampleElement && sampleElement.childElementCount) {
-        return 'none';
-      }
-
-      if (hasHiddenText || isPlacedBeforeText(sampleElementCss) ||
-        (cssStyleDecl.backgroundPosition && cssStyleDecl.backgroundPosition.indexOf('%') < 0)) {  // Clearly a sprite
-        return 'reversed';
-      }
-
-      if (shouldInvertBackground(cssStyleDecl, imageUrl, sampleElement)) {
-        return 'reversed';
-      }
-
-      return 'mediumDark';
-    }
-
     if (imageUrl) {
-      var bgInfo = {
+      return {
         prop: 'background-image',
-        hasImageUrl: !!imageUrl,
-        doRequireEmpty: hasRepeat,
+        imageUrl: imageUrl,
         backgroundColor: cssStyleDecl.backgroundColor
       };
-      if (getBackgroundImageFilter(bgInfo, imageUrl, cssStyleDecl, sampleElement) === 'reversed') {
-        return bgInfo;
-      }
     }
   }
 
@@ -547,7 +412,7 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
     styleService.init(function () {
       collectRelevantStyles(callbackFn);
     });
-    }
+  }
 
   function collectRelevantStyles(callbackFn) {
     if (!themeStyles) {
@@ -556,12 +421,38 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
         bgImageStyles = styleService.getAllMatchingStylesCustom(getSignificantBgImageProperties);
 
       originalBodyBackgroundColor = colorUtil.getDocumentBackgroundColor();
-      isOriginalThemeDark = colorUtil.isDarkColor(originalBodyBackgroundColor);
+      isDark = isOriginalThemeDark = colorUtil.isDarkColor(originalBodyBackgroundColor);
 
       themeStyles = bgStyles.concat(fgStyles).concat(bgImageStyles);
     }
 
-    callbackFn();
+    if (currentThemeName === 'dark' && !isDarkBgInfoInitialized) {
+      classifyBgImagesForDarkTheme(themeStyles, callbackFn);
+    }
+    else {
+      callbackFn();
+    }
+  }
+
+  function classifyBgImagesForDarkTheme(themeStyles, callbackFn) {
+    var bgImageStyles = themeStyles.filter(isBgImageStyle),
+      numImagesRemainingToClassify = bgImageStyles.length;
+
+    function isBgImageStyle(info) {
+      return info.value.prop === 'background-image';
+    }
+
+    function nextImage() {
+      if (numImagesRemainingToClassify -- === 0) {
+        callbackFn();
+      }
+    }
+
+    nextImage();  // In case we started with zero images
+
+    bgImageStyles.forEach(function(bgImageInfo) {
+      darkTheme.bgImgClassifier.classifyBackgroundImage(bgImageInfo, nextImage);
+    });
   }
 
   // Theme name must exist in colorChoices
@@ -594,9 +485,19 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
     if (newThemeName !== currentThemeName || newThemePower !== currentThemePower || newThemeTextHue !== currentThemeTextHue) {
       // Only apply theme when new settings are different from previously applied theme
       currentThemeName = newThemeName;
-      currentThemePower = newThemePower;
+      currentThemePower = newThemePower || DEFAULT_INTENSITY;
       currentThemeTextHue = newThemeTextHue;
-      applyTheme(newThemeName, newThemePower, newThemeTextHue);
+      // Only include inverter and img-classifier modules if dark theme is ued
+      if (currentThemeName === 'dark' && !darkTheme) {
+        require(['dark-theme/dark-theme'], function (darkThemeModule) {
+          darkThemeModule.init();
+          darkTheme = darkThemeModule;
+          applyTheme();
+        });
+      }
+      else {
+        applyTheme();
+      }
     }
   }
 
@@ -609,6 +510,9 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
       return;
     }
     isInitialized = true;
+
+    // TODO remove when no longer necessary
+    shouldRepaintToEnsureFullCoverage = platform.browser.isChrome && platform.browser.version < 48;
 
     conf.def('themeName', getSanitizedThemeName);
     conf.def('themePower', getSanitizedThemePower);
@@ -637,13 +541,12 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
       }
     }
 
-    sitecues.on('bp/did-expand', onPanelExpand);
-    sitecues.on('bp/did-shrink', onPanelShrink);
+    events.on('bp/did-expand', onPanelExpand);
+    events.on('bp/did-shrink', onPanelShrink);
   }
 
   return {
-    init: init,
-    applyTheme: applyTheme
+    init: init
   };
 
 });

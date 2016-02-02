@@ -5,27 +5,27 @@
 
 define(['core/conf/site'], function(site) {
   var CLASSIC_SITES = {
-    's-0000ee0c': 1,
+    //'s-0000ee0c': 1,  // EEOC.gov
     's-00e27714': 1,
     's-013cb0c3': 1,
-    's-0238c9c2': 1,
+    //'s-0238c9c2': 1,  // beta.nateproject.com
     's-041cf669': 1,
-    's-05fd6c66': 1,
+    //'s-05fd6c66': 1, // dcmetrobln.org
     's-0796b61d': 1, // 'http://www.brzeziny-gmina.pl' -- no sitecues
-    's-088595a0': 1,
-    's-093164c4': 1,
-    's-0bdb6b4f': 1,
-    's-0c114e61': 1,
+    //'s-088595a0': 1, // aberdeenassociates.com
+    //'s-093164c4': 1, // insulinnation.com
+    //'s-0bdb6b4f': 1, // meadowsfellowship.org
+    //'s-0c114e61': 1, // accessibilityproducts.net/
     's-14949bfa': 1,
     's-190630d2': 1,
-    's-1f978331': 1,
+    //'s-1f978331': 1, // http://www.njstatelib.org/
     's-2e146908': 1,
     's-339cc42c': 1,
     's-389f76da': 1,
-    's-3ab320ac': 1,
-    's-3b2b2901': 1,
+    // 's-3ab320ac': 1, // http://www.viscardicenter.org/
+    //'s-3b2b2901': 1, // http://ouragingmarket.com/
     's-456e33ab': 1, // 'http://www.gminakoscian.pl'  -- sitecues broken
-    's-45e84f08': 1,
+    //'s-45e84f08': 1, // http://www.virtualvisiontech.com/
     's-4aa44e78': 1,
     's-4bfe60ab': 1,
     's-542edffc': 1,
@@ -51,7 +51,7 @@ define(['core/conf/site'], function(site) {
     's-c27fa71d': 1,
     's-d01367db': 1,
     's-d06c2938': 1,
-    's-e8f9c7ca': 1,
+    //'s-e8f9c7ca': 1,  // sitecues.com
     's-f266b384': 1,
     's-f2a9dde2': 1,
     's-f424d83d': 1,

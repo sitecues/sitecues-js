@@ -42,11 +42,11 @@ define(
             // { os: 'Windows', os_version: '8.1',      browser: 'chrome',  browser_version: '46.0' },
             // { os: "Windows", os_version: '10',       browser: 'ie',      browser_version: '11.0' },
             // { os: 'Windows', os_version: '10',       browser: 'edge',    browser_version: '12.0' },
-            { os: 'Windows', os_version: '10',       browser: 'firefox', browser_version: '41.0' },
+            //{ os: 'Windows', os_version: '10',       browser: 'firefox', browser_version: '41.0' },
             { os: 'Windows', os_version: '10',       browser: 'chrome',  browser_version: '46.0' },
             // { os: 'OS X',    os_version: 'Yosemite', browser: 'safari',  browser_version: '8.0' },
-            { os: 'OS X',    os_version: 'Yosemite', browser: 'firefox', browser_version: '41.0' },
-            { os: 'OS X',    os_version: 'Yosemite', browser: 'chrome',  browser_version: '46.0' }
+            //{ os: 'OS X',    os_version: 'Yosemite', browser: 'firefox', browser_version: '41.0' },
+            //{ os: 'OS X',    os_version: 'Yosemite', browser: 'chrome',  browser_version: '46.0' }
             // SauceLabs-style...
             // { platform: 'Windows 10', browserName: 'internet explorer', version: '11' },
             // { platform: 'Windows 10', browserName: 'firefox',           version: '41' },
@@ -56,7 +56,7 @@ define(
             // { platform: 'OS X 10.10', browserName: 'chrome',            version: '46' }
         ];
 
-        // test.maxConcurrency = 10;  // how many browsers may be open at once
+        test.maxConcurrency = 10;  // how many browsers may be open at once
 
         // Specify which AMD module loader to use...
         // test.loaders = {

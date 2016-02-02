@@ -3,8 +3,8 @@
  * See docs at https://equinox.atlassian.net/wiki/display/EN/Smooth+Zoom
  */
 
-define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'page/util/common', 'core/metric'],
-  function ($, conf, site, platform, common, metric) {
+define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'page/util/common', 'core/metric', 'core/events'],
+  function ($, conf, site, platform, common, metric, events) {
 
   // Default zoom configuration
 
@@ -685,7 +685,7 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'page/
         pointerEvents: 'none'
       });
 
-      sitecues.emit('zoom/begin');
+      events.emit('zoom/begin');
 
       if (animationReadyCallback) {
         animationReadyCallback();
@@ -765,14 +765,14 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'page/
     repaintToEnsureCrispText();
 
     // notify all about zoom change
-    sitecues.emit('zoom', completedZoom);
+    events.emit('zoom', completedZoom);
 
     if (!isInitialLoadZoom) {
       conf.set('zoom', completedZoom);
       require(['audio-cues/audio-cues'], function (audioCues) {
         audioCues.playZoomCue(completedZoom);
       });
-      metric('zoom-changed', zoomInput);
+      new metric.ZoomChange(zoomInput).send();
     }
 
     clearZoomCallbacks();
@@ -1194,7 +1194,7 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'page/
       // Wait until <body> is ready
       // This can happen in the case of extension which loads very fast
       // In the future, extension may try to zoom sooner rather than waiting for entire document to load
-      sitecues.on('bp/did-complete', function() { performInitialLoadZoom(targetZoom); }); // Zoom once badge is ready
+      events.on('bp/did-complete', function() { performInitialLoadZoom(targetZoom); }); // Zoom once badge is ready
       return;
     }
 
@@ -1221,7 +1221,7 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'page/
       $body.css('width', getRestrictedWidth(completedZoom));
     }
     determineScrollbars();
-    sitecues.emit('resize');
+    events.emit('resize');
   }
 
   // We capture ctrl+wheel events because those are actually pinch/unpinch events
@@ -1245,7 +1245,7 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'page/
     event.preventDefault();
   }
 
-  function init() {
+  function init(wheelEvent) {
     if (isInitialized) {
       return;
     }
@@ -1259,13 +1259,13 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'page/
 
     initBodyInfo();
 
-    sitecues.on('bp/will-expand', function () {
+    events.on('bp/will-expand', function () {
       isPanelOpen = true;
       if (shouldPrepareAnimations()) {
         prepareAnimationOptimizations();
       }
     });
-    sitecues.on('bp/did-shrink', function () {
+    events.on('bp/did-shrink', function () {
       isPanelOpen = false;
       clearAnimationOptimizations(); // Browser can reclaim resources used
     });
@@ -1291,6 +1291,11 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'page/
     $(window).resize(onResize);
 
     fixZoomBodyCss(); // Get it read as soon as zoom might be used
+
+    if (wheelEvent) {
+      onMouseWheel(wheelEvent);
+    }
+    events.emit('zoom/init');
   }
 
   return {

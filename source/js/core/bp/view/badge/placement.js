@@ -47,8 +47,8 @@
  *    Parent: #scp-bp-container
  *    Accessibility: uses ARIA to describe controls
  */
-define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/platform'],
-  function(state, BP_CONST, helper, platform) {
+define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/platform', 'core/events'],
+  function(state, BP_CONST, helper, platform, events) {
   var BADGE_PARENT = BP_CONST.BADGE_MODE,
       HTML_PARENT  = BP_CONST.PANEL_MODE,
       currentBPParent,
@@ -66,7 +66,7 @@ define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/plat
       svgAspectRatio,
       documentElement = document.documentElement,
 
-      SHOULD_FIX_USE_ELEMENTS = platform.browser.isIE && platform.browser.version >= 11 && platform.os.majorVersion >= 10;
+      SHOULD_FIX_USE_ELEMENTS;
 
   // Allow animations just before panel expands
   function disableAnimations() {
@@ -323,10 +323,10 @@ define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/plat
       var cachedRect = helper.getRect(badgeElement),
           contentBox = Object.create(cachedRect),
           computedStyle = getComputedStyle(badgeElement),
-          paddingTop    = parseFloat(computedStyle.paddingTop),
-          paddingBottom = parseFloat(computedStyle.paddingBottom),
-          paddingRight  = parseFloat(computedStyle.paddingRight),
-          paddingLeft   = parseFloat(computedStyle.paddingLeft);
+          paddingTop    = Number.parseFloat(computedStyle.paddingTop),
+          paddingBottom = Number.parseFloat(computedStyle.paddingBottom),
+          paddingRight  = Number.parseFloat(computedStyle.paddingRight),
+          paddingLeft   = Number.parseFloat(computedStyle.paddingLeft);
 
       contentBox.width  -= paddingLeft + paddingRight;
       contentBox.height -= paddingTop  + paddingBottom;
@@ -364,6 +364,8 @@ define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/plat
 
     isInitialized = true;
 
+    SHOULD_FIX_USE_ELEMENTS = platform.browser.isIE && platform.browser.version >= 11 && platform.os.majorVersion >= 10;
+
     // Compute the aspect ratio (the width:height ratio required for the <svg>)
     var viewBoxRect = svg.viewBox.baseVal;
 
@@ -389,9 +391,9 @@ define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/plat
     if (state.get('isPageBadge')) {
 
       // Page badges must switch back and forth dynamically
-      sitecues.on('bp/will-expand', switchToHtmlParent);
-      sitecues.on('bp/did-shrink', switchToBadgeParent);
-      sitecues.on('zoom', onZoomChange);
+      events.on('bp/will-expand', switchToHtmlParent);
+      events.on('bp/did-shrink', switchToBadgeParent);
+      events.on('zoom', onZoomChange);
     }
     else {
       window.addEventListener('resize', repositionBPOverBadge);

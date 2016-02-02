@@ -9,8 +9,8 @@ define(['core/bp/constants',
     'bp-expanded/view/transform-util',
     'core/locale',
     'bp-secondary/insert-secondary-markup',
-    'bp-secondary/bp-secondary-features'
-],
+    'bp-secondary/bp-secondary-features',
+    'core/events'],
   function (BP_CONST,
             state,
             view,
@@ -19,7 +19,8 @@ define(['core/bp/constants',
             transformUtil,
             locale,
             markup,
-            secondaryFeatures) {
+            secondaryFeatures,
+            events) {
 
   var BUTTON_DROP_ANIMATION_MS = 800,
     ENABLED_PANEL_TRANSLATE_Y = 0,
@@ -299,7 +300,7 @@ define(['core/bp/constants',
 
     fadeInTextContentWhenLargeEnough();
 
-    sitecues.emit('bp/will-show-secondary-feature', name);
+    events.emit('bp/will-show-secondary-feature', name);
   }
 
   /********************** INTERACTIONS **************************/
@@ -368,14 +369,14 @@ define(['core/bp/constants',
     updateMoreButtonLabel(!willEnable);
     if (willEnable && !isFeatureAvailable(featureName)) {
       // The feature was not loaded yet -- wait until loaded
-      sitecues.on('bp/content-loaded', function() {
+      events.on('bp/content-loaded', function() {
         if (state.isButtonMenu()) {  // Make sure user hasn't left the 4 button menu while we waited
           toggleFeature(featureName);
         }
       });
     }
     else {
-      sitecues.emit('bp/will-toggle-feature');
+      events.emit('bp/will-toggle-feature');
       animateFeature(featureName, willEnable);
     }
   }
@@ -448,7 +449,7 @@ define(['core/bp/constants',
 
     if (state.isSecondaryPanelRequested()) {
       // Toggle current panel off
-      sitecues.emit('bp/did-toggle-' + state.getSecondaryPanelName(), false);
+      events.emit('bp/did-toggle-' + state.getSecondaryPanelName(), false);
     }
 
     finishAllAnimations();
@@ -478,9 +479,9 @@ define(['core/bp/constants',
       origFillHeight = parseFloat(getOutlineFill().getAttribute('height'));
       origPanelContentsRect = document.getElementById(BP_CONST.MAIN_CONTENT_FILL_ID).getBoundingClientRect();
 
-      sitecues.on('bp/will-shrink', onPanelClose);
+      events.on('bp/will-shrink', onPanelClose);
 
-      sitecues.emit('bp/did-init-secondary');
+      events.emit('bp/did-init-secondary');
     }
   }
 
