@@ -48,13 +48,16 @@ define(['core/conf/urls', 'core/platform'], function (urls, platform) {
 
         parsedData = parseData(data);
 
-        //Check if parsed back-up storage has saved preferences or a site ID
+        // Check if parsed back-up storage has saved preferences or a site ID
+        /*jshint forin: false */
         for (key in parsedData) {
           isEmpty = false;
         }
-
+        /*jshint forin: true */
       }
+
       window.removeEventListener('message', onMessageReceived);
+
       if (isEmpty) {
         onDataAvailableFn(); // Use callback even if we don't use the data -- otherwise sitecues won't load
       }
