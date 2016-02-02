@@ -76,10 +76,9 @@ define(
 
     var startRequestTime = new Date();
 
-    function onSpeechPlaying(event) {
+    function onSpeechPlaying() {
       var timeElapsed = new Date() - startRequestTime;
       isAudioPlaying = true;
-      events.emit('audio/speech-play', event);
       addStopAudioHandlers();
       new metric.TtsRequest({
         requestTime : timeElapsed,
@@ -103,7 +102,7 @@ define(
     getAudioPlayer(function() {
       var TTSUrl = getTTSUrl(text, lang);
 
-      networkPlayer.playAudioSrc(TTSUrl, onSpeechPlaying.bind(TTSUrl));
+      networkPlayer.playAudioSrc(TTSUrl, onSpeechPlaying);
     });
   }
 
