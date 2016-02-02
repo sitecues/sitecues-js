@@ -13,6 +13,7 @@ define(
       exports,
       speechSynthesis = window.speechSynthesis,
       SpeechSynthesisUtterance = window.SpeechSynthesisUtterance;
+
     function getVoices() {
 
       var
@@ -159,9 +160,11 @@ define(
       prom = prom.then(function () {
 
         var speech = new SpeechSynthesisUtterance(text);
-        console.log('Using voice:', voice && voice.name);
+        if (SC_DEV) {
+          console.log('Using voice:', voice && voice.name);
+        }
         speech.voice = voice;
-        // Note: Some voices do not support altering these settings.
+        // Note: Some voices do not support altering these settings and will break silently!
         speech.lang  = lang;
         // speech.voiceURI = 'native';
         // speech.volume = 1;  // float from 0 to 1, default is 1
