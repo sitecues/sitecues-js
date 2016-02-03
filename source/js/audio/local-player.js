@@ -10,7 +10,6 @@ define(
     'use strict';
 
     var
-      exports,
       speechSynthesis = window.speechSynthesis,
       SpeechSynthesisUtterance = window.SpeechSynthesisUtterance;
 
@@ -230,13 +229,11 @@ define(
       return speechSynthesis.pending || speechSynthesis.speaking;
     }
 
-    exports = {
+    return {
       stop          : stop,
       speak         : speak,
       speakPolitely : speakPolitely,
       isBusy        : isBusy
     };
-
-    return exports;
   }
 );
