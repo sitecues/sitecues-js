@@ -115,7 +115,7 @@ define(
 
   // Remove handler that stops speech on any key down.
   function removeBlurHandler() {
-    removeEventListener('blur', stopAudio);
+    $(window).off('blur', stopAudio);
   }
 
   /*
