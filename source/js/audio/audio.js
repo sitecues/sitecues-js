@@ -74,10 +74,10 @@ define(
       return; // Nothing to speak
     }
 
-    var startRequestTime = new Date();
+    var startRequestTime = Date.now();
 
     function onSpeechPlaying() {
-      var timeElapsed = new Date() - startRequestTime;
+      var timeElapsed = Date.now() - startRequestTime;
       isAudioPlaying = true;
       addStopAudioHandlers();
       new metric.TtsRequest({
