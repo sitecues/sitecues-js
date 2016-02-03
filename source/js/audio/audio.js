@@ -386,7 +386,7 @@ define(
     }
 
     ttsOn = conf.get('ttsOn');
-    useLocalSpeech = SC_LOCAL || site.get('speech').local;
+    useLocalSpeech = SC_LOCAL || (site.get('speech') || {}).local;
   }
 
   return {
