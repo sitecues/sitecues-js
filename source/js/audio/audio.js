@@ -199,22 +199,22 @@ define(
   function playAudioByKey(key) {
     stopAudio();  // Stop any currently playing audio
 
+    function onSpeechStart() {
+      isAudioPlaying = true;
+      addStopAudioHandlers();
+    }
+
     if (useLocalSpeech) {
       return localPlayer.speak({
           text   : cueText[key],
           locale : 'en-US',
-          onStart : function () {
-            isAudioPlaying = true;
-            addStopAudioHandlers();
-          }
+          onStart : onSpeechStart
         });
     }
 
     var url = getAudioKeyUrl(key);
     setupNetworkPlayer(function() {
-      isAudioPlaying = true;
-      networkPlayer.playAudioSrc(url);
-      addStopAudioHandlers();
+      networkPlayer.playAudioSrc(url, onSpeechStart);
     });
   }
 
@@ -351,10 +351,6 @@ define(
     });
   }
 
-  function toggleLocalSpeech() {
-    useLocalSpeech = !useLocalSpeech;
-  }
-
   function init() {
 
     if (isInitialized) {
@@ -382,7 +378,10 @@ define(
     events.on('hlb/closed keys/non-shift-key-pressed', stopAudio);
 
     if (SC_DEV) {
-      sitecues.toggleLocalSpeech = toggleLocalSpeech;
+      sitecues.toggleLocalSpeech = function toggleLocalSpeech() {
+        useLocalSpeech = !useLocalSpeech;
+        return useLocalSpeech;
+      };
     }
 
     ttsOn = conf.get('ttsOn');
