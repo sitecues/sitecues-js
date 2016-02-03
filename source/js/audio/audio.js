@@ -91,8 +91,8 @@ define(
 
     if (useLocalSpeech) {
       return localPlayer.speak({
-          text : text,
-          lang : lang,
+          text   : text,
+          locale : lang,
           onStart : onSpeechPlaying
         });
     }
@@ -201,8 +201,8 @@ define(
 
     if (useLocalSpeech) {
       return localPlayer.speak({
-          text : cueText[key],
-          lang : 'en-US',
+          text   : cueText[key],
+          locale : 'en-US',
           onStart : function () {
             isAudioPlaying = true;
             addStopAudioHandlers();

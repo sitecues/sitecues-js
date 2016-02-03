@@ -84,30 +84,44 @@ define(
       ));
     }
 
+    // Based on a given set of voice and language restrictions,
+    // get sitecues' favorite voice.
     function getBestVoice(options) {
-
-      // At the moment, we assume the first voice in the list is the best
-      // if we cannot find our favorite Google or OS X voices.
-
-      // In the future, the intention is to compute the best voice based
-      // on more data, such as the current document language, etc.
 
       var
         voices = options.voices,
-        lang   = options.lang,
+        locale = options.locale,
+        localeHasAccent = locale && locale.indexOf('-'),
+        lang,
+        localeVoices,
+        langVoices,
         filteredVoices,
         bestVoice;
 
-      filteredVoices = voices.filter(function (voice) {
-        return voice.lang.indexOf(lang) === 0 && voice.localService;
+      localeVoices = voices.filter(function (voice) {
+        return voice.lang.indexOf(locale) === 0 && voice.localService;
       });
 
-      if (filteredVoices.length < 1) {
-        throw new Error('No local voice available for ' + lang);
+      // If the incoming locale has an accent but we couldn't find any
+      // voices for it, we might still be able to find a voice for the
+      // correct language.
+      if (localeHasAccent && localeVoices.length < 1) {
+        lang = locale.split('-')[0];
+        langVoices = voices.filter(function (voice) {
+          return voice.lang.indexOf(lang) === 0 && voice.localService;
+        });
+        filteredVoices = langVoices;
+      }
+      else {
+        filteredVoices = localeVoices;
       }
 
-      // Voices come in ordered from most preferred to least,
-      // so using the first voice chooses the user's favorite.
+      if (filteredVoices.length < 1) {
+        throw new Error('No local voice available for ' + (lang || locale));
+      }
+
+      // Voices come in ordered from most preferred to least, so using the
+      // first voice chooses the user's favorite.
       bestVoice = filteredVoices[0];
 
       return bestVoice;
@@ -124,11 +138,11 @@ define(
 
       var
         text    = options.text,
-        lang    = options.lang,
+        locale  = options.locale,
         voice   = options.voice,
         polite  = options.polite,
         onStart = options.onStart,
-        prom   = Promise.resolve();
+        prom    = Promise.resolve();
 
       // TODO: Replace this poor excuse for a speech dictionary.
       text = options.text.replace(/sitecues/gi, 'sightcues').trim();
@@ -142,7 +156,7 @@ define(
           .then(function (voices) {
             return getBestVoice({
               voices : voices,
-              lang   : lang
+              locale : locale
             });
           })
           .then(function (bestVoice) {
@@ -165,7 +179,7 @@ define(
         }
         speech.voice = voice;
         // Note: Some voices do not support altering these settings and will break silently!
-        speech.lang  = lang;
+        speech.lang  = locale;
         // speech.voiceURI = 'native';
         // speech.volume = 1;  // float from 0 to 1, default is 1
         // speech.rate   = 1;  // float from 0 to 10, default is 1
