@@ -9,6 +9,7 @@ define(['core/conf/site'], function(site) {
     's-00e27714': 1,
     's-013cb0c3': 1,
     //'s-0238c9c2': 1,  // beta.nateproject.com
+    's-390bdfa2': 1, // http://www.mtsac.edu/aces/ (SC-3418)
     's-041cf669': 1,
     //'s-05fd6c66': 1, // dcmetrobln.org
     's-0796b61d': 1, // 'http://www.brzeziny-gmina.pl' -- no sitecues
