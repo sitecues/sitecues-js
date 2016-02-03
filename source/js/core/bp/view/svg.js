@@ -12,7 +12,7 @@ define(['core/bp/view/markup-finalizer', 'core/bp/view/styles'], function(finali
   var svg = '\
 <sc id="scp-focus-outline" role="presentation"></sc>\
 <sc id="scp-shadow-container" style="position:absolute;width:513px;height:630px;overflow:hidden">\
-  <sc id="scp-shadow" style="will-change: transform; perspective: 999;"></sc>\
+  <sc id="scp-shadow"></sc>\
 </sc>\
 \
 <svg id="scp-svg" role="group" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 810 300" preserveAspectRatio="xMinYMin" data-sc-reversible="false" data-metric="panel">\
