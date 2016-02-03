@@ -98,7 +98,7 @@ define(
     }
 
     // Network speech.
-    getAudioPlayer(function() {
+    setupNetworkPlayer(function() {
       var TTSUrl = getTTSUrl(text, lang);
 
       networkPlayer.playAudioSrc(TTSUrl, onSpeechPlaying);
@@ -211,7 +211,7 @@ define(
     }
 
     var url = getAudioKeyUrl(key);
-    getAudioPlayer(function() {
+    setupNetworkPlayer(function() {
       isAudioPlaying = true;
       networkPlayer.playAudioSrc(url);
       addStopAudioHandlers();
@@ -223,7 +223,7 @@ define(
 
     var url = urls.resolveResourceUrl('earcons/' + earconName + '.' + getMediaTypeForPrerecordedAudio());
 
-    getAudioPlayer(function() {
+    setupNetworkPlayer(function() {
       networkPlayer.playAudioSrc(url);
     });
   }
@@ -236,7 +236,7 @@ define(
   // At the moment, mp3, ogg and aac are sufficient for the browser/OS combinations we support.
   // For Ivona, audio formats are mp3 or ogg
   // For Lumenvox, audio formats are aac or ogg
-  function getAudioPlayer(callbackFn) {
+  function setupNetworkPlayer(callbackFn) {
     if (mediaTypeForTTS) {
       // Already retrieved
       callbackFn();
@@ -344,7 +344,7 @@ define(
           }
         },
         error: function() {
-          if (SC_DEV) { console.log('Error loading sitecues speech configuration.'); }
+          if (SC_DEV) { console.error('Error loading sitecues speech configuration.'); }
           callbackFn(FALLBACK_AUDIO_FORMATS);
         }
       });
