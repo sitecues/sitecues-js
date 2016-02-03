@@ -85,11 +85,11 @@ define(
 
     // Based on a given set of voice and language restrictions,
     // get sitecues' favorite voice.
-    function getBestVoice(options) {
+    function getBestVoice(option) {
 
       var
-        voices = options.voices,
-        locale = options.locale,
+        voices = option.voices,
+        locale = option.locale,
         localeHasAccent = locale && locale.indexOf('-'),
         lang,
         localeVoices,
@@ -133,18 +133,18 @@ define(
     }
 
     // Turn text into speech.
-    function speak(options) {
+    function speak(option) {
 
       var
-        text    = options.text,
-        locale  = options.locale,
-        voice   = options.voice,
-        polite  = options.polite,
-        onStart = options.onStart,
+        text    = option.text,
+        locale  = option.locale,
+        voice   = option.voice,
+        polite  = option.polite,
+        onStart = option.onStart,
         prom    = Promise.resolve();
 
       // TODO: Replace this poor excuse for a speech dictionary.
-      text = options.text.replace(/sitecues/gi, 'sightcues').trim();
+      text = option.text.replace(/sitecues/gi, 'sightcues').trim();
 
       if (!text) {
         return prom;
@@ -219,10 +219,10 @@ define(
 
     // "Polite" mode means wait your turn and let others finish speaking.
     // It adds speech to the queue and does not play it immediately.
-    function speakPolitely(options) {
-      options = Object.create(options);
-      options.polite = true;
-      speak(options);
+    function speakPolitely(option) {
+      option = Object.create(option);
+      option.polite = true;
+      speak(option);
     }
 
     function isBusy() {
