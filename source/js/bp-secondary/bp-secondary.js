@@ -8,6 +8,7 @@ define(['core/bp/constants',
     'bp-expanded/view/transform-animate',
     'bp-expanded/view/transform-util',
     'core/locale',
+    'core/platform',
     'bp-secondary/insert-secondary-markup',
     'bp-secondary/bp-secondary-features',
     'core/events'],
@@ -18,6 +19,7 @@ define(['core/bp/constants',
             animate,
             transformUtil,
             locale,
+            platform,
             markup,
             secondaryFeatures,
             events) {
@@ -410,8 +412,10 @@ define(['core/bp/constants',
 
     HEIGHT_RELATED_ELEMS.forEach(function(elem) {
       transformUtil.setElemTransform(elem, {});
-      elem.style.willChange = 'transform';
-      elem.style.perspective = 999;
+      if (!platform.browser.isFirefox) {
+        // Do not use will-change in Firefox as it caused SC-3421 on some sites
+        elem.style.willChange = 'transform';
+      }
     });
 
     resetWebKitLayout(moreButton);
