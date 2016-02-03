@@ -4,26 +4,31 @@
  */
 define(['$'], function ($) {
 
-  var audioElements    = [];
+  var audioElements = [];
 
   /**
-   * Play the audio src at the given url
-   * @param url source of audio to play
+   * Retrieve and play audio from a URL.
+   * @param option, settings such as source of audio to play
    */
-  function playAudioSrc(url, onPlaying) {
-    var audioElement = new Audio();
+  function play(option) {
+    var
+      url = option.url,
+      onStart = option.onStart,
+      audioElement = new Audio();
 
-    if (onPlaying) {
-      audioElement.addEventListener('playing', onPlaying);
+    if (onStart) {
+      $(audioElement).one('playing', onStart);
     }
 
+    // TODO: Can we remove this? Test across browsers.
     audioElement.src = ''; // Clean up
-    $(audioElement).one('canplay', playIt);
+
+    $(audioElement).one('canplay', onCanPlay);
     audioElement.src = url;
     audioElements.push(audioElement);
   }
 
-  function playIt(event) {
+  function onCanPlay(event) {
     var audioElement = event.target;
     $(audioElement).one('ended', onEnded);
     audioElement.play();
@@ -55,9 +60,9 @@ define(['$'], function ($) {
   }
 
   return {
-    playAudioSrc: playAudioSrc,
-    isBusy: isBusy,
-    stop: stop
+    play   : play,
+    stop   : stop,
+    isBusy : isBusy
   };
 });
 

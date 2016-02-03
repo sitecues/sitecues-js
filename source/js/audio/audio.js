@@ -101,7 +101,10 @@ define(
     setupNetworkPlayer(function() {
       var TTSUrl = getTTSUrl(text, lang);
 
-      networkPlayer.playAudioSrc(TTSUrl, onSpeechPlaying);
+      networkPlayer.play({
+        url     : TTSUrl,
+        onStart : onSpeechPlaying
+      });
     });
   }
 
@@ -214,7 +217,10 @@ define(
 
     var url = getAudioKeyUrl(key);
     setupNetworkPlayer(function() {
-      networkPlayer.playAudioSrc(url, onSpeechStart);
+      networkPlayer.play({
+        url     : url,
+        onStart : onSpeechStart
+      });
     });
   }
 
@@ -224,7 +230,9 @@ define(
     var url = urls.resolveResourceUrl('earcons/' + earconName + '.' + getMediaTypeForPrerecordedAudio());
 
     setupNetworkPlayer(function() {
-      networkPlayer.playAudioSrc(url);
+      networkPlayer.play({
+        url : url
+      });
     });
   }
 
