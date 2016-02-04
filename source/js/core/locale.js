@@ -8,7 +8,8 @@
 define([ 'core/data-map' ], function(dataMap) {
   var translations = {},
     DEFAULT_LANG = 'en-us',
-    LOCALE_DATA_MODULE_PREFIX = 'locale-data/',
+    LOCALE_DATA_PREFIX = 'locale-data/',
+    AUDIO_CUE_DATA_PREFIX = LOCALE_DATA_PREFIX + 'cue/',
     SUPPORTED_UI_LANGS = {'de':1, 'en':1, 'es':1, 'fr':1, 'pl':1},
     // Countries which have localization files that are different from the default for that language
     // For example, en-us files use 'color' instead of the worldwide standard 'colour'
@@ -146,13 +147,25 @@ define([ 'core/data-map' ], function(dataMap) {
     return mainBrowserLang;
   }
 
+  function getAudioCueTextAsync(key, callback) {
+    var lang = getShortWebsiteLang(),
+      langModuleName = AUDIO_CUE_DATA_PREFIX + lang;
+    dataMap.get(langModuleName, function(data) {
+      callback(data[key] || '');
+    });
+  }
+
+  function getMainBrowserLang() {
+    return navigator.language || navigator.userLanguage || navigator.browserLanguage || DEFAULT_LANG;
+  }
+
   function init(onReadyCallback) {
 
-    mainBrowserLang = navigator.language || navigator.userLanguage || navigator.browserLanguage || DEFAULT_LANG;
+    mainBrowserLang = getMainBrowserLang();
 
     // On load fetch the translations only once
     var lang = getSupportedWebsiteLang(),
-      langModuleName = LOCALE_DATA_MODULE_PREFIX + lang;
+      langModuleName = LOCALE_DATA_PREFIX + lang;
 
     dataMap.get(langModuleName, function(data) {
       translations = data;
@@ -165,6 +178,7 @@ define([ 'core/data-map' ], function(dataMap) {
     getAudioLang: getAudioLang,
     getBrowserLang: getBrowserLang,
     getTranslationLang: getTranslationLang,
+    getAudioCueTextAsync: getAudioCueTextAsync,
     translate: translate,
     localizeStrings: localizeStrings,
     translateNumber: translateNumber,

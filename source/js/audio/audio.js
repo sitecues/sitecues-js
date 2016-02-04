@@ -24,10 +24,9 @@ define(
     'audio/network-player',
     'audio/local-player',
     'audio/text-select',
-    'locale-data/cue/en',  // TODO: Aaron will refactor audio cues for localization
     'core/events'
   ],
-  function(constant, conf, site, $, builder, platform, locale, metric, urls, networkPlayer, localPlayer, textSelect, cueText, events) {
+  function(constant, conf, site, $, builder, platform, locale, metric, urls, networkPlayer, localPlayer, textSelect, events) {
 
   var ttsOn = false,
     isAudioPlaying,
@@ -210,11 +209,14 @@ define(
     }
 
     if (useLocalSpeech) {
-      return localPlayer.speak({
-          text   : cueText[key],
+      locale.getAudioCueTextAsync(key, function(cueText) {
+        localPlayer.speak({
+          text   : cueText,
           locale : 'en-US',
           onStart : onSpeechStart
         });
+      });
+      return;
     }
 
     var url = getAudioKeyUrl(key);
