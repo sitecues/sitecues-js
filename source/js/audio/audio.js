@@ -24,7 +24,7 @@ define(
     'audio/network-player',
     'audio/local-player',
     'audio/text-select',
-    'locale-data/cue/en',  // TODO: Aaron will take care of audio cues localization
+    'locale-data/cue/en',  // TODO: Aaron will refactor audio cues for localization
     'core/events'
   ],
   function(constant, conf, site, $, builder, platform, locale, metric, urls, networkPlayer, localPlayer, textSelect, cueText, events) {
