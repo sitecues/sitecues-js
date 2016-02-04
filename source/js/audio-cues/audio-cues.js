@@ -29,7 +29,7 @@ define(['core/conf/user/manager', 'audio/audio'], function(conf, audio) {
    */
   function shouldPlayDescriptiveSpeechOnCue() {
     var firstSpeechOn = conf.get(DESCRIPTIVE_SPEECH_ON_PARAM);
-    return !firstSpeechOn || firstSpeechOn + CUE_RESET_MS < new Date().getTime();
+    return !firstSpeechOn || firstSpeechOn + CUE_RESET_MS < Date.now();
   }
 
   /**
@@ -41,7 +41,7 @@ define(['core/conf/user/manager', 'audio/audio'], function(conf, audio) {
       return false;
     }
     var lastDescriptiveZoomCueTime = parseInt(conf.get(DESCRIPTIVE_HIGH_ZOOM_PARAM));
-    return !lastDescriptiveZoomCueTime || (+new Date()) - lastDescriptiveZoomCueTime > CUE_RESET_MS;
+    return !lastDescriptiveZoomCueTime || Date.now() - lastDescriptiveZoomCueTime > CUE_RESET_MS;
   }
 
   /*
@@ -65,7 +65,7 @@ define(['core/conf/user/manager', 'audio/audio'], function(conf, audio) {
     } else {
       audio.playAudioByKey(VERBAL_CUE_SPEECH_ON_DESCRIPTIVE);
       // Signals that the "descriptive speech on" cue has played
-      conf.set(DESCRIPTIVE_SPEECH_ON_PARAM, new Date().getTime());
+      conf.set(DESCRIPTIVE_SPEECH_ON_PARAM, Date.now());
     }
   }
 
@@ -76,7 +76,7 @@ define(['core/conf/user/manager', 'audio/audio'], function(conf, audio) {
     if (shouldPlayDescriptiveHighZoomCue(zoom)) {
       audio.playAudioByKey('verbalCueHighZoom');
       // Signals that the "descriptive high zoom" cue has played.
-      conf.set(DESCRIPTIVE_HIGH_ZOOM_PARAM, new Date().getTime());
+      conf.set(DESCRIPTIVE_HIGH_ZOOM_PARAM, Date.now());
     }
   }
 

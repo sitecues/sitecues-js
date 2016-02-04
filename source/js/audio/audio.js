@@ -12,6 +12,7 @@
 
 define(
   [
+    'audio/constant',
     'core/conf/user/manager',
     'core/conf/site',
     '$',
@@ -23,10 +24,10 @@ define(
     'audio/network-player',
     'audio/local-player',
     'audio/text-select',
-    'audio/cue-text',
+    'locale-data/cue/en',  // TODO: Aaron will take care of audio cues localization
     'core/events'
   ],
-  function(conf, site, $, builder, platform, locale, metric, urls, networkPlayer, localPlayer, textSelect, cueText, events) {
+  function(constant, conf, site, $, builder, platform, locale, metric, urls, networkPlayer, localPlayer, textSelect, cueText, events) {
 
   var ttsOn = false,
     isAudioPlaying,
@@ -39,6 +40,7 @@ define(
       LENS: 'space',
       HIGHLIGHT: 'shift'
     },
+    speechStrategy = constant.speechStrategy,
     useLocalSpeech;
 
   function onLensOpened(lensContent, fromHighlight) {
@@ -393,7 +395,9 @@ define(
     }
 
     ttsOn = conf.get('ttsOn');
-    useLocalSpeech = SC_LOCAL || (site.get('speech') || {}).local;
+    useLocalSpeech =
+      SC_LOCAL ||
+      (site.get('speech') || {}).strategy === speechStrategy.LOCAL;
   }
 
   return {
