@@ -170,6 +170,8 @@ define(
         stop();
       }
 
+      // When and if we have a voice to use, finish setting up
+      // and then play speech.
       prom = prom.then(function () {
 
         var speech = new SpeechSynthesisUtterance(text);
