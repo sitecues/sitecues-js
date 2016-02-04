@@ -18,19 +18,12 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
     }
 
     Metric.prototype.createDataJSON = function createDataJSON(name, details) {
-      var sessionData = this.sessionData,
-          data        = this.data = {
-            name: name,
-            clientTimeMs: Number(new Date()), // Epoch time in milliseconds  when the event occurred
-            zoomLevel: conf.get('zoom') || 1,
-            ttsState: conf.get('ttsOn') || false
-          };
-
-      if (details) {
-        data.details = details;
-      }
-
-      Object.assign(data, sessionData);
+      var data = this.data = JSON.parse(JSON.stringify(this.sessionData)); // Copy sessionData to new object
+      data.name = name;
+      data.clientTimeMs = Number(new Date()); // Epoch time in milliseconds  when the event occurred
+      data.zoomLevel = conf.get('zoom') || 1;
+      data.ttsState = conf.get('ttsOn') || false;
+      data.details = details;
     };
 
     Metric.prototype.send = function send() {
