@@ -3,7 +3,8 @@ define(
       './Base',
       'core/bp/constants'
     ],
-    function (Base, constants) {
+    function (Base, constant) {
+
         'use strict';
 
         class Badge extends Base {
@@ -19,13 +20,13 @@ define(
                     .mouseOverElement(Badge.BADGE_SELECTOR, Badge.MOUSEOVER_SELECTOR)
                     .then(function () {
                         return wait.forElementToStopMoving(Badge.OUTLINE_SELECTOR)
-                    })
+                    });
             }
         }
 
-        Badge.BADGE_SELECTOR     = '#' + constants.BADGE_ID;
-        Badge.OUTLINE_SELECTOR   = '#' + constants.MAIN_OUTLINE_ID;
-        Badge.MOUSEOVER_SELECTOR = '#' + constants.MOUSEOVER_TARGET;
+        Badge.BADGE_SELECTOR     = '#' + constant.BADGE_ID;
+        Badge.OUTLINE_SELECTOR   = '#' + constant.MAIN_OUTLINE_ID;
+        Badge.MOUSEOVER_SELECTOR = '#' + constant.MOUSEOVER_TARGET;
 
         return Badge;
     }

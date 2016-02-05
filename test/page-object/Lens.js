@@ -3,9 +3,9 @@ define(
         './Base',
         'intern/dojo/node!leadfoot/keys',  // unicode string constants used to control the keyboard
         'hlb/constants'
-
     ],
-    function (Base, keys, constants) {
+    function (Base, key, constant) {
+
         'use strict';
 
         class Lens extends Base {
@@ -19,31 +19,34 @@ define(
             open() {
                 const wait = this.wait;
                 return this.remote
-                    .setExecuteAsyncTimeout(4000)  // the Lens has this many milliseconds to come into existence
+                    // The Lens has this many milliseconds to come into existence.
+                    .setExecuteAsyncTimeout(4000)
                     .then(function () {
                         return wait
-                            .bindEventListener(Lens.events.READY)
+                            .bindEventListener(Lens.event.READY);
                     })
-                    .pressKeys(keys.SPACE)         // open the Lens
+                    // Open the lens.
+                    .pressKeys(key.SPACE)
                     .then(function () {
                         return wait
-                            .forEvent(Lens.events.READY, 4000)
-                    })
+                            .forEvent(Lens.event.READY, 4000);
+                    });
             }
 
             // Destroy the Lens and wait for its animation to finish.
             close() {
                 return this.remote
-                    .setExecuteAsyncTimeout(4000)  // the Lens has this many milliseconds to disappear from the DOM
-                    .pressKeys(keys.SPACE)          // close the Lens
+                    // The Lens has this many milliseconds to disappear from the DOM.
+                    .setExecuteAsyncTimeout(4000)
+                    // Close the Lens.
+                    .pressKeys(key.SPACE)
                     .waitForDeletedById(Lens.ID);
             }
-
         }
 
-        Lens.ID = constants.HLB_ID;
+        Lens.ID = constant.HLB_ID;
 
-        Lens.events = {
+        Lens.event = {
             READY  : 'hlb/ready',
             CLOSED : 'hlb/closed'
         };

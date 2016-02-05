@@ -109,8 +109,8 @@ define(
                                     3,
                                     'Body should have a y transformation of 3'
                                 );
-                            })
-                    })
+                            });
+                    });
             });
 
 
@@ -123,7 +123,8 @@ define(
                     })
                     .then(function () {
                         return input
-                            .holdKey('-')
+                            // TODO: Can we get this value from Leadfoot/keys
+                            .holdKey('-');
                     })
                     .then(function () {
                         return wait
@@ -135,9 +136,12 @@ define(
                     })
                     .then(function (tform) {
                         return remote
-                            .execute(function (transform) {
-                                return getComputedStyle(document.body)[transform];
-                            }, [tform])
+                            .execute(
+                                function (transform) {
+                                    return getComputedStyle(document.body)[transform];
+                                },
+                                [tform]
+                            )
                             .then(function (transform) {
                                 let matrix = transform.substring(7).split(','),
                                     xTrans = Number(matrix[0]),
@@ -152,7 +156,7 @@ define(
                                     1,
                                     'Body should have a y transformation of 1'
                                 );
-                            })
+                            });
                     });
             });
 
@@ -165,13 +169,16 @@ define(
                             .pressLargeA()
                             .then(function () {
                                 return browserUtil.getTransformAttributeName();
-                            })
+                            });
                     })
                     .then(function (tform) {
                         return remote
-                            .execute(function (transform) {
-                                return getComputedStyle(document.body)[transform];
-                            }, [tform])
+                            .execute(
+                                function (transform) {
+                                    return getComputedStyle(document.body)[transform];
+                                },
+                                [tform]
+                            )
                             .then(function (transform) {
                                 let matrix = transform.substring(7).split(','),
                                     xTrans = Number(matrix[0]),
@@ -186,8 +193,8 @@ define(
                                     3,
                                     'Body should have a y transformation of 3'
                                 );
-                            })
-                    })
+                            });
+                    });
             });
 
             test('Click on big A to zoom in, click on small A to zoom out', function () {
@@ -198,14 +205,17 @@ define(
                             .pressLargeA()
                             .then(function () {
                                 return browserUtil.getTransformAttributeName();
-                            })
+                            });
                     })
                     .then(function (tform) {
                         return panel
                             .pressSmallA()
-                            .execute(function (transform) {
-                                return getComputedStyle(document.body)[transform];
-                            }, [tform])
+                            .execute(
+                                function (transform) {
+                                    return getComputedStyle(document.body)[transform];
+                                },
+                                [tform]
+                            )
                             .then(function (transform) {
                                 let matrix = transform.substring(7).split(','),
                                     xTrans = Number(matrix[0]),
@@ -220,7 +230,7 @@ define(
                                     1,
                                     'Body should have a y transformation of 1'
                                 );
-                            })
+                            });
                     });
             });
 
@@ -232,13 +242,16 @@ define(
                             .dragSliderThumb(3)
                             .then(function () {
                                 return browserUtil.getTransformAttributeName();
-                            })
+                            });
                     })
                     .then(function (tform) {
                         return remote
-                            .execute(function (transform) {
-                                return getComputedStyle(document.body)[transform];
-                            }, [tform])
+                            .execute(
+                                function (transform) {
+                                    return getComputedStyle(document.body)[transform];
+                                },
+                                [tform]
+                            )
                             .then(function (transform) {
                                 let matrix = transform.substring(7).split(','),
                                     xTrans = Number(matrix[0]),
@@ -265,8 +278,8 @@ define(
                                     3,
                                     'Body should have a y transformation less than or equal to 3'
                                 );
-                            })
-                    })
+                            });
+                    });
             });
 
             test('Drag slider to fully zoomed position, drag slider back to zoom 1', function () {
@@ -278,16 +291,19 @@ define(
                             .then(function () {
                                 return panel
                                     .dragSliderThumb(1);
-                            })
+                            });
                     })
                     .then(function () {
                         return browserUtil.getTransformAttributeName()
                     })
                     .then(function (tform) {
                         return remote
-                            .execute(function (transform) {
-                                return getComputedStyle(document.body)[transform];
-                            }, [tform])
+                            .execute(
+                                function (transform) {
+                                    return getComputedStyle(document.body)[transform];
+                                },
+                                [tform]
+                            );
                     })
                     .then(function (transform) {
                         let matrix = transform.substring(7).split(','),
@@ -315,7 +331,7 @@ define(
                             1,
                             'Body should have a y transformation greater than or equal to 1'
                         );
-                    })
+                    });
             });
 
             test('Click in the middle of slider to zoom', function () {
@@ -326,7 +342,7 @@ define(
                             .clickSliderBar(2)
                             .then(function () {
                                 return browserUtil.getTransformAttributeName();
-                            })
+                            });
                     })
                     .then(function (tform) {
                         return remote
@@ -347,8 +363,8 @@ define(
                                     1,
                                     'Body should have a y transformation greater than 1'
                                 );
-                            })
-                    })
+                            });
+                    });
             });
 
             test('Ctrl + wheel up to zoom in', function () {
@@ -359,9 +375,12 @@ define(
                     })
                     .then(function (tform) {
                         return remote
-                            .execute(function (transform) {
-                                return getComputedStyle(document.body)[transform];
-                            }, [tform])
+                            .execute(
+                                function (transform) {
+                                    return getComputedStyle(document.body)[transform];
+                                },
+                                [tform]
+                            )
                             .then(function (transform) {
                                 let matrix = transform.substring(7).split(','),
                                     xTrans = Number(matrix[0]),
@@ -388,8 +407,8 @@ define(
                                     3,
                                     'Body can\'t have a x transformation greater than 3'
                                 );
-                            })
-                    })
+                            });
+                    });
             });
 
             test('Ctrl + wheel up to zoom in, Ctrl + wheel down to zoom out', function () {
@@ -404,9 +423,12 @@ define(
                     })
                     .then(function (tform) {
                         return remote
-                            .execute(function (transform) {
-                                return getComputedStyle(document.body)[transform];
-                            }, [tform])
+                            .execute(
+                                function (transform) {
+                                    return getComputedStyle(document.body)[transform];
+                                },
+                                [tform]
+                            )
                             .then(function (transform) {
                                 let matrix = transform.substring(7).split(','),
                                     xTrans = Number(matrix[0]),
@@ -433,10 +455,9 @@ define(
                                     1,
                                     'Body can\'t have a x transformation less than 1'
                                 );
-                            })
-                    })
+                            });
+                    });
             })
-
         });
     }
 );
