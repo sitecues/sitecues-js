@@ -11,12 +11,18 @@ define(
                 'http://tools.qa.sitecues.com:9000/site/';
 
         function testUrl(to, localPort) {
-            let loaderOptions = '?scjsurl=//' +
-                    (localPort ?
-                    'localhost:' + localPort + '/js/sitecues.js' :
-                    'js.dev.sitecues.com/l/s;id=s-00000005/dev/latest/js/sitecues.js') +
+
+            const loaderOptions =
+                    '?scjsurl=//' +
+                    (localPort
+                        ?
+                            'localhost:' + localPort + '/js/sitecues.js'
+                        :
+                            'js.dev.sitecues.com/l/s;id=s-00000005/dev/latest/js/sitecues.js'
+                    ) +
                     '&scwsid=s-00000005' +
                     '&scuimode=badge';
+
             return url.resolve(base, to + loaderOptions);
         }
 

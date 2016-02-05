@@ -15,7 +15,6 @@ define(
         'utility/Wait',
         'utility/UserInput',
         'utility/url'
-
     ],
     function (intern, tdd, chai, Panel, Badge, BrowserUtility, Wait, UserInput, url) {
 
