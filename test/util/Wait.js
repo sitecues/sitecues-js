@@ -6,7 +6,8 @@ define(
         'utility/math',
         'core/constants'
     ],
-    function (Base, Poll, Events, math, constants) {
+    function (Base, Poll, Events, math, constant) {
+
         'use strict';
 
         class Wait extends Base {
@@ -19,26 +20,32 @@ define(
             }
 
             forSitecuesToInitialize() {
-                var state = constants.READY_STATE;
+
+                let state = constant.READY_STATE;
 
                 return this.remote
                     .setExecuteAsyncTimeout(8000)
-                    .executeAsync(function (state, done) {
-                        var sitecues = window.sitecues = window.sitecues || {};
-                        if (sitecues.readyState === state.COMPLETE) {
-                            done('used ready state');
-                        }
-                        else if (typeof sitecues.onReady === 'function') {
-                            throw new Error('onReady is already assigned a function:', JSON.stringify(sitecues.onReady));
-                        }
-                        else {
-                            sitecues.onReady = function () { done('onReady callback'); };
-                        }
-                    }, [state])
-                  //For debugging
-                    .then(function (msg) {
-                        console.log(msg);
-                    })
+                    .executeAsync(
+                        function (state, done) {
+                            var sitecues = window.sitecues = window.sitecues || {};
+                            if (sitecues.readyState === state.COMPLETE) {
+                                done('used ready state');
+                            }
+                            else if (typeof sitecues.onReady === 'function') {
+                                throw new Error(
+                                    'onReady is already assigned a function:',
+                                    JSON.stringify(sitecues.onReady)
+                                );
+                            }
+                            else {
+                                sitecues.onReady = function () { done('onReady callback'); };
+                            }
+                        },
+                        [state]
+                    );
+                    //.then(function (msg) {
+                    //    console.log(msg);
+                    //});
             }
 
             forTransformToComplete(selector, wait, pollInterval) {
@@ -75,7 +82,6 @@ define(
             bindEventListener(event) {
                 return this.events.bindListener(event);
             }
-
         }
 
         return Wait;

@@ -163,7 +163,7 @@ define(
 
             test('Click on big A to zoom in', function () {
                 return badge
-                    .expandPanel()
+                    .openPanel()
                     .then(function () {
                         return panel
                             .pressLargeA()
@@ -199,7 +199,7 @@ define(
 
             test('Click on big A to zoom in, click on small A to zoom out', function () {
                 return badge
-                    .expandPanel()
+                    .openPanel()
                     .then(function () {
                         return panel
                             .pressLargeA()
@@ -236,7 +236,7 @@ define(
 
             test('Drag slider to fully zoomed position', function () {
                 return badge
-                    .expandPanel()
+                    .openPanel()
                     .then(function () {
                         return panel
                             .dragSliderThumb(3)
@@ -284,7 +284,7 @@ define(
 
             test('Drag slider to fully zoomed position, drag slider back to zoom 1', function () {
                 return badge
-                    .expandPanel()
+                    .openPanel()
                     .then(function () {
                         return panel
                             .dragSliderThumb(3)
@@ -336,7 +336,7 @@ define(
 
             test('Click in the middle of slider to zoom', function () {
                 return badge
-                    .expandPanel()
+                    .openPanel()
                     .then(function () {
                         return panel
                             .clickSliderBar(2)

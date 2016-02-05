@@ -14,7 +14,7 @@ define(
                 this.wait = wait;
             }
 
-            expandPanel() {
+            openPanel() {
                 const wait = this.wait;
                 return this.input
                     .mouseOverElement(Badge.BADGE_SELECTOR, Badge.MOUSEOVER_SELECTOR)

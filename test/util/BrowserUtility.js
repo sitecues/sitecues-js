@@ -6,16 +6,16 @@ define(
 
         'use strict';
 
-        var keyCodeMap = {
+        const keyCodeMap = {
             '=': {
                 'firefox': 61,
-                //Note: Can't set keyCode value of KeyboardEvent in chrome
+                // NOTE: Can't set keyCode value of KeyboardEvent in chrome
                 'chrome': 187,
                 'ie':187
             },
             '-': {
                 'firefox': 173,
-                //Note: Can't set keyCode value of KeyboardEvent in chrome
+                // NOTE: Can't set keyCode value of KeyboardEvent in chrome
                 'chrome': 189,
                 'ie': 189
             }
@@ -38,11 +38,11 @@ define(
             }
 
             getKeyCodeAndBrowserName(key) {
-                let data = [keyCodeMap[key][this.browserName], this.browserName];
+                const data = [keyCodeMap[key][this.browserName], this.browserName];
                 return this.remote
                     .then(function () {
                         return data;
-                    })
+                    });
             }
 
             setSitecuesUserPreference(key, value) {
@@ -94,9 +94,8 @@ define(
                     .clearSitecuesUserPreferences()
                     .then(function () {
                         return remote.clearSitecuesTestingNamespace();
-                    })
+                    });
             }
-
         }
 
         return BrowserUtility;
