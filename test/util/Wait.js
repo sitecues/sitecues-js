@@ -4,9 +4,10 @@ define(
         'utility/BrowserUtility',
         'utility/Poll',
         'utility/Events',
+        'utility/math',
         'core/constants'
     ],
-    function (Base, BrowserUtil, Poll, EventUtil, constant) {
+    function (Base, BrowserUtil, Poll, EventUtil, math, constant) {
 
         'use strict';
 

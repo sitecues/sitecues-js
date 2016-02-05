@@ -15,37 +15,39 @@ define(
 
             bindListener(event) {
                 return this.remote
-                    .execute(function (event) {
-                        var testNamespace  = window.sitecuesTestingNamespace = window.sitecuesTestingNamespace || {},
-                            eventNamespace;
+                    .execute(
+                        function (event) {
+                            var testNamespace  = window.sitecuesTestingNamespace = window.sitecuesTestingNamespace || {},
+                                eventNamespace;
 
-                        if (testNamespace[event]) {
-                            throw new Error('Event namespace is in use');
-                        }
-                        else if (typeof sitecues.on !== 'function') {
-                            throw new Error('Sitecues event system has not been initialized');
-                        }
-                        else {
-                            eventNamespace = testNamespace[event] = {};
-                            eventNamespace.instances = [];
-                        }
-
-                        function listener() {
-                            if (arguments.length) {
-                                //Save arguments passed to each instance of event
-                                eventNamespace.instances.push({
-                                    args: Array.prototype.slice.call(arguments)
-                                });
+                            if (testNamespace[event]) {
+                                throw new Error('Event namespace is in use');
+                            }
+                            else if (typeof sitecues.on !== 'function') {
+                                throw new Error('Sitecues event system has not been initialized');
                             }
                             else {
-                                eventNamespace.instances.push({ args : [] });
+                                eventNamespace = testNamespace[event] = {};
+                                eventNamespace.instances = [];
                             }
-                        }
 
-                        eventNamespace.listener = listener;
-                        sitecues.on(event, listener);
+                            function listener() {
+                                if (arguments.length) {
+                                    //Save arguments passed to each instance of event
+                                    eventNamespace.instances.push({
+                                        args : Array.prototype.slice.call(arguments)
+                                    });
+                                }
+                                else {
+                                    eventNamespace.instances.push({ args : [] });
+                                }
+                            }
 
-                    }, [event])
+                            eventNamespace.listener = listener;
+                            sitecues.on(event, listener);
+                        },
+                        [event]
+                    )
             }
 
             // NOTE: requiredArgs only works with primitive values,
