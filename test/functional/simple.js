@@ -5,31 +5,29 @@
 // See: http://theintern.github.io/leadfoot/keys.js.html#line14
 define(
     [
-        'intern!tdd',                      // the testing interface - defines how we register suites and tests
-        'intern/chai!assert',              // helps throw errors to fail tests, based on conditions
-        'intern/dojo/node!leadfoot/keys',  // unicode string constants used to control the keyboard
-        'intern/dojo/node!fs',             // Node's filesystem API, used to save screenshots
+        'intern!tdd',
+        'intern/chai!assert',
+        'intern/dojo/node!leadfoot/keys',
+        'intern/dojo/node!fs',
         'page-object/Highlight',
         'page-object/Lens',
         'utility/Wait',
         'utility/BrowserUtility',
         'utility/url'
     ],
-    function (tdd, assert, keys, fs, Highlight, Lens, Wait, BrowserUtility, url) {
+    function (tdd, assert, keys, fs, Highlight, Lens, Wait, BrowserUtil, url) {
 
         'use strict';
 
-            //NOTE: 9999 is supplied as the port hosting the local build, this is just for convenience
-            //and should be removed before it's added to CI
             const
-                testUrl    = url('simple.html', 9999),
+                testUrl    = url('simple.html', 9000),
                 suite      = tdd.suite,
                 test       = tdd.test,
                 before     = tdd.before,
                 afterEach  = tdd.afterEach,
                 beforeEach = tdd.beforeEach;
 
-        suite('Lens (simple)', function () {
+        suite('Lens', function () {
 
             const
                 picked = {
@@ -46,22 +44,25 @@ define(
             before(function () {
                 // Browser interface.
                 remote = this.remote;
-                // Test utilities.
-                browserUtil = new BrowserUtility(remote);   //Local storage, transform property strings, namespace management
-                wait        = new Wait(remote, browserUtil); //wait for sitecues events and element transformations
+                // Local storage, transform property strings, namespace management.
+                browserUtil = new BrowserUtil(remote);
+                // Utils for promising sitecues events and element transformations.
+                wait        = new Wait(remote);
                 // Feature abstractions.
                 highlight = new Highlight(remote, wait);
                 lens      = new Lens(remote, wait);
                 return remote
-                    .maximizeWindow() // best effort to normalize window sizes (not every browser opens the same)
-                    .get(testUrl)     // navigate to the desired page
+                    // Best effort to normalize window sizes (not every browser opens the same)
+                    .maximizeWindow()
+                    // Navigate to the desired page.
+                    .get(testUrl)
                     .then(function () {
                         return wait.forSitecuesToInitialize();
                     })
                     .then(function () {
                         return browserUtil.clearSitecuesUserPreferences();
                     })
-                    //Turn ttsOn, so that sitecues is on, so that we can use mouse highlight
+                    // Turn ttsOn, so that sitecues is on, so that we can use mouse highlight
                     .then(function () {
                         return browserUtil.setSitecuesUserPreference('ttsOn', true);
                     });
@@ -81,6 +82,7 @@ define(
                     });
             });
 
+            // Code to run after to each individual test in this suite.
             afterEach(function () {
                 return browserUtil
                     .resetEnvironment()
