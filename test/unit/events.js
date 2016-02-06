@@ -112,7 +112,7 @@ define(
                 events.on('two', deferred.callback(function () {
                     assert.deepEqual(
                         input,
-                        arguments,
+                        Array.prototype.slice.call(arguments),
                         'Event handler must receive arguments exactly as they were emitted.'
                     );
 

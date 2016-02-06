@@ -39,18 +39,18 @@ define(
             test('.clear() does not affect 3rd party data', function () {
 
                 var
-                    STORAGE_NAMESPACE = 'sitebutnocues',
+                    SOME_NAMESPACE = 'sitebutnocues',
                     thirdPartyData = JSON.stringify({
                         wee : 'boom',
                         ooh : 'nooo'
                     }),
-                    laterState,
+                    laterState;
 
-                localStorage.setItem(STORAGE_NAMESPACE, thirdPartyData);
+                localStorage.setItem(SOME_NAMESPACE, thirdPartyData);
 
                 storage.clear();
 
-                laterState = localStorage.getItem('something');
+                laterState = localStorage.getItem(SOME_NAMESPACE);
 
                 assert.strictEqual(
                     laterState,
