@@ -8,90 +8,118 @@ define(
 
         'use strict';
 
-        var suite  = tdd.suite
-        ,   test   = tdd.test
-        ,   beforeEach = tdd.beforeEach;
+        var suite  = tdd.suite,
+            test   = tdd.test,
+            beforeEach = tdd.beforeEach;
 
-        suite('Storage module', function () {
+        suite('Storage', function () {
 
-            var testLs = {
-                    userId: 'test-userid',
-                    'test-userid': {
-                        zoom: 1,
-                        firstHighZoom: 2,
-                        ttsOn: true,
-                        firstSpeechOn: 3
-                    }
-                };
-            
             beforeEach(function () {
                 localStorage.clear();
             });
 
-            test('Verify that we can clear local storage successfully', function () {
+            test('.clear() wipes app data', function () {
+
                 var sitecuesLs;
 
                 storage.init(function () {});
                 sitecuesLs = storage.getSitecuesLs();
-                assert.isString(sitecuesLs, 'SitecuesLS should be a stringified version of the LS object');
+                assert.isString(
+                    sitecuesLs,
+                    'There must be something stored in order to test that we can clear it.'
+                );
                 storage.clear();
-                sitecuesLs = storage.getSitecuesLs()
-                assert.isUndefined(sitecuesLs, 'Clearing should make getSitecuesLs return undefined');
+                sitecuesLs = storage.getSitecuesLs();
+                assert.isUndefined(
+                    sitecuesLs,
+                    'The retrieved data is undefined because we cleared it.'
+                );
             });
 
-            test('Save a sitecuesLS object, and receive back an identical object', function () {
-                var testPrefs
-                ,   parsedPrefs
-                ,   testPrefsKeys
-                ,   parsedPrefsKeys
-                ,   parsedLs;
+            test('.clear() does not affect 3rd party data', function () {
 
-                storage.setSitecuesLs(testLs);
-                parsedLs        = JSON.parse(storage.getSitecuesLs());
-                testPrefs       = testLs[testLs.userId];
-                parsedPrefs     = parsedLs[parsedLs.userId];
-                testPrefsKeys   = Object.keys(testPrefs);
-                parsedPrefsKeys = Object.keys(parsedPrefs);
+                var
+                    SOME_NAMESPACE = 'sitebutnocues',
+                    thirdPartyData = JSON.stringify({
+                        wee : 'boom',
+                        ooh : 'nooo'
+                    }),
+                    laterState;
 
-                assert.strictEqual(testLs.userId, parsedLs.userId,
-                    'The parsed local storage has a different user id than provided');
-                assert.strictEqual(testPrefsKeys.length, parsedPrefsKeys.length,
-                    'The parsed local storage preference object has a different number of keys');
+                localStorage.setItem(SOME_NAMESPACE, thirdPartyData);
 
-                testPrefsKeys.forEach(function (key, index) {
-                    assert.strictEqual(key, parsedPrefsKeys[index], 
-                        'Parsed local storage preference object has a different key: ' + parsedPrefsKeys[index]);
-                    assert.strictEqual(testPrefs[key], parsedPrefs[parsedPrefsKeys[index]],
-                        'Parsed local storage preference object has a different value: ' + parsedPrefs[parsedPrefsKeys[index]]);
-                })             
+                storage.clear();
+
+                laterState = localStorage.getItem(SOME_NAMESPACE);
+
+                assert.strictEqual(
+                    laterState,
+                    thirdPartyData,
+                    'Clearing sitecues data must not affect other apps.'
+                );
             });
 
-            test('Save a preference to local storage, and retrieve it successfully', function () {
-                var preferences, keys
-                ,   zoom = 1
-                ,   ttsOn = true;
+            test('.getSitecuesLs() returns what was stored.', function () {
+
+                var
+                    savedInfo = {
+                        userId : 'test-userid',
+                        'test-userid' : {
+                            zoom : 1,
+                            firstHighZoom : 2,
+                            ttsOn : true,
+                            firstSpeechOn : 3
+                        }
+                    },
+                    parsedInfo;
+
+                storage.setSitecuesLs(savedInfo);
+
+                parsedInfo = JSON.parse(storage.getSitecuesLs());
+
+                assert.deepEqual(
+                    parsedInfo,
+                    savedInfo,
+                    'The retrieved data must be identical to when it was stored.'
+                );
+            });
+
+            test('.getPrefs() retrieves the same user preferences that were saved.', function () {
+
+                var
+                    expectedPreference = {
+                        zoom  : 1,
+                        ttsOn : true
+                    },
+                    actualPreference;
 
                 storage.init(function () {});
-                storage.setPref('zoom', zoom);
-                storage.setPref('ttsOn', ttsOn);
 
-                preferences = storage.getPrefs();
-                keys        = Object.keys(preferences);
-                
-                assert.strictEqual(keys.length, 2, 'There should only be two preferences set');
-                assert.strictEqual(preferences['zoom'], zoom, 'Zoom should be set to ' + zoom);
-                assert.strictEqual(preferences['ttsOn'], ttsOn, 'ttsOn should be set to ' + ttsOn);
+                Object.keys(expectedPreference).forEach(function (key) {
+                    storage.setPref(key, expectedPreference[key]);
+                });
+
+                actualPreference = storage.getPrefs();
+
+                assert.deepEqual(
+                    actualPreference,
+                    expectedPreference,
+                    'The retrieved preferences must be identical to when they were stored.'
+                );
             });
 
-            test('Assign a userId to local storage, and retrieve it successfully', function () {
+            test('.getUserId() retrieves the same User ID that was saved.', function () {
+
                 var userId = 'test-id';
 
                 storage.init(function () {});
                 storage.setUserId(userId);
-                assert.strictEqual(storage.getUserId(), userId, 
-                    'Retrived local storage has a different userId than the one assigned');
+                assert.strictEqual(
+                    storage.getUserId(),
+                    userId,
+                    'The retrieved User ID must be identical to when it was stored.'
+                );
             });
-
         })
     }
 );

@@ -8,50 +8,76 @@ define(
 
         'use strict';
 
-        var suite      = tdd.suite
-        ,   test       = tdd.test
-        ,   beforeEach = tdd.beforeEach;
+        var suite      = tdd.suite,
+            test       = tdd.test,
+            beforeEach = tdd.beforeEach;
 
         suite('Events module', function () {
 
             beforeEach(function () {
                 events.off();
-            })
+            });
 
-            test('All handlers are removed when we call events.off with no arguments', function () {
-                var wereHandlersRun = false
-                ,   deferred = this.async(1000);
+            test('.off() removes all handlers when called with no arguments', function () {
+
+                var deferred = this.async(1000),
+                    wasCalled = false;
 
                 events.on('one', function () {
-                    wereHandlersRun = true;
-                })
-
-                events.on('two', function () {
-                    wereHandlersRun = true;
-                })
+                    wasCalled = true;
+                });
 
                 events.off();
 
                 events.emit('one');
-                events.emit('two');
-                deferred.callback(function () {
-                    assert.isFalse(wereHandlersRun, 'A handler was run despite calling events.off with a wildcard');
-                })();
-            })
 
-            //A test verifying that callbacks are called successfully on core.emit
-            test('Event handlers are called when we emit events', function () {
+                events.on('two', deferred.callback(function () {
+                    assert.isFalse(
+                        wasCalled,
+                        'A handler was run despite calling events.off with a wildcard'
+                    );
+                }));
+
+                events.emit('two');
+            });
+
+            test('.on() handlers are run when events are emitted', function () {
+
                 var deferred = this.async(1000);
+
                 events.on('event', deferred.callback(function () {}));
                 events.emit('event');
             });
 
-            test('Handlers for different events are invoked in the order their events are emitted', function () {
-                var wasHandlerRun
-                ,   deferred = this.async(1000);
+            test('.on() handlers for the same event are run in the order they are registered', function () {
+
+                var deferred = this.async(1000),
+                    wasHandlerRun;
+
+                    events.on('event', function () {
+                    wasHandlerRun = true;
+                });
+
+                events.on('event', deferred.callback(function () {
+                    assert.isTrue(
+                        wasHandlerRun,
+                        'Preceding event handler has not run.'
+                    );
+                }));
+
+                events.emit('event');
+            });
+
+            test('.on() handlers for different events are run in the order their events are emitted', function () {
+
+                var deferred = this.async(1000),
+                    wasHandlerRun;
 
                 events.on('two', deferred.callback(function () {
-                    assert.isTrue(wasHandlerRun, 'Preceding emitted event handler hasn\'t run yet');
+                    assert.isTrue(
+                        wasHandlerRun,
+                        'Preceding emitted event handler hasn\'t run yet'
+                    );
                 }));
 
                 events.on('one', function () {
@@ -62,65 +88,58 @@ define(
                 events.emit('two');
             });
 
-            ////A test verifying that callbacks are invoked in the order that they are bound
-            test('Handlers for the same event are invoked in the order they are bound', function () {
-                var wasHandlerRun
-                ,   deferred = this.async(1000);
+            test('.on() handlers receive arguments from .emit()', function () {
 
-                events.on('event', function () {
-                    wasHandlerRun = true;
-                });
-
-                events.on('event', deferred.callback(function () {
-                    assert.isTrue(wasHandlerRun, 'Preceding event handler has not run.');
-                }));
-
-                events.emit('event');
-            });
-
-            //A test to verify that emitted arguments are passed to event callbacks
-            test('Arguments emitted with the event are passed to the event handler', function () {
-                var deferred = this.async(1000)
-                ,   args     = [
+                var deferred = this.async(1000),
+                    input = [
                         'arg1',
+                        null,
+                        undefined,
+                        false,
                         2,
-                        {},
-                        []
+                        { a : 3 },
+                        [4]
                     ];
 
                 events.on('one', function () {
-                    assert.strictEqual(0, arguments.length, 
-                        'Events emitted with no arguments should not pass arguments to their handlers');
+                    assert.lengthOf(
+                        arguments,
+                        0,
+                        'Events emitted with no arguments should not pass arguments to their handlers'
+                    );
                 });
 
                 events.on('two', deferred.callback(function () {
-                    assert.strictEqual(args.length, arguments.length,
-                        'Event handler did not received the number of arguments expected');
-                    assert.strictEqual(args[0], arguments[0], 'Event did not receive string argument');
-                    assert.strictEqual(args[1], arguments[1], 'Event did not receive number argument');
-                    assert.strictEqual(args[2], arguments[2], 'Event did not receive object literal argument');
-                    assert.strictEqual(args[3], arguments[3], 'Event did not receive array argument');
+                    assert.deepEqual(
+                        input,
+                        Array.prototype.slice.call(arguments),
+                        'Event handler must receive arguments exactly as they were emitted.'
+                    );
+
                     events.off();
                 }));
 
                 events.emit('one');
-                events.emit('two', args[0], args[1], args[2], args[3]);
+                events.emit.apply(events, ['two'].concat(input));
             });
 
-            //A test to verify that callbacks are removed when we call core.off
-            test('Event handlers are removed when we call events.off for a specific event and handler', function () {
-                var wasHandlerOneRun = false
-                ,   wasHandlerTwoRun = false
-                ,   deferred = this.async(1000)
-                ,   handler1  = function () {
+            test('.off() removes handlers for a specific event', function () {
+
+                var deferred = this.async(1000),
+                    wasHandlerOneRun = false,
+                    wasHandlerTwoRun = false,
+                    handler1  = function () {
                         wasHandlerOneRun = true;
-                    }
-                ,   handler2 = function () {
+                    },
+                    handler2 = function () {
                         wasHandlerTwoRun = true;
                     };
 
                 events.on('done', deferred.callback(function () {
-                    assert.isFalse(wasHandlerOneRun, 'Handler was run despite removing all handlers for that event');
+                    assert.isFalse(
+                        wasHandlerOneRun,
+                        'Handler was run despite removing all handlers for that event'
+                    );
                 }));
 
                 events.on('one', handler1);
@@ -132,8 +151,6 @@ define(
                 events.emit('two');
 
                 events.emit('done');
-            })
-
+            });
         });
-
 });

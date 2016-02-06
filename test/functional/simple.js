@@ -291,9 +291,12 @@ define(
                             assert.isNull(data, 'Lens element does not have a class');
                         })
                         .end()
-                    .execute(function (selector, className) { // run the given code in the remote browser
-                        document.querySelector(selector).className = className;
-                    },[picked.selector, originalClass]);
+                    .execute(
+                        function (selector, className) { // run the given code in the remote browser
+                            document.querySelector(selector).className = className;
+                        },
+                        [picked.selector, originalClass]
+                    );
             });
 
             // -------- test boundary --------
@@ -328,9 +331,12 @@ define(
                     })
                     .pressKeys(keys.ESCAPE)
                     .waitForDeletedById(Lens.ID)
-                    .execute(function (id) {
-                        return document.querySelector('#' + id);
-                    }, [Lens.ID])
+                    .execute(
+                        function (id) {
+                            return document.querySelector('#' + id);
+                        },
+                        [Lens.ID]
+                    )
                     .then(function (data) {
                         assert.isNull(data, 'Lens no longer exists.');
                     });
