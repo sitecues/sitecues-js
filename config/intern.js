@@ -40,25 +40,9 @@ define(
             },
             // Places where unit and/or functional tests will be run...
             environments: [
-                // local-style...
-                // {
-                //     browserName: 'phantomjs',  // command line browser, very fast for tests
-                //     // pretend to be Chrome, to avoid fallbacks...
-                //     'phantomjs.page.settings.userAgent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.111 Safari/537.36'
-                // },
-                //{ browserName: 'firefox' }
-                 { browserName: 'chrome' }
-                // { browserName: 'safari' }
-                // BrowserStack-style...
-                // { os: 'Windows', os_version: '10',       browser: 'edge',    browser_version: '12.0' },
-                // { os: 'Windows', os_version: '10',       browser: 'firefox', browser_version: '40.0' },
-                // { os: 'Windows', os_version: '10',       browser: 'chrome',  browser_version: '44.0' },
-                // { os: 'OS X',    os_version: 'Yosemite', browser: 'safari',  browser_version: '8.0' },
-                // SauceLabs-style...
-                // { platform: 'Windows 10', browserName: 'internet explorer', version: '11' },
-                // { platform: 'Windows 10', browserName: 'firefox',           version: '40' },
-                // { platform: 'Windows 10', browserName: 'chrome',            version: '44' },
-                // { platform: 'OS X 10.10', browserName: 'safari',            version: '8' }
+                { browserName : 'firefox' },
+                // { browserName : 'safari' },
+                { browserName : 'chrome' }
             ],
 
             maxConcurrency: 1,  // how many browsers may be open at once
@@ -102,7 +86,7 @@ define(
 
             // Test whitelist regex. Any test IDs ('suite name - test name')
             // which do NOT match this pattern will be skipped.
-            //grep: /Zoom controls -.*/,
+            // grep : /.*/,
 
             // Ignore some code from test coverage reports, even if it loads
             // during testing. The paths that match this pattern will NOT
