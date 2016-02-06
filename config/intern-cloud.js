@@ -23,7 +23,7 @@ define(
             { os: 'Windows', os_version: '7',          browser: 'firefox', browser_version: '44.0' },
             { os: 'Windows', os_version: '7',          browser: 'chrome',  browser_version: '48.0' },
             // { os: "Windows", os_version: '10',         browser: 'ie',      browser_version: '11.0' },
-            { os: 'Windows', os_version: '10',         browser: 'edge',    browser_version: '12.0' },
+            // { os: 'Windows', os_version: '10',         browser: 'edge',    browser_version: '12.0' },
             { os: 'Windows', os_version: '10',         browser: 'firefox', browser_version: '44.0' },
             { os: 'Windows', os_version: '10',         browser: 'chrome',  browser_version: '48.0' },
             // { os: 'OS X',    os_version: 'El Capitan', browser: 'safari',  browser_version: '9.0' },
