@@ -21,6 +21,14 @@ define([], function() {
     isInitialized,
     NAMESPACE = 'sitecues';
 
+  /*
+   * Clear "sitecues" key value which is the outer namespace.
+   * @returns {DOMString}
+   */
+  function clear() {
+    localStorage.removeItem(NAMESPACE);
+  }
+
   function setSerializedAppData(dataString) {
     localStorage.setItem(NAMESPACE, dataString);
   }
@@ -59,22 +67,6 @@ define([], function() {
   }
 
   /*
-   * Clear "sitecues" key value which is the outer namespace.
-   * @returns {DOMString}
-   */
-  function clear() {
-    localStorage.removeItem(NAMESPACE);
-  }
-
-  /*
-   * Get current userId from Local Storage under "sitecues" namespace.
-   * @returns {JSON.parse.j|Array|Object}
-   */
-  function getUserId() {
-    return getAppData().userId;
-  }
-
-  /*
    * Set current userId from Local Storage under "sitecues" namespace.
    * @returns {JSON.parse.j|Array|Object}
    */
@@ -84,6 +76,14 @@ define([], function() {
       appData.userId = id;
       setAppData(appData);
     }
+  }
+
+  /*
+   * Get current userId from Local Storage under "sitecues" namespace.
+   * @returns {JSON.parse.j|Array|Object}
+   */
+  function getUserId() {
+    return getAppData().userId;
   }
 
   /**
@@ -141,11 +141,11 @@ define([], function() {
   return {
     init: init,
     clear: clear,
-    getUserId: getUserId,
     setUserId: setUserId,
+    getUserId: getUserId,
     setPref: setPref,
     getPrefs: getPrefs,
-    setSitecuesLs: setAppData,
-    getSitecuesLs: getSerializedAppData
+    setAppData: setAppData,
+    getSerializedAppData: getSerializedAppData
   };
 });
