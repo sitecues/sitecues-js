@@ -11,6 +11,8 @@
     "theme",
     "audio",
     "audio-cues",
+    "network-player",
+    "local-player",
     "status",
     "info",
     "pick-debug",

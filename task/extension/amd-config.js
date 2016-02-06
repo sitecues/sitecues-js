@@ -32,7 +32,8 @@ var config = require('../build-config.js'),
       'core/bp/badge/page-badge': 'empty:',
       'core/bp/badge/palette': 'empty:',
       'bp-img-placeholder/bp-img-placeholder/': 'empty:',
-      'bp-adaptive/bp-adaptive': 'empty:'
+      'bp-adaptive/bp-adaptive': 'empty:',
+      'network-player/network-player': 'empty:'
     },
     map: {
       '*': {

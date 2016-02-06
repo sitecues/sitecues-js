@@ -1,12 +1,17 @@
 define(
   [],
   function () {
-    return {
-      speechStrategy : {
-        AUTO    : 'auto',
+    var speechStrategy ={
+        AUTO    : 'auto', // Currently same as PREFER_NETWORK
         LOCAL   : 'local',
-        NETWORK : 'network'
-      }
+        NETWORK : 'network',
+        PREFER_LOCAL : 'preferLocal',
+        PREFER_NETWORK : 'preferNetwork'
+      };
+
+    return {
+      speechStrategy: speechStrategy,
+      autoStrategy : speechStrategy.PREFER_NETWORK
     };
   }
 );
