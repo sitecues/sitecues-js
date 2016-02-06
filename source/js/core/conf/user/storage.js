@@ -16,22 +16,46 @@
  * }
  */
 define([], function() {
-  var isInitialized;
+
+  var
+    isInitialized,
+    NAMESPACE = 'sitecues';
+
+  function setSerializedAppData(dataString) {
+    localStorage.setItem(NAMESPACE, dataString);
+  }
 
   /*
    * Get value of Local Storage's "sitecues" key which is the outer namespace.
    * @returns {DOMString}
    */
-  function getSitecuesLs() {
-    return localStorage.getItem('sitecues') || setSitecuesLs();
+  function getSerializedAppData() {
+    return localStorage.getItem(NAMESPACE);
+  }
+
+  function serialize(data) {
+    return JSON.stringify(data || {});
+  }
+
+  function deserialize(dataString) {
+    return dataString ? JSON.parse(dataString) : {};
   }
 
   /*
    * Set value of Local Storage's "sitecues" key which is the outer namespace.
    */
-  function setSitecuesLs(data) {
-    var dataString = JSON.stringify(data || {});
-    localStorage.setItem('sitecues', dataString);
+  function setAppData(data) {
+
+    var dataString = serialize(data);
+
+    setSerializedAppData(dataString);
+  }
+
+  function getAppData() {
+
+    var dataString = getSerializedAppData();
+
+    return deserialize(dataString);
   }
 
   /*
@@ -39,7 +63,7 @@ define([], function() {
    * @returns {DOMString}
    */
   function clear() {
-    localStorage.removeItem('sitecues');
+    localStorage.removeItem(NAMESPACE);
   }
 
   /*
@@ -47,40 +71,45 @@ define([], function() {
    * @returns {JSON.parse.j|Array|Object}
    */
   function getUserId() {
-    var sitecuesLs = getSitecuesLs();
-    if (sitecuesLs) {
-      var internalLs = JSON.parse(sitecuesLs);
-      return internalLs && internalLs.userId;
-    }
+    return getAppData().userId;
   }
 
   /*
    * Set current userId from Local Storage under "sitecues" namespace.
    * @returns {JSON.parse.j|Array|Object}
    */
-  function setUserId(value) {
-    var sitecuesLs = getSitecuesLs() || setSitecuesLs();
-    if (sitecuesLs) {
-      var internalLs = JSON.parse(sitecuesLs);
-      internalLs.userId = value || {};
-      setSitecuesLs(internalLs);
+  function setUserId(id) {
+    if (id) {
+      var appData = getAppData();
+      appData.userId = id;
+      setAppData(appData);
     }
   }
 
   /**
-   * Update LocalStorage data in key, value format | sitecues:userID namespace.
-   * @param {String} key
+   * Update LocalStorage data in name, value format | sitecues:userID namespace.
+   * @param {String} name
    * @param {String} value
    * @returns {void}
    */
-  function setPref(key, value) {
-    var userPrefData = getPrefs();
-    var sitecuesLs = JSON.parse(getSitecuesLs());
-    // Update value.
-    userPrefData[key] = value;
-    sitecuesLs[getUserId()] = userPrefData;
-    // Save in LocalStorage.
-    setSitecuesLs(sitecuesLs);
+  function setPref(name, value) {
+
+    var userId = getUserId();
+
+    // TODO: setPref() would be more useful if it knew how to
+    //       generate a user ID.
+    if (!userId) {
+      throw new Error('No user ID is set to save preferences for.');
+    }
+
+    var
+      userPreferences = getPrefs(),
+      appData = getAppData();
+
+    userPreferences[name] = value;
+
+    appData[getUserId()] = userPreferences;
+    setAppData(appData);
   }
 
   /**
@@ -88,9 +117,11 @@ define([], function() {
    * @returns {DOMString}
    */
   function getPrefs() {
-    var sitecuesLs = JSON.parse(getSitecuesLs()),
-      prefs = sitecuesLs[getUserId()];
-    return typeof prefs === 'object' ? prefs : {};
+    var
+      appData = getAppData(),
+      userPreferences = appData[getUserId()];
+
+    return userPreferences || {};
   }
 
   function init() {
@@ -99,6 +130,7 @@ define([], function() {
     }
     isInitialized = true;
 
+    // TODO: This seems bad. The caller should call methods explicitly.
     if (getUserId()) {
       // Has local storage sitecues prefs for this website
       return getPrefs();
@@ -113,7 +145,7 @@ define([], function() {
     setUserId: setUserId,
     setPref: setPref,
     getPrefs: getPrefs,
-    setSitecuesLs: setSitecuesLs,
-    getSitecuesLs: getSitecuesLs
+    setSitecuesLs: setAppData,
+    getSitecuesLs: getSerializedAppData
   };
 });
