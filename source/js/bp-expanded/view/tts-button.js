@@ -1,4 +1,3 @@
-// TODO wave animation broken except in default badge
 define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/locale', 'core/conf/user/manager', 'core/events'],
   function (BP_CONST, helper, state, locale, conf, events) {
   var
