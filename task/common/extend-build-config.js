@@ -13,7 +13,7 @@ function getConfig(baseConfig) {
     // Production versions have resources in a folder named by the version
     resourceFolderName: baseConfig.isDebugOn ? '.' : baseConfig.version,
     isLocal: process.env.LOCAL === 'on',  // Common library -- default is non-local
-    autoSpeechStrategy: process.env.AUTO_SPEECH || 'preferLocal',
+    autoSpeechStrategy: process.env.AUTO_SPEECH || 'preferNetwork',
     jsGlob: getGlob('js/**/*.js'),
     rasterGlob: [ getGlob('images/**/*.png'), getGlob('images/**/*.cur') ],
     svgGlob: getGlob('images/**/*.svg'),
