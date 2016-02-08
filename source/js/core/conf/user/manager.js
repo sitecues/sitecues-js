@@ -62,7 +62,7 @@ define(['core/conf/user/storage', 'core/conf/user/storage-backup', 'core/util/uu
     // Save the data from localStorage: User ID namespace.
     storage.setPref(key, value);
     //Save data to storage backup
-    storageBackup.save(storage.getSerializedAppData());
+    storageBackup.save(storage.getRawAppData());
   }
 
   // define key handler
@@ -91,9 +91,9 @@ define(['core/conf/user/storage', 'core/conf/user/storage-backup', 'core/util/uu
 
     var retrievedSettings;
 
-    retrievedSettings = storage.init();
+    retrievedSettings = storage.getPrefs();
 
-    if (retrievedSettings) {
+    if (Object.keys(retrievedSettings).length) {
       cache(retrievedSettings);
       onReadyCallbackFn();
     }
@@ -109,7 +109,7 @@ define(['core/conf/user/storage', 'core/conf/user/storage-backup', 'core/util/uu
             // No user id: generate one
             var userId = uuid();
             storage.setUserId(userId);
-            storageBackup.save(storage.getSerializedAppData());
+            storageBackup.save(storage.getRawAppData());
           }
           cache(storage.getPrefs());
           onReadyCallbackFn();

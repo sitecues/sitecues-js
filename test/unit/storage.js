@@ -59,7 +59,7 @@ define(
                 );
             });
 
-            test('.getSerializedAppData() returns what was stored', function () {
+            test('.getRawAppData() returns what was stored', function () {
 
                 var
                     expectedString = JSON.stringify({
@@ -75,7 +75,7 @@ define(
                 localStorage.setItem('sitecues', expectedString);
 
                 assert.deepEqual(
-                    storage.getSerializedAppData(),
+                    storage.getRawAppData(),
                     expectedString,
                     'The retrieved data must be identical to when it was stored'
                 );

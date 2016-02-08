@@ -18,57 +18,71 @@
 define([], function() {
 
   var
-    isInitialized,
     NAMESPACE = 'sitecues';
 
   /*
-   * Clear "sitecues" key value which is the outer namespace.
-   * @returns {DOMString}
+   * Delete the outer namespace where we store data.
+   * @returns {DOMString|null}
    */
   function clear() {
     localStorage.removeItem(NAMESPACE);
   }
 
-  function setSerializedAppData(dataString) {
+  /*
+   * Overwrite the entire namespace that we use for storing data.
+   * You should probably NOT use this! Prefer setAppData().
+   */
+  function setRawAppData(dataString) {
     localStorage.setItem(NAMESPACE, dataString);
   }
 
   /*
-   * Get value of Local Storage's "sitecues" key which is the outer namespace.
-   * @returns {DOMString}
+   * Get value of the entire namespace that we use for storing data.
+   * You should probably NOT use this! Prefer getAppData().
+   * @returns {DOMString or null}
    */
-  function getSerializedAppData() {
+  function getRawAppData() {
     return localStorage.getItem(NAMESPACE);
   }
 
+  /*
+   * Get the final representation that we will put into storage.
+   */
   function serialize(data) {
     return JSON.stringify(data || {});
   }
 
+  /*
+   * Get the normalized representation of what was in storage.
+   */
   function deserialize(dataString) {
     return dataString ? JSON.parse(dataString) : {};
   }
 
   /*
-   * Set value of Local Storage's "sitecues" key which is the outer namespace.
+   * Friendly API for overwriting all data we have put into storage.
+   * If you can, use clear() or setPref() instead.
    */
   function setAppData(data) {
 
     var dataString = serialize(data);
 
-    setSerializedAppData(dataString);
+    setRawAppData(dataString);
   }
 
+  /*
+   * Friendly API for retrieving all data we have put into storage.
+   * If you can, use getPrefs(), instead.
+   */
   function getAppData() {
 
-    var dataString = getSerializedAppData();
+    var dataString = getRawAppData();
 
     return deserialize(dataString);
   }
 
   /*
-   * Set current userId from Local Storage under "sitecues" namespace.
-   * @returns {JSON.parse.j|Array|Object}
+   * Overwrite only the userId portion of the data currently in storage.
    */
   function setUserId(id) {
     if (id) {
@@ -80,7 +94,7 @@ define([], function() {
 
   /*
    * Get current userId from Local Storage under "sitecues" namespace.
-   * @returns {JSON.parse.j|Array|Object}
+   * @returns {String|undefined}
    */
   function getUserId() {
     return getAppData().userId;
@@ -96,8 +110,6 @@ define([], function() {
 
     var userId = getUserId();
 
-    // TODO: setPref() would be more useful if it knew how to
-    //       generate a user ID.
     if (!userId) {
       throw new Error('No user ID is set to save preferences for.');
     }
@@ -113,8 +125,8 @@ define([], function() {
   }
 
   /**
-   * Get LocalStorage data | sitecues:userID namespace.
-   * @returns {DOMString}
+   * Get the user settings we have stored, nested within app data.
+   * @returns {Object}
    */
   function getPrefs() {
     var
@@ -124,28 +136,13 @@ define([], function() {
     return userPreferences || {};
   }
 
-  function init() {
-    if (isInitialized) {
-      return;
-    }
-    isInitialized = true;
-
-    // TODO: This seems bad. The caller should call methods explicitly.
-    if (getUserId()) {
-      // Has local storage sitecues prefs for this website
-      return getPrefs();
-    }
-
-  }
-
   return {
-    init: init,
     clear: clear,
     setUserId: setUserId,
     getUserId: getUserId,
     setPref: setPref,
     getPrefs: getPrefs,
     setAppData: setAppData,
-    getSerializedAppData: getSerializedAppData
+    getRawAppData: getRawAppData
   };
 });
