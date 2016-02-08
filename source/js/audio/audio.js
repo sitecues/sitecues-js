@@ -70,6 +70,7 @@ define(
   }
 
   // text and triggerType are optional
+  // @lang is the full or partial language for the speech as we know it, e.g. en-US or en
   function speakText(text, lang, triggerType) {
     stopAudio();  // Stop any currently playing audio and halt keydown listener until we're playing again
     if (!text.trim()) {
@@ -114,7 +115,7 @@ define(
 
     function speakViaNetwork(onUnavailable) {
       var onUnavailableFn = onUnavailable || noop;
-      if (isNetworkSpeechAllowed()) {
+      if (isNetworkSpeechAllowed(lang)) {
         require(['network-player/network-player'], function (networkPlayer) {
           lastPlayer = networkPlayer;
 
@@ -125,9 +126,12 @@ define(
               url: TTSUrl,
               onStart: function () {
                 onSpeechPlaying(false);
-              },
+              }
             })
-            .catch(onUnavailableFn);
+            .catch(function() {
+              rerouteNetworkSpeechLang(lang);
+              onUnavailableFn();
+            });
         });
       }
       else {
@@ -197,9 +201,9 @@ define(
     return '?l=' + (lang || getDocumentAudioLang()) + '&';
   }
 
-  function getAudioKeyUrl(key) {  // TODO why does an audio cue need the site id?
+  function getAudioKeyUrl(key, lang) {  // TODO why does an audio cue need the site id?
     var restOfUrl = 'cue/site/' + site.getSiteId() + '/' +
-      key + '.' + getMediaTypeForNetworkAudio() + getLanguageParameter();
+      key + '.' + getMediaTypeForNetworkAudio() + getLanguageParameter(lang);
     return urls.getApiUrl(restOfUrl);
   }
 
@@ -241,24 +245,29 @@ define(
   function speakByKey(key) {
     stopAudio();  // Stop any currently playing audio
 
+    var lang = getDocumentAudioLang(); // Use document language for cues, e.g. en-US or en
+
     function onSpeechStart() {
       isAudioPlaying = true;
       addStopAudioHandlers();
     }
 
     function speakLocally(onUnavailable) {
-      var onUnavailableFn = onUnavailable || noop;
-      if (isLocalSpeechAllowed()) {
+      var onUnavailableFn = onUnavailable || noop,
+        cueLang = getCueLanguage(lang);
+      if (cueLang && isLocalSpeechAllowed()) {
         require(['local-player/local-player'], function (localPlayer) {
           lastPlayer = localPlayer;
           locale.getAudioCueTextAsync(key, function (cueText) {
-            localPlayer
-              .speak({
-                text: cueText,
-                locale: 'en-US',
-                onStart: onSpeechStart
-              })
-              .catch(onUnavailableFn);
+            if (cueText) {
+              localPlayer
+                .speak({
+                  text: cueText,
+                  locale: cueLang,
+                  onStart: onSpeechStart
+                })
+                .catch(onUnavailableFn);
+            }
           });
         });
       }
@@ -269,10 +278,10 @@ define(
 
     function speakViaNetwork(onUnavailable) {
       var onUnavailableFn = onUnavailable || noop;
-      if (isNetworkSpeechAllowed()) {
+      if (isNetworkSpeechAllowed(lang)) {
         require(['network-player/network-player'], function (networkPlayer) {
           lastPlayer = networkPlayer;
-          var url = getAudioKeyUrl(key);
+          var url = getAudioKeyUrl(key, lang);
           networkPlayer
             .play({
               url: url,
@@ -382,8 +391,32 @@ define(
     return clientSpeechStrategy === speechStrategy.LOCAL || clientSpeechStrategy === speechStrategy.PREFER_LOCAL;
   }
 
-  function isNetworkSpeechAllowed() {
-    return getClientSpeechStrategy() !== speechStrategy.LOCAL;
+  function getRerouteNetworkSpeechLangKey(lang) {
+    return constant.REROUTE_NETWORK_SPEECH_KEY + lang;
+  }
+
+  function isNetworkSpeechAllowed(lang) {
+    return getClientSpeechStrategy() !== speechStrategy.LOCAL &&
+      !window.sessionStorage.getItem(getRerouteNetworkSpeechLangKey(lang));
+  }
+
+  // This language failed on the network -- disallow it for this tab (uses sessionStorage)
+  function rerouteNetworkSpeechLang(lang) {
+    // Set to any value to reroute this language to local speech
+    window.sessionStorage.setItem(getRerouteNetworkSpeechLangKey(lang), true);
+  }
+
+  function getCueLanguage(lang) {
+    var longLang = lang.toLowerCase(),
+      shortLang;
+
+    function useIfAvailable(tryLang) {
+      return constant.AVAILABLE_CUES[tryLang] && tryLang;
+    }
+
+    shortLang = longLang.split('-')[0];
+
+    return useIfAvailable(longLang) || useIfAvailable(shortLang);
   }
 
   function init() {

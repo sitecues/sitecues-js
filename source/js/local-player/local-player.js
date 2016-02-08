@@ -176,7 +176,7 @@ define(
 
         var speech = new SpeechSynthesisUtterance(text);
         if (SC_DEV) {
-          console.log('Using voice:', voice && voice.name);
+          console.log('Using voice:', voice);
         }
         speech.voice = voice;
         // Note: Some voices do not support altering these settings and will break silently!
