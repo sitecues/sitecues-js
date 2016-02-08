@@ -374,7 +374,7 @@ define(
   }
 
   function isLocalSpeechAllowed() {
-    return getClientSpeechStrategy() !== speechStrategy.NETWORK;
+    return getClientSpeechStrategy() !== speechStrategy.NETWORK && window.speechSynthesis;
   }
 
   function isLocalSpeechPreferred() {

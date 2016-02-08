@@ -11,7 +11,8 @@ define(
 
     return {
       speechStrategy: speechStrategy,
-      autoStrategy : speechStrategy.PREFER_NETWORK
+      // jshint -W117
+      autoStrategy : SC_AUTO_SPEECH || speechStrategy.PREFER_NETWORK
     };
   }
 );
