@@ -25,6 +25,7 @@ function getConfig(baseConfig) {
     extensionSourceDir: EXTENSION_SOURCE_DIR,
     tmpDir: require('os').tmpdir(),
     isLocal: process.env.LOCAL !== 'off', // Extension: default is local because of Google security requirements
+    autoSpeechStrategy: process.env.AUTO_SPEECH || 'local',
     jsGlob: getGlob('js/**/*.js'),
     rasterGlob: getGlob('images/**/*.png'),
     svgGlob: getGlob('images/**/*.svg'),

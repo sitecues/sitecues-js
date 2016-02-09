@@ -214,7 +214,7 @@ var requirejs, require, define;
             return;
           }
 
-          try {
+          //try {
             var then = v && v.then;
             if (isFunObj(v) && typeof then === 'function') {
               f2 = makeFulfill();
@@ -223,10 +223,10 @@ var requirejs, require, define;
               p[prop] = v;
               notify(listeners, v);
             }
-          } catch (e) {
-            called = false;
-            f.reject(e);
-          }
+          //} catch (e) {
+          //  called = false;
+          //  f.reject(e);
+          //}
         }
 
         f = {
@@ -247,16 +247,16 @@ var requirejs, require, define;
           var next = prim(function (nextResolve, nextReject) {
 
             function finish(fn, nextFn, v) {
-              try {
+              //try {
                 if (fn && typeof fn === 'function') {
                   v = fn(v);
                   nextResolve(v);
                 } else {
                   nextFn(v);
                 }
-              } catch (e) {
-                nextReject(e);
-              }
+              //} catch (e) {
+              //  nextReject(e);
+              //}
             }
 
             callback(p, ok, finish.bind(undefined, yes, nextResolve));
@@ -271,11 +271,11 @@ var requirejs, require, define;
         }
       };
 
-      try {
+      //try {
         fn(f.resolve, f.reject);
-      } catch (e) {
-        f.reject(e);
-      }
+      //} catch (e) {
+      //  f.reject(e);
+      //}
 
       return promise;
     };

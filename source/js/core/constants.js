@@ -12,7 +12,7 @@ define([], function () {
     PANEL_FOCUS_MOVE: 'panel-focus-moved',
     PANEL_CLICK: 'panel-clicked',
     PANEL_CLOSE: 'panel-closed',
-    FEEDBACK: 'feedback-send',
+    FEEDBACK: 'feedback-sent',
     SLIDER_SETTING_CHANGE: 'slider-setting-changed',
     BADGE_HOVER: 'badge-hovered',
     PAGE_VISIT: 'page-visited',
