@@ -263,10 +263,10 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
       }
       else if (prop === 'color' || prop === 'background-color') {
         newRgba = colorMapFn(style.value, intensity, textHue);
-        newValue = newRgba && newRgba.a && colorUtil.getColorString(newRgba);
+        newValue = newRgba && colorUtil.getColorString(newRgba);
       }
       if (newValue) {
-        var important = selector !== ':link' && selector !== ':visited', // Don't let these UA rules override page's <a> rules
+        var important = style.value.important && selector !== ':link' && selector !== ':visited', // Don't let these UA rules override page's <a> rules
           formFixes = '',
           textShadow = '';
         if (isButtonRule(selector)) {
@@ -350,6 +350,7 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
     if (gradient) {
       return {
         prop: '-sc-gradient',
+        important: cssStyleDecl.getPropertyPriority('background-image') === 'important',
         gradientType: gradient && gradient[1],
         gradientVal: gradient && gradient[2]
       };
@@ -364,6 +365,7 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
     if (imageUrl) {
       return {
         prop: 'background-image',
+        important: cssStyleDecl.getPropertyPriority('background-image') === 'important',
         imageUrl: imageUrl,
         backgroundColor: cssStyleDecl.backgroundColor
       };
@@ -398,7 +400,8 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
       return {
         prop: 'background-color',
         selector: selector,
-        parsedVal: rgba
+        parsedVal: rgba,
+        important: cssStyleDecl.getPropertyPriority('background-color') === 'important',
       };
     }
   }
@@ -415,6 +418,7 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
         prop: 'color',
         selector: selector,
         parsedVal: colorUtil.getRgba(fgStyle),
+        important: cssStyleDecl.getPropertyPriority('color') === 'important',
         contrastEnhancementDirection:
           (function() {
             var fgLuminosity = colorUtil.getLuminanceFromColorName(fgStyle);
