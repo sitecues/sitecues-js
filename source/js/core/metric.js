@@ -9,7 +9,7 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
     // IMPORTANT! Have the backend team review all metrics changes!!!
     var METRICS_VERSION = 5,
         isInitialized,
-        name = constants.METRIC_NAME;
+        name = constants.METRIC_NAME,
         metricHistory = [];
 
 
