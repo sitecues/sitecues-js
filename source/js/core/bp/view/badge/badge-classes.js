@@ -12,8 +12,8 @@ define([
    */
 
   function getPaletteClass() {
-    var paletteKey = BP_CONST.PALETTE_NAME_MAP[paletteKey],
-      paletteName = paletteKey ? state.get('paletteKey') : BP_CONST.PALETTE_NAME_MAP.normal;
+    var paletteKey = state.get('paletteKey'),
+      paletteName = BP_CONST.PALETTE_NAME_MAP[paletteKey || 'normal']
 
     return ' scp-palette' + paletteName;
   }
