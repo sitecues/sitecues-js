@@ -149,7 +149,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
       numPixelsToCheck = Math.floor(area / stepSize),
       histogramIndex,
       luminanceTotal = 0,
-      maxLuminance = 0
+      maxLuminance = 0;
 
     for(; byteIndex < numBytes; byteIndex += DWORD_SIZE * stepSize) {
       var rgba = {
