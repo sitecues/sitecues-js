@@ -12,6 +12,7 @@
     "sitecuesEverywhere" : false,
     "SC_DEV"             : false,
     "SC_LOCAL"           : false,
+    "SC_BROWSER_NETWORK_SPEECH": false,
     "SC_EXTENSION"       : false,
     "SC_VERSION"         : false,
 

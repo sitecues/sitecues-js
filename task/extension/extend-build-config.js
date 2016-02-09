@@ -26,6 +26,7 @@ function getConfig(baseConfig) {
     tmpDir: require('os').tmpdir(),
     isLocal: process.env.LOCAL !== 'off', // Extension: default is local because of Google security requirements
     autoSpeechStrategy: process.env.AUTO_SPEECH || 'local',
+    allowBrowserNetworkSpeech: process.env.BROWSER_NETWORK_SPEECH === 'on', // Allow window.speechSynthesis via network -- off by default
     jsGlob: getGlob('js/**/*.js'),
     rasterGlob: getGlob('images/**/*.png'),
     svgGlob: getGlob('images/**/*.svg'),

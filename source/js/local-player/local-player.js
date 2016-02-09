@@ -98,7 +98,7 @@ define(
         bestVoice;
 
       localeVoices = voices.filter(function (voice) {
-        return voice.lang.indexOf(locale) === 0 && voice.localService;
+        return voice.lang.indexOf(locale) === 0 && (SC_BROWSER_NETWORK_SPEECH || voice.localService);
       });
 
       // If the incoming locale has an accent but we couldn't find any
@@ -107,7 +107,7 @@ define(
       if (localeHasAccent && localeVoices.length < 1) {
         lang = locale.split('-')[0];
         langVoices = voices.filter(function (voice) {
-          return voice.lang.indexOf(lang) === 0 && voice.localService;
+          return voice.lang.indexOf(lang) === 0 && (SC_BROWSER_NETWORK_SPEECH || voice.localService);
         });
         filteredVoices = langVoices;
       }

@@ -14,6 +14,7 @@ function getConfig(baseConfig) {
     resourceFolderName: baseConfig.isDebugOn ? '.' : baseConfig.version,
     isLocal: process.env.LOCAL === 'on',  // Common library -- default is non-local
     autoSpeechStrategy: process.env.AUTO_SPEECH || 'preferNetwork',
+    allowBrowserNetworkSpeech: process.env.BROWSER_NETWORK_SPEECH === 'on', // Allow window.speechSynthesis via network -- off by default
     jsGlob: getGlob('js/**/*.js'),
     rasterGlob: [ getGlob('images/**/*.png'), getGlob('images/**/*.cur') ],
     svgGlob: getGlob('images/**/*.svg'),
