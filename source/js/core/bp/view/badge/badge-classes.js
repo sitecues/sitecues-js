@@ -13,7 +13,7 @@ define([
 
   function getPaletteClass() {
     var paletteKey = state.get('paletteKey'),
-      paletteName = BP_CONST.PALETTE_NAME_MAP[paletteKey || 'normal']
+      paletteName = BP_CONST.PALETTE_NAME_MAP[paletteKey || 'normal'];
 
     return ' scp-palette' + paletteName;
   }
