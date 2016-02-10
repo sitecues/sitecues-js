@@ -86,7 +86,7 @@ define([
 
   function onViewInitialized() {
     bpController.init();
-
+    fixDimensionsOfBody();
     pendingCompletionCallbackFn();
   }
 
@@ -134,6 +134,28 @@ define([
     sitecues.toggleClassicMode = function() {
       state.set('isClassicMode', !state.get('isClassicMode'));
     };
+  }
+
+  //It's possible that the transformations we apply to the body disrupt absolutely positioned elements
+  //contained by the initial containing block. This is a hacky solution to the problem, but it is much cheaper
+  //than analyzing the page and manually repositioning absolute elements.
+  function fixDimensionsOfBody() {
+    var body = document.body,
+      bodyStyle   = getComputedStyle(body),
+      docStyle    = getComputedStyle(document.documentElement),
+      botMargin   = parseFloat(bodyStyle.marginBottom),
+      topMargin   = bodyStyle.marginTop,
+      leftMargin  = bodyStyle.marginLeft,
+      rightMargin = bodyStyle.marginRight;
+
+    if (parseFloat(bodyStyle.height) < parseFloat(docStyle.height)) {
+      body.style.height = docStyle.height;
+    }
+    if (botMargin !== 0) {
+      //marginBottom doesn't override bottom margins that are set with the shorthand 'margin' style,
+      //so we get all the margins and set our own inline shorthand margin
+      body.style.margin = topMargin + ' ' + rightMargin + ' 0px ' + leftMargin;
+    }
   }
 
   /**
