@@ -17,6 +17,8 @@ define(['$', 'core/conf/urls', 'core/conf/site', 'Promise' ], function ($, urls,
       onStart = option.onStart,
       audioElement = new Audio();
 
+    audioElements.push(audioElement);
+
     return new Promise(function(resolve, reject) {
       getNetworkSpeechConfig(function (speechConfig, error) {
         if (speechConfig.ttsAvailable) {
@@ -25,6 +27,7 @@ define(['$', 'core/conf/urls', 'core/conf/site', 'Promise' ], function ($, urls,
         else {
           // Fetched site config disallowed network speech
           // This is a network setting as opposed to a client strategy
+          releaseAudioElement(audioElement);
           reject(new Error(error || ERR_NO_NETWORK_TTS));
         }
       });
@@ -48,7 +51,6 @@ define(['$', 'core/conf/urls', 'core/conf/site', 'Promise' ], function ($, urls,
         resolve();
       });
       audioElement.src = url;
-      audioElements.push(audioElement);
     }
 
     function onCanPlay(event) {
@@ -56,13 +58,18 @@ define(['$', 'core/conf/urls', 'core/conf/site', 'Promise' ], function ($, urls,
       audioElement.play();
     }
 
+    function releaseAudioElement() {
+      audioElements.splice(audioElements.indexOf(audioElement), 1);
+    }
+
     function onEnded(event) {
       var audioElement = event.target;
       removeListeners(audioElement);
-      audioElements.splice(audioElements.indexOf(audioElement), 1);
+      releaseAudioElement(audioElement);
     }
   }
 
+  // Busy when 1) pending network request, or 2) currently playing audio
   function isBusy() {
     return audioElements.length > 0;
   }
