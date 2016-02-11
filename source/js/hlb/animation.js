@@ -6,7 +6,7 @@ define(['hlb/dimmer', 'page/util/common', 'hlb/positioning', 'core/platform', '$
   function (dimmer, common, hlbPositioning, platform, $) {
 
   var INFLATION_SPEED = 400, // Default inflation duration
-      INFLATION_SPEED_FAST = 0, // Inflation duration when retargeting
+      INFLATION_SPEED_FAST = 1, // Inflation duration when retargeting -- need > 0 so that animation end fires correctly
       DEFLATION_SPEED = 150, // Default deflation duration
 
       getStartingScale = hlbPositioning.getStartingScale,
