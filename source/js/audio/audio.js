@@ -301,7 +301,7 @@ define(
 
       var url = urls.resolveResourceUrl('earcons/' + earconName + '.' + getMediaTypeForNetworkAudio());
 
-      require('audio/network-player', function (networkPlayer) {
+      require(['network-player/network-player'], function (networkPlayer) {
         networkPlayer.play({
           url: url
         });
