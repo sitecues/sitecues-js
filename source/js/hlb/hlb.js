@@ -93,7 +93,9 @@ define([
       $currentToInput = $toInputs.eq(i);
       fromInputType = $currentFromInput.prop('type');
       cloneIndex = $currentToInput[0].getAttribute('data-sc-cloned');
-      if (isHLBClosing && $currentToInput[0].getAttribute('data-sc-cloned')) {
+      //If we're closing the HLB, and the current form element is part of a cloned foundation
+      if (isHLBClosing && cloneIndex) {
+        //Query the DOM for the original form element, so we copy the HLB form value back into the appropriate field
         $currentToInput = $('[data-sc-cloned="' + cloneIndex + '"]');
         $currentToInput[0].removeAttribute('data-sc-cloned');
       }
@@ -555,6 +557,9 @@ define([
       $formDescendants           = $picked.find('input, textarea, select')
                                       .addBack('input, textarea, select');
 
+    //Set data attributes on each of the form input elements
+    //This allows us to query the DOM for the original elements
+    //when we want to give them the values entered into the HLB
     for (i = 0; i < $formDescendants.length; i++) {
       $formDescendants[i].setAttribute('data-sc-cloned', i + 1);
     }
