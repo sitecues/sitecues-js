@@ -207,7 +207,7 @@ define([
 
     // Let the rest of the application know that the hlb is ready
     // Listeners: hpan.js, invert.js, highlight.js, speech.js
-    events.emit('hlb/ready', $hlb, state.highlight);
+    events.emit(constants.HLB_READY, $hlb, state.highlight);
   }
 
   /**

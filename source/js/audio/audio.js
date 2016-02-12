@@ -27,7 +27,6 @@ define(
   function(constant, conf, site, $, builder, platform, locale, metric, urls, textSelect, events) {
 
   var ttsOn = false,
-    isAudioPlaying,
     lastPlayer,
     isInitialized,
     // TODO add more trigger types, e.g. shift+arrow, shift+space
@@ -78,11 +77,10 @@ define(
     }
 
     var startRequestTime = Date.now();
+    addStopAudioHandlers();
 
     function onSpeechPlaying(isLocal) {
       var timeElapsed = Date.now() - startRequestTime;
-      isAudioPlaying = true;
-      addStopAudioHandlers();
       new metric.TtsRequest({
         requestTime : timeElapsed,
         audioFormat : isLocal ? null : getMediaTypeForNetworkAudio(),
@@ -168,12 +166,9 @@ define(
    * or is not playing.
    */
   function stopAudio() {
-    if (isAudioPlaying) {
-      if (lastPlayer) {
-        lastPlayer.stop();
-      }
+    if (isBusy()) {
+      lastPlayer.stop();
       removeBlurHandler();
-      isAudioPlaying = false;
     }
   }
 
@@ -246,11 +241,7 @@ define(
     stopAudio();  // Stop any currently playing audio
 
     var lang = getDocumentAudioLang(); // Use document language for cues, e.g. en-US or en
-
-    function onSpeechStart() {
-      isAudioPlaying = true;
-      addStopAudioHandlers();
-    }
+    addStopAudioHandlers();
 
     function speakLocally(onUnavailable) {
       var onUnavailableFn = onUnavailable || noop,
@@ -263,8 +254,7 @@ define(
               localPlayer
                 .speak({
                   text: cueText,
-                  locale: cueLang,
-                  onStart: onSpeechStart
+                  locale: cueLang
                 })
                 .catch(onUnavailableFn);
             }
@@ -284,8 +274,7 @@ define(
           var url = getAudioKeyUrl(key, lang);
           networkPlayer
             .play({
-              url: url,
-              onStart: onSpeechStart
+              url: url
             })
             .catch(onUnavailableFn);
           });
@@ -312,7 +301,7 @@ define(
 
       var url = urls.resolveResourceUrl('earcons/' + earconName + '.' + getMediaTypeForNetworkAudio());
 
-      require('audio/network-player', function (networkPlayer) {
+      require(['network-player/network-player'], function (networkPlayer) {
         networkPlayer.play({
           url: url
         });
