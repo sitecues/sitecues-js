@@ -75,7 +75,7 @@ define([
    * @param  {[jQuery element]} from [The HLB or The Foundation]
    * @param  {[jQuery element]} to   [The HLB or The Foundation]
    */
-  function mapForm($from, $to) {
+  function mapForm($from, $to, isHLBClosing) {
 
     // Get descendants of The HLB / The Foundation that may have a value.
     var $fromInputs = $from.find('input, textarea, select')
@@ -85,15 +85,22 @@ define([
         i, len = $fromInputs.length,
         $currentFromInput,
         $currentToInput,
+        cloneIndex,
         fromInputType;
 
     for (i = 0; i < len; i = i + 1) {
       $currentFromInput = $fromInputs.eq(i);
       $currentToInput = $toInputs.eq(i);
       fromInputType = $currentFromInput.prop('type');
+      cloneIndex = $currentToInput[0].getAttribute('data-sc-cloned');
+      if (isHLBClosing && $currentToInput[0].getAttribute('data-sc-cloned')) {
+        $currentToInput = $('[data-sc-cloned="' + cloneIndex + '"]');
+        $currentToInput[0].removeAttribute('data-sc-cloned');
+      }
       if (fromInputType === 'radio' || fromInputType === 'checkbox') {
         $currentToInput.prop('checked', $currentFromInput.prop('checked'));
-      } else {
+      }
+      else {
         if (platform.browser.isSafari) {
           // In Safari, text inputs opening up in HLB show their contents flush to the bottom
           // instead of vertically centered, unless we tweak the value of the input just after the styles are set
@@ -106,7 +113,7 @@ define([
 
   function copyFormDataToPage() {
     // Copy any form input the user may have entered in the HLB back into the page.
-    mapForm($hlb, $foundation);
+    mapForm($hlb, $foundation, true);
   }
 
   // Return truthy value if a button is pressed on a mouse event.
@@ -542,16 +549,22 @@ define([
   // Implemented to fix issue on http://www.gwmicro.com/Support/Email_Lists/ when HLBing Subscription Management
   function getValidFormElement($picked) {
 
-    var pickedElement              = $picked[0],
-        pickedElementsBoundingBox  = pickedElement.getBoundingClientRect(),
-        // TODO: Seth: Why not use jQuery's .clone() ??
-        pickedElementClone         = pickedElement.cloneNode(true),
-        $pickedAndDescendants      = $picked.find('*').addBack(),
-        $pickedCloneAndDescendants = $(pickedElementClone).find('*').addBack(),
-        $submitButton              = $(),// TOOD why? This was duplicating the button: $picked.closest('form').find('input[type="submit"],button[type="submit"]'),
-        submitButtonClone          = $submitButton.clone(true),
-        $foundation                = $('<form>').append(pickedElementClone, submitButtonClone),
-        i;
+    var i,
+      pickedElement              = $picked[0],
+      pickedElementsBoundingBox  = pickedElement.getBoundingClientRect(),
+      $formDescendants           = $picked.find('input, textarea, select')
+                                      .addBack('input, textarea, select');
+
+    for (i = 0; i < $formDescendants.length; i++) {
+      $formDescendants[i].setAttribute('data-sc-cloned', i + 1);
+    }
+
+    var pickedElementClone       = pickedElement.cloneNode(true),
+      $pickedAndDescendants      = $picked.find('*').addBack(),
+      $pickedCloneAndDescendants = $(pickedElementClone).find('*').addBack(),
+      $submitButton              = $(),// TOOD why? This was duplicating the button: $picked.closest('form').find('input[type="submit"],button[type="submit"]'),
+      submitButtonClone          = $submitButton.clone(true),
+      $foundation                = $('<form>').append(pickedElementClone, submitButtonClone);
 
     // Setting this to true will remove the $foundation from the DOM before inflation.
     // This is a very special case where the foundation is not the same as the picked element.
