@@ -39,6 +39,7 @@ define([
       // http://www.windoweyesforoffice.com/sitecues/index.php
   var EXTRA_HIGHLIGHT_PADDING = 2, // TODO: Figure out why this is needed and compute it.
       MOUSE_SAFETY_ZONE       = 50, // Number of pixels the mouse is allowed to go outside the HLB, before it closes.
+      FORMS_SELECTOR          = 'input, textarea, select',
 
       $picked,         // The object chosen by the picker.
       $foundation,     // The sanitized input, used as the basis for creating an $hlb.
@@ -78,10 +79,10 @@ define([
   function mapForm($from, $to, isHLBClosing) {
 
     // Get descendants of The HLB / The Foundation that may have a value.
-    var $fromInputs = $from.find('input, textarea, select')
-            .addBack('input, textarea, select'),
-        $toInputs = $to.find('input, textarea, select')
-            .addBack('input, textarea, select'),
+    var $fromInputs = $from.find(FORMS_SELECTOR)
+            .addBack(FORMS_SELECTOR),
+        $toInputs = $to.find(FORMS_SELECTOR)
+            .addBack(FORMS_SELECTOR),
         i, len = $fromInputs.length,
         $currentFromInput,
         $currentToInput,
@@ -93,12 +94,17 @@ define([
       $currentToInput = $toInputs.eq(i);
       fromInputType = $currentFromInput.prop('type');
       cloneIndex = $currentToInput[0].getAttribute('data-sc-cloned');
+
       //If we're closing the HLB, and the current form element is part of a cloned foundation
       if (isHLBClosing && cloneIndex) {
-        //Query the DOM for the original form element, so we copy the HLB form value back into the appropriate field
+        //Remove the index property from the HLB element
+        $currentFromInput[0].removeAttribute('data-sc-cloned');
+        //Query the DOM for the original form element, so we can copy the HLB form value back into the appropriate field
         $currentToInput = $('[data-sc-cloned="' + cloneIndex + '"]');
+        //Remove the index from the original form element
         $currentToInput[0].removeAttribute('data-sc-cloned');
       }
+
       if (fromInputType === 'radio' || fromInputType === 'checkbox') {
         $currentToInput.prop('checked', $currentFromInput.prop('checked'));
       }
@@ -110,6 +116,7 @@ define([
         }
         $currentToInput.val($currentFromInput.val());
       }
+
     }
   }
 
@@ -548,26 +555,32 @@ define([
     return $foundation;
   }
 
+  function setCloneIndexOnFormDescendants($picked) {
+    var i,
+      $formDescendants = $picked.find(FORMS_SELECTOR)
+        .addBack(FORMS_SELECTOR);
+
+    for (i = 0; i < $formDescendants.length; i++) {
+      $formDescendants[i].setAttribute('data-sc-cloned', i + 1);
+    }
+  }
+
   // Implemented to fix issue on http://www.gwmicro.com/Support/Email_Lists/ when HLBing Subscription Management
   function getValidFormElement($picked) {
 
     var i,
       pickedElement              = $picked[0],
-      pickedElementsBoundingBox  = pickedElement.getBoundingClientRect(),
-      $formDescendants           = $picked.find('input, textarea, select')
-                                      .addBack('input, textarea, select');
+      pickedElementsBoundingBox  = pickedElement.getBoundingClientRect();
 
     //Set data attributes on each of the form input elements
     //This allows us to query the DOM for the original elements
     //when we want to give them the values entered into the HLB
-    for (i = 0; i < $formDescendants.length; i++) {
-      $formDescendants[i].setAttribute('data-sc-cloned', i + 1);
-    }
+    setCloneIndexOnFormDescendants($picked);
 
     var pickedElementClone       = pickedElement.cloneNode(true),
       $pickedAndDescendants      = $picked.find('*').addBack(),
       $pickedCloneAndDescendants = $(pickedElementClone).find('*').addBack(),
-      $submitButton              = $(),// TOOD why? This was duplicating the button: $picked.closest('form').find('input[type="submit"],button[type="submit"]'),
+      $submitButton              = $(),// TODO why? This was duplicating the button: $picked.closest('form').find('input[type="submit"],button[type="submit"]'),
       submitButtonClone          = $submitButton.clone(true),
       $foundation                = $('<form>').append(pickedElementClone, submitButtonClone);
 
