@@ -177,15 +177,6 @@ module.exports = function (grunt) {
                 }
             },
 
-            // Selenium configuration, used for the app's functional testing...
-            selenium_start : {
-                // NOTE: This server is destroyed when grunt exits.
-                // You MUST chain this with other tasks.
-                options : {
-                    port : 4447  // Override Selenium default of 4444, which is taken on OS X Server
-                }
-            },
-
             // Intern configuration, used for the app's unit testing and functional testing...
             intern : {
                 options : {
@@ -200,11 +191,6 @@ module.exports = function (grunt) {
                         config : 'config/intern-cloud'
                     }
                 }
-            },
-
-            // Selenium configuration, used for the app's functional testing...
-            selenium_stop : {
-                options : { }
             },
 
             // Watch configuration, used for automatically executing
@@ -226,8 +212,6 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-jscs');
     // Load the plugin that provides the "jslint" task.
     grunt.loadNpmTasks('grunt-jslint');
-    // Load the plugin that provides the "start_selenium" and "start_selenium" tasks.
-    grunt.loadNpmTasks('grunt-selenium-webdriver');
     // Load the plugin that provides the "intern" task.
     grunt.loadNpmTasks('intern');
     // Load the plugin that provides the "watch" task.
@@ -238,7 +222,7 @@ module.exports = function (grunt) {
     // Make a new task called 'opinion'.
     grunt.registerTask('opinion', ['lint', 'jslint']);
     // Make a new task called 'test'.
-    grunt.registerTask('test', ['selenium_start', 'intern:normal']);
+    grunt.registerTask('test', ['intern:cloud']);
 
     // Default task, will run if no task is specified.
     grunt.registerTask('default', ['clean', 'lint']);
