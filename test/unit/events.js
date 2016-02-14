@@ -18,29 +18,6 @@ define(
                 events.off();
             });
 
-            test('.off() removes all handlers when called with no arguments', function () {
-
-                var deferred = this.async(1000),
-                    wasCalled = false;
-
-                events.on('one', function () {
-                    wasCalled = true;
-                });
-
-                events.off();
-
-                events.emit('one');
-
-                events.on('two', deferred.callback(function () {
-                    assert.isFalse(
-                        wasCalled,
-                        'A handler was run despite calling events.off with a wildcard'
-                    );
-                }));
-
-                events.emit('two');
-            });
-
             test('.on() handlers are run when events are emitted', function () {
 
                 var deferred = this.async(1000);
@@ -127,30 +104,58 @@ define(
 
                 var deferred = this.async(1000),
                     wasHandlerOneRun = false,
-                    wasHandlerTwoRun = false,
-                    handler1  = function () {
-                        wasHandlerOneRun = true;
-                    },
-                    handler2 = function () {
-                        wasHandlerTwoRun = true;
-                    };
+                    wasHandlerTwoRun = false;
+
+                function handler1() {
+                    wasHandlerOneRun = true;
+                }
+                function handler2() {
+                    wasHandlerTwoRun = true;
+                }
 
                 events.on('done', deferred.callback(function () {
-                    assert.isFalse(
+                    assert.isTrue(
                         wasHandlerOneRun,
-                        'Handler was run despite removing all handlers for that event'
+                        'When a handler is provided, others must be unaffected'
+                    );
+                    assert.isTrue(
+                        wasHandlerTwoRun,
+                        'When a handler is provided, it must not run anymore'
                     );
                 }));
 
-                events.on('one', handler1);
-                events.off('one', handler1);
-                events.emit('one');
-
-                events.on('two', handler1);
-                events.off('two');
-                events.emit('two');
+                events.on('something', handler1);
+                events.on('something', handler2);
+                events.on('something', handler2);
+                events.on('something', handler1);
+                events.off('something', handler2);
+                events.emit('something');
 
                 events.emit('done');
             });
+
+            test('.off() removes all handlers when called with no arguments', function () {
+
+                var deferred = this.async(1000),
+                    wasCalled = false;
+
+                events.on('one', function () {
+                    wasCalled = true;
+                });
+
+                events.off();
+
+                events.emit('one');
+
+                events.on('two', deferred.callback(function () {
+                    assert.isFalse(
+                        wasCalled,
+                        'A handler was run despite calling events.off with a wildcard'
+                    );
+                }));
+
+                events.emit('two');
+            });
         });
-});
+    }
+);

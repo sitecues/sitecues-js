@@ -9,9 +9,9 @@ define(
 
         'use strict';
 
-        var suite  = tdd.suite
-        ,   test   = tdd.test
-        ,   before = tdd.before;
+        var suite  = tdd.suite,
+            test   = tdd.test,
+            before = tdd.before;
 
         suite('Common module', function () {
 
@@ -23,17 +23,17 @@ define(
                 this.skip('This method is not currently exported.');
                 assert.isTrue(
                     common.isTransparentColor('transparent'),
-                    'using explicit transparent value must return true'
+                    'Explicit transparency is considered transparent'
                 );
 
                 assert.isTrue(
                     common.isTransparentColor('rgba(4,4,4,0)'),
-                    'using alpha transparency must return true'
+                    'Alpha transparency is considered transparent'
                 );
 
                 assert.isFalse(
                   common.isTransparentColor('rgba(4,4,4,.5)'),
-                  'using alpha transparency must return true'
+                  'Explicit lack of alpha transparency is considered opaque'
                 );
             });
 
@@ -42,8 +42,8 @@ define(
                     content   = '!,2.y+',
                     className = 'blah',
                     fragment  = common.createSVGFragment(content, className),
-                // Using .childNodes over .children because we specifically
-                // do not expect an immediate text node child.
+                    // Using .childNodes over .children because we specifically
+                    // do not expect an immediate text node child.
                     svg = fragment.childNodes[0];
 
                 assert.strictEqual(
@@ -128,10 +128,10 @@ define(
                     style = {},
                     parentStyle = {};
 
-                //An element is a visual region if it doesn't share a background color with its parent element,
-                //it has a background image and it's not a sprite
-                //it's z index is greater than its parent
-                //and it isn't media with a width and height greater than five
+                // An element is a visual region if it doesn't share a background color with its parent element,
+                // it has a background image and it's not a sprite
+                // it's z index is greater than its parent
+                // and it isn't media with a width and height greater than five
                 style.backgroundColor = 'red';
                 parentStyle.backgroundColor = 'red';
                 style.backgroundImage = 'none';
@@ -167,9 +167,9 @@ define(
 
             test('.isSprite()', function () {
                 var style = {};
-                //Element is a sprite if its backgroundImage != none,
-                //and backgroundRepeat is 'no-repeat'
-                //or backgroundPosition is 0 for x or y coors
+                // Element is a sprite if its backgroundImage != none,
+                // and backgroundRepeat is 'no-repeat'
+                // or backgroundPosition is 0 for x or y coors
                 style.backgroundImage = 'url(\"test.com/test.png\")';
                 style.backgroundRepeat = 'no-repeat';
                 style.backgroundPosition = '1px 1px';
@@ -198,7 +198,7 @@ define(
             });
 
             test('.hasOwnBackground()', function () {
-                //TODO: remove style.backgroundImage != none check from isSprite check, redundant
+                // TODO: remove style.backgroundImage != none check from isSprite check, redundant
                 var element = {},
                     style = {},
                     parentStyle = {};
@@ -247,8 +247,8 @@ define(
             });
 
             test('.hasVisibleContent()', function () {
-                //Checks for size of media content box
-                //Checks if (max 10) text node children are empty
+                // Checks for size of media content box
+                // Checks if (max 10) text node children are empty
                 var element = document.createElement('textarea'),
                     text = document.createTextNode('\n\n\n\n\n\n\n\n\n');
                 element.appendChild(text);
@@ -309,18 +309,19 @@ define(
                 textArea.appendChild(document.createTextNode('test1'));
                 textArea.appendChild(document.createTextNode('\n\n\n\n\n\n\n\n\n\n'));
                 textArea.appendChild(document.createTextNode('test2'));
+
                 document.body.appendChild(textArea);
                 assert.isTrue(
                     common.hasVertScroll(textArea),
                     'Element has a scroll height greater than its height'
                 );
+                // Cleanup side effects from the test.
                 document.body.removeChild(textArea);
-
             });
 
             test('.getBulletWidth()', function () {
                 // Only checks for decimal, could check for decimal-leading-zero, lower latin, initial (decimal), etc.
-                //getClientWidth returns an integer value, getBoundingClientRect properties are not truncated
+                // getClientWidth returns an integer value, getBoundingClientRect properties are not truncated
                 var list = document.createElement('ul');
                 document.body.appendChild(list);
                 list.appendChild(document.createElement('li'));
@@ -342,7 +343,7 @@ define(
             test('.getComputedScale()', function () {
                 var div = document.createElement('div');
                 document.body.appendChild(div);
-                div.style[platform.transformProperty] = 'scale(5,5) ';
+                div.style.transform = 'scale(5,5) ';
                 assert.strictEqual(
                     common.getComputedScale(div),
                     5,
@@ -356,7 +357,6 @@ define(
                 );
                 // If an asymmetrical scale has been applied, only returns x scaling factor
             });
-
         });
     }
 );
