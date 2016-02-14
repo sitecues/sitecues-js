@@ -1,21 +1,42 @@
-// This module modifies the configuration for the testing framework to use cloud platforms.
+// This module modifies the configuration for using the testing framework with cloud platforms.
 
 define(
-    [   // dependencies....
-        './intern'  // base configuration
+    [
+        'intern',   // public API for the testing framework itself
+        './intern',  // base configuration
+        'intern/dojo/text!../package.json'
     ],
-    function (test) {
+    function (intern, config, pkgStr) {
 
         'use strict';
 
-        // Setting properties on the test object here overrides the base configuration.
+        var pkg = JSON.parse(pkgStr),
+            build = 'UNKNOWN',
+            project = pkg.name;
+
+        if (intern.args.build) {
+            build = intern.args.build;
+        }
+        // Make sure we are in Node and not a browser.
+        else if (typeof process === 'object' && process && process.env) {
+            build = process.env.BUILD || process.env.COMMIT;
+        }
+
+        // Setting properties on the config object here overrides the base configuration.
         // Best practice is to set only what needs to be different.
 
-        // BrowserStack accepts this as a category for the build.
-        test.capabilities.project = 'sitecues-js';
+        // Miscellaneous configuration, mainly for Selenium.
+        // Examples: https://code.google.com/p/selenium/wiki/DesiredCapabilities
+        config.capabilities = config.capabilities || {};
+        // BrowserStack-specific group for the build.
+        config.capabilities.project = project;
+        // Group for the test run, useful to map success history to code changes.
+        config.capabilities.build = build;
+        // Name of the test run, for logging purposes.
+        config.capabilities.name = 'Developer Test - ' + project;
 
-        // Places where unit and/or functional tests will be run...
-        test.environments = [
+        // Places where unit and/or functional tests will be run.
+        config.environments = [
             // BrowserStack-style...
             // Get latest: https://www.browserstack.com/automate/browsers.json
             // { os: "Windows", os_version: '7',          browser: 'ie',      browser_version: '10.0' },
@@ -39,35 +60,36 @@ define(
         ];
 
         // How many browsers may be open at once.
-        test.maxConcurrency = 10;
+        config.maxConcurrency = 3;
 
         // Each cloud testing service has their own weird quirks and different APIs,
         // so load up the necessary configuration to talk to them.
-        // test.tunnel = 'NullTunnel';         // no tunnel (default, if none provided)
-        test.tunnel = 'BrowserStackTunnel';
-        // test.tunnel = 'SauceLabsTunnel';
-        // test.tunnel = 'TestingBotTunnel';
-        test.tunnelOptions = {
+        // config.tunnel = 'NullTunnel';         // no tunnel (default, if none provided)
+        config.tunnel = 'BrowserStackTunnel';
+        // config.tunnel = 'SauceLabsTunnel';
+        // config.tunnel = 'TestingBotTunnel';
+        config.tunnelOptions = {
             // host: 'localhost:4447',  // custom location to find the selenium server
             // verbose: true            // more logging, only supported by BrowserStack
         };
 
-        // These are unit tests, which check the APIs of our application...
-        // test.suites = [
+        // These are unit tests, which check the APIs of our app.
+        // config.suites = [
         //     'test/unit/common'
         // ];
-        // These are functional tests, which check the user-facing behavior of our application...
-        // test.functionalSuites = [
+        // These are functional tests, which check the user-facing behavior of our app.
+        // config.functionalSuites = [
 
         // ];
 
-        // Any test IDs ("suite name - test name") which do NOT match this regex will be skipped...
-        // test.grep = /.*/;
+        // Test whitelist regex. Only test IDs ('suite name - test name')
+        // that match this pattern will run, all others will be skipped.
+        // config.grep = /.*/;
 
-        // The paths that match this regex will NOT be included in code coverage reports...
-        // test.excludeInstrumentation = /^(?:config|test|node_modules)\//;
+        // The paths that match this regex will NOT be included in code coverage reports.
+        // config.excludeInstrumentation = /^(?:config|test|node_modules)\//;
 
-        // Returns the modified settings...
-        return test;
+        // Provide the modified settings.
+        return config;
     }
 );

@@ -118,7 +118,7 @@ define(
                         wasHandlerOneRun,
                         'When a handler is provided, others must be unaffected'
                     );
-                    assert.isTrue(
+                    assert.isFalse(
                         wasHandlerTwoRun,
                         'When a handler is provided, it must not run anymore'
                     );

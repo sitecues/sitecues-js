@@ -5,17 +5,24 @@ define(
         // Base configuration.
         './intern-cloud'
     ],
-    function (test) {
-
-        // Setting properties on the test object here overrides the base configuration.
-        // Best practice is to set only what needs to be different.
+    function (config) {
 
         'use strict';
 
-        test.reporters = [
+        // Setting properties on the config object here overrides the base configuration.
+        // Best practice is to set only what needs to be different.
+
+        // Replace the first word of the test run name with "CI",
+        // to indicate that the test was triggered by CI and not
+        // a developer.
+        config.capabilities.name = config.capabilities.name.replace(
+            /^.+?(?=\s)/, 'CI'
+        );
+
+        config.reporters = [
             { id : 'JUnit', filename : 'report/test/junit.xml' }
         ];
 
-        return test;
+        return config;
     }
 );
