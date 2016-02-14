@@ -5,23 +5,6 @@ module.exports = function (grunt) {
     // Project configuration.
     grunt.initConfig(
         {
-            // Getting the full node app configuration as an object
-            // which can be used internally...
-            pkg : grunt.file.readJSON('package.json'),
-
-            // Clean configuration, used to wipe out temporary build data,
-            // for more robust and reliable builds...
-            clean : {
-                // options : {
-                // //    'no-write': true // this does a dry-run, logs but no actual file deletion
-                // },
-                normal : {
-                    src : [
-                        'build' // directory created by the build process
-                    ]
-                }
-            },
-
             // JSONLint configuration, used for linting config files...
             jsonlint : {
                 normal : {
@@ -202,8 +185,6 @@ module.exports = function (grunt) {
         }
     );
 
-    // Load the plugin that provides the "clean" task.
-    grunt.loadNpmTasks('grunt-contrib-clean');
     // Load the plugin that provides the "jsonlint" task.
     grunt.loadNpmTasks('grunt-jsonlint');
     // Load the plugin that provides the "jshint" task.
@@ -225,6 +206,6 @@ module.exports = function (grunt) {
     grunt.registerTask('test', ['intern:cloud']);
 
     // Default task, will run if no task is specified.
-    grunt.registerTask('default', ['clean', 'lint']);
+    grunt.registerTask('default', ['lint']);
 
 };
