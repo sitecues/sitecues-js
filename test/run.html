@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8">
+        <title>Sitecues Unit Tests</title>
+        <meta name="author" content="Seth Holladay">
+        <meta name="description" content="Convenience page for running the unit tests.">
+        <meta http-equiv="refresh" content="5; url=http://localhost:9000/__intern/client.html?config=config/intern&initialBaseUrl=/">
+        <style>
+            body {
+                font-family: Calibri, sans-serif;
+                font-size: 150%;
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1>Sitecues Unit Tests</h1>
+            <p>These are low-level API tests on the client.</p>
+        </header>
+        <article>
+            <p>
+                Attempting to redirect you to the Intern browser client via the Intern proxy.
+            </P>
+            <p>
+                Note that this requires the Intern proxy to be running. You can start it by running the command below.
+            </p>
+            <code>
+                node node_modules/.bin/intern-runner config=config/intern proxyOnly
+            </code>
+            <p>
+                If you want to learn more, take a look at:
+            </p>
+            <ul>
+                <li>The <a href="./README.md">README</a> for an overview.</li>
+                <li>The <a href="./help.html">help page</a> for a brief tutorial.</li>
+                <li>The <a href="https://equinox.atlassian.net/wiki/x/EgBOAg">documentation</a> for everything else.</li>
+            </ul>
+        </article>
+    </body>
+</html>
