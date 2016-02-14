@@ -26,10 +26,6 @@ define(
         // make sure we are in Node and not a browser...
         else if (typeof process === 'object' && process && process.env) {
             build = process.env.BUILD || process.env.COMMIT;
-            console.log('env:');
-            for (var key in process.env) {
-                console.log('   ', key, ':', process.env[key]);
-            }
         }
 
         return {
