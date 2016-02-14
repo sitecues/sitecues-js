@@ -4,6 +4,9 @@
 define(
     [],
     function () {
+
+        'use strict';
+
         return [
             'simple',
             'zoom'
