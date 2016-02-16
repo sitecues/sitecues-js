@@ -13,7 +13,7 @@
 // build system is responsible for privately namespacing them. Here, we must undo that to avoid
 // erroneous re-definition errors.
 
-/* globals -define, -require, SC_RESOURCE_FOLDER_NAME */
+/* globals -define, -require, SC_RESOURCE_FOLDER_NAME, importScripts */
 
 /* jshint proto: true */
 
@@ -49,7 +49,6 @@ var requirejs, require, define;
     contexts = {},
     queue = [],
     currDirRegExp = /^\.\//,
-    urlRegExp = /^\/|\:|\?|\.js$/,
     commentRegExp = /(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg,
     cjsRequireRegExp = /[^.]\s*require\s*\(\s*["']([^'"\s]+)["']\s*\)/g,
     jsSuffixRegExp = /\.js$/;
@@ -147,9 +146,10 @@ var requirejs, require, define;
       }
     }
 
-    function syncTick(fn) {
-      fn();
-    }
+    // Unused
+    //function syncTick(fn) {
+    //  fn();
+    //}
 
     function isFunObj(x) {
       var type = typeof x;
@@ -159,10 +159,14 @@ var requirejs, require, define;
     //Use setImmediate.bind() because attaching it (or setTimeout directly
     //to prim will result in errors. Noticed first on IE10,
     //issue requirejs/alameda#2)
-    nextTick = typeof setImmediate === 'function' ? setImmediate.bind() :
-      (typeof process !== 'undefined' && process.nextTick ?
-        process.nextTick : (typeof setTimeout !== 'undefined' ?
-        asyncTick : syncTick));
+    nextTick = asyncTick;
+    // The below code caused SC-3449
+    // Trying to call nextTick() in IE11 on some websites even with the .bind()
+    // caused SCRIPT65535: Invalid calling object
+    //nextTick = typeof setImmediate === 'function' ? setImmediate.bind() :
+    //  (typeof process !== 'undefined' && process.nextTick ?
+    //    process.nextTick : (typeof setTimeout !== 'undefined' ?
+    //    asyncTick : syncTick));
 
     function notify(ary, value) {
       prim.nextTick(function () {
