@@ -20,7 +20,7 @@ define(
         'use strict';
 
             const
-                testUrl    = url('simple.html', 9000),
+                testUrl    = url('simple.html'),
                 suite      = tdd.suite,
                 test       = tdd.test,
                 before     = tdd.before,

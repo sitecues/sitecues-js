@@ -30,7 +30,7 @@ define(
 
         suite('Zoom controls', function () {
 
-            const testUrl = url('simple.html', 9999);
+            const testUrl = url('simple.html');
 
             let remote,
                 browserUtil,
@@ -41,13 +41,13 @@ define(
 
             // Code to run when the suite starts, before any test.
             before(function () {
-                //Browser interface
+                // Browser interface
                 remote  = this.remote;
-                //Test utilities
+                // Test utilities
                 browserUtil = new BrowserUtility(remote);  //Browser utilities
                 wait    = new Wait(remote, browserUtil);  //Waits for page transformations & events
                 input   = new UserInput(remote, browserUtil, wait);
-                //UI abstractions
+                // UI abstractions
                 badge   = new Badge(remote, input, wait);
                 panel   = new Panel(remote, browserUtil, input, wait);
 

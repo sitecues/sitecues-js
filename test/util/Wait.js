@@ -32,7 +32,7 @@ define(
                         function (state, done) {
                             var sitecues = window.sitecues = window.sitecues || {};
                             if (sitecues.readyState === state.COMPLETE) {
-                                done('used ready state');
+                                done();
                             }
                             else if (typeof sitecues.onReady === 'function') {
                                 throw new Error(
@@ -42,7 +42,7 @@ define(
                             }
                             else {
                                 sitecues.onReady = function () {
-                                    done('onReady callback');
+                                    done();
                                 };
                             }
                         },
