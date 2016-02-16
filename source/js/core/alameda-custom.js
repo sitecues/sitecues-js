@@ -815,11 +815,11 @@ var requirejs, require, define;
           config.config[plainId] = config.config[id];
         }
 
-        try {
+        //try {
           req.exec(text);
-        } catch (e) {
-          reject(d, new Error('fromText eval for ' + plainId +
-            ' failed: ' + e));
+        //} catch (e) {
+        //  reject(d, new Error('fromText eval for ' + plainId +
+        //    ' failed: ' + e));
         }
 
         //Execute any waiting define created by the plainId
