@@ -820,7 +820,7 @@ var requirejs, require, define;
         //} catch (e) {
         //  reject(d, new Error('fromText eval for ' + plainId +
         //    ' failed: ' + e));
-        }
+        //}
 
         //Execute any waiting define created by the plainId
         takeQueue(plainId);
