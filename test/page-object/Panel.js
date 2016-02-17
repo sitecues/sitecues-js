@@ -40,19 +40,20 @@ define(
                 return input
                     .clickElement(Panel.THUMB_SELECTOR)
                     .then(function () {
-                        return browserUtil.getTransformAttributeName();
-                    })
-                    .then(function (transform) {
+                        const transform = 'transform';
                         zoom = (zoom < 1) ? 1 : (zoom > 3) ? 3 : zoom;
                         return remote
-                            .execute(function (selector, zoom, transform) {
-                                var matrix = getComputedStyle(document.body)[transform],
-                                    currentZoom  = Number(matrix.substring(7).split(',')[0]),
-                                    diff   = zoom - currentZoom,
-                                    slider  = document.querySelector(selector),
-                                    slideRect = slider.getBoundingClientRect();
-                                    return diff / 2 * slideRect.width;
-                            }, [Panel.SLIDER_SELECTOR, zoom, transform])
+                            .execute(
+                                function (selector, zoom, transform) {
+                                    var matrix = getComputedStyle(document.body)[transform],
+                                        currentZoom  = Number(matrix.substring(7).split(',')[0]),
+                                        diff   = zoom - currentZoom,
+                                        slider  = document.querySelector(selector),
+                                        slideRect = slider.getBoundingClientRect();
+                                        return diff / 2 * slideRect.width;
+                                },
+                                [Panel.SLIDER_SELECTOR, zoom, transform]
+                            )
                             .then(function (offset) {
                                 function moveSlider(distance) {
                                     return remote
@@ -97,7 +98,7 @@ define(
                     .clickElement(selector)
                     .then(function () {
                         return wait.forTransformToComplete('body', 4000, 25)
-                    })
+                    });
             }
 
             clickSliderBar(zoom) {

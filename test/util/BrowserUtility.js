@@ -27,16 +27,6 @@ define(
                 this.browserName = remote.environmentType.browserName;
             }
 
-            getTransformAttributeName() {
-                switch (this.browserName) {
-                    case 'chrome':
-                    case 'safari':
-                        return 'webkitTransform';
-                    default:
-                        return 'transform';
-                }
-            }
-
             getKeyCodeAndBrowserName(key) {
                 const data = [keyCodeMap[key][this.browserName], this.browserName];
                 return this.remote

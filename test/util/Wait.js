@@ -54,9 +54,8 @@ define(
             }
 
             forTransformToComplete(selector, wait, pollInterval) {
-                var transform = this.browserUtil.getTransformAttributeName();
                 return this.poll.untilElementStabilizes(
-                    selector, wait, pollInterval, null, [transform]
+                    selector, wait, pollInterval, null, ['transform']
                 );
             }
 
