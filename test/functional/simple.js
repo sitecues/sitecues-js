@@ -34,8 +34,7 @@ define(
                     selector: 'p'
                 };
 
-            let remote,
-                highlight,
+            let highlight,
                 lens,
                 browserUtil,
                 wait;
@@ -43,7 +42,7 @@ define(
             // Code to run when the suite starts, before any test.
             before(function () {
                 // Browser interface.
-                remote = this.remote;
+                const remote = this.remote;
                 // Local storage, transform property strings, namespace management.
                 browserUtil = new BrowserUtil(remote);
                 // Utils for promising sitecues events and element transformations.
@@ -52,6 +51,7 @@ define(
                 highlight = new Highlight(remote, wait);
                 lens      = new Lens(remote, wait);
                 return remote
+                    .setWindowPosition(0, 0)
                     // Best effort to normalize window sizes (not every browser opens the same)
                     .maximizeWindow()
                     // Navigate to the desired page.
@@ -70,7 +70,7 @@ define(
 
             // Code to run prior to each individual test in this suite.
             beforeEach(function () {
-                return remote
+                return this.remote
                     // NOTE: Page load timeouts are not yet supported in SafariDriver.
                     //       However, we are not testing Safari at the moment.
                     .setPageLoadTimeout(2000)
@@ -445,7 +445,7 @@ define(
             // test('Screenshot experiment', function () {
             //
             //     const
-            //         canDoScreenshot = this.remote.session.capabilities.takesScreenshot;
+            //         canDoScreenshot = this.remote.environmentType.takesScreenshot;
             //
             //     return this.remote               // represents the browser being tested
             //         .then(function () {

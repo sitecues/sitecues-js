@@ -24,7 +24,7 @@ define(
         class BrowserUtility extends Base {
             constructor(remote) {
                 super(remote);
-                this.browserName = remote.session._capabilities.browserName;
+                this.browserName = remote.environmentType.browserName;
             }
 
             getTransformAttributeName() {
