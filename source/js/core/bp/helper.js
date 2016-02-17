@@ -117,6 +117,24 @@ define(['core/platform', 'core/bp/constants'], function(platform, BP_CONST) {
     return false;
   }
 
+  //Edge can't handle text anchors during transformations, so we manually fix the x position of text within SVGs
+  function fixTextAnchors(svg) {
+    var elementsWithAnchors = svg.parentElement.querySelectorAll('[text-anchor]');
+
+    Array.prototype.forEach.call(elementsWithAnchors, function (element) {
+      var anchor     = element.getAttribute('text-anchor'),
+          textLength = element.getComputedTextLength(),
+          x          = parseFloat(element.getAttribute('x'));
+      if (anchor === 'middle') {
+        element.setAttribute('x', (x - textLength / 2).toFixed(2));
+      }
+      else if (anchor === 'end') {
+        element.setAttribute('x', (x - textLength).toFixed(2));
+      }
+      element.removeAttribute('text-anchor');
+    });
+  }
+
   return {
     byId: byId,
     invalidateId: invalidateId,
@@ -126,7 +144,8 @@ define(['core/platform', 'core/bp/constants'], function(platform, BP_CONST) {
     getCurrentSVGElementTransforms: getCurrentSVGElementTransforms,
     getNumberFromString: getNumberFromString,
     getEventTarget: getEventTarget,
-    cancelEvent: cancelEvent
+    cancelEvent: cancelEvent,
+    fixTextAnchors: fixTextAnchors
   };
 
 });

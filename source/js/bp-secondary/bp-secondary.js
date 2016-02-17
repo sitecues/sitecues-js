@@ -34,6 +34,7 @@ define(['core/bp/constants',
     origFillHeight,
     isActive = false,
     isInitialized,
+    hasOpened,
     fadeInTimer,
     animateHeightTimer,
     animationsCompleteTimer,
@@ -339,6 +340,13 @@ define(['core/bp/constants',
     updateGlobalState();
 
     if (SC_DEV) { console.log('Transitioning secondary panel to mode: ' + state.get('secondaryPanelTransitionTo')); }
+
+    //Text anchors don't work in Edge, and furthermore the secondary panel isn't rendered in Edge until it is enabled
+    //So this is where we have access to the length of the string and can reposition the text elements correctly
+    if (platform.browser.isEdge && !hasOpened) {
+      helper.fixTextAnchors(byId(BP_CONST.SECONDARY_ID));
+      hasOpened = true;
+    }
 
     animateButtonMenuDrop(willEnable);
 

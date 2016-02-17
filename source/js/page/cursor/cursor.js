@@ -333,7 +333,7 @@ define(['$', 'page/style-service/style-service', 'core/conf/user/manager', 'page
 
   function onPageZoom(pageZoom) {
     if (userSpecifiedSize) {
-      toggleZoomOptimization(); // Renable cursors -- they were disabled for zoom performance in IE
+      toggleZoomOptimization(); // Re-enable cursors -- they were disabled for zoom performance in IE
       return;
     }
     // At page zoom level 1.0, the cursor is the default size (same as us being off).
