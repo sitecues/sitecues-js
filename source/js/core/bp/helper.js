@@ -125,12 +125,12 @@ define(['core/platform', 'core/bp/constants'], function(platform, BP_CONST) {
 
     Array.prototype.forEach.call(elementsWithAnchors, function (element) {
       var anchor = element.getAttribute('text-anchor'),
-          x      = parseFloat(element.x),
+          x      = parseFloat(element.getAttribute('x')),
           textWidthInPixels = element.getComputedTextLength();
 
       function setX(val) {
         var SIG_FIGS = 2;
-        element.x = val.toFixed(SIG_FIGS);
+        element.setAttribute('x', val.toFixed(SIG_FIGS));
       }
 
       if (anchor === 'middle') {
