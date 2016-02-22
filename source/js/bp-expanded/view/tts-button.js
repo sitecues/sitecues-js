@@ -50,7 +50,7 @@ define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/loca
   function setTTSLabel(state) {
     var speechStateLabel = getTTSLabelElement(),
         localizedState = locale.translate(state),
-        text = localizedSpeechString + localizedState,
+        text = localizedSpeechString + ' ' + localizedState,
         node = document.createTextNode(text);
 
     speechStateLabel.removeChild(speechStateLabel.firstChild);
