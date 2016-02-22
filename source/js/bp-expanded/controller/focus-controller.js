@@ -239,10 +239,7 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
       document.activeElement.blur();
     } else {
       var focusable = savedDocumentFocus || ('focus' in document ? document : document.body);
-      //TODO: This breaks in Edge for some reason, haven't looked into it yet
-      if (typeof focusable.focus === 'function') {
-        focusable.focus();
-      }
+      focusable.focus();
     }
 
     window.removeEventListener('keydown', processKeyDown, true);
