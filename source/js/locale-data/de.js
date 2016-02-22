@@ -27,8 +27,8 @@ define([], function() {
     post_zoom: ' fach Zoom',
     zoom_off: 'Zoom Aus',
     speech: 'Sprache',
-    on: 'Ein',
-    off: 'Aus',
+    on: ' Ein',
+    off: ' Aus',
     // - Secondary
     tips: 'Tipps',
     settings: 'Einstellen',

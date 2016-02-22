@@ -27,8 +27,8 @@ define([], function() {
     post_zoom: 'x',
     zoom_off: 'Sin acercamiento',
     speech: 'Voz',
-    on: 'Alta',
-    off: 'Baja',
+    on: ' Alta',
+    off: ' Baja',
     // - Secondary
     tips: 'Consejos',
     settings: 'Ajustes',

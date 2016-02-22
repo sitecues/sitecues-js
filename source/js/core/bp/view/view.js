@@ -147,24 +147,11 @@ define([
     // Get size animations ready so that the badge can gracefully grow into a panel
     sizeAnimation.init();
 
-    //Edge causes the TTS text to jump around when apply the cursor styles, so we'll initialize the cursors prematurely
-    if (platform.browser.isEdge) {
-      require(['page/cursor/cursor'], function(cursor) {
-        cursor.init();
-        // Set badge classes. Render the badge. Render slider.
-        update();
+    // Set badge classes. Render the badge. Render slider.
+    update();
 
-        // Completion
-        onComplete();
-      });
-    }
-    else {
-      // Set badge classes. Render the badge. Render slider.
-      update();
-
-      // Completion
-      onComplete();
-    }
+    // Completion
+    onComplete();
 
   }
 
