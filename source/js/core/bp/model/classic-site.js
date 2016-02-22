@@ -32,7 +32,6 @@ define(['core/conf/site'], function(site) {
     's-7b90f601': 1,
     's-7d6bc776': 1,
     's-7f2e7ce1': 1,
-    's-9a526dbe': 1,
     's-9afa6ab9': 1,
     's-a5851e07': 1,
     's-acc8f046': 1,
