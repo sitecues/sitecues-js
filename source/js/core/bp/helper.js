@@ -129,8 +129,8 @@ define(['core/platform', 'core/bp/constants'], function(platform, BP_CONST) {
           textWidthInPixels = element.getComputedTextLength();
 
       function setX(val) {
-        var SIG_FIGS = 2;
-        element.setAttribute('x', val.toFixed(SIG_FIGS));
+        var DECIMAL_PLACES = 2;
+        element.setAttribute('x', val.toFixed(DECIMAL_PLACES));
       }
 
       if (anchor === 'middle') {
