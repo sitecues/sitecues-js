@@ -127,10 +127,16 @@ define([
     }
   }
 
+  function isClassicBrowser() {
+    // IE 9 is awful
+    // Edge is too, at least for now
+    return platform.browser.isIE9 || platform.browser.isEdge;
+  }
+
   // Classic mode is where the ? shows up instead of the down pointing arrow
-  // TODO remove
+  // TODO remove one day, we hope
   function initClassicMode() {
-    state.set('isClassicMode', !!(classicSite() || platform.browser.isIE9));
+    state.set('isClassicMode', !!(classicSite() || isClassicBrowser()));
     sitecues.toggleClassicMode = function() {
       state.set('isClassicMode', !state.get('isClassicMode'));
     };
