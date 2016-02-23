@@ -5,7 +5,7 @@ var gulp = require('gulp'),
 
 function lint() {
   var LINT_GLOB = [
-    'source/js/**/*.js', '!source/js/**/jquery.js', '!source/js/**/zepto.js',
+    'source/js/**/*.js', '!source/js/**/jquery.js', '!source/js/**/zepto.js', '!source/js/core/alameda-custom.js',
     'extension/source/js/**/*.js', '!extension/source/js/templated-code/**/*',
     // TODO lint tests
     //'test/**/*.js', '!test/legacy/**/*.js'.

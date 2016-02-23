@@ -5,23 +5,6 @@ module.exports = function (grunt) {
     // Project configuration.
     grunt.initConfig(
         {
-            // Getting the full node app configuration as an object
-            // which can be used internally...
-            pkg : grunt.file.readJSON('package.json'),
-
-            // Clean configuration, used to wipe out temporary build data,
-            // for more robust and reliable builds...
-            clean : {
-                // options : {
-                // //    'no-write': true // this does a dry-run, logs but no actual file deletion
-                // },
-                normal : {
-                    src : [
-                        'build' // directory created by the build process
-                    ]
-                }
-            },
-
             // JSONLint configuration, used for linting config files...
             jsonlint : {
                 normal : {
@@ -177,15 +160,6 @@ module.exports = function (grunt) {
                 }
             },
 
-            // Selenium configuration, used for the app's functional testing...
-            selenium_start : {
-                // NOTE: This server is destroyed when grunt exits.
-                // You MUST chain this with other tasks.
-                options : {
-                    port : 4447  // Override Selenium default of 4444, which is taken on OS X Server
-                }
-            },
-
             // Intern configuration, used for the app's unit testing and functional testing...
             intern : {
                 options : {
@@ -202,11 +176,6 @@ module.exports = function (grunt) {
                 }
             },
 
-            // Selenium configuration, used for the app's functional testing...
-            selenium_stop : {
-                options : { }
-            },
-
             // Watch configuration, used for automatically executing
             // tasks when saving app files during development...
             watch : {
@@ -216,8 +185,6 @@ module.exports = function (grunt) {
         }
     );
 
-    // Load the plugin that provides the "clean" task.
-    grunt.loadNpmTasks('grunt-contrib-clean');
     // Load the plugin that provides the "jsonlint" task.
     grunt.loadNpmTasks('grunt-jsonlint');
     // Load the plugin that provides the "jshint" task.
@@ -226,8 +193,6 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-jscs');
     // Load the plugin that provides the "jslint" task.
     grunt.loadNpmTasks('grunt-jslint');
-    // Load the plugin that provides the "start_selenium" and "start_selenium" tasks.
-    grunt.loadNpmTasks('grunt-selenium-webdriver');
     // Load the plugin that provides the "intern" task.
     grunt.loadNpmTasks('intern');
     // Load the plugin that provides the "watch" task.
@@ -238,9 +203,9 @@ module.exports = function (grunt) {
     // Make a new task called 'opinion'.
     grunt.registerTask('opinion', ['lint', 'jslint']);
     // Make a new task called 'test'.
-    grunt.registerTask('test', ['selenium_start', 'intern:normal']);
+    grunt.registerTask('test', ['intern:cloud']);
 
     // Default task, will run if no task is specified.
-    grunt.registerTask('default', ['clean', 'lint']);
+    grunt.registerTask('default', ['lint']);
 
 };

@@ -1,10 +1,10 @@
 {
   "manifest_version" : 2,
 
-  "name"             : "sitecues® everywhere",
-  "short_name"       : "sitecues® everywhere",
+  "name"             : "sitecues everywhere®",
+  "short_name"       : "sitecues everywhere®",
   "description"      : "sitecues zoom and speech for any website",
-  "version"          : "0.0.21",
+  "version"          : "0.0.30",
   "homepage_url"     : "http://sitecues.com/",
 
   "icons" : {

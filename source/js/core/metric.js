@@ -9,7 +9,8 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
     // IMPORTANT! Have the backend team review all metrics changes!!!
     var METRICS_VERSION = 5,
         isInitialized,
-        name = constants.METRIC_NAME;
+        name = constants.METRIC_NAME,
+        metricHistory = [];
 
 
     function Metric(name, details) {
@@ -27,7 +28,6 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
     };
 
     Metric.prototype.send = function send() {
-
       if (SC_LOCAL || site.get('suppressMetrics')) {   // No metric events in local mode
         return;
       }
@@ -37,9 +37,13 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
         data: this.data
       });
 
-      this.sent = true;
+      metricHistory.push(this);
 
     };
+
+    function getMetricHistory(){
+      return metricHistory;
+    }
 
     function wrap(metricName) {
       function metricFn(details) {
@@ -72,6 +76,7 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
 
     return {
       init: init,
+      getMetricHistory: getMetricHistory,
       TtsRequest: wrap(name.TTS_REQUEST),
       PanelFocusMove: wrap(name.PANEL_FOCUS_MOVE),
       PanelClick: wrap(name.PANEL_CLICK),

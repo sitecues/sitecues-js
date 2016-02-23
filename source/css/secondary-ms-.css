@@ -17,10 +17,7 @@ sc-button[data-setting-name="themeName"][aria-pressed="true"]:after {
 /* ------------- Textarea placeholder ------------ */
 
 #scp-feedback-textarea:-ms-input-placeholder {
-  position: relative !important;
   font-size: 24px !important;
-  left: 20px !important;
-  top: 35px !important;
   color: #777 !important;
 }
 

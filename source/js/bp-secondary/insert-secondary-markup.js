@@ -169,7 +169,7 @@ htmlSecondary =
     if (!isInitialized) {
       isInitialized = true;
       insertHtml('scp-html-secondary-anchor', htmlSecondary);
-      insertSvg('scp-secondary-anchor', svgSecondary, true);
+      insertSvg('scp-secondary-anchor', svgSecondary);
       insertSheets();
     }
   }

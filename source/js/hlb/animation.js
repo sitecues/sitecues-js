@@ -6,7 +6,7 @@ define(['hlb/dimmer', 'page/util/common', 'hlb/positioning', 'core/platform', '$
   function (dimmer, common, hlbPositioning, platform, $) {
 
   var INFLATION_SPEED = 400, // Default inflation duration
-      INFLATION_SPEED_FAST = 0, // Inflation duration when retargeting
+      INFLATION_SPEED_FAST = 0, // Inflation duration when retargeting -- need > 0 so that animation end fires correctly
       DEFLATION_SPEED = 150, // Default deflation duration
 
       getStartingScale = hlbPositioning.getStartingScale,
@@ -86,23 +86,35 @@ define(['hlb/dimmer', 'page/util/common', 'hlb/positioning', 'core/platform', '$
   }
 
   function animateCss(hlbElement, startScale, endScale, speed, translateCSS, onCompleteFn) {
+    var $hlbElement = $(hlbElement),
+      fromCss,
+      toCss = { transition: '', transform : 'scale(' + endScale + ') ' + translateCSS };
 
-    $(hlbElement).css({
+    if (!speed) {
+      // No animation -- do it immediately and return
+      $hlbElement.css(toCss);
+      onCompleteFn();
+      return;
+    }
+
+    // Animate fromCss -> toCss
+    fromCss = {
       transition: '',
       transform: 'scale(' + startScale + ') ' + translateCSS
-    });
+    };
+    $hlbElement.css(fromCss);
 
-    function onComplete() {
-      hlbElement.removeEventListener(platform.transitionEndEvent, onComplete);
+    function onTransitionEnd() {
+      hlbElement.removeEventListener(platform.transitionEndEvent, onTransitionEnd);
       onCompleteFn();
     }
 
+    // Allow the from CSS to register so that setting the toCss actually animates there
+    // rather than just setting the toCss and ignoring the fromCss
     setTimeout(function() {
-      $(hlbElement).css({
-        transition: platform.transformProperty + ' ' + speed + 'ms ease-in-out',
-        transform: 'scale(' + endScale + ') ' + translateCSS
-      });
-      hlbElement.addEventListener(platform.transitionEndEvent, onComplete);
+      toCss.transition = platform.transformProperty + ' ' + speed + 'ms ease-in-out';
+      $hlbElement.css(toCss);
+      hlbElement.addEventListener(platform.transitionEndEvent, onTransitionEnd);
     }, 0);
   }
 

@@ -117,6 +117,33 @@ define(['core/platform', 'core/bp/constants'], function(platform, BP_CONST) {
     return false;
   }
 
+  //Edge can't handle text anchors during transformations, so we manually fix the x position of text within SVGs
+  // A text anchor in SVG allows text to be centered, right-justified, etc.
+  //TODO: Remove this when Edge fixes its support for text anchors, see SC-3434
+  function fixTextAnchors(svg) {
+    var elementsWithAnchors = svg.parentElement.querySelectorAll('[text-anchor]');
+
+    Array.prototype.forEach.call(elementsWithAnchors, function (element) {
+      var anchor = element.getAttribute('text-anchor'),
+          x      = parseFloat(element.getAttribute('x')),
+          textWidthInPixels = element.getComputedTextLength();
+
+      function setX(val) {
+        var DECIMAL_PLACES = 2;
+        element.setAttribute('x', val.toFixed(DECIMAL_PLACES));
+      }
+
+      if (anchor === 'middle') {
+        setX(x - textWidthInPixels / 2);
+      }
+      else if (anchor === 'end') {
+        setX(x - textWidthInPixels);
+      }
+
+      element.removeAttribute('text-anchor');
+    });
+  }
+
   return {
     byId: byId,
     invalidateId: invalidateId,
@@ -126,7 +153,8 @@ define(['core/platform', 'core/bp/constants'], function(platform, BP_CONST) {
     getCurrentSVGElementTransforms: getCurrentSVGElementTransforms,
     getNumberFromString: getNumberFromString,
     getEventTarget: getEventTarget,
-    cancelEvent: cancelEvent
+    cancelEvent: cancelEvent,
+    fixTextAnchors: fixTextAnchors
   };
 
 });

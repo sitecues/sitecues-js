@@ -6,35 +6,48 @@
  * Specifically, it is responsible for:
  * - Playing speech when HLB opens, if speech is on. In this case it must request
  *   a media type supported both by the server (provided via site preferences)
- * - Stopping speech when a key is pressed or HLB closes
+ * - Stopping speech when a key is pressed or the Lens closes
  * - Playing audio by key when requested by another module
  */
 
-define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder', 'core/platform',
-    'core/locale', 'core/metric', 'core/conf/urls', 'audio/html5-player', 'audio/text-select', 'core/events'],
-  function(conf, site, $, builder, platform, locale, metric, urls, audioPlayer, textSelect, events) {
+define(
+  [
+    'audio/constant',
+    'core/conf/user/manager',
+    'core/conf/site',
+    '$',
+    'audio/speech-builder',
+    'core/platform',
+    'core/locale',
+    'core/metric',
+    'core/conf/urls',
+    'audio/text-select',
+    'core/events'
+  ],
+  function(constant, conf, site, $, builder, platform, locale, metric, urls, textSelect, events) {
 
   var ttsOn = false,
-    isAudioPlaying,
-    mediaTypeForTTS,  // For TTS only, not used for pre-recorded sounds such as verbal cues
-    mediaTypeForPrerecordedAudio,
+    lastPlayer,
     isInitialized,
-    isRetrievingAudioPlayer,
     // TODO add more trigger types, e.g. shift+arrow, shift+space
     TRIGGER_TYPES = {
       LENS: 'space',
       HIGHLIGHT: 'shift'
-    };
+    },
+    speechStrategy = constant.speechStrategy;
 
-  function onHlbOpened(hlbContent, fromHighlight) {
-    if (!ttsOn) {
-      return;
+  function onLensOpened(lensContent, fromHighlight) {
+    if (ttsOn) {
+      speakContentImpl(fromHighlight.picked, TRIGGER_TYPES.LENS);
     }
-    speakContentImpl(fromHighlight.picked, TRIGGER_TYPES.LENS);
+  }
+
+  function isBusy() {
+    return lastPlayer && lastPlayer.isBusy();
   }
 
   function speakContent(content, doAvoidInterruptions) {
-    if (doAvoidInterruptions && audioPlayer.isBusy()) {
+    if (doAvoidInterruptions && isBusy()) {
       return; // Already reading the highlight
     }
     if (!content) {
@@ -52,44 +65,97 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
     }
   }
 
+  function noop() {
+  }
+
   // text and triggerType are optional
+  // @lang is the full or partial language for the speech as we know it, e.g. en-US or en
   function speakText(text, lang, triggerType) {
     stopAudio();  // Stop any currently playing audio and halt keydown listener until we're playing again
     if (!text.trim()) {
       return; // Nothing to speak
     }
 
-    getAudioPlayer(function() {
-      var TTSUrl = getTTSUrl(text, lang),
-        startRequestTime = new Date();
+    var startRequestTime = Date.now();
+    addStopAudioHandlers();
 
-      function onSpeechComplete() {
-        var timeElapsed = new Date() - startRequestTime;
-        new metric.TtsRequest({
-          requestTime: timeElapsed,
-          audioFormat: mediaTypeForTTS,
-          charCount: text.length,
-          trigger: triggerType
-        }).send();
+    function onSpeechPlaying(isLocal) {
+      var timeElapsed = Date.now() - startRequestTime;
+      new metric.TtsRequest({
+        requestTime : timeElapsed,
+        audioFormat : isLocal ? null : getMediaTypeForNetworkAudio(),
+        charCount   : text.length,
+        trigger     : triggerType,
+        isLocalTTS  : isLocal
+      }).send();
+    }
+
+    function speakLocally(onUnavailable) {
+      var onUnavailableFn = onUnavailable || noop;
+      if (isLocalSpeechAllowed()) {
+        require(['local-player/local-player'], function (localPlayer) {
+          lastPlayer = localPlayer;
+          return localPlayer
+            .speak({
+              text: text,
+              locale: lang,
+              onStart: function () {
+                onSpeechPlaying(true);
+              }
+            })
+            .catch(onUnavailableFn);
+        });
       }
+      else {
+        onUnavailableFn();
+      }
+    }
 
-      audioPlayer.playAudioSrc(TTSUrl, onSpeechComplete);
+    function speakViaNetwork(onUnavailable) {
+      var onUnavailableFn = onUnavailable || noop;
+      if (isNetworkSpeechAllowed(lang)) {
+        require(['network-player/network-player'], function (networkPlayer) {
+          lastPlayer = networkPlayer;
 
-      isAudioPlaying = true;
-      events.emit('audio/speech-play', TTSUrl);
-      addStopAudioHandlers();
-    });
+          var TTSUrl = getTTSUrl(text, lang);
+
+          networkPlayer
+            .play({
+              url: TTSUrl,
+              onStart: function () {
+                onSpeechPlaying(false);
+              }
+            })
+            .catch(function() {
+              rerouteNetworkSpeechLang(lang);
+              onUnavailableFn();
+            });
+        });
+      }
+      else {
+        onUnavailableFn();
+      }
+    }
+
+    var speakViaNetworkFn = SC_LOCAL ? noop : speakViaNetwork; // Helps the minifier
+
+    if (isLocalSpeechPreferred()) {
+      speakLocally(speakViaNetworkFn);
+    }
+    else {
+      speakViaNetworkFn(speakLocally);
+    }
   }
 
   function addStopAudioHandlers() {
     // Stop speech on any key down.
     // Wait a moment, in case it was a keystroke that just got us here,
-    // for example down arrow to read next HLB or a hotkey to toggle speech
+    // for example down arrow to read next Lens or a hotkey to toggle speech
     removeBlurHandler();
     $(window).one('blur', stopAudio);
   }
 
-    // Remove handler that stops speech on any key down.
+  // Remove handler that stops speech on any key down.
   function removeBlurHandler() {
     $(window).off('blur', stopAudio);
   }
@@ -100,10 +166,9 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
    * or is not playing.
    */
   function stopAudio() {
-    if (isAudioPlaying) {
-      audioPlayer.stop();
+    if (isBusy()) {
+      lastPlayer.stop();
       removeBlurHandler();
-      isAudioPlaying = false;
     }
   }
 
@@ -131,9 +196,9 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
     return '?l=' + (lang || getDocumentAudioLang()) + '&';
   }
 
-  function getAudioKeyUrl(key) {  // TODO why does an audio cue need the site id?
+  function getAudioKeyUrl(key, lang) {  // TODO why does an audio cue need the site id?
     var restOfUrl = 'cue/site/' + site.getSiteId() + '/' +
-      key + '.' + getMediaTypeForPrerecordedAudio() + getLanguageParameter();
+      key + '.' + getMediaTypeForNetworkAudio() + getLanguageParameter(lang);
     return urls.getApiUrl(restOfUrl);
   }
 
@@ -144,7 +209,7 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
    * @returns {string} url
    */
   function getTTSUrl(text, lang) {
-    var restOfUrl = 'tts/site/' + site.getSiteId() + '/tts.' + mediaTypeForTTS + getLanguageParameter(lang) + 't=' + encodeURIComponent(text);
+    var restOfUrl = 'tts/site/' + site.getSiteId() + '/tts.' + getMediaTypeForNetworkAudio() + getLanguageParameter(lang) + 't=' + encodeURIComponent(text);
     return urls.getApiUrl(restOfUrl);
   }
 
@@ -172,58 +237,85 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
   /*
    * Uses a provisional player to play back audio by key, used for audio cues.
    */
-  function playAudioByKey(key) {
+  function speakByKey(key) {
     stopAudio();  // Stop any currently playing audio
 
-    var url = getAudioKeyUrl(key);
-    getAudioPlayer(function() {
-      isAudioPlaying = true;
-      audioPlayer.playAudioSrc(url);
-      // Stop speech on any key down.
-      addStopAudioHandlers();
-    });
+    var lang = getDocumentAudioLang(); // Use document language for cues, e.g. en-US or en
+    addStopAudioHandlers();
+
+    function speakLocally(onUnavailable) {
+      var onUnavailableFn = onUnavailable || noop,
+        cueLang = getCueLanguage(lang);
+      if (cueLang && isLocalSpeechAllowed()) {
+        require(['local-player/local-player'], function (localPlayer) {
+          lastPlayer = localPlayer;
+          locale.getAudioCueTextAsync(key, function (cueText) {
+            if (cueText) {
+              localPlayer
+                .speak({
+                  text: cueText,
+                  locale: cueLang
+                })
+                .catch(onUnavailableFn);
+            }
+          });
+        });
+      }
+      else {
+        onUnavailableFn();
+      }
+    }
+
+    function speakViaNetwork(onUnavailable) {
+      var onUnavailableFn = onUnavailable || noop;
+      if (isNetworkSpeechAllowed(lang)) {
+        require(['network-player/network-player'], function (networkPlayer) {
+          lastPlayer = networkPlayer;
+          var url = getAudioKeyUrl(key, lang);
+          networkPlayer
+            .play({
+              url: url
+            })
+            .catch(onUnavailableFn);
+          });
+      }
+      else {
+        onUnavailableFn();
+      }
+    }
+
+    var speakViaNetworkFn = SC_LOCAL ? noop : speakViaNetwork;
+
+    if (isLocalSpeechPreferred()) {
+      speakLocally(speakViaNetworkFn);
+    }
+    else {
+      speakViaNetworkFn(speakLocally);
+    }
   }
 
   function playEarcon(earconName) {
-    stopAudio();
+    if (!SC_LOCAL) {
+      // TODO can we play earcons in the extension without the heavyweight network player?
+      stopAudio();
 
-    var url = urls.resolveResourceUrl('earcons/' + earconName + '.' + getMediaTypeForPrerecordedAudio());
+      var url = urls.resolveResourceUrl('earcons/' + earconName + '.' + getMediaTypeForNetworkAudio());
 
-    getAudioPlayer(function() {
-      audioPlayer.playAudioSrc(url);
-    });
-  }
-
-  // What audio format will we use?
-  // At the moment, mp3, ogg and aac are sufficient for the browser/OS combinations we support.
-  // For Ivona, audio formats are mp3 or ogg
-  // For Lumenvox, audio formats are aac or ogg
-  function getAudioPlayer(callbackFn) {
-    if (mediaTypeForTTS) {
-      // Already retrieved
-      callbackFn();
-      return;
+      require(['network-player/network-player'], function (networkPlayer) {
+        networkPlayer.play({
+          url: url
+        });
+      });
     }
-    if (isRetrievingAudioPlayer) {
-      // Currently retrieving
-      return;
-    }
-
-    isRetrievingAudioPlayer = true;
-
-    getMediaTypeForTTS(function() {
-      isRetrievingAudioPlayer = false;
-      callbackFn();
-    });
   }
 
   function getBrowserSupportedTypeFromList(listOfAvailableExtensions) {
     var audioApi,
       index = 0,
       MEDIA_TYPES = {
-        ogg: 'audio/ogg',
-        mp3: 'audio/mpeg',
-        aac: 'audio/aac'
+        ogg : 'audio/ogg',
+        mp3 : 'audio/mpeg'
+        // aac : 'audio/aac'    // Not currently used
       };
 
     try {
@@ -231,7 +323,7 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
     } catch (e) {}
 
     if (audioApi) {
-      for (; index < listOfAvailableExtensions.length; index ++) {
+      for (; index < listOfAvailableExtensions.length; index++) {
         var extension = listOfAvailableExtensions[index];
         if (audioApi.canPlayType(MEDIA_TYPES[extension])) {
           return extension;
@@ -243,26 +335,12 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
     return listOfAvailableExtensions.indexOf('aac') >= 0 ? 'aac' : 'mp3';  // Prefer aac, otherwise use mp3
   }
 
-  // What audio format will we use for TTS?
-  // Note: calling this depends on having site information, which is retrieved when TTS is turned on.
-  function getMediaTypeForTTS(callbackFn) {
-    if (mediaTypeForTTS) {
-      callbackFn(mediaTypeForTTS);
-    }
-    function onAudioFormatsReceived(ttsAudioFormats) {
-      mediaTypeForTTS = getBrowserSupportedTypeFromList(ttsAudioFormats);
-      callbackFn(mediaTypeForTTS);
-    }
-
-    fetchAudioFormats(onAudioFormatsReceived);
-  }
-
   // What audio format will we use for prerecorded audio?
-  function getMediaTypeForPrerecordedAudio() {
-    if (!mediaTypeForPrerecordedAudio) {
-      mediaTypeForPrerecordedAudio = getBrowserSupportedTypeFromList(['mp3','ogg']);
+  function getMediaTypeForNetworkAudio() {
+    if (!getMediaTypeForNetworkAudio.cached) {
+      getMediaTypeForNetworkAudio.cached = getBrowserSupportedTypeFromList(['mp3','ogg']);
     }
-    return mediaTypeForPrerecordedAudio;
+    return getMediaTypeForNetworkAudio.cached;
   }
 
   /**
@@ -273,44 +351,61 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
     return ttsOn;
   }
 
-  function fetchAudioFormats(callbackFn) {
-    var AUDIO_FORMATS_KEY = 'ttsAudioFormats',
-      audioFormats = site.get(AUDIO_FORMATS_KEY),
-      FALLBACK_AUDIO_FORMATS = ['ogg']; // Supported by all TTS engines we use
-    if (audioFormats) {
-      callbackFn(audioFormats);
-      return;
-    }
-
+  // Get the client's preferred speech strategy.
+  // This may not be the ultimate speech strategy used, because
+  // 1) network speech will not play if ttsAvailable = false in served site preferences
+  function getClientSpeechStrategy() {
     if (SC_LOCAL) {
-      // Cannot save to server when we have no access to it
-      // Putting this condition in allows us to paste sitecues into the console
-      // and test it on sites that have a content security policy
-      callbackFn(FALLBACK_AUDIO_FORMATS);
-      return;
+      return speechStrategy.LOCAL;
+    }
+    if (!getClientSpeechStrategy.cached) {
+      getClientSpeechStrategy.cached = (site.get('speech') || {}).strategy || speechStrategy.AUTO;
+      if (getClientSpeechStrategy.cached === speechStrategy.AUTO) {
+        getClientSpeechStrategy.cached = constant.autoStrategy;
+      }
+      if (SC_DEV) {
+        console.log('Speech strategy: ' + getClientSpeechStrategy.cached);
+      }
     }
 
-    require(['core/util/xhr'], function(xhr) {
-      xhr.getJSON({
-        // The 'provided.siteId' parameter must exist, or else core would have aborted the loading of modules.
-        url: urls.getApiUrl('2/site/' + site.getSiteId() + '/config'),
-        success: function (data) {
-          var settings = data.settings,
-            i = 0;
-          // Copy the fetched key/value pairs into the site configuration.
-          for (; i < settings.length; i++) {
-            if (settings[i].key === AUDIO_FORMATS_KEY) {
-              callbackFn(settings[i].value);
-              return;
-            }
-          }
-        },
-        error: function() {
-          if (SC_DEV) { console.log('Error loading sitecues speech configuration.'); }
-          callbackFn(FALLBACK_AUDIO_FORMATS);
-        }
-      });
-    });
+    return getClientSpeechStrategy.cached;
+  }
+
+  function isLocalSpeechAllowed() {
+    return getClientSpeechStrategy() !== speechStrategy.NETWORK && window.speechSynthesis;
+  }
+
+  function isLocalSpeechPreferred() {
+    var clientSpeechStrategy = getClientSpeechStrategy();
+    return clientSpeechStrategy === speechStrategy.LOCAL || clientSpeechStrategy === speechStrategy.PREFER_LOCAL;
+  }
+
+  function getRerouteNetworkSpeechLangKey(lang) {
+    return constant.REROUTE_NETWORK_SPEECH_KEY + lang;
+  }
+
+  function isNetworkSpeechAllowed(lang) {
+    return getClientSpeechStrategy() !== speechStrategy.LOCAL &&
+      !window.sessionStorage.getItem(getRerouteNetworkSpeechLangKey(lang));
+  }
+
+  // This language failed on the network -- disallow it for this tab (uses sessionStorage)
+  function rerouteNetworkSpeechLang(lang) {
+    // Set to any value to reroute this language to local speech
+    window.sessionStorage.setItem(getRerouteNetworkSpeechLangKey(lang), true);
+  }
+
+  function getCueLanguage(lang) {
+    var longLang = lang.toLowerCase(),
+      shortLang;
+
+    function useIfAvailable(tryLang) {
+      return constant.AVAILABLE_CUES[tryLang] && tryLang;
+    }
+
+    shortLang = longLang.split('-')[0];
+
+    return useIfAvailable(longLang) || useIfAvailable(shortLang);
   }
 
   function init() {
@@ -324,17 +419,30 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
     // Speak on text selection
     textSelect.init();
 
+    // TODO: It would be better to listen for 'hlb/create' here so that
+    //       speech synthesis happens during the opening animation.
+    //       Unfortunately, this currently causes browsers to choke
+    //       on the animation when using local speech. But that
+    //       will likely improve in time.
     /*
-     * A highlight box has been requested.  This will create the player
-     * if necessary, but will not play anything.
+     * Speak whenever the lens is opened, if speech is on, etc.
      */
-    events.on('hlb/did-create', onHlbOpened);
+
+    events.on('hlb/ready', onLensOpened);
 
     /*
      * A highlight box was closed.  Stop/abort/dispose of the player
      * attached to it.
      */
     events.on('hlb/closed keys/non-shift-key-pressed', stopAudio);
+
+    if (SC_DEV) {
+      // For debugging purposes
+      // Takes one of the strategies from audio/constant.js
+      sitecues.setSpeechStrategy = function setSpeechStrategy(newStrategy) {
+        getClientSpeechStrategy.cached = newStrategy;
+      };
+    }
 
     ttsOn = conf.get('ttsOn');
   }
@@ -344,7 +452,7 @@ define(['core/conf/user/manager', 'core/conf/site', '$', 'audio/speech-builder',
     setSpeechState: setSpeechState,
     toggleSpeech: toggleSpeech,
     isSpeechEnabled: isSpeechEnabled,
-    playAudioByKey: playAudioByKey,
+    speakByKey: speakByKey,
     speakContent: speakContent,
     speakText: speakText,
     playEarcon: playEarcon,

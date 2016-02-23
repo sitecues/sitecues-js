@@ -274,7 +274,7 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
   function addInlineStyles() {
     var cssText = '';
 
-    $('body [style]').each(function(index, element) {
+    $('body [style]').not('#sitecues-badge,#sitecues-badge *').each(function(index, element) {
       $(element).attr(INLINE_ID_ATTR, index);
       cssText += '[' + INLINE_ID_ATTR + '="' + index + '"] {' + element.getAttribute('style') + '}\n';
     });

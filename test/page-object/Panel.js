@@ -3,7 +3,8 @@ define(
         './Base',
         'core/bp/constants'
     ],
-    function (Base, constants) {
+    function (Base, constant) {
+
         'use strict';
 
         class Panel extends Base {
@@ -16,11 +17,11 @@ define(
             }
             /*
             clickSmallA(clicks) {
-                return this.clickZoomControl('#' + constants.SMALL_A_ID, clicks);
+                return this.clickZoomControl('#' + constant.SMALL_A_ID, clicks);
             }
 
             clickLargeA(clicks) {
-                return this.clickZoomControl('#' + constants.LARGE_A_ID, clicks);
+                return this.clickZoomControl('#' + constant.LARGE_A_ID, clicks);
             }
             */
             pressSmallA() {
@@ -39,19 +40,20 @@ define(
                 return input
                     .clickElement(Panel.THUMB_SELECTOR)
                     .then(function () {
-                        return browserUtil.getTransformAttributeName();
-                    })
-                    .then(function (transform) {
+                        const transform = 'transform';
                         zoom = (zoom < 1) ? 1 : (zoom > 3) ? 3 : zoom;
                         return remote
-                            .execute(function (selector, zoom, transform) {
-                                var matrix = getComputedStyle(document.body)[transform],
-                                    currentZoom  = Number(matrix.substring(7).split(',')[0]),
-                                    diff   = zoom - currentZoom,
-                                    slider  = document.querySelector(selector),
-                                    slideRect = slider.getBoundingClientRect();
-                                    return diff / 2 * slideRect.width;
-                            }, [Panel.SLIDER_SELECTOR, zoom, transform])
+                            .execute(
+                                function (selector, zoom, transform) {
+                                    var matrix = getComputedStyle(document.body)[transform],
+                                        currentZoom  = Number(matrix.substring(7).split(',')[0]),
+                                        diff   = zoom - currentZoom,
+                                        slider  = document.querySelector(selector),
+                                        slideRect = slider.getBoundingClientRect();
+                                        return diff / 2 * slideRect.width;
+                                },
+                                [Panel.SLIDER_SELECTOR, zoom, transform]
+                            )
                             .then(function (offset) {
                                 function moveSlider(distance) {
                                     return remote
@@ -96,26 +98,33 @@ define(
                     .clickElement(selector)
                     .then(function () {
                         return wait.forTransformToComplete('body', 4000, 25)
-                    })
+                    });
             }
 
             clickSliderBar(zoom) {
+
                 const remote = this.remote,
                       wait   = this.wait;
 
-                zoom = (zoom < 1) ? 1 : (zoom > 3) ? 3 : zoom;
+                // Clamp zoom to within 1 and 3, inclusive.
+                zoom = Math.min(Math.max(1, zoom), 3);
 
                 return remote
-                    .execute(function (selector, zoom) {
-                        var MAGIC_SHIFT_FACTOR = 5.2,
-                            slider  = document.querySelector(selector),
-                            slideRect = slider.getBoundingClientRect(),
-                            shift   = MAGIC_SHIFT_FACTOR * zoom, //Shifts the x position on the slider relative to the zoom parameter,
-                                                                 //it ensures that we don't press the big A at the end of the slider,
-                            xOffset = Math.max(0, (zoom - 1) / 2 * slideRect.width - shift),
-                            yOffset = slideRect.height / 2;
-                        return [xOffset, yOffset];
-                    }, [Panel.SLIDER_SELECTOR, zoom])
+                    .execute(
+                        function (selector, zoom) {
+                            var MAGIC_SHIFT_FACTOR = 5.2,
+                                slider  = document.querySelector(selector),
+                                slideRect = slider.getBoundingClientRect(),
+                                // Shifts the x position on the slider relative to the zoom parameter,
+                                // it ensures that we don't press the big A at the end of the slider,
+                                shift   = MAGIC_SHIFT_FACTOR * zoom,
+
+                                xOffset = Math.max(0, (zoom - 1) / 2 * slideRect.width - shift),
+                                yOffset = slideRect.height / 2;
+                            return [xOffset, yOffset];
+                        },
+                        [Panel.SLIDER_SELECTOR, zoom]
+                    )
                     .then(function (offset) {
                         return remote
                             .findByCssSelector(Panel.SLIDER_SELECTOR)
@@ -126,7 +135,7 @@ define(
                                         .forTransformToComplete('body', 8000, 25);
                                 })
                                 .end();
-                    })
+                    });
             }
 
             /*
@@ -169,10 +178,10 @@ define(
 
         }
 
-        Panel.THUMB_SELECTOR   = '#' + constants.ZOOM_SLIDER_THUMB_ID;
-        Panel.SLIDER_SELECTOR  = '#' + constants.ZOOM_SLIDER_ID;
-        Panel.SMALL_A_SELECTOR = '#' + constants.SMALL_A_ID;
-        Panel.LARGE_A_SELECTOR = '#' + constants.LARGE_A_ID;
+        Panel.THUMB_SELECTOR   = '#' + constant.ZOOM_SLIDER_THUMB_ID;
+        Panel.SLIDER_SELECTOR  = '#' + constant.ZOOM_SLIDER_ID;
+        Panel.SMALL_A_SELECTOR = '#' + constant.SMALL_A_ID;
+        Panel.LARGE_A_SELECTOR = '#' + constant.LARGE_A_ID;
 
         return Panel;
     }

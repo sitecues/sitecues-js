@@ -1,10 +1,10 @@
 'use strict';
 
 var config = require('../build-config.js'),
-  fs = require('fs'),
   sourceFoldersConfig = require('../source-folders.json'),
   bundleFolders = sourceFoldersConfig.bundleFolders,
   JS_SOURCE_DIR = config.librarySourceDir + '/js',
+  glob = require('glob'),
   dataFolders = sourceFoldersConfig.dataFolders,
   dataModules = getDataModules(),
   amdConfig = {
@@ -32,7 +32,8 @@ var config = require('../build-config.js'),
       'core/bp/badge/page-badge': 'empty:',
       'core/bp/badge/palette': 'empty:',
       'bp-img-placeholder/bp-img-placeholder/': 'empty:',
-      'bp-adaptive/bp-adaptive': 'empty:'
+      'bp-adaptive/bp-adaptive': 'empty:',
+      'network-player/network-player': 'empty:'
     },
     map: {
       '*': {
@@ -46,15 +47,17 @@ var config = require('../build-config.js'),
 function getDataModules() {
   var allDataModules = [];
   dataFolders.forEach(function(dataFolder) {
+
     var dir = config.librarySourceDir + '/js/' + dataFolder,
-      filesList = fs.readdirSync(dir),
+      filesList = glob.sync(dir + '/**/*.js'),
       dataModules;
     if (!filesList) {
       throw('No data files found for: ' + dir);
     }
 
     dataModules = filesList.map(function(fileName) {
-      return dataFolder + '/' + fileName.split('.js')[0]; // E.g. en.js -> locale-data/en
+      var relativeFileName = fileName.split(JS_SOURCE_DIR + '/')[1];  // Strip off source/js/
+      return relativeFileName.split('.js')[0]; // E.g. en.js -> locale-data/en
     });
 
     // Put data folders first

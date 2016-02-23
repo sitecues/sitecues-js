@@ -39,6 +39,7 @@ define([
       // http://www.windoweyesforoffice.com/sitecues/index.php
   var EXTRA_HIGHLIGHT_PADDING = 2, // TODO: Figure out why this is needed and compute it.
       MOUSE_SAFETY_ZONE       = 50, // Number of pixels the mouse is allowed to go outside the HLB, before it closes.
+      FORMS_SELECTOR          = 'input, textarea, select',
 
       $picked,         // The object chosen by the picker.
       $foundation,     // The sanitized input, used as the basis for creating an $hlb.
@@ -58,7 +59,8 @@ define([
         'li'       : getValidListElement,
         'fieldset' : getValidFieldsetElement,
         'input'    : getValidFormElement
-      };
+      },
+      state = {};
 
   if (SC_DEV) {
     // Boolean that determines if we log HLB information (only works in SC_DEV mode)
@@ -74,25 +76,39 @@ define([
    * @param  {[jQuery element]} from [The HLB or The Foundation]
    * @param  {[jQuery element]} to   [The HLB or The Foundation]
    */
-  function mapForm($from, $to) {
+  function mapForm($from, $to, isHLBClosing) {
 
     // Get descendants of The HLB / The Foundation that may have a value.
-    var $fromInputs = $from.find('input, textarea, select')
-            .addBack('input, textarea, select'),
-        $toInputs = $to.find('input, textarea, select')
-            .addBack('input, textarea, select'),
+    var $fromInputs = $from.find(FORMS_SELECTOR)
+            .addBack(FORMS_SELECTOR),
+        $toInputs = $to.find(FORMS_SELECTOR)
+            .addBack(FORMS_SELECTOR),
         i, len = $fromInputs.length,
         $currentFromInput,
         $currentToInput,
+        cloneIndex,
         fromInputType;
 
     for (i = 0; i < len; i = i + 1) {
       $currentFromInput = $fromInputs.eq(i);
       $currentToInput = $toInputs.eq(i);
       fromInputType = $currentFromInput.prop('type');
+      cloneIndex = $currentToInput[0].getAttribute('data-sc-cloned');
+
+      //If we're closing the HLB, and the current form element is part of a cloned foundation
+      if (isHLBClosing && cloneIndex) {
+        //Remove the index property from the HLB element
+        $currentFromInput[0].removeAttribute('data-sc-cloned');
+        //Query the DOM for the original form element, so we can copy the HLB form value back into the appropriate field
+        $currentToInput = $('[data-sc-cloned="' + cloneIndex + '"]');
+        //Remove the index from the original form element
+        $currentToInput[0].removeAttribute('data-sc-cloned');
+      }
+
       if (fromInputType === 'radio' || fromInputType === 'checkbox') {
         $currentToInput.prop('checked', $currentFromInput.prop('checked'));
-      } else {
+      }
+      else {
         if (platform.browser.isSafari) {
           // In Safari, text inputs opening up in HLB show their contents flush to the bottom
           // instead of vertically centered, unless we tweak the value of the input just after the styles are set
@@ -100,12 +116,13 @@ define([
         }
         $currentToInput.val($currentFromInput.val());
       }
+
     }
   }
 
   function copyFormDataToPage() {
     // Copy any form input the user may have entered in the HLB back into the page.
-    mapForm($hlb, $foundation);
+    mapForm($hlb, $foundation, true);
   }
 
   // Return truthy value if a button is pressed on a mouse event.
@@ -197,7 +214,7 @@ define([
 
     // Let the rest of the application know that the hlb is ready
     // Listeners: hpan.js, invert.js, highlight.js, speech.js
-    events.emit('hlb/ready', $hlb);
+    events.emit(constants.HLB_READY, $hlb, state.highlight);
   }
 
   /**
@@ -245,6 +262,8 @@ define([
   }
 
   function targetHLB(highlight, isRetargeting) {
+
+    state.highlight = highlight;
 
     if (!highlight.fixedContentRect) {
       return;  // No highlight present -- nothing to open HLB on
@@ -536,19 +555,34 @@ define([
     return $foundation;
   }
 
+  function setCloneIndexOnFormDescendants($picked) {
+    var i,
+      $formDescendants = $picked.find(FORMS_SELECTOR)
+        .addBack(FORMS_SELECTOR);
+
+    for (i = 0; i < $formDescendants.length; i++) {
+      $formDescendants[i].setAttribute('data-sc-cloned', i + 1);
+    }
+  }
+
   // Implemented to fix issue on http://www.gwmicro.com/Support/Email_Lists/ when HLBing Subscription Management
   function getValidFormElement($picked) {
 
-    var pickedElement              = $picked[0],
-        pickedElementsBoundingBox  = pickedElement.getBoundingClientRect(),
-        // TODO: Seth: Why not use jQuery's .clone() ??
-        pickedElementClone         = pickedElement.cloneNode(true),
-        $pickedAndDescendants      = $picked.find('*').addBack(),
-        $pickedCloneAndDescendants = $(pickedElementClone).find('*').addBack(),
-        $submitButton              = $(),// TOOD why? This was duplicating the button: $picked.closest('form').find('input[type="submit"],button[type="submit"]'),
-        submitButtonClone          = $submitButton.clone(true),
-        $foundation                = $('<form>').append(pickedElementClone, submitButtonClone),
-        i;
+    var i,
+      pickedElement              = $picked[0],
+      pickedElementsBoundingBox  = pickedElement.getBoundingClientRect();
+
+    //Set data attributes on each of the form input elements
+    //This allows us to query the DOM for the original elements
+    //when we want to give them the values entered into the HLB
+    setCloneIndexOnFormDescendants($picked);
+
+    var pickedElementClone       = pickedElement.cloneNode(true),
+      $pickedAndDescendants      = $picked.find('*').addBack(),
+      $pickedCloneAndDescendants = $(pickedElementClone).find('*').addBack(),
+      $submitButton              = $(),// TODO why? This was duplicating the button: $picked.closest('form').find('input[type="submit"],button[type="submit"]'),
+      submitButtonClone          = $submitButton.clone(true),
+      $foundation                = $('<form>').append(pickedElementClone, submitButtonClone);
 
     // Setting this to true will remove the $foundation from the DOM before inflation.
     // This is a very special case where the foundation is not the same as the picked element.

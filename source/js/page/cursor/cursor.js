@@ -168,8 +168,11 @@ define(['$', 'page/style-service/style-service', 'core/conf/user/manager', 'page
     }
   }
 
-  function setCursorsDisabled(doDisable) {
-    cursorStylesheetObject.disabled = !!doDisable;
+  // Turning off custom cursor improves zoom animation in IE
+  function toggleZoomOptimization(doDisable) {
+    if (platform.browser.isIE) { // Only necessary for IE
+      cursorStylesheetObject.disabled = Boolean(doDisable);
+    }
   }
 
   function createStyleSheet(id, cssText) {
@@ -198,12 +201,10 @@ define(['$', 'page/style-service/style-service', 'core/conf/user/manager', 'page
       callback();
     });
 
-    if (platform.browser.isIE) {
-      // While zooming, turn off our CSS rules so that the browser doesn't spend
-      // CPU cycles recalculating the custom cursor rules to apply during each frame
-      // This makes a difference in IE 9/10 -- doesn't seem to help in other browsers.
-      events.on('zoom/begin', function() {setCursorsDisabled(true); });
-    }
+    // While zooming, turn off our CSS rules so that the browser doesn't spend
+    // CPU cycles recalculating the custom cursor rules to apply during each frame
+    // This makes a difference in IE 9/10 -- doesn't seem to help in other browsers.
+    events.on('zoom/begin', function() {toggleZoomOptimization(true); });
   }
 
   // Stylesheet just for BP cursors
@@ -236,11 +237,7 @@ define(['$', 'page/style-service/style-service', 'core/conf/user/manager', 'page
     // Refresh document cursor stylesheet if we're using one
     if (cursorStylesheetObject) {
       refreshCursorStyles(cursorStylesheetObject, cursorTypeUrls);
-      if (platform.browser.isIE) {
-        setTimeout(function () {
-          setCursorsDisabled(false);
-        }, REENABLE_CURSOR_MS);
-      }
+      setTimeout(toggleZoomOptimization, REENABLE_CURSOR_MS);
     }
 
     // Refresh BP cursor stylesheet
@@ -336,6 +333,7 @@ define(['$', 'page/style-service/style-service', 'core/conf/user/manager', 'page
 
   function onPageZoom(pageZoom) {
     if (userSpecifiedSize) {
+      toggleZoomOptimization(); // Re-enable cursors -- they were disabled for zoom performance in IE
       return;
     }
     // At page zoom level 1.0, the cursor is the default size (same as us being off).
@@ -358,9 +356,7 @@ define(['$', 'page/style-service/style-service', 'core/conf/user/manager', 'page
     conf.get('mouseSize', onMouseSizeSetting);
     conf.get('mouseHue', onMouseHueSetting);
 
-    if (!userSpecifiedSize) {
-      events.on('zoom', onPageZoom);
-    }
+    events.on('zoom', onPageZoom);
 
     constructBPCursorStylesheet();
     autoSize = getSize();

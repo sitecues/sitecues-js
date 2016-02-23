@@ -147,7 +147,9 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
       area = height * width,
       stepSize = Math.floor(area / Math.min(area, MAX_PIXELS_TO_TEST)),
       numPixelsToCheck = Math.floor(area / stepSize),
-      histogramIndex;
+      histogramIndex,
+      luminanceTotal = 0,
+      maxLuminance = 0;
 
     for(; byteIndex < numBytes; byteIndex += DWORD_SIZE * stepSize) {
       var rgba = {
@@ -162,6 +164,10 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
       }
 
       grayscaleVal = colorUtil.getFastLuminance(rgba);
+      luminanceTotal += grayscaleVal;
+      if (grayscaleVal > maxLuminance) {
+        maxLuminance = grayscaleVal;
+      }
       histogramIndex = Math.floor(grayscaleVal * GRAYSCALE_HISTOGRAM_SIZE);
 
       if (grayscaleHistogram[histogramIndex] > 0)  {
@@ -193,7 +199,9 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
       numDifferentGrayscaleVals: numDifferentGrayscaleVals,
       numMultiUseGrayscaleVals: numMultiUseGrayscaleVals,
       percentWithSameGrayscale: maxSameGrayscale / numPixelsToCheck,
-      numDifferentHues: numDifferentHues
+      numDifferentHues: numDifferentHues,
+      averageLuminance: luminanceTotal / numPixelsToCheck,
+      maxLuminance: maxLuminance
     };
   }
 
@@ -280,13 +288,17 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
     getPixelInfo(img, src, rect, function(pixelInfo) {
       var score = 0,
         BASE_SCORE = 130,
+        DARK_LUMINANCE_THRESHOLD = 0.30,
+        DARK_LUMINANCE_MAX_THRESHOLD = 0.30,
         manyValuesScore,
         manyReusedValuesScore,
         oneValueReusedOftenScore,
         numHuesScore = 0,
-        transparentPixelsScore;
+        transparentPixelsScore,
+        darknessScore = 0;
 
       if (pixelInfo) {
+
         // Low score -> NO invert (probably photo)
         // High score -> YES invert (probably logo, icon or image of text)
 
@@ -298,10 +310,20 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
         manyValuesScore = -1.5 * Math.min(200, pixelInfo.numDifferentGrayscaleVals);
 
         // Values reused -> less likely to be a photo
-        manyReusedValuesScore = 15 * pixelInfo.numMultiUseGrayscaleVals;
+        manyReusedValuesScore = 15 * Math.min(20, pixelInfo.numMultiUseGrayscaleVals);
 
         // One large swath of color -> less likely to be a photo. For example 30% -> +60 points
         oneValueReusedOftenScore = Math.min(50, pixelInfo.percentWithSameGrayscale * 200);
+
+        if (!pixelInfo.hasTransparentPixels && pixelInfo.averageLuminance < DARK_LUMINANCE_THRESHOLD) {
+          // This is already a very dark image, so inverting it will make it bright -- unlikely the right thing to do
+          // We don't do this for images with transparent pixels, because it is likely a dark drawing on a light background,
+          // which needs to be inverted
+          darknessScore = -1000 * (DARK_LUMINANCE_THRESHOLD - pixelInfo.averageLuminance);
+          if (pixelInfo.maxLuminance < DARK_LUMINANCE_MAX_THRESHOLD) {
+            darknessScore *= 2; // Really dark -- there is nothing bright in this image at all
+          }
+        }
 
         // Many hues -> more likely to be a photo -- experimentation showed that 8 hues seemed to work as a threshold
         if (pixelInfo.numDifferentHues < 8) {
@@ -313,7 +335,8 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
           numHuesScore =  pixelInfo.numDifferentHues * -2;
         }
 
-        score = BASE_SCORE + transparentPixelsScore + manyValuesScore + manyReusedValuesScore + oneValueReusedOftenScore + numHuesScore;
+        score = BASE_SCORE + transparentPixelsScore + manyValuesScore + manyReusedValuesScore + oneValueReusedOftenScore +
+          darknessScore + numHuesScore;
         // Image has full color information
         if (SC_DEV && isDebuggingOn && img) {
           $(img).attr('data-sc-pixel-info', JSON.stringify(pixelInfo));
