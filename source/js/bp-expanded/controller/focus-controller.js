@@ -239,7 +239,10 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
       document.activeElement.blur();
     } else {
       var focusable = savedDocumentFocus || ('focus' in document ? document : document.body);
-      focusable.focus();
+      //TODO: Focusing is broken in Edge, figure out the root cause of this
+      if (typeof focusable.focus === 'function') {
+        focusable.focus();
+      }
     }
 
     window.removeEventListener('keydown', processKeyDown, true);

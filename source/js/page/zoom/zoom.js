@@ -769,9 +769,11 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'page/
 
     if (!isInitialLoadZoom) {
       conf.set('zoom', completedZoom);
-      require(['audio-cues/audio-cues'], function (audioCues) {
-        audioCues.playZoomCue(completedZoom);
-      });
+      if (!didUnzoom) {
+        require(['audio-cues/audio-cues'], function (audioCues) {
+          audioCues.playZoomCue(completedZoom);
+        });
+      }
       new metric.ZoomChange(zoomInput).send();
     }
 

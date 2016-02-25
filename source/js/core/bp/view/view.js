@@ -152,6 +152,7 @@ define([
 
     // Completion
     onComplete();
+
   }
 
   return {

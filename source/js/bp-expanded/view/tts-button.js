@@ -1,8 +1,9 @@
-define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/locale', 'core/conf/user/manager', 'core/events'],
-  function (BP_CONST, helper, state, locale, conf, events) {
+define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/locale', 'core/conf/user/manager', 'core/events', 'core/platform'],
+  function (BP_CONST, helper, state, locale, conf, events, platform) {
   var
     waveAnimationTimer,
     waveAnimationStepNum,
+    localizedSpeechString,
     isInitialized,
     isSpeechEnabled = conf.get('ttsOn'),
     isListeningToEvents;
@@ -15,10 +16,6 @@ define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/loca
 
   function getTTSButtonElement() {
     return helper.byId(BP_CONST.SPEECH_ID);
-  }
-
-  function getTTSStateLabelNode() {
-    return helper.byId(BP_CONST.SPEECH_STATE_ID).firstChild;
   }
 
   function getTTSLabelElement() {
@@ -43,14 +40,21 @@ define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/loca
     var ttsLabelElement = getTTSLabelElement();
     var speechLabelWidth = ttsLabelElement.getBoundingClientRect().width;
     setAlignment(speechLabelWidth > getMaxLabelWidth() ? 'end' : 'start');
+
+    if (platform.browser.isEdge) {
+      helper.fixTextAnchors(ttsLabelElement);
+    }
+
   }
 
-  function setTTSLabel(text) {
+  function setTTSLabel(state) {
+    var speechStateLabel = getTTSLabelElement(),
+        localizedState = locale.translate(state),
+        text = localizedSpeechString + ' ' + localizedState,
+        node = document.createTextNode(text);
 
-    var speechStateLabel = getTTSStateLabelNode(),
-        localizedText = locale.translate(text);
-
-    speechStateLabel.data = localizedText;
+    speechStateLabel.removeChild(speechStateLabel.firstChild);
+    speechStateLabel.appendChild(node);
 
     ensureLabelFitsInPanel();
   }
@@ -129,8 +133,6 @@ define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/loca
     }
   }
 
-
-
   function endHoverEffects() {
     endWaveAnimation();
     enableDimmingHover(false);
@@ -171,6 +173,8 @@ define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/loca
     }
 
     isInitialized = true;
+
+    localizedSpeechString = locale.translate('speech');
 
     toggleListeners(true);
 

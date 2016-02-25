@@ -7,21 +7,18 @@ define(['core/conf/user/manager', 'audio/audio'], function(conf, audio) {
 
   // The high zoom threshold for the zoom-based verbal cue
   var HIGH_ZOOM_THRESHOLD = 1.6,
-    // Tracks if the user has heard the "descriptive high zoom" cue.
+    // Tracks the last time the user has heard the "descriptive high zoom" cue.
     DESCRIPTIVE_HIGH_ZOOM_PARAM = 'firstHighZoom',
 
     // Time in millis after which cues should replay.
     CUE_RESET_MS = 7 * 86400000, // 7 days
 
-    // Tracks if the user has heard the longer, more descriptive "speech on" cue.
+    // Tracks the last time the user has heard the longer, more descriptive "speech on" cue.
     DESCRIPTIVE_SPEECH_ON_PARAM ='firstSpeechOn',
 
     VERBAL_CUE_SPEECH_ON = 'verbalCueSpeechOn',
     VERBAL_CUE_SPEECH_ON_DESCRIPTIVE = 'verbalCueSpeechOnFirst',
-    VERBAL_CUE_SPEECH_OFF = 'verbalCueSpeechOff',
-
-    // This is the initial zoom level, we're only going to use the verbal cue if someone increases it
-    initialZoom = conf.get('zoom') || 1;
+    VERBAL_CUE_SPEECH_OFF = 'verbalCueSpeechOff';
 
   /**
    * Returns true if the "descriptive speech on" cue should be played.
@@ -37,11 +34,10 @@ define(['core/conf/user/manager', 'audio/audio'], function(conf, audio) {
    */
   function shouldPlayDescriptiveHighZoomCue(zoom) {
     // If zoom isn't high enough, or hasn't increased beyond initial setting, don't play cue
-    if (zoom < HIGH_ZOOM_THRESHOLD || zoom <= initialZoom) {
-      return false;
+    if (zoom >= HIGH_ZOOM_THRESHOLD) {
+      var lastDescriptiveZoomCueTime = parseInt(conf.get(DESCRIPTIVE_HIGH_ZOOM_PARAM));
+      return !lastDescriptiveZoomCueTime || Date.now() - lastDescriptiveZoomCueTime > CUE_RESET_MS;
     }
-    var lastDescriptiveZoomCueTime = parseInt(conf.get(DESCRIPTIVE_HIGH_ZOOM_PARAM));
-    return !lastDescriptiveZoomCueTime || Date.now() - lastDescriptiveZoomCueTime > CUE_RESET_MS;
   }
 
   /*

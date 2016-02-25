@@ -243,5 +243,5 @@ define(['core/conf/user/manager', 'core/util/session', 'core/locale', 'core/metr
     isOn : isOn,
     init : init
   };
-
+    
 });
