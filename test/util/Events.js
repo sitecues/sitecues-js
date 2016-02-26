@@ -1,4 +1,3 @@
-//TODO: Unit tests for event system & local storage format
 define(
     [
         './Base'
