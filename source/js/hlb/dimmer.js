@@ -60,8 +60,11 @@ define(['$', 'core/conf/user/manager', 'page/util/common', 'core/platform'], fun
   }
 
   function animateOpacity(dimmerElement, startOpacity, endOpacity, speed, onCompleteFn) {
+
+    var startTime = Date.now();
+
     function nextFrame() {
-      var timeElapsed = new Date() - startTime,
+      var timeElapsed = Date.now() - startTime,
         percentComplete = timeElapsed > speed ? 1 : timeElapsed / speed,
         currentOpacity = startOpacity + (endOpacity - startOpacity) * percentComplete;
 
@@ -73,8 +76,6 @@ define(['$', 'core/conf/user/manager', 'page/util/common', 'core/platform'], fun
         onCompleteFn();
       }
     }
-
-    var startTime = new Date();
     nextFrame();
   }
 

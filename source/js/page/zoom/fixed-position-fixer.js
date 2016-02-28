@@ -29,6 +29,27 @@ define(['$', 'page/zoom/zoom', 'core/platform', 'core/conf/site', 'page/style-se
      the transforms that are reactions to the scroll events on top of any transforms.
      */
     function refresh(didZoomChange) {
+
+      var elementsToAdjust = $(fixedSelector),
+        // The current amount of zoom applied to the page
+        pageZoom = zoomMod.getCompletedZoom(),
+        // The current amount of zoom applied to the fixed content
+        appliedFixedItemZoom = SHOULD_ZOOM_FIXED_ELEMENTS ? 1 : pageZoom,
+        // The actual amount of zoom we want for the fixed content.
+        // It can be up to MAX_ZOOM_FIXED_CONTENT
+        desiredFixedItemZoom = Math.min(pageZoom, MAX_ZOOM_FIXED_CONTENT),
+        // Amount to scale to bring fixed position content down to MAX_ZOOM_FIXED_CONTENT
+        // Will be 1 if the current zoom level is <= MAX_ZOOM_FIXED_CONTENT, because the size doesn't need to change.
+        // Otherwise, will be < 1 in order to reduce the size.
+        scaleTransform = desiredFixedItemZoom / appliedFixedItemZoom,
+        anchorForFixedElems = platform.browser.isIE ? document.documentElement : document.body,
+        anchorRect = anchorForFixedElems.getBoundingClientRect(),
+        // Amount to move the fixed positioned items so that they appear in the correct place
+        offsetLeft = (- anchorRect.left / pageZoom).toFixed(1),
+        offsetTop = ((toolbarHeight - anchorRect.top) / pageZoom).toFixed(1),
+        // To help restrict the width of toolbars
+        winWidth = window.innerWidth;
+
       /**
        * Positions a fixed element as if it respects the viewport rule.
        * Also clears the positioning if the element is no longer fixed.
@@ -37,14 +58,16 @@ define(['$', 'page/zoom/zoom', 'core/platform', 'core/conf/site', 'page/style-se
        * @param  elements [element to position]
        */
       function adjustElement(index, element) {
+
         var id = element.id,
           idPrefix = id && id.split('-')[0];
+
         if (idPrefix === 'sitecues' || idPrefix === 'scp') {
           return;
         }
 
         var css = {
-          transform: ''
+          transform : ''
         };
 
         var computedStyle = getComputedStyle(element);
@@ -75,26 +98,6 @@ define(['$', 'page/zoom/zoom', 'core/platform', 'core/conf/site', 'page/style-se
         }
         $(element).css(css);
       }
-
-      var elementsToAdjust = $(fixedSelector),
-        // The current amount of zoom applied to the page
-        pageZoom = zoomMod.getCompletedZoom(),
-        // The current amount of zoom applied to the fixed content
-        appliedFixedItemZoom = SHOULD_ZOOM_FIXED_ELEMENTS ? 1 : pageZoom,
-        // The actual amount of zoom we want for the fixed content.
-        // It can be up to MAX_ZOOM_FIXED_CONTENT
-        desiredFixedItemZoom = Math.min(pageZoom, MAX_ZOOM_FIXED_CONTENT),
-        // Amount to scale to bring fixed position content down to MAX_ZOOM_FIXED_CONTENT
-        // Will be 1 if the current zoom level is <= MAX_ZOOM_FIXED_CONTENT, because the size doesn't need to change.
-        // Otherwise, will be < 1 in order to reduce the size.
-        scaleTransform = desiredFixedItemZoom / appliedFixedItemZoom,
-        anchorForFixedElems = platform.browser.isIE ? document.documentElement : document.body,
-        anchorRect = anchorForFixedElems.getBoundingClientRect(),
-        // Amount to move the fixed positioned items so that they appear in the correct place
-        offsetLeft = (- anchorRect.left / pageZoom).toFixed(1),
-        offsetTop = ((toolbarHeight - anchorRect.top) / pageZoom).toFixed(1),
-        // To help restrict the width of toolbars
-        winWidth = window.innerWidth;
 
       // Include last adjusted elements to ensure our adjustment styles are cleared if the element is no longer fixed
       elementsToAdjust.add(lastAdjustedElements).each(adjustElement);

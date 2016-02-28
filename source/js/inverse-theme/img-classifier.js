@@ -383,6 +383,11 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
 
   // Classify an image that is loaded/loading from a src
   function classifyLoadableImage(img, onShouldReverseImage) {
+
+    var
+      storageKey = getStorageKey(img),
+      cachedResult = sessionStorage.getItem(storageKey);
+
     function classifyLoadedImage() {
       shouldInvertElement(img, function(isReversible, didAnalyzePixels) {
 
@@ -390,7 +395,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
           // Only cache for expensive operations, in order to save on storage space
           var imageClass = isReversible ? CLASS_INVERT : CLASS_NORMAL;
           // Use session storage instead of local storage so that we don't pollute too much
-          window.sessionStorage.setItem(storageKey, imageClass);
+          sessionStorage.setItem(storageKey, imageClass);
         }
 
         onImageClassified(img, isReversible, onShouldReverseImage);
@@ -400,9 +405,6 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
     function imageLoadError() {
       onImageClassified(img, false);
     }
-
-    var storageKey = getStorageKey(img),
-      cachedResult = window.sessionStorage.getItem(storageKey);
 
     if (cachedResult) {
       // Use cached result if available

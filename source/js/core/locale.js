@@ -67,16 +67,6 @@ define([ 'core/data-map' ], function(dataMap) {
   // If not provided, all countries and langs are acceptable
   // @param langsWhiteList -- if provided, it is the list of acceptable languages.
   function extendLangWithBrowserCountry(lang, countriesWhiteList, langsWhiteList) {
-    function extendLangWith(extendCode) {
-      if (extendCode.indexOf('-') > 0 && langPrefix === getLanguagePrefix(extendCode)) {
-        if (!countriesWhiteList || countriesWhiteList.hasOwnProperty(extendCode)) {
-          return extendCode;
-        }
-        if (langsWhiteList[langPrefix]) {
-          return langPrefix;  // Use without a country
-        }
-      }
-    }
 
     var langPrefix = getLanguagePrefix(lang),
       prioritizedBrowserLangs = (function() {
@@ -89,6 +79,17 @@ define([ 'core/data-map' ], function(dataMap) {
       })(),
       langWithCountry,
       index = 0;
+
+    function extendLangWith(extendCode) {
+      if (extendCode.indexOf('-') > 0 && langPrefix === getLanguagePrefix(extendCode)) {
+        if (!countriesWhiteList || countriesWhiteList.hasOwnProperty(extendCode)) {
+          return extendCode;
+        }
+        if (langsWhiteList[langPrefix]) {
+          return langPrefix;  // Use without a country
+        }
+      }
+    }
 
     for (; index < prioritizedBrowserLangs.length; index ++) {
       langWithCountry = extendLangWith(prioritizedBrowserLangs[index]);

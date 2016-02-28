@@ -385,6 +385,14 @@ define(['$', 'page/util/common', 'core/conf/user/manager', 'core/conf/site',
   }
 
   function getHeuristicResult(candidates, doAllowVoting) {
+
+    // 1. Get the best candidate (pre-voting)
+    var
+      scoreObjs = getScores(candidates),
+      bestIndex = getCandidateWithHighestScore(scoreObjs),
+      origBestIndex = bestIndex,
+      extraWork = 0;
+
     function processResult(pickedIndex) {
       // Log the results if necessary for debugging
       if (SC_DEV && isDebuggingOn) {
@@ -396,12 +404,6 @@ define(['$', 'page/util/common', 'core/conf/user/manager', 'core/conf/site',
       return pickedIndex < 0 ? null : candidates[pickedIndex];
     }
 
-    var scoreObjs = getScores(candidates);
-
-    // 1. Get the best candidate (pre-voting)
-    var bestIndex = getCandidateWithHighestScore(scoreObjs),
-      origBestIndex = bestIndex,
-      extraWork = 0;
     if (bestIndex < 0) {
       return processResult(-1); // No valid candidate
     }

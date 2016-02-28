@@ -880,6 +880,13 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
   }
 
   function getBestOverlayContainer() {
+
+    var
+      numAncestors = state.styles.length,
+      ancestor = state.picked[0],
+      ancestorStyle,
+      index = 0;
+
     function hasVerticalOverflow() {
       var scrollHeight = ancestor.scrollHeight - EXTRA_PADDING_PIXELS;
       if (scrollHeight > ancestor.offsetHeight) {
@@ -892,10 +899,6 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
       }
     }
 
-    var index = 0,
-      numAncestors = state.styles.length,
-      ancestor = state.picked[0],
-      ancestorStyle;
     while (++ index < numAncestors - 1) {
       ancestor = ancestor.parentElement;
       ancestorStyle = state.styles[index];

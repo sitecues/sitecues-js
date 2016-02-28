@@ -3,6 +3,9 @@
  */
 define([ 'core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/platform', 'core/events'],
   function(state, BP_CONST, helper, platform, events) {
+
+    'use strict';
+
   var requestFrameFn = window.requestAnimationFrame   ||
                        window.msRequestAnimationFrame ||
                        function (fn) {
@@ -386,14 +389,6 @@ define([ 'core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/pla
   // TODO just move this right into the SVG? Why not just have it in the markup
   function firstTimeRender() {
 
-    function getTranslateX(id) {
-      return badgeTransforms[id].translateX;
-    }
-
-    function setTransform (id, value) {
-      byId(id).setAttribute(TRANSFORM_STRING, TRANSLATE_STRING + (value || getTranslateX(id)) + CLOSING_PAREN);
-    }
-
     var SLIDER_BAR_ID       = BP_CONST.ZOOM_SLIDER_BAR_ID,
         SLIDER_THUMB_ID     = BP_CONST.ZOOM_SLIDER_THUMB_ID,
         badgeTransforms     = BP_CONST.TRANSFORMS.BADGE,
@@ -407,6 +402,13 @@ define([ 'core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/pla
         isRealSettings      = state.get('isRealSettings'),
         sliderThumbTranslateX = isRealSettings ? badgeTransforms[SLIDER_THUMB_ID].translateX : BP_CONST.TRANSFORMS.FAKE_BADGE_TRANSLATEX;
 
+    function getTranslateX(id) {
+      return badgeTransforms[id].translateX;
+    }
+
+    function setTransform (id, value) {
+      byId(id).setAttribute(TRANSFORM_STRING, TRANSLATE_STRING + (value || getTranslateX(id)) + CLOSING_PAREN);
+    }
 
     setTransform(BP_CONST.SMALL_A_ID);
     setTransform(BP_CONST.LARGE_A_ID);
@@ -629,6 +631,29 @@ define([ 'core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/pla
    */
   function performAnimation() {
 
+    var isPanelRequested              = state.isPanelRequested(),
+
+      startingPosition              = getCurrentTransformPosition(),
+      startingSize                  = getCurrentSize(),
+      startingSVGElementTransforms  = helper.getCurrentSVGElementTransforms(),
+      startingScale,
+
+      endingPosition                = getTargetTransformPosition(),
+      endingSize                    = getTargetSize(),
+      endingSVGElementTransforms    = getTargetSVGElementTransforms(),
+      endingScale,
+
+      positionDifference            = getDifferenceObject(startingPosition, endingPosition),
+      svgElementTransformDifference = getDifferenceObject(startingSVGElementTransforms, endingSVGElementTransforms),
+      scaleDifference,
+
+      fullAnimationDuration         = isPanelRequested ? BP_CONST.EXPAND_ANIMATION_DURATION_MS : BP_CONST.SHRINK_ANIMATION_DURATION_MS,
+
+      startCrispFactor,
+
+      percentEnlarged               = state.get('currentMode'),
+      percentAnimationComplete      = isPanelRequested ? percentEnlarged : 1 - percentEnlarged;
+
     function animationTick () {
 
       var timeSinceFirstAnimationTick = Date.now() - animationStartTime,
@@ -683,29 +708,6 @@ define([ 'core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/pla
 
       return platform.isRetina() ? 1.5 : 3;
     }
-
-    var isPanelRequested              = state.isPanelRequested(),
-
-        startingPosition              = getCurrentTransformPosition(),
-        startingSize                  = getCurrentSize(),
-        startingSVGElementTransforms  = helper.getCurrentSVGElementTransforms(),
-        startingScale,
-
-        endingPosition                = getTargetTransformPosition(),
-        endingSize                    = getTargetSize(),
-        endingSVGElementTransforms    = getTargetSVGElementTransforms(),
-        endingScale,
-
-        positionDifference            = getDifferenceObject(startingPosition, endingPosition),
-        svgElementTransformDifference = getDifferenceObject(startingSVGElementTransforms, endingSVGElementTransforms),
-        scaleDifference,
-
-        fullAnimationDuration         = isPanelRequested ? BP_CONST.EXPAND_ANIMATION_DURATION_MS : BP_CONST.SHRINK_ANIMATION_DURATION_MS,
-
-        startCrispFactor,
-
-        percentEnlarged               = state.get('currentMode'),
-        percentAnimationComplete      = isPanelRequested ? percentEnlarged : 1 - percentEnlarged;
 
     if (isPanelRequested && state.isBadge()) {
 

@@ -66,8 +66,11 @@ define(['hlb/dimmer', 'page/util/common', 'hlb/positioning', 'core/platform', '$
   }
 
   function animateJs(hlbElement, startScale, endScale, speed, translateCSS, onCompleteFn) {
+
+    var startTime = Date.now();
+
     function nextFrame() {
-      var timeElapsed = new Date() - startTime,
+      var timeElapsed = Date.now() - startTime,
         percentComplete = timeElapsed >= speed ? 1 : timeElapsed / speed,
         currentScale = startScale + (endScale - startScale) * percentComplete,
         transformValue = 'scale(' + currentScale + ') ' + translateCSS;
@@ -80,8 +83,6 @@ define(['hlb/dimmer', 'page/util/common', 'hlb/positioning', 'core/platform', '$
         onCompleteFn();
       }
     }
-
-    var startTime = new Date();
     nextFrame();
   }
 
