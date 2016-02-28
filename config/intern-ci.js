@@ -31,12 +31,12 @@ define(
             // variable within Bamboo's logs is to add 'PASSWORD' as a suffix.
             // Thus, we have to inform the test framework of the unconventional
             // variable name. Otherwise, this would not be necessary.
-            config.tunnelOptions.accessKey = process.env.BROWSERSTACK_PASSWORD;
+            config.tunnelOptions.accessKey = process.env.BAMBOO_BROWSERSTACK_PASSWORD;
 
-            console.log('bs user is present:', typeof process.env.BROWSERSTACK_USERNAME === 'string' && Boolean(process.env.BROWSERSTACK_USERNAME));
-            console.log('bs user[0-2]:', process.env.BROWSERSTACK_USERNAME.slice(0, 3));
+            console.log('bs user is present:', typeof process.env.BAMBOO_BROWSERSTACK_USERNAME === 'string' && Boolean(process.env.BAMBOO_BROWSERSTACK_USERNAME));
+            console.log('bs user[0-2]:', process.env.BAMBOO_BROWSERSTACK_USERNAME.slice(0, 3));
 
-            console.log('bs pwd is present:', typeof process.env.BROWSERSTACK_PASSWORD === 'string' && Boolean(process.env.BROWSERSTACK_PASSWORD));
+            console.log('bs pwd is present:', typeof process.env.BAMBOO_BROWSERSTACK_PASSWORD === 'string' && Boolean(process.env.BAMBOO_BROWSERSTACK_PASSWORD));
             console.log('bs key[0-2]:', config.tunnelOptions.accessKey && config.tunnelOptions.accessKey.slice(0, 3));
         }
 
