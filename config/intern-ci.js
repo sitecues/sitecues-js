@@ -22,16 +22,23 @@ define(
         // TODO: Re-enable functional tests in CI once they are more reliable.
         config.functionalSuites = false;
 
-        config.tunnelOptions = config.tunnelOptions || {};
+        if (typeof process === 'object' &&
+            process.env) {
 
-        // Work around the fact that the only way to obfuscate an environment
-        // variable within Bamboo's logs is to add 'PASSWORD' as a suffix.
-        // Thus, we have to inform the test framework of the unconventional
-        // variable name. Otherwise, this would not be necessary.
-        config.tunnelOptions.accessKey =
-            typeof process === 'object' &&
-            process.env &&
-            process.env.BROWSERSTACK_PASSWORD;
+            config.tunnelOptions = config.tunnelOptions || {};
+
+            // Work around the fact that the only way to obfuscate an environment
+            // variable within Bamboo's logs is to add 'PASSWORD' as a suffix.
+            // Thus, we have to inform the test framework of the unconventional
+            // variable name. Otherwise, this would not be necessary.
+            config.tunnelOptions.accessKey = process.env.BROWSERSTACK_PASSWORD;
+
+            console.log('bs user is present:', typeof process.env.BROWSERSTACK_USERNAME === 'string' && Boolean(process.env.BROWSERSTACK_USERNAME));
+            console.log('bs user[0-2]:', process.env.BROWSERSTACK_USERNAME.slice(0, 3));
+
+            console.log('bs pwd is present:', typeof process.env.BROWSERSTACK_PASSWORD === 'string' && Boolean(process.env.BROWSERSTACK_PASSWORD));
+            console.log('bs key[0-2]:', config.tunnelOptions.accessKey && config.tunnelOptions.accessKey.slice(0, 3));
+        }
 
         config.reporters = [
             { id : 'Runner' },
