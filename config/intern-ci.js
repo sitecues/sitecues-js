@@ -22,8 +22,7 @@ define(
         // TODO: Re-enable functional tests in CI once they are more reliable.
         config.functionalSuites = false;
 
-        if (typeof process === 'object' &&
-            process.env) {
+        if (typeof process === 'object' && process.env) {
 
             config.tunnelOptions = config.tunnelOptions || {};
 
@@ -34,7 +33,8 @@ define(
         }
 
         config.reporters = [
-            { id : 'Runner' },
+            // Log to the console for debugging.
+            // { id : 'Runner' },
             { id : 'JUnit', filename : 'report/test/junit.xml' }
         ];
 
