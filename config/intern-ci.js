@@ -34,6 +34,7 @@ define(
             process.env.BROWSERSTACK_PASSWORD;
 
         config.reporters = [
+            { id : 'Runner' },
             { id : 'JUnit', filename : 'report/test/junit.xml' }
         ];
 
