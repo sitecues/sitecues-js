@@ -162,7 +162,8 @@ define([], function() {
     // Second role "dialog" gives more detail
     'role'     : 'dialog',
     'tabindex' : -1,
-    'class'    : 'scp-loading'
+    'class'    : 'scp-loading',
+    'aria-label': 'sitecues'
   };
 
   constants.BADGE_ATTRS = {
