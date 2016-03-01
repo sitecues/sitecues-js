@@ -286,6 +286,7 @@ define([
   }
 
   return {
-    init: init
+    init: init,
+    expandPanel: expandPanel
   };
 });

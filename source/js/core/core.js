@@ -33,11 +33,27 @@ define(['core/conf/site', 'core/conf/urls', 'core/run', 'core/constants', 'core/
     sitecues.getVersion = getVersion;
     sitecues.isOn = run.isOn;
 
+    // Control BP expansion
+    sitecues.expandPanel = expandPanel;
+    sitecues.shrinkPanel = shrinkPanel;
+
     //Loading state enumerations
     sitecues.readyStates = state;
 
     // 'Plant our flag' on this page.
     sitecues.exists = true;
+  }
+
+  function expandPanel() {
+    require(['core/bp/controller/bp-controller'], function(bpController) {
+      bpController.expandPanel();
+    });
+  }
+
+  function shrinkPanel() {
+    require(['bp-expanded/controller/shrink-controller'], function(shrinkController) {
+      shrinkController.shrinkPanel();
+    });
   }
 
 
