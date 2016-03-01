@@ -136,10 +136,14 @@ define([
   // Classic mode is where the ? shows up instead of the down pointing arrow
   // TODO remove one day, we hope
   function initClassicMode() {
-    state.set('isClassicMode', !!(classicSite() || isClassicBrowser()));
+    state.set('isClassicMode', isClassicMode());
     sitecues.toggleClassicMode = function() {
       state.set('isClassicMode', !state.get('isClassicMode'));
     };
+  }
+
+  function isClassicMode() {
+    return Boolean(classicSite() || isClassicBrowser());
   }
 
   //It's possible that the transformations we apply to the body disrupt absolutely positioned elements
@@ -220,6 +224,7 @@ define([
   }
 
   return {
-    init: init
+    init: init,
+    isClassicMode: isClassicMode
   };
 });
