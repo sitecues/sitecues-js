@@ -1,6 +1,12 @@
 // Badge palette code.
 // Not included in the extension since that always uses the same colors in the toolbar.
-define(['core/bp/model/state', 'core/conf/site', 'core/bp/constants'], function(state, site, BP_CONST) {
+define(
+  [
+    'core/bp/model/state',
+    'core/conf/site',
+    'core/bp/constants'
+  ],
+  function(state, site, BP_CONST) {
 
   // badgeFileName is optional, and used in the case of old <img> badge placeholders.
   // In that case the filename defines which palette to use, e.g. sitecues-badge-reverse-blue.png
