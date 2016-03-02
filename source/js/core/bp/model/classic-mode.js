@@ -7,7 +7,6 @@ define(['core/conf/site', 'core/platform'], function(site, platform) {
   var CLASSIC_SITES = {
     's-00e27714': 1,
     's-013cb0c3': 1,
-    's-390bdfa2': 1, // http://www.mtsac.edu/aces/ (SC-3418)
     's-041cf669': 1,
     's-0796b61d': 1, // http://www.brzeziny-gmina.pl -- no sitecues
     's-14949bfa': 1,
