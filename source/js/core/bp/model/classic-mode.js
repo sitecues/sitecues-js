@@ -15,7 +15,6 @@ define(['core/conf/site', 'core/platform'], function(site, platform) {
     's-2e146908': 1,
     's-389f76da': 1,
     's-456e33ab': 1, // http://www.gminakoscian.pl  -- sitecues broken
-    's-4aa44e78': 1,
     's-4bfe60ab': 1,
     's-542edffc': 1,
     's-548f9948': 1,
