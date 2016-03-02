@@ -1,7 +1,12 @@
 /**
  * Page badge view. Not included in the extension since that always uses the toolbar.
  */
-define(['core/bp/view/view', 'core/bp/view/badge/palette'], function(baseView, palette) {
+define(
+  [
+    'core/bp/view/view',
+    'core/bp/view/badge/palette'
+  ],
+  function(baseView, palette) {
 
   // Make sure the badge has non-static positioning to make it easy to place
   // the position: absolute sc-bp-container inside of it
