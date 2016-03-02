@@ -21,7 +21,7 @@ define([
   'core/bp/constants',
   'core/platform',
   'core/conf/site',
-  'core/bp/model/classic-site',
+  'core/bp/model/classic-mode',
   'core/bp/view/badge/page-badge'
 ], function(bpController,
            state,
@@ -29,7 +29,7 @@ define([
            BP_CONST,
            platform,
            site,
-           classicSite,
+           classicMode,
            pageBadgeView) {
 
   /*
@@ -127,23 +127,13 @@ define([
     }
   }
 
-  function isClassicBrowser() {
-    // IE 9 is awful
-    // Edge is too, at least for now
-    return platform.browser.isIE9 || platform.browser.isEdge;
-  }
-
   // Classic mode is where the ? shows up instead of the down pointing arrow
   // TODO remove one day, we hope
   function initClassicMode() {
-    state.set('isClassicMode', isClassicMode());
+    state.set('isClassicMode', classicMode());
     sitecues.toggleClassicMode = function() {
       state.set('isClassicMode', !state.get('isClassicMode'));
     };
-  }
-
-  function isClassicMode() {
-    return Boolean(classicSite() || isClassicBrowser());
   }
 
   //It's possible that the transformations we apply to the body disrupt absolutely positioned elements
@@ -224,7 +214,6 @@ define([
   }
 
   return {
-    init: init,
-    isClassicMode: isClassicMode
+    init: init
   };
 });

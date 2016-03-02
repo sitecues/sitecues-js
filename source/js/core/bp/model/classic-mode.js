@@ -1,9 +1,9 @@
 /**
- * Does the current site require classic mode?
+ * Does the current site/browser require classic mode?
  * Classic mode is where the ? shows up instead of the down arrow. This can be necessary if themes aren't working.
  */
 
-define(['core/conf/site'], function(site) {
+define(['core/conf/site', 'core/platform'], function(site, platform) {
   var CLASSIC_SITES = {
     's-00e27714': 1,
     's-013cb0c3': 1,
@@ -43,7 +43,13 @@ define(['core/conf/site'], function(site) {
     's-f78268e1': 1
   };
 
-  function isClassic() {
+  function isClassicBrowser() {
+    // IE 9 is awful
+    // Edge is too, at least for now
+    return platform.browser.isIE9 || platform.browser.isEdge;
+  }
+
+  function isClassicSite() {
     var classicPref = site.get('classicMode');
     if (typeof classicPref !== 'undefined') {
       return classicPref;
@@ -51,5 +57,9 @@ define(['core/conf/site'], function(site) {
     return CLASSIC_SITES[site.getSiteId()];
   }
 
-  return isClassic;
+  function isClassicMode() {
+    return Boolean(isClassicSite() || isClassicBrowser());
+  }
+
+  return isClassicMode;
 });
