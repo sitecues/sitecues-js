@@ -13,7 +13,7 @@ define(['core/bp/helper', 'core/platform', 'core/conf/site'],
     doWebKitPrefix,
     doMsPrefix,
 
-    BASE_SHEET_ID    = 'sitecues-bp-css',
+    BASE_SHEET_ID    = 'sitecues-js-bp-css',
 
     BASE_CSS;
 

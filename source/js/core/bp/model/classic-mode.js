@@ -6,7 +6,6 @@
 define(['core/conf/site', 'core/platform'], function(site, platform) {
   var CLASSIC_SITES = {
     's-00e27714': 1,
-    's-013cb0c3': 1,
     's-041cf669': 1,
     's-0796b61d': 1, // http://www.brzeziny-gmina.pl -- no sitecues
     's-14949bfa': 1,
@@ -17,7 +16,6 @@ define(['core/conf/site', 'core/platform'], function(site, platform) {
     's-4bfe60ab': 1,
     's-542edffc': 1,
     's-548f9948': 1,
-    's-570759e3': 1, // http://ialvs.com  -- site down
     's-6097a290': 1,
     's-620610ee': 1,
     's-b737790f': 1,
@@ -34,8 +32,6 @@ define(['core/conf/site', 'core/platform'], function(site, platform) {
     's-a5851e07': 1,
     's-acc8f046': 1,
     's-c27fa71d': 1,
-    's-d06c2938': 1,
-    's-f266b384': 1,
     's-f2a9dde2': 1,
     's-f424d83d': 1,
     's-f78268e1': 1

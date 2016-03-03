@@ -13,7 +13,7 @@ define(['$', 'page/zoom/zoom', 'core/platform', 'core/conf/site', 'page/style-se
       lastAdjustedElements     = $(),
       autoRefreshTimer,         // Refresh fixed elements every now and then even if no scroll, e.g. a user's click may have made a fixed lightbox appear
       autoRefreshMs = site.get('fixedPositionRefreshMs'),   // How often to refresh the fixed elements even without a scroll (or falsey if not at all). Recommended setting is 500
-      POSITION_STYLESHEET_NAME = 'sitecues-position',
+      POSITION_STYLESHEET_NAME = 'sitecues-js-position',
       ATTR_SHIFT_INLINE_FIXED = 'data-sc-shift-inline-fixed',
       MAX_ZOOM_FIXED_CONTENT = 1.8,
       domObserver,

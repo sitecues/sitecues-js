@@ -25,7 +25,7 @@ define(['core/conf/site', 'core/conf/urls'], function(site, urls) {
       cssUrl = urls.resolveResourceUrl('css/site-themes/' + siteId + '.css');
     cssLink.setAttribute('rel', 'stylesheet');
     cssLink.setAttribute('href', cssUrl);
-    cssLink.id = 'sitecues-custom-theme';
+    cssLink.id = 'sitecues-js-custom-theme';
     document.querySelector('head').appendChild(cssLink);
   }
 
