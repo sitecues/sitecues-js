@@ -16,7 +16,6 @@ define(['core/conf/site', 'core/platform'], function(site, platform) {
     's-4bfe60ab': 1,
     's-542edffc': 1,
     's-548f9948': 1,
-    's-570759e3': 1, // http://ialvs.com  -- site down
     's-6097a290': 1,
     's-620610ee': 1,
     's-b737790f': 1,

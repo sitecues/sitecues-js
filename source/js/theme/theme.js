@@ -309,7 +309,7 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
    */
   function getStyleSheet() {
     if (!$themeStyleSheet) {
-      $themeStyleSheet = $('<style>').appendTo('head')
+      $themeStyleSheet = $('<style>').appendTo('html')
         .attr('id', THEME_STYLESHEET_NAME);
     }
     return $themeStyleSheet;
