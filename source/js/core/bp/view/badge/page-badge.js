@@ -43,5 +43,4 @@ define(
   return {
     init: init
   };
-
 });

@@ -220,5 +220,4 @@ define([], function() {
   }
 
   return exports;
-
 });
