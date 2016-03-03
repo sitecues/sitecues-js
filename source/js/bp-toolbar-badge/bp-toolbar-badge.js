@@ -5,13 +5,14 @@
 // TODO add a close button
 
 define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/bp/view/view'], function(BP_CONST, state, helper, baseView) {
-  var isInitialized;
+  var isInitialized,
+    TOOLBAR_HEIGHT = 38;
 
   function getPalette(callbackFn) {
     callbackFn(BP_CONST.PALETTE_NAME_MAP.normal);
   }
 
-  function adjustFixedElementsBelowToolbar(toolbarElement) {
+  function adjustFixedElementsBelowToolbar() {
     // TODO Make this work better:
     // - it doesn't work that well across sites
     // - it's heavy in the page
@@ -21,24 +22,8 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/bp/v
       // down. As this process requires the style-service, when the toolbar is inserted,
       // we will initialize the style service immediately.
       document.body.style.position = 'relative';
-      fixer.init(toolbarElement.offsetHeight);
+      fixer.init(TOOLBAR_HEIGHT);
     });
-  }
-
-  // In some cases body may be positioned absolutely above the toolbar
-  function ensureBodyBelowToolbar() {
-    var body = document.body;
-    if (body) {
-      if (getComputedStyle(body).position !== 'static' &&
-        body.getBoundingClientRect().top < 41) {
-        body.setAttribute('data-sc-extra-toolbar-bump', '');
-      }
-    }
-    else {
-      // Wait for body. There will always be one after DOMContentLoaded,
-      // because the browser inserts one if the markup didn't provide it.
-      document.addEventListener('DOMContentLoaded', ensureBodyBelowToolbar);
-    }
   }
 
   function init(onComplete) {
@@ -55,12 +40,10 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/bp/v
 
     helper.setAttributes(toolbarElement, BP_CONST.DEFAULT_TOOLBAR_ATTRS);
 
-    ensureBodyBelowToolbar();
-
     state.set('isPageBadge', false);
     state.set('isToolbarBadge', true);
 
-    adjustFixedElementsBelowToolbar(toolbarElement);
+    adjustFixedElementsBelowToolbar();
 
     baseView.init(toolbarElement, onComplete);
   }

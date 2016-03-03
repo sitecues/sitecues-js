@@ -17,73 +17,10 @@ define(['$', 'page/util/common', 'page/util/element-classifier', 'page/highlight
 
     'use strict';
 
-  // ----------- PUBLIC  ----------------
-
-  // Get a judgement for each node
-  // The judgements, traits and nodes all correlate, such that index 0 of each array
-  // stores information for the first candidate node, index 1 is the parent, etc.
-  // When the node is unusable, judgements is set to null, rather than wasting cycles calculating the judgements.
-  function getJudgementStack(traitStack, nodeStack) {
-    var firstNonInlineTraits = getTraitsOfFirstNonInlineCandidate(traitStack),
-      childJudgements = null,
-      childTraits = traitStack[0],  // For simplicity of calculations, not allowed to be null
-      // Get cascaded spacing traits and add them to traitStack
-      spacingInfoStack = getCascadedSpacingInfo(traitStack, nodeStack);  // topSpacing, leftSpacing, topDivider, etc.
-
-    // Return the judgements for the candidate at the given index
-    // Return null if the candidate is unusable
-    function mapJudgements(traits, index) {
-      var node = nodeStack[index],
-        judgements = getJudgements(traitStack, childTraits, firstNonInlineTraits, node,
-          spacingInfoStack, childJudgements, index);
-      childJudgements = judgements;
-      childTraits = traits;
-      return judgements;
-    }
-
-    return traitStack.map(mapJudgements);
-  }
-
-  // This is a hook for customization scripts, which can add their own judgements by overriding this method.
-  // Pass in as { judgementName: fn(), judgementName2: fn2(), etc. }
-  // Parameters to judgement functions are:
-  //   judgements, traits, belowTraits, belowJudgements, parentTraits, firstNonInlineTraits, node, index
-  // For each judgement, a weight of the same name must exist.
-  function provideCustomJudgements(judgements) {
-    customJudgements = judgements;
-  }
-
-  // ------------ PRIVATE -------------
-
-  function getJudgements(traitStack, childTraits, firstNonInlineTraits, node, spacingStack, childJudgements, index) {
-    var judgementGetter,
-      traits = traitStack[index],
-      numCandidates = traitStack.length,
-      parentTraits = index < numCandidates - 1 ? traitStack[index + 1] : traits,
-      firstTraits = traitStack[0],
-      judgements = spacingStack[index];  // Begin with cascaded spacing info
-
-    // Computed judgements
-    $.extend(judgements, getVisualSeparationJudgements(node, traits, parentTraits, childTraits, judgements, childJudgements));
-    $.extend(judgements, getSizeJudgements(node, judgements, traits, firstNonInlineTraits, childJudgements));
-    $.extend(judgements, getGrowthJudgements(traits, childTraits, parentTraits, firstNonInlineTraits, firstTraits, childJudgements));
-    $.extend(judgements, getCellLayoutJudgements(node, judgements, traits, parentTraits, childJudgements, firstNonInlineTraits));
-    $.extend(judgements, getDOMStructureJudgements(judgements, traits, childJudgements, childTraits, node, index));
-
-    for (judgementGetter in customJudgements) {
-      if (customJudgements.hasOwnProperty(judgementGetter)) {
-        $.extend(judgements, judgementGetter(judgements, traits, childTraits, childJudgements, parentTraits, firstNonInlineTraits, node, index));
-      }
-    }
-
-    judgements.isUsable = isUsable(traits, judgements);
-
-    return judgements;
-  }
-
   // ** Semantic constants ***
   // For ARIA roles other tags could be used, but this is most likely and more performant than checking all possibilities
-  var DIVIDER_SELECTOR = 'hr,div[role="separator"],img',
+  var
+    DIVIDER_SELECTOR = 'hr,div[role="separator"],img',
     SECTION_START_SELECTOR = 'h1,h2,h3,h4,h5,h6,hgroup,header,dt,div[role="heading"],hr,div[role="separator"]',
     GREAT_TAGS = { blockquote:1, td:1, ol:1, menu:1 },
     GOOD_TAGS = { a:1, address:1, button:1, code:1, dl:1, fieldset:1, form:1, p:1, pre:1, li:1, section:1, tr:1 },
@@ -136,6 +73,70 @@ define(['$', 'page/util/common', 'page/util/element-classifier', 'page/highlight
     LINK_LIST_FACTOR = 1.5,                        // How much to multiply list score by if it's a list of links
     OUT_OF_FLOW_LIST_FACTOR = 6,                 // How much to multiply list score by if it's a positioned list (a menu)
     customJudgements = {};
+
+    // ----------- PUBLIC  ----------------
+
+    // Get a judgement for each node
+    // The judgements, traits and nodes all correlate, such that index 0 of each array
+    // stores information for the first candidate node, index 1 is the parent, etc.
+    // When the node is unusable, judgements is set to null, rather than wasting cycles calculating the judgements.
+    function getJudgementStack(traitStack, nodeStack) {
+      var firstNonInlineTraits = getTraitsOfFirstNonInlineCandidate(traitStack),
+        childJudgements = null,
+        childTraits = traitStack[0],  // For simplicity of calculations, not allowed to be null
+      // Get cascaded spacing traits and add them to traitStack
+        spacingInfoStack = getCascadedSpacingInfo(traitStack, nodeStack);  // topSpacing, leftSpacing, topDivider, etc.
+
+      // Return the judgements for the candidate at the given index
+      // Return null if the candidate is unusable
+      function mapJudgements(traits, index) {
+        var node = nodeStack[index],
+          judgements = getJudgements(traitStack, childTraits, firstNonInlineTraits, node,
+            spacingInfoStack, childJudgements, index);
+        childJudgements = judgements;
+        childTraits = traits;
+        return judgements;
+      }
+
+      return traitStack.map(mapJudgements);
+    }
+
+    // This is a hook for customization scripts, which can add their own judgements by overriding this method.
+    // Pass in as { judgementName: fn(), judgementName2: fn2(), etc. }
+    // Parameters to judgement functions are:
+    //   judgements, traits, belowTraits, belowJudgements, parentTraits, firstNonInlineTraits, node, index
+    // For each judgement, a weight of the same name must exist.
+    function provideCustomJudgements(judgements) {
+      customJudgements = judgements;
+    }
+
+    // ------------ PRIVATE -------------
+
+    function getJudgements(traitStack, childTraits, firstNonInlineTraits, node, spacingStack, childJudgements, index) {
+      var judgementGetter,
+        traits = traitStack[index],
+        numCandidates = traitStack.length,
+        parentTraits = index < numCandidates - 1 ? traitStack[index + 1] : traits,
+        firstTraits = traitStack[0],
+        judgements = spacingStack[index];  // Begin with cascaded spacing info
+
+      // Computed judgements
+      $.extend(judgements, getVisualSeparationJudgements(node, traits, parentTraits, childTraits, judgements, childJudgements));
+      $.extend(judgements, getSizeJudgements(node, judgements, traits, firstNonInlineTraits, childJudgements));
+      $.extend(judgements, getGrowthJudgements(traits, childTraits, parentTraits, firstNonInlineTraits, firstTraits, childJudgements));
+      $.extend(judgements, getCellLayoutJudgements(node, judgements, traits, parentTraits, childJudgements, firstNonInlineTraits));
+      $.extend(judgements, getDOMStructureJudgements(judgements, traits, childJudgements, childTraits, node, index));
+
+      for (judgementGetter in customJudgements) {
+        if (customJudgements.hasOwnProperty(judgementGetter)) {
+          $.extend(judgements, judgementGetter(judgements, traits, childTraits, childJudgements, parentTraits, firstNonInlineTraits, node, index));
+        }
+      }
+
+      judgements.isUsable = isUsable(traits, judgements);
+
+      return judgements;
+    }
 
     // Which edges of node are adjacent to parent's edge? E.g. top, left, bottom, right
     // Returns an array of edges, e.g. ["top", "left"]
@@ -839,9 +840,9 @@ define(['$', 'page/util/common', 'page/util/element-classifier', 'page/highlight
     }
     return traitStack[0];
   }
+
   return {
     getJudgementStack: getJudgementStack,
     provideCustomJudgements: provideCustomJudgements
   };
-
 });

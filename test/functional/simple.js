@@ -53,6 +53,8 @@ define(
                 return remote
                     .setWindowPosition(0, 0)
                     // Best effort to normalize window sizes (not every browser opens the same)
+                    // TODO: Set size by getting dimensions from client-side screen.availHeight, etc.
+                    // .setWindowSize(1440, 873)
                     .maximizeWindow()
                     // Navigate to the desired page.
                     .get(testUrl)

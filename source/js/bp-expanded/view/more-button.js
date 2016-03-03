@@ -83,6 +83,9 @@ define(['core/bp/constants', 'core/bp/helper', 'bp-expanded/view/transform-util'
     doAlwaysShowButton = true;
 
     getHelpOrSecondaryPanel(); // Preload
+
+    // Add mouse listeners once BP is ready
+    addMouseListeners();
   }
 
   function showMoreButtonSlowly() {
@@ -149,9 +152,6 @@ define(['core/bp/constants', 'core/bp/helper', 'bp-expanded/view/transform-util'
     moreButtonContainer = byId(BP_CONST.MORE_BUTTON_CONTAINER_ID);
     moreOpacityElem = byId('scp-more-button-opacity');
 
-    // Add mouse listeners once BP is ready
-    addMouseListeners();
-
     // After a complete expansion of the badge, determine if and when we will show
     // the "more" button.
     events.on('bp/did-expand', initButtonBehavior); // Future expansions
@@ -163,6 +163,8 @@ define(['core/bp/constants', 'core/bp/helper', 'bp-expanded/view/transform-util'
 
     // Always hide the more button when the panel is about to collapse.
     events.on('bp/will-shrink', hideHelpButton);
+
+    //TODO: Once Edge gets itself together (see SC-3434) we should attach the button mouse listener here instead of after revealing it
 
     hovers.init();
   }

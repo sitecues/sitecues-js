@@ -23,6 +23,11 @@ define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/loca
   }
 
   function ensureLabelFitsInPanel() {
+
+    var
+      ttsLabelElement = getTTSLabelElement(),
+      speechLabelWidth = ttsLabelElement.getBoundingClientRect().width;
+
     function setAlignment(alignment) {
       // alignment is 'start' for left justification, and 'end' for right justification
       ttsLabelElement.setAttribute('text-anchor', alignment);
@@ -37,8 +42,6 @@ define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/loca
     }
 
     // Use right justification if label is too large to fit
-    var ttsLabelElement = getTTSLabelElement();
-    var speechLabelWidth = ttsLabelElement.getBoundingClientRect().width;
     setAlignment(speechLabelWidth > getMaxLabelWidth() ? 'end' : 'start');
 
     if (platform.browser.isEdge) {

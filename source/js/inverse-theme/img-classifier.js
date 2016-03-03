@@ -25,6 +25,9 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
   }
 
   function getInvertUrl(url) {
+    if (url.substring(0, 5) === 'data:') {
+      return url;  // Don't try to use web service to invert a data: url
+    }
     var
       absoluteUrl = urls.resolveUrl(url),
       apiUrl = urls.getApiUrl('image/invert?url=' + encodeURIComponent(absoluteUrl));
@@ -47,14 +50,14 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
       isSafeRequest = !urls.isOnDifferentDomain(url),
       safeUrl;
 
-    function returnImageWhenComplete(loadableImg) {
+    function returnImageWhenComplete(loadableImg, isInverted) {
       if (loadableImg.complete) {
-        onReadableImageAvailable(loadableImg); // Already loaded
+        onReadableImageAvailable(loadableImg, isInverted); // Already loaded
       }
       else {
         $(loadableImg)
           .on('load', function() {
-            onReadableImageAvailable(loadableImg);
+            onReadableImageAvailable(loadableImg, isInverted);
           })
           .on('error', onReadableImageError);
       }
@@ -72,7 +75,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
     else {
       // Uses inverted image for analysis so that if we need to display it, it's already in users cache.
       // The inverted image will show the same number of brightness values in the histogram so this won't effect classification
-      safeUrl = getInvertUrl(url);
+      safeUrl = getInvertUrl(url, true);
     }
 
     returnImageWhenComplete(createSafeImage(safeUrl));
@@ -101,11 +104,11 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
     canvas.width = width;
     canvas.height = height;
 
-    function onReadableImageAvailable(readableImg) {
+    function onReadableImageAvailable(readableImg, isInverted) {
       ctx = canvas.getContext('2d');
       ctx.drawImage(readableImg, top, left, width, height);
       imageData = ctx.getImageData(0, 0, width, height).data;
-      processImageData(imageData);
+      processImageData(imageData, isInverted);
     }
 
     function onImageError() {
@@ -118,12 +121,12 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
 
   // Either pass img or src, but not both
   function getPixelInfo(img, src, rect, processPixelInfo) {
-    getImageData(img, src, rect, function(data) {
-      processPixelInfo(data && getPixelInfoImpl(data, rect.width, rect.height));
+    getImageData(img, src, rect, function(data, isInverted) {
+      processPixelInfo(data && getPixelInfoImpl(data, rect.width, rect.height, isInverted));
     });
   }
 
-  function getPixelInfoImpl(data, width, height) {
+  function getPixelInfoImpl(data, width, height, isInverted) {
     //
     // Compute Image Features (if we can...)
     // We may not be able to if the image is not from the same origin.
@@ -146,21 +149,39 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
       MAX_PIXELS_TO_TEST = 523,
       area = height * width,
       stepSize = Math.floor(area / Math.min(area, MAX_PIXELS_TO_TEST)),
-      numPixelsToCheck = Math.floor(area / stepSize),
+      MIN_TRANSPARENCY_FOR_VALID_PIXEL = 0.3,
+      //numPixelsToCheck = Math.floor(area / stepSize),
+      numPixelsChecked = 0,
       histogramIndex,
       luminanceTotal = 0,
       maxLuminance = 0;
 
     for(; byteIndex < numBytes; byteIndex += DWORD_SIZE * stepSize) {
-      var rgba = {
-        r: data[byteIndex],
-        g: data[byteIndex + 1],
-        b: data[byteIndex + 2],
-        a: data[byteIndex + 3]
-      };
+      var
+        rgba = {
+          r: data[byteIndex],
+          g: data[byteIndex + 1],
+          b: data[byteIndex + 2],
+          a: data[byteIndex + 3]
+        },
+        isSemiTransparent = rgba.a < 255;
 
-      if (rgba.a < 255) {  // Alpha channel
+      if (isSemiTransparent) {  // Alpha channel
         hasTransparentPixels = true;
+        if (rgba.a < MIN_TRANSPARENCY_FOR_VALID_PIXEL) {
+          continue;  // Don't use pixels that are mostly transparent for histogram or brighness measurements
+        }
+      }
+
+      ++ numPixelsChecked;
+
+      if (isInverted) {
+        // Used inverted image to get around cross-origin issues
+        // We use this instead of passthrough option because it puts the image into the cache in case we need it
+        // However, we need to evaluate the brightness as if it's not inverted
+        rgba.r = 255 - rgba.r;
+        rgba.g = 255 - rgba.g;
+        rgba.b = 255 - rgba.b;
       }
 
       grayscaleVal = colorUtil.getFastLuminance(rgba);
@@ -198,9 +219,9 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
       hasTransparentPixels: hasTransparentPixels,
       numDifferentGrayscaleVals: numDifferentGrayscaleVals,
       numMultiUseGrayscaleVals: numMultiUseGrayscaleVals,
-      percentWithSameGrayscale: maxSameGrayscale / numPixelsToCheck,
+      percentWithSameGrayscale: numPixelsChecked ? maxSameGrayscale / numPixelsChecked : 0.5,
       numDifferentHues: numDifferentHues,
-      averageLuminance: luminanceTotal / numPixelsToCheck,
+      averageLuminance: numPixelsChecked ? luminanceTotal / numPixelsChecked : 0.5,
       maxLuminance: maxLuminance
     };
   }
@@ -290,12 +311,14 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
         BASE_SCORE = 130,
         DARK_LUMINANCE_THRESHOLD = 0.30,
         DARK_LUMINANCE_MAX_THRESHOLD = 0.30,
+        BRIGHT_LUMINANCE_THRESHOLD = 0.60,
         manyValuesScore,
         manyReusedValuesScore,
         oneValueReusedOftenScore,
         numHuesScore = 0,
         transparentPixelsScore,
-        darknessScore = 0;
+        darkNonTransparencyScore = 0,
+        brightWithTransparencyScore = 0;
 
       if (pixelInfo) {
 
@@ -315,13 +338,20 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
         // One large swath of color -> less likely to be a photo. For example 30% -> +60 points
         oneValueReusedOftenScore = Math.min(50, pixelInfo.percentWithSameGrayscale * 200);
 
-        if (!pixelInfo.hasTransparentPixels && pixelInfo.averageLuminance < DARK_LUMINANCE_THRESHOLD) {
+        if (pixelInfo.hasTransparentPixels) {
+          if (pixelInfo.averageLuminance > BRIGHT_LUMINANCE_THRESHOLD) {
+            // This is already looks like bright text or a bright icon
+            // Don't revert, because it will most likely end up as dark on dark
+            brightWithTransparencyScore = -1500 * (pixelInfo.averageLuminance - BRIGHT_LUMINANCE_THRESHOLD);
+          }
+        }
+        else if (pixelInfo.averageLuminance < DARK_LUMINANCE_THRESHOLD) {
           // This is already a very dark image, so inverting it will make it bright -- unlikely the right thing to do
           // We don't do this for images with transparent pixels, because it is likely a dark drawing on a light background,
           // which needs to be inverted
-          darknessScore = -1000 * (DARK_LUMINANCE_THRESHOLD - pixelInfo.averageLuminance);
+          darkNonTransparencyScore = -1000 * (DARK_LUMINANCE_THRESHOLD - pixelInfo.averageLuminance);
           if (pixelInfo.maxLuminance < DARK_LUMINANCE_MAX_THRESHOLD) {
-            darknessScore *= 2; // Really dark -- there is nothing bright in this image at all
+            darkNonTransparencyScore *= 2; // Really dark -- there is nothing bright in this image at all
           }
         }
 
@@ -336,7 +366,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
         }
 
         score = BASE_SCORE + transparentPixelsScore + manyValuesScore + manyReusedValuesScore + oneValueReusedOftenScore +
-          darknessScore + numHuesScore;
+          brightWithTransparencyScore + darkNonTransparencyScore + numHuesScore;
         // Image has full color information
         if (SC_DEV && isDebuggingOn && img) {
           $(img).attr('data-sc-pixel-info', JSON.stringify(pixelInfo));
@@ -383,6 +413,11 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
 
   // Classify an image that is loaded/loading from a src
   function classifyLoadableImage(img, onShouldReverseImage) {
+
+    var
+      storageKey = getStorageKey(img),
+      cachedResult = sessionStorage.getItem(storageKey);
+
     function classifyLoadedImage() {
       shouldInvertElement(img, function(isReversible, didAnalyzePixels) {
 
@@ -390,7 +425,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
           // Only cache for expensive operations, in order to save on storage space
           var imageClass = isReversible ? CLASS_INVERT : CLASS_NORMAL;
           // Use session storage instead of local storage so that we don't pollute too much
-          window.sessionStorage.setItem(storageKey, imageClass);
+          sessionStorage.setItem(storageKey, imageClass);
         }
 
         onImageClassified(img, isReversible, onShouldReverseImage);
@@ -401,10 +436,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
       onImageClassified(img, false);
     }
 
-    var storageKey = getStorageKey(img),
-      cachedResult = window.sessionStorage.getItem(storageKey);
-
-    if (cachedResult) {
+    if (!SC_DEV && cachedResult) {
       // Use cached result if available
       onImageClassified(img, cachedResult === CLASS_INVERT, onShouldReverseImage);
     }

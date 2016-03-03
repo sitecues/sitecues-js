@@ -156,5 +156,4 @@ define(['core/platform', 'core/bp/constants'], function(platform, BP_CONST) {
     cancelEvent: cancelEvent,
     fixTextAnchors: fixTextAnchors
   };
-
 });

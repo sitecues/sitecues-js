@@ -130,7 +130,11 @@ define([
   // Classic mode is where the ? shows up instead of the down pointing arrow
   // TODO remove one day, we hope
   function initClassicMode() {
+<<<<<<< HEAD
+    state.set('isClassicMode', isClassicMode());
+=======
     state.set('isClassicMode', classicMode());
+>>>>>>> dev
     sitecues.toggleClassicMode = function() {
       state.set('isClassicMode', !state.get('isClassicMode'));
     };

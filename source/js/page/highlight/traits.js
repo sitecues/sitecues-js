@@ -4,10 +4,19 @@
  *  bounding rectangle
  *  margin, padding, overall spacing
  */
-define(['$', 'page/highlight/traitcache', 'page/highlight/highlight-position', 'page/zoom/zoom', 'page/util/element-classifier'],
+define(
+  [
+    '$',
+    'page/highlight/traitcache',
+    'page/highlight/highlight-position',
+    'page/zoom/zoom',
+    'page/util/element-classifier'
+  ],
   function($, traitcache, mhpos, zoomMod, elemClassifier) {
 
     'use strict';
+
+    var bodyWidth, viewSize;
 
   // ---- PUBLIC ----
 
@@ -22,8 +31,6 @@ define(['$', 'page/highlight/traitcache', 'page/highlight/highlight-position', '
   }
 
   // ---- PRIVATE ----
-
-  var bodyWidth, viewSize;
 
   // Properties that depend only on the node itself, and not other traits in the stack
   function getTraits(node) {

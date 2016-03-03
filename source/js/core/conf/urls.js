@@ -1,4 +1,4 @@
-define(['core/conf/site'], function(site) {
+define(['core/conf/site', 'core/platform'], function(site, platform) {
 
   var apiDomain,  // Either ws.sitecues.com/ or ws.dev.sitecues.com/
     scriptOrigin,  // Either http[s]://js.sitecues.com/ or http[s]://js.dev.sitecues.com/
@@ -123,14 +123,14 @@ define(['core/conf/site'], function(site) {
   // Return an absolute URL. If the URL was relative, return an absolute URL that is relative to a base URL.
   // @optional parsedBaseUrl If not provided, will use the current page.
   function resolveUrl(urlStr, baseUrl) {
-    try {
+    if (!platform.browser.isIE || platform.browser.isEdge) {
+      // URL object exists in IE11 but "new URL()" throws error "Object doesn’t support this action"
       var parsedUrl = new URL(urlStr, baseUrl || document.location);
       return parsedUrl.toString();
     }
-    catch(ex) {
-    }
 
-    // TODO support for IE9 -- remove when we remove IE9 support
+    // IE 9-11 polyfill
+    // TODO remove if IE11 ever goes away!!
     var parsedBaseUrl = parseUrl(baseUrl || '.');
 
     var absRegExpResult = ABSOLUTE_URL_REGEXP.exec(urlStr);

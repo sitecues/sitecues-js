@@ -79,7 +79,37 @@ define(
                 return browserUtil.resetEnvironment();
             });
 
-            test('Plus key held to zoom in', function () {
+            test('Click in the middle of slider to zoom', function () {
+                return badge
+                    .openPanel()
+                    .then(function () {
+                        return panel.clickSliderBar(2);
+                    })
+                    .findByCssSelector('body')
+                        .getComputedStyle('transform')
+                        .then(function (transform) {
+
+                            let matrix = transform.substring(7).split(','),
+                                xScale = Number(matrix[0]),
+                                yScale = Number(matrix[3]);
+
+                            assert.closeTo(
+                                xScale,
+                                2,
+                                0.2,
+                                'Horizontal zoom must be near slider position'
+                            );
+                            assert.closeTo(
+                                yScale,
+                                2,
+                                0.2,
+                                'Verical zoom must be near slider position'
+                            );
+                        })
+                        .end();
+            });
+
+            test('Zoom all the way in and out via holding plus/minus keys', function () {
                 return input
                     .holdKey('=')
                     .then(function () {
@@ -90,94 +120,75 @@ define(
                         .getComputedStyle('transform')
                         .then(function (transform) {
                             let matrix = transform.substring(7).split(','),
-                                xTrans = Number(matrix[0]),
-                                yTrans = Number(matrix[3]);
+                                xScale = Number(matrix[0]),
+                                yScale = Number(matrix[3]);
                             assert.strictEqual(
-                                xTrans,
+                                xScale,
                                 3,
-                                'Body should be have an x transformation of 3'
+                                'Horizontal zoom must be identical to slider position'
                             );
                             assert.strictEqual(
-                                yTrans,
+                                yScale,
                                 3,
-                                'Body should have a y transformation of 3'
+                                'Verical zoom must be identical to slider position'
                             );
                         })
-                        .end();
-            });
-
-
-            test('Plus key held to zoom in, minus key held to zoom out', function () {
-                return input
-                    .holdKey('=')
+                        .end()
                     .then(function () {
-                        return wait
-                            .forTransformToComplete('body', 8000, 25);
+                        // TODO: Can we get this value from Leadfoot/keys
+                        return input.holdKey('-');
                     })
                     .then(function () {
-                        return input
-                            // TODO: Can we get this value from Leadfoot/keys
-                            .holdKey('-');
-                    })
-                    .then(function () {
-                        return wait
-                            .forTransformToComplete('body', 8000, 25);
+                        return wait.forTransformToComplete('body', 8000, 25);
                     })
                     .findByCssSelector('body')
                         .getComputedStyle('transform')
                         .then(function (transform) {
+
                             let matrix = transform.substring(7).split(','),
-                                xTrans = Number(matrix[0]),
-                                yTrans = Number(matrix[3]);
+                                xScale = Number(matrix[0]),
+                                yScale = Number(matrix[3]);
+
                             assert.strictEqual(
-                                xTrans,
+                                xScale,
                                 1,
-                                'Body should be have an x transformation of 1'
+                                'Horizontal zoom must be identical to slider position'
                             );
                             assert.strictEqual(
-                                yTrans,
+                                yScale,
                                 1,
-                                'Body should have a y transformation of 1'
+                                'Vertical zoom must be identical to slider position'
                             );
                         })
                         .end();
             });
 
-
-            test('Click on big A to zoom in', function () {
+            test('Zoom all the way in and out via holding \"A\"s', function () {
                 return badge
                     .openPanel()
                     .then(function () {
-                        return panel
-                            .pressLargeA();
+                        return panel.pressLargeA();
                     })
                     .findByCssSelector('body')
                         .getComputedStyle('transform')
                         .then(function (transform) {
+
                             let matrix = transform.substring(7).split(','),
-                                xTrans = Number(matrix[0]),
-                                yTrans = Number(matrix[3]);
+                                xScale = Number(matrix[0]),
+                                yScale = Number(matrix[3]);
+
                             assert.strictEqual(
-                                xTrans,
+                                xScale,
                                 3,
-                                'Body should be have an x transformation of 3'
+                                'Horizontal zoom must be identical to slider position'
                             );
                             assert.strictEqual(
-                                yTrans,
+                                yScale,
                                 3,
-                                'Body should have a y transformation of 3'
+                                'Vertical zoom must be identical to slider position'
                             );
                         })
-                        .end();
-            });
-
-            test('Click on big A to zoom in, click on small A to zoom out', function () {
-                return badge
-                    .openPanel()
-                    .then(function () {
-                        return panel
-                            .pressLargeA();
-                    })
+                        .end()
                     .then(function () {
                         return panel
                             .pressSmallA();
@@ -186,200 +197,164 @@ define(
                         .getComputedStyle('transform')
                         .then(function (transform) {
                             let matrix = transform.substring(7).split(','),
-                                xTrans = Number(matrix[0]),
-                                yTrans = Number(matrix[3]);
+                                xScale = Number(matrix[0]),
+                                yScale = Number(matrix[3]);
                             assert.strictEqual(
-                                xTrans,
+                                xScale,
                                 1,
-                                'Body must have an x transformation of 1'
+                                'Horizontal zoom must be identical to slider position'
                             );
                             assert.strictEqual(
-                                yTrans,
+                                yScale,
                                 1,
-                                'Body must have a y transformation of 1'
+                                'Vertical zoom must be identical to slider position'
                             );
                         })
                         .end();
             });
 
-            test('Drag slider to fully zoomed position', function () {
+            test('Zoom all the way in and out via slider drag', function () {
                 return badge
                     .openPanel()
                     .then(function () {
-                        return panel
-                            .dragSliderThumb(3);
+                        return panel.dragSliderThumb(3);
                     })
                     .findByCssSelector('body')
                         .getComputedStyle('transform')
                         .then(function (transform) {
+
                             let matrix = transform.substring(7).split(','),
-                                xTrans = Number(matrix[0]),
-                                yTrans = Number(matrix[3]);
-                            assert.closeTo(
-                                xTrans,
+                                xScale = Number(matrix[0]),
+                                yScale = Number(matrix[3]);
+
+                            assert.isAtMost(
+                                xScale,
                                 3,
-                                .2,
-                                'Body should be have an x transformation of 3'
-                            );
-                            assert.closeTo(
-                                yTrans,
-                                3,
-                                .2,
-                                'Body should have a y transformation of 3'
+                                'Horizontal zoom must be within slider range'
                             );
                             assert.isAtMost(
-                                xTrans,
+                                yScale,
                                 3,
-                                'Body should be have an x transformation less than or equal to 3'
+                                'Vertical zoom must be within slider range'
                             );
-                            assert.isAtMost(
-                                yTrans,
+                            assert.closeTo(
+                                xScale,
                                 3,
-                                'Body should have a y transformation less than or equal to 3'
+                                0.2,
+                                'Horizontal zoom must be near slider position'
+                            );
+                            assert.closeTo(
+                                yScale,
+                                3,
+                                0.2,
+                                'Vertical zoom must be near slider position'
                             );
                         })
-                        .end();
-            });
-
-            test('Drag slider to fully zoomed position, drag slider back to zoom 1', function () {
-                return badge
-                    .openPanel()
+                        .end()
                     .then(function () {
-                        return panel
-                            .dragSliderThumb(3);
-                    })
-                    .then(function () {
-                        return panel
-                            .dragSliderThumb(1);
+                        return panel.dragSliderThumb(1);
                     })
                     .findByCssSelector('body')
                         .getComputedStyle('transform')
                         .then(function (transform) {
+
                             let matrix = transform.substring(7).split(','),
-                                xTrans = Number(matrix[0]),
-                                yTrans = Number(matrix[3]);
-                            assert.closeTo(
-                                xTrans,
+                                xScale = Number(matrix[0]),
+                                yScale = Number(matrix[3]);
+
+                            assert.isAtLeast(
+                                xScale,
                                 1,
-                                .2,
-                                'Body should be have an x transformation close to 1'
-                            );
-                            assert.closeTo(
-                                yTrans,
-                                1,
-                                .2,
-                                'Body should have a y transformation close to 1'
+                                'Horizontal zoom must be within slider range'
                             );
                             assert.isAtLeast(
-                                xTrans,
+                                yScale,
                                 1,
-                                'Body should be have an x transformation greater than or equal to 1'
+                                'Vertical zoom must be within slider range'
                             );
-                            assert.isAtLeast(
-                                yTrans,
+                            assert.closeTo(
+                                xScale,
                                 1,
-                                'Body should have a y transformation greater than or equal to 1'
+                                0.2,
+                                'Horizontal zoom must be near slider position'
+                            );
+                            assert.closeTo(
+                                yScale,
+                                1,
+                                0.2,
+                                'Vertical zoom must be near slider position'
                             );
                         })
                         .end();
             });
 
-            test('Click in the middle of slider to zoom', function () {
-                return badge
-                    .openPanel()
-                    .then(function () {
-                        return panel
-                            .clickSliderBar(2);
-                    })
-                    .findByCssSelector('body')
-                        .getComputedStyle('transform')
-                        .then(function (transform) {
-                            let matrix = transform.substring(7).split(','),
-                                xTrans = Number(matrix[0]),
-                                yTrans = Number(matrix[3]);
-                            assert.isAbove(
-                                xTrans,
-                                1,
-                                'Body should be have an x transformation greater than 1'
-                            );
-                            assert.isAbove(
-                                yTrans,
-                                1,
-                                'Body should have a y transformation greater than 1'
-                            );
-                        })
-                        .end();
-            });
-
-            test('Ctrl + wheel up to zoom in', function () {
+            test('Zoom all the way in and out via Cntrl + wheel', function () {
                 return input
                     .ctrlWheel('up', 10)
                     .findByCssSelector('body')
                         .getComputedStyle('transform')
                         .then(function (transform) {
+
                             let matrix = transform.substring(7).split(','),
-                                xTrans = Number(matrix[0]),
-                                yTrans = Number(matrix[3]);
-                            assert.closeTo(
-                                xTrans,
+                                xScale = Number(matrix[0]),
+                                yScale = Number(matrix[3]);
+
+                            assert.isAtMost(
+                                xScale,
                                 3,
-                                .2,
-                                'Body should be have an x transformation close to 3'
-                            );
-                            assert.closeTo(
-                                yTrans,
-                                3,
-                                .2,
-                                'Body should have a y transformation close to 3'
+                                'Horizontal zoom must be within slider range'
                             );
                             assert.isAtMost(
-                                yTrans,
+                                yScale,
                                 3,
-                                'Body can\'t have a y transformation greater than 3'
+                                'Vertical zoom must be within slider range'
                             );
-                            assert.isAtMost(
-                                xTrans,
+                            assert.closeTo(
+                                xScale,
                                 3,
-                                'Body can\'t have a x transformation greater than 3'
+                                0.2,
+                                'Horizontal zoom must be near slider position'
+                            );
+                            assert.closeTo(
+                                yScale,
+                                3,
+                                0.2,
+                                'Vertical zoom must be near slider position'
                             );
                         })
-                        .end();
-            });
-
-            test('Ctrl + wheel up to zoom in, Ctrl + wheel down to zoom out', function () {
-                return input
-                    .ctrlWheel('up', 10)
+                        .end()
                     .then(function () {
-                        return input
-                            .ctrlWheel('down', 10);
+                        return input.ctrlWheel('down', 10);
                     })
                     .findByCssSelector('body')
                         .getComputedStyle('transform')
                         .then(function (transform) {
+
                             let matrix = transform.substring(7).split(','),
-                                xTrans = Number(matrix[0]),
-                                yTrans = Number(matrix[3]);
-                            assert.closeTo(
-                                xTrans,
+                                xScale = Number(matrix[0]),
+                                yScale = Number(matrix[3]);
+
+                            assert.isAtLeast(
+                                xScale,
                                 1,
-                                .2,
-                                'Body should be have an x transformation close to 1'
-                            );
-                            assert.closeTo(
-                                yTrans,
-                                1,
-                                .2,
-                                'Body should have a y transformation close to 1'
+                                'Horizontal zoom must be within slider range'
                             );
                             assert.isAtLeast(
-                                yTrans,
+                                yScale,
                                 1,
-                                'Body can\'t have a y transformation less than 1'
+                                'Veetical zoom must be within slider range'
                             );
-                            assert.isAtLeast(
-                                xTrans,
+                            assert.closeTo(
+                                xScale,
                                 1,
-                                'Body can\'t have a x transformation less than 1'
+                                0.2,
+                                'Horizontal zoom must be near slider position'
+                            );
+                            assert.closeTo(
+                                yScale,
+                                1,
+                                0.2,
+                                'Verical zoom must be near slider position'
                             );
                         })
                         .end();

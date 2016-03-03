@@ -39,6 +39,13 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
    */
   function onThemeChange() {
 
+    var
+      newThemeName = conf.get('themeName'),
+      newThemePower = conf.get('themePower'),
+      newThemeTextHue = conf.get('themeTextHue'),
+      colorMapFn,
+      willBeInverted;
+
     function applyThemeCss(inverseSpriteCss) {
       var
         themeCss = colorMapFn ? getThemeCssText(colorMapFn, currentThemePower, currentThemeTextHue) : '',
@@ -70,12 +77,6 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
 
       isInverted = willBeInverted;
     }
-
-    var newThemeName = conf.get('themeName'),
-      newThemePower = conf.get('themePower'),
-      newThemeTextHue = conf.get('themeTextHue'),
-      colorMapFn,
-      willBeInverted;
 
     if (newThemeName === currentThemeName && newThemePower === currentThemePower && newThemeTextHue === currentThemeTextHue) {
       return; // No change
@@ -552,5 +553,4 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
   return {
     init: init
   };
-
 });

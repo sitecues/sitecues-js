@@ -664,6 +664,11 @@ define(['$', 'page/highlight/highlight', 'page/util/common',
   }
 
   function moveByTagName(acceptableTagsMap, isReverse) {
+
+    var
+      treeWalker = document.createTreeWalker(document.body, NodeFilter.SHOW_ELEMENT, null, false),
+      $lastPicked = getHighlight().picked;
+
     function doesMatchTags(element) {
       if (!acceptableTagsMap[element.localName]) {
         return;
@@ -700,9 +705,6 @@ define(['$', 'page/highlight/highlight', 'page/util/common',
         }
       }
     }
-
-    var $lastPicked = getHighlight().picked,
-      treeWalker = document.createTreeWalker(document.body, NodeFilter.SHOW_ELEMENT, null, false);
 
     // Set the starting point (can do with tree walker but doesn't look like the similar node iterator API can do this)
     if ($lastPicked) {

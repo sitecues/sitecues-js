@@ -15,22 +15,13 @@
  */
 
 define(['core/bp/constants', 'core/bp/helper'], function(BP_CONST, helper) {
+  'use strict';
   // Create <div> and put the existing badge inside it.
   // Transfer necessary styles from the <img> to the <div>
   function convertExistingBadge(badgeImg) {
 
-    // Transfer styles from placeholder <img> to <div>
-    // Remove those styles from placeholder <img>
-    function transferStylesFromExistingBadge (styles) {
-      var len = styles.length,
-        i  = 0;
-      for (; i < len; i++) {
-        newBadge.style[styles[i]] = helper.getNumberFromString(badgeComputedStyles[styles[i]]) + 'px';
-        badgeImg.style[styles[i]] = 0;
-      }
-    }
-
-    var newBadge          = document.createElement('sc'),
+    var
+      newBadge            = document.createElement('sc'),
       badgeImgBoundingBox = helper.getRect(badgeImg),
       badgeComputedStyles = window.getComputedStyle(badgeImg),
       stylesToTransfer    = [
@@ -43,6 +34,17 @@ define(['core/bp/constants', 'core/bp/helper'], function(BP_CONST, helper) {
         'paddingLeft',
         'paddingRight'
       ];
+
+    // Transfer styles from placeholder <img> to <div>
+    // Remove those styles from placeholder <img>
+    function transferStylesFromExistingBadge(styles) {
+      var len = styles.length,
+        i  = 0;
+      for (; i < len; i++) {
+        newBadge.style[styles[i]] = helper.getNumberFromString(badgeComputedStyles[styles[i]]) + 'px';
+        badgeImg.style[styles[i]] = 0;
+      }
+    }
 
     // Added to fix issue on ruhglobal.com
     if (badgeImg.style.position === 'relative') {
