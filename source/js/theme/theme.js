@@ -402,7 +402,7 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
         prop: 'background-color',
         selector: selector,
         parsedVal: rgba,
-        important: cssStyleDecl.getPropertyPriority('background-color') === 'important',
+        important: cssStyleDecl.getPropertyPriority('background-color') === 'important'
       };
     }
   }
