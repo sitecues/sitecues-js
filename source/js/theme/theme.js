@@ -553,5 +553,4 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
   return {
     init: init
   };
-
 });
