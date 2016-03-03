@@ -44,5 +44,4 @@ define([
   return {
     getViewClasses: getViewClasses
   };
-
 });
