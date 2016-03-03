@@ -33,7 +33,6 @@ define(['core/conf/site', 'core/platform'], function(site, platform) {
     's-a5851e07': 1,
     's-acc8f046': 1,
     's-c27fa71d': 1,
-    's-f266b384': 1,
     's-f2a9dde2': 1,
     's-f424d83d': 1,
     's-f78268e1': 1
