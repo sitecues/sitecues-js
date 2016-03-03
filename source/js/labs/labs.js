@@ -7,7 +7,7 @@
  */
 
 define(['core/conf/user/manager', '$', 'core/events'], function(conf, $, events) {
-  
+
 
 
   var labSettings = $.extend({}, conf.get('labs'));
@@ -24,8 +24,8 @@ define(['core/conf/user/manager', '$', 'core/events'], function(conf, $, events)
     labSettings = $.extend({}, labInfo);
     conf.set('labs', labSettings);
   });
+
   return {
     isEnabled: isEnabled
   };
-
 });
