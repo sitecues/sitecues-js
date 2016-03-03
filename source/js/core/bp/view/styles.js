@@ -156,11 +156,11 @@ define(['core/bp/helper', 'core/platform', 'core/conf/site'],
 
       // .scp-toolbar means it's a toolbar
       '.scp-toolbar': {
-        'position': 'fixed',
+        'position': 'fixed !important',
         'top': 0,
         'left': 0,
         'width': '100%',
-        'height': '38px',
+        'height': '38px !important',
         'margin': '0 !important',  // Prevent page style pollution
         'box-sizing': 'border-box',
         'box-shadow': '1px 1px 15px 0 rgba(9, 9, 9, .5)',
@@ -174,20 +174,9 @@ define(['core/bp/helper', 'core/platform', 'core/conf/site'],
         'margin': '0 !important'  // Prevent page style pollution
       },
 
-      // Move the body down by the height of the toolbar + 1px for the box-shadow
+      // Move the body down by the height of the toolbar
       'html[data-sitecues-toolbar]': {
-        'padding-top': '41px !important'
-      },
-
-      // Fixed position elements will now be relative to the <body>, so that they move down below the toolbar
-      // This messes up Google maps for some reason. We've disabled google maps in the extension.
-      // TODO This also messes up https://www.yahoo.com/movies/monkey-kingdom-disneynature-116935977622.html
-      'html[data-sitecues-toolbar] > body:not([data-sc-extra-toolbar-bump])': {
-        'transform': 'translateY(0)'
-      },
-
-      'body[data-sc-extra-toolbar-bump]': {
-        'transform': 'translateY(41px)'
+        'padding-top': '38px !important'
       },
 
       /********** Transform animation speed **********/
