@@ -6,7 +6,7 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
     'theme/color-choices', 'page/util/color', 'theme/custom-site-theme', 'core/events' ],
   function($, conf, styleService, platform, colorChoices, colorUtil, customTheme, events) {
   var $themeStyleSheet,
-    THEME_STYLESHEET_NAME = 'sitecues-theme',
+    THEME_STYLESHEET_NAME = 'sitecues-js-theme',
     REPAINT_MS = 40,
     themeStyles,
     // TODO remove once no longer necessary -- should be soon
