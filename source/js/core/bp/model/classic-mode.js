@@ -19,7 +19,6 @@ define(['core/conf/site', 'core/platform'], function(site, platform) {
     's-6097a290': 1,
     's-620610ee': 1,
     's-b737790f': 1,
-    's-68a01ec7': 1,
     's-6fd0ef74': 1,
     's-73dd0fcf': 1,
     's-742d6f96': 1, // ruhglobal.com -- No sitecues?
