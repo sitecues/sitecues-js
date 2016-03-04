@@ -9,7 +9,6 @@ define(['core/conf/site', 'core/platform'], function(site, platform) {
     's-0796b61d': 1, // http://www.brzeziny-gmina.pl -- no sitecues
     's-14949bfa': 1,
     's-190630d2': 1,
-    's-2e146908': 1,
     's-389f76da': 1,
     's-456e33ab': 1, // http://www.gminakoscian.pl  -- sitecues broken
     's-4bfe60ab': 1,
@@ -17,7 +16,6 @@ define(['core/conf/site', 'core/platform'], function(site, platform) {
     's-548f9948': 1,
     's-6097a290': 1,
     's-620610ee': 1,
-    's-b737790f': 1,
     's-6fd0ef74': 1,
     's-73dd0fcf': 1,
     's-742d6f96': 1, // ruhglobal.com -- No sitecues?
@@ -28,6 +26,7 @@ define(['core/conf/site', 'core/platform'], function(site, platform) {
     's-9afa6ab9': 1,
     's-a5851e07': 1,
     's-acc8f046': 1,
+    's-b737790f': 1,
     's-c27fa71d': 1,
     's-f424d83d': 1,
     's-f78268e1': 1
