@@ -26,6 +26,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
 
   function getInvertUrl(url) {
     if (url.substring(0, 5) === 'data:') {
+      // TODO can't we invert this in code and provide a new data: url?
       return url;  // Don't try to use web service to invert a data: url
     }
     var
