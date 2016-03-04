@@ -1125,10 +1125,10 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'page/
       return;  // Valid rectangle added. No need to walk into children.
     }
     $(node).children().each(function() {
-      //For some reason, Edge will run this function despite there not being any children belonging to the element. Edge...
+      //For some reason, Edge will run this function despite there not being any element children belonging to the element. Edge...
       //TODO: Remove this conditional if Edge ever gets its act together. Reproducible here: www.njstatelib.org
       //NOTE: Does not reproduce when the console is open. Yeah that was a fun one to figure out
-      if (this) {
+      if (this.nodeType === 1) {
         getBodyRectImpl(this, sumRect, visibleNodes, style, isStrict);
       }
     });
