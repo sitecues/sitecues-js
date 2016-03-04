@@ -13,8 +13,7 @@ define(['core/conf/site', 'core/platform'], function(site, platform) {
     's-456e33ab': 1, // http://bip.wokiss.pl/kamieniec                // http://www.gminakoscian.pl  -- sitecues broken
     's-4bfe60ab': 1, // http://www.windoweyesforoffice.com           
     's-542edffc': 1, // http://bip.wokiss.pl/przedecz                
-    's-548f9948': 1, // http://ialvs.com                             
-    's-6097a290': 1, // http://gatfl.org                             
+    's-6097a290': 1, // http://gatfl.org
     's-620610ee': 1, // http://makingcareeasier.com                  
     's-6fd0ef74': 1, // http://adapadvocacyassociation.org           
     's-73dd0fcf': 1, // http://bip.kornik.pl                         
