@@ -6,7 +6,6 @@
 define(['core/conf/site', 'core/platform'], function(site, platform) {
   var CLASSIC_SITES = {
     's-00e27714': 1,
-    's-041cf669': 1,
     's-0796b61d': 1, // http://www.brzeziny-gmina.pl -- no sitecues
     's-14949bfa': 1,
     's-190630d2': 1,
