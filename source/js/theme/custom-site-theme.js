@@ -19,6 +19,7 @@ define(['core/conf/site', 'core/conf/urls'], function(site, urls) {
       's-570759e3': 1,
       's-6d6f89a3': 1,
       's-73dd0fcf': 1,
+      's-7b90f601': 1,
       's-9afa6ab9': 1,
       's-acc8f046': 1,
       's-b427fffb': 1,

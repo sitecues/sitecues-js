@@ -7,7 +7,6 @@ define(['core/conf/site', 'core/platform'], function(site, platform) {
   var CLASSIC_SITES = {
     's-00e27714': 1, // http://millburnlibrary.org                   
     's-6097a290': 1, // http://gatfl.org
-    's-7b90f601': 1, // http://tiicann.org
     's-9afa6ab9': 1, // http://perkins.org
     's-b737790f': 1  // http://window-eyes.at
   };
