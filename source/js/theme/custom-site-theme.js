@@ -16,7 +16,8 @@ define(['core/conf/site', 'core/conf/urls'], function(site, urls) {
       's-6d6f89a3': 1,
       's-9afa6ab9': 1,
       's-b427fffb': 1,
-      's-c27fa71d': 1
+      's-c27fa71d': 1,
+      's-f2a9dde2': 1
     },
     isInitialized;
 

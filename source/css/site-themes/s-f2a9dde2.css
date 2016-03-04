@@ -1,0 +1,9 @@
+/** mydigitalapex.com **/
+
+/* -------------- Dark theme --------------- */
+
+/* Avoid light bg which obscures light text */
+#subheader-slider * {
+  background-image: none !important;
+  background-color: black !important;
+}
