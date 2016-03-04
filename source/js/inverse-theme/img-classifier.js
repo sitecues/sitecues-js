@@ -310,74 +310,86 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
     // The magic values in here are taken from the original machine-learned algorithms
     // from Jeff Bigham's work, and have been tweaked a bit.
     getPixelInfo(img, src, rect, function(pixelInfo) {
-      var score = 0,
+      if (!pixelInfo) {
+        if (SC_DEV && isDebuggingOn && img) {
+          $(img).attr('data-sc-pixel-score', 'invalid');
+        }
+        onPixelScoreAvailable(0, true);  // true -> this was an expensive operation so we should cache the result
+        return;
+      }
+
+      var score,
         BASE_SCORE = 130,
         DARK_LUMINANCE_THRESHOLD = 0.30,
         DARK_LUMINANCE_MAX_THRESHOLD = 0.30,
         BRIGHT_LUMINANCE_THRESHOLD = 0.60,
-        manyValuesScore,
-        manyReusedValuesScore,
-        oneValueReusedOftenScore,
-        numHuesScore = 0,
-        transparentPixelsScore,
-        darkNonTransparencyScore = 0,
-        brightWithTransparencyScore = 0;
+        analysis = {
+          manyValuesScore: 0,
+          manyReusedValuesScore: 0,
+          oneValueReusedOftenScore: 0,
+          numHuesScore: 0,
+          transparentPixelsScore: 0,
+          darkNonTransparencyScore: 0,
+          brightWithTransparencyScore: 0
+        };
 
-      if (pixelInfo) {
+      // Low score -> NO invert (probably photo)
+      // High score -> YES invert (probably logo, icon or image of text)
 
-        // Low score -> NO invert (probably photo)
-        // High score -> YES invert (probably logo, icon or image of text)
+      // Transparent pixels -> more likely icon that needs inversion
+      // No transparent pixels -> rectangular shape that usually won't be problematic over any background
+      analysis.transparentPixelsScore = pixelInfo.hasTransparentPixels * 100;
 
-        // Transparent pixels -> more likely icon that needs inversion
-        // No transparent pixels -> rectangular shape that usually won't be problematic over any background
-        transparentPixelsScore = pixelInfo.hasTransparentPixels * 100;
+      // More values -> more likely to be photo
+      analysis.manyValuesScore = -1.5 * Math.min(200, pixelInfo.numDifferentGrayscaleVals);
 
-        // More values -> more likely to be photo
-        manyValuesScore = -1.5 * Math.min(200, pixelInfo.numDifferentGrayscaleVals);
+      // Values reused -> less likely to be a photo
+      analysis.manyReusedValuesScore = 15 * Math.min(20, pixelInfo.numMultiUseGrayscaleVals);
 
-        // Values reused -> less likely to be a photo
-        manyReusedValuesScore = 15 * Math.min(20, pixelInfo.numMultiUseGrayscaleVals);
+      // One large swath of color -> less likely to be a photo. For example 30% -> +60 points
+      analysis.oneValueReusedOftenScore = Math.min(50, pixelInfo.percentWithSameGrayscale * 200);
 
-        // One large swath of color -> less likely to be a photo. For example 30% -> +60 points
-        oneValueReusedOftenScore = Math.min(50, pixelInfo.percentWithSameGrayscale * 200);
-
-        if (pixelInfo.hasTransparentPixels) {
-          if (pixelInfo.averageLuminance > BRIGHT_LUMINANCE_THRESHOLD) {
-            // This is already looks like bright text or a bright icon
-            // Don't revert, because it will most likely end up as dark on dark
-            brightWithTransparencyScore = -1500 * (pixelInfo.averageLuminance - BRIGHT_LUMINANCE_THRESHOLD);
-          }
-        }
-        else if (pixelInfo.averageLuminance < DARK_LUMINANCE_THRESHOLD) {
-          // This is already a very dark image, so inverting it will make it bright -- unlikely the right thing to do
-          // We don't do this for images with transparent pixels, because it is likely a dark drawing on a light background,
-          // which needs to be inverted
-          darkNonTransparencyScore = -1000 * (DARK_LUMINANCE_THRESHOLD - pixelInfo.averageLuminance);
-          if (pixelInfo.maxLuminance < DARK_LUMINANCE_MAX_THRESHOLD) {
-            darkNonTransparencyScore *= 2; // Really dark -- there is nothing bright in this image at all
-          }
-        }
-
-        // Many hues -> more likely to be a photo -- experimentation showed that 8 hues seemed to work as a threshold
-        if (pixelInfo.numDifferentHues < 8) {
-          // Few hues: probably not a photo -- YES invert
-          numHuesScore =  Math.pow(pixelInfo.numDifferentHues - 8, 2) * 1.5;
-        }
-        else if (pixelInfo.numDifferentHues > 35) {
-          // Many hues: probably a photo -- NO invert
-          numHuesScore =  pixelInfo.numDifferentHues * -2;
-        }
-
-        score = BASE_SCORE + transparentPixelsScore + manyValuesScore + manyReusedValuesScore + oneValueReusedOftenScore +
-          brightWithTransparencyScore + darkNonTransparencyScore + numHuesScore;
-        // Image has full color information
-        if (SC_DEV && isDebuggingOn && img) {
-          $(img).attr('data-sc-pixel-info', JSON.stringify(pixelInfo));
-          $(img).attr('data-sc-pixel-score', score);
+      if (pixelInfo.hasTransparentPixels) {
+        if (pixelInfo.averageLuminance > BRIGHT_LUMINANCE_THRESHOLD) {
+          // This is already looks like bright text or a bright icon
+          // Don't revert, because it will most likely end up as dark on dark
+          analysis.brightWithTransparencyScore = -1500 * (pixelInfo.averageLuminance - BRIGHT_LUMINANCE_THRESHOLD);
         }
       }
-      else if (SC_DEV && isDebuggingOn && img) {
-        $(img).attr('data-sc-pixel-score', 'invalid');
+      else if (pixelInfo.averageLuminance < DARK_LUMINANCE_THRESHOLD) {
+        // This is already a very dark image, so inverting it will make it bright -- unlikely the right thing to do
+        // We don't do this for images with transparent pixels, because it is likely a dark drawing on a light background,
+        // which needs to be inverted
+        analysis.darkNonTransparencyScore = -1000 * (DARK_LUMINANCE_THRESHOLD - pixelInfo.averageLuminance);
+        if (pixelInfo.maxLuminance < DARK_LUMINANCE_MAX_THRESHOLD) {
+          analysis.darkNonTransparencyScore *= 2; // Really dark -- there is nothing bright in this image at all
+        }
+      }
+
+      // Many hues -> more likely to be a photo -- experimentation showed that 8 hues seemed to work as a threshold
+      if (pixelInfo.numDifferentHues < 8) {
+        // Few hues: probably not a photo -- YES invert
+        analysis.numHuesScore =  Math.pow(pixelInfo.numDifferentHues - 8, 2) * 1.5;
+      }
+      else if (pixelInfo.numDifferentHues > 35) {
+        // Many hues: probably a photo -- NO invert
+        analysis.numHuesScore =  pixelInfo.numDifferentHues * -2;
+      }
+
+      score = BASE_SCORE +
+        analysis.transparentPixelsScore +
+        analysis.manyValuesScore +
+        analysis.manyReusedValuesScore +
+        analysis.oneValueReusedOftenScore +
+        analysis.brightWithTransparencyScore +
+        analysis.darkNonTransparencyScore +
+        analysis.numHuesScore;
+
+      // Image has full color information
+      if (SC_DEV && isDebuggingOn && img) {
+        $(img).attr('data-sc-pixel-info', JSON.stringify(pixelInfo));
+        $(img).attr('data-sc-pixel-score-breakdown', JSON.stringify(analysis));
+        $(img).attr('data-sc-pixel-score', score);
       }
 
       onPixelScoreAvailable(score, true);  // true -> this was an expensive operation so we should cache the result
