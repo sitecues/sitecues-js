@@ -116,7 +116,7 @@ define(['$', 'page/zoom/zoom', 'core/platform', 'core/conf/site', 'page/style-se
     // Get a CSS selector matching all elements that can be position: fixed
     function getFixedPositionSelector() {
       if (!fixedSelector) {
-        fixedSelector = getUnjoinedFixedPositionSelectors.join();
+        fixedSelector = getUnjoinedFixedPositionSelectors().join();
       }
       return fixedSelector;
     }
