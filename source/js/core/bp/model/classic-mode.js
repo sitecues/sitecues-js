@@ -22,7 +22,6 @@ define(['core/conf/site', 'core/platform'], function(site, platform) {
     's-789901d0': 1,
     's-79b6a3ce': 1,
     's-7b90f601': 1,
-    's-7d6bc776': 1,
     's-9afa6ab9': 1,
     's-a5851e07': 1,
     's-acc8f046': 1,
