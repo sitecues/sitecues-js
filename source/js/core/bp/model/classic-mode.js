@@ -6,12 +6,7 @@
 define(['core/conf/site', 'core/platform'], function(site, platform) {
   var CLASSIC_SITES = {
     's-00e27714': 1, // http://millburnlibrary.org                   
-    's-0796b61d': 1, // http://bip.wokiss.pl/wagrowiecm/              // http://www.brzeziny-gmina.pl -- no sitecues
-    's-190630d2': 1, // http://bip.wokiss.pl/koscianm
-    's-389f76da': 1, // http://bip.powiat-slupca.pl
-    's-4bfe60ab': 1, // http://bip.wokiss.pl/kamieniec                // http://www.gminakoscian.pl  -- sitecues broken
     's-6097a290': 1, // http://gatfl.org
-    's-73dd0fcf': 1, // http://bip.kornik.pl
     's-7b90f601': 1, // http://tiicann.org
     's-9afa6ab9': 1, // http://perkins.org
     's-b737790f': 1  // http://window-eyes.at
