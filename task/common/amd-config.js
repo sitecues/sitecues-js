@@ -32,8 +32,10 @@ var config = require('../build-config'),
       out: config.buildDir + '/js/sitecues.js',
       // sitecues.js gets version number
       wrap: {
-        start: 'sitecues.version="' + config.version + '";\n' +
-          '"use strict";\n'
+        start:
+        'if (sitecues && sitecues.exists) throw new Error("The sitecues library already exists on this page.");\n' +
+        'Object.defineProperty(sitecues, "version", { value: "' + config.version + '", writable: false });\n' +
+        '"use strict";\n'
       },
       // Include alameda in core
       include: [ 'core/alameda-custom' ],

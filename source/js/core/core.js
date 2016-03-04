@@ -139,12 +139,6 @@ define(['core/conf/site', 'core/conf/urls', 'core/run', 'core/constants', 'core/
     return;
   }
 
-  // See if another sitecues library has 'planted it's flag' on this page.
-  if (sitecues.exists) {
-    console.error('The sitecues library already exists on this page.');
-    return;
-  }
-
   // As we have now 'planted our flag', export the public fields.
   exportPublicFields();
 
