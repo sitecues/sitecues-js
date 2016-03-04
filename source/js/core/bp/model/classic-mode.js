@@ -27,8 +27,7 @@ define(['core/conf/site', 'core/platform'], function(site, platform) {
     's-acc8f046': 1, // http://oxfordlanecapital.com                 
     's-b737790f': 1, // http://window-eyes.at                        
     's-c27fa71d': 1, // http://www.texasat.net                       
-    's-f424d83d': 1, // http://faast.org                             
-    's-f78268e1': 1  // http://ticc.com
+    's-f424d83d': 1  // http://faast.org
   };
 
   function isClassicBrowser() {
