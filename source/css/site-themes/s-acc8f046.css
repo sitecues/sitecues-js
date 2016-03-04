@@ -1,9 +1,8 @@
-/** mydigitalapex.com **/
+/** oxfordlanecapital.com **/
 
 /* -------------- Dark theme --------------- */
 
 /* Avoid light bg which obscures light text */
-.sitecues-reverse-theme #subheader-slider * {
+.sitecues-reverse-theme #irwMenuTable a {
   background-image: none !important;
-  background-color: black !important;
 }
