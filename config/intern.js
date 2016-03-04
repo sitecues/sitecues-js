@@ -4,10 +4,9 @@
 define(
     [   // dependencies...
         '../test/all-unit',
-        '../test/all-functional',
-
+        '../test/all-functional'
     ],
-    function (allUnit, allFunctional, pkg) {
+    function (allUnit, allFunctional) {
 
         'use strict';
 
