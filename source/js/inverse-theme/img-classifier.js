@@ -151,7 +151,9 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
       area = height * width,
       stepSize = Math.floor(area / Math.min(area, MAX_PIXELS_TO_TEST)),
       MIN_TRANSPARENCY_FOR_VALID_PIXEL = 0.3,
-      //numPixelsToCheck = Math.floor(area / stepSize),
+      numPixelsToCheck = Math.floor(area / stepSize),
+      // Greater of: 6 pixels or 5% of total pixels checked
+      numSameBeforeConsideredMultiUse = Math.max(Math.ceil(numPixelsToCheck * 0.05), 6),
       numPixelsChecked = 0,
       histogramIndex,
       luminanceTotal = 0,
@@ -194,7 +196,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
 
       if (grayscaleHistogram[histogramIndex] > 0)  {
         numWithSameGrayscale = ++ grayscaleHistogram[histogramIndex];
-        if (numWithSameGrayscale === 6) {
+        if (numWithSameGrayscale === numSameBeforeConsideredMultiUse) {
           ++numMultiUseGrayscaleVals;
         }
         if (numWithSameGrayscale > maxSameGrayscale) {
