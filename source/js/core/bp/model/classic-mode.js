@@ -14,8 +14,7 @@ define(['core/conf/site', 'core/platform'], function(site, platform) {
     's-73dd0fcf': 1, // http://bip.kornik.pl
     's-7b90f601': 1, // http://tiicann.org
     's-9afa6ab9': 1, // http://perkins.org
-    's-a5851e07': 1, // http://harpo.com.pl
-    's-b737790f': 1, // http://window-eyes.at
+    's-b737790f': 1  // http://window-eyes.at
   };
 
   function isClassicBrowser() {
