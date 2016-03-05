@@ -320,8 +320,8 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
 
       var score,
         BASE_SCORE = 130,
-        DARK_LUMINANCE_THRESHOLD = 0.30,
-        DARK_LUMINANCE_MAX_THRESHOLD = 0.30,
+        DARK_LUMINANCE_THRESHOLD = 0.40,
+        DARK_LUMINANCE_MAX_THRESHOLD = 0.35,
         BRIGHT_LUMINANCE_THRESHOLD = 0.60,
         analysis = {
           manyValuesScore: 0,
@@ -360,7 +360,7 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
         // This is already a very dark image, so inverting it will make it bright -- unlikely the right thing to do
         // We don't do this for images with transparent pixels, because it is likely a dark drawing on a light background,
         // which needs to be inverted
-        analysis.darkNonTransparencyScore = -1000 * (DARK_LUMINANCE_THRESHOLD - pixelInfo.averageLuminance);
+        analysis.darkNonTransparencyScore = -1000 * (DARK_LUMINANCE_THRESHOLD - pixelInfo.averageLuminance) - 50;
         if (pixelInfo.maxLuminance < DARK_LUMINANCE_MAX_THRESHOLD) {
           analysis.darkNonTransparencyScore *= 2; // Really dark -- there is nothing bright in this image at all
         }

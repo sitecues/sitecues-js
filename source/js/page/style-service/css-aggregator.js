@@ -181,7 +181,7 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
 
   // Convert @import into new stylesheet requests
   function processAtImports(sheet) {
-    var IMPORT_REGEXP = /\s*(?:@import\s+url\((?:(?:['" ])*([^"'\)]+)['" ]*)\)\s*([^;$]*))/gi;
+    var IMPORT_REGEXP = /\s*(?:@import\s+(?:url\()?(?:(?:['" ])*([^"'\)]+)['" ]*)(?:\))?\s*([^;$]*))/gi;
 
     return sheet.text.replace(IMPORT_REGEXP, function(totalMatch, actualUrl, mediaQuery) {
       // Insert sheet for retrieval before this sheet, so that the order of precedence is preserved
