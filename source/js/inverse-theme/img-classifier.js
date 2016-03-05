@@ -24,10 +24,39 @@ define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/u
     return imageExtension && imageExtension[0];
   }
 
+  function getInvertedDataUrl(url) {
+    // The image service can't invert this url, but we can do it in JS.
+    // Very useful for example on http://www.gatfl.gatech.edu/tflwiki/index.php?title=Team
+    var img = $('<img>').attr('src', url)[0],
+      canvas = document.createElement('canvas'),
+      width = canvas.width = img.naturalWidth,
+      height = canvas.height = img.naturalHeight,
+      ctx = canvas.getContext('2d');
+
+    ctx.drawImage(img, 0, 0, width, height);
+
+    var imageData = ctx.getImageData(0, 0, width, height),
+      data = imageData.data,
+      dataLength = data.length,
+      index = 0;
+
+    for (; index < dataLength; index += 4) {
+      // red
+      data[index] = 255 - data[index];
+      // green
+      data[index + 1] = 255 - data[index + 1];
+      // blue
+      data[index + 2] = 255 - data[index + 2];
+    }
+
+    ctx.putImageData(imageData, 0, 0);
+
+    return canvas.toDataURL();
+  }
+
   function getInvertUrl(url) {
     if (url.substring(0, 5) === 'data:') {
-      // TODO can't we invert this in code and provide a new data: url?
-      return url;  // Don't try to use web service to invert a data: url
+      return getInvertedDataUrl(url);
     }
     var
       absoluteUrl = urls.resolveUrl(url),

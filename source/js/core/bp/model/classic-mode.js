@@ -5,7 +5,6 @@
 
 define(['core/conf/site', 'core/platform'], function(site, platform) {
   var CLASSIC_SITES = {
-    's-6097a290': 1, // http://gatfl.org
     's-9afa6ab9': 1, // http://perkins.org
     's-b737790f': 1  // http://window-eyes.at
   };
