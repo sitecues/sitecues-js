@@ -5,8 +5,7 @@
  */
 define(['core/conf/user/storage', 'core/conf/user/storage-backup', 'core/util/uuid'], function (storage, storageBackup, uuid) {
   // private variables
-  var cachedSettings = {},   // We cache prefs in cachedSettings for speed -- getting from localStorage is slower
-      handlers       = {},
+  var handlers       = {},
       listeners      = {};
 
   function getUserId() {
@@ -17,8 +16,11 @@ define(['core/conf/user/storage', 'core/conf/user/storage-backup', 'core/util/uu
   function get(key, callback) {
 
     // handle sync getting of value
+    var settings = storage.getPrefs(),
+      value = settings[key];
+
     if (!callback) {
-      return cachedSettings[key];
+      return value;
     }
 
     // private variables
@@ -27,16 +29,19 @@ define(['core/conf/user/storage', 'core/conf/user/storage-backup', 'core/util/uu
     // push callback to listeners list
     listeners[key].push(callback);
 
-    if (cachedSettings.hasOwnProperty(key)) {
-      // call back if there is value for key
-      callback(cachedSettings[key]);
+    if (settings.hasOwnProperty(key)) {
+      // call back if there is value for key (no immediate callback for settings that are not yet defined)
+      callback(value);
     }
   }
 
   // set preferences value (or pass undefined to unset)
   function set(key, value) {
     // private variables
-    var list, i, l;
+    var list,
+      index = 0,
+      numListeners,
+      oldValue = get(key);
 
     // call handler if needed
     // if undefined, we are unsetting the value, and do need to go through the conf.def handler
@@ -45,20 +50,17 @@ define(['core/conf/user/storage', 'core/conf/user/storage-backup', 'core/util/uu
     }
 
     // value isn't changed
-    if (value === cachedSettings[key]) {
+    if (value === oldValue) {
       return;
     }
-
-    // save value, use handler if needed
-    cachedSettings[key] = value;
 
     // if list isn't empty, call each listener
     // about new value
     list = listeners[key];
     if (list) {
-      l = list.length;
-      for (i = 0; i < l; i++) {
-        list[i](value);
+      numListeners = list.length;
+      for (; index < numListeners; index++) {
+        list[index](value);
       }
     }
 
@@ -84,18 +86,10 @@ define(['core/conf/user/storage', 'core/conf/user/storage-backup', 'core/util/uu
     }
   }
 
-  // get/update all stored values
-  function cache(settings) {
-    if (settings) {
-      cachedSettings = settings;
-    }
-    return cachedSettings;
-  }
-
   // Reset all settings as if it is a new user
   function reset() {
     // Undefine all settings and call setting notification callbacks
-    var allSettings = Object.keys(cachedSettings);
+    var allSettings = Object.keys(storage.getPrefs());
     allSettings.forEach(function(settingName) {
       unset(settingName);
     });
@@ -111,7 +105,6 @@ define(['core/conf/user/storage', 'core/conf/user/storage-backup', 'core/util/uu
     retrievedSettings = storage.getPrefs();
 
     if (Object.keys(retrievedSettings).length) {
-      cache(retrievedSettings);
       onReadyCallbackFn();
     }
     else {
@@ -128,7 +121,6 @@ define(['core/conf/user/storage', 'core/conf/user/storage-backup', 'core/util/uu
             storage.setUserId(userId);
             saveToBackup();
           }
-          cache(storage.getPrefs());
           onReadyCallbackFn();
         });
       });
@@ -142,7 +134,6 @@ define(['core/conf/user/storage', 'core/conf/user/storage-backup', 'core/util/uu
     get: get,
     set: set,
     def: def,
-    cache: cache,
     reset: reset
   };
 });
