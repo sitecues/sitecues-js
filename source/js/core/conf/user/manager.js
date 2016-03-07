@@ -33,16 +33,19 @@ define(['core/conf/user/storage', 'core/conf/user/storage-backup', 'core/util/uu
     }
   }
 
-  // set preferences value
+  // set preferences value (or pass undefined to unset)
   function set(key, value) {
     // private variables
     var list, i, l;
 
     // call handler if needed
-    value = handlers[key] ? handlers[key](value) : value;
+    // if undefined, we are unsetting the value, and do need to go through the conf.def handler
+    if (typeof value !== 'undefined' && handlers[key]) {
+      value = handlers[key](value);
+    }
 
-    // value isn't changed or is empty after handler
-    if (typeof value === 'undefined' || value === cachedSettings[key]) {
+    // value isn't changed
+    if (value === cachedSettings[key]) {
       return;
     }
 
@@ -62,6 +65,14 @@ define(['core/conf/user/storage', 'core/conf/user/storage-backup', 'core/util/uu
     // Save the data from localStorage: User ID namespace.
     storage.setPref(key, value);
     //Save data to storage backup
+    saveToBackup();
+  }
+
+  function unset(key) {
+    set(key, undefined);
+  }
+
+  function saveToBackup() {
     storageBackup.save(storage.getRawAppData());
   }
 
@@ -83,8 +94,14 @@ define(['core/conf/user/storage', 'core/conf/user/storage-backup', 'core/util/uu
 
   // Reset all settings as if it is a new user
   function reset() {
-    storage.clear();
-    storageBackup.clear();
+    // Undefine all settings and call setting notification callbacks
+    var allSettings = Object.keys(cachedSettings);
+    allSettings.forEach(function(settingName) {
+      unset(settingName);
+    });
+
+    // Some settings have a default value -- we'll clear everything except for user id now
+    saveToBackup();
   }
 
   function init(onReadyCallbackFn) {
@@ -109,7 +126,7 @@ define(['core/conf/user/storage', 'core/conf/user/storage-backup', 'core/util/uu
             // No user id: generate one
             var userId = uuid();
             storage.setUserId(userId);
-            storageBackup.save(storage.getRawAppData());
+            saveToBackup();
           }
           cache(storage.getPrefs());
           onReadyCallbackFn();

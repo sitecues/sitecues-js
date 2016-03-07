@@ -21,14 +21,6 @@ define([], function() {
     NAMESPACE = 'sitecues';
 
   /*
-   * Delete the outer namespace where we store data.
-   * @returns {DOMString|null}
-   */
-  function clear() {
-    localStorage.removeItem(NAMESPACE);
-  }
-
-  /*
    * Overwrite the entire namespace that we use for storing data.
    * You should probably NOT use this! Prefer setAppData().
    */
@@ -137,7 +129,6 @@ define([], function() {
   }
 
   return {
-    clear: clear,
     setUserId: setUserId,
     getUserId: getUserId,
     setPref: setPref,

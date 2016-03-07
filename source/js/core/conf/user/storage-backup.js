@@ -123,7 +123,6 @@ define(['core/conf/urls', 'core/platform'], function (urls, platform) {
   return {
     init: init,
     load: load,
-    save: save,
-    clear: clear
+    save: save
   };
 });
