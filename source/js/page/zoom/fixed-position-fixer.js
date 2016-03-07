@@ -260,7 +260,7 @@ define(['$', 'page/zoom/zoom', 'core/platform', 'core/conf/site', 'page/style-se
     // attach handlers to the window scroll event:
     // http://ejohn.org/blog/learning-from-twitter
     function lazyTurnOn() {
-      var doTurnOn = fixedSelector && document.body.style.transform !== '';
+      var doTurnOn = getFixedPositionSelector() && document.body.style.transform !== '';
 
       if (!doTurnOn) {
         if (SHOULD_POSITION_FIXED_ELEMENTS_ON_SCROLL) {
