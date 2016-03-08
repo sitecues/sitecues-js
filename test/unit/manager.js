@@ -38,17 +38,13 @@ define(
                     });
                 }
 
-                function clearLocalStorage(resolve) {
-                    localStorage.clear();
-                    resolve();
-                }
                 function initManagerCallback(resolve) {
                     manager.init(resolve);
                 }
 
                 return new Promise(initBackupCallback)
                     .then(function() {
-                        return new Promise(clearLocalStorage);
+                        localStorage.clear();
                     })
                     .then(function() {
                         return new Promise(initManagerCallback);
