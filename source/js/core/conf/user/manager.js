@@ -54,6 +54,9 @@ define(['core/conf/user/storage', 'core/conf/user/storage-backup', 'core/util/uu
       return;
     }
 
+    // Save the data from localStorage: User ID namespace.
+    storage.setPref(key, value);
+
     // if list isn't empty, call each listener
     // about new value
     list = listeners[key];
@@ -64,8 +67,6 @@ define(['core/conf/user/storage', 'core/conf/user/storage-backup', 'core/util/uu
       }
     }
 
-    // Save the data from localStorage: User ID namespace.
-    storage.setPref(key, value);
     //Save data to storage backup
     saveToBackup();
   }
@@ -93,9 +94,6 @@ define(['core/conf/user/storage', 'core/conf/user/storage-backup', 'core/util/uu
     allSettings.forEach(function(settingName) {
       unset(settingName);
     });
-
-    // Some settings have a default value -- we'll clear everything except for user id now
-    saveToBackup();
   }
 
   function init(onReadyCallbackFn) {
