@@ -70,21 +70,21 @@ define(
 
             test('.reset() clears all settings', function () {
 
-               var VALUE = 2,
+                var VALUE = 2;
 
-               manager.set('shoes', VALUE);
-               manager.set('socks', VALUE);
-               manager.set('earrings', VALUE);
-               manager.reset();
+                manager.set('shoes', VALUE);
+                manager.set('socks', VALUE);
+                manager.set('earrings', VALUE);
+                manager.reset();
 
-               assert.isUndefined(
-                   (
-                       manager.get('shoes') ||
-                       manager.get('socks') ||
-                       manager.get('earrings')
-                   ),
-                   'Settings reset must prevent retrieval of old values'
-               );
+                assert.isUndefined(
+                    (
+                        manager.get('shoes') ||
+                        manager.get('socks') ||
+                        manager.get('earrings')
+                    ),
+                    'Settings reset must prevent retrieval of old values'
+                );
             });
 
             test('.reset() maintains the userId', function () {
