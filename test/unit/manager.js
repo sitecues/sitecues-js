@@ -19,7 +19,7 @@ define(
 
             beforeEach(function () {
 
-                //Set global flags
+                // Set global flags
                 window.SC_DEV = false;
                 window.SC_EXTENSION = true;  // For getBaseResourceUrl() to function properly (TODO kinda hacky)
                 window.sitecues = {
@@ -53,15 +53,15 @@ define(
 
             test('.init() creates userId', function () {
 
-              var isUserIdAvailable;
+                var isUserIdAvailable;
 
-              isUserIdAvailable = typeof manager.getUserId() !== 'undefined';
+                isUserIdAvailable = typeof manager.getUserId() !== 'undefined';
 
-              assert.equal(
-                  isUserIdAvailable,
-                  true,
-                  'A userId was not generated'
-              );
+                assert.equal(
+                    isUserIdAvailable,
+                    true,
+                    'A userId was not generated'
+                );
             });
 
             test('.set() sets a setting', function () {
@@ -101,19 +101,18 @@ define(
 
             test('.reset() leaves userId', function () {
 
-              var isUserIdAvailable;
+                var isUserIdAvailable;
 
-              manager.reset();
+                manager.reset();
 
-              isUserIdAvailable = typeof manager.getUserId() !== 'undefined';
+                isUserIdAvailable = typeof manager.getUserId() !== 'undefined';
 
-              assert.equal(
-                  isUserIdAvailable ,
-                  true,
-                  'The userId was cleared by reset()'
-              );
+                assert.equal(
+                    isUserIdAvailable ,
+                    true,
+                    'The userId was cleared by reset()'
+                );
             });
-
 
             test('.def() callback is called and constrains a setting', function () {
 
@@ -151,7 +150,6 @@ define(
                     'The callback() was not called the appropriate number of times'
                 );
             });
-
 
             test('.get() callback is called if value was already set', function () {
 
