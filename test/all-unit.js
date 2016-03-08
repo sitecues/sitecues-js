@@ -10,7 +10,7 @@ define(
         return [
             'common',
             'events',
-            'manager',
+            //'manager',
             'storage'
         ];
     }
