@@ -8,7 +8,7 @@
  *    }
  */
 
-define(['$', 'page/zoom/zoom', 'page/util/color', 'core/conf/site', 'core/conf/urls'], function($, zoomMod, colorUtil, site, urls) {
+define(['$', 'page/util/color', 'core/conf/site', 'core/conf/urls'], function($, colorUtil, site, urls) {
   var REVERSIBLE_ATTR = 'data-sc-reversible',
     customSelectors = site.get('themes') || { },
     DARK_BG_THRESHOLD = 0.6,
