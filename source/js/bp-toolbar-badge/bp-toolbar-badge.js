@@ -4,13 +4,20 @@
  */
 // TODO add a close button
 
-define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/bp/view/view'], function(BP_CONST, state, helper, baseView) {
+define([
+  'core/bp/constants',
+  'core/bp/model/state',
+  'core/bp/helper',
+  'core/bp/view/palette',
+  'core/bp/view/view'
+],
+  function(BP_CONST,
+           state,
+           helper,
+           palette,
+           baseView) {
   var isInitialized,
     TOOLBAR_HEIGHT = 38;
-
-  function getPalette(callbackFn) {
-    callbackFn(BP_CONST.PALETTE_NAME_MAP.normal);
-  }
 
   function adjustFixedElementsBelowToolbar() {
     // TODO Make this work better:
@@ -45,11 +52,12 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/bp/v
 
     adjustFixedElementsBelowToolbar();
 
-    baseView.init(toolbarElement, onComplete);
+    palette.init(null, function() {
+      baseView.init(toolbarElement, onComplete);
+    });
   }
 
   return {
-    init: init,
-    getPalette: getPalette
+    init: init
   };
 });

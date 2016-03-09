@@ -102,6 +102,10 @@ define([
     // This will cause the CSS to update
     bpContainer.setAttribute('class', classes);
 
+    if (!isOrWillBePanel) {
+      updateBadgePalette();
+    }
+
     // If we are expanding or contracting, aria-expanded is true (enables CSS and communicates with screen readers)
     updateAria(isOrWillBePanel);
 
@@ -112,6 +116,12 @@ define([
     if (isNewSubpanel) {
       events.emit('bp/did-open-subpanel');
     }
+  }
+
+  function updateBadgePalette() {
+    var currentBadgeClassAttr = badgeElement.getAttribute('class') || '',
+      newBadgeClassAttr = currentBadgeClassAttr.replace(/scp-palette-[a-z]+/, '') + ' ' + badgeClasses.getPaletteClass();
+    badgeElement.setAttribute('class', newBadgeClassAttr);
   }
 
   // This function augments the badge placement element, which is passed in.
