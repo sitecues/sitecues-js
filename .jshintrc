@@ -1,42 +1,8 @@
+// Configuration for JSHint. These settings are used to ensure code quality during the build process.
+
 {
-
-  // Configuration for JSHint. These settings are used to ensure code quality during the build process.
-
   // Maximum number of rule violations to report before giving up.
   "maxerr"        : 100,
-
-  // List of variables to assume are already defined. Set to `true` to tolerate assigments to those variables.
-  "globals": {
-    // sitecues specific
-    "sitecues"           : false,
-    "sitecuesEverywhere" : false,
-    "SC_DEV"             : false,
-    "SC_LOCAL"           : false,
-    "SC_VERSION"         : false,
-
-    "console": false,
-
-    // AMD
-    "require" : false,
-    "define"  : false,
-
-    // TODO: We should not be using escape(), it is non-standard and deprecated.
-    "escape": false,
-
-    // TODO: Submit patch to JSHint to include these in `browser` vars:
-    "webkitAudioContext"  : false,
-    "CSSPrimitiveValue"   : false,
-    "CSSStyleDeclaration" : false,
-    "devicePixelRatio"    : false,
-    "pageXOffset"         : false,
-    "pageYOffset"         : false,
-    "innerWidth"          : false,
-    "innerHeight"         : false,
-    "outerWidth"          : false,
-    "outerHeight"         : false,
-    "screenX"             : false,
-    "screenY"             : false
-  },
 
   // Enforcing - Rules that cause the linter to complain more.
 
@@ -77,7 +43,7 @@
   // Whether to prohibit usage of variables that are never defined.
   "undef"         : true,
   // Whether to demand that all variables that are defined do eventually get used.
-  "unused"        : true,
+  "unused"        : "strict",
 
 
   // Relaxing - Rules that cause the linter to chill out and complain less.
@@ -131,13 +97,13 @@
 
   // Environments
 
-  "browser"       : true,     // Web Browser (window, document, etc)
+  "browser"       : false,    // Web Browser (window, document, etc)
   "couch"         : false,    // CouchDB
   "devel"         : false,    // Development/debugging (alert, confirm, etc)
   "dojo"          : false,    // Dojo Toolkit
   "jquery"        : false,    // jQuery
   "mootools"      : false,    // MooTools
-  "node"          : true,    // Node.js
+  "node"          : true,     // Node.js
   "nonstandard"   : false,    // Widely adopted globals (escape, unescape, etc)
   "prototypejs"   : false,    // Prototype and Scriptaculous
   "rhino"         : false,    // Rhino

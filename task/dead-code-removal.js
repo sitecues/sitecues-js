@@ -27,6 +27,9 @@ function removeDeadCode(jsFileName, onErrorCallback, onWriteComplete) {
   var sitecuesJsFileName = jsFileName;
 
   function beginCompile(err, sourceBuffer) {
+    if (err) {
+      throw err;
+    }
     closureCompiler.compile(sourceBuffer, closureOptions, onCompileComplete);
   }
 
@@ -46,6 +49,9 @@ function removeAllDeadCode(callback) {
   }
 
   function onJsListingRetrieved(err, jsFileNames) {
+    if (err) {
+      throw err;
+    }
     numFilesRemaining = jsFileNames.length;
     jsFileNames.forEach(function(jsFile) {
       removeDeadCode(jsFile, callback, onWriteComplete);
