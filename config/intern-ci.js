@@ -34,7 +34,8 @@ define(
 
         config.reporters = [
             // Log to the console for debugging.
-            // { id : 'Runner' },
+            { id : 'Runner' },
+            // Inform Bamboo of the results.
             { id : 'JUnit', filename : 'report/test/junit.xml' }
         ];
 
