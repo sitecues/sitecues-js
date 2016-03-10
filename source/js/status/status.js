@@ -42,7 +42,7 @@ define(
     function status(callback) {
 
       var html = document.documentElement,
-          prefData = conf.cache(),
+          prefData = conf.get(),
           coordinates,
           ajaxUrls = {  // Set the server URLs for retrieving the status of our services (version info, etc.)
             ws : urls.getApiUrl('util/status')

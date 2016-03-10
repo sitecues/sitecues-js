@@ -12,12 +12,20 @@ define(['core/conf/user/storage', 'core/conf/user/storage-backup', 'core/util/uu
     return storage.getUserId();
   }
 
-  // get preferences value
+  // get preferences value(s)
+  // key is optional -- if not provided returns all settings
+  // callback is optional -- if provided is called back for initial setting and whenever setting changes
   function get(key, callback) {
 
     // handle sync getting of value
     var settings = storage.getPrefs(),
-      value = settings[key];
+      value;
+
+    if (!key) {
+      return settings;
+    }
+
+    value = settings[key];
 
     if (!callback) {
       return value;
