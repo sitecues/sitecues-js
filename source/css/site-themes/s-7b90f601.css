@@ -1,0 +1,16 @@
+/* http://tiicann.org/ */
+
+/* -------------- Dark theme --------------- */
+
+/* Using td@background to set gradient image which is deprecated and not supported by the image */
+.sitecues-dark-theme td[background] {
+  background-image: none !important;
+}
+.sitecues-dark-theme table {
+  background-color: black !important;
+}
+
+/* Weird nav bar separators -- just hide them */
+.sitecues-dark-theme img[src="images/nav_bar_br.gif"] {
+  visibility: hidden;
+}

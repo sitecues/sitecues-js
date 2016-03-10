@@ -6,7 +6,7 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
     'theme/color-choices', 'page/util/color', 'theme/custom-site-theme', 'core/events' ],
   function($, conf, styleService, platform, colorChoices, colorUtil, customTheme, events) {
   var $themeStyleSheet,
-    THEME_STYLESHEET_NAME = 'sitecues-theme',
+    THEME_STYLESHEET_NAME = 'sitecues-js-theme',
     REPAINT_MS = 40,
     themeStyles,
     // TODO remove once no longer necessary -- should be soon
@@ -39,6 +39,13 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
    */
   function onThemeChange() {
 
+    var
+      newThemeName = conf.get('themeName'),
+      newThemePower = conf.get('themePower'),
+      newThemeTextHue = conf.get('themeTextHue'),
+      colorMapFn,
+      willBeInverted;
+
     function applyThemeCss(inverseSpriteCss) {
       var
         themeCss = colorMapFn ? getThemeCssText(colorMapFn, currentThemePower, currentThemeTextHue) : '',
@@ -70,12 +77,6 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
 
       isInverted = willBeInverted;
     }
-
-    var newThemeName = conf.get('themeName'),
-      newThemePower = conf.get('themePower'),
-      newThemeTextHue = conf.get('themeTextHue'),
-      colorMapFn,
-      willBeInverted;
 
     if (newThemeName === currentThemeName && newThemePower === currentThemePower && newThemeTextHue === currentThemeTextHue) {
       return; // No change
@@ -308,7 +309,7 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
    */
   function getStyleSheet() {
     if (!$themeStyleSheet) {
-      $themeStyleSheet = $('<style>').appendTo('head')
+      $themeStyleSheet = $('<style>').appendTo('html')
         .attr('id', THEME_STYLESHEET_NAME);
     }
     return $themeStyleSheet;
@@ -401,7 +402,7 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
         prop: 'background-color',
         selector: selector,
         parsedVal: rgba,
-        important: cssStyleDecl.getPropertyPriority('background-color') === 'important',
+        important: cssStyleDecl.getPropertyPriority('background-color') === 'important'
       };
     }
   }
@@ -552,5 +553,4 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
   return {
     init: init
   };
-
 });

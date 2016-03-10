@@ -18,47 +18,6 @@ define(
                 localStorage.clear();
             });
 
-            test('.clear() wipes app data', function () {
-
-                var
-                    OUR_NAMESPACE = 'sitecues',
-                    dataString = JSON.stringify({
-                        anything : 'goas',
-                        way      : [
-                            { deep : 2 }
-                        ]
-                    });
-
-                localStorage.setItem(OUR_NAMESPACE, dataString);
-
-                storage.clear();
-
-                assert.isNull(
-                    localStorage.getItem(OUR_NAMESPACE),
-                    'The retrieved data must be null because we cleared it'
-                );
-            });
-
-            test('.clear() does not affect 3rd party data', function () {
-
-                var
-                    SOME_NAMESPACE = 'sitebutnocues',
-                    thirdPartyData = JSON.stringify({
-                        wee : 'boom',
-                        ooh : 'nooo'
-                    });
-
-                localStorage.setItem(SOME_NAMESPACE, thirdPartyData);
-
-                storage.clear();
-
-                assert.strictEqual(
-                    localStorage.getItem(SOME_NAMESPACE),
-                    thirdPartyData,
-                    'Clearing sitecues data must not affect other apps'
-                );
-            });
-
             test('.getRawAppData() returns what was stored', function () {
 
                 var
@@ -205,6 +164,6 @@ define(
                     'The retrieved preferences must be identical to when they were stored'
                 );
             });
-        })
+        });
     }
 );

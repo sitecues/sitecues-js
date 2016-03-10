@@ -14,8 +14,8 @@ define(['$', 'page/style-service/style-service', 'core/conf/user/manager', 'page
       URL_REGEXP = '//[a-z0-9\-_]+(\.[a-z0-9\-_]+)+([a-z0-9\-_\.,@\?^=%&;:/~\+#]*[a-z0-9\-@\?^=%&;/~\+#])?',
       CURSOR_TYPES = ['default', 'pointer' ],
       CURSOR_SYNONYMS = { _default: 'auto' },  // Map cursor: auto -> cursor: default
-      SITECUES_CURSOR_CSS_ID = 'sitecues-cursor',
-      SITECUES_BP_CURSOR_CSS_ID = 'sitecues-bp-cursor',
+      SITECUES_CURSOR_CSS_ID = 'sitecues-js-cursor',
+      SITECUES_BP_CURSOR_CSS_ID = 'sitecues-js-bp-cursor',
       MIN_BP_CURSOR_SIZE = 1.9,
       REENABLE_CURSOR_MS = 20,
       ajaxCursors = {}, // URLs for IE cursors that have already been fetched via AJAX
@@ -191,7 +191,7 @@ define(['$', 'page/style-service/style-service', 'core/conf/user/manager', 'page
   function constructCursorStylesheet(callback) {
     var cssText = getCursorStylesAsText();
 
-    // Create the sitecues <style id="sitecues-cursor"> element and content
+    // Create the sitecues <style id="sitecues-js-cursor"> element and content
     $stylesheet = createStyleSheet(SITECUES_CURSOR_CSS_ID, cssText);
 
     // Now set the cursorStyles global to the rules in the cursor style sheet.
@@ -225,7 +225,7 @@ define(['$', 'page/style-service/style-service', 'core/conf/user/manager', 'page
   /**
    * Generates a CSS cursor property for every supported
    * cursor type at the current zoom level and then changes
-   * all cursor properties in the <style id="sitecues-cursor">
+   * all cursor properties in the <style id="sitecues-js-cursor">
    */
   function doRefresh() {
     // Get cursor URLs for current zoom levels

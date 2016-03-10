@@ -79,7 +79,7 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'page/
     MS_PER_X_ZOOM_GLIDE = 1400, // For animations, the number of milliseconds per unit of zoom (e.g. from 1x to 2x)
     MS_PER_X_ZOOM_SLIDER = 500, // For click in slider
     ZOOM_PRECISION = 3, // Decimal places allowed
-    SITECUES_ZOOM_ID = 'sitecues-zoom',
+    SITECUES_ZOOM_ID = 'sitecues-js-zoom',
     ANIMATION_END_EVENTS = 'animationend webkitAnimationEnd MSAnimationEnd',
     TRANSFORM_PROP_CSS = platform.transformPropertyCss,
     MIN_RECT_SIDE = 4,
@@ -1125,7 +1125,12 @@ define(['$', 'core/conf/user/manager', 'core/conf/site', 'core/platform', 'page/
       return;  // Valid rectangle added. No need to walk into children.
     }
     $(node).children().each(function() {
-      getBodyRectImpl(this, sumRect, visibleNodes, style, isStrict);
+      //For some reason, Edge will run this function despite there not being any element children belonging to the element. Edge...
+      //TODO: Remove this conditional if Edge ever gets its act together. Reproducible here: www.njstatelib.org
+      //NOTE: Does not reproduce when the console is open. Yeah that was a fun one to figure out
+      if (this.nodeType === 1) {
+        getBodyRectImpl(this, sumRect, visibleNodes, style, isStrict);
+      }
     });
   }
 

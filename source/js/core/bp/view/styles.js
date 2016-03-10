@@ -13,7 +13,7 @@ define(['core/bp/helper', 'core/platform', 'core/conf/site'],
     doWebKitPrefix,
     doMsPrefix,
 
-    BASE_SHEET_ID    = 'sitecues-bp-css',
+    BASE_SHEET_ID    = 'sitecues-js-bp-css',
 
     BASE_CSS;
 
@@ -156,16 +156,16 @@ define(['core/bp/helper', 'core/platform', 'core/conf/site'],
 
       // .scp-toolbar means it's a toolbar
       '.scp-toolbar': {
-        'position': 'fixed',
+        'position': 'fixed !important',
         'top': 0,
         'left': 0,
         'width': '100%',
-        'height': '38px',
+        'height': '38px !important',
         'margin': '0 !important',  // Prevent page style pollution
         'box-sizing': 'border-box',
         'box-shadow': '1px 1px 15px 0 rgba(9, 9, 9, .5)',
         'padding': '6px 0 8px calc(50% - 66px)',
-        'background-color': '#f7fcff !important',  // Ensure our own theme engine doesn't turn the toolbar dark
+        'background-color': customBadgePalette.toolbar || '#f7fcff',  // Ensure our own theme engine doesn't turn the toolbar dark
         'z-index': '9999999'
       },
 
@@ -174,20 +174,9 @@ define(['core/bp/helper', 'core/platform', 'core/conf/site'],
         'margin': '0 !important'  // Prevent page style pollution
       },
 
-      // Move the body down by the height of the toolbar + 1px for the box-shadow
+      // Move the body down by the height of the toolbar
       'html[data-sitecues-toolbar]': {
-        'padding-top': '41px !important'
-      },
-
-      // Fixed position elements will now be relative to the <body>, so that they move down below the toolbar
-      // This messes up Google maps for some reason. We've disabled google maps in the extension.
-      // TODO This also messes up https://www.yahoo.com/movies/monkey-kingdom-disneynature-116935977622.html
-      'html[data-sitecues-toolbar] > body:not([data-sc-extra-toolbar-bump])': {
-        'transform': 'translateY(0)'
-      },
-
-      'body[data-sc-extra-toolbar-bump]': {
-        'transform': 'translateY(41px)'
+        'padding-top': '38px !important'
       },
 
       /********** Transform animation speed **********/
@@ -439,6 +428,10 @@ define(['core/bp/helper', 'core/platform', 'core/conf/site'],
         'fill': '#fff'
       },
 
+      '.scp-palette-rb.scp-toolbar': {
+        'background-color': '#080300'
+      },
+
       // -- Reverse yellow ---
       '.scp-palette-ry #scp-wave1': {
         'fill': '#FFE460'
@@ -458,6 +451,10 @@ define(['core/bp/helper', 'core/platform', 'core/conf/site'],
 
       '.scp-palette-ry .scp-A-button, .scp-palette-ry #scp-head, .scp-palette-ry #scp-zoom-slider-bar': {
         'fill': '#fff'
+      },
+
+      '.scp-palette-ry.scp-toolbar': {
+        'background-color': '#080300'
       },
 
       // -- Expanded panel colors --

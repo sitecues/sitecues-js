@@ -1,6 +1,12 @@
 // Badge palette code.
 // Not included in the extension since that always uses the same colors in the toolbar.
-define(['core/bp/model/state', 'core/conf/site', 'core/bp/constants'], function(state, site, BP_CONST) {
+define(
+  [
+    'core/bp/model/state',
+    'core/conf/site',
+    'core/bp/constants'
+  ],
+  function(state, site, BP_CONST) {
 
   // badgeFileName is optional, and used in the case of old <img> badge placeholders.
   // In that case the filename defines which palette to use, e.g. sitecues-badge-reverse-blue.png
@@ -32,17 +38,25 @@ define(['core/bp/model/state', 'core/conf/site', 'core/bp/constants'], function(
   function init(badgeFileName, onComplete) {
 
     var paletteKey = getSimplePaletteType(badgeFileName);
+
+    // Handle 'adaptive' palette
     if (paletteKey === BP_CONST.PALETTE_NAME_ADAPTIVE) {
-      require(['bp-adaptive/bp-adaptive'], function(bpAdaptive) {
-        state.set('defaultPaletteKey', BP_CONST.PALETTE_NAME_NORMAL);
-        bpAdaptive.initAdaptivePalette(onComplete);
-      });
+      if (SC_EXTENSION || state.get('isToolbarBadge')) {
+        // Toolbars don't adapt to theme changes -- 'adaptive' is not valid in tat case
+        paletteKey = BP_CONST.PALETTE_NAME_NORMAL;
+      }
+      else {
+        require(['bp-adaptive/bp-adaptive'], function (bpAdaptive) {
+          state.set('defaultPaletteKey', BP_CONST.PALETTE_NAME_NORMAL);
+          bpAdaptive.initAdaptivePalette(onComplete);
+        });
+        return;
+      }
     }
-    else {
-      state.set('defaultPaletteKey', paletteKey);
-      state.set('paletteKey', paletteKey);
-      onComplete();
-    }
+
+    state.set('defaultPaletteKey', paletteKey);
+    state.set('paletteKey', paletteKey);
+    onComplete();
   }
 
   return {

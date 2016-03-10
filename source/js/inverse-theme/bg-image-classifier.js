@@ -68,10 +68,20 @@ define(['page/util/color', 'inverse-theme/img-classifier'], function(colorUtil, 
       parseInt(cssStyleDecl.fontSize) === 0 || parseInt(sampleElementCss.fontSize) === 0;
   }
 
+  // Check for CSS repeat rules which usually indicate the image is a texture/pattern
   function hasRepeat(cssStyleDecl, sampleElementCss) {
 
-    var repeat = cssStyleDecl.backgroundRepeat || sampleElementCss.backgroundRepeat;
-    return repeat && repeat.indexOf('no-repeat') === -1;
+    // Look for repeat rule on the style declaration itself
+    var cssDeclRepeat = cssStyleDecl.backgroundRepeat;
+    if (cssDeclRepeat && cssDeclRepeat.indexOf('no-repeat') < 0) {
+      return true; // This means it's repeat, repeat-x or repeat-y
+    }
+
+    // Look for repeat rule on the computed style, but don't trust 'repeat' -- it's the default
+    var computedRepeat = sampleElementCss.backgroundRepeat;
+    if (computedRepeat === 'repeat-x' || computedRepeat === 'repeat-y') {
+      return true;
+    }
   }
 
   function classifyBackgroundImage(bgStyle, callbackFn) {

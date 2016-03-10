@@ -1,0 +1,8 @@
+/* http://bip.wokiss.pl/kamieniec */
+/* http://www.gminakoscian.pl  */
+
+/* -------------- Dark theme --------------- */
+
+/* #cookies-message is inserted dynamically and uses inline style */
+.sitecues-dark-theme #cookies-message { background-color: #111 !important; }
+#cookies-message { background-color: #111; }

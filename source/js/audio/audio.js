@@ -419,16 +419,17 @@ define(
     // Speak on text selection
     textSelect.init();
 
-    // TODO: It would be better to listen for 'hlb/create' here so that
-    //       speech synthesis happens during the opening animation.
-    //       Unfortunately, this currently causes browsers to choke
-    //       on the animation when using local speech. But that
-    //       will likely improve in time.
     /*
      * Speak whenever the lens is opened, if speech is on, etc.
+     * Use a later speech fetch if local speech is preferred, because it makes the lens expansion animation janky.
+     * TODO: It would be better to always listen for 'hlb/did-create' here so that
+     *      speech synthesis happens during the opening animation.
+     *      Unfortunately, this currently causes browsers to choke
+     *      on the animation when using local speech. But that
+     *      may improve in time.
      */
-
-    events.on('hlb/ready', onLensOpened);
+    var SPEECH_BEGIN_EVENT = isLocalSpeechPreferred() ? 'hlb/ready' : 'hlb/did-create';
+    events.on(SPEECH_BEGIN_EVENT, onLensOpened);
 
     /*
      * A highlight box was closed.  Stop/abort/dispose of the player

@@ -181,7 +181,7 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
 
   // Convert @import into new stylesheet requests
   function processAtImports(sheet) {
-    var IMPORT_REGEXP = /\s*(?:@import\s+url\((?:(?:['" ])*([^"'\)]+)['" ]*)\)\s*([^;$]*))/gi;
+    var IMPORT_REGEXP = /\s*(?:@import\s+(?:url\()?(?:(?:['" ])*([^"'\)]+)['" ]*)(?:\))?\s*([^;$]*))/gi;
 
     return sheet.text.replace(IMPORT_REGEXP, function(totalMatch, actualUrl, mediaQuery) {
       // Insert sheet for retrieval before this sheet, so that the order of precedence is preserved
@@ -308,7 +308,7 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
     }
 
     function isUsable(index, elem) {
-      var SITECUES_STYLE_ID_PREFIX = 'sitecues-',  // <style id="sitecues-XXX"> are sitecues stylesheets
+      var SITECUES_STYLE_ID_PREFIX = 'sitecues-js-',  // <style id="sitecues-js-XXX"> are sitecues stylesheets
         id = elem.id;
       if (!id || !startsWith(id, SITECUES_STYLE_ID_PREFIX)) {
         return elem.localName === 'link' ? isUsableLinkedStyleSheet(elem) : isUsableStyleElement(elem);

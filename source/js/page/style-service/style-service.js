@@ -6,7 +6,7 @@ define(['$', 'page/style-service/css-aggregator', 'page/style-service/media-quer
 
   var $combinedStylesheet,  // Style sheet we lazily create as a composite of all styles, which we use to look at parsed style rules
     combinedDOMStylesheetObject,
-    SITECUES_COMBINED_CSS_ID = 'sitecues-combined-css',
+    SITECUES_COMBINED_CSS_ID = 'sitecues-js-combined-css',
     WAIT_BEFORE_INIT_STYLESHEET = 50,
     isInitialized,
     isCssRequested,   // Have we even begun the init sequence?
@@ -49,7 +49,7 @@ define(['$', 'page/style-service/css-aggregator', 'page/style-service/media-quer
 
     isCssRequested = true;
 
-    // Create a <style id="sitecues-combined-css"> containing all relevant style rule in the right order.
+    // Create a <style id="sitecues-js-combined-css"> containing all relevant style rule in the right order.
     // It will start with default user agent style rules and add
     // any <style> or <link> that is not from sitecues, and create a combined stylesheet with those contents (in the right order).
 

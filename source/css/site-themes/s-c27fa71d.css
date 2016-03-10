@@ -12,6 +12,11 @@
   background-image: none !important;
 }
 
+/* Avoid light text on light bg */
+.sitecues-reverse-theme .RadMenu_QuickLinks .link {
+  color: #000;
+}
+
 /* Badge did not get auto-reversed */
 .sitecues-reverse-theme #scp-zoom-slider-thumb {
   fill: #447AC4

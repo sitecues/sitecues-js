@@ -36,13 +36,11 @@ define([
       classBuilder += ' scp-realsettings';
     }
 
-    classBuilder += getPaletteClass();
-
     return classBuilder;
   }
 
   return {
-    getViewClasses: getViewClasses
+    getViewClasses: getViewClasses,
+    getPaletteClass: getPaletteClass
   };
-
 });

@@ -96,9 +96,7 @@ define(['core/conf/urls', 'core/platform'], function (urls, platform) {
   // Optional callbacks
   function init(onReadyCallback) {
 
-    if (!isInitialized) {
-      IS_BACKUP_DISABLED = platform.browser.isIE9;
-    }
+    IS_BACKUP_DISABLED = platform.browser.isIE && platform.browser.version <= 10;
 
     if (isInitialized || isLoaded || IS_BACKUP_DISABLED) {
       onReadyCallback();
@@ -125,7 +123,6 @@ define(['core/conf/urls', 'core/platform'], function (urls, platform) {
   return {
     init: init,
     load: load,
-    save: save,
-    clear: clear
+    save: save
   };
 });

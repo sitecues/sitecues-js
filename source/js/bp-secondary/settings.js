@@ -66,13 +66,17 @@ define(['core/bp/constants', 'core/bp/helper', 'core/conf/user/manager', 'core/b
 
     Object.keys(allSettingNames).forEach(function(name) {
       conf.get(name, function(newValue) {
+        newValue = newValue || 'none';  // Will now be 'none', 'warm', 'bold' or 'dark'
         var settingElems = settingsPanel.querySelectorAll('sc-button[data-setting-name="' + name + '"]'),
           index = settingElems.length,
           elem,
+          currentButtonValue,
           isCurrentValue;
         while (index -- ) {
           elem = settingElems[index];
-          isCurrentValue = elem.getAttribute('data-setting-value') === newValue;
+          // This button is used for what theme? 'none', 'warm', 'bold' or 'dark'
+          currentButtonValue = elem.getAttribute('data-setting-value') || 'none';
+          isCurrentValue = newValue === currentButtonValue;
           elem.setAttribute('aria-pressed', isCurrentValue);
         }
       });
@@ -114,7 +118,7 @@ define(['core/bp/constants', 'core/bp/helper', 'core/conf/user/manager', 'core/b
 
   function themeSlidersInit() {
     conf.get('themeName', function (name) {
-      var isThemePowerEnabled = name !== null,
+      var isThemePowerEnabled = Boolean(name),
         isThemeTextHueEnabled = name === 'dark';
       getThemePowerGroup().setAttribute('data-show', isThemePowerEnabled);
       getThemeTextHueGroup().setAttribute('data-show', isThemeTextHueEnabled);

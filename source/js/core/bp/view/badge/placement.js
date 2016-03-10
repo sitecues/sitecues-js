@@ -49,6 +49,9 @@
  */
 define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/platform', 'core/events'],
   function(state, BP_CONST, helper, platform, events) {
+
+    'use strict';
+
   var BADGE_PARENT = BP_CONST.BADGE_MODE,
       HTML_PARENT  = BP_CONST.PANEL_MODE,
       currentBPParent,
@@ -137,16 +140,6 @@ define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/plat
   // This is only called when the BP is small (about to expand or finished collapsing)
   function repositionBPOverBadge() {
 
-    function getPadding(property) {
-      return parseFloat(badgeComputedStyle['padding' + property]) * appliedZoom;
-    }
-
-
-    // Used for setting the bpContainer left, top, width, and height
-    function setBPProperty(prop) {
-      bpElement.style[prop] = (badgeRect[prop] / appliedZoom) + 'px';
-    }
-
     // Current badge rectangle in screen coordinates
     var newBadgeRect   = helper.getRect(badgeElement),
 
@@ -161,9 +154,19 @@ define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/plat
 
         isToolbarBadge = state.get('isToolbarBadge');
 
-    //If the badge is currently dimensionless, use the cached badge dimensions
+    function getPadding(property) {
+      return parseFloat(badgeComputedStyle['padding' + property]) * appliedZoom;
+    }
+
+
+    // Used for setting the bpContainer left, top, width, and height
+    function setBPProperty(prop) {
+      bpElement.style[prop] = (badgeRect[prop] / appliedZoom) + 'px';
+    }
+
+    // If the badge is currently dimensionless, use the cached badge dimensions
     if (rectHasNoArea(newBadgeRect)) {
-      //We saved the badge rect when it was a child of the documentElement, so we multiply by the current zoom
+      // We saved the badge rect when it was a child of the documentElement, so we multiply by the current zoom
       newBadgeRect.height = badgeGeometry.cachedRect.height * appliedZoom;
       newBadgeRect.width  = badgeGeometry.cachedRect.width  * appliedZoom;
     }
@@ -289,9 +292,9 @@ define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/plat
         parent          = element.parentElement,
         rect            = helper.getRect(element);
 
-    //If the element isn't displayed, translate it out of the viewport and attach it to the document element.
-    //This way we can be confident that an ancestor of the element isn't hiding it
-    //This doesn't guarantee that a stylesheet isn't hiding the element, but it is sufficient for our current purposes
+    // If the element isn't displayed, translate it out of the viewport and attach it to the document element.
+    // This way we can be confident that an ancestor of the element isn't hiding it
+    // This doesn't guarantee that a stylesheet isn't hiding the element, but it is sufficient for our current purposes
     if (rectHasNoArea(rect)) {
       element.style[platform.transformProperty] = 'translate(-99999px,-99999px)';
       documentElement.appendChild(element);
@@ -311,11 +314,11 @@ define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/plat
     }
   }
 
-  //This method caches the dimensions of the badge, and if it is not currently visible
-  //temporarily appends the badge directly to the document element to prevent its ancestors from hiding it.
-  //This ensures that we have a fallback size reference when we need to reposition the bp SVG.
-  //Otherwise, if we collapse the panel when the badge element has no area
-  //the panel will disappear entirely!
+  // This method caches the dimensions of the badge, and if it is not currently visible
+  // temporarily appends the badge directly to the document element to prevent its ancestors from hiding it.
+  // This ensures that we have a fallback size reference when we need to reposition the bp SVG.
+  // Otherwise, if we collapse the panel when the badge element has no area
+  // the panel will disappear entirely!
   function initBadgeGeometry() {
     badgeElement.appendChild(bpElement);
 
@@ -350,7 +353,7 @@ define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/plat
     return !rect.width || !rect.height;
   }
 
-    /**
+  /**
    * [init initializes the placement of the bpElement, svgElement, and badgeElement]
    * @param  {[DOM element]} badge       [Either placeholder or badge we create with ID 'sitecues-badge']
    * @param  {[DOM element]} bpContainer [SVG container <div> with ID 'scp-bp-container']
@@ -403,5 +406,4 @@ define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/plat
   return {
     init: init
   };
-
 });

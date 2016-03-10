@@ -45,6 +45,9 @@ define(['core/bp/model/state', 'core/bp/view/view', 'core/bp/constants'], functi
   }
 
   function adaptToSitecuesThemeChange(newTheme) {
+    if (state.get('isToolbarBadge')) {
+        return; // Toolbars don't adapt to theme changes
+    }
     // If sitecues theme changes to dark, force adaptive palette. Otherwise use default palette.
     state.set('isAdaptivePalette', newTheme === 'dark');
     checkBackgroundColorChange(bpView.update, true);

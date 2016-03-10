@@ -20,7 +20,6 @@ define([
   // How long we wait before expanding BP
   var hoverDelayTimer,
     isInitialized,
-    doRequireMouseStopBeforeExpansion,
     // We ignore the first mouse move when a window becomes active, otherwise badge opens
     // if the mouse happens to be over the badge/toolbar
     doIgnoreNextMouseMove = true;
@@ -68,12 +67,7 @@ define([
       return;  // Already expanding -> do nothing
     }
 
-    if (doRequireMouseStopBeforeExpansion) {
-      cancelHoverDelayTimer();
-    }
-    else if (hoverDelayTimer) {
-      return; // Already waiting to hover
-    }
+    cancelHoverDelayTimer();
 
     // Is the event related to the visible contents of the badge?
     // (as opposed to the hidden areas around the badge)
@@ -255,7 +249,6 @@ define([
   function init() {
     if (!isInitialized) {
       isInitialized = true;
-      doRequireMouseStopBeforeExpansion = state.get('isToolbarBadge');
 
       var badgeElement = getBadgeElement();
       badgeElement.addEventListener('keydown', processBadgeActivationKeys);
@@ -286,6 +279,7 @@ define([
   }
 
   return {
-    init: init
+    init: init,
+    expandPanel: expandPanel
   };
 });

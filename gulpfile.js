@@ -101,3 +101,4 @@ gulp.task(function watch() {
     gulp.watch(config.buildDir + '/**/*', { name: 'postBuildCommand' }, runPostBuildCommand);
   }
 });
+
