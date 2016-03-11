@@ -33,7 +33,7 @@ var require = {
   })(sitecues.everywhereConfig || sitecues.config),
   map: {
     '*': {
-      '$': 'jquery'
+      '$': 'page/jquery/jquery'
     }
   }
 };

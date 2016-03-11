@@ -7846,7 +7846,7 @@
 
   // TODO ideally this should not hardcode sitecues.define -- pass it through r.js. However, it works for now.
   if ( !SC_EXTENSION ) {
-    sitecues.define( "jquery", [], function() {
+    sitecues.define( "page/jquery/jquery", [], function() {
       return jQuery;
     });
   }
