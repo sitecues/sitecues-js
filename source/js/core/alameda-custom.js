@@ -32,11 +32,8 @@ var require = {
     return withLatestReplaced;  // Includes version name so that cached resources are only used with the appropriately matching sitecues.js
   })(sitecues.everywhereConfig || sitecues.config),
   map: {
-    // All modules get 'zepto' when they ask for $
     '*': {
-      // We use jQuery when the page has prototype.js, as it is fundamentally incompatible with Zepto
-      // This is just the tip of the iceberg: https://github.com/madrobby/zepto/issues/710
-      '$': window.Prototype ? 'jquery' : 'page/zepto/zepto'
+      '$': 'jquery'
     }
   }
 };

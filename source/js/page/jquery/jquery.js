@@ -1,7 +1,3 @@
-// JQUERY IS ONLY USED IN CONJUNCTION WITH PROTOTYPE.JS, WHICH IS INCOMPATIBLE WITH ZEPTO!!
-
-// Note: We used to use this for IE9, but now we use Zepto in almost all cases
-
 // Custom build of jQuery
 // How we do it:
 // 1. Visit http://projects.jga.me/jquery-builder/

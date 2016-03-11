@@ -9,7 +9,6 @@ var config = require('../build-config.js'),
   dataModules = getDataModules(),
   amdConfig = {
     include: getIncludes(dataModules),
-    exclude: [ 'page/zepto/zepto' ],  // Use jquery instead of zepto as it works in more cases (compatibility with pages that use Prototype.js)
     wrap: {
       start: 'sitecues.version="' + config.version + '";\n' +
         '"use strict";\n'

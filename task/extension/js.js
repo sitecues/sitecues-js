@@ -62,7 +62,6 @@ function getCompileFunctionMap() {
 
   functionMap[JS_SOURCE_DIR] = compileLibrary;
   functionMap[config.extensionSourceDir + '/js/'] = copyExtensionScripts;
-  functionMap[JS_SOURCE_DIR + '/jquery.js'] = copyJQuery;
 
   return functionMap;
 }
@@ -152,10 +151,6 @@ function copyExtensionScripts() {
     '!' + config.extensionSourceDir + '/js/overrides/**/*',
     '!' + config.extensionSourceDir + '/js/templated-code/**/*'
   ]);
-}
-
-function copyJQuery() {
-  return copyScripts(config.librarySourceDir + '/js/jquery.js');
 }
 
 module.exports = {
