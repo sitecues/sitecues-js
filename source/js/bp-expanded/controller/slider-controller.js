@@ -1,8 +1,9 @@
 /*
  Slider Controller
  */
-define(['core/bp/constants', 'core/bp/helper', 'core/platform', 'core/bp/model/state', 'bp-expanded/view/slider', 'page/zoom/zoom', 'core/events'],
-  function (BP_CONST, helper, platform, state, sliderView, zoomMod, events) {
+define(['core/bp/constants', 'page/zoom/constants', 'core/bp/helper', 'core/platform', 'core/bp/model/state', 'bp-expanded/view/slider', 'page/zoom/zoom',
+        'page/zoom/animation', 'core/events'],
+  function (BP_CONST, ZOOM_CONST, helper, platform, state, sliderView, zoomMod, animation, events) {
 
   var isListeningToWindowMouseEvents,
     isInitialized;
@@ -51,7 +52,7 @@ define(['core/bp/constants', 'core/bp/helper', 'core/platform', 'core/bp/model/s
       sliderWidth     = sliderRect.width - sliderThumbRect.width,
       newPercent      = (evt.clientX - sliderLeft) / sliderWidth;
 
-    var newValue        = (newPercent * zoomMod.RANGE) + zoomMod.MIN;
+    var newValue        = (newPercent * ZOOM_CONST.ZOOM_RANGE) + ZOOM_CONST.MIN_ZOOM;
     zoomMod.jumpTo(newValue);
 
     evt.preventDefault();
@@ -91,7 +92,7 @@ define(['core/bp/constants', 'core/bp/helper', 'core/platform', 'core/bp/model/s
     // Init zoom, add permanent listeners
     zoomMod.init();
     sliderView.render(zoomMod.getCompletedZoom());
-    zoomMod.setThumbChangeListener(sliderView.updateThumbPosition);
+    animation.setThumbChangeListener(sliderView.updateThumbPosition);
 
     // Zoom controls
     var sliderTarget = helper.byId(BP_CONST.ZOOM_SLIDER_ID),

@@ -1,4 +1,4 @@
-define(['core/platform', 'page/zoom/zoom', 'page/util/color', 'core/conf/urls'], function (platform, zoomModule, colorUtil, urls) {
+define(['core/platform', 'page/zoom/constants', 'page/util/color', 'core/conf/urls'], function (platform, ZOOM_CONST, colorUtil, urls) {
   // Viewbox coordinates are multiplied by 10 so that we can remove coordinates from our decimal places
   // Also, viewbox left side begins at -10px (-100) so that the left side of the thumb shows up in the hand cursor on Windows
   var PREFIX = '<svg xmlns="http://www.w3.org/2000/svg" width="SIDE" height="SIDE" viewBox="-100,0,SIDE0,SIDE0"><defs><filter id="d" width="200%" height="200%"><feOffset result="offOut" in="SourceAlpha" dx="2.5" dy="5" /><feGaussianBlur result="blurOut" in="offOut" stdDeviation="5" /><feBlend in="SourceGraphic" in2="blurOut" mode="normal" /></filter></defs><g transform="scale(SIZE)" filter="url(#d)">',
@@ -126,7 +126,7 @@ define(['core/platform', 'page/zoom/zoom', 'page/util/color', 'core/conf/urls'],
   }
 
   function getCursorZoom(pageZoom) {
-    var zoomDiff = pageZoom - zoomModule.MIN,
+    var zoomDiff = pageZoom - ZOOM_CONST.MIN_ZOOM,
     // SC-1431 Need to keep the cursor smaller than MAX_CURSOR_SIZE_WIN (defined in custom.js)
     // when on Windows OS, otherwise the cursor intermittently can become a large black square.
     // Therefore, on Windows we cannot zoom the cursor up as much as on the Mac (3.5x instead of 4x)
@@ -134,7 +134,7 @@ define(['core/platform', 'page/zoom/zoom', 'page/util/color', 'core/conf/urls'],
       CURSOR_ZOOM_RANGE = CURSOR_ZOOM_MAX - CURSOR_ZOOM_MIN;
 
     // ALGORITHM - SINUSOIDAL EASING OUT HOLLADAY SPECIAL: Decelerating to zero velocity, more quickly.
-    return CURSOR_ZOOM_RANGE * Math.sin(zoomDiff / zoomModule.RANGE * (Math.PI / 2.8)) + CURSOR_ZOOM_MIN;
+    return CURSOR_ZOOM_RANGE * Math.sin(zoomDiff / ZOOM_CONST.ZOOM_RANGE * (Math.PI / 2.8)) + CURSOR_ZOOM_MIN;
   }
 
   return {
