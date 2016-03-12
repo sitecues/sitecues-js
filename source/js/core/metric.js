@@ -7,7 +7,7 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
 
     // IMPORTANT! Increment METRICS_VERSION this every time metrics change in any way
     // IMPORTANT! Have the backend team review all metrics changes!!!
-    var METRICS_VERSION = 5,
+    var METRICS_VERSION = 6,
         isInitialized,
         name = constants.METRIC_NAME,
         metricHistory = [];

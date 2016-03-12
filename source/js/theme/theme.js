@@ -328,9 +328,10 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
     }
     if (lastIndexRgb < 0) {
       // Color is not rgb() or rgba() -- may be a color name such as 'white'.
-      // Color name will be last.
+      // In most browsers, color name will be last.
+      // In Firefox, the color comes first
       var possibleColors = bgShorthand.split(' ');
-      return possibleColors[possibleColors.length - 1];
+      return possibleColors[platform.browser.isFirefox ? 0 : possibleColors.length - 1];
     }
     // Format = rgb(x,x,x) or rgba(x,x,x,x)
     return bgShorthand.substr(lastIndexRgb).split(')')[0] + ')';

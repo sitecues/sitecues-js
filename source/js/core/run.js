@@ -228,7 +228,7 @@ define(['core/conf/user/manager', 'core/util/session', 'core/locale', 'core/metr
   function init() {
     // When keyboard listening is ready
     events.on('keys/did-init', onKeyHandlingInitialized);
-    events.on('zoom/init', onZoomInitialized);
+    events.on('zoom/ready', onZoomInitialized);
 
     numPrereqsToComplete = 2;
 

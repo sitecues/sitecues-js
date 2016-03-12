@@ -5,7 +5,7 @@
 
 define(['core/conf/site', 'core/platform'], function(site, platform) {
   var CLASSIC_SITES = {
-    's-b737790f': 1  // http://window-eyes.at -- site currently down, cannot test
+    // 's-b737790f': 1  // http://www.window-eyes.at
   };
 
   function isClassicBrowser() {

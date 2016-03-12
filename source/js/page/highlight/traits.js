@@ -9,10 +9,10 @@ define(
     '$',
     'page/highlight/traitcache',
     'page/highlight/highlight-position',
-    'page/zoom/zoom',
+    'page/zoom/util/body-geometry',
     'page/util/element-classifier'
   ],
-  function($, traitcache, mhpos, zoomMod, elemClassifier) {
+  function($, traitcache, mhpos, bodyGeo, elemClassifier) {
 
     'use strict';
 
@@ -24,7 +24,7 @@ define(
     var traitStack;
 
     viewSize = traitcache.getCachedViewSize();
-    bodyWidth = zoomMod.getBodyWidth();
+    bodyWidth = bodyGeo.getBodyWidth();
     traitStack = nodes.map(getTraits);
 
     return traitStack;

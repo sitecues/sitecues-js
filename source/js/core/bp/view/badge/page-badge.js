@@ -4,7 +4,7 @@
 define(
   [
     'core/bp/view/view',
-    'core/bp/view/badge/palette'
+    'core/bp/view/palette'
   ],
   function(baseView, palette) {
 

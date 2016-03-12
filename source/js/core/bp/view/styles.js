@@ -165,7 +165,7 @@ define(['core/bp/helper', 'core/platform', 'core/conf/site'],
         'box-sizing': 'border-box',
         'box-shadow': '1px 1px 15px 0 rgba(9, 9, 9, .5)',
         'padding': '6px 0 8px calc(50% - 66px)',
-        'background-color': '#f7fcff !important',  // Ensure our own theme engine doesn't turn the toolbar dark
+        'background-color': customBadgePalette.toolbar || '#f7fcff',  // Ensure our own theme engine doesn't turn the toolbar dark
         'z-index': '9999999'
       },
 
@@ -428,6 +428,10 @@ define(['core/bp/helper', 'core/platform', 'core/conf/site'],
         'fill': '#fff'
       },
 
+      '.scp-palette-rb.scp-toolbar': {
+        'background-color': '#080300'
+      },
+
       // -- Reverse yellow ---
       '.scp-palette-ry #scp-wave1': {
         'fill': '#FFE460'
@@ -447,6 +451,10 @@ define(['core/bp/helper', 'core/platform', 'core/conf/site'],
 
       '.scp-palette-ry .scp-A-button, .scp-palette-ry #scp-head, .scp-palette-ry #scp-zoom-slider-bar': {
         'fill': '#fff'
+      },
+
+      '.scp-palette-ry.scp-toolbar': {
+        'background-color': '#080300'
       },
 
       // -- Expanded panel colors --

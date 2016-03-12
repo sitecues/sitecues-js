@@ -38,17 +38,25 @@ define(
   function init(badgeFileName, onComplete) {
 
     var paletteKey = getSimplePaletteType(badgeFileName);
+
+    // Handle 'adaptive' palette
     if (paletteKey === BP_CONST.PALETTE_NAME_ADAPTIVE) {
-      require(['bp-adaptive/bp-adaptive'], function(bpAdaptive) {
-        state.set('defaultPaletteKey', BP_CONST.PALETTE_NAME_NORMAL);
-        bpAdaptive.initAdaptivePalette(onComplete);
-      });
+      if (SC_EXTENSION || state.get('isToolbarBadge')) {
+        // Toolbars don't adapt to theme changes -- 'adaptive' is not valid in tat case
+        paletteKey = BP_CONST.PALETTE_NAME_NORMAL;
+      }
+      else {
+        require(['bp-adaptive/bp-adaptive'], function (bpAdaptive) {
+          state.set('defaultPaletteKey', BP_CONST.PALETTE_NAME_NORMAL);
+          bpAdaptive.initAdaptivePalette(onComplete);
+        });
+        return;
+      }
     }
-    else {
-      state.set('defaultPaletteKey', paletteKey);
-      state.set('paletteKey', paletteKey);
-      onComplete();
-    }
+
+    state.set('defaultPaletteKey', paletteKey);
+    state.set('paletteKey', paletteKey);
+    onComplete();
   }
 
   return {

@@ -1,4 +1,12 @@
 define(['core/conf/site', 'core/conf/urls', 'core/run', 'core/constants', 'core/events'], function (site, urls, run, constants, events) {
+
+  if (document.documentElement.hasAttribute('data-sitecues-everywhere')) {
+    // Don't run if the extension has planted its flag.
+    // (The sitecues.exists field is not accessible here if it's set in an extension context.)
+    safe_production_msg('Sitecues Everywhere prioritized over Sitecues from webpage.');
+    return;
+  }
+
   // Enums for sitecues loading state
   var state = constants.READY_STATE;
 

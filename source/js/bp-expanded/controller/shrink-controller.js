@@ -83,11 +83,17 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
         return;
       }
 
-      if (isOpenedWithHover() && isMouseOutsidePanel(evt, 0)) { // Any click anywhere outside of visible contents, no safe-zone needed
-        shrinkPanel();
+      if (isMouseOutsidePanel(evt, 0)) {
+        if (isOpenedWithHover()) { // Any click anywhere outside of visible contents, no safe-zone needed
+          shrinkPanel();
+        }
+        return;
       }
 
-      fireClickMetric(evt);
+      // Fire metrics only for clicks inside the panel
+      if (isWithinContainer(evt.target, BP_CONST.BP_CONTAINER_ID)) {
+        fireClickMetric(evt);
+      }
     }
 
     function maybeShrinkPanel() {
