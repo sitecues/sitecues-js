@@ -20,19 +20,20 @@ function strToBool(str) {
 
 // Path join helper function that takes both strings and arrays.
 function pathJoin() {
-    var i, pathComps, arg, len = arguments.length;
+
+    const len = arguments.length;
 
     if (!len) {
         return;
     }
 
-    pathComps = [];
-    for (i = 0; i < len; i++) {
-        arg = arguments[i];
+    const pathComps = [];
+    for (let i = 0; i < len; i += 1) {
+        const arg = arguments[i];
 
         if (arg instanceof Array) {
             pathComps = pathComps.concat(arg);
-        } else if (typeof(arg) == 'string') {
+        } else if (typeof arg === 'string') {
             pathComps.push(arg);
         } else {
             return;
