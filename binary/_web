@@ -1,4 +1,7 @@
 #!/usr/bin/env node
+
+'use strict';
+
 // A simple service wrapper around the test site.
 var BgRunner = require('bg-runner'),
     path = require('path'),
