@@ -286,7 +286,7 @@ app.use('/tools', express.static(pathJoin(projectRoot, 'tools', 'site')));
     };
 
     // Set the root listener.
-    var siteRoot = path.normalize(pathJoin(projectRoot, 'tests', 'pages'));
+    const siteRoot = path.normalize(pathJoin(projectRoot, 'tests', 'pages'));
     app.get('/site/*', function (req, res, next) {
         var exists = false, filePath = path.normalize(pathJoin(siteRoot, req.params[0].split('/')));
 
