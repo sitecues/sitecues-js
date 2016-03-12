@@ -87,8 +87,9 @@ express.static.mime.define({
 });
 
 // Process the command line args.
-var useHttps = strToBool(process.argv[3]),
-    portFile = null;
+const useHttps = strToBool(process.argv[3]),
+
+let portFile = null;
 
 // The fifth argument is the port file destination.
 if (process.argv.length > 5) {
@@ -354,7 +355,7 @@ if (portFile) {
 }
 
 // Enable HTTPS if needed.
-if (useHttps){
+if (useHttps) {
     // Update the ports file.
     if (portFile) {
         fs.writeFileSync(portFile, ' -Dswdda.testSite.httpsPort=443 -Dswdda.sitecuesUrl.httpsPort=443', {flag:'a'});
