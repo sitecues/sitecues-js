@@ -87,7 +87,7 @@ express.static.mime.define({
 });
 
 // Process the command line args.
-const useHttps = strToBool(process.argv[3]),
+const useHttps = strToBool(process.argv[3]);
 
 let portFile = null;
 
