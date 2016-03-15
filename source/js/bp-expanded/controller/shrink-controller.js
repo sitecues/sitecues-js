@@ -70,11 +70,7 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
         ancestor = ancestor.parentNode;
       }
 
-      function getTrimmedId(id) {
-        return id.split('scp-')[1] || id;
-      }
-
-      new metric.PanelClick({ target: id ? getTrimmedId(id) : 'window' }).send();
+      new metric.PanelClick({ target: id }).send();
     }
 
 
