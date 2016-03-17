@@ -65,6 +65,8 @@ define(
       // Optimize fonts for legibility? Helps a little bit with Chrome on Windows
       shouldOptimizeLegibility,
       TRANSFORM_PROP_CSS,
+      // We store their current applied transition shorthand property, to revert to when we finish the zoom operation
+      cachedTransitionProperty = null,
 
       // Constants
 
@@ -106,6 +108,8 @@ define(
 
       // Make sure we're ready
       bodyGeo.init();
+
+      fixBodyTransitionStyle();
 
       // Ensure no other operation is running
       clearZoomCallbacks();
@@ -568,6 +572,8 @@ define(
       // Get next forward/backward glide animations ready.
       // Doing it now helps with performance, because stylesheet will be parsed and ready for next zoom.
       setTimeout(setupNextZoomStyleSheet, 0);
+
+      restoreBodyTransitionStyle();
     }
 
     function cancelGlideChangeTimer() {
@@ -716,6 +722,42 @@ define(
       else {
         performInstantZoomOperation();
       }
+    }
+
+    //If there is a transition style applied to the body, we need to be sure that it doesn't apply to transformations
+    //otherwise our zoom logic will break
+    function fixBodyTransitionStyle() {
+      var style  = getComputedStyle(body),
+        property = style.transitionProperty,
+        delay    = style.transitionDelay.split(',').some(function (dly) {
+          return parseFloat(dly);
+        });
+        if (!delay) {
+          var duration = style.transitionDuration.split(',').some(function (drtn) {
+            return parseFloat(drtn);
+          });
+        }
+
+      if (!delay && !duration) {
+        return;
+      }
+
+      if (property.indexOf('all') >= 0 || property.indexOf('transform') >= 0) {
+        cachedTransitionProperty = body.style.transition;
+        if (body.style.transition) {
+          body.style.transition += ', ';
+        }
+        body.style.transition += 'transform 0s';
+      }
+
+    }
+
+    //Restore the intended inline style when we're done transforming the body
+    function restoreBodyTransitionStyle() {
+      if (typeof cachedTransitionProperty === 'string') {
+        body.style.transition = cachedTransitionProperty;
+      }
+      cachedTransitionProperty = null;
     }
 
     // Allow one listener for all zoom updates, even mid-animation.
