@@ -277,7 +277,7 @@ define(
       }
       else {
         $(document).ready(function() {
-          init(callback)
+          init(callback);
         });
       }
       // Not necessary to use CSS will-change with element.animate()
