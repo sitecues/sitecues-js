@@ -731,9 +731,11 @@ define(
         property = style.transitionProperty,
         delay    = style.transitionDelay.split(',').some(function (dly) {
           return parseFloat(dly);
-        });
+        }),
+        duration;
+
         if (!delay) {
-          var duration = style.transitionDuration.split(',').some(function (drtn) {
+          duration = style.transitionDuration.split(',').some(function (drtn) {
             return parseFloat(drtn);
           });
         }
