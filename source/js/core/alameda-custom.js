@@ -153,14 +153,11 @@ var requirejs, require, define;
       return type === 'object' || type === 'function';
     }
 
-    //Use setImmediate.bind() because attaching it (or setTimeout directly
-    //to prim will result in errors. Noticed first on IE10,
-    //issue requirejs/alameda#2)
     nextTick = asyncTick;
     // The below code caused SC-3449
-    // Trying to call nextTick() in IE11 on some websites even with the .bind()
+    // Trying to call nextTick() in IE11 on some websites even with the . bind()
     // caused SCRIPT65535: Invalid calling object
-    //nextTick = typeof setImmediate === 'function' ? setImmediate.bind() :
+    //nextTick = typeof setImmediate === 'function' ? setImmediate. bind () :
     //  (typeof process !== 'undefined' && process.nextTick ?
     //    process.nextTick : (typeof setTimeout !== 'undefined' ?
     //    asyncTick : syncTick));
