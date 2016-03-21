@@ -260,8 +260,14 @@ var requirejs, require, define;
               //}
             }
 
-            callback(p, ok, finish.bind(undefined, yes, nextResolve));
-            errback(p, fail, finish.bind(undefined, no, nextReject));
+            callback(p, ok, function() {
+              var args = [yes, nextResolve].concat(Array.prototype.slice.call(arguments));
+              finish.apply(undefined, args);
+            });
+            errback(p, fail, function() {
+              var args = [no, nextReject].concat(Array.prototype.slice.call(arguments))
+              finish.apply(undefined, args);
+            });
 
           });
           return next;

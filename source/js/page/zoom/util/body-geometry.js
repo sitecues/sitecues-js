@@ -276,7 +276,9 @@ define(
         callback();
       }
       else {
-        $(document).ready(init.bind(undefined, callback));
+        $(document).ready(function() {
+          init(callback)
+        });
       }
       // Not necessary to use CSS will-change with element.animate()
       // Putting this on the <body> is too much. We saw the following message in Firefox's console:

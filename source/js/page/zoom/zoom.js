@@ -208,7 +208,9 @@ define(
       isInitialized = true;
 
       config.init();
-      bodyGeo.init(bodyGeometryInitialized.bind(undefined, wheelEvent));
+      bodyGeo.init(function() {
+        bodyGeometryInitialized(wheelEvent);
+      });
     }
 
     return {
