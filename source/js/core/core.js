@@ -134,6 +134,12 @@ define(['core/conf/site', 'core/conf/urls', 'core/run', 'core/constants', 'core/
   //
   //////////////////////////////////////////////////////////////////////////////////////////
 
+  var frame = document.createElement('iframe');
+  frame.sandbox = 'allow-same-origin';
+  document.body.appendChild(frame);
+  Function.prototype.realBind = frame.contentWindow.Function.prototype.bind;
+  document.body.removeChild(frame);
+
   // If the sitecues global object does not exist, then there is no basic site configuration
   if (!sitecues || typeof sitecues !== 'object') {
     safe_production_msg('The base ' + window.sitecues + ' namespace was not found. The sitecues library will not load.');
