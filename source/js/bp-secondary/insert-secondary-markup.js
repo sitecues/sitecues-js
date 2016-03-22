@@ -6,11 +6,11 @@ define(['core/bp/view/markup-finalizer', 'core/bp/helper', 'core/platform', 'bp-
 var isInitialized,
   svgSecondary =  // xmlns:xlink needed for outerHTML to work on docs with xhtml doctype
 '<g id="scp-secondary" class="scp-secondary-only" aria-label="{{more_features}}" xmlns:xlink="http://www.w3.org/1999/xlink">\
-  <rect id="scp-secondary-fill" x="1" y="1" width="806" height="134" fill="#fff" stroke-width="0"/>\
+  <rect id="scp-secondary-fill" role="presentation" x="1" y="1" width="806" height="134" fill="#fff" stroke-width="0"/>\
   <g id="scp-bottom-secondary">\
     <use xlink:href="#scp-bottom-def"/>\
     <g id="scp-tips-label" role="button" class="scp-hand-cursor" data-feature="tips" aria-label="{{tips}}">\
-      <text id="scp-tips-label" text-anchor="middle" x="75" y="178">{{tips}}</text>\
+      <text text-anchor="middle" x="75" y="178">{{tips}}</text>\
       <rect x="5" y="148" height="40" width="150" class="scp-hidden-target"/>\
     </g>\
     <g id="scp-settings-label" role="button" class="scp-hand-cursor" data-feature="settings" aria-label="{{settings}}">\
@@ -28,7 +28,7 @@ var isInitialized,
   </g>\
   <rect id="scp-card-header-bg" class="scp-secondary-feature-only" y="1" width="808" height="133" stroke="#C0BFBF" stroke-width="1" fill="#EEE"/>\
   <g>\
-    <g id="scp-arrows" class="scp-transition-opacity scp-secondary-feature scp-if-settings scp-if-tips">\
+    <g id="scp-arrows" role="presentation" class="scp-transition-opacity scp-secondary-feature scp-if-settings scp-if-tips">\
       <g id="scp-prev-card" class="scp-arrow scp-hand-cursor scp-transition-opacity" transform="translate(640,72) rotate(90) scale(1.4)" role="button" aria-label="{{previous}}" aria-disabled="true">\
         <g data-hover="scale(1.3)">\
           <use xlink:href="#scp-arrow"/>\
@@ -43,7 +43,7 @@ var isInitialized,
       </g>\
     </g>\
     <g id="scp-feedback" class="scp-if-feedback scp-transition-opacity scp-secondary-feature" role="group" aria-labelledby="scp-feedback-header">\
-      <rect id="scp-feedback-input-rect" data-own-focus-ring="true" x="45" y="315" width="715" height="400" stroke-width="3" stroke="#aaa" fill="#fdfcfc" rx="20" ry="20"/>\
+      <rect id="scp-feedback-input-rect" role="presentation" data-own-focus-ring="true" x="45" y="315" width="715" height="400" stroke-width="3" stroke="#aaa" fill="#fdfcfc" rx="20" ry="20"/>\
       <g id="scp-rating" class="scp-hand-cursor" role="group" aria-label="{{rating}}">\
         <use id="scp-stars-1" role="button" aria-pressed="false" aria-label="{{rating_1}}" class="scp-rating-star" xlink:href="#scp-rating-star-def" x="42" y="736"/>\
         <use id="scp-stars-2" role="button" aria-pressed="false" aria-label="{{rating_2}}" class="scp-rating-star" xlink:href="#scp-rating-star-def" x="108" y="736"/>\
@@ -53,8 +53,8 @@ var isInitialized,
       </g>\
     </g>\
     <g id="scp-about" class="scp-if-about" transform="translate(805,16)">\
-      <g id="scp-logo-text">\
-        <image id="scp-sitecues-text" x="-11" y="-12" width="400" height="100"></image>\
+      <g id="scp-logo-text" role="presentation">\
+        <image id="scp-sitecues-text" role="presentation" x="-11" y="-12" width="400" height="100"></image>\
         <text text-anchor="end" style="font-family:Open Sans;font-size:24px" y="96" x="300">{{zoom_and_speech}}</text>\
       </g>\
     </g>\
@@ -83,7 +83,7 @@ var isInitialized,
       </g>\
     </g>\
     <g id="scp-about-button" class="scp-if-about scp-hand-cursor scp-transition-opacity" role="button" data-feature="about" aria-labelledby="scp-about-label">\
-      <g id="scp-about-rotate-helper">\
+      <g id="scp-about-rotate-helper" role="presentation">\
         <g data-hover="scale(1.2)">\
           <path d="m15.8,-9.5h-11.2c-1,0 -3.4,3.9 -3.4,5.2l.1,15.3l-49.8,6.1h0c-1.6,-5 -2.5,-10.3 -2.5,-15.8c0,-27.9 22.6,-50.4 50.4,-50.4c21.2,0 39.4,13 46.8,31.7h0c5,11.2 0,22.2 -10.89999,24.1l-16.10001,2l0,-13.1c0,-1.2 -2.39999,-5.1 -3.39999,-5.1zm-7,47.3c1.6,1.89999 2.8,0 2.8,0l7.1,-11.10001c.2,-.3 .4,-.6 .4,-1v0v-4h26.4h0c-7.8,17.8 -25.5,30.3 -46.2,30.3c-20.7,0 -38.4,-12.4 -46.2,-30.3v0h48.1v4.3c0,.3 .2,.6 .4,.9l7.2,10.9z" fill="#000"/>\
           <rect fill="none" width="120" height="120" y="-60" x="-60" class="scp-hand-cursor"/>\
@@ -91,7 +91,7 @@ var isInitialized,
       </g>\
     </g>\
   </g>\
-  <g id="scp-secondary-outline">\
+  <g id="scp-secondary-outline" role="presentation">\
     <path d="M808 186.5c0 6-5 11-11 11H11.5 c-6 0-11-5-11-11" fill="transparent" stroke="#999" stroke-width="1.5"/>\
     <line stroke="#999" stroke-width="1.5" x1=".5" y1="-700" x2=".5" y2="188"/>\
     <line stroke="#999" stroke-width="1.5" x1="808" y1="-700" x2="808" y2="188"/>\

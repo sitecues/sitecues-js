@@ -11,7 +11,7 @@ define(['core/bp/view/markup-finalizer', 'core/bp/view/styles'], function(finali
 
   var svg = '\
 <sc id="scp-focus-outline" role="presentation"></sc>\
-<sc id="scp-shadow-container" style="position:absolute;width:513px;height:630px;overflow:hidden">\
+<sc id="scp-shadow-container" role="presentation" style="position:absolute;width:513px;height:630px;overflow:hidden">\
   <sc id="scp-shadow"></sc>\
 </sc>\
 \
@@ -48,26 +48,26 @@ define(['core/bp/view/markup-finalizer', 'core/bp/view/styles'], function(finali
 <rect id="scp-badge-bg" fill="white" stroke-width="0" x="0" y="0" width="630" height="124" opacity="0"/>\
 <rect id="scp-badge-focus-rect" fill="transparent" stroke-width="0" x="10" y="10" width="620" height="114" rx="15" ry="15" filter="url(#scp-focusblur)"/>\
 <g id="scp-main" aria-label="{{sitecues_main_panel}}">\
-  <rect id="scp-main-content-fill" fill="white" stroke-width="0" x="1" y="1" width="806" height="134" class="scp-panel-only" opacity="0"/>\
+  <rect id="scp-main-content-fill" role="presentation" fill="white" stroke-width="0" x="1" y="1" width="806" height="134" class="scp-panel-only" opacity="0"/>\
   <use id="scp-small-A" xlink:href="#scp-small-A-def" y="48" role="button" aria-label="{{zoom_out}}" class="scp-A-button"/>\
   <g id="scp-zoom-slider-bar" role="slider" aria-valuemin="1" aria-valuemax="3" aria-valuenow="1" aria-labelledby="scp-zoom-label" data-thumb-mover="scp-zoom-slider-thumb">\
     <use xlink:href="#scp-zoom-slider-bar-def" x="80" y="60"/>\
-    <rect id="scp-zoom-slider-target" class="scp-hidden-target scp-hand-cursor" x="80" y="44" width="280" height="67"/>\
+    <rect id="scp-zoom-slider-target" role="presentation" class="scp-hidden-target scp-hand-cursor" x="80" y="44" width="280" height="67"/>\
   </g>\
   <use id="scp-zoom-slider-thumb" class="scp-hand-cursor" xlink:href="#scp-zoom-slider-thumb-def" role="presentation" aria-controls="scp-zoom-slider-bar" y="48" x="60"/>\
   <use id="scp-large-A" xlink:href="#scp-large-A-def" x="380" y="21" role="button" aria-label="{{zoom_in}}" class="scp-A-button"/>\
   <line id="scp-vert-divider" class="scp-panel-only" opacity="0" stroke="#888" stroke-width="2" x1="500" y1="31" x2="500" y2="99"/>\
   <g id="scp-speech" role="checkbox" aria-checked="false" aria-label="{{speech}}"> <!-- ARIA Toggle button not working well with NVDA screen reader -->\
-    <use id="scp-head" xlink:href="#scp-head-def" x="530" y="11"/>\
-    <use id="scp-wave1" xlink:href="#scp-wave1-def" class="scp-wave" x="530" y="11"/>\
-    <use id="scp-wave2" xlink:href="#scp-wave2-def" class="scp-wave" x="530" y="11"/>\
-    <use id="scp-wave3" xlink:href="#scp-wave3-def" class="scp-wave" y="11" x="530"/>\
-    <rect id="scp-speech-target" x="530" y="5" width="193" height="115" class="scp-hidden-target scp-hand-cursor"/>\
+    <use id="scp-head" role="presentation" xlink:href="#scp-head-def" x="530" y="11"/>\
+    <use id="scp-wave1" role="presentation" xlink:href="#scp-wave1-def" class="scp-wave" x="530" y="11"/>\
+    <use id="scp-wave2" role="presentation" xlink:href="#scp-wave2-def" class="scp-wave" x="530" y="11"/>\
+    <use id="scp-wave3" role="presentation" xlink:href="#scp-wave3-def" class="scp-wave" y="11" x="530"/>\
+    <rect id="scp-speech-target" role="presentation" x="530" y="5" width="193" height="115" class="scp-hidden-target scp-hand-cursor"/>\
   </g>\
   <g id="scp-bottom" class="scp-panel-only" opacity="0">\
-    <use id="scp-bottom-mousetarget" xlink:href="#scp-bottom-def"/>\
-    <g id="scp-bottom-text" opacity="0">\
-      <text id="scp-zoom-label" x="25" y="178"><tspan id="scp-zoom-value">{{zoom_off}}</tspan></text>\
+    <use id="scp-bottom-mousetarget" role="presentation" xlink:href="#scp-bottom-def"/>\
+    <g id="scp-bottom-text" role="presentation" opacity="0">\
+      <text id="scp-zoom-label" x="25" y="178"><tspan id="scp-zoom-value" role="presentation">{{zoom_off}}</tspan></text>\
       <text id="scp-speech-label" x="581" y="178" data-x-start="581" data-x-end="795">\
         {{speech}} {{off}}\
       </text>\
@@ -75,22 +75,22 @@ define(['core/bp/view/markup-finalizer', 'core/bp/view/styles'], function(finali
     <rect opacity="0" x="0" y="195" width="808" height="64"/>\
   </g>\
 </g>\
-<g id="scp-secondary-anchor"/>\
-<use id="scp-main-outline" xlink:href="#scp-outline-def" class="scp-panel-only" fill="none" opacity="0"/>\
-<g id="scp-more-button-opacity" transform="translate(400,198)">\
-  <g id="scp-more-button-container">\
+<g id="scp-secondary-anchor" role="presentation" />\
+<use id="scp-main-outline" role="presentation" xlink:href="#scp-outline-def" class="scp-panel-only" fill="none" opacity="0"/>\
+<g id="scp-more-button-opacity" role="presentation" transform="translate(400,198)">\
+  <g id="scp-more-button-container" role="presentation">\
     <g id="scp-more-button-group" data-hover="scale(1.2)" class="scp-hand-cursor" role="button" aria-label="{{more_features}}">\
       <circle fill="#FFF" stroke="#777" stroke-width="5" stroke-miterlimit="10" cx="0" cy="0" r="34"/>\
-      <use id="scp-more-arrow" fill="#777" xlink:href="#scp-arrow"/>\
-      <path id="scp-question" fill="#777" stroke="#777" stroke-width="2" d="M0,-16c-3.4 0-6 1-7.5 2.6-1.6 1.6-2.2 3.6-2.4 5.1l4 .5c.2-1 .5-2 1.2-2.8 .8-.8 2-1.5 4.6-1.5 2.6 0 4.1 .5 4 1.4 .8 .7 1.1 1.6 1.1 2.6 0 3.3-1.4 4.2-3.4 6-2 1.8-4.6 4.3-4.6 9v1h4v-1c0-3.3 1.2-4.2 3.2-6 2-1.8 4.8-4.3 4.8-9 0-2-.7-4.1-2.4-5.6-1.7-1.6-4.3-2.4-7.6-2.4zm-2.8 28v4h4v-4h-4z"></path>\
+      <use id="scp-more-arrow" role="presentation" fill="#777" xlink:href="#scp-arrow"/>\
+      <path id="scp-question" role="presentation" fill="#777" stroke="#777" stroke-width="2" d="M0,-16c-3.4 0-6 1-7.5 2.6-1.6 1.6-2.2 3.6-2.4 5.1l4 .5c.2-1 .5-2 1.2-2.8 .8-.8 2-1.5 4.6-1.5 2.6 0 4.1 .5 4 1.4 .8 .7 1.1 1.6 1.1 2.6 0 3.3-1.4 4.2-3.4 6-2 1.8-4.6 4.3-4.6 9v1h4v-1c0-3.3 1.2-4.2 3.2-6 2-1.8 4.8-4.3 4.8-9 0-2-.7-4.1-2.4-5.6-1.7-1.6-4.3-2.4-7.6-2.4zm-2.8 28v4h4v-4h-4z"></path>\
       <circle cx="0" cy="0" r="36" class="scp-hidden-target"/>\
     </g>\
   </g>\
 </g>\
-<rect id="scp-mouseover-target" x="0" y="0" width="700" height="160" opacity="0"/>\
+<rect id="scp-mouseover-target" role="presentation" x="0" y="0" width="700" height="160" opacity="0"/>\
 </svg>\
 \
-<sc id="scp-html-secondary-anchor" style="display:none"></sc>'; // Hack to make sure innerHTML doesn't remove any important last element
+<sc id="scp-html-secondary-anchor" role="presentation" style="display:none"></sc>'; // Hack to make sure innerHTML doesn't remove any important last element
 
   return function() {
     styles.init();
