@@ -59,22 +59,41 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
       }
     }
 
+    // This will roughly help us group similar types of element clicks
+    function getAriaOrNativeRole(elem) {
+      var role = elem.getAttribute('role'),
+        tag;
+      if (!role) {
+        // No role: use tag name
+        tag = elem.localName;
+        if (tag === 'input') {
+          // Tag name is input, use @type
+          role = elem.getAttribute('type');
+        }
+        else if (tag === 'g' || tag === 'div') {
+          // Tag name is g|div, use 'group'
+          role = 'group';
+        }
+      }
+      return role;
+    }
+
     function fireClickMetric(evt) {
       var ancestor = helper.getEventTarget(evt),
+        role,
         id; // default name if we don't find a metric target
       while (ancestor) {
-        id = ancestor.id;
-        if (id || id === BP_CONST.BP_CONTAINER_ID) {
-          break;
+        role = getAriaOrNativeRole(ancestor);
+        if (role !== 'presentation') {  // Do not fire metrics for items only included to help presentation, e.g. a shadow
+          id = ancestor.id;
+          if (id || id === BP_CONST.BP_CONTAINER_ID) {
+            break;
+          }
         }
         ancestor = ancestor.parentNode;
       }
 
-      function getTrimmedId(id) {
-        return id.split('scp-')[1] || id;
-      }
-
-      new metric.PanelClick({ target: id ? getTrimmedId(id) : 'window' }).send();
+      new metric.PanelClick({ target: id, role: role }).send();
     }
 
 

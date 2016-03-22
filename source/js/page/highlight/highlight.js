@@ -1,10 +1,13 @@
 // TODO Work in Firefox + EEOC menus
 // TODO Test! Especially in IE
+//TODO: Break this module down a bit, there are too many dependencies and it is huge
+/*jshint -W072 */ //Currently there are too many dependencies, so we need to tell JSHint to ignore it for now
 define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 'page/highlight/traitcache',
-    'page/highlight/highlight-position', 'page/util/common', 'page/util/color',
-    'page/util/geo', 'page/util/element-classifier', 'core/platform', 'page/highlight/constants', 'core/events'],
-  function($, conf, zoomMod, picker, traitcache, mhpos, common, colorUtil, geo, elementClassifier, platform, constants, events) {
-
+        'page/highlight/highlight-position', 'page/util/common', 'page/util/color', 'page/util/geo', 'page/util/element-classifier',
+        'core/platform', 'page/highlight/constants', 'core/events', 'page/zoom/util/body-geometry'],
+  function($, conf, zoomMod, picker, traitcache, mhpos, common, colorUtil, geo, elementClassifier, platform, constants, events,
+           bodyGeo) {
+/*jshint +W072 */
   var
 
   isInitialized,
@@ -1494,7 +1497,7 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
     var knownGoodState = state;
     var knownGoodScore = -9;
     var skipElement;
-    var bodyWidth = zoomMod.getBodyWidth();
+    var bodyWidth = bodyGeo.getBodyWidth();
     var bodyHeight = document.body.scrollHeight;
 
     traitcache.resetCache();

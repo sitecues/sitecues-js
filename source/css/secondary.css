@@ -41,7 +41,10 @@
 
 /** Enable secondary panel **/
 .scp-secondary-feature {
-  display: block;
+  /* On ticc.com the secondary panel menu items failed to appear unless we added !important to this style rule,
+  TODO: Go back and figure out why this works everywhere else. This selector has lower specificity, and since secondary.css
+  is an external stylesheet it should have lower precedence. Mysterious*/
+  display: block !important;
 }
 
 /* Secondary panel has it's own stretchable outline */

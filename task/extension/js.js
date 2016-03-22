@@ -62,7 +62,7 @@ function getCompileFunctionMap() {
 
   functionMap[JS_SOURCE_DIR] = compileLibrary;
   functionMap[config.extensionSourceDir + '/js/'] = copyExtensionScripts;
-  functionMap[JS_SOURCE_DIR + '/jquery.js'] = copyJQuery;
+  functionMap[JS_SOURCE_DIR + 'page/jquery/jquery.js'] = copyJQuery;
 
   return functionMap;
 }
@@ -155,7 +155,7 @@ function copyExtensionScripts() {
 }
 
 function copyJQuery() {
-  return copyScripts(config.librarySourceDir + '/js/jquery.js');
+  return copyScripts(config.librarySourceDir + '/js/page/jquery/jquery.js');
 }
 
 module.exports = {

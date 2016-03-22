@@ -97,9 +97,18 @@ define([], function () {
     return this;
   }
 
-  manager.on   = on.bind(manager);
-  manager.off  = off.bind(manager);
-  manager.emit = emit.bind(manager);
+  manager.on   = function() {
+    var args = Array.prototype.slice.call(arguments);
+    on.apply(manager, args);
+  };
+  manager.off  = function() {
+    var args = Array.prototype.slice.call(arguments);
+    off.apply(manager, args);
+  };
+  manager.emit = function() {
+    var args = Array.prototype.slice.call(arguments);
+    emit.apply(manager, args);
+  };
 
   return {
     on   : manager.on,

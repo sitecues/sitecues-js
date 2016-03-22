@@ -1,4 +1,4 @@
-define(['core/conf/user/manager', 'page/zoom/zoom', 'core/events'], function (conf, zoomMod, events) {
+define(['core/conf/user/manager', 'page/zoom/util/body-geometry', 'core/events'], function (conf, bodyGeo, events) {
   var isOn = false,
     isHlbOn = false,
     isPanelOpen = false,
@@ -19,7 +19,7 @@ define(['core/conf/user/manager', 'page/zoom/zoom', 'core/events'], function (co
       movementX = getBackfillMovementX(evt),
 
       // Right side of body in absolute coordinates
-      bodyRight = zoomMod.getBodyRight(),
+      bodyRight = bodyGeo.getBodyRight(),
 
       // Width of window
       winWidth = window.innerWidth,
@@ -113,7 +113,7 @@ define(['core/conf/user/manager', 'page/zoom/zoom', 'core/events'], function (co
 
     // Turn on if zoom is > 1 and content overflows window more than a tiny amount
     var zoom = getZoom(),
-      doTurnOn = zoom > 1 && zoomMod.getBodyRight() / window.innerWidth > 1.02 && !isHlbOn && !isPanelOpen && !isZooming;
+      doTurnOn = zoom > 1 && bodyGeo.getBodyRight() / window.innerWidth > 1.02 && !isHlbOn && !isPanelOpen && !isZooming;
 
     if (doTurnOn !== isOn) {
       if (doTurnOn) {

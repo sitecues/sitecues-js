@@ -1,6 +1,6 @@
 define(['$', 'page/highlight/highlight', 'page/util/common',
-  'page/highlight/pick', 'page/zoom/zoom', 'page/util/geo', 'page/zoom/fixed-position-fixer', 'core/events'],
-  function($, mh, common, picker, zoomMod, geo, fixedFixer, events) {
+  'page/highlight/pick', 'page/zoom/util/body-geometry', 'page/util/geo', 'page/zoom/fixed-position-fixer', 'core/events'],
+  function($, mh, common, picker, bodyGeo, geo, fixedFixer, events) {
 
   var STEP_SIZE_VERT = 18,
     STEP_SIZE_HORIZ = 24,  // Different step sizes because content tends to be wider than tall (lines of text)
@@ -364,8 +364,8 @@ define(['$', 'page/highlight/highlight', 'page/util/common',
       startPanTime,
       // Farthest panning could possibly go
       maxPanUp = 0,
-      maxPanLeft = zoomMod.getBodyLeft(),
-      maxPanRight = zoomMod.getBodyRight() - winRight,
+      maxPanLeft = bodyGeo.getBodyLeft(),
+      maxPanRight = bodyGeo.getBodyRight() - winRight,
       maxPanDown = document.documentElement.scrollHeight - winBottom,
       // Target end point for panning
       targetPanLeft,

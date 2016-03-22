@@ -45,6 +45,7 @@
     "grunt-jslint": "1.1.14",
     "grunt-jsonlint": "1.0.7",
     "gulp": "github:gulpjs/gulp#4.0",
+    "gulp-check": "0.1.1",
     "gulp-cleanhtml": "1.0.1",
     "gulp-compile-handlebars": "0.6.1",
     "gulp-jshint": "2.0.0",

@@ -23,7 +23,6 @@ var gulp = require('gulp'),
   absoluteSourceFolderStringLength,
   JS_SOURCE_DIR = config.librarySourceDir + '/js',
   compileFunctionMap = getCompileFunctionMap(),
-  uglify = require('gulp-uglify'),
   isMin = config.isMinifying,
   uglifyOptions = {
     compress: {
@@ -135,15 +134,7 @@ function getCompileFunctionMap() {
     functionMap[JS_SOURCE_DIR + '/' + sourceFolder] = fn;
   });
 
-  functionMap[JS_SOURCE_DIR + '/jquery.js'] = copyJQuery;
-
   return functionMap;
-}
-
-function copyJQuery() {
-  return gulp.src(JS_SOURCE_DIR + '/jquery.js')
-    .pipe(uglify(uglifyOptions))
-    .pipe(gulp.dest(config.resourceDir + '/js'));
 }
 
 function prepareValidation() {

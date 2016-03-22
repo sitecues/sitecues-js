@@ -10,7 +10,7 @@ var config = require('../build-config'),
   extend = require('extend'),
   JS_SOURCE_DIR = config.librarySourceDir + '/js',
   PATHS = {
-    '$': 'empty:', // Allows runtime config to switch between jQuery and Zepto as necessary
+    '$': 'empty:', 
     'Promise': 'empty:'   // In runtime config, via definePrim : 'Promise' to allow use of alameda's built-in Prim library
   },
   AMD_BASE_CONFIG = {
@@ -43,9 +43,7 @@ var config = require('../build-config'),
       insertRequire: [ 'core/core' ]
     },
     page: {
-      // In-page library for sitecues bundles zepto.
-      // This is not done for the extension, which prefers jquery for compatibility with Prototype.js
-      include: [ 'page/zepto/zepto' ]
+      include: [ 'page/jquery/jquery' ]
     }
   };
 
@@ -78,7 +76,7 @@ function getBundleConfig(amdConfig, bundleName) {
   amdConfig.fileExclusionRegExp = new RegExp('^' + bundleName + '$');
   includeMainModule(amdConfig, bundleName);
 
-  var paths = extend({}, PATHS); // Determine location of $ at runtime (jquery vs zepto)
+  var paths = extend({}, PATHS);
 
   bundleFolders.forEach(function(otherBundle) {
     if (otherBundle !== bundleName) {

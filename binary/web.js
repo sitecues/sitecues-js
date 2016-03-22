@@ -20,19 +20,20 @@ function strToBool(str) {
 
 // Path join helper function that takes both strings and arrays.
 function pathJoin() {
-    var i, pathComps, arg, len = arguments.length;
+
+    const len = arguments.length;
 
     if (!len) {
         return;
     }
 
-    pathComps = [];
-    for (i = 0; i < len; i++) {
-        arg = arguments[i];
+    const pathComps = [];
+    for (let i = 0; i < len; i += 1) {
+        const arg = arguments[i];
 
         if (arg instanceof Array) {
             pathComps = pathComps.concat(arg);
-        } else if (typeof(arg) == 'string') {
+        } else if (typeof arg === 'string') {
             pathComps.push(arg);
         } else {
             return;
@@ -86,8 +87,9 @@ express.static.mime.define({
 });
 
 // Process the command line args.
-var useHttps = strToBool(process.argv[3]),
-    portFile = null;
+const useHttps = strToBool(process.argv[3]);
+
+let portFile = null;
 
 // The fifth argument is the port file destination.
 if (process.argv.length > 5) {
@@ -284,7 +286,7 @@ app.use('/tools', express.static(pathJoin(projectRoot, 'tools', 'site')));
     };
 
     // Set the root listener.
-    var siteRoot = path.normalize(pathJoin(projectRoot, 'tests', 'pages'));
+    const siteRoot = path.normalize(pathJoin(projectRoot, 'tests', 'pages'));
     app.get('/site/*', function (req, res, next) {
         var exists = false, filePath = path.normalize(pathJoin(siteRoot, req.params[0].split('/')));
 
@@ -353,7 +355,7 @@ if (portFile) {
 }
 
 // Enable HTTPS if needed.
-if (useHttps){
+if (useHttps) {
     // Update the ports file.
     if (portFile) {
         fs.writeFileSync(portFile, ' -Dswdda.testSite.httpsPort=443 -Dswdda.sitecuesUrl.httpsPort=443', {flag:'a'});

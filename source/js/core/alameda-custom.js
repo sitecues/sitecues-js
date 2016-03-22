@@ -32,11 +32,8 @@ var require = {
     return withLatestReplaced;  // Includes version name so that cached resources are only used with the appropriately matching sitecues.js
   })(sitecues.everywhereConfig || sitecues.config),
   map: {
-    // All modules get 'zepto' when they ask for $
     '*': {
-      // We use jQuery when the page has prototype.js, as it is fundamentally incompatible with Zepto
-      // This is just the tip of the iceberg: https://github.com/madrobby/zepto/issues/710
-      '$': window.Prototype ? 'jquery' : 'page/zepto/zepto'
+      '$': 'page/jquery/jquery'
     }
   }
 };
@@ -156,14 +153,11 @@ var requirejs, require, define;
       return type === 'object' || type === 'function';
     }
 
-    //Use setImmediate.bind() because attaching it (or setTimeout directly
-    //to prim will result in errors. Noticed first on IE10,
-    //issue requirejs/alameda#2)
     nextTick = asyncTick;
     // The below code caused SC-3449
-    // Trying to call nextTick() in IE11 on some websites even with the .bind()
+    // Trying to call nextTick() in IE11 on some websites even with the . bind()
     // caused SCRIPT65535: Invalid calling object
-    //nextTick = typeof setImmediate === 'function' ? setImmediate.bind() :
+    //nextTick = typeof setImmediate === 'function' ? setImmediate. bind () :
     //  (typeof process !== 'undefined' && process.nextTick ?
     //    process.nextTick : (typeof setTimeout !== 'undefined' ?
     //    asyncTick : syncTick));
@@ -263,8 +257,14 @@ var requirejs, require, define;
               //}
             }
 
-            callback(p, ok, finish.bind(undefined, yes, nextResolve));
-            errback(p, fail, finish.bind(undefined, no, nextReject));
+            callback(p, ok, function() {
+              var args = [yes, nextResolve].concat(Array.prototype.slice.call(arguments));
+              finish.apply(undefined, args);
+            });
+            errback(p, fail, function() {
+              var args = [no, nextReject].concat(Array.prototype.slice.call(arguments))
+              finish.apply(undefined, args);
+            });
 
           });
           return next;

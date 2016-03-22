@@ -218,7 +218,8 @@ define(['core/bp/helper', 'core/platform', 'core/conf/site'],
 
       '#scp-shadow-container': {
         'display': 'none',
-        'opacity': 0
+        'opacity': 0,
+        'pointer-events': 'none'
       },
 
       '.scp-want-panel.scp-ie9-false #scp-shadow-container': {

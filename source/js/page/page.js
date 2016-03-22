@@ -9,6 +9,13 @@ define([
   'page/hpan/hpan',
   'page/zoom/fixed-position-fixer',
   'page/focus/focus',
-  'page/cursor/cursor'
+  'page/cursor/cursor',
+  'page/zoom/util/body-geometry',
+  'page/zoom/util/restrict-zoom',
+  'page/zoom/util/viewport',
+  'page/zoom/config/config',
+  'page/zoom/animation',
+  'page/zoom/constants',
+  'page/zoom/state'
   ], function() { }
 );
