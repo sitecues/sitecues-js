@@ -56,15 +56,17 @@ define(['core/conf/user/manager', 'core/util/session', 'core/locale', 'core/metr
   }
 
   function initThemes() {
-    require([ 'theme/theme', 'page/focus/focus' ], function (theme, focus) {
+    require([ 'theme/theme', 'page/focus/focus', 'page/keys/keys' ], function (theme, focus, keys) {
       theme.init();
       focus.init();
+      keys.init();
     });
   }
 
   function initMouse() {
-    require([ 'page/cursor/cursor' ], function (cursor) {
+    require([ 'page/cursor/cursor', 'page/keys/keys' ], function (cursor, keys) {
       cursor.init();
+      keys.init();
     });
   }
 
