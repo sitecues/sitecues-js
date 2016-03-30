@@ -177,6 +177,7 @@ define(['core/conf/site', 'core/platform'], function(site, platform) {
     resolveResourceUrl: resolveResourceUrl,
     parseUrl: parseUrl,
     isOnDifferentDomain: isOnDifferentDomain,
+    isProduction: isProduction,
     resolveUrl: resolveUrl
   };
 
