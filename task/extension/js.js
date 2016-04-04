@@ -22,6 +22,7 @@ var gulp = require('gulp'),
   size = config.isShowingSizes && require('gulp-size'),
   Promise_ = require('bluebird'),   // TODO update bamboo to use node 3+ and remove this polyfill dependency
   replace = require('gulp-replace'),
+  PAGE_DISABLED_CHECK = 'if (window.localStorage.getItem("sitecues-disabled") !== "true") (function() {',
   isMin = config.isMinifying,
   uglify = require('gulp-uglify'),
   uglifyOptions = {
@@ -112,7 +113,9 @@ function cleanLibrary() {
 
 function compressLibrary() {
   return gulp.src(intermediateSitecuesJs)
-    // These replacements allow uglify to remove a lot of dead code
+    // Check before IIFE so that no init code runs if page disabled -- only does this replacement once
+    .pipe(replace(/^\;\(function\(\) \{/, PAGE_DISABLED_CHECK))
+    // These replacements allow uglify to remove a lot of dead code -- these replacements are global
     .pipe(replace('platform.browser.isIE9', 'false'))
     .pipe(replace('platform.browser.isIE', 'false'))
     .pipe(replace('platform.browser.isFirefox', 'false'))

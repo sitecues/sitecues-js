@@ -1,10 +1,17 @@
 define(['core/conf/site', 'core/conf/urls', 'core/run', 'core/constants', 'core/events'], function (site, urls, run, constants, events) {
 
-  if (!SC_EXTENSION && document.documentElement.hasAttribute('data-sitecues-everywhere')) {
-    // Don't run if the extension has planted its flag.
-    // (The sitecues.exists field is not accessible here if it's set in an extension context.)
-    safe_production_msg('Sitecues Everywhere prioritized over Sitecues from webpage.');
-    return;
+  if (!SC_EXTENSION) {
+    if (document.documentElement.hasAttribute('data-sitecues-everywhere')) {
+      // Don't run if the extension has planted its flag.
+      // (The sitecues.exists field is not accessible here if it's set in an extension context.)
+      safe_production_msg('Sitecues Everywhere prioritized over Sitecues from webpage.');
+      return;
+    }
+    // Extension script: is extension allowed on this page?
+    if (window.localStorage.getItem('sitecues-disabled') === 'true') {
+      safe_production_msg('Sitecues has been disabled on this page.');
+      return;
+    }
   }
 
   // Enums for sitecues loading state
@@ -137,13 +144,6 @@ define(['core/conf/site', 'core/conf/urls', 'core/run', 'core/constants', 'core/
   // If the sitecues global object does not exist, then there is no basic site configuration
   if (!sitecues || typeof sitecues !== 'object') {
     safe_production_msg('The base ' + window.sitecues + ' namespace was not found. The sitecues library will not load.');
-    return;
-  }
-
-  // Extension script: is extension allowed on this page?
-  var data = window.localStorage.getItem('sitecues-disabled');
-  if (data && data !== 'false') {
-    console.log('sitecues has been disabled on this page.');
     return;
   }
 
