@@ -31,16 +31,9 @@ define(
     isInitialized,
     // TODO add more trigger types, e.g. shift+arrow, shift+space
     TRIGGER_TYPES = {
-      LENS: 'space',
       HIGHLIGHT: 'shift'
     },
     speechStrategy = constant.speechStrategy;
-
-  function onLensOpened(lensContent, fromHighlight) {
-    if (ttsOn) {
-      speakContentImpl(fromHighlight.picked, TRIGGER_TYPES.LENS);
-    }
-  }
 
   function isBusy() {
     return lastPlayer && lastPlayer.isBusy();
@@ -420,18 +413,6 @@ define(
     textSelect.init();
 
     /*
-     * Speak whenever the lens is opened, if speech is on, etc.
-     * Use a later speech fetch if local speech is preferred, because it makes the lens expansion animation janky.
-     * TODO: It would be better to always listen for 'hlb/did-create' here so that
-     *      speech synthesis happens during the opening animation.
-     *      Unfortunately, this currently causes browsers to choke
-     *      on the animation when using local speech. But that
-     *      may improve in time.
-     */
-    var SPEECH_BEGIN_EVENT = isLocalSpeechPreferred() ? 'hlb/ready' : 'hlb/did-create';
-    events.on(SPEECH_BEGIN_EVENT, onLensOpened);
-
-    /*
      * A highlight box was closed.  Stop/abort/dispose of the player
      * attached to it.
      */
@@ -453,6 +434,7 @@ define(
     setSpeechState: setSpeechState,
     toggleSpeech: toggleSpeech,
     isSpeechEnabled: isSpeechEnabled,
+    isBusy: isBusy,
     speakByKey: speakByKey,
     speakContent: speakContent,
     speakText: speakText,

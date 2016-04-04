@@ -1,5 +1,5 @@
-define(['page/zoom/zoom', 'page/highlight/move-keys', 'core/conf/user/manager', 'page/highlight/highlight'],
-  function(zoomMod, moveKeys, conf, mh) {
+define(['page/zoom/zoom', 'page/highlight/move-keys', 'core/conf/user/manager'],
+  function(zoomMod, moveKeys, conf) {
   return {
     decreaseZoom: function(event) {
       zoomMod.init();
@@ -38,17 +38,37 @@ define(['page/zoom/zoom', 'page/highlight/move-keys', 'core/conf/user/manager', 
       }
     },
     speakHighlight: function(doAllowRepeat, doClearRememberedHighlight) {
-      var highlight = mh.getHighlight();
-      if (highlight && (doAllowRepeat || highlight !== this.lastHighlight)) {
-        this.lastHighlight = highlight;
-        require(['audio/audio'], function(audio) {
+      require(['audio/text-select', 'page/highlight/highlight', 'audio/audio'], function(textSelect, mh, audio) {
+        // Speech enabled?
+        if (!audio.isSpeechEnabled()) {
+          return;
+        }
+
+        // If already playing something, the speak command stops current speech
+        if (audio.isBusy()) {
+          audio.stopAudio();
+          return;
+        }
+
+        var textSelection = textSelect.getSelectedText(),
+          highlight = mh.getHighlight();
+
+        // Text selection takes precedence over mouse highlight
+        if (textSelection) {
+          audio.speakText(textSelection);
+          return;
+        }
+
+        // Use mouse highlight
+        if (highlight && (doAllowRepeat || highlight !== this.lastHighlight)) {
+          this.lastHighlight = highlight;
           audio.init();
           audio.speakContent(highlight.picked);
-        });
-      }
-      if (doClearRememberedHighlight) {
-        this.lastHighlight = null;
-      }
+        }
+        if (doClearRememberedHighlight) {
+          this.lastHighlight = null;
+        }
+      });
     },
     toggleSpeech:  function() {
       require(['audio/audio'], function(audio) {
