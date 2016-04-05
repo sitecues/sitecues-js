@@ -178,12 +178,12 @@ define(
     while (element) {
       var lang = element.getAttribute('lang') || element.getAttribute('xml:lang');
       if (lang) {
-        return locale.getAudioLang(lang);
+        return locale.getAudioLocale(lang);
       }
       element = element.parentElement;
     }
 
-    return locale.getAudioLang();
+    return locale.getAudioLocale();
   }
 
   function getDocumentAudioLang() {
