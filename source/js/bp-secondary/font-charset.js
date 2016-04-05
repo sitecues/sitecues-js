@@ -6,7 +6,7 @@ define(['core/locale'], function(locale) {
    * @returns {*}
    */
   return function() {
-    var lang = locale.getShortWebsiteLang(),
+    var lang = locale.getLang(),
       EXTENDED_LANGS = {
         'latin-ext': [
           'hr', // Croatian
