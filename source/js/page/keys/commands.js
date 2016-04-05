@@ -44,12 +44,6 @@ define(['page/zoom/zoom', 'page/highlight/move-keys', 'core/conf/user/manager'],
           return;
         }
 
-        // If already playing something, the speak command stops current speech
-        if (audio.isBusy()) {
-          audio.stopAudio();
-          return;
-        }
-
         var textSelection = textSelect.getSelectedText(),
           highlight = mh.getHighlight();
 
