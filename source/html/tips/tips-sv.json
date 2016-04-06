@@ -1,0 +1,52 @@
+{
+  "spacebar": "spacebar",
+
+  "slider": {
+    "howto": "Use the zoom slider"
+  },
+  "zoomkeys": {
+    "long_press": "Hold keys longer to zoom more.",
+    "howto": "Press the - or + key to zoom the page"
+  },
+  "highlight": {
+    "purpose": "The highlighter selects areas to read.",
+    "step1": "1. Choose something to focus on.",
+    "step2": "2. Move your mouse to highlight it.",
+    "keys": "Or, use spacebar to begin highlighting, arrow keys to move the highlight, and Escape to stop highlighting."
+  },
+  "lens": {
+    "purpose": "The lens magnifies.",
+    "step1": "1. Highlight something interesting",
+    "step2": "2. Press"
+  },
+  "speech": {
+    "purpose": "The speech feature reads text aloud.",
+    "step1": "1. Click the speech button",
+    "step2": "2. Highlight & press"
+  },
+  "guide": {
+    "full": {
+      "label": "Full guide",
+      "action": "Practice sitecues"
+    },
+    "keyboard": {
+      "label": "Keyboard help",
+      "action": "Jump straight there"
+    }
+  },
+
+  "title": "Tips",
+
+  "cards": {
+    "Zoom": "Zoom",
+    "Highlight": "Highlight",
+    "Lens": "Lens",
+    "Speech": "Speech",
+    "More": "More"
+  },
+
+  "demopage": {
+    "welcome": "Welcome!",
+    "blurb": "sitecues reads the web."
+  }
+}
