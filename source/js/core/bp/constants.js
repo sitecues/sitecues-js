@@ -163,7 +163,7 @@ define([], function() {
     'role'     : 'dialog',
     'tabindex' : -1,
     'class'    : 'scp-loading',
-    'aria-label': 'sitecues'
+    'aria-label': 'Sitecues'
   };
 
   constants.BADGE_ATTRS = {

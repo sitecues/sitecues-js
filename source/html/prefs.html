@@ -24,7 +24,7 @@
         }
         catch (ex) {
           // 'localStorage' prop inaccessible in iframe -- security settings must be set to 'disallow third party site data'
-          console.log('Third party site data disallowed in browser security settings: sitecues will not sync its settings between different websites.');
+          console.log('Third party site data disallowed in browser security settings: Sitecues will not sync its settings between different websites.');
         }
         event.source.postMessage(value, event.origin);
       }

@@ -5,8 +5,8 @@ define([], function() {
   return {
     // ARIA labels
     // - Main
-    sitecues_main_panel: 'sitecues dialog',
-    badge_label: 'sitecues Vergrößerungs und Sprachausgabe Steuerung. sitecues unterstützt Menschen, die kein eigenes Bildschirmausleseprogramm oder Vergrößerungssoftware haben.',
+    sitecues_main_panel: 'Sitecues dialog',
+    badge_label: 'Sitecues Vergrößerungs und Sprachausgabe Steuerung. Sitecues unterstützt Menschen, die kein eigenes Bildschirmausleseprogramm oder Vergrößerungssoftware haben.',
     zoom_in: 'Grösser',
     zoom_out: 'Kleiner',
     // - Secondary
@@ -42,7 +42,7 @@ define([], function() {
     thank_you: 'Danke',
     // - About
     about_preamble: 'Diese Seite verwendet sirecues um Ihnen den Zugang zu erleichtern. Sie können die Inhalte vergrößern oder sogar vorlesen lassen. Weitere Informationen finden Sie unter ',
-    about_rate_us: 'Wir freuen uns über Rückmeldung Ihrer Erfahrungen mit sitecues.',
+    about_rate_us: 'Wir freuen uns über Rückmeldung Ihrer Erfahrungen mit Sitecues.',
     zoom_and_speech: 'Vergrösserung &amp; Sprache'
   };
 });

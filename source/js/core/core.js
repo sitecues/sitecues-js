@@ -126,7 +126,7 @@ define(['core/conf/site', 'core/conf/urls', 'core/run', 'core/constants', 'core/
 
     // Library URL must be a valid URL
     if (!urls.isValidLibraryUrl()) {
-      console.error('Unable to get valid sitecues script url. Library can not initialize.');
+      console.error('Unable to get valid Sitecues script url. Library can not initialize.');
       return;
     }
 
@@ -157,7 +157,7 @@ define(['core/conf/site', 'core/conf/urls', 'core/run', 'core/constants', 'core/
     // Stop sitecues from initializing if:
     // 1) sitecues is running in an IFRAME
     // 2) sitecues.config.iframe = falsey
-    safe_production_msg('Developer note (sitecues): the following iframe attempted to load sitecues, which does not currently support iframes: '+window.location +
+    safe_production_msg('Developer note (Sitecues): the following iframe attempted to load Sitecues, which does not currently support iframes: '+window.location +
       ' ... email support@sitecues.com for more information.');
   }
   else {
