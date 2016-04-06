@@ -29,7 +29,6 @@
   },
   "devDependencies": {
     "amdclean": "2.7.0",
-    "bluebird": "3.3.3",
     "chai": "3.5.0",
     "clean-css": "3.4.9",
     "closure-compiler": "0.2.12",
