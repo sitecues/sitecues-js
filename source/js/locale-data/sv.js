@@ -5,21 +5,21 @@ define([], function() {
   return {
     // ARIA labels
     // - Main
-    sitecues_main_panel: 'sitecues huvudpanel',
-    badge_label: 'sitecues zoom- och läsverktyg; ??? sitecues assists users who do not have their own screen reader or magnifier.',
+    sitecues_main_panel: 'Sitecues huvudpanel',
+    badge_label: 'Sitecues zoom- och läsverktyg; Sitecues vänder sig till användare som inte har en egen skärmläsare eller skärmförstorare.',
     zoom_in: 'zooma in',
     zoom_out: 'zooma ut',
     // - Secondary
-    more_features: 'More features',   
-    previous: 'Previous',             
-    next: 'Next',                     
+    more_features: 'Fler funktioner',
+    previous: 'Föregående',
+    next: 'Nästa',
     // - Feedback
-    rating: 'Rating',                 
-    rating_1: '1 star',               
-    rating_2: '2 stars',              
-    rating_3: '3 stars',              
-    rating_4: '4 stars',              
-    rating_5: '5 stars',              
+    rating: 'Betyg',
+    rating_1: '1 stjärna',
+    rating_2: '2 stjärnor',
+    rating_3: '3 stjärnor',
+    rating_4: '4 stjärnor',
+    rating_5: '5 stjärnor',
 
     // Visible labels
     // - Main
@@ -31,18 +31,18 @@ define([], function() {
     off: 'Av',
     // - Secondary
     tips: 'Tips',                     
-    settings: 'Settings',             
-    rate_us: 'Rate us',               
-    rate_us_prompt: 'We would love to hear from you!',  
-    rate_us_suggest: 'Have questions, comments or suggestions?', 
-    about: 'About',                   
+    settings: 'Inställningar',
+    rate_us: 'Recensera oss',
+    rate_us_prompt: 'Vi skulle bli jätteglada om du hör av dig till oss!',
+    rate_us_suggest: 'Har du frågor, kommentarer eller förslag?',
+    about: 'Om',
     // - Feedback
-    send: 'Send',                     
-    tell_us_something: 'Tell us something ...',      
-    thank_you: 'Thank you',                          
+    send: 'Skicka',
+    tell_us_something: 'Berätta något för oss …',
+    thank_you: 'Tack så mycket',
     // - About
-    about_preamble: 'This website has added sitecues to make it easier to see, hear, and use. For more information, please visit ',
-    about_rate_us: 'We encourage you to provide feedback on your experience.',
-    zoom_and_speech: 'zoom &amp; speech'             
+    about_preamble: 'Denna webbsida använder Sitecues för att göra det lättare att se, lyssna och använda. För mer information, besök ',
+    about_rate_us: 'Vi tar gärna emot din feedback på din upplevelse.',
+    zoom_and_speech: 'zoom &amp; läs'
   };
 });
