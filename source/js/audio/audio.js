@@ -117,11 +117,11 @@ define(
         require(['network-player/network-player'], function (networkPlayer) {
           lastPlayer = networkPlayer;
 
-          var TTSUrl = getTTSUrl(text, lang);
+          var ttsUrl = getTTSUrl(text, lang);
 
           networkPlayer
             .play({
-              url: TTSUrl,
+              url: ttsUrl,
               onStart: function () {
                 onSpeechPlaying(false);
               }
