@@ -20,7 +20,6 @@ var gulp = require('gulp'),
   fs = require('fs'),
   amdClean = require('amdclean'),
   size = config.isShowingSizes && require('gulp-size'),
-  Promise_ = require('bluebird'),   // TODO update bamboo to use node 3+ and remove this polyfill dependency
   replace = require('gulp-replace'),
   PAGE_DISABLED_CHECK = 'if (window.localStorage.getItem("sitecues-disabled") !== "true") (function() {',
   isMin = config.isMinifying,
@@ -69,7 +68,7 @@ function getCompileFunctionMap() {
 }
 
 function generateTemplatedCode() {
-  return new Promise_(function(resolve, reject) {
+  return new Promise(function(resolve, reject) {
     var handlebarsOptions = {};
     gulp.src(config.extensionSourceDir + '/js/templated-code/data-map.hbs.js')
       .pipe(handlebars({dataModules: amdConfig.dataModules}, handlebarsOptions))
@@ -81,7 +80,7 @@ function generateTemplatedCode() {
 }
 
 function optimizeLibrary() {
-  return new Promise_(function(resolve, reject) {
+  return new Promise(function(resolve, reject) {
     requirejs.optimize(
       amdConfig.getAmdConfig(),
       // We will uglify below after replacing platform.browser.foo variables we know about, this allowing more dead code removal.
@@ -94,7 +93,7 @@ function optimizeLibrary() {
 }
 
 function cleanLibrary() {
-  return new Promise_(
+  return new Promise(
     function(resolve, reject) {
       var cleanedCode = amdClean.clean({
         filePath: intermediateSitecuesJs
