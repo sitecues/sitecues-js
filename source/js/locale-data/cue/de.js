@@ -9,7 +9,9 @@ define(
       verbalCueSpeechOn :
         'Sprachausgabe Ein.',
       verbalCueSpeechOnFirst :
-        'Willkommen! Teile dieser Seite, wie zum Beispiel Text, können vergrößert werden. Bewegen Sie den Mauszeiger über den Text den Sie vergrößern möchten und drücken Sie die Leertaste.'
+        'Willkommen! Teile dieser Seite, wie zum Beispiel Text, können vergrößert werden. Bewegen Sie den Mauszeiger über den Text den Sie vergrößern möchten und drücken Sie die Leertaste.',
+      verbalCueSpeechOnSecond:
+        ''
     };
   }
 );

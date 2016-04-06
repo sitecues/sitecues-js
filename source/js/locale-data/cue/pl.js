@@ -9,7 +9,9 @@ define(
       verbalCueSpeechOn :
         'Czytanie uruchomione.',
       verbalCueSpeechOnFirst :
-        'Czytanie uruchomione. Aby usłyszeć część strony czytaną na głos przesuń nad nią kursor myszy i naciśnij klawisz spacji.'
+        'Czytanie uruchomione. Aby usłyszeć część strony czytaną na głos przesuń nad nią kursor myszy i naciśnij klawisz spacji.',
+      verbalCueSpeechOnSecond:
+        ''
     };
   }
 );

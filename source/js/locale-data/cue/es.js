@@ -9,7 +9,9 @@ define(
       verbalCueSpeechOn :
         'Voz alta',
       verbalCueSpeechOnFirst :
-        'Voz alta. Para escuchar áreas de la pagina leidas en alto, mueve tu mouse hacia ellas y presiona la tecla de espacio.'
+        'Voz alta. Para escuchar áreas de la pagina leidas en alto, mueve tu mouse hacia ellas y presiona la tecla de espacio.',
+      verbalCueSpeechOnSecond:
+        ''
     };
   }
 );

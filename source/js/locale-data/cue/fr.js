@@ -9,7 +9,9 @@ define(
       verbalCueSpeechOn :
         'Diction activée.',
       verbalCueSpeechOnFirst :
-        'Diction activée. Avec le son activé, pour entendre une partie de la page lue, bougez votre souris sur le texte et appuyez sur la barre d\'espace.'
+        'Diction activée. Avec le son activé, pour entendre une partie de la page lue, bougez votre souris sur le texte et appuyez sur la barre d\'espace.',
+      verbalCueSpeechOnSecond:
+        ''
     };
   }
 );
