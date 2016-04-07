@@ -13,8 +13,8 @@ define(['core/conf/user/manager', 'audio/audio'], function(conf, audio) {
     VERBAL_CUE_HIGH_ZOOM = 'verbalCueHighZoom',
 
     VERBAL_CUE_SPEECH_ON = 'verbalCueSpeechOn',
-    VERBAL_CUE_SPEECH_ON_DESCRIPTIVE_1 = 'verbalCueSpeechOnFirst',
-    VERBAL_CUE_SPEECH_ON_DESCRIPTIVE_2 = 'verbalCueSpeechOnSecond',
+    VERBAL_CUE_SPEECH_ON_DESCRIPTIVE_1 = 'verbalCueSpeechOn1',
+    VERBAL_CUE_SPEECH_ON_DESCRIPTIVE_2 = 'verbalCueSpeechOn2',
     VERBAL_CUE_SPEECH_OFF = 'verbalCueSpeechOff';
 
   // Should descriptive cue be used?
