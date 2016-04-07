@@ -1,52 +1,52 @@
 {
-  "spacebar": "spacebar",
+  "spacebar": "Mellanslagtangenten: ",
 
   "slider": {
-    "howto": "Use the zoom slider"
+    "howto": "Använd zoomreglaget"
   },
   "zoomkeys": {
-    "long_press": "Hold keys longer to zoom more.",
-    "howto": "Press the - or + key to zoom the page"
+    "long_press": "tryck längre på tangenterna för att zooma mer.: ",
+    "howto": "Håll ner - tangenten eller + tangenten för att zooma sidan"
   },
   "highlight": {
-    "purpose": "The highlighter selects areas to read.",
-    "step1": "1. Choose something to focus on.",
-    "step2": "2. Move your mouse to highlight it.",
-    "keys": "Or, use spacebar to begin highlighting, arrow keys to move the highlight, and Escape to stop highlighting."
+    "purpose": "Markören väljer område för uppläsning.: ",
+    "step1": "1. Välj något att fokusera på.: ",
+    "step2": "2. Flytta musen för att markera det.: ",
+    "keys": "eller använd mellanslagtangenten för att uppläsning av området, piltangenterna för att flytta fokuseringen till annat område och Escape för att avsluta fokuseringen."
   },
   "lens": {
-    "purpose": "The lens magnifies.",
-    "step1": "1. Highlight something interesting",
-    "step2": "2. Press"
+    "purpose": "Skärmförstoraren.: ",
+    "step1": "1. Markera något intressant: ",
+    "step2": "2. Tryck"
   },
   "speech": {
-    "purpose": "The speech feature reads text aloud.",
-    "step1": "1. Click the speech button",
-    "step2": "2. Highlight & press"
+    "purpose": "Läsfunktionen läser upp text.: ",
+    "step1": "1. Klicka på knappen läs: ",
+    "step2": "2. Markera & tryck"
   },
   "guide": {
     "full": {
-      "label": "Full guide",
-      "action": "Practice Sitecues"
+      "label": "Full guide: ",
+      "action": "Öva med Sitecues"
     },
     "keyboard": {
-      "label": "Keyboard help",
-      "action": "Jump straight there"
+      "label": "Tangentbordshjälp: ",
+      "action": "Hoppa direkt dit"
     }
   },
 
-  "title": "Tips",
+  "title": "Tips: ",
 
   "cards": {
-    "Zoom": "Zoom",
-    "Highlight": "Highlight",
-    "Lens": "Lens",
-    "Speech": "Speech",
-    "More": "More"
+    "Zoom": "Zooma: ",
+    "Highlight": "Markera: ",
+    "Lens": "Lins: ",
+    "Speech": "Tal: ",
+    "More": "Mer"
   },
 
   "demopage": {
-    "welcome": "Welcome!",
-    "blurb": "Sitecues reads the web."
+    "welcome": "Välkommen!: ",
+    "blurb": "Sitecues läser på webben."
   }
 }
