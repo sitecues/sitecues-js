@@ -113,7 +113,7 @@ define(
     }
 
     function speakViaNetwork(onUnavailable) {
-      var onUnavailableFn = onUnavailable || noop;0
+      var onUnavailableFn = onUnavailable || noop;
       if (isNetworkSpeechAllowed(lang)) {
         lastPlayer = networkPlayer;
 
