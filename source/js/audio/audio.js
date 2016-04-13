@@ -22,9 +22,11 @@ define(
     'core/metric',
     'core/conf/urls',
     'audio/text-select',
-    'core/events'
+    'core/events',
+    'audio/local-player',
+    'audio/network-player'
   ],
-  function(constant, conf, site, $, builder, platform, locale, metric, urls, textSelect, events) {
+  function(constant, conf, site, $, builder, platform, locale, metric, urls, textSelect, events, localPlayer, networkPlayer) {
 
   var ttsOn = false,
     lastPlayer,
@@ -53,12 +55,13 @@ define(
     if (!content) {
       return; // Nothing to read
     }
-    stopAudio();
 
     speakContentImpl(content, TRIGGER_TYPES.HIGHLIGHT);
   }
 
   function speakContentImpl($content, triggerType) {
+    stopAudio();
+
     var text = builder.getText($content);
     if (text) {
       speakText(text, getElementAudioLang($content[0]), triggerType);
@@ -93,18 +96,16 @@ define(
     function speakLocally(onUnavailable) {
       var onUnavailableFn = onUnavailable || noop;
       if (isLocalSpeechAllowed()) {
-        require(['local-player/local-player'], function (localPlayer) {
-          lastPlayer = localPlayer;
-          return localPlayer
-            .speak({
-              text: text,
-              locale: lang,
-              onStart: function () {
-                onSpeechPlaying(true);
-              }
-            })
-            .catch(onUnavailableFn);
-        });
+        lastPlayer = localPlayer;
+        return localPlayer
+          .speak({
+            text: text,
+            locale: lang,
+            onStart: function () {
+              onSpeechPlaying(true);
+            }
+          })
+          .catch(onUnavailableFn);
       }
       else {
         onUnavailableFn();
@@ -112,25 +113,23 @@ define(
     }
 
     function speakViaNetwork(onUnavailable) {
-      var onUnavailableFn = onUnavailable || noop;
+      var onUnavailableFn = onUnavailable || noop;0
       if (isNetworkSpeechAllowed(lang)) {
-        require(['network-player/network-player'], function (networkPlayer) {
-          lastPlayer = networkPlayer;
+        lastPlayer = networkPlayer;
 
-          var ttsUrl = getTTSUrl(text, lang);
+        var ttsUrl = getTTSUrl(text, lang);
 
-          networkPlayer
-            .play({
-              url: ttsUrl,
-              onStart: function () {
-                onSpeechPlaying(false);
-              }
-            })
-            .catch(function() {
-              rerouteNetworkSpeechLang(lang);
-              onUnavailableFn();
-            });
-        });
+        networkPlayer
+          .play({
+            url: ttsUrl,
+            onStart: function () {
+              onSpeechPlaying(false);
+            }
+          })
+          .catch(function() {
+            rerouteNetworkSpeechLang(lang);
+            onUnavailableFn();
+          });
       }
       else {
         onUnavailableFn();
@@ -247,18 +246,16 @@ define(
       var onUnavailableFn = onUnavailable || noop,
         cueLang = getCueLanguage(lang);
       if (cueLang && isLocalSpeechAllowed()) {
-        require(['local-player/local-player'], function (localPlayer) {
-          lastPlayer = localPlayer;
-          locale.getAudioCueTextAsync(key, function (cueText) {
-            if (cueText) {
-              localPlayer
-                .speak({
-                  text: cueText,
-                  locale: cueLang
-                })
-                .catch(onUnavailableFn);
-            }
-          });
+        lastPlayer = localPlayer;
+        locale.getAudioCueTextAsync(key, function (cueText) {
+          if (cueText) {
+            localPlayer
+              .speak({
+                text: cueText,
+                locale: cueLang
+              })
+              .catch(onUnavailableFn);
+          }
         });
       }
       else {
@@ -269,15 +266,13 @@ define(
     function speakViaNetwork(onUnavailable) {
       var onUnavailableFn = onUnavailable || noop;
       if (isNetworkSpeechAllowed(lang)) {
-        require(['network-player/network-player'], function (networkPlayer) {
-          lastPlayer = networkPlayer;
-          var url = getAudioKeyUrl(key, lang);
-          networkPlayer
-            .play({
-              url: url
-            })
-            .catch(onUnavailableFn);
-          });
+        lastPlayer = networkPlayer;
+        var url = getAudioKeyUrl(key, lang);
+        networkPlayer
+          .play({
+            url: url
+          })
+          .catch(onUnavailableFn);
       }
       else {
         onUnavailableFn();
@@ -301,10 +296,8 @@ define(
 
       var url = urls.resolveResourceUrl('earcons/' + earconName + '.' + getMediaTypeForNetworkAudio());
 
-      require(['network-player/network-player'], function (networkPlayer) {
-        networkPlayer.play({
-          url: url
-        });
+      networkPlayer.play({
+        url: url
       });
     }
   }
