@@ -7,7 +7,7 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
 
     // IMPORTANT! Increment METRICS_VERSION this every time metrics change in any way
     // IMPORTANT! Have the backend team review all metrics changes!!!
-    var METRICS_VERSION = 9,
+    var METRICS_VERSION = 10,
         isInitialized,
         name = constants.METRIC_NAME,
         metricHistory = [];
@@ -94,17 +94,17 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
     return {
       init: init,
       getMetricHistory: getMetricHistory,
-      TtsRequest: wrap(name.TTS_REQUEST),
-      PanelFocusMove: wrap(name.PANEL_FOCUS_MOVE),
+      BadgeHover: wrap(name.BADGE_HOVER),
+      Feedback: wrap(name.FEEDBACK),
+      KeyCommand: wrap(name.KEY_COMMAND),
+      LensOpen: wrap(name.LENS_OPEN),
+      PageVisit: wrap(name.PAGE_VISIT),
       PanelClick: wrap(name.PANEL_CLICK),
       PanelClose: wrap(name.PANEL_CLOSE),
+      PanelFocusMove: wrap(name.PANEL_FOCUS_MOVE),
       SliderSettingChange: wrap(name.SLIDER_SETTING_CHANGE),
-      BadgeHover: wrap(name.BADGE_HOVER),
-      PageVisit: wrap(name.PAGE_VISIT),
-      LensOpen: wrap(name.LENS_OPEN),
-      KeyCommand: wrap(name.KEY_COMMAND),
-      ZoomChange: wrap(name.ZOOM_CHANGE),
-      Feedback: wrap(name.FEEDBACK)
+      TtsRequest: wrap(name.TTS_REQUEST),
+      ZoomChange: wrap(name.ZOOM_CHANGE)
     };
   });
 
