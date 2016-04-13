@@ -136,7 +136,7 @@ define(
         });
       }
 
-      return 'Fetching sitecues status...';
+      return 'Fetching Sitecues status...';
     }
 
     return status;

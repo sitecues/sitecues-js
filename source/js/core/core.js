@@ -1,10 +1,17 @@
 define(['core/conf/site', 'core/conf/urls', 'core/run', 'core/constants', 'core/events'], function (site, urls, run, constants, events) {
 
-  if (document.documentElement.hasAttribute('data-sitecues-everywhere')) {
-    // Don't run if the extension has planted its flag.
-    // (The sitecues.exists field is not accessible here if it's set in an extension context.)
-    safe_production_msg('Sitecues Everywhere prioritized over Sitecues from webpage.');
-    return;
+  if (!SC_EXTENSION) {
+    if (document.documentElement.hasAttribute('data-sitecues-everywhere')) {
+      // Don't run if the extension has planted its flag.
+      // (The sitecues.exists field is not accessible here if it's set in an extension context.)
+      safe_production_msg('Sitecues Everywhere prioritized over Sitecues from webpage.');
+      return;
+    }
+    // Extension script: is extension allowed on this page?
+    if (window.localStorage.getItem('sitecues-disabled') === 'true') {
+      safe_production_msg('Sitecues has been disabled on this page.');
+      return;
+    }
   }
 
   // Enums for sitecues loading state
@@ -119,7 +126,7 @@ define(['core/conf/site', 'core/conf/urls', 'core/run', 'core/constants', 'core/
 
     // Library URL must be a valid URL
     if (!urls.isValidLibraryUrl()) {
-      console.error('Unable to get valid sitecues script url. Library can not initialize.');
+      console.error('Unable to get valid Sitecues script url. Library can not initialize.');
       return;
     }
 
@@ -140,13 +147,6 @@ define(['core/conf/site', 'core/conf/urls', 'core/run', 'core/constants', 'core/
     return;
   }
 
-  // Extension script: is extension allowed on this page?
-  var data = window.localStorage.getItem('sitecues-disabled');
-  if (data && data !== 'false') {
-    console.log('sitecues has been disabled on this page.');
-    return;
-  }
-
   // As we have now 'planted our flag', export the public fields.
   exportPublicFields();
 
@@ -157,7 +157,7 @@ define(['core/conf/site', 'core/conf/urls', 'core/run', 'core/constants', 'core/
     // Stop sitecues from initializing if:
     // 1) sitecues is running in an IFRAME
     // 2) sitecues.config.iframe = falsey
-    safe_production_msg('Developer note (sitecues): the following iframe attempted to load sitecues, which does not currently support iframes: '+window.location +
+    safe_production_msg('Developer note (Sitecues): the following iframe attempted to load Sitecues, which does not currently support iframes: '+window.location +
       ' ... email support@sitecues.com for more information.');
   }
   else {

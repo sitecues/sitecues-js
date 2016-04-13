@@ -17,7 +17,6 @@ var gulp = require('gulp'),
   size = config.isShowingSizes && require('gulp-size'),
   path = require('path'),
   pkgDir = require('pkg-dir'),
-  Promise_ = require('bluebird'),   // TODO update bamboo to use node 3+ and remove this polyfill dependency
   amdConfigs = require('./amd-config'),
   absoluteSourceFolder,
   absoluteSourceFolderStringLength,
@@ -107,7 +106,7 @@ function validate(callback) {
 }
 
 function optimize(amdConfig) {
-  return new Promise_(
+  return new Promise(
     function(resolve, reject) {
       requirejs.optimize(
         amdConfig,

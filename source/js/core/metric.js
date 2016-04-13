@@ -7,7 +7,7 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
 
     // IMPORTANT! Increment METRICS_VERSION this every time metrics change in any way
     // IMPORTANT! Have the backend team review all metrics changes!!!
-    var METRICS_VERSION = 8,
+    var METRICS_VERSION = 9,
         isInitialized,
         name = constants.METRIC_NAME,
         metricHistory = [];
@@ -54,6 +54,21 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
       return metricFn;
     }
 
+    function isTester() {
+
+      if (localStorage.getItem('sitecues-is-tester')) {
+        // Once a tester, always a tester
+        return true;
+      }
+
+      if (site.get('isTester') || !urls.isProduction()) {
+        localStorage.setItem('sitecues-is-tester', 'true'); // Remember this tester
+        return true;
+      }
+
+      return false;
+    }
+
     function init() {
 
       if (isInitialized) {
@@ -71,7 +86,8 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
         pageUrl: location.href,
         browserUserAgent: navigator.userAgent,
         isClassicMode: classicMode(),
-        clientLanguage: locale.getBrowserLang()
+        clientLanguage: locale.getBrowserLang(),
+        isTester: isTester()
       };
     }
 

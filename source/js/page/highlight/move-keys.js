@@ -102,8 +102,8 @@ define(['$', 'page/highlight/highlight', 'page/util/common',
 
   function onMovementCommand(nextMove) {
     // Movement command
-    if (hlbElement && performHLBScroll(nextMove)) {
-      return; // HLB could scroll -- finish
+    if (hlbElement && !nextMove.shiftKey && performHLBScroll(nextMove)) {
+      return; // HLB could scroll -- finish (don't do this if shift pressed as we are exploring with speech)
     }
 
     if (isNavigationEnabled) {

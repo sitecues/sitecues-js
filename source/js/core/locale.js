@@ -4,29 +4,55 @@
  * - Provide localized strings for current language
  * - Translate text with {{keys}} in it
  * - Localize a number string
+ *
+ * Definitions:
+ * - lang is a 2 letter code such as 'en'
+ * - locale is either a lang or can include more info, such as 'en-GB'
  */
 define([ 'core/data-map' ], function(dataMap) {
   var translations = {},
-    DEFAULT_LANG = 'en-us',
+    DEFAULT_LOCALE = 'en-us',
     LOCALE_DATA_PREFIX = 'locale-data/',
     AUDIO_CUE_DATA_PREFIX = LOCALE_DATA_PREFIX + 'cue/',
     SUPPORTED_UI_LANGS = {'de':1, 'en':1, 'es':1, 'fr':1, 'pl':1},
     // Countries which have localization files that are different from the default for that language
     // For example, en-us files use 'color' instead of the worldwide standard 'colour'
     COUNTRY_EXCEPTIONS = { 'en-US': 1 },
-    mainBrowserLang;
+    mainBrowserLocale;
 
   // Get the language but not the regional differences
   // For example, return just 'en' but not 'en-US'.
-  function getLanguagePrefix(lang) {
-    return lang.split('-')[0];
+  function getLanguageFromLocale(locale) {
+    return locale.split('-')[0];
   }
 
   // The the full xx-XX code for the website
-  function getFullWebsiteLang() {
+  function getLocale() {
     var docElem = document.documentElement;
 
-    return docElem.lang || docElem.getAttribute('xml:lang') || mainBrowserLang || DEFAULT_LANG;
+    return docElem.lang ||
+      docElem.getAttribute('xml:lang') ||
+      getMetaTagLocale() ||
+      mainBrowserLocale ||
+      DEFAULT_LOCALE;
+  }
+
+  function getMetaTagLocale() {
+    function isValidLocale(locale) {
+      // Regex from http://stackoverflow.com/questions/3962543/how-can-i-validate-a-culture-code-with-a-regular-expression
+      var VALID_LOCALE_REGEX = /^[a-z]{2,3}(?:-[A-Z]{2,3}(?:-[a-zA-Z]{4})?)?$/;
+      return locale.match(VALID_LOCALE_REGEX);
+    }
+
+    var META_LANG_SELECTOR = 'meta[name=language],meta[http-equiv=language],meta[name=Content-Language],meta[http-equiv=Content-Language]',
+      metaLocaleElement = document.querySelector(META_LANG_SELECTOR),
+      metaLocale;
+
+    if (metaLocaleElement) {
+      metaLocale = metaLocaleElement.getAttribute('content').split(',')[0].trim();  // Can be comma-separated
+      // Validate the format of the attribute -- some docs online use invalid strings such as 'Spanish'
+      return isValidLocale(metaLocale) && metaLocale;
+    }
   }
 
   /**
@@ -35,15 +61,15 @@ define([ 'core/data-map' ], function(dataMap) {
    * If there are country-specific translation exceptions, such as 'en-US', we strip the last part and return only 'en'
    * @returns String
    */
-  function getShortWebsiteLang() {
-    var websiteLanguage = getFullWebsiteLang();
-    return getLanguagePrefix(websiteLanguage);
+  function getLang() {
+    var websiteLanguage = getLocale();
+    return getLanguageFromLocale(websiteLanguage);
   }
 
-  function getSupportedWebsiteLang() {
-    var lang = getShortWebsiteLang();
+  function getSupportedUiLang() {
+    var lang = getLang();
 
-    return SUPPORTED_UI_LANGS[lang] ? lang : DEFAULT_LANG;
+    return SUPPORTED_UI_LANGS[lang] ? lang : DEFAULT_LOCALE;
   }
 
   // The language for audio
@@ -53,10 +79,10 @@ define([ 'core/data-map' ], function(dataMap) {
   // because that is the preferred accent for French.
   // However, if the fr-CA browser visits an en-US or en-UK page, the page's code is returned because the
   // user's preferred English accent in unknown
-  function getAudioLang(optionalStartingLang) {
-    var langToConvert = optionalStartingLang || getFullWebsiteLang();
+  function getAudioLocale(optionalStartingLocale) {
+    var localeToConvert = optionalStartingLocale || getLocale();
 
-    return extendLangWithBrowserCountry(langToConvert);
+    return extendLocaleWithBrowserCountry(localeToConvert);
   }
 
   // If document is in the same language as the browser, then
@@ -66,22 +92,22 @@ define([ 'core/data-map' ], function(dataMap) {
   // @param countriesWhiteList -- if provided, it is the list of acceptable fully country codes, e.g. en-US.
   // If not provided, all countries and langs are acceptable
   // @param langsWhiteList -- if provided, it is the list of acceptable languages.
-  function extendLangWithBrowserCountry(lang, countriesWhiteList, langsWhiteList) {
+  function extendLocaleWithBrowserCountry(locale, countriesWhiteList, langsWhiteList) {
 
-    var langPrefix = getLanguagePrefix(lang),
-      prioritizedBrowserLangs = (function() {
-        var browserLangs = (navigator.languages || [ ]).slice();
+    var langPrefix = getLanguageFromLocale(locale),
+      prioritizedBrowserLocales = (function() {
+        var browserLocales = (navigator.languages || [ ]).slice();
         // Put the mainBrowserLang at the start of the prioritized list of languages
-        if (!browserLangs.length) {
-          browserLangs = [ mainBrowserLang ];
+        if (!browserLocales.length) {
+          browserLocales = [ mainBrowserLocale ];
         }
-        return browserLangs;
+        return browserLocales;
       })(),
       langWithCountry,
       index = 0;
 
     function extendLangWith(extendCode) {
-      if (extendCode.indexOf('-') > 0 && langPrefix === getLanguagePrefix(extendCode)) {
+      if (extendCode.indexOf('-') > 0 && langPrefix === getLanguageFromLocale(extendCode)) {
         if (!countriesWhiteList || countriesWhiteList.hasOwnProperty(extendCode)) {
           return extendCode;
         }
@@ -91,19 +117,19 @@ define([ 'core/data-map' ], function(dataMap) {
       }
     }
 
-    for (; index < prioritizedBrowserLangs.length; index ++) {
-      langWithCountry = extendLangWith(prioritizedBrowserLangs[index]);
+    for (; index < prioritizedBrowserLocales.length; index ++) {
+      langWithCountry = extendLangWith(prioritizedBrowserLocales[index]);
       if (langWithCountry) {
         return langWithCountry; // Matched one of the preferred accents
       }
     }
 
-    return lang;
+    return locale;
   }
 
   // Return the translated text for the key
   function translate(key) {
-    var lang = getShortWebsiteLang(),
+    var lang = getLang(),
       text = translations[key];
 
     if (typeof text === 'undefined') {
@@ -127,7 +153,7 @@ define([ 'core/data-map' ], function(dataMap) {
    * @param numDigits (optional)
    */
   function translateNumber(number, numDigits) {
-    var lang = getShortWebsiteLang();
+    var lang = getLang();
     //Number.toLocaleString locale parameter is unsupported in Safari
     var translated = number.toLocaleString(lang);
     return numDigits ? translated.slice(0, numDigits + 1) : translated;
@@ -137,35 +163,35 @@ define([ 'core/data-map' ], function(dataMap) {
   // In most cases, just returns 'en', 'de', etc.
   // However, when there are special files for a country translation, returns a longer name like 'en-us' for the U.S.
   // The language is based on the page, but the country is based on the browser (if the lang is the same)
-  function getTranslationLang() {
-    var langOnly = getSupportedWebsiteLang();
+  function getUiLocale() {
+    var langOnly = getSupportedUiLang();
 
-    return extendLangWithBrowserCountry(langOnly, COUNTRY_EXCEPTIONS, SUPPORTED_UI_LANGS).toLowerCase();
+    return extendLocaleWithBrowserCountry(langOnly, COUNTRY_EXCEPTIONS, SUPPORTED_UI_LANGS).toLowerCase();
   }
 
   // The preferred language of the current browser
-  function getBrowserLang() {
-    return mainBrowserLang;
+  function getBrowserLocale() {
+    return mainBrowserLocale;
   }
 
   function getAudioCueTextAsync(key, callback) {
-    var lang = getShortWebsiteLang(),
+    var lang = getLang(),
       langModuleName = AUDIO_CUE_DATA_PREFIX + lang;
     dataMap.get(langModuleName, function(data) {
       callback(data[key] || '');
     });
   }
 
-  function getMainBrowserLang() {
-    return navigator.language || navigator.userLanguage || navigator.browserLanguage || DEFAULT_LANG;
+  function getMainBrowserLocale() {
+    return navigator.language || navigator.userLanguage || navigator.browserLanguage || DEFAULT_LOCALE;
   }
 
   function init(onReadyCallback) {
 
-    mainBrowserLang = getMainBrowserLang();
+    mainBrowserLocale = getMainBrowserLocale();
 
     // On load fetch the translations only once
-    var lang = getSupportedWebsiteLang(),
+    var lang = getSupportedUiLang(),
       langModuleName = LOCALE_DATA_PREFIX + lang;
 
     dataMap.get(langModuleName, function(data) {
@@ -175,10 +201,10 @@ define([ 'core/data-map' ], function(dataMap) {
   }
 
   return {
-    getShortWebsiteLang: getShortWebsiteLang,
-    getAudioLang: getAudioLang,
-    getBrowserLang: getBrowserLang,
-    getTranslationLang: getTranslationLang,
+    getLang: getLang,
+    getAudioLocale: getAudioLocale,
+    getBrowserLang: getBrowserLocale,
+    getUiLocale: getUiLocale,
     getAudioCueTextAsync: getAudioCueTextAsync,
     translate: translate,
     localizeStrings: localizeStrings,
