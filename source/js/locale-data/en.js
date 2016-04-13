@@ -6,7 +6,7 @@ define([], function() {
     // ARIA labels
     // - Main
     sitecues_main_panel: 'Sitecues main panel',
-    badge_label: 'Sitecues zoom and speech tools; Sitecues assists users who do not have their own screen reader or magnifier.',he
+    badge_label: 'Sitecues zoom and speech tools; Sitecues assists users who do not have their own screen reader or magnifier.',
     zoom_in: 'zoom in',
     zoom_out: 'zoom out',
     // - Secondary
