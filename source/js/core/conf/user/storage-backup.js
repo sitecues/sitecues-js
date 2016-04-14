@@ -109,6 +109,7 @@ define(['core/conf/urls', 'core/platform'], function (urls, platform) {
       iframe.setAttribute('aria-hidden', true);
       iframe.setAttribute('role', 'presentation');
       iframe.id = ID;
+      // Needs to have some size (1x1) and not be display:none -- otherwise it won't load in some browsers
       iframe.style.cssText = 'position:absolute;width:1px;height:1px;left:-9999px;visibility:hidden;';
       iframe.src = urls.resolveResourceUrl(PATH);
       // Set title and text description for iframe. Without this, accessibility tools fail,
