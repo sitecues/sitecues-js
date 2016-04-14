@@ -8,16 +8,16 @@ define([], function () {
   };
 
   constants.METRIC_NAME = {
-    TTS_REQUEST: 'tts-requested',
-    PANEL_FOCUS_MOVE: 'panel-focus-moved',
+    BADGE_HOVER: 'badge-hovered',
+    FEEDBACK: 'feedback-sent',
+    KEY_COMMAND: 'key-command',
+    LENS_OPEN: 'hlb-opened',
+    PAGE_VISIT: 'page-visited',
     PANEL_CLICK: 'panel-clicked',
     PANEL_CLOSE: 'panel-closed',
-    FEEDBACK: 'feedback-sent',
+    PANEL_FOCUS_MOVE: 'panel-focus-moved',
     SLIDER_SETTING_CHANGE: 'slider-setting-changed',
-    BADGE_HOVER: 'badge-hovered',
-    PAGE_VISIT: 'page-visited',
-    LENS_OPEN: 'hlb-opened',
-    KEY_COMMAND: 'key-command',
+    TTS_REQUEST: 'tts-requested',
     ZOOM_CHANGE: 'zoom-changed'
   };
 

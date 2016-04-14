@@ -106,12 +106,13 @@ define(['core/conf/user/storage', 'core/conf/user/storage-backup', 'core/util/uu
 
   function init(onReadyCallbackFn) {
 
-    var retrievedSettings;
+    var retrievedSettings,
+      didUseStorageBackup = false;
 
     retrievedSettings = storage.getPrefs();
 
     if (Object.keys(retrievedSettings).length) {
-      onReadyCallbackFn();
+      onReadyCallbackFn(false);
     }
     else {
       // Could not find local storage for sitecues prefs
@@ -120,6 +121,7 @@ define(['core/conf/user/storage', 'core/conf/user/storage-backup', 'core/util/uu
         storageBackup.load(function (data) {
           if (data) {
             storage.setAppData(data);
+            didUseStorageBackup = true;
           }
           else {
             // No user id: generate one
@@ -127,11 +129,10 @@ define(['core/conf/user/storage', 'core/conf/user/storage-backup', 'core/util/uu
             storage.setUserId(userId);
             saveToBackup();
           }
-          onReadyCallbackFn();
+          onReadyCallbackFn(didUseStorageBackup);
         });
       });
     }
-
   }
 
   return {

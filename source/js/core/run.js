@@ -20,6 +20,7 @@ define(['core/conf/user/manager', 'core/util/session', 'core/locale', 'core/metr
     isKeyReleased,
     isKeyHandlingInitialized,
     wasSitecuesEverOn,
+    initialPageVisitDetails,
     // Keys that can init sitecues
     INIT_CODES = CORE_CONST.INIT_CODES,
     // Enums for sitecues loading states
@@ -93,10 +94,7 @@ define(['core/conf/user/manager', 'core/util/session', 'core/locale', 'core/metr
   }
 
   function onSitecuesReady() {
-    new metric.PageVisit({
-      nativeZoom: platform.nativeZoom,
-      isRetina  : platform.isRetina()
-    }).send();
+    new metric.PageVisit(initialPageVisitDetails).send();
 
     sitecues.readyState = state.COMPLETE;
     //Freeze readyState on load
@@ -237,7 +235,14 @@ define(['core/conf/user/manager', 'core/util/session', 'core/locale', 'core/metr
     // Start initialization
     session.init();
     platform.init();
-    conf.init(onPrereqComplete);
+    conf.init(function(didUseStorageBackup) {
+      initialPageVisitDetails = {
+        nativeZoom: platform.nativeZoom,
+        isRetina  : platform.isRetina(),
+        didUseStorageBackup: didUseStorageBackup
+      };
+      onPrereqComplete();
+    });
     locale.init(onPrereqComplete);
   }
 
