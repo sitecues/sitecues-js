@@ -8,6 +8,7 @@ define(['$', 'page/style-service/css-aggregator', 'page/style-service/media-quer
     domStylesheetObjects = [],
     SITECUES_COMBINED_CSS_ID = 'sitecues-js-combined-css',
     WAIT_BEFORE_INIT_STYLESHEET = 50,
+    WAIT_BEFORE_CREATE_NEXT_STYLESHEET = 100,
     isInitialized,
     isCssRequested,   // Have we even begun the init sequence?
     isCssComplete,      // Init sequence is complete
@@ -94,7 +95,8 @@ define(['$', 'page/style-service/css-aggregator', 'page/style-service/media-quer
           .text(cssChunks[index])
           .get(0);
       if (++ index < numChunks) {
-        setTimeout(createNext, 100);
+        // We must wait before creating the next stylesheet otherwise we overload IE11 and cause it to lockup
+        setTimeout(createNext, WAIT_BEFORE_CREATE_NEXT_STYLESHEET);
       }
       else {
         callback(elems);
