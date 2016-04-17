@@ -4,37 +4,126 @@
  */
 define(['$', 'page/style-service/css-aggregator', 'page/style-service/media-queries'], function ($, cssAggregator, mediaQueries) {
 
-  var $combinedStylesheet,  // Style sheet we lazily create as a composite of all styles, which we use to look at parsed style rules
-    combinedDOMStylesheetObject,
+  var $combinedStylesheets,  // Style sheet we lazily create as a composite of all styles, which we use to look at parsed style rules
+    domStylesheetObjects = [],
     SITECUES_COMBINED_CSS_ID = 'sitecues-js-combined-css',
     WAIT_BEFORE_INIT_STYLESHEET = 50,
+    WAIT_BEFORE_CREATE_NEXT_STYLESHEET = 100,
     isInitialized,
     isCssRequested,   // Have we even begun the init sequence?
     isCssComplete,      // Init sequence is complete
-    callbackFns = [];
+    callbackFns = [],
+    CSS_SIZE_THRESHOLD = 99999;
+
+  function addChunk(css, chunks, start, end) {
+    var newChunk = css.substring(start, end),
+      numChunks = chunks.length;
+
+    if (chunks[numChunks - 1].length + newChunk.length < CSS_SIZE_THRESHOLD) {
+      // Still fits within size threshold, just add to last chunk
+      chunks[numChunks - 1] += newChunk;
+    }
+    else {
+      chunks[numChunks] = newChunk;
+    }
+  }
+
+  // Each } that is not inside an outer {} ends a legal chunk of CSS
+  // We've already removed comments, so no need to worry about those
+  function chunkCssByClosingBrace(css) {
+    var chunks = [ '' ],
+      lastChunkStart = 0,
+      position = 0,
+      nextClosingBrace,
+      nextOpeningBrace,
+      braceDepth = 0;
+
+    while (true) {
+      nextClosingBrace = css.indexOf('}', position);
+      nextOpeningBrace = css.indexOf('{', position);
+      if (nextOpeningBrace >= 0 && nextOpeningBrace < nextClosingBrace) {
+        braceDepth ++; // Now 1 if not already inside other braces
+        position = nextOpeningBrace + 1;
+        continue;
+      }
+      else if (nextClosingBrace >= 0 ) {
+        braceDepth --;
+        if (braceDepth === 0) {
+          // The end of a CSS block
+          position = nextClosingBrace + 1;
+          addChunk(css, chunks, lastChunkStart, position);
+          lastChunkStart = position;
+        }
+        else if (SC_DEV && braceDepth < 0) {
+          console.log('Error parsing CSS ... brace mismatch!');
+        }
+      }
+      else {
+        // Last chunk
+        addChunk(css, chunks, lastChunkStart, css.length);
+        break;
+      }
+    }
+
+    return chunks;
+  }
+
+  // Sometimes CSS that's too large creates huge performance problems in IE, locking up the browser
+  // There seems to be a size threshold where the problems don't occur if they are under that
+  function chunkCss(allCss) {
+    if (allCss.length < CSS_SIZE_THRESHOLD) {
+      return [ allCss ];
+    }
+
+    return chunkCssByClosingBrace(allCss);
+  }
 
   /**
    * Create an disabled style sheet to be filled in later with styles
    */
-  function createCombinedStyleSheet(allCss) {
-    // Construct sitecues combined CSS <style> element
-    return $('<style>')
-      .appendTo('head')
-      .attr('id', SITECUES_COMBINED_CSS_ID)
-      .text(allCss);
+  function createCombinedStylesheets(allCss, callback) {
+    var cssChunks = chunkCss(allCss),
+      index = 0,
+      numChunks = cssChunks.length,
+      elems = [];
+
+    function createNext() {
+      elems[index] =
+        $('<style>')
+          .appendTo('head')
+          .attr('id', SITECUES_COMBINED_CSS_ID + '-' + index)
+          .text(cssChunks[index])
+          .get(0);
+      if (++ index < numChunks) {
+        // We must wait before creating the next stylesheet otherwise we overload IE11 and cause it to lockup
+        setTimeout(createNext, WAIT_BEFORE_CREATE_NEXT_STYLESHEET);
+      }
+      else {
+        callback(elems);
+      }
+    }
+
+    createNext();
   }
 
   // This is called() when all the CSS text of the document is available for processing
   function onAllCssRetrieved(allCss) {
-    $combinedStylesheet = createCombinedStyleSheet(allCss);
-    getDOMStylesheet($combinedStylesheet, function(styleSheetObject) {
-      combinedDOMStylesheetObject = styleSheetObject;
-      combinedDOMStylesheetObject.disabled = true; // Don't interfere with page
-      // Takes the browser a moment to process the new stylesheet
-      setTimeout(function() {
-        isCssComplete = true;
-        clearCallbacks();
-      }, WAIT_BEFORE_INIT_STYLESHEET);
+    createCombinedStylesheets(allCss, function(combinedStylesheets) {
+      $combinedStylesheets = $(combinedStylesheets);
+      var numRemainingToComplete = $combinedStylesheets.length;
+      $.each($($combinedStylesheets), function (index, stylesheet) {
+        getDOMStylesheet($(stylesheet), function (domStylesheetObject) {
+          domStylesheetObject[index] = domStylesheetObject;
+          domStylesheetObject.disabled = true; // Don't interfere with page
+          if (--numRemainingToComplete === 0) {
+            // Takes the browser a moment to process the new stylesheet
+            setTimeout(function () {
+              isCssComplete = true;
+              clearCallbacks();
+            }, WAIT_BEFORE_INIT_STYLESHEET);
+          }
+        });
+      });
     });
   }
 
@@ -86,7 +175,8 @@ define(['$', 'page/style-service/css-aggregator', 'page/style-service/media-quer
     var rule,
       ruleValue,
       cssStyleDeclaration,
-      styleResults = [];
+      styleResults = [],
+      index = 0;
 
     function getMediaTypeFromCssText(rule) {
       // Change @media MEDIA_QUERY_RULES { to just MEDIA_QUERY_RULES
@@ -127,7 +217,9 @@ define(['$', 'page/style-service/css-aggregator', 'page/style-service/media-quer
       return [];
     }
 
-    addMatchingRules(combinedDOMStylesheetObject);
+    for (; index < domStylesheetObjects.length; index ++) {
+      addMatchingRules(domStylesheetObjects[index]);
+    }
 
     return styleResults;
   }
