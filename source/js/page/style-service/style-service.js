@@ -48,15 +48,20 @@ define(['$', 'page/style-service/css-aggregator', 'page/style-service/media-quer
       }
       else if (nextClosingBrace >= 0 ) {
         braceDepth --;
+        position = nextClosingBrace + 1;
         if (braceDepth === 0) {
           // The end of a CSS block
-          position = nextClosingBrace + 1;
           addChunk(css, chunks, lastChunkStart, position);
           lastChunkStart = position;
         }
-        else if (SC_DEV && braceDepth < 0) {
-          console.log('Error parsing CSS ... brace mismatch!');
+        else if (braceDepth < 0) {
+          if (SC_DEV) {
+            console.log('Error parsing CSS ... brace mismatch at %s', css.substring(0, nextClosingBrace + 1));
+          }
+          addChunk(css, chunks, lastChunkStart, css.length);
+          break;
         }
+        else {}
       }
       else {
         // Last chunk
