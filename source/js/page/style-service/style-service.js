@@ -41,7 +41,7 @@ define(['$', 'page/style-service/css-aggregator', 'page/style-service/media-quer
       nextClosingBrace = css.indexOf('}', position);
       nextOpeningBrace = css.indexOf('{', position);
       if (nextOpeningBrace >= 0 && nextOpeningBrace < nextClosingBrace) {
-        braceDepth ++;
+        braceDepth ++; // Now 1 if not already inside other braces
         position = nextOpeningBrace + 1;
         continue;
       }
