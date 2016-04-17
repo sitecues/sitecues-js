@@ -5,14 +5,14 @@
 define(['$', 'page/style-service/css-aggregator', 'page/style-service/media-queries'], function ($, cssAggregator, mediaQueries) {
 
   var $combinedStylesheets,  // Style sheet we lazily create as a composite of all styles, which we use to look at parsed style rules
-    domStylesheetObjects,
+    domStylesheetObjects = [],
     SITECUES_COMBINED_CSS_ID = 'sitecues-js-combined-css',
     WAIT_BEFORE_INIT_STYLESHEET = 50,
     isInitialized,
     isCssRequested,   // Have we even begun the init sequence?
     isCssComplete,      // Init sequence is complete
     callbackFns = [],
-    CSS_SIZE_THRESHOLD = 20000;
+    CSS_SIZE_THRESHOLD = 99999;
 
   function addChunk(css, chunks, start, end) {
     var newChunk = css.substring(start, end),
@@ -38,11 +38,11 @@ define(['$', 'page/style-service/css-aggregator', 'page/style-service/media-quer
       braceDepth = 0;
 
     while (true) {
-      nextClosingBrace = css.lastIndexOf('}', position);
-      nextOpeningBrace = css.lastIndexOf('{', position);
+      nextClosingBrace = css.indexOf('}', position);
+      nextOpeningBrace = css.indexOf('{', position);
       if (nextOpeningBrace >= 0 && nextOpeningBrace < nextClosingBrace) {
         braceDepth ++;
-        position = nextOpeningBrace;
+        position = nextOpeningBrace + 1;
         continue;
       }
       else if (nextClosingBrace >= 0 ) {
@@ -51,6 +51,7 @@ define(['$', 'page/style-service/css-aggregator', 'page/style-service/media-quer
           // The end of a CSS block
           position = nextClosingBrace + 1;
           addChunk(css, chunks, lastChunkStart, position);
+          lastChunkStart = position;
         }
         else if (SC_DEV && braceDepth < 0) {
           console.log('Error parsing CSS ... brace mismatch!');
@@ -79,39 +80,47 @@ define(['$', 'page/style-service/css-aggregator', 'page/style-service/media-quer
   /**
    * Create an disabled style sheet to be filled in later with styles
    */
-  function createCombinedStyleSheets(allCss) {
+  function createCombinedStylesheets(allCss, callback) {
     var cssChunks = chunkCss(allCss),
       index = 0,
       numChunks = cssChunks.length,
       elems = [];
 
-    for (; index < numChunks; index ++) {
+    function createNext() {
       elems[index] =
         $('<style>')
           .appendTo('head')
           .attr('id', SITECUES_COMBINED_CSS_ID + '-' + index)
           .text(cssChunks[index])
           .get(0);
+      if (++ index < numChunks) {
+        setTimeout(createNext, 100);
+      }
+      else {
+        callback(elems);
+      }
     }
 
-    return $(elems);
+    createNext();
   }
 
   // This is called() when all the CSS text of the document is available for processing
   function onAllCssRetrieved(allCss) {
-    $combinedStylesheets = createCombinedStyleSheets(allCss);
-    var numRemainingToComplete = $combinedStylesheets.length;
-    $.each($combinedStylesheets, function(index, stylesheet) {
-      getDOMStylesheet($(stylesheet), function(domStylesheetObjects) {
-        domStylesheetObjects[index] = domStylesheetObjects;
-        domStylesheetObjects.disabled = true; // Don't interfere with page
-        if ( -- numRemainingToComplete === 0) {
-          // Takes the browser a moment to process the new stylesheet
-          setTimeout(function() {
-            isCssComplete = true;
-            clearCallbacks();
-          }, WAIT_BEFORE_INIT_STYLESHEET);
-        }
+    createCombinedStylesheets(allCss, function(combinedStylesheets) {
+      $combinedStylesheets = $(combinedStylesheets);
+      var numRemainingToComplete = $combinedStylesheets.length;
+      $.each($($combinedStylesheets), function (index, stylesheet) {
+        getDOMStylesheet($(stylesheet), function (domStylesheetObject) {
+          domStylesheetObject[index] = domStylesheetObject;
+          domStylesheetObject.disabled = true; // Don't interfere with page
+          if (--numRemainingToComplete === 0) {
+            // Takes the browser a moment to process the new stylesheet
+            setTimeout(function () {
+              isCssComplete = true;
+              clearCallbacks();
+            }, WAIT_BEFORE_INIT_STYLESHEET);
+          }
+        });
       });
     });
   }
@@ -165,8 +174,7 @@ define(['$', 'page/style-service/css-aggregator', 'page/style-service/media-quer
       ruleValue,
       cssStyleDeclaration,
       styleResults = [],
-      index = 0,
-      numStylesheets = domStylesheetObjects.length;
+      index = 0;
 
     function getMediaTypeFromCssText(rule) {
       // Change @media MEDIA_QUERY_RULES { to just MEDIA_QUERY_RULES
@@ -207,7 +215,7 @@ define(['$', 'page/style-service/css-aggregator', 'page/style-service/media-quer
       return [];
     }
 
-    for (; index < numStylesheets; index ++) {
+    for (; index < domStylesheetObjects.length; index ++) {
       addMatchingRules(domStylesheetObjects[index]);
     }
 
