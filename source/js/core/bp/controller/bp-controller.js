@@ -204,7 +204,8 @@ define([
 
   // Don't scroll document while BP is open
   function preventScroll(evt) {
-    if (!evt.target.hasAttribute('data-allow-scroll') ||
+    var target = helper.getEventTarget(evt);
+    if (!target.hasAttribute('data-allow-scroll') ||
       willScrollDocument(evt)) { // Avoid scrolling the document
       return helper.cancelEvent(evt);
     }
