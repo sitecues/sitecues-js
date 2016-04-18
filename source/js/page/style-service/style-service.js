@@ -8,18 +8,18 @@ define(['$', 'page/style-service/css-aggregator', 'page/style-service/media-quer
     domStylesheetObjects = [],
     SITECUES_COMBINED_CSS_ID = 'sitecues-js-combined-css',
     WAIT_BEFORE_INIT_STYLESHEET = 50,
-    WAIT_BEFORE_CREATE_NEXT_STYLESHEET = 100,
+    WAIT_BEFORE_CREATE_NEXT_STYLESHEET_CHUNK = 25, // How long to wait in between processing CSS chunks
+    CSS_MAX_CHUNK_SIZE = 25000, // Max number of CSS chars to process at once
     isInitialized,
     isCssRequested,   // Have we even begun the init sequence?
     isCssComplete,      // Init sequence is complete
-    callbackFns = [],
-    CSS_SIZE_THRESHOLD = 99999;
+    callbackFns = [];
 
   function addChunk(css, chunks, start, end) {
     var newChunk = css.substring(start, end),
       numChunks = chunks.length;
 
-    if (chunks[numChunks - 1].length + newChunk.length < CSS_SIZE_THRESHOLD) {
+    if (chunks[numChunks - 1].length + newChunk.length < CSS_MAX_CHUNK_SIZE) {
       // Still fits within size threshold, just add to last chunk
       chunks[numChunks - 1] += newChunk;
     }
@@ -76,7 +76,7 @@ define(['$', 'page/style-service/css-aggregator', 'page/style-service/media-quer
   // Sometimes CSS that's too large creates huge performance problems in IE, locking up the browser
   // There seems to be a size threshold where the problems don't occur if they are under that
   function chunkCss(allCss) {
-    if (allCss.length < CSS_SIZE_THRESHOLD) {
+    if (allCss.length < CSS_MAX_CHUNK_SIZE) {
       return [ allCss ];
     }
 
@@ -101,7 +101,7 @@ define(['$', 'page/style-service/css-aggregator', 'page/style-service/media-quer
           .get(0);
       if (++ index < numChunks) {
         // We must wait before creating the next stylesheet otherwise we overload IE11 and cause it to lockup
-        setTimeout(createNext, WAIT_BEFORE_CREATE_NEXT_STYLESHEET);
+        setTimeout(createNext, WAIT_BEFORE_CREATE_NEXT_STYLESHEET_CHUNK);
       }
       else {
         callback(elems);
