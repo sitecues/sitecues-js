@@ -119,7 +119,7 @@ define(['$', 'page/style-service/css-aggregator', 'page/style-service/media-quer
       $.each($($combinedStylesheets), function (index, stylesheet) {
         getDOMStylesheet($(stylesheet), function (domStylesheetObject) {
           domStylesheetObjects[index] = domStylesheetObject;
-          domStylesheetObjects.disabled = true; // Don't interfere with page
+          domStylesheetObject.disabled = true; // Don't interfere with page
           if (--numRemainingToComplete === 0) {
             // Takes the browser a moment to process the new stylesheet
             setTimeout(function () {
