@@ -118,8 +118,8 @@ define(['$', 'page/style-service/css-aggregator', 'page/style-service/media-quer
       var numRemainingToComplete = $combinedStylesheets.length;
       $.each($($combinedStylesheets), function (index, stylesheet) {
         getDOMStylesheet($(stylesheet), function (domStylesheetObject) {
-          domStylesheetObject[index] = domStylesheetObject;
-          domStylesheetObject.disabled = true; // Don't interfere with page
+          domStylesheetObjects[index] = domStylesheetObject;
+          domStylesheetObjects.disabled = true; // Don't interfere with page
           if (--numRemainingToComplete === 0) {
             // Takes the browser a moment to process the new stylesheet
             setTimeout(function () {
