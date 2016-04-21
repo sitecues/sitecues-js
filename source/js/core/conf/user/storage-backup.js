@@ -4,7 +4,7 @@
  */
 
 // IMPORTANT: The extension defines this module in order to override the mechanism
-define(['core/conf/urls', 'core/platform'], function (urls, platform) {
+define(['core/conf/urls', 'core/platform', 'core/conf/site'], function (urls, platform, site) {
 
   var PATH = 'html/prefs.html',
     ID = 'sitecues-prefs',
@@ -96,7 +96,7 @@ define(['core/conf/urls', 'core/platform'], function (urls, platform) {
   // Optional callbacks
   function init(onReadyCallback) {
 
-    IS_BACKUP_DISABLED = platform.browser.isIE && platform.browser.version <= 10;
+    IS_BACKUP_DISABLED = (platform.browser.isIE && platform.browser.version <= 10) || site.get('isStorageBackupDisabled');
 
     if (isInitialized || isLoaded || IS_BACKUP_DISABLED) {
       onReadyCallback();
