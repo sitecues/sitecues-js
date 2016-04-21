@@ -24,4 +24,5 @@ define([], function () {
   return {
     isActiveMediaQuery: isActiveMediaQuery
   };
+
 });
