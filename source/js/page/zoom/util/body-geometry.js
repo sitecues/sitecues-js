@@ -91,13 +91,14 @@ define(
         leftMostCoord = 9999, // Everything else will be smaller
         rightMostNode,
         rightMostCoord = 0,
+        startNode = $(config.visibleRoots)[0] || body,
         MIN_WIDTH_MAIN_NODE = 300,
         bodyStyle = getComputedStyle(body);
 
-      getBodyRectImpl(body, bodyInfo, visibleNodes, bodyStyle, true);
+      getBodyRectImpl(startNode, bodyInfo, visibleNodes, bodyStyle, true);
 
       if (!visibleNodes.length) {
-        getBodyRectImpl(body, bodyInfo, visibleNodes, bodyStyle);
+        getBodyRectImpl(startNode, bodyInfo, visibleNodes, bodyStyle);
       }
 
       bodyInfo.width = bodyInfo.right - bodyInfo.left;

@@ -38,7 +38,12 @@ define(['$', 'core/conf/site'], function ($, site) {
       maxZoomToRestrictWidthIfFluid: site.get('maxRewrapZoom') || 1.5,
 
       // Set to 5 on sites where the words get too close to the left window's edge
-      leftMarginOffset: site.get('leftMarginOffset') || 2
+      leftMarginOffset: site.get('leftMarginOffset') || 2,
+
+      // Visible content containers for understanding left margin of page, or undefined to auto-detect,
+      // The first one found will be used to determine the body's geometry.
+      // e.g. '#pageWrapper, body>table'
+      visibleRoots: site.get('visibleRoots')
     });
   }
 
