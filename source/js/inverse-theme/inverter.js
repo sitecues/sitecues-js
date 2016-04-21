@@ -87,7 +87,7 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
     var savedSrc = $img.attr('data-sc-src');
     if (doReverse) {
       // Add proxied src
-      if (savedSrc === null) {
+      if (!savedSrc) {
         // First time
         currentSrc = $img.attr('src');
         $img.attr('data-sc-src', currentSrc);
