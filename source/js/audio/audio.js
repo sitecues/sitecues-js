@@ -174,7 +174,7 @@ define(
   }
 
   function fireBusyEvent() {
-    if (networkPlayer.isBusy() || localPlayer.isBusy()) {
+    if (isBusy()) {
       // Already fired
       return;
     }
@@ -182,7 +182,7 @@ define(
   }
 
   function fireNotBusyEvent() {
-    if (networkPlayer.isBusy() || localPlayer.isBusy()) {
+    if (isBusy()) {
       // Still has other audio to play -- one of the players is still busy
       return;
     }
