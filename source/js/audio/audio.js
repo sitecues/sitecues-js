@@ -271,7 +271,7 @@ define(
             localPlayer
               .speak({
                 text: cueText,
-                locale: cueLang,
+                locale: cueLang
               })
               .then(fireNotBusyEvent)
               .catch(onUnavailableFn);
