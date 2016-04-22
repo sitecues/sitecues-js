@@ -274,15 +274,13 @@ define(
                 locale: cueLang
               })
               .then(fireNotBusyEvent)
-              .catch(onUnavailableFn);
+              .catch(function() {
+                onUnavailableFn();
+              });
           }
         });
       }
       else {
-        if (platform.browser.isIE) {
-          console.log('Value: ' + typeof onUnavailableFn);
-          console.log(onUnavailableFn);
-        }
         onUnavailableFn();
       }
     }
@@ -298,7 +296,9 @@ define(
             url: url
           })
           .then(fireNotBusyEvent)
-          .catch(onUnavailableFn);
+          .catch(function() {
+            onUnavailableFn();
+          });
       }
       else {
         onUnavailableFn();
