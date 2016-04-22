@@ -317,7 +317,7 @@ define(['$', 'page/highlight/highlight', 'page/util/common',
 
   function speakHighlight() {
     require(['page/keys/commands'], function(commands) {
-      commands.speakHighlight(true);
+      commands.speakHighlight();
     });
   }
 

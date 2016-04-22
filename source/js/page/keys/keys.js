@@ -21,11 +21,12 @@ define(['page/util/element-classifier', 'page/keys/commands', 'core/metric', 'co
     ZOOM_IN_CODES = CORE_CONST.ZOOM_IN_CODES,
     ZOOM_OUT_CODES = CORE_CONST.ZOOM_OUT_CODES,
     HIGHLIGHT_TOGGLE_EVENT = HIGHLIGHT_CONST.HIGHLIGHT_TOGGLE_EVENT,
-    isShiftKeyDown,
-    isAnyNonShiftKeyDown,
+    wasOnlyShiftKeyDown,
+    isStopSpeechKey,
     isHighlightVisible,
     isLensVisible,
     isSitecuesOn = true,  // Init called when sitecues turned on for the first time
+    isAudioPlaying,
     lastKeyInfo,
     isInitialized,
 
@@ -236,16 +237,16 @@ define(['page/util/element-classifier', 'page/keys/commands', 'core/metric', 'co
   function onKeyUp(event) {
     notifySitecuesKeyDown(true);
     if (event.keyCode === keyCode.SHIFT) {
-      if (isOnlyShift()) {
-        commands.speakHighlight(false, true);
+      if (isBeginSpeechCommand()) {
+        commands.speakHighlight();
       }
     }
 
-    isShiftKeyDown = false;
     // Once the shift key is up, we clear the any key down flag.
     // This is a simple approach that handles all except very weird key behavior
     // such as shift up down up all while another key is pressed.
-    isAnyNonShiftKeyDown = false;
+    isStopSpeechKey = false;
+    wasOnlyShiftKeyDown = false;
 
     emitOnlyShiftStatus();
 
@@ -262,26 +263,23 @@ define(['page/util/element-classifier', 'page/keys/commands', 'core/metric', 'co
 
   // Track to find out whether the shift key is pressed by itself
   function emitOnlyShiftStatus() {
-    events.emit('key/only-shift', isOnlyShift());
+    events.emit('key/only-shift', wasOnlyShiftKeyDown);
   }
 
-  function isOnlyShift() {
-    return isShiftKeyDown && !isAnyNonShiftKeyDown;
+  function isBeginSpeechCommand() {
+    return wasOnlyShiftKeyDown && !isStopSpeechKey;
   }
 
   // If shift key down, process it
   function preProcessKeyDown(event) {
     var isShift = event.keyCode === keyCode.SHIFT;
-    if (!isShift || !isShiftKeyDown) {
+    if (!isShift || isAudioPlaying) {
       // Key down stops speech/audio
       // Exception is repeated shift key, which also starts speech when shift is held down
-      events.emit('keys/non-shift-key-pressed');
+      commands.stopAudio();
+      isStopSpeechKey = true;
     }
-
-    if (!isShift) {
-      isAnyNonShiftKeyDown = true;
-    }
-    isShiftKeyDown = isShift;
+    wasOnlyShiftKeyDown = isShift;
     emitOnlyShiftStatus();
   }
 
@@ -320,6 +318,10 @@ define(['page/util/element-classifier', 'page/keys/commands', 'core/metric', 'co
 
     events.on('sitecues/did-toggle', function(isOn) {
       isSitecuesOn = isOn;
+    });
+
+    events.on('audio/did-toggle', function(isOn) {
+      isAudioPlaying = isOn;
     });
 
     if (keyEvent) {

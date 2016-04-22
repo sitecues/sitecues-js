@@ -37,18 +37,20 @@ define(['page/zoom/zoom', 'page/highlight/move-keys', 'core/conf/user/manager', 
         });
       }
     },
-    speakHighlight: function(doAllowRepeat, doClearRememberedHighlight) {
+    speakHighlight: function () {
       var highlight = mh.getHighlight();
-      if (highlight && (doAllowRepeat || highlight !== this.lastHighlight)) {
-        this.lastHighlight = highlight;
-        require(['audio/audio'], function(audio) {
+      if (highlight) {
+        require(['audio/audio'], function (audio) {
           audio.init();
           audio.speakContent(highlight.picked);
         });
       }
-      if (doClearRememberedHighlight) {
-        this.lastHighlight = null;
-      }
+    },
+    stopAudio: function() {
+      require(['audio/audio'], function (audio) {
+        audio.init();
+        audio.stopAudio();
+      });
     },
     toggleSpeech:  function() {
       require(['audio/audio'], function(audio) {

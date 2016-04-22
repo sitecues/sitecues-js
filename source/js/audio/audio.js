@@ -36,6 +36,7 @@ define(
       LENS: 'space',
       HIGHLIGHT: 'shift'
     },
+    AUDIO_BUSY_EVENT = 'audio/did-toggle',
     speechStrategy = constant.speechStrategy;
 
   function onLensOpened(lensContent, fromHighlight) {
@@ -68,9 +69,6 @@ define(
     }
   }
 
-  function noop() {
-  }
-
   // text and triggerType are optional
   // @lang is the full or partial language for the speech as we know it, e.g. en-US or en
   function speakText(text, lang, triggerType) {
@@ -94,9 +92,10 @@ define(
     }
 
     function speakLocally(onUnavailable) {
-      var onUnavailableFn = onUnavailable || noop;
+      var onUnavailableFn = onUnavailable || fireNotBusyEvent;
       if (isLocalSpeechAllowed()) {
         lastPlayer = localPlayer;
+        fireBusyEvent();
         return localPlayer
           .speak({
             text: text,
@@ -105,6 +104,7 @@ define(
               onSpeechPlaying(true);
             }
           })
+          .then(fireNotBusyEvent)
           .catch(onUnavailableFn);
       }
       else {
@@ -113,9 +113,10 @@ define(
     }
 
     function speakViaNetwork(onUnavailable) {
-      var onUnavailableFn = onUnavailable || noop;
+      var onUnavailableFn = onUnavailable || fireNotBusyEvent;
       if (isNetworkSpeechAllowed(lang)) {
         lastPlayer = networkPlayer;
+        fireBusyEvent();
 
         var ttsUrl = getTTSUrl(text, lang);
 
@@ -126,6 +127,7 @@ define(
               onSpeechPlaying(false);
             }
           })
+          .then(fireNotBusyEvent)
           .catch(function() {
             rerouteNetworkSpeechLang(lang);
             onUnavailableFn();
@@ -136,7 +138,7 @@ define(
       }
     }
 
-    var speakViaNetworkFn = SC_LOCAL ? noop : speakViaNetwork; // Helps the minifier
+    var speakViaNetworkFn = SC_LOCAL ? fireNotBusyEvent : speakViaNetwork; // Helps the minifier
 
     if (isLocalSpeechPreferred()) {
       speakLocally(speakViaNetworkFn);
@@ -169,6 +171,22 @@ define(
       lastPlayer.stop();
       removeBlurHandler();
     }
+  }
+
+  function fireBusyEvent() {
+    if (networkPlayer.isBusy() || localPlayer.isBusy()) {
+      // Already fired
+      return;
+    }
+    events.emit(AUDIO_BUSY_EVENT, true);
+  }
+
+  function fireNotBusyEvent() {
+    if (networkPlayer.isBusy() || localPlayer.isBusy()) {
+      // Still has other audio to play -- one of the players is still busy
+      return;
+    }
+    events.emit(AUDIO_BUSY_EVENT, false);
   }
 
   // Get language that applies to element (optional param)
@@ -243,17 +261,19 @@ define(
     addStopAudioHandlers();
 
     function speakLocally(onUnavailable) {
-      var onUnavailableFn = onUnavailable || noop,
+      var onUnavailableFn = onUnavailable || fireNotBusyEvent,
         cueLang = getCueLanguage(lang);
       if (cueLang && isLocalSpeechAllowed()) {
         lastPlayer = localPlayer;
+        fireBusyEvent();
         locale.getAudioCueTextAsync(key, function (cueText) {
           if (cueText) {
             localPlayer
               .speak({
                 text: cueText,
-                locale: cueLang
+                locale: cueLang,
               })
+              .then(fireNotBusyEvent)
               .catch(onUnavailableFn);
           }
         });
@@ -264,14 +284,16 @@ define(
     }
 
     function speakViaNetwork(onUnavailable) {
-      var onUnavailableFn = onUnavailable || noop;
+      var onUnavailableFn = onUnavailable || fireNotBusyEvent;
       if (isNetworkSpeechAllowed(lang)) {
         lastPlayer = networkPlayer;
+        fireBusyEvent();
         var url = getAudioKeyUrl(key, lang);
         networkPlayer
           .play({
             url: url
           })
+          .then(fireNotBusyEvent)
           .catch(onUnavailableFn);
       }
       else {
@@ -279,7 +301,7 @@ define(
       }
     }
 
-    var speakViaNetworkFn = SC_LOCAL ? noop : speakViaNetwork;
+    var speakViaNetworkFn = SC_LOCAL ? fireNotBusyEvent : speakViaNetwork;
 
     if (isLocalSpeechPreferred()) {
       speakLocally(speakViaNetworkFn);
@@ -428,7 +450,7 @@ define(
      * A highlight box was closed.  Stop/abort/dispose of the player
      * attached to it.
      */
-    events.on('hlb/closed keys/non-shift-key-pressed', stopAudio);
+    events.on('hlb/closed', stopAudio);
 
     if (SC_DEV) {
       // For debugging purposes

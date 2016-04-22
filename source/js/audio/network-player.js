@@ -50,6 +50,10 @@ define(['$', 'core/conf/urls', 'core/conf/site', 'Promise' ], function ($, urls,
         onEnded(event);
         resolve();
       });
+      $(audioElement).one('pause', function(event) {
+        onEnded(event);
+        resolve();
+      });
       audioElement.src = url;
     }
 
@@ -79,6 +83,7 @@ define(['$', 'core/conf/urls', 'core/conf/site', 'Promise' ], function ($, urls,
     $audioElement.off('canplay'); // Don't fire notification to play if we haven't played yet
     $audioElement.off('error');
     $audioElement.off('ended');
+    $audioElement.off('pause');
   }
 
   /**
@@ -86,14 +91,12 @@ define(['$', 'core/conf/urls', 'core/conf/site', 'Promise' ], function ($, urls,
    */
   function stop() {
     audioElements.forEach(function(audioElement) {
-      removeListeners(audioElement);
       // We can only pause in IE9 if there is enough data
       // for the current and at least the next frame
       if (audioElement.readyState >= audioElement.HAVE_FUTURE_DATA) {
         audioElement.pause();
       }
     });
-    audioElements = [];
   }
 
   function getNetworkSpeechConfig(callbackFn) {
