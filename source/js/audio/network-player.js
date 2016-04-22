@@ -123,13 +123,10 @@ define(['$', 'core/conf/urls', 'core/conf/site', 'Promise' ], function ($, urls,
 
   function fetchNetworkSpeechConfig(callbackFn) {
     require(['core/util/xhr'], function(xhr) {
-      console.log('Fetching speech config');
       xhr.getJSON({
         // The 'provided.siteId' parameter must exist, or else core would have aborted the loading of modules.
         url: urls.getApiUrl('2/site/' + site.getSiteId() + '/config'),
         success: function (data) {
-          console.log('Speech config');
-          console.log(data);
           var origSettings = data.settings,
             currentSetting,
             i = 0;
@@ -148,7 +145,6 @@ define(['$', 'core/conf/urls', 'core/conf/site', 'Promise' ], function ($, urls,
           callbackFn(speechConfig);
         },
         error: function(error) {
-          console.log(error);
           callbackFn({}, error);
         }
       });
