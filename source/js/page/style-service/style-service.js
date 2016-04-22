@@ -102,6 +102,11 @@ define(['$', 'page/style-service/css-aggregator', 'page/style-service/media-quer
           .attr('id', SITECUES_COMBINED_CSS_ID + '-' + index)
           .text(cssChunks[index])
           .get(0);
+        if ('disabled' in newSheet) {
+          // Disable as early as possible:
+          // Not supported in IE, so we will use the DOMStyleSheet object to disable as well
+          newSheet.disabled = true;
+        }
         elems[index] = newSheet;
         getDOMStylesheet($(newSheet), function(domStylesheetObject) {
           domStylesheetObject.disabled = true;
