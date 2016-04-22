@@ -281,6 +281,7 @@ define(
       else {
         if (platform.browser.isIE) {
           console.log('Value: ' + typeof onUnavailableFn);
+          console.log(onUnavailableFn);
         }
         onUnavailableFn();
       }
