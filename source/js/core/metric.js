@@ -25,6 +25,12 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
       data.zoomLevel = conf.get('zoom') || 1;
       data.ttsState = conf.get('ttsOn') || false;
       data.details = details;
+      if (!data.userId) {
+        console.error('Sitecues metrics warning: no user ID!');
+        if (SC_DEV) {
+          console.trace();
+        }
+      }
     };
 
     Metric.prototype.send = function send() {
