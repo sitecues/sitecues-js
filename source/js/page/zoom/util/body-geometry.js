@@ -246,16 +246,14 @@ define(
 
       return window.innerWidth / restrictZoom.forFluidWidthRestriction(currZoom) + 'px';
     }
-    
-    function getBodyInfo(refresh) {
-      if (refresh || !cachedBodyInfo) {
-        cachedBodyInfo = computeBodyInfo();
-      }
+
+    // Return cached body info or undefined if unknown
+    function getCachedBodyInfo() {
       return cachedBodyInfo;
     }
 
     function refreshBodyInfo() {
-      getBodyInfo(true);
+      cachedBodyInfo = computeBodyInfo();
     }
 
     // Ensure that initial body info is ready
@@ -265,22 +263,27 @@ define(
         callback = noop;
       }
 
-      if (cachedBodyInfo) { //Already initialized
+      // We expect <body> to be defined now, but we're being defensive
+      // (perhaps future extension will init and call us very early).
+      if (document.body) {
+        if (!body) {
+          body = document.body;
+          $body = $(body);
+        }
+
+        if (!cachedBodyInfo) {
+          refreshBodyInfo();
+        }
+
         callback();
         return;
       }
 
-      if (document.body) {
-        body = document.body;
-        $body = $(body);
-        cachedBodyInfo = computeBodyInfo();
-        callback();
-      }
-      else {
-        $(document).ready(function() {
-          init(callback);
-        });
-      }
+      // No document.body yet
+      $(document).ready(function() {
+        init(callback);
+      });
+
       // Not necessary to use CSS will-change with element.animate()
       // Putting this on the <body> is too much. We saw the following message in Firefox's console:
       // Will-change memory consumption is too high. Surface area covers 2065500 pixels, budget is the document
@@ -297,7 +300,8 @@ define(
       getBodyRight: getBodyRight,
       getBodyLeft: getBodyLeft,
       getMainNode: getMainNode,
-      getBodyInfo: getBodyInfo,
+      getCachedBodyInfo: getCachedBodyInfo,
+      computeBodyInfo: computeBodyInfo,
       refreshBodyInfo: refreshBodyInfo,
       getFormattedTranslateX: getFormattedTranslateX,
       init: init

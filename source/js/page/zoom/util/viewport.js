@@ -37,7 +37,7 @@ define(
 
     // Use scrollbars if necessary for size of content
     // Get the visible content rect (as opposed to element rect which contains whitespace)
-    var rect = bodyGeo.getBodyInfo(true),
+    var rect = bodyGeo.computeBodyInfo(),
       right = Math.max(rect.right, rect.width),
       bottom = Math.max(rect.bottom, rect.height),
       winHeight = window.innerHeight,
@@ -71,7 +71,7 @@ define(
   // In effect, stretch the bottom-right corner of the visible content down and/or right
   // to meet the bottom-right corner of the window.
   function maximizeContentVisibility() {
-    var bodyRight = bodyGeo.getBodyInfo().rightMostNode.getBoundingClientRect().right, // Actual right coord of visible content
+    var bodyRight = bodyGeo.getCachedBodyInfo().rightMostNode.getBoundingClientRect().right, // Actual right coord of visible content
       bodyHeight = document.body.scrollHeight,
       winWidth = window.innerWidth,
       winHeight = window.innerHeight,
