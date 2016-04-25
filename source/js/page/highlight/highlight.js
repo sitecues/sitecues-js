@@ -120,9 +120,9 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
     return colorUtil.getLuminanceFromColorName(colorValue) > MID_COLOR_INTENSITY;
   }
 
-  function getElementsContainingOwnText(selector) {
+  function getElementsContainingOwnVisibleText($subtree) {
     var TEXT_NODE = 3;
-    return $(selector).find('*').addBack().filter(function() {
+    return $subtree.filter(function() {
       var childNodes = this.childNodes,
         numChildNodes = childNodes.length,
         index,
@@ -142,43 +142,66 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
     });
   }
 
-  function hasLightText(selector) {
-    var textContainers = getElementsContainingOwnText(selector),
+  function getTextInfo(selector) {
+    var $subtree = $(selector).find('*').addBack(),
+      textContainers = getElementsContainingOwnVisibleText($subtree),
+      elementsToCheck = textContainers.length ? textContainers : $subtree,
       MAX_ELEMENTS_TO_CHECK = 100,
-      containsLightText = false;
+      containsLightText = false,
+      containsDarkText = false;
 
-    textContainers.each(function(index) {
+    elementsToCheck.each(function(index) {
       if (index >= MAX_ELEMENTS_TO_CHECK) {
         return false;
       }
       var textColor = traitcache.getStyleProp(this, 'color');
       if (isLightIntensity(textColor)) {
         containsLightText = true;
-        return false;
+      }
+      else {
+        containsDarkText = true;
       }
     });
-    return containsLightText;
+
+    return {
+      hasLightText: containsLightText,
+      hasDarkText: containsDarkText,
+      hasVisibleText: textContainers.length > 0
+    };
   }
 
-  function hasDarkBackgroundOnAnyOf(styles) {
+  function hasDarkBackgroundOnAnyOf(styles, textInfo) {
 
-    for (var count = 0; count < styles.length; count ++) {
-      var bgColor = styles[count].backgroundColor,
-        bgRgba = colorUtil.getRgba(bgColor),
+    var hasOnlyLightText = textInfo.hasLightText && !textInfo.hasDarkText,
+      count = 0;
+
+    for (; count < styles.length; count ++) {
+      var style = styles[count],
+        bgRgba = colorUtil.getRgba(style.backgroundColor),
         isMostlyOpaque = bgRgba.a > 0.8;
+      if (style.backgroundImage && style.backgroundImage !== 'none') {
+        if (hasOnlyLightText) {
+          return true; // Has a background image, has light text and NO dark text -- probably a dark background
+        }
+        if (!textInfo.hasVisibleText) {
+
+        }
+      }
       if (isMostlyOpaque) {
-        return !isLightIntensity(bgRgba);
+        return !isLightIntensity(bgRgba);     // Opaque, dark background
       }
     }
   }
 
   function updateColorApproach(picked, style) {
     // Get data on backgrounds and text colors used
-    state.hasDarkBackgroundColor = hasDarkBackgroundOnAnyOf(style);
-    state.hasLightText = hasLightText(picked);
+    var textInfo = getTextInfo(picked);
+    state.hasLightText = textInfo.hasLightText;
+    state.hasDarkText = textInfo.hasDarkText;
+    state.hasDarkBackgroundColor = hasDarkBackgroundOnAnyOf(style, textInfo);
 
     // Get the approach used for highlighting
-    if (picked.length > 1 || shouldAvoidBackgroundImage(picked) || state.hasLightText) {
+    if (picked.length > 1 || shouldAvoidBackgroundImage(picked) || state.hasLightText || !textInfo.hasVisibleText) {
       //  approach #1 -- use overlay for background color
       //                 use overlay for rounded outline
       //  pros: one single rectangle instead of potentially many
@@ -186,7 +209,8 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
       //        visually seamless
       //  cons: washes dark text out (does not have this problem with light text)
       //  when-to-use: for article or cases where multiple items are selected
-      //               when background sprites are used, which we don't want to overwrite with out background
+      //               when images or background sprites are used, which we don't want to overwrite with out background
+      //               a lack of text indicates a good opportunity to use technique as it is an indicator of image content
       state.bgColor = getTransparentBackgroundColor();
       state.doUseOverlayForBgColor = true; // Washes foreground out
     } else {
