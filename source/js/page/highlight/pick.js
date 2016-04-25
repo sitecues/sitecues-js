@@ -266,9 +266,7 @@ define(['$', 'page/util/common', 'core/conf/user/manager', 'core/conf/site',
     var selector = customSelectors.disable ? customSelectors.disable.slice() : '';
     // TODO: Once HLB'd form controls no longer crashes MS Edge we can remove it, at least for those versions
     // For now: make sure we don't pick those controls by adding them to the custom disabled selector
-    if (GLOBAL_DISABLE_PICKER_SELECTOR) {
-      selector += ',' + GLOBAL_DISABLE_PICKER_SELECTOR;
-    }
+    selector = (selector ? selector + ',' : '') + GLOBAL_DISABLE_PICKER_SELECTOR;
     return selector;
   }
 
