@@ -349,7 +349,6 @@ var requirejs, require, define;
         //Defaults. Do not set a default for map
         //config to speed up normalize(), which
         //will run faster if there is no default.
-        waitSeconds: 7,
         baseUrl: './',
         paths: {},
         bundles: {},
@@ -1076,12 +1075,6 @@ var requirejs, require, define;
     }
 
     function check(d) {
-      var err,
-        notFinished = [],
-        waitInterval = config.waitSeconds * 1000,
-      //It is possible to disable the wait interval by using waitSeconds of 0.
-        expired = waitInterval && (startTime + waitInterval) < (new Date()).getTime();
-
       if (loadCount === 0) {
         //If passed in a deferred, it is for a specific require call.
         //Could be a sync case that needs resolution right away.
@@ -1098,20 +1091,7 @@ var requirejs, require, define;
         }
       }
 
-      //If still waiting on loads, and the waiting load is something
-      //other than a plugin resource, or there are still outstanding
-      //scripts, then just try back later.
-      if (expired) {
-        //If wait time expired, throw error of unloaded modules.
-        eachProp(deferreds, function (d) {
-          if (!d.finished) {
-            notFinished.push(d.map.id);
-          }
-        });
-        err = new Error('Timeout for modules: ' + notFinished);
-        err.requireModules = notFinished;
-        req.onError(err);
-      } else if (loadCount || requireDeferreds.length) {
+      if (loadCount || requireDeferreds.length) {
         //Something is still waiting to load. Wait for it, but only
         //if a later check is not already scheduled.
         if (!checkingLater) {
