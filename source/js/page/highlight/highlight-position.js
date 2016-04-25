@@ -5,7 +5,8 @@
 define(['$', 'page/util/common', 'page/util/element-classifier', 'page/zoom/zoom', 'core/platform', 'page/highlight/traitcache'],
   function ($, common, elemClassifier, zoomMod, platform, traitcache) {
 
-  var MIN_RECT_SIDE = 4;
+  var MIN_RECT_SIDE = 4,
+    MAX_TEXT_INDENT_USED_TO_HIDE = -499; // text-indent less than this we consider as something used to hide alternative text for bg image sprites
 
   /**
    * Get the fixed position rectangles for the target's actual rendered content.
@@ -147,6 +148,10 @@ define(['$', 'page/util/common', 'page/util/element-classifier', 'page/zoom/zoom
     };
   }
 
+  function isTextIndentUsedToHide(style) {
+    return parseInt(style.textIndent) < MAX_TEXT_INDENT_USED_TO_HIDE;
+  }
+
   function getSpriteRect(element, style) {
     // Check special case for sprites, often used for fake bullets
     // The following cases are unlikely to be sprites:
@@ -155,7 +160,7 @@ define(['$', 'page/util/common', 'page/util/element-classifier', 'page/zoom/zoom
 
     // Check for elements with only a background-image
     var rect = $.extend({}, traitcache.getScreenRect(element, true));
-    if ($(element).is(':empty') || style.textIndent !== '0px') {
+    if ($(element).is(':empty') || isTextIndentUsedToHide(style)) {
       // Empty elements have no other purpose than to show background sprites
       // Also, background image elements with text-indent are used to make accessible images
       // (the text is offscreen -- screen readers see it but the eye doesn't)
@@ -374,7 +379,9 @@ define(['$', 'page/util/common', 'page/util/element-classifier', 'page/zoom/zoom
       }
 
       // --- Elements with children ---
-      if (this.hasChildNodes()) {
+      // Ignore children when text-indent is negative, as this indicates hidden offscreen content,
+      // most commonly a background image sprite with a text child being used as alternative text.
+      if (this.hasChildNodes() && !isTextIndentUsedToHide(style)) {
         // Use bounds of visible descendants
         getHighlightInfoRecursive($(this.childNodes), accumulatedResults, doStretchForSprites, doIgnoreFloats);  // Recursion
         return;
