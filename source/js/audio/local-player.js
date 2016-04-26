@@ -1,6 +1,6 @@
 define(
   [
-    'Promise',
+    'Promise'
   ],
   function (Promise) {
 
@@ -173,47 +173,72 @@ define(
       // When and if we have a voice to use, finish setting up
       // and then play speech.
       prom = prom.then(function () {
+        return new Promise(function(resolve, reject) {
+          var speech = new SpeechSynthesisUtterance(text);
+          if (SC_DEV) {
+            console.log('Using voice:', voice);
+          }
+          speech.voice = voice;
+          // Note: Some voices do not support altering these settings and will break silently!
+          speech.lang = locale;
+          // speech.voiceURI = 'native';
+          // speech.volume = 1;  // float from 0 to 1, default is 1
+          // speech.rate   = 1;  // float from 0 to 10, default is 1
+          // speech.pitch  = 1;  // float from 0 to 2, default is 1
 
-        var speech = new SpeechSynthesisUtterance(text);
-        if (SC_DEV) {
-          console.log('Using voice:', voice);
-        }
-        speech.voice = voice;
-        // Note: Some voices do not support altering these settings and will break silently!
-        speech.lang  = locale;
-        // speech.voiceURI = 'native';
-        // speech.volume = 1;  // float from 0 to 1, default is 1
-        // speech.rate   = 1;  // float from 0 to 10, default is 1
-        // speech.pitch  = 1;  // float from 0 to 2, default is 1
+          // Event listeners...
 
-        // Event listeners...
+          if (onStart) {
+            speech.addEventListener('start', onStart);
+          }
 
-        if (onStart) {
-          speech.addEventListener('start', onStart);
-        }
+          function removeListeners() {
+            if (onStart) {
+              speech.removeEventListener('start', onStart);
+            }
+            speech.removeEventListener('end', onSpeechEnd);
+            speech.removeEventListener('error', onSpeechError);
+            speech.removeEventListener('pause', onSpeechPause);
+          }
 
-        // Examples of other things we could do:
+          function onSpeechEnd() {
+            if (SC_DEV) {
+              console.log('Finished in ' + event.elapsedTime + ' seconds.');
+            }
+            removeListeners();
+            resolve();
+          }
 
-        // speech.addEventListener('end', function onSpeechEnd(event) {
-        //     console.log('Finished in ' + event.elapsedTime + ' seconds.');
-        // });
-        // speech.addEventListener('error', function onSpeechError(event) {
-        //     console.log('Speech error.');
-        // });
-        // speech.addEventListener('pause', function onSpeechPause(event) {
-        //     console.log('Speech was paused.');
-        // });
-        // speech.addEventListener('resume', function onSpeechResume(event) {
-        //     console.log('Speech has resumed from a paused state.');
-        // });
-        // speech.addEventListener('boundary', function onSpeechBoundary(event) {
-        //     console.log('Encountered a word or sentence boundary.');
-        // });
-        // speech.addEventListener('mark', function onSpeechMark(event) {
-        //     console.log('Encountered an SSML mark tag.');
-        // });
+          function onSpeechError(event) {
+            removeListeners();
+            reject(event.error);
+          }
 
-        speechSynthesis.speak(speech);
+          function onSpeechPause() {
+            if (SC_DEV) {
+              console.log('Speech was paused.');
+            }
+            removeListeners();
+            resolve();
+          }
+          speech.addEventListener('end', onSpeechEnd);
+          speech.addEventListener('error', onSpeechError);
+          speech.addEventListener('pause', onSpeechPause);
+
+          // Examples of other things we could do:
+          // speech.addEventListener('resume', function onSpeechResume(event) {
+          //     console.log('Speech has resumed from a paused state.');
+          // });
+          // speech.addEventListener('boundary', function onSpeechBoundary(event) {
+          //     console.log('Encountered a word or sentence boundary.');
+          // });
+          // speech.addEventListener('mark', function onSpeechMark(event) {
+          //     console.log('Encountered an SSML mark tag.');
+          // });
+
+          speechSynthesis.speak(speech);
+        });
+
       });
 
       return prom;

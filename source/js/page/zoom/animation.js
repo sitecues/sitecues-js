@@ -286,12 +286,12 @@ define(
     function shouldUseKeyFramesAnimation() {
 
       // Only IE10 and up can do CSS animate.
-      var isOldIE = platform.browser.isIE && platform.browser.version < 10,
+      var isIE = platform.browser.isIE,
         isSafari = platform.browser.isSafari,
         restrictingWidthInSafari = isSafari && config.shouldRestrictWidth;
 
       return shouldSmoothZoom()   &&
-        !isOldIE                  &&
+        !isIE                  &&
           // Safari is herky jerky if animating the width and using key frames
           // TODO fix initial load zoom with jsZoom -- not doing anything
         !restrictingWidthInSafari &&

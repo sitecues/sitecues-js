@@ -123,7 +123,7 @@ define(['core/conf/site', 'core/platform'], function(site, platform) {
   // Return an absolute URL. If the URL was relative, return an absolute URL that is relative to a base URL.
   // @optional parsedBaseUrl If not provided, will use the current page.
   function resolveUrl(urlStr, baseUrl) {
-    if (!platform.browser.isIE || platform.browser.isEdge) {
+    if (!platform.browser.isIE || typeof URL === 'function') {
       // URL object exists in IE11 but "new URL()" throws error "Object doesn’t support this action"
       var parsedUrl = new URL(urlStr, baseUrl || document.location);
       return parsedUrl.toString();

@@ -171,7 +171,10 @@ define(['$', 'page/style-service/style-service', 'core/conf/user/manager', 'page
   // Turning off custom cursor improves zoom animation in IE
   function toggleZoomOptimization(doDisable) {
     if (platform.browser.isIE) { // Only necessary for IE
-      cursorStylesheetObject.disabled = Boolean(doDisable);
+      // The style service may not have initialized
+      if (cursorStylesheetObject) {
+        cursorStylesheetObject.disabled = Boolean(doDisable);
+      }
     }
   }
 

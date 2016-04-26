@@ -41,6 +41,9 @@ define(['$', 'page/util/common', 'core/conf/user/manager', 'core/conf/site',
     PICK_RULE_IGNORE = 'ignore',   // don't pick this item
     // Use hack to avoid Edge bugs where HLB on inputs caused crashes
     SHOULD_AVOID_INPUTS = platform.browser.isIE && platform.browser.version > 11,
+    GLOBAL_DISABLE_PICKER_SELECTOR =
+      'iframe[name="google_conversion_frame"]' + // Don't pick invisible Google Adwords iframe
+      (SHOULD_AVOID_INPUTS ? ',input,textarea,select' : ''),
 
     // The following weights are used to multiple each judgement of the same name, defined in judgements.js
     // The score is a sum of these weights * judgements
@@ -263,12 +266,7 @@ define(['$', 'page/util/common', 'core/conf/user/manager', 'core/conf/site',
     var selector = customSelectors.disable ? customSelectors.disable.slice() : '';
     // TODO: Once HLB'd form controls no longer crashes MS Edge we can remove it, at least for those versions
     // For now: make sure we don't pick those controls by adding them to the custom disabled selector
-    if (SHOULD_AVOID_INPUTS) {
-      if (selector) {
-        selector += ',';
-      }
-      selector += 'input,textarea,select';
-    }
+    selector = (selector ? selector + ',' : '') + GLOBAL_DISABLE_PICKER_SELECTOR;
     return selector;
   }
 

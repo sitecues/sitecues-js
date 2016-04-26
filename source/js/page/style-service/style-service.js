@@ -2,14 +2,16 @@
  * Service that lazily gets user agent and page stylesheets
  * and provides information about them.
  */
-define(['$', 'page/style-service/css-aggregator', 'page/style-service/media-queries'], function ($, cssAggregator, mediaQueries) {
+define(['$', 'page/style-service/css-aggregator', 'page/style-service/media-queries', 'core/platform'],
+  function ($,
+            cssAggregator,
+            mediaQueries,
+            platform) {
 
-  var $combinedStylesheets,  // Style sheet we lazily create as a composite of all styles, which we use to look at parsed style rules
-    domStylesheetObjects = [],
+  var domStylesheetObjects = [],
     SITECUES_COMBINED_CSS_ID = 'sitecues-js-combined-css',
-    WAIT_BEFORE_INIT_STYLESHEET = 50,
-    WAIT_BEFORE_CREATE_NEXT_STYLESHEET_CHUNK = 25, // How long to wait in between processing CSS chunks
-    CSS_MAX_CHUNK_SIZE = 25000, // Max number of CSS chars to process at once
+    WAIT_BEFORE_USING_STYLESHEET_DATA = 50,
+    CSS_MAX_CHUNK_SIZE = 5000, // Max number of CSS chars to process at once
     isInitialized,
     isCssRequested,   // Have we even begun the init sequence?
     isCssComplete,      // Init sequence is complete
@@ -76,7 +78,7 @@ define(['$', 'page/style-service/css-aggregator', 'page/style-service/media-quer
   // Sometimes CSS that's too large creates huge performance problems in IE, locking up the browser
   // There seems to be a size threshold where the problems don't occur if they are under that
   function chunkCss(allCss) {
-    if (allCss.length < CSS_MAX_CHUNK_SIZE) {
+    if (!platform.browser.isIE || allCss.length < CSS_MAX_CHUNK_SIZE) {
       return [ allCss ];
     }
 
@@ -93,15 +95,25 @@ define(['$', 'page/style-service/css-aggregator', 'page/style-service/media-quer
       elems = [];
 
     function createNext() {
-      elems[index] =
+      var newSheet =
         $('<style>')
           .appendTo('head')
           .attr('id', SITECUES_COMBINED_CSS_ID + '-' + index)
           .text(cssChunks[index])
           .get(0);
+        if ('disabled' in newSheet) {
+          // Disable as early as possible:
+          // Not supported in IE, so we will use the DOMStyleSheet object to disable as well
+          newSheet.disabled = true;
+        }
+        elems[index] = newSheet;
+        getDOMStylesheet($(newSheet), function(domStylesheetObject) {
+          domStylesheetObject.disabled = true;
+          domStylesheetObjects[index] = domStylesheetObject;
+        });
       if (++ index < numChunks) {
-        // We must wait before creating the next stylesheet otherwise we overload IE11 and cause it to lockup
-        setTimeout(createNext, WAIT_BEFORE_CREATE_NEXT_STYLESHEET_CHUNK);
+        // We must wait before fting the next stylesheet otherwise we overload IE11 and cause it to lockup
+        setTimeout(createNext, 0);
       }
       else {
         callback(elems);
@@ -113,22 +125,11 @@ define(['$', 'page/style-service/css-aggregator', 'page/style-service/media-quer
 
   // This is called() when all the CSS text of the document is available for processing
   function onAllCssRetrieved(allCss) {
-    createCombinedStylesheets(allCss, function(combinedStylesheets) {
-      $combinedStylesheets = $(combinedStylesheets);
-      var numRemainingToComplete = $combinedStylesheets.length;
-      $.each($($combinedStylesheets), function (index, stylesheet) {
-        getDOMStylesheet($(stylesheet), function (domStylesheetObject) {
-          domStylesheetObjects[index] = domStylesheetObject;
-          domStylesheetObject.disabled = true; // Don't interfere with page
-          if (--numRemainingToComplete === 0) {
-            // Takes the browser a moment to process the new stylesheet
-            setTimeout(function () {
-              isCssComplete = true;
-              clearCallbacks();
-            }, WAIT_BEFORE_INIT_STYLESHEET);
-          }
-        });
-      });
+    createCombinedStylesheets(allCss, function() {
+      setTimeout(function () {
+        isCssComplete = true;
+        clearCallbacks();
+      }, WAIT_BEFORE_USING_STYLESHEET_DATA);
     });
   }
 
@@ -232,6 +233,7 @@ define(['$', 'page/style-service/css-aggregator', 'page/style-service/media-quer
   /**
    * Get the DOM object for the stylesheet that lets us traverse the style rules.
    * Annoying that we have to do this.
+   * TODO: should we remove it as soon as we find and hold onto the result?
    * @param $stylesheet
    * @returns {*}
    */
