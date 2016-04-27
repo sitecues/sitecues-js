@@ -25,7 +25,7 @@ define(
     var
       body,
       $body,
-      cachedBodyInfo, // The info we have on the body, including the rect and mainNode
+      originalBodyInfo, // The info we have on the body, including the rect and mainNode
       MIN_RECT_SIDE  = constants.MIN_RECT_SIDE,
       ZOOM_PRECISION = constants.ZOOM_PRECISION;
 
@@ -40,41 +40,41 @@ define(
       var divisorUsedToRestrictWidth = config.shouldRestrictWidth ? restrictZoom.forFluidWidthRestriction(state.completedZoom) : 1;
 
       // Multiply be the amount of zoom currently used
-      return state.completedZoom * cachedBodyInfo.width / divisorUsedToRestrictWidth;
+      return state.completedZoom * originalBodyInfo.width / divisorUsedToRestrictWidth;
     }
 
     function getBodyRight() {
       init();
 
-      return cachedBodyInfo.right * state.completedZoom;
+      return originalBodyInfo.right * state.completedZoom;
     }
 
     function getBodyLeft() {
       init();
 
-      return cachedBodyInfo.leftMostNode.getBoundingClientRect().left + window.pageXOffset;
+      return originalBodyInfo.leftMostNode.getBoundingClientRect().left + window.pageXOffset;
     }
 
     function getMainNode() {
       init();
 
-      return cachedBodyInfo.mainNode;
+      return originalBodyInfo.mainNode;
     }
 
     // Is it a fluid layout?
     function isFluidLayout() {
-      if (cachedBodyInfo.width === window.outerWidth) {
+      if (originalBodyInfo.width === window.outerWidth) {
         // Handle basic case -- this works for duxburysystems.com, where the visible body content
         // spans the entire width of the available space
         return true;
       }
       // We consider it fluid if the main node we discovered inside the body changes width
       // if we change the body's width.
-      var origWidth = cachedBodyInfo.mainNode.clientWidth,
+      var origWidth = originalBodyInfo.mainNode.clientWidth,
         newWidth,
         isFluid;
       body.style.width = (window.innerWidth / 5) + 'px';
-      newWidth = cachedBodyInfo.mainNode.clientWidth;
+      newWidth = originalBodyInfo.mainNode.clientWidth;
       isFluid = origWidth !== newWidth;
       body.style.width = '';
 
@@ -227,8 +227,8 @@ define(
       if (config.shouldRestrictWidth) {
         return '';  // For fluid layouts, we use an transform-origin of 0% 0%, so we don't need this
       }
-      var zoomOriginX = Math.max(window.innerWidth, cachedBodyInfo.transformOriginX) / 2, // X-coordinate origin of transform
-        bodyLeft = cachedBodyInfo.left,
+      var zoomOriginX = Math.max(window.innerWidth, originalBodyInfo.transformOriginX) / 2, // X-coordinate origin of transform
+        bodyLeft = originalBodyInfo.left,
         halfOfBody = (zoomOriginX - bodyLeft) * targetZoom,
         pixelsOffScreenLeft = (halfOfBody - zoomOriginX) + config.leftMarginOffset,
         pixelsToShiftRight = Math.max(0, pixelsOffScreenLeft),
@@ -242,18 +242,18 @@ define(
     function getRestrictedBodyWidth(currZoom) {
       // For a short period of time, we tried the following, in a commit that suggested it helped reduce horizontal panning.
       // However, that change led to SC-3191
-      //var winWidth = cachedBodyInfo.width;
+      //var winWidth = originalBodyInfo.width;
 
       return window.innerWidth / restrictZoom.forFluidWidthRestriction(currZoom) + 'px';
     }
 
     // Return cached body info or undefined if unknown
-    function getCachedBodyInfo() {
-      return cachedBodyInfo;
+    function getOriginalBodyInfo() {
+      return originalBodyInfo;
     }
 
     function refreshBodyInfo() {
-      cachedBodyInfo = computeBodyInfo();
+      originalBodyInfo = computeBodyInfo();
     }
 
     // Ensure that initial body info is ready
@@ -271,7 +271,7 @@ define(
           $body = $(body);
         }
 
-        if (!cachedBodyInfo) {
+        if (!originalBodyInfo) {
           refreshBodyInfo();
         }
 
@@ -300,7 +300,7 @@ define(
       getBodyRight: getBodyRight,
       getBodyLeft: getBodyLeft,
       getMainNode: getMainNode,
-      getCachedBodyInfo: getCachedBodyInfo,
+      getOriginalBodyInfo: getOriginalBodyInfo,
       computeBodyInfo: computeBodyInfo,
       refreshBodyInfo: refreshBodyInfo,
       getFormattedTranslateX: getFormattedTranslateX,
