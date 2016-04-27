@@ -97,9 +97,11 @@ define(['$', 'page/style-service/css-aggregator', 'page/style-service/media-quer
     function createNext() {
       var newSheet =
         $('<style>')
-          .appendTo('head')
           .attr('id', SITECUES_COMBINED_CSS_ID + '-' + index)
+          // Note: be sure to insert text into stylesheet before inserting into DOM
+          // measured in IE11 to be more performant
           .text(cssChunks[index])
+          .appendTo('head')
           .get(0);
         if ('disabled' in newSheet) {
           // Disable as early as possible:
