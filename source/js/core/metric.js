@@ -88,8 +88,8 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
       if (document.querySelector('[data-provider="sitecues-proxy"]')) {
         return 'forward-proxy';
       }
-      var url = window.location.toString();
-      if (url.indexOf('//proxy.dev.sitecues.com:') > 0 || url.indexOf('//proxy.sitecues.com:')) {
+      var hostname = window.location.hostname;
+      if (hostname.indexOf('proxy.dev.sitecues.com') >= 0 || hostname.indexOf('proxy.sitecues.com') >= 0) {
         return 'reverse-proxy';
       }
       return 'page';
