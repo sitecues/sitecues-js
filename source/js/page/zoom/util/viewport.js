@@ -71,7 +71,7 @@ define(
   // In effect, stretch the bottom-right corner of the visible content down and/or right
   // to meet the bottom-right corner of the window.
   function maximizeContentVisibility() {
-    var bodyRight = bodyGeo.getCachedBodyInfo().rightMostNode.getBoundingClientRect().right, // Actual right coord of visible content
+    var bodyRight = bodyGeo.getOriginalBodyInfo().rightMostNode.getBoundingClientRect().right, // Actual right coord of visible content
       bodyHeight = document.body.scrollHeight,
       winWidth = window.innerWidth,
       winHeight = window.innerHeight,
