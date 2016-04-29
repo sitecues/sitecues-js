@@ -9,6 +9,8 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
     // IMPORTANT! Have the backend team review all metrics changes!!!
     var METRICS_VERSION = 10,
         isInitialized,
+        doSuppressMetrics,
+        doLogMetrics,
         name = constants.METRIC_NAME,
         metricHistory = [];
 
@@ -34,7 +36,11 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
     };
 
     Metric.prototype.send = function send() {
-      if (SC_LOCAL || site.get('suppressMetrics')) {   // No metric events in local mode
+      if (doLogMetrics) {
+        console.log('Metric / %s\n%o\n%o', this.data.name, this.data);
+      }
+
+      if (SC_LOCAL || doSuppressMetrics) {   // No metric events in local mode
         return;
       }
 
@@ -75,12 +81,28 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
       return false;
     }
 
+    function getSource() {
+      if (SC_EXTENSION) {
+        return 'extension';
+      }
+      if (document.querySelector('[data-provider="sitecues-proxy"]')) {
+        return 'forward-proxy';
+      }
+      var url = window.location.toString();
+      if (url.indexOf('//proxy.dev.sitecues.com:') > 0 || url.indexOf('//proxy.sitecues.com:')) {
+        return 'reverse-proxy';
+      }
+      return 'page';
+    }
+
     function init() {
 
       if (isInitialized) {
         return;
       }
       isInitialized = true;
+
+      doSuppressMetrics = site.get('suppressMetrics') || isTester();
 
       Metric.prototype.sessionData = {
         scVersion: sitecues.getVersion(),
@@ -93,9 +115,14 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
         browserUserAgent: navigator.userAgent,
         isClassicMode: classicMode(),
         clientLanguage: locale.getBrowserLang(),
-        isTester: isTester()
+        source: getSource()
       };
     }
+
+    sitecues.toggleLogMetrics = function toggleLogMetrics() {
+      doLogMetrics = !doLogMetrics;
+      return doLogMetrics;
+    };
 
     return {
       init: init,
