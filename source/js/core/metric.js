@@ -89,7 +89,7 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
         return 'forward-proxy';
       }
       var hostname = window.location.hostname;
-      if (hostname.indexOf('proxy.dev.sitecues.com') >= 0 || hostname.indexOf('proxy.sitecues.com') >= 0) {
+      if (hostname.indexOf('proxy.') === 0 || hostname.indexOf('.sitecues.com') > 0) {
         return 'reverse-proxy';
       }
       return 'page';
