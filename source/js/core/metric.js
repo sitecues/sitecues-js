@@ -37,7 +37,7 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
 
     Metric.prototype.send = function send() {
       if (doLogMetrics) {
-        console.log('Metric / %s\n%o\n%o', this.data.name, this.data);
+        console.log('Metric / %s\n%o', this.data.name, this.data);
       }
 
       if (SC_LOCAL || doSuppressMetrics) {   // No metric events in local mode
@@ -85,12 +85,12 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
       if (SC_EXTENSION) {
         return 'extension';
       }
-      if (document.querySelector('[data-provider="sitecues-proxy"]')) {
-        return 'forward-proxy';
-      }
       var hostname = window.location.hostname;
       if (hostname.indexOf('proxy.') === 0 && hostname.indexOf('.sitecues.com') > 0) {
         return 'reverse-proxy';
+      }
+      if (document.querySelector('script[data-provider="sitecues-proxy"]')) {
+        return 'forward-proxy';
       }
       return 'page';
     }
