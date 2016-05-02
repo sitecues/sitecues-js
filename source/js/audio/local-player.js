@@ -23,12 +23,13 @@ define(
         };
 
       // Promise handler for when loading voices is asynchronous.
-      function waitForVoices(resolve, reject) {
+      function waitForVoices(resolve) {
         // At least one voice has loaded asynchronously.
         // We don't know if/when any more will come in,
         // so it is best to consider the job done here.
         function onVoicesChanged(event) {
           // Give the available voices as the result.
+          clearTimeout(voicesTimeout);
           resolve(speechSynthesis.getVoices());
           // Remove thyself.
           event.currentTarget.removeEventListener(event.type, onVoicesChanged, true);
@@ -37,14 +38,14 @@ define(
         // Handle timeouts so we don't wait forever in any case where
         // the voiceschanged event never fires.
         function onTimeout() {
-          reject(new Error(
+          throw new Error(
             errMessage.TIMEOUT
-          ));
+          );
         }
 
         speechSynthesis.addEventListener('voiceschanged', onVoicesChanged, true);
 
-        setTimeout(
+        var voicesTimeout = setTimeout(
           onTimeout,  // Code to run when we are fed up with waiting.
           3000        // The browser has this long to load voices.
         );
@@ -78,9 +79,7 @@ define(
       // have any voices available, or all existing voices could
       // suddenly be uninstalled. No such situation has been
       // encountered, but we try to take care of that here.
-      return Promise.reject(new Error(
-        errMessage.NO_VOICES
-      ));
+      throw new Error(errMessage.NO_VOICES);
     }
 
     // Based on a given set of voice and language restrictions,
@@ -173,7 +172,7 @@ define(
       // When and if we have a voice to use, finish setting up
       // and then play speech.
       prom = prom.then(function () {
-        return new Promise(function(resolve, reject) {
+        return new Promise(function(resolve) {
           var speech = new SpeechSynthesisUtterance(text);
           if (SC_DEV) {
             console.log('Using voice:', voice);
@@ -211,7 +210,7 @@ define(
 
           function onSpeechError(event) {
             removeListeners();
-            reject(event.error);
+            throw event.error;
           }
 
           function onSpeechPause() {

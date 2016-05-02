@@ -8,8 +8,7 @@ define(['core/conf/site',
             urls,
             run,
             constants,
-            events,
-            errors) {
+            events) {
 
   if (!SC_EXTENSION) {
     if (document.documentElement.hasAttribute('data-sitecues-everywhere')) {

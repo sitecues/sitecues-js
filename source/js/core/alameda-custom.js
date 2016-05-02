@@ -38,6 +38,29 @@ var require = {
   }
 };
 
+// https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent/CustomEvent
+// Currently only needed for IE11
+(function () {
+
+  if ( typeof window.CustomEvent === "function" ) {
+    return false;
+  }
+
+  function CustomEvent ( event, params ) {
+    params = params || { bubbles: false, cancelable: false, detail: undefined };
+    var evt = document.createEvent( 'CustomEvent' );
+    evt.initCustomEvent( event, params.bubbles, params.cancelable, params.detail );
+    return evt;
+  }
+
+  CustomEvent.prototype = window.Event.prototype;
+
+  window.CustomEvent = CustomEvent;
+})();
+
+
+// Alameda
+
 var requirejs, require, define;
 (function (global, undef) {
   var prim, topReq, dataMain, src, subPath,
@@ -196,6 +219,11 @@ var requirejs, require, define;
         ok = [],
         fail = [];
 
+      function reportError(error) {
+        var event = new CustomEvent('SitecuesPromiseError', {detail: error});
+        window.dispatchEvent(event);
+      }
+
       function makeFulfill() {
         var f, f2,
           called = false;
@@ -212,7 +240,7 @@ var requirejs, require, define;
             return;
           }
 
-          //try {
+          try {
             var then = v && v.then;
             if (isFunObj(v) && typeof then === 'function') {
               f2 = makeFulfill();
@@ -221,10 +249,11 @@ var requirejs, require, define;
               p[prop] = v;
               notify(listeners, v);
             }
-          //} catch (e) {
-          //  called = false;
-          //  f.reject(e);
-          //}
+          } catch (e) {
+            called = false;
+            reportError(e);
+            f.reject(e);
+          }
         }
 
         f = {
@@ -245,16 +274,17 @@ var requirejs, require, define;
           var next = prim(function (nextResolve, nextReject) {
 
             function finish(fn, nextFn, v) {
-              //try {
+              try {
                 if (fn && typeof fn === 'function') {
                   v = fn(v);
                   nextResolve(v);
                 } else {
                   nextFn(v);
                 }
-              //} catch (e) {
-              //  nextReject(e);
-              //}
+              } catch (e) {
+                reportError(e);
+                nextReject(e);
+              }
             }
 
             callback(p, ok, function() {
@@ -275,11 +305,12 @@ var requirejs, require, define;
         }
       };
 
-      //try {
+      try {
         fn(f.resolve, f.reject);
-      //} catch (e) {
-      //  f.reject(e);
-      //}
+      } catch (e) {
+        reportError(e);
+        f.reject(e);
+      }
 
       return promise;
     };

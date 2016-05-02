@@ -8,6 +8,16 @@ define(['core/metric', 'core/conf/urls'], function(metric, urls) {
     return urls.parseUrl(source).origin === urls.getScriptOrigin();
   }
 
+  function logError(detail, doLogToConsole) {
+    if (doLogToConsole) {
+      console.log('%cSitecues Error: %o', 'color: orange', detail);
+    }
+
+    // detail object contains everything we need (message, line, col, etc.)
+    metric.init();
+    new metric.Error(detail).send();
+  }
+
   function onError(event) {
     var error = event.error,
       filename = event.filename;
@@ -17,18 +27,20 @@ define(['core/metric', 'core/conf/urls'], function(metric, urls) {
       return;
     }
 
-    metric.init();
-    var details = {
+    logError({
       message: error.message,
       source: filename, // JS file with error
       lineno: event.lineno,
       colno: event.colno,
       stack: error.stack
-    };
+    });
+  }
 
-    // error object already contains everything we need (message, line, col, etc.)
-    new metric.Error(details).send();
+
+  function onPromiseCaught(event) {
+    logError(event.detail, true);
   }
 
   window.addEventListener('error', onError, true);   // May get both JS and resource errors
+  window.addEventListener('SitecuesPromiseError', onPromiseCaught, true);   // Thrown from prim library
 });
