@@ -81,8 +81,13 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
       return false;
     }
 
+    // TODO Should go away once we go to the new extension which is entirely in a content script
+    function isOldExtension() {
+      return sitecues.everywhereConfig;
+    }
+
     function getSource() {
-      if (SC_EXTENSION) {
+      if (SC_EXTENSION || isOldExtension()) {
         return 'extension';
       }
       var hostname = window.location.hostname;
@@ -102,7 +107,7 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
       }
       isInitialized = true;
 
-      doSuppressMetrics = site.get('suppressMetrics') || isTester();
+      doSuppressMetrics = site.get('suppressMetrics');
 
       Metric.prototype.sessionData = {
         scVersion: sitecues.getVersion(),
@@ -115,7 +120,8 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
         browserUserAgent: navigator.userAgent,
         isClassicMode: classicMode(),
         clientLanguage: locale.getBrowserLang(),
-        source: getSource()
+        source: getSource(),
+        isTester: isTester()
       };
     }
 

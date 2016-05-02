@@ -38,6 +38,7 @@ define([], function() {
   }
 
   // Configuration for sitecues everywhere, if it exists
+  // TODO Should go away once we go to the new extension which is entirely in a content script
   function getEverywhereConfig() {
     return sitecues.everywhereConfig || {};
   }
