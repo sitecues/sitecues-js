@@ -893,6 +893,7 @@ var requirejs, require, define;
         }, false);
 
         script.src = url;
+        script.setAttribute('crossorigin', 'anonymous');
 
         document.head.appendChild(script);
       };

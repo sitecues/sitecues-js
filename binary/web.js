@@ -116,6 +116,11 @@ app.all(/\/html\/|\/images\/cursors\//, function(req, res, next) {
     return next();
 });
 
+app.all(/\/js\//, function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  return next();
+});
+
 // Set up the handling of the per-siteID URLs of the format /l/s;id=s-XXXXXXXX/*
 (function(){
     // Creates a build data instance

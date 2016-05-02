@@ -134,6 +134,7 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
       init: init,
       getMetricHistory: getMetricHistory,
       BadgeHover: wrap(name.BADGE_HOVER),
+      Error: wrap(name.ERROR),
       Feedback: wrap(name.FEEDBACK),
       KeyCommand: wrap(name.KEY_COMMAND),
       LensOpen: wrap(name.LENS_OPEN),

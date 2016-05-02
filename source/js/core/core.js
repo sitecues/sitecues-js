@@ -1,4 +1,15 @@
-define(['core/conf/site', 'core/conf/urls', 'core/run', 'core/constants', 'core/events'], function (site, urls, run, constants, events) {
+define(['core/conf/site',
+  'core/conf/urls',
+  'core/run',
+  'core/constants',
+  'core/events',
+  'core/errors'],
+  function (site,
+            urls,
+            run,
+            constants,
+            events,
+            errors) {
 
   if (!SC_EXTENSION) {
     if (document.documentElement.hasAttribute('data-sitecues-everywhere')) {

@@ -28,6 +28,7 @@ var config = require('../build-config.js'),
       'core/conf/user/storage-backup': '../../extension/source/js/overrides/storage-backup',
       'core/data-map': config.tmpDir + '/data-map',
       // UNUSED in the extension
+      'core/errors': 'empty:',
       'core/bp/badge/page-badge': 'empty:',
       'core/bp/badge/palette': 'empty:',
       'bp-img-placeholder/bp-img-placeholder/': 'empty:',
