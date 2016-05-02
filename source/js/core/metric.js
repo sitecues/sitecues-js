@@ -68,13 +68,13 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
 
     function isTester() {
 
-      if (localStorage.getItem('sitecues-is-tester')) {
+      if (conf.get('isTester')) {
         // Once a tester, always a tester
         return true;
       }
 
       if (site.get('isTester') || !urls.isProduction()) {
-        localStorage.setItem('sitecues-is-tester', 'true'); // Remember this tester
+        conf.set('isTester', true);  // Remember this tester
         return true;
       }
 
