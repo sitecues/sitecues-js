@@ -24,6 +24,21 @@ define(
 
       // Promise handler for when loading voices is asynchronous.
       function waitForVoices(resolve) {
+        speechSynthesis.addEventListener('voiceschanged', onVoicesChanged, true);
+
+        var voicesTimeout = setTimeout(
+          onTimeout,  // Code to run when we are fed up with waiting.
+          3000        // The browser has this long to load voices.
+        );
+
+        // Handle timeouts so we don't wait forever in any case where
+        // the voiceschanged event never fires.
+        function onTimeout() {
+          throw new Error(
+            errMessage.TIMEOUT
+          );
+        }
+
         // At least one voice has loaded asynchronously.
         // We don't know if/when any more will come in,
         // so it is best to consider the job done here.
@@ -34,21 +49,6 @@ define(
           // Remove thyself.
           event.currentTarget.removeEventListener(event.type, onVoicesChanged, true);
         }
-
-        // Handle timeouts so we don't wait forever in any case where
-        // the voiceschanged event never fires.
-        function onTimeout() {
-          throw new Error(
-            errMessage.TIMEOUT
-          );
-        }
-
-        speechSynthesis.addEventListener('voiceschanged', onVoicesChanged, true);
-
-        var voicesTimeout = setTimeout(
-          onTimeout,  // Code to run when we are fed up with waiting.
-          3000        // The browser has this long to load voices.
-        );
       }
 
       // Tickle the browser with a feather to get it to actually load voices.
