@@ -68,11 +68,16 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
 
   // CSS proxy passes us the CSS text whether or not cross-origin policy allows it
   // Example of page that needs this: http://www.dcmetrobln.org/about-us
-  // If Brian updates server to use Graham's latest, we may need to
-  // update to new URL format that passes url as a parameter ala css-proxy?url=foo
   function getCssProxyUrl(url) {
-    var absoluteUrl = urls.resolveUrl(url);
-    return urls.getApiUrl('css-proxy/' + absoluteUrl); // TODO encodeURIComponent(absoluteUrl));
+    if (url.substring(0, 5) === 'data:') {
+      return url;
+    }
+
+    var absoluteUrl = urls.resolveUrl(url),
+      apiUrl = urls.getApiUrl('css/passthrough/?url=' + encodeURIComponent(absoluteUrl));
+
+    // TODO remove this line when dev servers are updated
+    return apiUrl.replace('/ws.dev.', '/ws.');
   }
 
   /**
