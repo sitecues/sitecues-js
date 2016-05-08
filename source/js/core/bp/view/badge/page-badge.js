@@ -4,9 +4,10 @@
 define(
   [
     'core/bp/view/view',
-    'core/bp/view/palette'
+    'core/bp/view/palette',
+    'Promise'
   ],
-  function(baseView, palette) {
+  function(baseView, palette, Promise) {
 
   // Make sure the badge has non-static positioning to make it easy to place
   // the position: absolute sc-bp-container inside of it

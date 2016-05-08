@@ -9,7 +9,7 @@
  * - lang is a 2 letter code such as 'en'
  * - locale is either a lang or can include more info, such as 'en-GB'
  */
-define([ 'core/data-map' ], function(dataMap) {
+define([ 'core/data-map', 'Promise' ], function(dataMap, Promise) {
   var translations = {},
     DEFAULT_LOCALE = 'en-us',
     LOCALE_DATA_PREFIX = 'locale-data/',
