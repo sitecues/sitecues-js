@@ -18,10 +18,10 @@ define(
                 localStorage.clear();
             });
 
-            test('.getRawAppData() returns what was stored', function () {
+            test('.getAppData() returns what was stored', function () {
 
                 var
-                    expectedString = JSON.stringify({
+                    expected = {
                         userId : 'test-id',
                         'test-id' : {
                             zoom : 1,
@@ -29,13 +29,13 @@ define(
                             ttsOn : true,
                             firstSpeechOn : 3
                         }
-                    });
+                    };
 
-                localStorage.setItem('sitecues', expectedString);
+                localStorage.setItem('sitecues', JSON.stringify(expected));
 
                 assert.deepEqual(
-                    storage.getRawAppData(),
-                    expectedString,
+                    storage.getAppData(),
+                    expected,
                     'The retrieved data must be identical to when it was stored'
                 );
             });
@@ -64,25 +64,24 @@ define(
                 );
             });
 
-            test('.setUserId() stores an ID for later retrieval', function () {
+            test('.createUser() creates a user ID in the correct format', function () {
 
                 var
                     OUR_NAMESPACE = 'sitecues',
-                    fakeUserId = 'test-id',
-                    expectedString = JSON.stringify({
-                        userId : fakeUserId
-                    });
+                    UUID_REGEX = /(?:[a-f\d]{8}(?:-[a-f\d]{4}){3}-[a-f\d]{12}?)/,
+                    newUserId;
 
                 assert.isNull(
                     localStorage.getItem(OUR_NAMESPACE),
-                    'There must be nothing stored in order to test that .setUserId() has an effect'
+                    'There must be nothing stored in order to test that .createUser() has an effect'
                 );
 
-                storage.setUserId(fakeUserId);
+                storage.createUser();
 
-                assert.deepEqual(
-                    localStorage.getItem(OUR_NAMESPACE),
-                    expectedString,
+                newUserId = JSON.parse(localStorage.getItem(OUR_NAMESPACE)).userId;
+
+                assert.isNotNull(
+                    newUserId.match(UUID_REGEX),
                     'The user ID must be stored in a specific format'
                 );
             });

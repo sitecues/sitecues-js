@@ -131,7 +131,7 @@ define([
   // the websites placeholder.  It sets the SVG height and width so that it visually covers the
   // placeholder/badgeElement.  It binds event handlers to append the BPContainer to <html> or
   // the badgeElement (switching parent).
-  function init(badgePlacementElem, onComplete) {
+  function init(badgePlacementElem) {
 
     // Create the container and insert the SVG
     badgeElement = badgePlacementElem;
@@ -159,10 +159,6 @@ define([
 
     // Set badge classes. Render the badge. Render slider.
     update();
-
-    // Completion
-    onComplete();
-
   }
 
   return {

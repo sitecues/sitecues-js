@@ -19,25 +19,31 @@ define(
     }
   }
 
-  function onBadgeReady(badge, onComplete, badgeFileName) {
-    palette.init(badgeFileName, function() {
-      ensureNonStaticPositioning(badge);
-      baseView.init(badge, onComplete);
-    });
+  function initBadgeView(badge, badgeFileName) {
+    return palette.init(badgeFileName)
+      .then(function() {
+        ensureNonStaticPositioning(badge);
+        baseView.init(badge);
+      });
   }
 
-  function init(badge, onComplete) {
-    if (badge.localName === 'img') {
+  function init(origBadgeElem) {
+    return new Promise(function(resolve) {
+      if (origBadgeElem.localName !== 'img') {
+        // Normal placeholder badge
+        return resolve({badgeElem: origBadgeElem});
+      }
       // If a customer uses the <img> placeholder...
-      require(['bp-img-placeholder/bp-img-placeholder'], function(imagePlaceHolder) {
-        var newBadge = imagePlaceHolder.init(badge);
-        onBadgeReady(newBadge, onComplete, badge.src);
+      require(['bp-img-placeholder/bp-img-placeholder'], function (imagePlaceHolder) {
+        var newBadge = imagePlaceHolder.init(origBadgeElem);
+        resolve({
+          badgeElem: newBadge,
+          origSrc: origBadgeElem.src
+        });
       });
-    }
-    else {
-      // Normal placeholder badge
-      onBadgeReady(badge, onComplete);
-    }
+    }).then(function(badgeInfo) {
+      return initBadgeView(badgeInfo.badgeElem, badgeInfo.origSrc);
+    });
   }
 
   return {

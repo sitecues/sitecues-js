@@ -4,107 +4,145 @@
  */
 
 // IMPORTANT: The extension defines this module in order to override the mechanism
-define(['core/conf/urls', 'core/platform', 'core/conf/site'], function (urls, platform, site) {
+define(['core/conf/urls', 'core/platform', 'core/conf/site', 'Promise'], function (urls, platform, site, Promise) {
 
   var PATH = 'html/prefs.html',
     ID = 'sitecues-prefs',
     iframe,
-    isLoaded,
-    isInitialized,
+    isIframeLoaded,
+    ERROR_PREFIX = 'Sitecues storage backup - ',
     IS_BACKUP_DISABLED;
 
   // If data is defined, it is a set call, otherwise we are getting data
-  function postMessageToIframe(optionalData) {
-    if (iframe) {
-      iframe.contentWindow.postMessage(optionalData, urls.getScriptOrigin());
-    }
-  }
-
-  function parseData(data) {
-    if (data && typeof data === 'string' && data.charAt(0) === '{') {
-      try {
-        return JSON.parse(data);
-      }
-      catch (ex) {
-        clear();
-        if (SC_DEV) {
-          console.log('Failed to parse backed-up prefs data');
-        }
-      }
-    }
-  }
-
-  function load(onDataAvailableFn) {
-    function onMessageReceived(event) {
-      var key,
-        isEmpty = true,
-        data = event.data,
-        parsedData = {};
-
-      if (event.origin === urls.getScriptOrigin()) {  // Best practice: check if message is from the expected origin
-        if (SC_DEV) {
-          console.log('Backup prefs retrieved');
-        }
-
-        parsedData = parseData(data);
-
-        // Check if parsed back-up storage has saved preferences or a site ID
-        /*jshint forin: false */
-        for (key in parsedData) {
-          isEmpty = false;
-        }
-        /*jshint forin: true */
-      }
-
-      window.removeEventListener('message', onMessageReceived);
-
-      if (isEmpty) {
-        onDataAvailableFn(); // Use callback even if we don't use the data -- otherwise sitecues won't load
-      }
-      else {
-        onDataAvailableFn(parsedData);
-      }
-    }
-
-    if (IS_BACKUP_DISABLED) {
-      onDataAvailableFn();
-      return;
-    }
-    window.addEventListener('message', onMessageReceived);
-    if (SC_DEV) {
-      console.log('Retrieve backup prefs');
-    }
-    postMessageToIframe();
-  }
-
-  function save(data) {
-    init(function () {
-      if (IS_BACKUP_DISABLED) {
-        return;
-      }
+  function postMessageToIframe(optionalDataToSend) {
+    return new Promise(function(resolve, reject) {
       if (SC_DEV) {
-        console.log('Backing up prefs: ' + data);
+        if (optionalDataToSend) {
+          console.log('Saving data to Sitecues storage backup: %o', optionalDataToSend);
+        }
+        else {
+          console.log('Retrieving data from Sitecues storage backup');
+        }
       }
-      postMessageToIframe(data);
+
+      window.addEventListener('message', onMessageReceived);
+
+      iframe.contentWindow.postMessage(optionalDataToSend, urls.getScriptOrigin());
+      var timeout = setTimeout(
+        onTimeout,  // Code to run when we are fed up with waiting.
+        3000        // The browser has this long to get results from the iframe
+      );
+      
+      function onMessageReceived(event) {
+        clearTimeout(timeout);
+        removeMessageListener();
+
+        var eventData = event.data,
+          receivedData = eventData.rawAppData,
+          error = eventData.error;
+
+        if (error) {
+          reject(new Error(ERROR_PREFIX + error));
+          return;
+        }
+
+        if (event.origin !== urls.getScriptOrigin()) {  // Best practice: check if message is from the expected origin
+          reject(new Error(ERROR_PREFIX + 'wrong origin'));
+          return;
+        }
+
+        if (SC_DEV) {
+          if (optionalDataToSend) {
+            console.log('Saved data to Sitecues storage backup');
+          }
+          else if (receivedData) {
+            console.log('Received data from Sitecues storage backup: %o', receivedData);
+          }
+          else {
+            console.log('Sitecues storage backup empty');
+          }
+        }
+
+        resolve(receivedData);
+      }
+
+      function removeMessageListener() {
+        window.removeEventListener('message', onMessageReceived);
+      }
+
+      function onTimeout() {
+        removeMessageListener();
+        reject(new Error(ERROR_PREFIX + 'timed out'));
+      }
     });
   }
 
-  function clear() {
-    save('{}');
+  function performIframeAction(optionalData) {
+    if (IS_BACKUP_DISABLED) {
+      return Promise.resolve();
+    }
+
+    return createIframe()
+      .then(function() {
+        return postMessageToIframe(optionalData);
+      });
   }
 
-  // Optional callbacks
-  function init(onReadyCallback) {
+  function load() {
+    return performIframeAction();
+  }
 
-    IS_BACKUP_DISABLED = (platform.browser.isIE && platform.browser.version <= 10) || site.get('isStorageBackupDisabled');
 
-    if (isInitialized || isLoaded || IS_BACKUP_DISABLED) {
-      onReadyCallback();
-      return;
-    }
-    isInitialized = true;
+  function save(parsedData) {
+    return performIframeAction(parsedData);
+  }
 
-    if (!iframe) {
+  function createIframe() {
+    return new Promise(function(resolve, reject) {
+      var timeout;
+
+      function onTimeout() {
+        removeListeners();
+        reject(new Error(ERROR_PREFIX + 'timed out'));
+      }
+
+      function removeListeners() {
+        iframe.removeEventListener('error', onError);
+        iframe.removeEventListener('load', onLoad);
+        clearTimeout(timeout);
+      }
+
+      function onLoad() {
+        isIframeLoaded = true;
+        resolve();
+      }
+
+      function onError(event) {
+        reject(new Error(event.error));
+      }
+
+      function addListeners() {
+        timeout = setTimeout(
+          onTimeout,  // Code to run when we are fed up with waiting.
+          3000        // The browser has this long to get results from the iframe
+        );
+
+        iframe.addEventListener('load', onLoad);
+        iframe.addEventListener('error', onError);
+      }
+
+      // Has existing iframe
+      if (iframe) {
+        if (isIframeLoaded) {
+          resolve();
+        }
+        else {
+          addListeners();
+        }
+        return;
+      }
+
+      // Create iframe
       iframe = document.createElement('iframe');
       iframe.setAttribute('aria-hidden', true);
       iframe.setAttribute('role', 'presentation');
@@ -121,17 +159,19 @@ define(['core/conf/urls', 'core/platform', 'core/conf/site'], function (urls, pl
       iframe.setAttribute('title', SITECUES_IFRAME_TEXT);
       iframe.innerText = SITECUES_IFRAME_TEXT;
       document.documentElement.appendChild(iframe);
-    }
 
-    iframe.addEventListener('load', function () {
-      isLoaded = true;
-      onReadyCallback();
+      addListeners();
     });
+  }
+
+
+  function init() {
+    IS_BACKUP_DISABLED = (platform.browser.isIE && platform.browser.version <= 10) || site.get('isStorageBackupDisabled');
   }
 
   return {
     init: init,
-    load: load,
-    save: save
+    load: load,   // Returns a promise
+    save: save    // Returns a promise
   };
 });

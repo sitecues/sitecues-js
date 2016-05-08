@@ -15,7 +15,7 @@
  *    }
  * }
  */
-define([], function() {
+define(['core/util/uuid'], function(uuid) {
 
   var
     NAMESPACE = 'sitecues';
@@ -69,19 +69,18 @@ define([], function() {
   function getAppData() {
 
     var dataString = getRawAppData();
-
     return deserialize(dataString);
   }
 
   /*
    * Overwrite only the userId portion of the data currently in storage.
    */
-  function setUserId(id) {
-    if (id) {
-      var appData = getAppData();
-      appData.userId = id;
-      setAppData(appData);
-    }
+  function createUser() {
+    var appData = {},
+      userId = uuid();
+    appData.userId = userId;
+    appData[userId] = {};
+    setAppData(appData);
   }
 
   /*
@@ -112,7 +111,7 @@ define([], function() {
 
     userPreferences[name] = value;
 
-    appData[getUserId()] = userPreferences;
+    appData[userId] = userPreferences;
     setAppData(appData);
   }
 
@@ -129,11 +128,11 @@ define([], function() {
   }
 
   return {
-    setUserId: setUserId,
+    createUser: createUser,
     getUserId: getUserId,
     setPref: setPref,
     getPrefs: getPrefs,
     setAppData: setAppData,
-    getRawAppData: getRawAppData
+    getAppData: getAppData
   };
 });

@@ -7,7 +7,7 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
 
     // IMPORTANT! Increment METRICS_VERSION this every time metrics change in any way
     // IMPORTANT! Have the backend team review all metrics changes!!!
-    var METRICS_VERSION = 10,
+    var METRICS_VERSION = 11,
         isInitialized,
         doSuppressMetrics,
         doLogMetrics,
@@ -27,12 +27,6 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
       data.zoomLevel = conf.get('zoom') || 1;
       data.ttsState = conf.get('ttsOn') || false;
       data.details = details;
-      if (!data.userId) {
-        console.error('Sitecues metrics warning: no user ID!');
-        if (SC_DEV) {
-          console.trace();
-        }
-      }
     };
 
     Metric.prototype.send = function send() {

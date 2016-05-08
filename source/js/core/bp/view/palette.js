@@ -4,9 +4,10 @@ define(
   [
     'core/bp/model/state',
     'core/conf/site',
-    'core/bp/constants'
+    'core/bp/constants',
+    'Promise'
   ],
-  function(state, site, BP_CONST) {
+  function(state, site, BP_CONST, Promise) {
 
   // badgeFileName is optional, and used in the case of old <img> badge placeholders.
   // In that case the filename defines which palette to use, e.g. sitecues-badge-reverse-blue.png
@@ -35,7 +36,7 @@ define(
 
   // initialize the badge color palette support
   // @badgeFileName is optional -- provided when the badge is from an <img>, which clues us into the palette
-  function init(badgeFileName, onComplete) {
+  function init(badgeFileName) {
 
     var paletteKey = getSimplePaletteType(badgeFileName);
 
@@ -46,17 +47,19 @@ define(
         paletteKey = BP_CONST.PALETTE_NAME_NORMAL;
       }
       else {
-        require(['bp-adaptive/bp-adaptive'], function (bpAdaptive) {
-          state.set('defaultPaletteKey', BP_CONST.PALETTE_NAME_NORMAL);
-          bpAdaptive.initAdaptivePalette(onComplete);
+        return new Promise(function(resolve) {
+          require(['bp-adaptive/bp-adaptive'], function (bpAdaptive) {
+            state.set('defaultPaletteKey', BP_CONST.PALETTE_NAME_NORMAL);
+            bpAdaptive.initAdaptivePalette();
+            resolve();
+          });
         });
-        return;
       }
     }
 
     state.set('defaultPaletteKey', paletteKey);
     state.set('paletteKey', paletteKey);
-    onComplete();
+    return Promise.resolve();
   }
 
   return {

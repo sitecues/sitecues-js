@@ -38,9 +38,9 @@ var config = require('../build-config'),
         '"use strict";\n'
       },
       // Include alameda in core
-      include: [ 'core/alameda-custom' ],
+      include: [ 'core/alameda-custom', 'core/errors' ],
       // Make sure core initializes itself
-      insertRequire: [ 'core/core' ]
+      insertRequire: [ 'core/errors', 'core/core' ]
     },
     page: {
       include: [ 'page/jquery/jquery' ]

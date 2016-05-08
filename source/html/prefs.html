@@ -6,30 +6,86 @@
 <body>
 <script type="text/javascript">
   (function() {
-    // If event.data is falsey, we are retrieving the data
-    // If event.data is defined, we are saving the data
-    function handleRequest(event) {
-      if (event.data) {
-        // Saving data
-        try {
-          localStorage.setItem('sitecues', event.data);
-        }
-        catch (ex) {
-          // 'localStorage' prop inaccessible in iframe -- security settings must be set to 'disallow third party site data'
-          // Swallow the exception -- we don't want to pollute the console.log for every setting save attempt
-        }
+    function logError(event, error) {
+      console.log(error);
+      event.source.postMessage({
+        error: error
+      }, event.origin);
+    }
+
+    function getParsedGlobalData() {
+      var rawData = localStorage.getItem('sitecues');
+      return rawData && JSON.parse(rawData);
+    }
+
+    // Save: Should be called any time the Sitecues preferences or user id change
+    function saveData(event) {
+      var globalData = {},
+        globalUserId;
+      try {
+        globalData = getParsedGlobalData();
+      }
+      catch(ex) {
+        console.log('Invalid Sitecues storage backup data');
+      }
+      globalUserId = globalData && globalData.userId;
+      if (!event.data.userId || typeof event.data.userId !== 'string') {
+        logError(event, 'Invalid user id save attempt');
+        return;
+      }
+      if (typeof globalUserId === 'string' && event.data.userId > globalUserId) {
+        // In case of user id mismatch will reject if the new user id is larger
+        // This way the system will gradually settle on the smallest user id used in any page
+        logError(event, 'User id mismatch in Sitecues storage backup.');
+        return;
+      }
+      try {
+        localStorage.setItem('sitecues', JSON.stringify(event.data));
+      }
+      catch (ex) {
+        // Sometimes third party site data is disallowed in browser security settings. New user will be created.
+        logError(event, 'Cannot save preferences.\n' + ex);
+        return;
+      }
+
+      event.source.postMessage({}, event.origin);
+    }
+
+    // Load: Should only be called once, at the launch of Sitecues
+    function loadData(event) {
+      var data;
+      try {
+        data = getParsedGlobalData();
+      }
+      catch (ex) {
+        // Sometimes third party site data is disallowed in browser security settings. Sitecues will not sync its settings between different websites.
+        logError(event, 'Cannot load preferences.\n' + ex);
+        return;
+      }
+
+      function sendRawAppData(rawAppData) {
+        event.source.postMessage({ rawAppData: rawAppData }, event.origin);
+      }
+
+      if (!data) {
+        sendRawAppData({});  // Never initialized -- this is a valid state
+      }
+      else if (typeof data.userId !== 'string') {
+        logError(event, 'Backed up preferences contain invalid user id. Will repair.')
       }
       else {
-        // Retrieving data
-        var value = '';
-        try {
-          value = localStorage.getItem('sitecues');
-        }
-        catch (ex) {
-          // 'localStorage' prop inaccessible in iframe -- security settings must be set to 'disallow third party site data'
-          console.log('Third party site data disallowed in browser security settings: Sitecues will not sync its settings between different websites.');
-        }
-        event.source.postMessage(value, event.origin);
+        sendRawAppData(data);
+      }
+    }
+
+    // If event.data is defined, we are saving the data
+    // Else event.data is falsey, and we are retrieving the data
+    function handleRequest(event) {
+      if (event.data) {   // Parsed data received
+        saveData(event);
+      }
+      else {
+        loadData(event);  // Will return parsed data
       }
     }
 

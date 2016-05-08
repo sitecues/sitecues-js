@@ -7,10 +7,9 @@
  */
 
 define(['core/conf/user/manager', 'core/util/session', 'core/locale', 'core/metric', 'core/platform', 'core/bp/bp',
-        'core/constants', 'core/events'],
-  function (conf, session, locale, metric, platform, bp, CORE_CONST, events) {
+        'core/constants', 'core/events', 'Promise'],
+  function (conf, session, locale, metric, platform, bp, CORE_CONST, events, Promise) {
   var
-    numPrereqsToComplete,
     areZoomEnhancementsInitialized,
     isZoomInitialized,
     isSpeechInitialized,
@@ -212,17 +211,27 @@ define(['core/conf/user/manager', 'core/util/session', 'core/locale', 'core/metr
     window.removeEventListener('keyup', onKeyUp);
   }
 
-  function onPrereqComplete() {
-    if (--numPrereqsToComplete === 0) {
-      //Locale needs to be initialized before metric
-      metric.init();
-      // Both settings AND locale are now complete ... onto BP!!
-      bp.init(initPageFeatureListeners);
-    }
-  }
-
   function isOn() {
     return isSitecuesOn;
+  }
+
+  function initMetrics(confSummary) {
+    confSummary = confSummary || {};
+    session.init(confSummary);
+    initialPageVisitDetails = {
+      nativeZoom: platform.nativeZoom,
+      isRetina  : platform.isRetina(),
+      didUseStorageBackup: confSummary.didUseStorageBackup,
+      isSameUser: confSummary.isSameUser
+    };
+
+    metric.init();
+  }
+
+  function initConfAndMetrics() {
+    return conf.init()
+      .catch(function noop() {})
+      .then(initMetrics);
   }
 
   function init() {
@@ -230,20 +239,11 @@ define(['core/conf/user/manager', 'core/util/session', 'core/locale', 'core/metr
     events.on('keys/did-init', onKeyHandlingInitialized);
     events.on('zoom/ready', onZoomInitialized);
 
-    numPrereqsToComplete = 2;
-
     // Start initialization
-    session.init();
     platform.init();
-    conf.init(function(didUseStorageBackup) {
-      initialPageVisitDetails = {
-        nativeZoom: platform.nativeZoom,
-        isRetina  : platform.isRetina(),
-        didUseStorageBackup: didUseStorageBackup
-      };
-      onPrereqComplete();
-    });
-    locale.init(onPrereqComplete);
+    Promise.all([initConfAndMetrics(), locale.init()])
+      .then(bp.init)
+      .then(initPageFeatureListeners);
   }
 
   return {

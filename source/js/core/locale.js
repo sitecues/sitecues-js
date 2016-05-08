@@ -186,17 +186,18 @@ define([ 'core/data-map' ], function(dataMap) {
     return navigator.language || navigator.userLanguage || navigator.browserLanguage || DEFAULT_LOCALE;
   }
 
-  function init(onReadyCallback) {
+  function init() {
+    return new Promise(function(resolve) {
+      mainBrowserLocale = getMainBrowserLocale();
 
-    mainBrowserLocale = getMainBrowserLocale();
+      // On load fetch the translations only once
+      var lang = getSupportedUiLang(),
+        langModuleName = LOCALE_DATA_PREFIX + lang;
 
-    // On load fetch the translations only once
-    var lang = getSupportedUiLang(),
-      langModuleName = LOCALE_DATA_PREFIX + lang;
-
-    dataMap.get(langModuleName, function(data) {
-      translations = data;
-      onReadyCallback();
+      dataMap.get(langModuleName, function (data) {
+        translations = data;
+        resolve();
+      });
     });
   }
 

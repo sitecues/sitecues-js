@@ -10,7 +10,10 @@ define(['core/metric', 'core/conf/urls'], function(metric, urls) {
 
   function logError(detail, doLogToConsole) {
     if (doLogToConsole) {
-      console.log('%cSitecues Error: %o', 'color: orange', detail);
+      console.log('%cSitecues Error %s', 'color: orange', detail.message);
+      if (detail.stack) {
+        console.log(detail.stack);
+      }
     }
 
     // detail object contains everything we need (message, line, col, etc.)
@@ -38,7 +41,11 @@ define(['core/metric', 'core/conf/urls'], function(metric, urls) {
 
 
   function onPromiseCaught(event) {
-    logError(event.detail, true);
+    var detail = event.detail;
+    logError( {
+      message: detail.message,
+      stack: detail.stack
+    }, true);
   }
 
   window.addEventListener('error', onError, true);   // May get both JS and resource errors
