@@ -22,6 +22,7 @@
 
 .scp-link,.scp-link:visited,.scp-link:focus,.scp-link:hover {
   color: #447AC4 !important; /* Same as #scp-wave3 */
+  font-size: 20px !important;
 }
 
 .scp-button-link,.scp-button-link:visited,.scp-button-link:focus,.scp-button-link:hover {
@@ -31,6 +32,8 @@
   height: 100%;
   display: inline-block;
   padding: 9px 0;
+  font-size: 20px !important;
+
 }
 
 /******************* Secondary content *********************/
