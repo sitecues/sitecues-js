@@ -103,7 +103,7 @@ define(['core/bp/helper', 'core/platform', 'core/conf/site'],
       /***************** Loading/badge  ****************/
 
       // If there is an old badge image, do not show it -- we will show new BP-based badge in place of it
-      '#sitecues-badge>img': {
+      'img#sitecues-badge, #sitecues-badge>img': {
         'visibility': 'hidden !important',
         'opacity': '0 !important'
       },
