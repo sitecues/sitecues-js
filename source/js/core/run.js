@@ -222,7 +222,8 @@ define(['core/conf/user/manager', 'core/util/session', 'core/locale', 'core/metr
       nativeZoom: platform.nativeZoom,
       isRetina  : platform.isRetina(),
       didUseStorageBackup: confSummary.didUseStorageBackup,
-      isSameUser: confSummary.isSameUser
+      isSameUser: confSummary.isSameUser,
+      prefsError: confSummary.error
     };
 
     metric.init();
@@ -230,7 +231,7 @@ define(['core/conf/user/manager', 'core/util/session', 'core/locale', 'core/metr
 
   function initConfAndMetrics() {
     return conf.init()
-      .catch(function noop() {})
+      .catch(function handlePrefsError(error) { return { error: error.message }; })
       .then(initMetrics);
   }
 
