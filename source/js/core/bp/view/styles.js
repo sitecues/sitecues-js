@@ -102,10 +102,10 @@ define(['core/bp/helper', 'core/platform', 'core/conf/site'],
 
       /***************** Loading/badge  ****************/
 
-      // If there is an old badge image, it will fade out
+      // If there is an old badge image, do not show it -- we will show new BP-based badge in place of it
       '#sitecues-badge>img': {
-        'transition': 'opacity 1.5s',
-        'opacity': '1 !important'
+        'visibility': 'hidden !important',
+        'opacity': '0 !important'
       },
 
       // When panel is closed, we use position: absolute
