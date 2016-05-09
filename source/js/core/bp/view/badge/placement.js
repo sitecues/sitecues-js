@@ -114,7 +114,7 @@ define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/plat
     fitSVGtoBadgeRect();
   }
 
-  // Spartan and IE11 on Windows 10 fix
+  // Edge and IE11 on Windows 10 fix
   // Once the BP is moved, these browsers are not re-recognizing the @xlink:href on <use> elements
   // if they are moved. However, toggling a space in front of the attribute value fixes the issue.
   function fixUseElementsInIE() {
@@ -367,7 +367,7 @@ define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/plat
 
     isInitialized = true;
 
-    SHOULD_FIX_USE_ELEMENTS = platform.browser.isIE && platform.browser.version >= 11 && platform.os.majorVersion >= 10;
+    SHOULD_FIX_USE_ELEMENTS = platform.browser.isMS && platform.os.majorVersion >= 10;
 
     // Compute the aspect ratio (the width:height ratio required for the <svg>)
     var viewBoxRect = svg.viewBox.baseVal;

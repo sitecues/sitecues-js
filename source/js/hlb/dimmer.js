@@ -1,7 +1,7 @@
 /**
  * BackgroundDimmer can dim all content in the page behind a given z-index.
  */
-define(['$', 'core/conf/user/manager', 'page/util/common', 'core/platform'], function($, conf, common, platform) {
+define(['$' ], function($) {
 
   //////////////////////////////
   // PRIVATE VARIABLES
@@ -14,13 +14,7 @@ define(['$', 'core/conf/user/manager', 'page/util/common', 'core/platform'], fun
       DIMMER_MIN_OPACITY = 0,
       DIMMER_MAX_OPACITY = 0.65,
 
-      isOldIE = platform.browser.isIE && platform.browser.version < 11,
-
-      requestFrameFn = window.requestAnimationFrame ||
-        window.msRequestAnimationFrame ||
-        function (fn) {
-          return setTimeout(fn, 16);
-        };
+      requestFrameFn = window.requestAnimationFrame;
 
   //////////////////////////////
   // PUBLIC FUNCTIONS
@@ -37,15 +31,14 @@ define(['$', 'core/conf/user/manager', 'page/util/common', 'core/platform'], fun
       return; // Background already dimmed
     }
 
-    var multiplySize = isOldIE ? 2 : 1, // Fixes bug with white line in the middle of the outline
-      documentElement = document.documentElement,
+    var documentElement = document.documentElement,
       width = Math.max(documentElement.scrollWidth, window.innerWidth),
       height = Math.max(documentElement.scrollHeight, window.innerHeight),
       rect = {
         left: 0,
         top: 0,
-        width: width * multiplySize ,
-        height: height * multiplySize
+        width: width,
+        height: height
       },
       $dimmerElement = drawRect(rect, '#000', $parentOfDimmer);
 
@@ -102,7 +95,8 @@ define(['$', 'core/conf/user/manager', 'page/util/common', 'core/platform'], fun
 
   // Draw a rectangle that does not capture any mouse events
   // Implemented via zero-area element and CSS outline
-  // Useful because IE9/10 does not have pointer-events: none
+  // Used to be necessary because IE9/10 does not have pointer-events: none
+  // We could replace this with a div at this point, but it works fine.
   // For example, if drawing a horizontal box we draw a line that is 0px high:
   //
   //       ---------------
@@ -120,18 +114,17 @@ define(['$', 'core/conf/user/manager', 'page/util/common', 'core/platform'], fun
         outlineColor: color,
         outlineStyle: 'solid'
       },
-      elemThickness = (platform.browser.isIE ? 0 : 1) + 'px',
       useOutlineWidth;
 
     if (absRect.width > absRect.height) {   // Wider than tall: draw horizontal line
       useOutlineWidth = absRect.height / 2;
       useCss.width = absRect.width - 2 * useOutlineWidth + 'px';
-      useCss.height = elemThickness;
+      useCss.height = '1px';
     }
     else {   // Taller than wide: draw vertical line
       useOutlineWidth = absRect.width / 2;
       useCss.height = absRect.height - 2 * useOutlineWidth + 'px';
-      useCss.width = elemThickness;
+      useCss.width = '1px';
     }
 
     useCss.left = Math.round(absRect.left + useOutlineWidth) + 'px';

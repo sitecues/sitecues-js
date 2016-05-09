@@ -9,11 +9,7 @@ define(['hlb/dimmer', 'page/util/common', 'hlb/positioning', 'core/platform', '$
       INFLATION_SPEED_FAST = 0, // Inflation duration when retargeting -- need > 0 so that animation end fires correctly
       DEFLATION_SPEED = 150, // Default deflation duration
 
-      getStartingScale = hlbPositioning.getStartingScale,
-
-      animate = platform.browser.isIE9 ? animateJs : animateCss,
-
-      animationTimerIE9;
+      getStartingScale = hlbPositioning.getStartingScale;
 
   /**
    * [transitionInHLB animates the inflation of the HLB and background dimmer]
@@ -31,7 +27,7 @@ define(['hlb/dimmer', 'page/util/common', 'hlb/positioning', 'core/platform', '$
 
     hlbStyle[platform.transformOriginProperty] = data.originCSS;
 
-    animate($hlb[0], startingScale, hlbPositioning.getFinalScale($hlb), speed, data.translateCSS, data.onHLBReady);
+    animateCss($hlb[0], startingScale, hlbPositioning.getFinalScale($hlb), speed, data.translateCSS, data.onHLBReady);
   }
 
   /**
@@ -44,9 +40,6 @@ define(['hlb/dimmer', 'page/util/common', 'hlb/positioning', 'core/platform', '$
 
     // Un-dim the background!
     dimmer.undimBackgroundContent(DEFLATION_SPEED);
-
-    // Stop any IE9 animations
-    clearTimeout(animationTimerIE9);
 
     // Do we bother animating the deflation?
 
@@ -62,28 +55,7 @@ define(['hlb/dimmer', 'page/util/common', 'hlb/positioning', 'core/platform', '$
       return;
     }
 
-    animate($hlb[0], getCurrentScale($hlb), getStartingScale($hlb), DEFLATION_SPEED, data.translateCSS, data.onHLBClosed);
-  }
-
-  function animateJs(hlbElement, startScale, endScale, speed, translateCSS, onCompleteFn) {
-
-    var startTime = Date.now();
-
-    function nextFrame() {
-      var timeElapsed = Date.now() - startTime,
-        percentComplete = timeElapsed >= speed ? 1 : timeElapsed / speed,
-        currentScale = startScale + (endScale - startScale) * percentComplete,
-        transformValue = 'scale(' + currentScale + ') ' + translateCSS;
-
-      hlbElement.style[platform.transformProperty] = transformValue;
-      if (percentComplete < 1) {
-        animationTimerIE9 = setTimeout(nextFrame, 16);
-      }
-      else if (onCompleteFn) {
-        onCompleteFn();
-      }
-    }
-    nextFrame();
+    animateCss($hlb[0], getCurrentScale($hlb), getStartingScale($hlb), DEFLATION_SPEED, data.translateCSS, data.onHLBClosed);
   }
 
   function animateCss(hlbElement, startScale, endScale, speed, translateCSS, onCompleteFn) {

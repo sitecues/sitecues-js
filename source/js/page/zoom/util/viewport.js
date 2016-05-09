@@ -17,12 +17,6 @@ define(
   // Should always be true for IE, because it fixes major positioning bugs
     shouldManuallyAddScrollbars;
 
-  // Avoid evil Firefox insanity bugs, where zoom animation jumps all over the place on wide window with Retina display
-  function shouldFixFirefoxScreenCorruptionBug() {
-    return platform.browser.isFirefox && platform.browser.version < 33 && platform.isRetina() &&
-      window.outerWidth > 1024;
-  }
-
   // We are going to remove scrollbars and re-add them ourselves, because we can do a better job
   // of knowing when the visible content is large enough to need scrollbars.
   // This also corrects the dreaded IE scrollbar bug, where fixed position content
@@ -92,7 +86,6 @@ define(
   }
 
   return {
-    shouldFixFirefoxScreenCorruptionBug: shouldFixFirefoxScreenCorruptionBug,
     maximizeContentVisibility: maximizeContentVisibility,
     jumpToLocationHash: jumpToLocationHash,
     determineScrollbars: determineScrollbars,

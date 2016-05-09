@@ -1,9 +1,9 @@
 /**
  * Basic metrics logger
  */
-define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/locale', 'core/platform', 'core/util/xhr',
+define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/locale', 'core/util/xhr',
         'core/conf/urls', 'core/constants', 'core/bp/model/classic-mode'],
-  function (conf, session, site, locale, platform, xhr, urls, constants, classicMode) {
+  function (conf, session, site, locale, xhr, urls, constants, classicMode) {
 
     // IMPORTANT! Increment METRICS_VERSION this every time metrics change in any way
     // IMPORTANT! Have the backend team review all metrics changes!!!

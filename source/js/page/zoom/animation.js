@@ -46,8 +46,7 @@ define(
       glideChangeTimer,       // Timer used for callbacks
 
       // Function to call for requesting an animation frame
-      requestFrame = window.requestAnimationFrame || window.msRequestAnimationFrame ||
-        function(fn) { return setTimeout(fn, 16); },  // 16ms is about 60fps
+      requestFrame = window.requestAnimationFrame,
 
       // State to help with animation optimizations and will-change
       zoomBeginTimer, // Timer before zoom can actually begin (waiting for browser to create composite layer)
@@ -152,19 +151,6 @@ define(
             input.isButtonPress = true;
           }
         }
-        if (!shouldSmoothZoom()) {
-          beginZoomOperation(targetZoom, input);
-          // Instant zoom
-          if (event) {
-            // When no animations and key/button pressed -- just be clunky and zoom a bit closer to the target
-            var delta = MIN_ZOOM_PER_CLICK * (state.completedZoom < targetZoom ? 1 : -1);
-            state.currentTargetZoom = restrictZoom.toValidRange(state.completedZoom + delta);
-          }
-          performInstantZoomOperation();
-          finishZoomOperation();
-          return;
-        }
-
         input.isLongGlide = true; // Default, assume glide will not be cut off early
         beginZoomOperation(targetZoom, input, beginGlideAnimation);  // Provide callback for when animation can actually start
         $(window).one('keyup', finishGlideIfEnough);
@@ -211,13 +197,7 @@ define(
 
     // Cancel any currently requested animation frame
     function cancelFrame() {
-      var cancel = window.cancelAnimationFrame || window.msCancelRequestAnimationFrame;
-      if (cancel) {
-        cancel(zoomAnimator);
-      }
-      else {
-        clearTimeout(zoomAnimator);
-      }
+      window.cancelAnimationFrame(zoomAnimator);
     }
 
     // Add useful zoom fixes to the body's @style
@@ -267,36 +247,17 @@ define(
       state.zoomInput.isSliderClick = true;
     }
 
-    // Should smooth zoom be used or step zoom?
-    // In dev, we can override as follows:
-    // Shift-key: Script-based smooth zoom
-    // Ctrl-key: CSS-based smooth zoom
-    function shouldSmoothZoom() {
-      if (viewport.shouldFixFirefoxScreenCorruptionBug()) {
-        return false;
-      }
-
-      return config.shouldSmoothZoom;
-    }
-
     // If smooth zoom is used, which kind -- JS or CSS keyframes?
     // In dev, we can override default behavior as follows:
     // Shift-key: Script-based
     // Ctrl-key: CSS-based
     function shouldUseKeyFramesAnimation() {
 
-      // Only IE10 and up can do CSS animate.
-      var isIE = platform.browser.isIE,
-        isSafari = platform.browser.isSafari,
-        restrictingWidthInSafari = isSafari && config.shouldRestrictWidth;
+      var restrictingWidthInSafari = platform.browser.isSafari && config.shouldRestrictWidth;
 
-      return shouldSmoothZoom()   &&
-        !isIE                  &&
-          // Safari is herky jerky if animating the width and using key frames
-          // TODO fix initial load zoom with jsZoom -- not doing anything
-        !restrictingWidthInSafari &&
-          // Chrome will use element.animate();
-        !shouldUseElementDotAnimate;
+      return !platform.browser.isIE &&  // IE/Edge are working better with JS animation
+        !restrictingWidthInSafari &&  // Safari is herky jerky if animating the width and using key frames
+        !shouldUseElementDotAnimate;  // Chrome will use element.animate();
     }
 
     // Animate until the currentTargetZoom, used for gliding zoom changes
@@ -715,13 +676,8 @@ define(
       }
     }
 
-    function chooseZoomStrategy(shouldPerformContinualUpdates) {
-      if (shouldPerformContinualUpdates) {
-        zoomAnimator = requestFrame(performContinualZoomUpdates);
-      }
-      else {
-        performInstantZoomOperation();
-      }
+    function chooseZoomStrategy() {
+      zoomAnimator = requestFrame(performContinualZoomUpdates);
     }
 
     //If there is a transition style applied to the body, we need to be sure that it doesn't apply to transformations

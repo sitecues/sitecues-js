@@ -9,7 +9,6 @@ define([
   'core/bp/model/state',
   'core/conf/user/manager',
   'core/bp/view/size-animation',
-  'core/platform',
   'core/locale',
   'core/conf/site',
   'core/bp/view/panel/panel-classes',
@@ -21,7 +20,6 @@ define([
             state,
             conf,
             sizeAnimation,
-            platform,
             locale,
             site,
             panelClasses,
@@ -97,7 +95,6 @@ define([
     // Get the view classes that will create the desired appearance
     var isOrWillBePanel = state.isPanelRequested(),
       classes = isOrWillBePanel ? panelClasses.getViewClasses() : badgeClasses.getViewClasses();
-    classes += ' scp-ie9-' + platform.browser.isIE9;
 
     // This will cause the CSS to update
     bpContainer.setAttribute('class', classes);

@@ -1,8 +1,8 @@
 /**
  * Generic module for handling the cards used by tips and settings
  */
-define(['core/bp/constants', 'core/bp/helper', 'core/locale', 'core/bp/model/state', 'core/platform', 'core/util/xhr', 'core/conf/urls', 'core/conf/site', 'core/events'],
-  function (BP_CONST, helper, locale, state, platform, xhr, urls, site, events) {
+define(['core/bp/constants', 'core/bp/helper', 'core/locale', 'core/bp/model/state', 'core/util/xhr', 'core/conf/urls', 'core/events'],
+  function (BP_CONST, helper, locale, state, xhr, urls, events) {
 
   var
     PANELS_WITH_CARDS = { tips: 1, settings: 1},
@@ -21,20 +21,13 @@ define(['core/bp/constants', 'core/bp/helper', 'core/locale', 'core/bp/model/sta
     xhr.get({
       url: panelUrl,
       success: function(html) {
-        var tabStrip,
-          finalHTML = addSemanticSugar(html),
+        var finalHTML = addSemanticSugar(html),
           panelElement,
           htmlContainer = document.createElement('div'); // Just a container where we can parse out the desired contents
 
         htmlContainer.innerHTML = finalHTML;
         panelElement = htmlContainer.firstElementChild;
-        removeUnsupportedContent(panelElement);
         getContainer().appendChild(panelElement);
-
-        tabStrip = panelElement.querySelector('.scp-card-chooser');
-        if (tabStrip.childElementCount > 3) {
-          fixTabStripSpacing(tabStrip);
-        }
 
         toggleCardActive(panelElement.firstElementChild, true);
 
@@ -67,52 +60,6 @@ define(['core/bp/constants', 'core/bp/helper', 'core/locale', 'core/bp/model/sta
       .replace(/<\/sc-normal-range>/g, '</input>')
       .replace(/<sc-hue-range /g, '<input type="range"' + INTERACTIVE + ' scp-hue-range" ')
       .replace(/<\/sc-hue-range>/g, '</input>');
-  }
-
-  // Use all the spacing to the left and right of the tab strip
-  // We need as much as we can get
-  function fixTabStripSpacing(tabStrip) {
-    var firstTab = tabStrip.firstElementChild,
-      tabStripStyle = getComputedStyle(tabStrip),
-      firstWidth = getTabTextWidth(firstTab),
-      additionalSpaceLeft = (firstTab.getBoundingClientRect().width - firstWidth) / 2;
-
-    function getTabTextWidth(tab) {
-      // Temporarily use inline so we can measure the width of these tabs
-      tab.style.display = 'inline';
-      var width = tab.getBoundingClientRect().width;
-      tab.style.display = '';
-      return width;
-    }
-
-    tabStrip.style.left = (parseFloat(tabStripStyle.left) - additionalSpaceLeft) + 'px';
-    tabStrip.style.width = (parseFloat(tabStripStyle.width) + additionalSpaceLeft * 2) + 'px';
-  }
-
-  // Remove elements unless required by the site config
-  function removeAllElements(panelElement, elementsToRemoveSelector) {
-    function applyDisplayStyle(elements, display) {
-      var index = elements.length;
-      while (index--) {
-        elements[index].style.display = display;
-      }
-    }
-
-    var remove = panelElement.querySelectorAll(elementsToRemoveSelector),
-      keepSelector = site.get('keepInPanel'),
-      keep = keepSelector && panelElement.querySelectorAll(keepSelector);
-
-    applyDisplayStyle(remove, 'none');
-    if (keep) {
-      applyDisplayStyle(keep, 'block');
-    }
-
-  }
-
-  function removeUnsupportedContent(panelElement) {
-    if (platform.browser.isIE && platform.browser.version <= 10) {
-      removeAllElements(panelElement, '[data-no-ie10]');
-    }
   }
 
   function onPanelUpdate() {

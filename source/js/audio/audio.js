@@ -17,7 +17,6 @@ define(
     'core/conf/site',
     '$',
     'audio/speech-builder',
-    'core/platform',
     'core/locale',
     'core/metric',
     'core/conf/urls',
@@ -26,7 +25,7 @@ define(
     'audio/local-player',
     'audio/network-player'
   ],
-  function(constant, conf, site, $, builder, platform, locale, metric, urls, textSelect, events, localPlayer, networkPlayer) {
+  function(constant, conf, site, $, builder, locale, metric, urls, textSelect, events, localPlayer, networkPlayer) {
 
   var ttsOn = false,
     lastPlayer,

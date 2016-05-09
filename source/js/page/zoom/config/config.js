@@ -6,7 +6,6 @@ define(['$', 'core/conf/site'], function ($, site) {
     // Default zoom configuration
     config = { // Can be customized via provideCustomConfig()
       // Should smooth zoom animations be enabled?
-      shouldSmoothZoom: true,
       provideCustomZoomConfig: provideCustomZoomConfig,
       init: init
     };

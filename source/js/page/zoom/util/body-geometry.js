@@ -1,8 +1,6 @@
 define(
   [
     '$',
-    'core/platform',
-    'core/events',
     'page/util/common',
     'page/zoom/config/config',
     'page/zoom/constants',
@@ -11,8 +9,6 @@ define(
   ],
   function (
     $,
-    platform,
-    events,
     common,
     config,
     constants,

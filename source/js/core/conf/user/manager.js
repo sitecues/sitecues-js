@@ -115,44 +115,54 @@ define(['Promise', 'core/conf/user/storage', 'core/conf/user/storage-backup' ], 
 
   function init() {
 
-    function onNoPrefsData() {
-      // No or invalid user: generate one
-      createUser();
-    }
-
     function onPrefsError(error) {
       createUser();
       return Promise.reject(error);
     }
 
-    function onStorageBackupReply(prefsData) {
-      if (prefsData) {
-        // Only returns data if at least a userId is present
-        storage.setAppData(prefsData);
-        return {
-          didUseStorageBackup: true,
-          isSameUser: true
-        };
+    function globalUser(globalPrefsData) {
+      // Prefer user in storage-backup -- it's a different user id
+      if (SC_DEV && storage.getUserId()) {
+        console.log('User discrepancy found: preferring global user');
       }
-      else {
-        return onNoPrefsData();
-      }
+      // This discrepancy is a rare case - when it happens we just use the global prefs data
+      // to remove the conflict
+      storage.setAppData(globalPrefsData);
+      return {
+        didUseStorageBackup: true,
+        isSameUser: false
+      };
     }
 
-    if (storage.getUserId()) {
-      // Prefs already in local storage
-      return Promise.resolve({
+    function localUser() {
+      return {
         didUseStorageBackup: false,
         isSameUser: true
-      });
+      };
     }
 
+    function getBestUser(globalPrefsData) {
+      var localUserId = storage.getUserId(),
+        globalUserId = globalPrefsData && globalPrefsData.userId;
 
-    // Could not find local storage for sitecues prefs
-    // Try cross-domain backup storage
+      if (globalUserId && globalUserId !== localUserId) {
+        // Use global user if it exists and it is different from the local user
+        // (or no local user id but a global one exists)
+        return globalUser(globalPrefsData);
+      }
+      else if (localUserId) {
+        // Has a valid local user
+        return localUser();
+      }
+      else {
+        // No or invalid user: generate one
+        createUser();
+      }
+    }
+
     storageBackup.init();
     return storageBackup.load()
-      .then(onStorageBackupReply)
+      .then(getBestUser)
       .catch(onPrefsError);
   }
 

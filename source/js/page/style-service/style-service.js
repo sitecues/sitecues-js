@@ -77,6 +77,7 @@ define(['$', 'page/style-service/css-aggregator', 'page/style-service/media-quer
 
   // Sometimes CSS that's too large creates huge performance problems in IE, locking up the browser
   // There seems to be a size threshold where the problems don't occur if they are under that
+  // Note: not necessary in Edge!
   function chunkCss(allCss) {
     if (!platform.browser.isIE || allCss.length < CSS_MAX_CHUNK_SIZE) {
       return [ allCss ];

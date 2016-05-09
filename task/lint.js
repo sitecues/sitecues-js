@@ -2,7 +2,8 @@
 
 var gulp = require('gulp'),
   jshint = require('gulp-jshint'),
-  check = require('gulp-check');
+  check = require('gulp-check'),
+  amdCheck = require('gulp-amdcheck');
 
 function lint() {
   var LINT_GLOB = [
@@ -33,11 +34,24 @@ function checkForBindUsage() {
     });
 }
 
+function checkAmd() {
+  var LINT_GLOB = [
+    'source/js/**/*.js'
+  ];
+
+  return gulp.src(LINT_GLOB)
+    .pipe(amdCheck({
+      errorOnUnusedDependencies: true,
+      logUnusedDependencyPaths: false
+    }));
+}
+
 checkForBindUsage.displayName = 'checkForBindUsage';
 
 var lintTasks =
   gulp.parallel(
     lint,
+    checkAmd,
     checkForBindUsage
   );
 

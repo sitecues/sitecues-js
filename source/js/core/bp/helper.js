@@ -1,5 +1,5 @@
 // It is too similar to utils.js which is confusing
-define(['core/platform', 'core/bp/constants'], function(platform, BP_CONST) {
+define(['core/bp/constants'], function(BP_CONST) {
   /**
    *** Getters ***
    */

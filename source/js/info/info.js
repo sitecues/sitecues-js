@@ -159,8 +159,8 @@ define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 
 
   function addCloseButton() {
     var helpRect = $iframe[0].getBoundingClientRect(),
-      offsetLeft = platform.browser.isIE ? -30 : -17, // Deal with big scrollbars on Windows
-      offsetTop = platform.browser.isIE ? -6 : -1;
+      offsetLeft = platform.browser.isMS ? -30 : -17, // Deal with big scrollbars on Windows
+      offsetTop = platform.browser.isMS ? -6 : -1;
 
     $closeButton =
       $('<scx style="display:block" class="scp-hand-cursor"><scx style="position:relative;left:14px;top:23px;color:#ccc">x</scx></scx>')

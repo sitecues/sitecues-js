@@ -7,10 +7,6 @@ define(
   [
     '$',
     'core/conf/user/manager',
-    'core/conf/site',
-    'core/platform',
-    'page/util/common',
-    'core/metric',
     'core/events',
     'page/zoom/animation',
     'page/zoom/util/body-geometry',
@@ -23,10 +19,6 @@ define(
   function (
     $,
     conf,
-    site,
-    platform,
-    common,
-    metric,
     events,
     animation,
     bodyGeo,
@@ -70,11 +62,10 @@ define(
     // Use to jump the current zoom immediately to the targetZoom requested
     // The use case for this is currently the zoom slider
     function jumpTo(targetZoom) {
-      var shouldPerformContinualUpdates = !viewport.shouldFixFirefoxScreenCorruptionBug();
       if (!animation.isZoomOperationRunning()) {
         // 1st call -- we will glide to it, it may be far away from previous zoom value
         animation.beginZoomOperation(targetZoom, {isSlider: true}); // Get ready for more slider updates
-        if (shouldPerformContinualUpdates && targetZoom !== state.completedZoom) {
+        if (targetZoom !== state.completedZoom) {
           animation.performJsAnimateZoomOperation();
           animation.updateSlider();
         }
@@ -84,7 +75,7 @@ define(
           animation.cancelFrame();
           animation.cancelGlideChangeTimer();
           state.zoomInput.isSliderDrag = true;
-          animation.chooseZoomStrategy(shouldPerformContinualUpdates);
+          animation.chooseZoomStrategy();
         }
         // 3rd and subsequent calls, just update the target zoom value
         // so that the continual update loop uses the new value

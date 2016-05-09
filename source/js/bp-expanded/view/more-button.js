@@ -29,7 +29,7 @@ define(['core/bp/constants', 'core/bp/helper', 'bp-expanded/view/transform-util'
       return;
     }
 
-    // Not IE9: go ahead with secondary panel
+    // Open secondary panel (not in classic mode)
     require(['bp-secondary/bp-secondary'], function(secondary) {
       // Show or hide the secondary panel.
       secondary.init();

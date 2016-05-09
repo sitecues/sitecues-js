@@ -885,8 +885,7 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
           display: 'block'
         }),
         // For some reason using the <body> works better in FF version <= 32
-        isOldFirefox = platform.browser.isFirefox && platform.browser.version < 33,
-        offsetElement = isOldFirefox ? document.body : $measureDiv[0];
+        offsetElement = $measureDiv[0];
       offsetRect = offsetElement.getBoundingClientRect();
       $measureDiv.remove();
     }

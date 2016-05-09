@@ -6,16 +6,8 @@ define([ 'core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/pla
 
     'use strict';
 
-  var requestFrameFn = window.requestAnimationFrame   ||
-                       window.msRequestAnimationFrame ||
-                       function (fn) {
-                         return setTimeout(fn, 16);
-                       },
-      cancelFrameFn  = window.cancelAnimationFrame   ||
-                       window.msCancelAnimationFrame ||
-                       function (fn) {
-                         clearTimeout(fn);
-                       },
+  var requestFrameFn = window.requestAnimationFrame,
+      cancelFrameFn  = window.cancelAnimationFrame,
       expandEasingFn   = function (t) { return (--t)*t*t+1;}, // https://gist.github.com/gre/1650294
       collapseEasingFn = function (t) { return t; },          // Linear looks better for collapse animation
       animationStartTime,

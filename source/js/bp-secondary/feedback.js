@@ -1,5 +1,5 @@
-define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/platform', 'core/metric', 'core/bp/view/view', 'core/events'],
-  function (BP_CONST, helper, state, platform, metric, view, events) {
+define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/metric', 'core/bp/view/view', 'core/events'],
+  function (BP_CONST, helper, state, metric, view, events) {
   var byId = helper.byId,
     isActive = false,
     isInitialized,
@@ -94,7 +94,6 @@ define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/plat
 
     // Copy current rating to group
     // TODO need to test usability of ratings with screen reader
-    // TODO breaking in IE9!! Object doesn't support getAttribute()
     ratingElem.setAttribute('aria-label', targetStar.getAttribute('aria-label'));
 
     updateMailtoLink();

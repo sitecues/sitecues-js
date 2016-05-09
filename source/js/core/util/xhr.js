@@ -1,27 +1,20 @@
-// Cheap, extremely minimal XHR for IE9+ and other browsers
+// Cheap, extremely minimal XHR
 // Takes subset of $.ajax params -- data, contentType, headers, cache, dataType, url, success, error
 
 define([], function () {
 
   // -- PRIVATE --
 
-  // Cross-browser XHR requests (supports IE9)
+  // Cross-browser XHR requests
   function initRequest(postData, requestObj, optionalContentTypeOverride, successFnOverride) {
     var xhr = new XMLHttpRequest(),
       type = postData ? 'POST' : 'GET',
       contentType = optionalContentTypeOverride || requestObj.contentType;
 
-    if ('withCredentials' in xhr) {
-      // Everything except for IE9
-      xhr.open(type, requestObj.url, true);
-      if (contentType) {
-        // If post, the content type is what we're sending, if get it's what we're receiving
-        xhr.setRequestHeader(postData ? 'Content-Type' : 'Accept', contentType); // Can be set on XHR but not XDomainRequest
-      }
-    } else {
-      // IE9 only
-      xhr = new XDomainRequest();
-      xhr.open(type, requestObj.url);
+    xhr.open(type, requestObj.url, true);
+    if (contentType) {
+      // If post, the content type is what we're sending, if get it's what we're receiving
+      xhr.setRequestHeader(postData ? 'Content-Type' : 'Accept', contentType); // Can be set on XHR but not XDomainRequest
     }
 
     xhr.onload = function() {
@@ -40,12 +33,7 @@ define([], function () {
     };
 
     // Send it!
-    if (postData) {
-      xhr.send(postData);
-    }
-    else {
-      xhr.send();
-    }
+    xhr.send(postData);
   }
 
   // -- PUBLIC ---
