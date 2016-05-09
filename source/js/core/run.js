@@ -223,7 +223,7 @@ define(['core/conf/user/manager', 'core/util/session', 'core/locale', 'core/metr
       isRetina  : platform.isRetina(),
       didUseStorageBackup: confSummary.didUseStorageBackup,
       isSameUser: confSummary.isSameUser,
-      prefsError: confSummary.error.message
+      prefsError: confSummary.error && confSummary.error.message
     };
 
     metric.init();
