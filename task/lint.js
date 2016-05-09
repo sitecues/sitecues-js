@@ -49,7 +49,8 @@ checkForBindUsage.displayName = 'checkForBindUsage';
 
 var lintTasks =
   gulp.parallel(
-    lint,
+    lintES5,
+    lintES6,
     checkAmd,
     checkForBindUsage
   );
