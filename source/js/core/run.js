@@ -223,7 +223,7 @@ define(['core/conf/user/manager', 'core/util/session', 'core/locale', 'core/metr
       isRetina  : platform.isRetina(),
       didUseStorageBackup: confSummary.didUseStorageBackup,
       isSameUser: confSummary.isSameUser,
-      prefsError: confSummary.error
+      prefsError: confSummary.error.message
     };
 
     metric.init();
@@ -231,7 +231,7 @@ define(['core/conf/user/manager', 'core/util/session', 'core/locale', 'core/metr
 
   function initConfAndMetrics() {
     return conf.init()
-      .catch(function handlePrefsError(error) { return { error: error.message }; })
+      .catch(function handlePrefsError(error) { return { error: error }; })
       .then(initMetrics);
   }
 
