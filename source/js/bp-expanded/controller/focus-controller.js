@@ -62,7 +62,7 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
         'stars-3',
         'stars-4',
         'stars-5',
-        'feedback-send',
+        'feedback-send-link',
         'feedback-thanks',
         'tips-label',
         'settings-label',
