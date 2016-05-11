@@ -41,7 +41,7 @@ define(['core/util/uuid'], function(uuid) {
 
   function init(options) {
     // Use session id and page view id from parent page if available
-    exports.sessionId  = (options.isSameUser && getReusableSessionId()) || createSessionId();
+    exports.sessionId  = (options.canReuseSession && getReusableSessionId()) || createSessionId();
     exports.pageViewId = getParentPageViewId() || uuid();
   }
 

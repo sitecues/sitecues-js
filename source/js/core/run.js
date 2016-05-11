@@ -92,8 +92,12 @@ define(['core/conf/user/manager', 'core/util/session', 'core/locale', 'core/metr
     }
   }
 
-  function onSitecuesReady() {
+  function firePageVisitedMetric() {
     new metric.PageVisit(initialPageVisitDetails).send();
+  }
+
+  function onSitecuesReady() {
+    firePageVisitedMetric();
 
     sitecues.readyState = state.COMPLETE;
     //Freeze readyState on load
@@ -215,23 +219,36 @@ define(['core/conf/user/manager', 'core/util/session', 'core/locale', 'core/metr
     return isSitecuesOn;
   }
 
-  function initMetrics(confSummary) {
-    confSummary = confSummary || {};
-    session.init(confSummary);
-    initialPageVisitDetails = {
-      nativeZoom: platform.nativeZoom,
-      isRetina  : platform.isRetina(),
-      didUseStorageBackup: confSummary.didUseStorageBackup,
-      isSameUser: confSummary.isSameUser,
-      prefsError: confSummary.error && confSummary.error.message
-    };
+  function initMetrics(sitecuesInitSummary) {
+    // sitecuesInitSummary can contain the following fields:
+    // isSameUser
+    // didUseStorageBackup
+    // isUnsupportedPlatform
+    // error (a string)
+    sitecuesInitSummary = sitecuesInitSummary || {};
+
+    session.init({
+      // Do not reuse session if user changes
+      // If unsupported platform, allow session id to remain consistent
+      canReuseSession: sitecuesInitSummary.isSameUser || sitecuesInitSummary.isUnsupportedPlatform
+    });
+
+    // Copy sitecuesInitSummary so we can add to it
+    initialPageVisitDetails = JSON.parse(JSON.stringify(sitecuesInitSummary));
+
+    // Add platform details
+    initialPageVisitDetails.nativeZoom = platform.nativeZoom;
+    initialPageVisitDetails.isRetina = platform.isRetina();
+    initialPageVisitDetails.os = platform.os;
+    initialPageVisitDetails.browser = platform.browser.is;
+    initialPageVisitDetails.browserVersion = platform.browser.version;
 
     metric.init();
   }
 
   function initConfAndMetrics() {
     return conf.init()
-      .catch(function handlePrefsError(error) { return { error: error }; })
+      .catch(function handlePrefsError(error) { return { error: error.message }; })
       .then(initMetrics);
   }
 
@@ -241,10 +258,19 @@ define(['core/conf/user/manager', 'core/util/session', 'core/locale', 'core/metr
     events.on('zoom/ready', onZoomInitialized);
 
     // Start initialization
-    platform.init();
-    Promise.all([initConfAndMetrics(), locale.init()])
-      .then(bp.init)
-      .then(initPageFeatureListeners);
+    if (platform.init()) {
+      // Supported platform: continue to init Sitecues
+      Promise.all([initConfAndMetrics(), locale.init()])
+        .then(bp.init)
+        .then(initPageFeatureListeners);
+    }
+    else {
+      // Unsupported platform: fail early but fire page-visited metric
+      initMetrics({
+        isUnsupportedPlatform: true
+      });
+      firePageVisitedMetric();
+    }
   }
 
   return {

@@ -61,31 +61,46 @@ define([], function() {
   function getBrowser(agent) {
     var browserStr = getBrowserStr(agent),
       isMS = browserStr === 'IE',
-      version = getVersion(agent, isMS);
+      version,
+      browser = {
+        zoom: 'zoom' in document.createElement('div').style,
+        is: browserStr,
+        isFirefox: browserStr === 'Firefox',
+        //Evaluates true for Internet Explorer and Edge (there is a lot of overlap in browser specific logic)
+        isMS: isMS, // Includes Edge
+        isIE: isMS && version < 12,  // Does not include Edge
+        isEdge: isMS && version >= 12,
+        isChrome: browserStr === 'Chrome',
+        isOpera: browserStr === 'Opera',
+        isSafari: browserStr === 'Safari',
+        isWebKit: browserStr === 'Chrome' || browserStr === 'Opera' || browserStr === 'Safari'
+      };
 
+    browser.version = version = getVersion(agent, browser);
+    browser.isIE = isMS && version < 12;
+    browser.isEdge = isMS && version >= 12;
 
-    return {
-      zoom: 'zoom' in document.createElement('div').style,
-      is: browserStr,
-      version: version,
-      isFirefox: browserStr === 'Firefox',
-      //Evaluates true for Internet Explorer and Edge (there is a lot of overlap in browser specific logic)
-      isMS: isMS, // Includes Edge
-      isIE: isMS && version < 12,  // Does not include Edge
-      isEdge: isMS && version >= 12,
-      isChrome: browserStr === 'Chrome',
-      isOpera: browserStr === 'Opera',
-      isSafari: browserStr === 'Safari',
-      isWebKit: browserStr === 'Chrome' || browserStr === 'Opera' || browserStr === 'Safari'
-    };
+    return browser;
   }
 
   // Set globally accessible version constants
-  function getVersion(agent, isMS) {
+  function getVersion(agent, browser) {
     // If IE is being used, determine which version
     var charIndex = agent.indexOf('rv:');
     if (charIndex === -1) {
-      if (isMS) {
+      if (browser.isChrome) {
+        charIndex = agent.indexOf('Chrome/');
+        if (charIndex > 0) {
+          charIndex += 7;
+        }
+      }
+      else if (browser.isSafari) {
+        charIndex = agent.indexOf('Version/');
+        if (charIndex > 0) {
+          charIndex += 8;
+        }
+      }
+      else if (browser.isMS) {
         // Use MSIE XX.X
         charIndex = agent.indexOf('MSIE');
         if (charIndex < 0) {
@@ -117,7 +132,6 @@ define([], function() {
       is: osStr,
       isMac: osStr === 'mac',
       isWin: osStr === 'win',
-      isLinux: osStr === 'mac', // This should say 'mac', not 'linux'
       // Set globally accessible version constants
       versionString: (function () {
         // If IE is being used, determine which version
@@ -200,17 +214,44 @@ define([], function() {
     return isRetinaDisplay;
   }
 
+  // Returns truthy value if the current OS/browser combo is supported
+  function isSupported(os, browser) {
+    if (os.isWin || os.isMac) {
+      var version = browser.version;
+      if (browser.isIE) {
+        return version === 11;
+      }
+      if (browser.isEdge) {
+        return version > 12;
+      }
+      if (browser.isFirefox) {
+        return version > 33;
+      }
+      if (browser.isSafari) {
+        return version > 7;
+      }
+      if (browser.isChrome) {
+        return version > 40;
+      }
+    }
+  }
+
+  // return truthy if platform is supported
   function init() {
     agent = navigator.userAgent || '';
     exports.browser = getBrowser(agent);
     exports.os = getOS(agent, getOSStr(navigator.platform.toLowerCase()));
+    exports.nativeZoom = getNativeZoom();
+    if (!isSupported(exports.os, exports.browser)) {
+      return;
+    }
+
     exports.canUseRetinaCursors = exports.browser.isChrome;
     exports.cssPrefix = getCssPrefix(exports.browser);
     exports.transformPropertyCss = exports.browser.isWebKit && !isCssPropSupported('transform')? '-webkit-transform' : 'transform';
     exports.transformProperty = exports.transformPropertyCss.replace('-t', 'T').replace('-', '');
     exports.transformOriginProperty = exports.transformProperty + 'Origin';
     exports.transitionEndEvent = exports.browser.isWebKit ? 'webkitTransitionEnd' : 'transitionend';
-    exports.nativeZoom = getNativeZoom();
 
     // Invalidate cached retina info on window resize, as it may have moved to another display.
     // When a window moves to another display, it can change whether we're on a retina display.
@@ -218,6 +259,8 @@ define([], function() {
     addEventListener('resize', function () {
       isRetinaDisplay = undefined;
     });
+
+    return true;
   }
 
   return exports;
