@@ -9,7 +9,6 @@ define([
   'core/bp/model/state',
   'core/conf/user/manager',
   'core/bp/view/size-animation',
-  'core/platform',
   'core/locale',
   'core/conf/site',
   'core/bp/view/panel/panel-classes',
@@ -21,7 +20,6 @@ define([
             state,
             conf,
             sizeAnimation,
-            platform,
             locale,
             site,
             panelClasses,
@@ -97,7 +95,6 @@ define([
     // Get the view classes that will create the desired appearance
     var isOrWillBePanel = state.isPanelRequested(),
       classes = isOrWillBePanel ? panelClasses.getViewClasses() : badgeClasses.getViewClasses();
-    classes += ' scp-ie9-' + platform.browser.isIE9;
 
     // This will cause the CSS to update
     bpContainer.setAttribute('class', classes);
@@ -131,7 +128,7 @@ define([
   // the websites placeholder.  It sets the SVG height and width so that it visually covers the
   // placeholder/badgeElement.  It binds event handlers to append the BPContainer to <html> or
   // the badgeElement (switching parent).
-  function init(badgePlacementElem, onComplete) {
+  function init(badgePlacementElem) {
 
     // Create the container and insert the SVG
     badgeElement = badgePlacementElem;
@@ -159,10 +156,6 @@ define([
 
     // Set badge classes. Render the badge. Render slider.
     update();
-
-    // Completion
-    onComplete();
-
   }
 
   return {

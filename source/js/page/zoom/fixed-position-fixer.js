@@ -137,8 +137,7 @@ define(['$', 'page/zoom/zoom', 'core/platform', 'core/conf/site', 'page/style-se
     // Show or hide fixed position elements
     function setAllowMouseEvents(doAllowMouse) {
       var selector = getFixedPositionSelector(),
-        supportsPointerEventsCss = !platform.browser.isIE || platform.browser.version > 10,
-        applyCssProp = supportsPointerEventsCss ? 'pointerEvents' : 'none',
+        applyCssProp = 'pointerEvents',
         applyCssValue = doAllowMouse ? '' : 'none';
 
       $(selector).css(applyCssProp, applyCssValue);
@@ -231,9 +230,7 @@ define(['$', 'page/zoom/zoom', 'core/platform', 'core/conf/site', 'page/style-se
         var selectors = getUnjoinedFixedPositionSelectors();
         if (selectors) {
           createPositionStyleSheet(selectors);
-          if (!platform.browser.isIE || platform.browser.version > 10) {
-            listenForInlineFixedPositioning();
-          }
+          listenForInlineFixedPositioning();
           lazyTurnOn();
         }
       });

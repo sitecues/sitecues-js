@@ -91,11 +91,7 @@ define(['$', 'core/conf/urls', 'core/conf/site', 'Promise' ], function ($, urls,
    */
   function stop() {
     audioElements.forEach(function(audioElement) {
-      // We can only pause in IE9 if there is enough data
-      // for the current and at least the next frame
-      if (audioElement.readyState >= audioElement.HAVE_FUTURE_DATA) {
-        audioElement.pause();
-      }
+      audioElement.pause();
     });
   }
 

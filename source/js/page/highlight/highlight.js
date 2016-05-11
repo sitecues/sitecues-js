@@ -885,8 +885,7 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
           display: 'block'
         }),
         // For some reason using the <body> works better in FF version <= 32
-        isOldFirefox = platform.browser.isFirefox && platform.browser.version < 33,
-        offsetElement = isOldFirefox ? document.body : $measureDiv[0];
+        offsetElement = $measureDiv[0];
       offsetRect = offsetElement.getBoundingClientRect();
       $measureDiv.remove();
     }
@@ -1276,11 +1275,11 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
       // We have an old highlight and mouse moved.
       // What to do about the old highlight? Keep or hide? Depends on whether mouse is still in it
       if (!cursorPos || isScrollEvent(event)) {
-        cursorPos = getCursorPos(event, window.pageXOffset, window.pageYOffset);
+        cursorPos = getCursorPos(event);
       }
       else {
         // No need to recalculate scroll position -- it stayed the same
-        cursorPos = getCursorPos(event);
+        cursorPos = getCursorPos(event, cursorPos.pageXOffset, cursorPos.pageYOffset);
       }
 
       if (isExistingHighlightRelevant()) {
@@ -1385,8 +1384,8 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
       y: event.clientY,
       screenX: event.screenX,
       screenY: event.screenY,
-      scrollX: scrollX || window.pageXOffset,
-      scrollY: scrollY || window.pageYOffset,
+      scrollX: typeof scrollX === 'number' ? scrollX : window.pageXOffset,
+      scrollY: typeof scrollY === 'number' ? scrollY : window.pageYOffset,
       doCheckCursorInHighlight: true
     };
   }

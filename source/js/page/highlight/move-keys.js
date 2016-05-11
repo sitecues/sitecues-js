@@ -36,10 +36,7 @@ define(['$', 'page/highlight/highlight', 'page/util/common',
     // Approximate amount of time for one animation frame
     ONE_ANIMATION_FRAME_MS = 16,  // 16ms is about 60fps
     // Method for animation
-    requestFrame = window.requestAnimationFrame || window.msRequestAnimationFrame ||
-      function (fn) {
-        return setTimeout(fn, ONE_ANIMATION_FRAME_MS);
-      },
+    requestFrame = window.requestAnimationFrame,
     getHighlight = mh.getHighlight,
     isNavigationEnabled = true,// labs.isEnabled('arrowKeyNav'), // We no longer use labs here, it is on by default
     SAFE_ZONE = 30; // Begin scrolling when we get this close to window edge

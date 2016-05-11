@@ -24,7 +24,7 @@
     </sc-p>
   </sc-card>
 
-  <sc-card id="scp-mouse-settings" aria-labelledby="scp-mouse-settings-tab" data-no-ie10="true">
+  <sc-card id="scp-mouse-settings" aria-labelledby="scp-mouse-settings-tab">
     <sc id="scp-mouse-settings-group" role="presentation">
       <sc-p class="scp-range-group" data-show="true">
         <sc-normal-range id="scp-mouse-size" min="1" max="3.5" step =".05" data-setting-name="mouseSize" aria-labelledby="scp-mouse-size-label"></sc-normal-range>
@@ -42,7 +42,7 @@
 
   <sc class="scp-card-chooser">
     <sc-tab id="scp-theme-settings-tab" data-target="scp-theme-settings">{{cards.Colors}}</sc-tab>
-    <sc-tab id="scp-mouse-settings-tab" data-target="scp-mouse-settings" data-no-ie10="true">{{cards.Mouse}}</sc-tab>
+    <sc-tab id="scp-mouse-settings-tab" data-target="scp-mouse-settings">{{cards.Mouse}}</sc-tab>
   </sc>
 
   <sc class="scp-card-indicator"></sc>

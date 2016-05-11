@@ -4,10 +4,10 @@
  */
 define([
     '$',
-    'core/conf/user/manager',
     'hlb/event-handlers',
     'hlb/positioning',
     'hlb/styling',
+    'core/conf/user/manager',
     'core/platform',
     'page/util/element-classifier',
     'hlb/animation',
@@ -17,10 +17,10 @@ define([
     'core/events'],
   function(
     $,
-    conf,
     eventHandlers,
     hlbPositioning,
     hlbStyling,
+    conf,
     platform,
     elemClassifier,
     hlbAnimation,
@@ -128,8 +128,6 @@ define([
   // Return truthy value if a button is pressed on a mouse event.
   // There are three properties for mouse buttons, and they all work differently -- both
   // in terms of browsers and on mousemove events in particular.
-  // DANGER! Does not work in IE9 -- always returns falsey value.
-  // If we need it in IE9 we'll need to globally track mousedown and mouseup events.
   function isButtonDown(mouseEvent) {
     return typeof mouseEvent.buttons === 'undefined' ? mouseEvent.which : mouseEvent.buttons;
   }
@@ -392,7 +390,7 @@ define([
     // Create and append the HLB and DIMMER wrapper element to the DOM
     $hlbWrapper = getOrCreateHLBWrapper();
 
-    if ((platform.browser.isIE && getEditableItems().length) || platform.browser.isSafari) {
+    if (platform.browser.isIE && getEditableItems().length) {
       // TODO try to remove these hacks
       // Hack#1: IE + text fields -- avoid bug where textfield was locked
       // Hack#2: Safari -- avoid bug where HLB is blurry, at least on tired.com (SC-3185)
@@ -757,12 +755,6 @@ define([
     };
   }
 
-//  TODO should we remove permanently or do we want to keep this?
-//  // Legal sizes == '-' (smaller), null (default), '+' (larger)
-//  conf.def('lensSize', function(size) {
-//    return size === '-' || size === '+' ? size : null;
-//  });
-//
   return {
     getElement: getElement,
     toggleHLB: toggleHLB,

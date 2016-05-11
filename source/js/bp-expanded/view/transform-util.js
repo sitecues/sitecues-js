@@ -7,7 +7,7 @@
 
 define([ 'core/platform' ], function(platform) {
 
-  var SHOULD_USE_CSS_TRANSFORM_IN_SVG = !platform.browser.isIE;
+  var SHOULD_USE_CSS_TRANSFORM_IN_SVG = !platform.browser.isMS;
 
   // Skips past non-numeric characters and get the next number as type 'number'
   // It will include a negative sign and decimal point if it exists in the string
@@ -68,9 +68,6 @@ define([ 'core/platform' ], function(platform) {
       scale = 1,
       rotate = 0,
 
-      // IE9 sometimes does not include a translation that is seperated by a comma;
-      translateSplitter,
-
       // We use String.prototype.split to extract the values we want, and we need a
       // variable to store the intermediary result.  I'm not a huge fan of this.
       rotateValues,
@@ -78,8 +75,7 @@ define([ 'core/platform' ], function(platform) {
 
     if (hasTranslate) {
 
-      translateSplitter = transformString.indexOf(',') !== -1 ? ',' : ' ';
-      transformValues = transformString.split(translateSplitter);
+      transformValues = transformString.split(',');
       translateX = transformValues[0] || 0;
       translateY = hasScale ? transformValues[1].split('scale')[0] : transformValues[1] || 0;
 

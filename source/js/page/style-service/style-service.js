@@ -77,6 +77,7 @@ define(['$', 'page/style-service/css-aggregator', 'page/style-service/media-quer
 
   // Sometimes CSS that's too large creates huge performance problems in IE, locking up the browser
   // There seems to be a size threshold where the problems don't occur if they are under that
+  // Note: not necessary in Edge!
   function chunkCss(allCss) {
     if (!platform.browser.isIE || allCss.length < CSS_MAX_CHUNK_SIZE) {
       return [ allCss ];
@@ -97,9 +98,11 @@ define(['$', 'page/style-service/css-aggregator', 'page/style-service/media-quer
     function createNext() {
       var newSheet =
         $('<style>')
-          .appendTo('head')
           .attr('id', SITECUES_COMBINED_CSS_ID + '-' + index)
+          // Note: be sure to insert text into stylesheet before inserting into DOM
+          // measured in IE11 to be more performant
           .text(cssChunks[index])
+          .appendTo('head')
           .get(0);
         if ('disabled' in newSheet) {
           // Disable as early as possible:

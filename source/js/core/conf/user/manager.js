@@ -3,7 +3,7 @@
  * properties represent the state of the user session, and are
  * persisted in the user preferences data store.
  */
-define(['core/conf/user/storage', 'core/conf/user/storage-backup', 'core/util/uuid'], function (storage, storageBackup, uuid) {
+define(['Promise', 'core/conf/user/storage', 'core/conf/user/storage-backup' ], function (Promise, storage, storageBackup) {
   // private variables
   var handlers       = {},
       listeners      = {};
@@ -84,7 +84,10 @@ define(['core/conf/user/storage', 'core/conf/user/storage-backup', 'core/util/uu
   }
 
   function saveToBackup() {
-    storageBackup.save(storage.getRawAppData());
+    storageBackup.save(storage.getAppData())
+      .catch(function(error) {
+        throw new Error(error);   // TODO find a cleaner way to log our errors/rejections once we move to native promises
+      });
   }
 
   // define key handler
@@ -99,40 +102,68 @@ define(['core/conf/user/storage', 'core/conf/user/storage-backup', 'core/util/uu
   function reset() {
     // Undefine all settings and call setting notification callbacks
     var allSettings = Object.keys(storage.getPrefs());
-    allSettings.forEach(function(settingName) {
-      unset(settingName);
-    });
+    allSettings.forEach(unset);
   }
 
-  function init(onReadyCallbackFn) {
-
-    var retrievedSettings,
-      didUseStorageBackup = false;
-
-    retrievedSettings = storage.getPrefs();
-
-    if (Object.keys(retrievedSettings).length) {
-      onReadyCallbackFn(false);
+  function createUser() {
+    if (SC_DEV) {
+      console.log('New Sitecues user created');
     }
-    else {
-      // Could not find local storage for sitecues prefs
-      // Try cross-domain backup storage
-      storageBackup.init(function () {
-        storageBackup.load(function (data) {
-          if (data) {
-            storage.setAppData(data);
-            didUseStorageBackup = true;
-          }
-          else {
-            // No user id: generate one
-            var userId = uuid();
-            storage.setUserId(userId);
-            saveToBackup();
-          }
-          onReadyCallbackFn(didUseStorageBackup);
-        });
-      });
+    storage.createUser();
+    saveToBackup();
+  }
+
+  function init() {
+
+    function onPrefsError(error) {
+      createUser();
+      return Promise.reject(error);
     }
+
+    function globalUser(globalPrefsData) {
+      // Prefer user in storage-backup -- it's a different user id
+      if (SC_DEV && storage.getUserId()) {
+        console.log('User discrepancy found: preferring global user');
+      }
+      // This discrepancy is a rare case - when it happens we just use the global prefs data
+      // to remove the conflict
+      storage.setAppData(globalPrefsData);
+      return {
+        didUseStorageBackup: true,
+        isSameUser: false
+      };
+    }
+
+    function localUser() {
+      return {
+        didUseStorageBackup: false,
+        isSameUser: true
+      };
+    }
+
+    function getBestUser(globalPrefsData) {
+      var localUserId = storage.getUserId(),
+        globalUserId = globalPrefsData && globalPrefsData.userId;
+
+      if (globalUserId && globalUserId !== localUserId) {
+        // Use global user if it exists and it is different from the local user
+        // (or no local user id but a global one exists)
+        return globalUser(globalPrefsData);
+      }
+      else if (localUserId) {
+        // Has a valid local user
+        return localUser();
+      }
+      else {
+        // No or invalid user: generate one
+        createUser();
+      }
+    }
+
+    storageBackup.init();
+    return storageBackup.load()
+      .then(getBestUser)
+      .catch(onPrefsError);
   }
 
   return {

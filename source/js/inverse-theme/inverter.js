@@ -2,8 +2,8 @@
  *  Used for dark themes.
  */
 
-define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core/platform', 'inverse-theme/img-classifier'],
-  function($, conf, styleService, platform, imgClassifier) {
+define(['$', 'core/platform', 'inverse-theme/img-classifier'],
+  function($, platform, imgClassifier) {
 
   var mutationObserver,
     $allReversibleElems = $(),
@@ -164,6 +164,8 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
   }
 
   function init() {
+    // The filter value doesn't work in IE, and is *extremely* slow in Safari
+    // It does work well in Edge, Chrome and Firefox
     SHOULD_USE_PROXY = platform.browser.isIE || platform.browser.isSafari;
 
     filterProperty = getFilterProperty();

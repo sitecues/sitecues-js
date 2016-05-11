@@ -178,7 +178,7 @@ define(['$'], function($) {
       textEquiv = textEquiv || node.getAttribute('title') || '';
     }
 
-    else if ($node.is('input,textarea')) {
+    else if ($node.is('input:not([type="password"]),textarea')) {
       // value, placeholder and title on these form controls
       textEquiv = textEquiv || getInputLabelAttributeText(node);
       value = node.value;

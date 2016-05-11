@@ -16,8 +16,7 @@ define([
            helper,
            palette,
            baseView) {
-  var isInitialized,
-    TOOLBAR_HEIGHT = 38;
+  var TOOLBAR_HEIGHT = 38;
 
   function adjustFixedElementsBelowToolbar() {
     // TODO Make this work better:
@@ -33,12 +32,7 @@ define([
     });
   }
 
-  function init(onComplete) {
-    if (isInitialized) {
-      return;
-    }
-    isInitialized = true;
-
+  function init() {
     var toolbarElement = document.createElement('sc'),
       docElem = document.documentElement;
 
@@ -52,9 +46,10 @@ define([
 
     adjustFixedElementsBelowToolbar();
 
-    palette.init(null, function() {
-      baseView.init(toolbarElement, onComplete);
-    });
+    return palette.init(null)
+      .then(function() {
+        baseView.init(toolbarElement);
+      });
   }
 
   return {

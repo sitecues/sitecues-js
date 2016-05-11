@@ -1,5 +1,5 @@
 // Fix urls and localize strings in markup
-define(['core/locale', 'core/platform'], function(locale, platform) {
+define(['core/locale'], function(locale) {
   function removeHash(loc) {
     return loc.replace(/\#.*/, '');
   }
@@ -11,16 +11,12 @@ define(['core/locale', 'core/platform'], function(locale, platform) {
   // such as http://wokiss.pl/szkolenia.html will have an invisible badge in some browsers.
   // Note: the base can be set via <base> tag or http header.
   function convertRelativeUrlsToAbsolute(text) {
-    if (!platform.browser.isIE9) {
-      var MATCH_URLS = /(href="|url\()(?:#)/g,
-        pageUrlMinusHash = removeHash(document.location.href);
+    var MATCH_URLS = /(href="|url\()(?:#)/g,
+      pageUrlMinusHash = removeHash(document.location.href);
 
-      return text.replace(MATCH_URLS, function (totalMatch, attributeName) {
-        return attributeName + pageUrlMinusHash + '#';
-      });
-    }
-
-    return text;
+    return text.replace(MATCH_URLS, function (totalMatch, attributeName) {
+      return attributeName + pageUrlMinusHash + '#';
+    });
   }
 
   return function(markup) {

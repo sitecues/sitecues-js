@@ -1,13 +1,12 @@
 /* Focus Controller */
-define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metric', 'core/platform', 'core/bp/view/view', 'core/events',
+define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metric', 'core/bp/view/view', 'core/events',
         'core/constants'],
-  function (BP_CONST, state, helper, metric, platform, view, events, CORE_CONST) {
+  function (BP_CONST, state, helper, metric, view, events, CORE_CONST) {
 
   var savedDocumentFocus,
     tabbedElement,
     isInitialized,
     isListeningToClicks,
-    renderFocusOutline = platform.browser.isFirefox ? renderFocusOutlineFirefox : renderFocusOutlineNotFirefox,
     byId   = helper.byId,
     keyCode = CORE_CONST.KEY_CODE,
     TAB    = keyCode.TAB,
@@ -63,7 +62,7 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
         'stars-3',
         'stars-4',
         'stars-5',
-        'feedback-send',
+        'feedback-send-link',
         'feedback-thanks',
         'tips-label',
         'settings-label',
@@ -267,15 +266,7 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
     }
   }
 
-  function renderFocusOutlineFirefox() {
-    // getBoundingClientRect() shows bad focus outlines in Firefox
-    var showFocusOn = getElementToShowFocusOn(),
-      type = showFocusOn instanceof SVGElement ? 'stroke-child': 'box-shadow';
-    showFocusOn.setAttribute('data-show-focus', type);
-  }
-
-
-  function renderFocusOutlineNotFirefox() {
+  function renderFocusOutline() {
     // @data-visible-focus-on = id of element to show focus on
     // @data-show-focus = focus to be shown on this element
     // @data-own-focus-ring = element will show it's own focus ring

@@ -9,6 +9,7 @@ define([], function () {
 
   constants.METRIC_NAME = {
     BADGE_HOVER: 'badge-hovered',
+    ERROR: 'error',
     FEEDBACK: 'feedback-sent',
     KEY_COMMAND: 'key-command',
     LENS_OPEN: 'hlb-opened',

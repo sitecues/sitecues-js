@@ -26,8 +26,8 @@
  */
 
 define(['$', 'page/util/common', 'core/conf/user/manager', 'core/conf/site',
-    'page/highlight/traitcache', 'page/highlight/traits', 'page/highlight/judge', 'core/platform'],
-  function($, common, conf, site, traitcache, traits, judge, platform) {
+    'page/highlight/traitcache', 'page/highlight/traits', 'page/highlight/judge'],
+  function($, common, conf, site, traitcache, traits, judge) {
 
   var UNUSABLE_SCORE = -99999,       // A score so low there is no chance of picking the item
     MAX_ANCESTORS_TO_ANALYZE = 14,   // Maximum ancestors to climb looking for start.
@@ -39,11 +39,9 @@ define(['$', 'page/util/common', 'core/conf/user/manager', 'core/conf/site',
     PICK_RULE_DISABLE = 'disable', // don't pick this anything -- not this item, any ancestor, or any descendant
     PICK_RULE_PREFER = 'prefer',   // pick this item
     PICK_RULE_IGNORE = 'ignore',   // don't pick this item
-    // Use hack to avoid Edge bugs where HLB on inputs caused crashes
-    SHOULD_AVOID_INPUTS = platform.browser.isIE && platform.browser.version > 11,
+    // Use hack to avoid IE bugs where HLB on inputs does not allow editing
     GLOBAL_DISABLE_PICKER_SELECTOR =
-      'iframe[name="google_conversion_frame"]' + // Don't pick invisible Google Adwords iframe
-      (SHOULD_AVOID_INPUTS ? ',input,textarea,select' : ''),
+      'iframe[name="google_conversion_frame"]', // Don't pick invisible Google Adwords iframe
 
     // The following weights are used to multiple each judgement of the same name, defined in judgements.js
     // The score is a sum of these weights * judgements
@@ -116,7 +114,7 @@ define(['$', 'page/util/common', 'core/conf/user/manager', 'core/conf/site',
     isDebuggingOn,
     isVoteDebuggingOn,
     isAutoPickDebuggingOn,
-    isVotingOn = !platform.browser.isIE || platform.browser.version >= 11,
+    isVotingOn = true,
     lastPicked;
 
   /*

@@ -37,11 +37,11 @@ define([], function() {
   // If a vendor prefix is needed for a CSS property, what would it be?
   function getCssPrefix(currBrowser) {
     return currBrowser.isWebKit  ?
-      '-webkit-'      :
+      '-webkit-'        :
       currBrowser.isFirefox ?
         '-moz-'         :
-        currBrowser.isIE      ?
-          '-ms-'          :
+        currBrowser.isMS    ?
+          '-ms-'        :
           '';
   }
 
@@ -51,7 +51,8 @@ define([], function() {
   }
 
   // Get the name or vendor-prefixed property name, whichever is supported
-  // For example getCssProp('transform" returns 'transform', '-webkit-transform', '-moz-transform' or '-ms-transform' as appropriate
+  // For example getCssProp('transform" returns 'transform', '-webkit-transform', '-moz-transform' or 'transform' as appropriate
+  // Note: Regarding 'transform', we only need to do this for Safari 8 at this point
   function getCssProp(propName) {
     return isCssPropSupported(propName) ? propName : exports.cssPrefix + propName;
   }
@@ -59,32 +60,47 @@ define([], function() {
   // Set globally accessible browser constants
   function getBrowser(agent) {
     var browserStr = getBrowserStr(agent),
-      isIE = browserStr === 'IE',
-      version = getVersion(agent, isIE);
+      isMS = browserStr === 'IE',
+      version,
+      browser = {
+        zoom: 'zoom' in document.createElement('div').style,
+        is: browserStr,
+        isFirefox: browserStr === 'Firefox',
+        //Evaluates true for Internet Explorer and Edge (there is a lot of overlap in browser specific logic)
+        isMS: isMS, // Includes Edge
+        isIE: isMS && version < 12,  // Does not include Edge
+        isEdge: isMS && version >= 12,
+        isChrome: browserStr === 'Chrome',
+        isOpera: browserStr === 'Opera',
+        isSafari: browserStr === 'Safari',
+        isWebKit: browserStr === 'Chrome' || browserStr === 'Opera' || browserStr === 'Safari'
+      };
 
+    browser.version = version = getVersion(agent, browser);
+    browser.isIE = isMS && version < 12;
+    browser.isEdge = isMS && version >= 12;
 
-    return {
-      zoom: 'zoom' in document.createElement('div').style,
-      is: browserStr,
-      version: version,
-      isFirefox: browserStr === 'Firefox',
-      //Evaluates true for Internet Explorer and Edge (there is a lot of overlap in browser specific logic)
-      isIE: isIE, // Includes Edge
-      isIE9: isIE && version === 9,
-      isEdge: isIE && version >= 12,
-      isChrome: browserStr === 'Chrome',
-      isOpera: browserStr === 'Opera',
-      isSafari: browserStr === 'Safari',
-      isWebKit: browserStr === 'Chrome' || browserStr === 'Opera' || browserStr === 'Safari'
-    };
+    return browser;
   }
 
   // Set globally accessible version constants
-  function getVersion(agent, isIE) {
+  function getVersion(agent, browser) {
     // If IE is being used, determine which version
     var charIndex = agent.indexOf('rv:');
     if (charIndex === -1) {
-      if (isIE) {
+      if (browser.isChrome) {
+        charIndex = agent.indexOf('Chrome/');
+        if (charIndex > 0) {
+          charIndex += 7;
+        }
+      }
+      else if (browser.isSafari) {
+        charIndex = agent.indexOf('Version/');
+        if (charIndex > 0) {
+          charIndex += 8;
+        }
+      }
+      else if (browser.isMS) {
         // Use MSIE XX.X
         charIndex = agent.indexOf('MSIE');
         if (charIndex < 0) {
@@ -116,7 +132,6 @@ define([], function() {
       is: osStr,
       isMac: osStr === 'mac',
       isWin: osStr === 'win',
-      isLinux: osStr === 'mac', // This should say 'mac', not 'linux'
       // Set globally accessible version constants
       versionString: (function () {
         // If IE is being used, determine which version
@@ -153,7 +168,7 @@ define([], function() {
     if (browser.isWebKit) {
       computedNativeZoom = outerWidth / innerWidth;
     }
-    else if (browser.isIE) {
+    else if (browser.isMS) {
       // Note: on some systems the default zoom is > 100%. This happens on our Windows 7 + IE10 Dell Latitude laptop
       // See http://superuser.com/questions/593162/how-do-i-change-the-ctrl0-zoom-level-in-ie10
       // This means the actual zoom may be 125% but the user's intentional zoom is only 100%
@@ -199,17 +214,44 @@ define([], function() {
     return isRetinaDisplay;
   }
 
+  // Returns truthy value if the current OS/browser combo is supported
+  function isSupported(os, browser) {
+    if (os.isWin || os.isMac) {
+      var version = browser.version;
+      if (browser.isIE) {
+        return version === 11;
+      }
+      if (browser.isEdge) {
+        return version > 12;
+      }
+      if (browser.isFirefox) {
+        return version > 33;
+      }
+      if (browser.isSafari) {
+        return version > 7;
+      }
+      if (browser.isChrome) {
+        return version > 40;
+      }
+    }
+  }
+
+  // return truthy if platform is supported
   function init() {
     agent = navigator.userAgent || '';
     exports.browser = getBrowser(agent);
     exports.os = getOS(agent, getOSStr(navigator.platform.toLowerCase()));
+    exports.nativeZoom = getNativeZoom();
+    if (!isSupported(exports.os, exports.browser)) {
+      return;
+    }
+
     exports.canUseRetinaCursors = exports.browser.isChrome;
     exports.cssPrefix = getCssPrefix(exports.browser);
-    exports.transformPropertyCss =  exports.browser.isIE9 ? '-ms-transform' : ((exports.browser.isWebKit && !isCssPropSupported('transform'))? '-webkit-transform' : 'transform');
+    exports.transformPropertyCss = exports.browser.isWebKit && !isCssPropSupported('transform')? '-webkit-transform' : 'transform';
     exports.transformProperty = exports.transformPropertyCss.replace('-t', 'T').replace('-', '');
     exports.transformOriginProperty = exports.transformProperty + 'Origin';
     exports.transitionEndEvent = exports.browser.isWebKit ? 'webkitTransitionEnd' : 'transitionend';
-    exports.nativeZoom = getNativeZoom();
 
     // Invalidate cached retina info on window resize, as it may have moved to another display.
     // When a window moves to another display, it can change whether we're on a retina display.
@@ -217,6 +259,8 @@ define([], function() {
     addEventListener('resize', function () {
       isRetinaDisplay = undefined;
     });
+
+    return true;
   }
 
   return exports;

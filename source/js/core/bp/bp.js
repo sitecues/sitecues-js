@@ -19,27 +19,25 @@ define([
   'core/bp/model/state',
   'core/bp/helper',
   'core/bp/constants',
-  'core/platform',
   'core/conf/site',
   'core/bp/model/classic-mode',
-  'core/bp/view/badge/page-badge'
+  'core/bp/view/badge/page-badge',
+  'Promise'
 ], function(bpController,
            state,
            helper,
            BP_CONST,
-           platform,
            site,
            classicMode,
-           pageBadgeView) {
+           pageBadgeView,
+           Promise) {
 
   /*
    *** Public methods ***
    */
 
   // The htmlContainer has all of the SVG inside of it, and can take keyboard focus
-  var isBpInitializing,
-      byId = helper.byId,
-      pendingCompletionCallbackFn,
+  var byId = helper.byId,
       badgeView;
 
   /**
@@ -59,35 +57,34 @@ define([
    * BP feature is ready to be enabled.  It creates the necessary elements,
    * renders them, and emits events for the rest of the application to
    */
-  function initBPFeature() {
-    if (isBpInitializing) {
-      return;
-    }
-
-    isBpInitializing = true;
-
+  function initBPView() {
     if (!SC_EXTENSION && !isToolbarUIRequested()) {
-      var badgePlaceholderElem = helper.byId(BP_CONST.BADGE_ID);
+      var badgePlaceholderElem = getBadgeElement();
 
       // Get site's in-page placeholder badge or create our own
       if (badgePlaceholderElem) {
         badgeView = pageBadgeView;
-        pageBadgeView.init(badgePlaceholderElem, onViewInitialized);
-        return;
+        return pageBadgeView.init(badgePlaceholderElem);
       }
     }
 
     // Toolbar mode requested or no badge (toolbar is default)
-    require(['bp-toolbar-badge/bp-toolbar-badge'], function(toolbarView) {
-      badgeView = toolbarView;
-      toolbarView.init(onViewInitialized);
+    // Note: cannot use require().then because we use AMD clean in the extension
+    return new Promise(function(resolve) {
+      require(['bp-toolbar-badge/bp-toolbar-badge'], function (toolbarView) {
+        badgeView = toolbarView;
+        badgeView.init();
+        resolve();
+      });
     });
   }
 
-  function onViewInitialized() {
-    bpController.init();
-    fixDimensionsOfBody();
-    pendingCompletionCallbackFn();
+  function initBPFeature() {
+    return initBPView()
+      .then(function() {
+        bpController.init();
+        fixDimensionsOfBody();
+      });
   }
 
   /*
@@ -101,30 +98,55 @@ define([
         - If the customer does NOT use the <img>, attach a readystatechange event listener to the document.
   */
 
-  // Init BP if the badge is ready and the document is 'interactive'|'complete'
-  // Return true if BP initialized
-  function initBPIfDocAndBadgeReady() {
+  function isDocReady() {
     var readyState = document.readyState;
-    if (readyState === 'complete' || (isBadgeReady() && readyState === 'interactive')) {
-      initBPFeature();
-      return true;
-    }
+    return readyState === 'complete' || readyState === 'interactive';
   }
 
-  function isBadgeReady() {
-    var badgeElement = getBadgeElement();
-    return badgeElement && (badgeElement.localName !== 'img' || badgeElement.complete);
+  // Init BP if the badge is ready and the document is 'interactive'|'complete'
+  // Return true if BP initialized
+  function docReady() {
+    if (isDocReady()) {
+      return Promise.resolve();
+    }
+
+    return new Promise(function(resolve) {
+      function onReadyStateChange() {
+        if (isDocReady()) {
+          resolve();
+          document.removeEventListener('readystatechange', onReadyStateChange);
+        }
+      }
+
+      document.addEventListener('readystatechange', onReadyStateChange);
+    });
+  }
+
+  function badgeReady() {
+    // If badge is already in the DOM, we can already init
+    var badgeElem = getBadgeElement();
+    if (badgeElem) {
+      return Promise.resolve();
+    }
+
+    // No badge yet -- wait until doc is interactive or complete
+    return docReady();
   }
 
   // The toolbar gets to init earlier than a site-provided badge
   // It's safe to init as soon as the <body> is available
-  function initWhenBodyAvailable() {
-    if (document.body) {
-      initBPFeature();
-    }
-    else {
-      setTimeout(initWhenBodyAvailable, 250);
-    }
+  function bodyReady() {
+    var CHECK_BODY_INTERVAL = 250;
+    return new Promise(function(resolve) {
+      function checkBody() {
+        if (document.body) {
+          resolve();
+        } else {
+          setTimeout(checkBody, CHECK_BODY_INTERVAL);
+        }
+      }
+      checkBody();
+    });
   }
 
   // Classic mode is where the ? shows up instead of the down pointing arrow
@@ -159,7 +181,9 @@ define([
   }
 
   /**
-   * init(bpCompleteCallbackFn)
+   * init()
+   *
+   * @return Promise
    *
    * Looks for the badge element, or wait for it to load, and insert and display the BP based on it's position.
    *    When this is called:
@@ -179,38 +203,25 @@ define([
    *     b) Need to wait for <img>
    *   4. Missing badge and document not complete -- need to wait to see if badge shows up
    *   5. Missing badge and document complete (causes toolbar)
-   *
-   * @param bpCompleteCallbackFn called after BP is created and displayed
    */
-  function init(bpCompleteCallbackFn) {
+  function init() {
 
-    pendingCompletionCallbackFn = bpCompleteCallbackFn;
-
+    // Get whether the BP will run in classic mode (still needed for MS Edge)
     initClassicMode();
 
     // ---- Look for toolbar config ----
     if (isToolbarUIRequested()) {
       // Case 1: toolbar config -- no need to wait for badge placeholder
       if (SC_DEV) { console.log('Early initialization of toolbar.'); }
-      initWhenBodyAvailable();
-      return;
+      return bodyReady()
+        .then(initBPFeature);
     }
 
     // ---- Look for badge, fall back to toolbar if necessary ----
 
     // Page may still be loading -- check if the badge is available
-    if (!initBPIfDocAndBadgeReady()) {
-      // Could not init sitecues yet
-      var earlyBadgeElement = getBadgeElement();
-      if (earlyBadgeElement && !isBadgeReady()) {
-        // We have a badge <img> but it's not loaded yet
-        // Check document and badge after badge loads
-        earlyBadgeElement.addEventListener('load', initBPIfDocAndBadgeReady);
-      }
-
-      // Whenever document readyState changes, check to see if we can init sitecues
-      document.addEventListener('readystatechange', initBPIfDocAndBadgeReady);
-    }
+    return badgeReady()
+      .then(initBPFeature);
   }
 
   return {

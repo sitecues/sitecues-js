@@ -5,16 +5,8 @@
 
 define(['bp-expanded/view/transform-util', 'core/platform'], function (transformUtil, platform) {
 
-  var requestFrameFn = window.requestAnimationFrame   ||
-                       window.msRequestAnimationFrame ||
-                       function (fn) {
-                         return setTimeout(fn, 16);
-                       },
-      cancelFrameFn  = window.cancelAnimationFrame   ||
-                       window.msCancelAnimationFrame ||
-                       function (fn) {
-                         clearTimeout(fn);
-                       },
+  var requestFrameFn = window.requestAnimationFrame,
+      cancelFrameFn  = window.cancelAnimationFrame,
 
       // https://gist.github.com/gre/1650294
       timingFunctions = {

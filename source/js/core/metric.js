@@ -1,14 +1,16 @@
 /**
  * Basic metrics logger
  */
-define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/locale', 'core/platform', 'core/util/xhr',
-        'core/conf/urls', 'core/constants', 'core/bp/model/classic-mode'],
-  function (conf, session, site, locale, platform, xhr, urls, constants, classicMode) {
+define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/locale', 'core/util/xhr',
+        'core/conf/urls', 'core/constants', 'core/bp/model/classic-mode' ],
+  function (conf, session, site, locale, xhr, urls, constants, classicMode) {
 
     // IMPORTANT! Increment METRICS_VERSION this every time metrics change in any way
     // IMPORTANT! Have the backend team review all metrics changes!!!
-    var METRICS_VERSION = 10,
+    var METRICS_VERSION = 11,
         isInitialized,
+        doSuppressMetrics,
+        doLogMetrics,
         name = constants.METRIC_NAME,
         metricHistory = [];
 
@@ -25,16 +27,14 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
       data.zoomLevel = conf.get('zoom') || 1;
       data.ttsState = conf.get('ttsOn') || false;
       data.details = details;
-      if (!data.userId) {
-        console.error('Sitecues metrics warning: no user ID!');
-        if (SC_DEV) {
-          console.trace();
-        }
-      }
     };
 
     Metric.prototype.send = function send() {
-      if (SC_LOCAL || site.get('suppressMetrics')) {   // No metric events in local mode
+      if (doLogMetrics) {
+        console.log('Metric / %s\n%o', this.data.name, this.data);
+      }
+
+      if (SC_LOCAL || doSuppressMetrics) {   // No metric events in local mode
         return;
       }
 
@@ -62,17 +62,36 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
 
     function isTester() {
 
-      if (localStorage.getItem('sitecues-is-tester')) {
+      if (conf.get('isTester')) {
         // Once a tester, always a tester
         return true;
       }
 
       if (site.get('isTester') || !urls.isProduction()) {
-        localStorage.setItem('sitecues-is-tester', 'true'); // Remember this tester
+        conf.set('isTester', true);  // Remember this tester
         return true;
       }
 
       return false;
+    }
+
+    // TODO Should go away once we go to the new extension which is entirely in a content script
+    function isOldExtension() {
+      return sitecues.everywhereConfig;
+    }
+
+    function getSource() {
+      if (SC_EXTENSION || isOldExtension()) {
+        return 'extension';
+      }
+      var hostname = window.location.hostname;
+      if (hostname.indexOf('proxy.') === 0 && hostname.indexOf('.sitecues.com') > 0) {
+        return 'reverse-proxy';
+      }
+      if (document.querySelector('script[data-provider="sitecues-proxy"]')) {
+        return 'forward-proxy';
+      }
+      return 'page';
     }
 
     function init() {
@@ -81,6 +100,8 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
         return;
       }
       isInitialized = true;
+
+      doSuppressMetrics = site.get('suppressMetrics');
 
       Metric.prototype.sessionData = {
         scVersion: sitecues.getVersion(),
@@ -93,14 +114,21 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
         browserUserAgent: navigator.userAgent,
         isClassicMode: classicMode(),
         clientLanguage: locale.getBrowserLang(),
+        source: getSource(),
         isTester: isTester()
       };
     }
+
+    sitecues.toggleLogMetrics = function toggleLogMetrics() {
+      doLogMetrics = !doLogMetrics;
+      return doLogMetrics;
+    };
 
     return {
       init: init,
       getMetricHistory: getMetricHistory,
       BadgeHover: wrap(name.BADGE_HOVER),
+      Error: wrap(name.ERROR),
       Feedback: wrap(name.FEEDBACK),
       KeyCommand: wrap(name.KEY_COMMAND),
       LensOpen: wrap(name.LENS_OPEN),

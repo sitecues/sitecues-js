@@ -11,7 +11,7 @@ define([], function() {
     isSecondaryExpanding    : false, // Is secondary panel currently expanding to accommodate new contents?
     isSecondaryExpanded     : false, // Is secondary panel fully expanded?
     isStickyPanel           : false, // Sticky panel is for debugging -- mouseout doesn't close the panel
-    isClassicMode           : false, // Use question mark if IE9 or site is incompatible with themes
+    isClassicMode           : false, // Use question mark if browser support is weak or site is incompatible with themes
     doSuppressHovers        : false, // Suppress mouse hovers until next mousemove, because browser won't recompute them until then (useful for animations)
     isKeyboardMode          : false, // Show focus in this mode, support tab navigation
     isOpenedWithHover       : false, // If opened with the hover, then user should be able to close with mouse out

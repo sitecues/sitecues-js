@@ -1,4 +1,4 @@
-define(['core/conf/site', 'core/platform'], function(site, platform) {
+define(['core/conf/site' ], function(site) {
 
   var apiDomain,  // Either ws.sitecues.com/ or ws.dev.sitecues.com/
     scriptOrigin,  // Either http[s]://js.sitecues.com/ or http[s]://js.dev.sitecues.com/
@@ -34,7 +34,7 @@ define(['core/conf/site', 'core/platform'], function(site, platform) {
 
   // Parse a URL into { protocol, hostname, origin, path }
   // Does not support mailto links (or anything where the protocol isn't followed by //)
-  // TODO After we kill IE9, we can move to new URL(), but be careful of IE incompatibilities (e.g. port, origin, host)
+  // TODO After we kill IE11, we can move to new URL(), but be careful of IE incompatibilities (e.g. port, origin, host)
   function parseUrl(urlStr) {
     if (typeof urlStr !== 'string') {
       return;
@@ -54,8 +54,8 @@ define(['core/conf/site', 'core/platform'], function(site, platform) {
     // Extract the path of the pathname.
     pathname = parser.pathname;
 
-    // IE9 versions pathname does not contain first slash whereas in other browsers it does.
-    // So let's unify pathnames. Since we need '/' anyway, just add it to pathname when needed.
+    // Ensure pathname begins with /
+    // TODO is this necessary in any browser? Used to be for IE9
     if (pathname.indexOf('/') > 0) {
       pathname = '/' + pathname;
     }
@@ -123,13 +123,13 @@ define(['core/conf/site', 'core/platform'], function(site, platform) {
   // Return an absolute URL. If the URL was relative, return an absolute URL that is relative to a base URL.
   // @optional parsedBaseUrl If not provided, will use the current page.
   function resolveUrl(urlStr, baseUrl) {
-    if (!platform.browser.isIE || typeof URL === 'function') {
+    if (typeof URL === 'function') {
       // URL object exists in IE11 but "new URL()" throws error "Object doesn’t support this action"
       var parsedUrl = new URL(urlStr, baseUrl || document.location);
       return parsedUrl.toString();
     }
 
-    // IE 9-11 polyfill
+    // IE 9-11 polyfill (also Edge 12)
     // TODO remove if IE11 ever goes away!!
     var parsedBaseUrl = parseUrl(baseUrl || '.');
 

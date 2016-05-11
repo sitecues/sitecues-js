@@ -5,19 +5,16 @@
  * Stop event from bubbling up to window/document object.
  */
 // TODO: Call this module scrolling.js
-define(['$', 'page/util/common', 'core/platform'], function($, common, platform) {
+define(['$' ], function($) {
 
   /////////////////////////
   // PRIVATE VARIABLES
   ////////////////////////
 
-      // Decide which event to use depending on which browser is being used
-  var wheelEventName = platform.browser.isSafari ? 'mousewheel' : 'wheel',
-
-      //  Wheel event callback, must be scoped at the module level because
-      //  we create this event callback every time the HLB opens because
-      //  the callback requires a reference to the HLB element...s
-      wheelEventCallback,
+  //  Wheel event callback, must be scoped at the module level because
+  //  we create this event callback every time the HLB opens because
+  //  the callback requires a reference to the HLB element...s
+  var wheelEventCallback,
 
     isCapturing;
 
@@ -26,7 +23,7 @@ define(['$', 'page/util/common', 'core/platform'], function($, common, platform)
    */
   function releaseWheelEvents() {
 
-    window.removeEventListener(wheelEventName, wheelEventCallback);
+    window.removeEventListener('wheel', wheelEventCallback);
 
     isCapturing = false;
   }
@@ -137,7 +134,7 @@ define(['$', 'page/util/common', 'core/platform'], function($, common, platform)
 
 
     // Trap the mousewheel events (wheel for all browsers except Safari, which uses mousewheel)
-    window.addEventListener(wheelEventName, wheelEventCallback);
+    window.addEventListener('wheel', wheelEventCallback);
   }
 
   return {

@@ -1,15 +1,24 @@
-define(['core/conf/site', 'core/conf/urls', 'core/run', 'core/constants', 'core/events'], function (site, urls, run, constants, events) {
+define(['core/conf/site',
+  'core/conf/urls',
+  'core/run',
+  'core/constants',
+  'core/events'],
+  function (site,
+            urls,
+            run,
+            constants,
+            events) {
 
   if (!SC_EXTENSION) {
     if (document.documentElement.hasAttribute('data-sitecues-everywhere')) {
       // Don't run if the extension has planted its flag.
       // (The sitecues.exists field is not accessible here if it's set in an extension context.)
-      safe_production_msg('Sitecues Everywhere prioritized over Sitecues from webpage.');
+      logToConsole('Sitecues Everywhere prioritized over Sitecues from webpage.');
       return;
     }
     // Extension script: is extension allowed on this page?
     if (window.localStorage.getItem('sitecues-disabled') === 'true') {
-      safe_production_msg('Sitecues has been disabled on this page.');
+      logToConsole('Sitecues has been disabled on this page.');
       return;
     }
   }
@@ -17,20 +26,13 @@ define(['core/conf/site', 'core/conf/urls', 'core/run', 'core/constants', 'core/
   // Enums for sitecues loading state
   var state = constants.READY_STATE;
 
-  function safe_production_msg (text) {
-    if (window.navigator.userAgent.indexOf('MSIE ') > 0) {
-      // Using console.log in IE9 too early can cause "Invalid pointer" errors -- see SC-2237.
-      // To be safe, do not use console.log in sitecues.js in IE.
-      return;
-    }
-    if (console) {
-      console.log('**** '+text+' ****');
-    }
+  function logToConsole(text) {
+    console.log('**** '+text+' ****');
   }
 
   if (SC_DEV) {
-    safe_production_msg('SITECUES MODE: SC_DEV');
-    safe_production_msg('SITECUES VERSION: ' + sitecues.version);
+    logToConsole('SITECUES MODE: SC_DEV');
+    logToConsole('SITECUES VERSION: ' + sitecues.version);
   }
 
   // This function is called when we are sure that no other library already exists in the page. Otherwise,
@@ -143,7 +145,7 @@ define(['core/conf/site', 'core/conf/urls', 'core/run', 'core/constants', 'core/
 
   // If the sitecues global object does not exist, then there is no basic site configuration
   if (!sitecues || typeof sitecues !== 'object') {
-    safe_production_msg('The base ' + window.sitecues + ' namespace was not found. The sitecues library will not load.');
+    logToConsole('The base ' + window.sitecues + ' namespace was not found. The sitecues library will not load.');
     return;
   }
 
@@ -157,7 +159,7 @@ define(['core/conf/site', 'core/conf/urls', 'core/run', 'core/constants', 'core/
     // Stop sitecues from initializing if:
     // 1) sitecues is running in an IFRAME
     // 2) sitecues.config.iframe = falsey
-    safe_production_msg('Developer note (Sitecues): the following iframe attempted to load Sitecues, which does not currently support iframes: '+window.location +
+    logToConsole('Developer note (Sitecues): the following iframe attempted to load Sitecues, which does not currently support iframes: '+window.location +
       ' ... email support@sitecues.com for more information.');
   }
   else {

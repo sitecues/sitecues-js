@@ -2,8 +2,8 @@
  * This is module for common positioning utilities that might need to be used across all of the different modules.
  * See more info on https://equinox.atlassian.net/wiki/display/EN/positioning+utility
  */
-define(['$', 'page/util/common', 'page/util/element-classifier', 'page/zoom/zoom', 'core/platform', 'page/highlight/traitcache'],
-  function ($, common, elemClassifier, zoomMod, platform, traitcache) {
+define(['$', 'page/util/common', 'page/util/element-classifier', 'page/zoom/zoom', 'page/highlight/traitcache'],
+  function ($, common, elemClassifier, zoomMod, traitcache) {
 
   var MIN_RECT_SIDE = 4,
     MAX_TEXT_INDENT_USED_TO_HIDE = -499; // text-indent less than this we consider as something used to hide alternative text for bg image sprites
@@ -58,7 +58,6 @@ define(['$', 'page/util/common', 'page/util/element-classifier', 'page/zoom/zoom
     var range = document.createRange(),
       parent,
       // ********** Some browsers are fine **********
-      doIECorrections = platform.browser.isIE && platform.browser.version < 11,
       isElement = node.nodeType === 1;
 
     if (isElement) {
@@ -74,10 +73,6 @@ define(['$', 'page/util/common', 'page/util/element-classifier', 'page/zoom/zoom
 
     var contentsRangeRect = $.extend({}, range.getBoundingClientRect());
 
-    if (doIECorrections) {
-      contentsRangeRect = getOldIECorrectionsToRangeRect(contentsRangeRect);
-    }
-
     if (!isElement) {
       var textVerticalClipRect = getTextVerticalClipping(node, contentsRangeRect, range);
 
@@ -92,17 +87,6 @@ define(['$', 'page/util/common', 'page/util/element-classifier', 'page/zoom/zoom
     }
 
     return contentsRangeRect;
-  }
-
-  function getOldIECorrectionsToRangeRect(origRangeRect) {
-    // Factor in IE native browser zoom
-    var nativeZoom = screen.deviceXDPI / screen.logicalXDPI;
-    origRangeRect.top /= nativeZoom;
-    origRangeRect.left /= nativeZoom;
-    origRangeRect.width /= nativeZoom;
-    origRangeRect.height /= nativeZoom;
-
-    return normalizeRect(origRangeRect);
   }
 
   function getRectMinusPadding(rect, style) {

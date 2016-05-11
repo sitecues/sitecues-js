@@ -56,23 +56,24 @@ define(['core/bp/constants', 'core/bp/helper'], function(BP_CONST, helper) {
 
     // Set other styles that cannot be abstracted into a helper function.
     newBadge.style.display = 'inline-block';
-    newBadge.style.height  = badgeImgBoundingBox.height - (badgeComputedStyles.paddingTop  + badgeComputedStyles.paddingBottom) + 'px';
-    newBadge.style.width   = badgeImgBoundingBox.width  - (badgeComputedStyles.paddingLeft + badgeComputedStyles.paddingRight)  + 'px';
+    var newHeight = badgeImgBoundingBox.height,
+      WIDTH_TO_HEIGHT_RATIO = 6.5;
+    newBadge.style.height  = newHeight + 'px';
+    newBadge.style.width   = newHeight * WIDTH_TO_HEIGHT_RATIO + 'px';
     newBadge.style.float   = badgeComputedStyles.float;
 
     // Existing badge is hidden from screen readers, because the new <sc> parent will be the real badge
     badgeImg.setAttribute('aria-hidden', true);
     badgeImg.parentElement.insertBefore(newBadge, badgeImg);
 
-    newBadge.appendChild(badgeImg);
-
     moveBadgeIdToParent(badgeImg, newBadge);
+
+    badgeImg.parentElement.removeChild(badgeImg);
 
     return newBadge;
   }
 
   function moveBadgeIdToParent(badgeImg, newBadge) {
-    badgeImg.removeAttribute('id');
     newBadge.id = BP_CONST.BADGE_ID;
 
     // Invalidate the id in the cache because we just removed the BADGE_ID
