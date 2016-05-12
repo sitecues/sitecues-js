@@ -273,7 +273,7 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
         if (isButtonRule(selector)) {
           // Don't alter buttons -- it will change it from a native button and the appearance will break
           // color, background-color
-          formFixes = 'border:1px outset ButtonFace;border-radius:4px';
+          formFixes = 'border:1px outset ButtonFace;border-radius:4px;';
         }
         if (newRgba.textShadow) {
           // Sometimes we want to darken, so we create a tiny text shadow of the same color as the text
