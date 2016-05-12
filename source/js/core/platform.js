@@ -135,11 +135,18 @@ define([], function() {
       // Set globally accessible version constants
       versionString: (function () {
         // If IE is being used, determine which version
-        var charIndex = agent.indexOf(osStr === 'win' ? 'Windows NT' : 'Mac OS X ');
+        var charIndex = agent.indexOf(osStr === 'win' ? 'Windows NT' : 'Mac OS X '),
+          UNKNOWN_VERSION = '0';
         if (charIndex === -1) {
-          return '0'; // Unknown version
+          return UNKNOWN_VERSION; // Unknown version
         }
-        return agent.slice(charIndex).replace(/^\D*/, '').replace(/\W.*$/, '');
+
+        var versionMatches = agent.slice(charIndex)
+          .replace(/^\D*/, '')
+          .replace('_', '.')  // Mac OS X 10_4_3 -> 10.4_3   (we will be parsing this as a float)
+          .match(/[\d\.]+/);
+
+        return versionMatches ? versionMatches[0] : UNKNOWN_VERSION;
       })()
     };
 
@@ -152,6 +159,7 @@ define([], function() {
     // 10 = Windows 10
     // For more details see https://en.wikipedia.org/?title=Windows_NT
     os.majorVersion = parseInt(os.versionString);
+    os.fullVersion = parseFloat(os.versionString);
 
     // Restore if needed
     // os.minorVersion = parseInt(platformModule.os.versionString.split(/\D/)[1]);

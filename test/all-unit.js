@@ -10,6 +10,7 @@ define(
         return [
             'common',
             'events',
+            'platform',
             //'manager',
             'storage'
         ];
