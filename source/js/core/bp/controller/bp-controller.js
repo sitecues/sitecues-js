@@ -170,6 +170,8 @@ define([
         // Opened with click means opened with keyboard in screen reader
         setTimeout(function() {
           changeModeToPanel(true);
+          // Set screen reader flag for the life of this page view
+          state.set('isOpenedWithScreenReader', true);
         }, 0);
       }
     }
@@ -183,36 +185,6 @@ define([
       evt.preventDefault();
       changeModeToPanel(true); // Opened with keyboard
     }
-  }
-
-  // Document will be scrolled if the current element is already scrolled all the way in this direction
-  function willScrollDocument(event) {
-    var
-      elem = event.target,
-      deltaY = parseInt(event.deltaY || -event.wheelDeltaY),    // parseInt() sanitizes by converting strange -0 value to 0
-      scrollHeight     = elem.scrollHeight,    // The total height of the scrollable area
-      scrollTop        = elem.scrollTop,       // Pixel height of invisible area above element (what has been scrolled)
-      clientHeight     = elem.clientHeight,    // The height of the element in the window
-      scrollBottom     = scrollHeight-scrollTop-clientHeight, // The pixels height invisible area below element (what is left to scroll)
-      scrollingDown    = deltaY > 0,           // If the user is scrolling downwards
-      scrollingUp      = deltaY < 0;           // If the user is scrolling upwards
-
-    return (scrollingDown && deltaY > scrollBottom) ||   // Already at bottom
-      (scrollingUp && -deltaY > scrollTop) ||   // Already at top
-      !deltaY; // Horizontal scrolling will always scroll document
-  }
-
-  // Don't scroll document while BP is open
-  function preventScroll(evt) {
-    var target = helper.getEventTarget(evt);
-    if (!target.hasAttribute('data-allow-scroll') ||
-      willScrollDocument(evt)) { // Avoid scrolling the document
-      return helper.cancelEvent(evt);
-    }
-  }
-
-  function willExpand() {
-    window.addEventListener('wheel', preventScroll);
   }
 
   function didExpand() {
@@ -239,10 +211,6 @@ define([
     });
   }
 
-  function willShrink() {
-    window.removeEventListener('wheel', preventScroll);
-  }
-
   /*
    Private functions.
    */
@@ -258,9 +226,7 @@ define([
       badgeElement.addEventListener('mouseout', cancelHoverDelayTimer);
 
       window.addEventListener('focus', onWindowFocus);
-      events.on('bp/will-expand', willExpand);
       events.on('bp/did-expand', didExpand);
-      events.on('bp/will-shrink', willShrink);
       events.on('zoom', didZoom);
       events.on('speech/did-change', didChangeSpeech);
 
