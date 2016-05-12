@@ -12,10 +12,10 @@ define(
             test   = tdd.test,
             before = tdd.before;
 
-        suite('Platform module', function () {
+        suite('Platform', function () {
 
             before(function () {
-              platform.init();
+                platform.init();
             });
 
             test('.os.fullVersion provides a number', function () {
@@ -24,7 +24,6 @@ define(
                     '.os.fullVersion must be a number'
                 );
             });
-
         });
     }
 );
