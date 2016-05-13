@@ -2,7 +2,10 @@
  * Service that lazily gets user agent and page stylesheets
  * and provides information about them.
  */
-define(['$', 'page/style-service/css-aggregator', 'page/style-service/media-queries', 'core/platform'],
+define(['$',
+  'page/style-service/css-aggregator',
+  'page/style-service/media-queries',
+  'core/platform'],
   function ($,
             cssAggregator,
             mediaQueries,
@@ -12,6 +15,7 @@ define(['$', 'page/style-service/css-aggregator', 'page/style-service/media-quer
     SITECUES_COMBINED_CSS_ID = 'sitecues-js-combined-css',
     WAIT_BEFORE_USING_STYLESHEET_DATA = 50,
     CSS_MAX_CHUNK_SIZE = 5000, // Max number of CSS chars to process at once
+    DOM_STYLESHEET_KEY = 'DOMSS',
     isInitialized,
     isCssRequested,   // Have we even begun the init sequence?
     isCssComplete,      // Init sequence is complete
@@ -236,22 +240,31 @@ define(['$', 'page/style-service/css-aggregator', 'page/style-service/media-quer
   /**
    * Get the DOM object for the stylesheet that lets us traverse the style rules.
    * Annoying that we have to do this.
-   * TODO: should we remove it as soon as we find and hold onto the result?
+   * Uses callback instead of Promises because we want to be synchronous if possible.
+   * This allows us to disable style sheets before they can cause a rerendering
    * @param $stylesheet
    * @returns {*}
    */
   function getDOMStylesheet($stylesheet, callback) {
+    var cachedDOMStylesheet = $stylesheet.data(DOM_STYLESHEET_KEY);
+    if (cachedDOMStylesheet) {
+      callback(cachedDOMStylesheet);
+      return;
+    }
+
     var tries = 1,
       MAX_TRIES = 20,
       TRY_INTERVAL_MS = 10,
       id = $stylesheet[0].id;
     function getStyleSheet() {
       var i = 0,
-        numSheets = document.styleSheets.length;
+        numSheets = document.styleSheets.length,
+        domSheet;
       for (; i < numSheets; i++) {
-        if (document.styleSheets[i].ownerNode.id === id) {
-          // devlog('Found stylesheet %s after try#%d', id, tries);
-          callback(document.styleSheets[i]);
+        domSheet = document.styleSheets[i];
+        if (domSheet.ownerNode.id === id) {
+          $stylesheet.data(DOM_STYLESHEET_KEY, domSheet);
+          callback(domSheet);
           return;
         }
       }
@@ -263,6 +276,28 @@ define(['$', 'page/style-service/css-aggregator', 'page/style-service/media-quer
     }
 
     getStyleSheet();
+  }
+
+  /**
+   * Lazily get the style sheet to be used for applying the theme.
+   * @returns {jQuery}
+   */
+  function updateSheet(id, text) {
+    var $sheet = $('#' + id);
+    if ($sheet.length) {
+      // Just update the text of the stylesheet
+      $sheet.text(text);
+    }
+    else {
+      // Create the stylesheet
+      // Note: be sure to insert text into stylesheet before inserting into DOM
+      // measured in IE11 to be more performant
+      $sheet = $('<style>')
+        .text(text)
+        .attr('id', id)
+        .appendTo('html');
+    }
+    return $sheet;
   }
 
   /**
@@ -312,6 +347,7 @@ define(['$', 'page/style-service/css-aggregator', 'page/style-service/media-quer
     getAllMatchingStyles: getAllMatchingStyles,
     getAllMatchingStylesCustom: getAllMatchingStylesCustom,
     getDOMStylesheet: getDOMStylesheet,
+    updateSheet: updateSheet,
     getStyleText: getStyleText
   };
 });

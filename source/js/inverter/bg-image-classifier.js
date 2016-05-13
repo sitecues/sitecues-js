@@ -1,4 +1,4 @@
-define(['page/util/color', 'inverse-theme/img-classifier'], function(colorUtil, imgClassifier) {
+define(['page/util/color', 'inverter/img-classifier'], function(colorUtil, imgClassifier) {
   var BG_IMAGE_BONUS = 40,
     MAX_SCORE_CHECK_PIXELS = 200;
 

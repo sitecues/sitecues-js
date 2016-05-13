@@ -2,14 +2,28 @@
  *  Used for dark themes.
  */
 
-define(['$', 'core/platform', 'inverse-theme/img-classifier'],
-  function($, platform, imgClassifier) {
+define([
+  '$',
+  'Promise',
+  'core/platform',
+  'page/style-service/style-service',
+  'inverter/bg-image-classifier',
+  'inverter/img-classifier'
+  ],
+  function($,
+           Promise,
+           platform,
+           styleService,
+           bgImgClassifier,
+           imgClassifier) {
 
   var mutationObserver,
     $allReversibleElems = $(),
     filterProperty,
     // Use proxy in IE and Safari, because: no css invert in IE, and it's extremely slow in Safari
-    SHOULD_USE_PROXY;
+    SHOULD_USE_PROXY,
+    inverseSpriteSheet,
+    INVERSE_SPRITE_STYLESHEET_ID = 'sitecues-js-invert-sprites';
 
   function toggle(doStart, doRefreshImages) {
     if (doStart) {
@@ -18,6 +32,8 @@ define(['$', 'core/platform', 'inverse-theme/img-classifier'],
     else {
       stop();
     }
+
+    toggleSheet(inverseSpriteSheet, !doStart);
   }
 
   function stop() {
@@ -163,12 +179,65 @@ define(['$', 'core/platform', 'inverse-theme/img-classifier'],
     return div.style.filter ? 'filter': platform.cssPrefix + 'filter';
   }
 
-  function init() {
+  function classifyBgImages(themeStyles) {
+    return new Promise(function(resolve) {
+      // Update theme styles with bg info
+      var bgImageStyles = themeStyles.filter(isBgImageStyle),
+        numImagesRemainingToClassify = bgImageStyles.length;
+
+      function isBgImageStyle(info) {
+        return info.value.prop === 'background-image';
+      }
+
+      function nextImage() {
+        if (numImagesRemainingToClassify-- === 0) {
+          resolve();
+        }
+      }
+
+      nextImage();  // In case we started with zero images
+
+      bgImageStyles.forEach(function (bgImageInfo) {
+        bgImgClassifier.classifyBackgroundImage(bgImageInfo, nextImage);
+      });
+    });
+  }
+
+  function toggleSheet(sheet, isDisabled) {
+    sheet.disabled = isDisabled;
+  }
+
+  // Return a promise that inversions are ready to use
+  function init(themeStyles) {
+    // Already initialized?
+    if (inverseSpriteSheet) {
+      return Promise.resolve();
+    }
+
+    // Not initialized yet
+
     // The filter value doesn't work in IE, and is *extremely* slow in Safari
     // It does work well in Edge, Chrome and Firefox
     SHOULD_USE_PROXY = platform.browser.isIE || platform.browser.isSafari;
-
     filterProperty = getFilterProperty();
+
+    // Create inverseSpriteSheet only once
+    return classifyBgImages(themeStyles)
+      .then(createSpriteSheet)
+      .then(function(domStyleSheet) {
+        inverseSpriteSheet = domStyleSheet;
+      });
+
+    function createSpriteSheet() {
+      return new Promise(function (resolve) {
+        // Create style sheet
+        var inverseSpriteCss = getReverseSpriteCssText(themeStyles),
+          $sheet = styleService.updateSheet(INVERSE_SPRITE_STYLESHEET_ID, inverseSpriteCss);
+
+        // Return a promise to the DOM stylesheet
+        styleService.getDOMStylesheet($sheet, resolve);
+      });
+    }
   }
 
   return {
