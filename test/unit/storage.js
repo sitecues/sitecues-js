@@ -80,9 +80,10 @@ define(
 
                 newUserId = JSON.parse(localStorage.getItem(OUR_NAMESPACE)).userId;
 
-                assert.isNotNull(
-                    newUserId.match(UUID_REGEX),
-                    'The user ID must be stored in a specific format'
+                assert.match(
+                    newUserId,
+                    UUID_REGEX,
+                    'The user ID must be stored as a valid UUID.'
                 );
             });
 

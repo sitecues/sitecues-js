@@ -1,12 +1,9 @@
-// Herein lies the base configuration for the testing framework.
-// Other files can use this as an AMD module.
+// This is the base configuration for the testing framework.
+// You can extend this for special use cases.
 
 define(
-    [   // dependencies...
-        '../test/all-unit',
-        '../test/all-functional'
-    ],
-    function (allUnit, allFunctional) {
+    [],
+    function () {
 
         'use strict';
 
@@ -60,14 +57,14 @@ define(
             },
 
             // Which unit test suite files to load. These check our APIs.
-            suites : allUnit.map(function (suite) {
-                return UNIT_PKG + '/' + suite;
-            }),
+            suites : [
+                UNIT_PKG + '/**/*.js'
+            ],
             // Which functional test suite files to load. These check our
             // user-facing behavior.
-            functionalSuites : allFunctional.map(function (suite) {
-                return FUNC_PKG + '/' + suite;
-            }),
+            functionalSuites : [
+                FUNC_PKG + '/**/*.js'
+            ],
 
             // Test whitelist regex. Only test IDs ('suite name - test name')
             // that match this pattern will run, all others will be skipped.
