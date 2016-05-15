@@ -148,6 +148,7 @@ sc-button {
 
 sc-button[aria-disabled="true"] {
   background-color: #999;
+  transform: scale(1) !important;
 }
 
 sc-button:hover {
