@@ -15,6 +15,14 @@ define(['core/conf/urls', 'core/platform', 'core/conf/site', 'Promise'], functio
 
   // If data is defined, it is a set call, otherwise we are getting data
   function postMessageToIframe(optionalDataToSend) {
+    var scriptOrigin = urls.getScriptOrigin();
+
+    if (!urls.isProduction()) {
+      // Trying to debug uncommon iframe errors
+      console.log('Attempting to fetch storage backup, script origin = ' + scriptOrigin);
+      console.log('Prefs iframe: ' + iframe.src);
+    }
+
     return new Promise(function(resolve, reject) {
       if (SC_DEV) {
         if (optionalDataToSend) {
@@ -27,7 +35,7 @@ define(['core/conf/urls', 'core/platform', 'core/conf/site', 'Promise'], functio
 
       window.addEventListener('message', onMessageReceived);
 
-      iframe.contentWindow.postMessage(optionalDataToSend, urls.getScriptOrigin());
+      iframe.contentWindow.postMessage(optionalDataToSend, scriptOrigin);
       var timeout = setTimeout(
         onTimeout,  // Code to run when we are fed up with waiting.
         3000        // The browser has this long to get results from the iframe
@@ -46,7 +54,7 @@ define(['core/conf/urls', 'core/platform', 'core/conf/site', 'Promise'], functio
           return;
         }
 
-        if (event.origin !== urls.getScriptOrigin()) {  // Best practice: check if message is from the expected origin
+        if (event.origin !== scriptOrigin) {  // Best practice: check if message is from the expected origin
           reject(new Error(ERROR_PREFIX + 'wrong origin'));
           return;
         }
