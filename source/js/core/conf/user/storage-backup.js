@@ -175,7 +175,7 @@ define(['core/conf/urls', 'core/platform', 'core/conf/site', 'Promise'], functio
 
 
   function init() {
-    IS_BACKUP_DISABLED = (platform.browser.isIE && platform.browser.version <= 10) || site.get('isStorageBackupDisabled');
+    IS_BACKUP_DISABLED = site.get('isStorageBackupDisabled');
   }
 
   return {
