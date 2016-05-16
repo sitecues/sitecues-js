@@ -4,7 +4,7 @@
  */
 
 // IMPORTANT: The extension defines this module in order to override the mechanism
-define(['core/conf/urls', 'core/platform', 'core/conf/site', 'Promise'], function (urls, platform, site, Promise) {
+define(['core/conf/urls', 'core/conf/site', 'Promise'], function (urls, site, Promise) {
 
   var PATH = 'html/prefs.html',
     ID = 'sitecues-prefs',
