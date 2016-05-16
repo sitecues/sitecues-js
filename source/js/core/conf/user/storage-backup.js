@@ -20,7 +20,7 @@ define(['core/conf/urls', 'core/platform', 'core/conf/site', 'Promise'], functio
     if (!urls.isProduction()) {
       // Trying to debug uncommon iframe errors (e.g. in SC-3307):
       // Failed to execute 'postMessage' on 'DOMWindow': The target origin provided ('https://js.sitecues.com') does not match the recipieient window's origin ('http://www.fullerton.edu').
-      console.log('Attempting to fetch storage backup, script origin = ' + scriptOrigin);
+      console.log('Attempting to communicate with storage backup, script origin = ' + scriptOrigin);
       console.log('Prefs iframe: ' + iframe.src);
     }
 
