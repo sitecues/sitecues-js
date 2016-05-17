@@ -69,15 +69,13 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/urls', 'page/style-
   // CSS proxy passes us the CSS text whether or not cross-origin policy allows it
   // Example of page that needs this: http://www.dcmetrobln.org/about-us
   function getCssProxyUrl(url) {
-    if (url.substring(0, 5) === 'data:') {
+    if (url.indexOf('data:') === 0) {
       return url;
     }
 
-    var absoluteUrl = urls.resolveUrl(url),
-      apiUrl = urls.getApiUrl('css/passthrough/?url=' + encodeURIComponent(absoluteUrl));
+    var absoluteUrl = urls.resolveUrl(url);
 
-    // TODO remove this line when dev servers are updated
-    return apiUrl.replace('/ws.dev.', '/ws.');
+    return urls.getApiUrl('css/passthrough/?url=' + encodeURIComponent(absoluteUrl));
   }
 
   /**
@@ -194,7 +192,8 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/urls', 'page/style-
       if (SC_DEV && mediaQuery) {
         console.log('@import media query: ' + mediaQuery);
       }
-      if (mediaQueries.isActiveMediaQuery(mediaQuery)) {
+      if (mediaQueries.isActiveMediaQuery(mediaQuery) &&
+        isUsableCssUrl(actualUrl)) {
         insertNewSheetBefore(sheet, urls.resolveUrl(actualUrl, sheet.url));
       }
       // Now remove @import line from CSS so that it does not get reprocessed
@@ -298,6 +297,14 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/urls', 'page/style-
     $(document).ready(collectAllCssImpl);
   }
 
+  function isUsableCssUrl(url) {
+    // Sitecues does not need to process CSS3 fonts, at least for now -- waste of processing
+    // Fill in more common font pattern libraries here
+    // The benefit is less work and speedier processing of site CSS
+    var GOOGLE_FONT_PATTERN = '//fonts.google';
+    return url.indexOf(GOOGLE_FONT_PATTERN) < 0;
+  }
+
   function collectAllCssImpl() {
 
     function startsWith(s1, s2) {
@@ -305,7 +312,8 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/urls', 'page/style-
     }
 
     function isUsableLinkedStyleSheet(linkElem) {
-      return mediaQueries.isActiveMediaQuery(linkElem.media);     // Ignore all CSS with the wrong media, e.g. print
+      return mediaQueries.isActiveMediaQuery(linkElem.media) &&     // Ignore all CSS with the wrong media, e.g. print
+        isUsableCssUrl(linkElem.href);
     }
 
     function isUsableStyleElement(styleElem) {
