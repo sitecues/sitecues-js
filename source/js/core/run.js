@@ -132,11 +132,13 @@ define(['core/conf/user/manager', 'core/util/session', 'core/locale', 'core/metr
     });
 
     // -- Themes --
-    conf.get('themeName', function(themeName) {
-      if (themeName) {
-        initThemes();
-      }
-    });
+    if (platform.featureSupport.themes) {
+      conf.get('themeName', function (themeName) {
+        if (themeName) {
+          initThemes();
+        }
+      });
+    }
 
     // -- Mouse --
     conf.get('mouseSize', function(mouseSize) {

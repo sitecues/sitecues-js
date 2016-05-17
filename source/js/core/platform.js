@@ -260,6 +260,9 @@ define([], function() {
     exports.transformProperty = exports.transformPropertyCss.replace('-t', 'T').replace('-', '');
     exports.transformOriginProperty = exports.transformProperty + 'Origin';
     exports.transitionEndEvent = exports.browser.isWebKit ? 'webkitTransitionEnd' : 'transitionend';
+    exports.featureSupport = {
+      themes: !exports.browser.isMS
+    };
 
     // Invalidate cached retina info on window resize, as it may have moved to another display.
     // When a window moves to another display, it can change whether we're on a retina display.
