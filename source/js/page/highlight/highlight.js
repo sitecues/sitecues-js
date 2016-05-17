@@ -1723,6 +1723,7 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
     if (seed) {
       var elem = $(seed)[0];
       if (elem) {
+        traitcache.updateCachedViewPosition(); // Reset cache view to ensure scrolling accounted for
         state.picked = doUsePicker ? picker.find(elem, doSuppressVoting) : $(elem);
         state.target = elem;
         if (state.picked) {
