@@ -8,7 +8,17 @@
  *    }
  */
 
-define(['$', 'page/util/color', 'core/conf/site', 'core/conf/urls'], function($, colorUtil, site, urls) {
+define(['$',
+  'page/util/color',
+  'core/conf/site',
+  'core/conf/urls',
+  'inverter/invert-url'
+],
+  function($,
+           colorUtil,
+           site,
+           urls,
+           invertUrl) {
   var REVERSIBLE_ATTR = 'data-sc-reversible',
     customSelectors = site.get('themes') || { },
     DARK_BG_THRESHOLD = 0.6,
@@ -22,50 +32,6 @@ define(['$', 'page/util/color', 'core/conf/site', 'core/conf/urls'], function($,
   function getImageExtension(src) {
     var imageExtension = src.match(/\.png|\.jpg|\.jpeg|\.gif|\.svg/i);
     return imageExtension && imageExtension[0];
-  }
-
-  function getInvertedDataUrl(url) {
-    // The image service can't invert this url, but we can do it in JS.
-    // Very useful for example on http://www.gatfl.gatech.edu/tflwiki/index.php?title=Team
-    var img = $('<img>').attr('src', url)[0],
-      canvas = document.createElement('canvas'),
-      width = canvas.width = img.naturalWidth,
-      height = canvas.height = img.naturalHeight,
-      ctx = canvas.getContext('2d');
-
-    ctx.drawImage(img, 0, 0, width, height);
-
-    var imageData = ctx.getImageData(0, 0, width, height),
-      data = imageData.data,
-      dataLength = data.length,
-      index = 0;
-
-    for (; index < dataLength; index += 4) {
-      // red
-      data[index] = 255 - data[index];
-      // green
-      data[index + 1] = 255 - data[index + 1];
-      // blue
-      data[index + 2] = 255 - data[index + 2];
-    }
-
-    ctx.putImageData(imageData, 0, 0);
-
-    return canvas.toDataURL();
-  }
-
-  function getInvertUrl(url) {
-    if (url.substring(0, 5) === 'data:') {
-      return getInvertedDataUrl(url);
-    }
-    var
-      absoluteUrl = urls.resolveUrl(url),
-      apiUrl = urls.getApiUrl('image/invert?url=' + encodeURIComponent(absoluteUrl));
-
-    // TODO remove this line when dev servers are updated
-    apiUrl = apiUrl.replace('/ws.dev.', '/ws.');
-
-    return apiUrl;
   }
 
   // Get <img> that can have its pixel data read --
@@ -101,14 +67,15 @@ define(['$', 'page/util/color', 'core/conf/site', 'core/conf/urls'], function($,
       // Element we want to read is not an <img> -- for example, <input type="image">
       // Create an <img> with the same url so we can apply it to the canvas
       safeUrl = url;
-    }
-    else {
-      // Uses inverted image for analysis so that if we need to display it, it's already in users cache.
-      // The inverted image will show the same number of brightness values in the histogram so this won't effect classification
-      safeUrl = getInvertUrl(url, true);
+      returnImageWhenComplete(createSafeImage(safeUrl));
     }
 
-    returnImageWhenComplete(createSafeImage(safeUrl));
+    // Uses inverted image for analysis so that if we need to display it, it's already in users cache.
+    // The inverted image will show the same number of brightness values in the histogram so this won't effect classification
+    invertUrl.getInvertUrl(url, img)
+      .then(function(newUrl) {
+        returnImageWhenComplete(createSafeImage(newUrl, true));
+      });
   }
 
   function createSafeImage(url) {
@@ -631,7 +598,6 @@ define(['$', 'page/util/color', 'core/conf/site', 'core/conf/urls'], function($,
 
   return {
     classify: classify,
-    getInvertUrl: getInvertUrl,
     getSizeScore: getSizeScore,
     getImageExtension: getImageExtension,
     getExtensionScore: getExtensionScore,

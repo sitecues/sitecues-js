@@ -7,15 +7,17 @@ define([
   'Promise',
   'core/platform',
   'page/style-service/style-service',
+  'inverter/invert-url',
   'inverter/bg-image-classifier',
   'inverter/img-classifier'
-  ],
-  function($,
-           Promise,
-           platform,
-           styleService,
-           bgImgClassifier,
-           imgClassifier) {
+],
+function($,
+         Promise,
+         platform,
+         styleService,
+         invertUrl,
+         bgImgClassifier,
+         imgClassifier) {
 
   var mutationObserver,
     $allReversibleElems = $(),
@@ -94,7 +96,7 @@ define([
     }
     else {
       // Clear filter
-      $img.css(filterProperty,  savedFilter || '');
+      $img.css(filterProperty, savedFilter || '');
     }
   }
 
@@ -109,11 +111,15 @@ define([
         $img.attr('data-sc-src', currentSrc);
         savedSrc = currentSrc;
       }
-      $img.attr('src', imgClassifier.getInvertUrl(savedSrc));
+
+      invertUrl.getInvertUrl(savedSrc)
+        .then(function(newUrl) {
+          $img.attr('src', newUrl);
+        });
     }
     else {
       // Clear proxied src
-      $img.attr('src',  savedSrc || '');
+      $img.attr('src', savedSrc || '');
     }
   }
 
@@ -133,8 +139,8 @@ define([
 
     function isReversibleFilter(index, elem) {
       return elem.getAttribute('data-sc-reversible') === 'true' ||
-          elem.getAttribute('allowtransparency') === 'true' ||
-          (elem.src && elem.src.match(REVERSIBLE_FRAME_REGEX));
+        elem.getAttribute('allowtransparency') === 'true' ||
+        (elem.src && elem.src.match(REVERSIBLE_FRAME_REGEX));
     }
 
     $iframes = $root.find('iframe').filter(isReversibleFilter);
@@ -148,29 +154,30 @@ define([
     });
   }
 
+  function isReversibleBg(style) {
+    // Return a promise to a CSS text for reversed sprites
+    return style.value.doReverse;
+  }
+
+  // Reverse background images
+  function getCssForOneSprite(style) {
+    var imageUrl = style.value.imageUrl,
+      selector = style.rule.selectorText;
+    return invertUrl.getInvertUrl(imageUrl)
+      .then(function(newUrl) {
+        return selector + '{\n' +
+          'background-image: url(' + newUrl + ') !important;\n' +
+          '}\n';
+        });
+  }
+
   function getReverseSpriteCssText(themeStyles) {
-    // Reverse background images
-    function getCssForOneSprite(bgInfo, selector) {
-      if (!bgInfo.doReverse) {
-        return '';
-      }
+    var reversibleBgStyles = themeStyles.filter(isReversibleBg);
 
-      return selector + '{\n' +
-        'background-image: url(' + imgClassifier.getInvertUrl(bgInfo.imageUrl) + ') !important;\n' +
-        '}\n';
-    }
-    var styleSheetText = '';
-
-    // Backgrounds
-    themeStyles.forEach(function(style) {
-      // Don't alter buttons -- it will change it from a native button and the appearance will break
-      // color, background-color
-      if (style.value.prop === 'background-image') {
-        styleSheetText += getCssForOneSprite(style.value, style.rule.selectorText);
-      }
-    });
-
-    return styleSheetText;
+    return Promise.all(reversibleBgStyles.map(getCssForOneSprite))
+      .then(function(allCss) {
+        return allCss.join('\n');
+      });
   }
 
   function getFilterProperty() {
@@ -223,20 +230,18 @@ define([
 
     // Create inverseSpriteSheet only once
     return classifyBgImages(themeStyles)
-      .then(createSpriteSheet)
+      .then(getReverseSpriteCssText(themeStyles))
+      .then(function(inverseSpriteCss) {
+        var $sheet = styleService.updateSheet(INVERSE_SPRITE_STYLESHEET_ID, inverseSpriteCss);
+        return new Promise(function(resolve) {
+          styleService.getDOMStylesheet($sheet, resolve);
+        });
+      })
       .then(function(domStyleSheet) {
         inverseSpriteSheet = domStyleSheet;
       });
 
     function createSpriteSheet() {
-      return new Promise(function (resolve) {
-        // Create style sheet
-        var inverseSpriteCss = getReverseSpriteCssText(themeStyles),
-          $sheet = styleService.updateSheet(INVERSE_SPRITE_STYLESHEET_ID, inverseSpriteCss);
-
-        // Return a promise to the DOM stylesheet
-        styleService.getDOMStylesheet($sheet, resolve);
-      });
     }
   }
 
