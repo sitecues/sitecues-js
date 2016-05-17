@@ -23,6 +23,7 @@ define([
            customTheme,
            events) {
   var THEME_STYLESHEET_ID = 'sitecues-js-theme',
+    TRANSITION_STYLESHEET_ID = 'sitecues-js-theme-transition',
     themeSheet,
     REPAINT_MS = 40,
     cachedStyleInfo,
@@ -33,8 +34,10 @@ define([
     isInitialized,
     originalBodyBackgroundColor,
     isOriginalThemeDark,
-    isInverted,   // Is dark theme currently applied
-    transitionTimer,
+    isInverted = false,   // Is dark theme currently applied
+    neverInverted = true,
+    finishThemeTimer,
+    oldTransitionMs, // Last transition speed
     currentThemeName,  // one of the theme names from color-choices.js
     currentThemePower,  // .01 - 1
     currentThemeTextHue,  // 0 - 1
@@ -53,6 +56,10 @@ define([
     if (shouldRepaintToEnsureFullCoverage) {
       repaintPage();
     }
+
+    // Only our color changes should use our transitions
+    $('html').removeClass(TRANSITION_CLASS);
+
     if (!SC_EXTENSION) {
       // Don't do this in extension -- there is no badge
       require(['bp-adaptive/bp-adaptive'], function (bpAdaptive) {
@@ -73,27 +80,33 @@ define([
       newThemeTextHue = conf.get('themeTextHue'),
       colorMapFn,
       willBeInverted,
-      transitionMs,
-      isFlippingInversion;
+      isFlippingInversion,
+      doStartDisabled,
+      transitionMs;
 
     function prepareThemeCss() {
       var
         themeCss = colorMapFn ? getThemeCssText(colorMapFn, currentThemePower, currentThemeTextHue) : '',
-        transitionCss = initializeTransition(transitionMs),
-        $sheet = styleService.updateSheet(THEME_STYLESHEET_ID, transitionCss + themeCss);
+        $sheet = styleService.updateSheet(THEME_STYLESHEET_ID, {
+          text: themeCss,
+          doDisable: doStartDisabled
+        });
 
       return new Promise(function (resolve) {
         styleService.getDOMStylesheet($sheet, function (domSheet) {
           themeSheet = domSheet;
-          if (isFlippingInversion) {
-            // Disable themes while we get the rest of the theme ready,
-            // because we look at background colors of ancestors of images s hints to help classify
-            // This must be done synchronously to avoid an extra re-render
-            themeSheet.disabled = true;
-          }
           resolve();
         });
       });
+    }
+
+    function prepareTransition() {
+      // Create or update transition stylesheet if needed
+      if (transitionMs !== oldTransitionMs) {
+        console.log(transitionMs);
+        styleService.updateSheet(TRANSITION_STYLESHEET_ID, { text : getThemeTransitionCss(transitionMs) });
+        oldTransitionMs = transitionMs;
+      }
     }
 
     function toggleBodyClasses() {
@@ -109,6 +122,10 @@ define([
       return; // No change
     }
 
+    if (!newThemeName && !currentThemeName) {
+      return; // Theme power and text hue changes are irrelevant when there is no theme
+    }
+
     // New theme settings are different
     currentThemeName = newThemeName;
     currentThemePower = newThemePower || DEFAULT_INTENSITY;
@@ -116,6 +133,8 @@ define([
     colorMapFn = colorChoices[currentThemeName];
     willBeInverted = isDarkTheme(colorMapFn);
     isFlippingInversion = isInverted !== willBeInverted;
+    // First time inverting, do not enable new dark styles yet, so we can perform sprite calculations on original background
+    doStartDisabled = willBeInverted && neverInverted;
     // We want to animate quickly between light themes, but slowly when performing a drastic change
     // such as going from light to dark or vice-versa
     transitionMs = isFlippingInversion ? TRANSITION_MS_SLOW : TRANSITION_MS_FAST;
@@ -125,16 +144,24 @@ define([
       .then(function() {
         // Invert if necessary
         if (isFlippingInversion) {
+          neverInverted = false;
           return toggleInversion(willBeInverted);
         }
       })
+      .then(prepareTransition)
       .then(function() {
         // Finalize theme
-        if (themeSheet.disabled) {
-          themeSheet.disabled = false;  // Reenable theme style sheet that was disabled for inversion
+        if (doStartDisabled) {
+          styleService.updateSheet(THEME_STYLESHEET_ID, { doDisable : false });
         }
         toggleBodyClasses();
-        setTimeout(finalizeTheme, transitionMs);
+
+        // Turn on transitions
+        $('html').addClass(TRANSITION_CLASS);
+        clearTimeout(finishThemeTimer);
+
+        finishThemeTimer = setTimeout(finalizeTheme, transitionMs);
+
         isInverted = willBeInverted;
       });
   }
@@ -177,16 +204,6 @@ define([
     };
     var themedBg = colorMapFn(originalBg, 1);
     return colorUtil.isDarkColor(themedBg);
-  }
-
-  function initializeTransition(transitionMs) {
-    $('html').addClass(TRANSITION_CLASS);
-    clearTimeout(transitionTimer);
-    transitionTimer = setTimeout(function() {
-      $('html').removeClass(TRANSITION_CLASS);
-    }, transitionMs);
-
-    return getThemeTransitionCss(transitionMs);
   }
 
   function getThemeTransitionCss(transitionMs) {

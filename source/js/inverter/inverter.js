@@ -232,7 +232,7 @@ function($,
     return classifyBgImages(themeStyles)
       .then(getReverseSpriteCssText(themeStyles))
       .then(function(inverseSpriteCss) {
-        var $sheet = styleService.updateSheet(INVERSE_SPRITE_STYLESHEET_ID, inverseSpriteCss);
+        var $sheet = styleService.updateSheet(INVERSE_SPRITE_STYLESHEET_ID, { text : inverseSpriteCss });
         return new Promise(function(resolve) {
           styleService.getDOMStylesheet($sheet, resolve);
         });
@@ -240,9 +240,6 @@ function($,
       .then(function(domStyleSheet) {
         inverseSpriteSheet = domStyleSheet;
       });
-
-    function createSpriteSheet() {
-    }
   }
 
   return {

@@ -100,22 +100,12 @@ define(['$',
       elems = [];
 
     function createNext() {
-      var newSheet =
-        $('<style>')
-          .attr('id', SITECUES_COMBINED_CSS_ID + '-' + index)
-          // Note: be sure to insert text into stylesheet before inserting into DOM
-          // measured in IE11 to be more performant
-          .text(cssChunks[index])
-          .appendTo('head')
-          .get(0);
-        if ('disabled' in newSheet) {
-          // Disable as early as possible:
-          // Not supported in IE, so we will use the DOMStyleSheet object to disable as well
-          newSheet.disabled = true;
-        }
-        elems[index] = newSheet;
-        getDOMStylesheet($(newSheet), function(domStylesheetObject) {
-          domStylesheetObject.disabled = true;
+      var $newSheet = updateSheet(SITECUES_COMBINED_CSS_ID + '-' + index, {
+        text: cssChunks[index],
+        doDisable: true
+      });
+        elems[index] = $newSheet[0];
+        getDOMStylesheet($newSheet, function(domStylesheetObject) {
           domStylesheetObjects[index] = domStylesheetObject;
         });
       if (++ index < numChunks) {
@@ -282,21 +272,45 @@ define(['$',
    * Lazily get the style sheet to be used for applying the theme.
    * @returns {jQuery}
    */
-  function updateSheet(id, text) {
-    var $sheet = $('#' + id);
-    if ($sheet.length) {
-      // Just update the text of the stylesheet
-      $sheet.text(text);
-    }
-    else {
+  function updateSheet(id, options) {
+    var $sheet = $('#' + id),
+      text = options.text,
+      doDisable = options.doDisable,
+      doCreate = !$sheet.length;
+
+    if (doCreate) {
       // Create the stylesheet
       // Note: be sure to insert text into stylesheet before inserting into DOM
       // measured in IE11 to be more performant
       $sheet = $('<style>')
-        .text(text)
-        .attr('id', id)
-        .appendTo('html');
+        .attr('id', id);
     }
+
+
+    // Update text
+    if (typeof text === 'string') {
+      $sheet.text(text);
+    }
+
+    // Update disabled state
+    if (typeof doDisable === 'boolean') {
+      if (doDisable) {
+        // Same as disabling but works without access to DOMStyleSheet object, which is hard to get to
+        // This can always be done right away
+        // We use the media attribute as an easier cross-browser way to disable sheets
+        // Once IE11 goes away we may want to go back to using .disabled property access
+        $sheet.attr('media', '(max-width:0px)');
+      }
+      else {
+        $sheet.removeAttr('media');
+      }
+    }
+
+    if (doCreate) {
+      // Insert in DOM
+      $sheet.appendTo('html');
+    }
+
     return $sheet;
   }
 
