@@ -142,7 +142,9 @@ define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/metr
   }
 
   function toggleSendEnabled(doEnable) {
+    // We do both a fake button and a link child -- the link is for the mailto: we do in the extension
     getFeedbackSendButton().setAttribute('aria-disabled', !doEnable);
+    getFeedbackSendLink().setAttribute('aria-disabled', !doEnable);
   }
 
   function isSendEnabled() {

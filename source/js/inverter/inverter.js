@@ -2,14 +2,30 @@
  *  Used for dark themes.
  */
 
-define(['$', 'core/platform', 'inverse-theme/img-classifier'],
-  function($, platform, imgClassifier) {
+define([
+  '$',
+  'Promise',
+  'core/platform',
+  'page/style-service/style-service',
+  'inverter/invert-url',
+  'inverter/bg-image-classifier',
+  'inverter/img-classifier'
+],
+function($,
+         Promise,
+         platform,
+         styleService,
+         invertUrl,
+         bgImgClassifier,
+         imgClassifier) {
 
   var mutationObserver,
     $allReversibleElems = $(),
     filterProperty,
     // Use proxy in IE and Safari, because: no css invert in IE, and it's extremely slow in Safari
-    SHOULD_USE_PROXY;
+    SHOULD_USE_PROXY,
+    inverseSpriteSheet,
+    INVERSE_SPRITE_STYLESHEET_ID = 'sitecues-js-invert-sprites';
 
   function toggle(doStart, doRefreshImages) {
     if (doStart) {
@@ -18,6 +34,8 @@ define(['$', 'core/platform', 'inverse-theme/img-classifier'],
     else {
       stop();
     }
+
+    toggleSheet(inverseSpriteSheet, !doStart);
   }
 
   function stop() {
@@ -78,7 +96,7 @@ define(['$', 'core/platform', 'inverse-theme/img-classifier'],
     }
     else {
       // Clear filter
-      $img.css(filterProperty,  savedFilter || '');
+      $img.css(filterProperty, savedFilter || '');
     }
   }
 
@@ -93,11 +111,15 @@ define(['$', 'core/platform', 'inverse-theme/img-classifier'],
         $img.attr('data-sc-src', currentSrc);
         savedSrc = currentSrc;
       }
-      $img.attr('src', imgClassifier.getInvertUrl(savedSrc));
+
+      invertUrl.getInvertUrl(savedSrc)
+        .then(function(newUrl) {
+          $img.attr('src', newUrl);
+        });
     }
     else {
       // Clear proxied src
-      $img.attr('src',  savedSrc || '');
+      $img.attr('src', savedSrc || '');
     }
   }
 
@@ -117,8 +139,8 @@ define(['$', 'core/platform', 'inverse-theme/img-classifier'],
 
     function isReversibleFilter(index, elem) {
       return elem.getAttribute('data-sc-reversible') === 'true' ||
-          elem.getAttribute('allowtransparency') === 'true' ||
-          (elem.src && elem.src.match(REVERSIBLE_FRAME_REGEX));
+        elem.getAttribute('allowtransparency') === 'true' ||
+        (elem.src && elem.src.match(REVERSIBLE_FRAME_REGEX));
     }
 
     $iframes = $root.find('iframe').filter(isReversibleFilter);
@@ -132,29 +154,30 @@ define(['$', 'core/platform', 'inverse-theme/img-classifier'],
     });
   }
 
+  function isReversibleBg(style) {
+    // Return a promise to a CSS text for reversed sprites
+    return style.value.doReverse;
+  }
+
+  // Reverse background images
+  function getCssForOneSprite(style) {
+    var imageUrl = style.value.imageUrl,
+      selector = style.rule.selectorText;
+    return invertUrl.getInvertUrl(imageUrl)
+      .then(function(newUrl) {
+        return selector + '{\n' +
+          'background-image: url(' + newUrl + ') !important;\n' +
+          '}\n';
+        });
+  }
+
   function getReverseSpriteCssText(themeStyles) {
-    // Reverse background images
-    function getCssForOneSprite(bgInfo, selector) {
-      if (!bgInfo.doReverse) {
-        return '';
-      }
+    var reversibleBgStyles = themeStyles.filter(isReversibleBg);
 
-      return selector + '{\n' +
-        'background-image: url(' + imgClassifier.getInvertUrl(bgInfo.imageUrl) + ') !important;\n' +
-        '}\n';
-    }
-    var styleSheetText = '';
-
-    // Backgrounds
-    themeStyles.forEach(function(style) {
-      // Don't alter buttons -- it will change it from a native button and the appearance will break
-      // color, background-color
-      if (style.value.prop === 'background-image') {
-        styleSheetText += getCssForOneSprite(style.value, style.rule.selectorText);
-      }
-    });
-
-    return styleSheetText;
+    return Promise.all(reversibleBgStyles.map(getCssForOneSprite))
+      .then(function(allCss) {
+        return allCss.join('\n');
+      });
   }
 
   function getFilterProperty() {
@@ -163,12 +186,60 @@ define(['$', 'core/platform', 'inverse-theme/img-classifier'],
     return div.style.filter ? 'filter': platform.cssPrefix + 'filter';
   }
 
-  function init() {
+  function classifyBgImages(themeStyles) {
+    return new Promise(function(resolve) {
+      // Update theme styles with bg info
+      var bgImageStyles = themeStyles.filter(isBgImageStyle),
+        numImagesRemainingToClassify = bgImageStyles.length;
+
+      function isBgImageStyle(info) {
+        return info.value.prop === 'background-image';
+      }
+
+      function nextImage() {
+        if (numImagesRemainingToClassify-- === 0) {
+          resolve();
+        }
+      }
+
+      nextImage();  // In case we started with zero images
+
+      bgImageStyles.forEach(function (bgImageInfo) {
+        bgImgClassifier.classifyBackgroundImage(bgImageInfo, nextImage);
+      });
+    });
+  }
+
+  function toggleSheet(sheet, isDisabled) {
+    sheet.disabled = isDisabled;
+  }
+
+  // Return a promise that inversions are ready to use
+  function init(themeStyles) {
+    // Already initialized?
+    if (inverseSpriteSheet) {
+      return Promise.resolve();
+    }
+
+    // Not initialized yet
+
     // The filter value doesn't work in IE, and is *extremely* slow in Safari
     // It does work well in Edge, Chrome and Firefox
     SHOULD_USE_PROXY = platform.browser.isIE || platform.browser.isSafari;
-
     filterProperty = getFilterProperty();
+
+    // Create inverseSpriteSheet only once
+    return classifyBgImages(themeStyles)
+      .then(getReverseSpriteCssText(themeStyles))
+      .then(function(inverseSpriteCss) {
+        var $sheet = styleService.updateSheet(INVERSE_SPRITE_STYLESHEET_ID, { text : inverseSpriteCss });
+        return new Promise(function(resolve) {
+          styleService.getDOMStylesheet($sheet, resolve);
+        });
+      })
+      .then(function(domStyleSheet) {
+        inverseSpriteSheet = domStyleSheet;
+      });
   }
 
   return {

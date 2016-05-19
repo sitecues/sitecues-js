@@ -148,6 +148,7 @@ sc-button {
 
 sc-button[aria-disabled="true"] {
   background-color: #999;
+  transform: scale(1) !important;
 }
 
 sc-button:hover {
@@ -594,6 +595,8 @@ sc-button[data-setting-name="themeName"][aria-pressed="true"]:after {
   background-color: transparent !important;
   box-shadow: none !important;
   box-sizing: border-box !important;
+  max-width: none !important;
+  max-width: none !important;
 }
 #scp-feedback-textarea:focus {
   box-shadow: none !important;

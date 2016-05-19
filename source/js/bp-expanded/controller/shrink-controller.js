@@ -37,6 +37,12 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
       }
     }
 
+    // return truthy value if mouseout should cause panel to close
+    function canShrinkFromMouseout() {
+      // Only allow close from hover if opened from hover, or mouse was in panel once
+      return state.get('wasMouseInPanel') || isOpenedWithHover();
+    }
+
     function winMouseMove(evt) {
 
       if (isButtonDown(evt)) {
@@ -47,7 +53,7 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
         if (SC_DEV && isSticky()) {
           return;
         }
-        if (state.get('wasMouseInPanel')) {
+        if (canShrinkFromMouseout()) {
           shrinkPanel();
         }
       }
@@ -101,7 +107,9 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
       }
 
       if (isMouseOutsidePanel(evt, 0)) {
-        if (isOpenedWithHover()) { // Any click anywhere outside of visible contents, no safe-zone needed
+        if (!state.get('isOpenedWithScreenReader')) {
+          // Any click anywhere outside of visible contents should close panel, no safe-zone needed
+          // Unless opened by a screen reader in virtual cursor mode, because JAWS sends spurious clicks outside of panel (SC-3211)
           shrinkPanel();
         }
         return;
@@ -210,8 +218,8 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
 
       // Pressing tab or shift tab when panel is open switches it to keyboard mode
       addOrRemoveFn('mousedown', winMouseDown);
-      if (isOpenedWithHover()) {
-        // Only allow close from hover if opened from hover
+      if (!state.get('isOpenedWithScreenReader')) {
+        // Mousemove can close panel after mouseout, unless opened with a screen reader
         addOrRemoveFn('mousemove', winMouseMove);
       }
       addOrRemoveFn('mouseout', winMouseLeave);

@@ -4,7 +4,7 @@
  */
 
 // IMPORTANT: The extension defines this module in order to override the mechanism
-define(['core/conf/urls', 'core/platform', 'core/conf/site', 'Promise'], function (urls, platform, site, Promise) {
+define(['core/conf/urls', 'core/conf/site', 'Promise'], function (urls, site, Promise) {
 
   var PATH = 'html/prefs.html',
     ID = 'sitecues-prefs',
@@ -15,6 +15,15 @@ define(['core/conf/urls', 'core/platform', 'core/conf/site', 'Promise'], functio
 
   // If data is defined, it is a set call, otherwise we are getting data
   function postMessageToIframe(optionalDataToSend) {
+    var scriptOrigin = urls.getScriptOrigin();
+
+    if (!urls.isProduction()) {
+      // Trying to debug uncommon iframe errors (e.g. in SC-3307):
+      // Failed to execute 'postMessage' on 'DOMWindow': The target origin provided ('https://js.sitecues.com') does not match the recipieient window's origin ('http://www.fullerton.edu').
+      console.log('Attempting to communicate with storage backup, script origin = ' + scriptOrigin);
+      console.log('Prefs iframe: ' + iframe.src);
+    }
+
     return new Promise(function(resolve, reject) {
       if (SC_DEV) {
         if (optionalDataToSend) {
@@ -27,7 +36,7 @@ define(['core/conf/urls', 'core/platform', 'core/conf/site', 'Promise'], functio
 
       window.addEventListener('message', onMessageReceived);
 
-      iframe.contentWindow.postMessage(optionalDataToSend, urls.getScriptOrigin());
+      iframe.contentWindow.postMessage(optionalDataToSend, scriptOrigin);
       var timeout = setTimeout(
         onTimeout,  // Code to run when we are fed up with waiting.
         3000        // The browser has this long to get results from the iframe
@@ -46,7 +55,7 @@ define(['core/conf/urls', 'core/platform', 'core/conf/site', 'Promise'], functio
           return;
         }
 
-        if (event.origin !== urls.getScriptOrigin()) {  // Best practice: check if message is from the expected origin
+        if (event.origin !== scriptOrigin) {  // Best practice: check if message is from the expected origin
           reject(new Error(ERROR_PREFIX + 'wrong origin'));
           return;
         }
@@ -166,7 +175,7 @@ define(['core/conf/urls', 'core/platform', 'core/conf/site', 'Promise'], functio
 
 
   function init() {
-    IS_BACKUP_DISABLED = (platform.browser.isIE && platform.browser.version <= 10) || site.get('isStorageBackupDisabled');
+    IS_BACKUP_DISABLED = site.get('isStorageBackupDisabled');
   }
 
   return {

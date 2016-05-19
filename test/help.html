@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <title>Sitecues Testing Help</title>
         <meta name="author" content="Seth Holladay">
-        <meta name="description" content="Guidance for running sitecues tests.">
+        <meta name="description" content="Guidance for running Sitecues tests.">
         <style>
             * {
                 padding : 0;
@@ -129,9 +129,10 @@
             <section>
                 <h2>Still learning?</h2>
                 <p>
-                    No problem! Here are the basics. Sitecues has unit tests that run alongside sitecues in a
-                    web browser, and functional tests that control a web browser remotely. Functional tests
-                    are the most powerful, but unit tests are easier to run and are much simpler.
+                    Automated tests exist to protect us from defects. There are two main categories. Unit tests
+                    run alongside Sitecues in a web browser. Functional tests run on a server that controls a
+                    web browser remotely. Functional tests are the most powerful, but unit tests are simpler
+                    and easier to write, run, and debug.
                 </p>
                 <p>
                     After a tiny bit of setup, you will be able to run the unit tests simply by visiting the
@@ -150,7 +151,7 @@
                         happens from a developer's point of view when individual components are used.
                     </li>
                     <li>
-                        <strong>Functional tests</strong> imitate a real-world end user by controlling mouse and
+                        <strong>Functional tests</strong> imitate a human end user by controlling mouse and
                         keyboard input, clicking on links, filling out forms, etc.
                     </li>
                     <li>
@@ -162,12 +163,30 @@
                         launch browsers and do other fancy things that aren't possible from the browser client alone.
                     </li>
                     <li>
-                        There is also a <strong>Node.js client</strong> (<kbd>intern-client</kbd>), which is a tool
-                        to run unit tests that don't need a browser at all (e.g. math utilities). Other projects
-                        use it, such as the sitecues Proxy, but since sitecues itself is strictly a browser app,
-                        it is mostly irrelevant.
+                        There is also a <strong>Node.js client</strong> (<kbd>intern-client</kbd>) for running unit tests
+                        that don't need a browser at all (e.g. math utilities). Other projects use it, such as the
+                        Sitecues Proxy. But since Sitecues itself is strictly a browser app, you can ignore it.
                     </li>
                 </ul>
+            </section>
+            <section>
+                <h2>Get Started</h2>
+                <p>
+                    Set up a Sitecues development environment. Then <code>npm install</code> to get the project's
+                    dependencies.
+                </p>
+                <p>
+                    Congrats, the testing framework is now ready to be used. However, it lives at
+                    <code>node_modules/.bin/intern-runner</code> and that is no fun to type.
+                    So let's do <code>npm install intern --global</code> and now you can
+                    simply type <code>intern-runner</code> instead, to use it.
+                </p>
+                <p>
+                    Now we will run the unit tests. All you need to do is host
+                    <code>node_modules/intern/client.html</code> on an HTTP server of some kind and visit its URL.
+                    For convenience, host it by running <code>intern-runner proxyOnly config=config/intern</code>
+                    and then visit <a href="run.html">test/run.html</a>, which will forward you to where it lives.
+                </p>
             </section>
             <section>
                 <h2 id="faq-heading">FAQ</h2>
@@ -204,30 +223,11 @@
                 </dl>
             </section>
             <section>
-                <h2>Get Started</h2>
-                <p>
-                    Set up a sitecues development environment. Then <code>npm install</code> to set up the project's
-                    dependencies.
-                </p>
-                <p>
-                    Congrats, the testing framework is now ready to be used. However, it lives at
-                    <code>node_modules/.bin/intern-runner</code> and that is no fun to type.
-                    So let's install a copy of it globally with <code>npm install -g intern</code>
-                    and now you can simply type <code>intern-runner</code> instead, to use it.
-                </p>
-                <p>
-                    Now we will run the unit tests. All you need to do is host
-                    <code>node_modules/intern/client.html</code> on an HTTP server of some kind and visit its URL.
-                    For convenience, host it by running <code>intern-runner proxyOnly config=config/intern</code>
-                    and then visit <a href="run.html">test/run.html</a>, which will forward you to where it lives.
-                </p>
-            </section>
-            <section>
                 <h2>Troubleshooting</h2>
                 <p>
                     The most common problems come from not having your computer set up with the correct tools to
                     follow the instructions of our documentation. So your first pit stop should be the
-                    <a href="https://equinox.atlassian.net/wiki/x/sYHI">Setup Guide</a> for a sitecues development
+                    <a href="https://equinox.atlassian.net/wiki/x/sYHI">Setup Guide</a> for a Sitecues development
                     environment. That will give you a solid foundation to work with, so that you can follow along.
                 </p>
                 <p>
@@ -246,13 +246,13 @@
             <section>
                 <h2>Resources</h2>
                 <p>
-                    We have our own documentation for <a href="https://equinox.atlassian.net/wiki/x/EgBOAg">testing sitecues</a>.
+                    We have our own documentation for <a href="https://equinox.atlassian.net/wiki/x/EgBOAg">testing Sitecues</a>.
                     Intern also has its own <a href"https://theintern.github.io/intern/#what-is-intern">documentation</a>, which
                     covers more general testing topics and is a good place to learn about its features.
                 </p>
                 <p>
                     There is an <a href="https://github.com/theintern/intern-tutorial">interactive tutorial</a> for Intern,
-                    that will teach you about the framework in isolation from sitecues.
+                    that will teach you about the framework in isolation from Sitecues.
                 </p>
                 <p>
                     There is a browser extension called the <a href="https://github.com/theintern/recorder">Intern Recorder</a>

@@ -448,7 +448,9 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
   function getSVGDataURI(svgMarkup, width, height) {
     var attrs = width ? ' width="' + width + '" height="' + height + '" ' : '',
       wrappedSvg = '<svg xmlns="http://www.w3.org/2000/svg"' + attrs + '>' + svgMarkup + '</svg>';
-    return 'url("data:image/svg+xml,' + encodeURI(wrappedSvg) + '")';
+    // Use encodeURIComponent instead of encodeURI because we also want # -> %23,
+    // otherwise Firefox is unhappy when we set the fill color
+    return 'url("data:image/svg+xml,' + encodeURIComponent(wrappedSvg) + '")';
   }
 
   function updateElementBgImage() {
@@ -1721,6 +1723,7 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
     if (seed) {
       var elem = $(seed)[0];
       if (elem) {
+        traitcache.updateCachedViewPosition(); // Reset cache view to ensure scrolling accounted for
         state.picked = doUsePicker ? picker.find(elem, doSuppressVoting) : $(elem);
         state.target = elem;
         if (state.picked) {

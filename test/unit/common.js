@@ -13,7 +13,7 @@ define(
             test   = tdd.test,
             before = tdd.before;
 
-        suite('Common module', function () {
+        suite('Common', function () {
 
             before(function () {
               platform.init();

@@ -2,7 +2,10 @@
  * Service that lazily gets user agent and page stylesheets
  * and provides information about them.
  */
-define(['$', 'page/style-service/css-aggregator', 'page/style-service/media-queries', 'core/platform'],
+define(['$',
+  'page/style-service/css-aggregator',
+  'page/style-service/media-queries',
+  'core/platform'],
   function ($,
             cssAggregator,
             mediaQueries,
@@ -12,6 +15,7 @@ define(['$', 'page/style-service/css-aggregator', 'page/style-service/media-quer
     SITECUES_COMBINED_CSS_ID = 'sitecues-js-combined-css',
     WAIT_BEFORE_USING_STYLESHEET_DATA = 50,
     CSS_MAX_CHUNK_SIZE = 5000, // Max number of CSS chars to process at once
+    DOM_STYLESHEET_KEY = 'DOMSS',
     isInitialized,
     isCssRequested,   // Have we even begun the init sequence?
     isCssComplete,      // Init sequence is complete
@@ -96,22 +100,12 @@ define(['$', 'page/style-service/css-aggregator', 'page/style-service/media-quer
       elems = [];
 
     function createNext() {
-      var newSheet =
-        $('<style>')
-          .attr('id', SITECUES_COMBINED_CSS_ID + '-' + index)
-          // Note: be sure to insert text into stylesheet before inserting into DOM
-          // measured in IE11 to be more performant
-          .text(cssChunks[index])
-          .appendTo('head')
-          .get(0);
-        if ('disabled' in newSheet) {
-          // Disable as early as possible:
-          // Not supported in IE, so we will use the DOMStyleSheet object to disable as well
-          newSheet.disabled = true;
-        }
-        elems[index] = newSheet;
-        getDOMStylesheet($(newSheet), function(domStylesheetObject) {
-          domStylesheetObject.disabled = true;
+      var $newSheet = updateSheet(SITECUES_COMBINED_CSS_ID + '-' + index, {
+        text: cssChunks[index],
+        doDisable: true
+      });
+        elems[index] = $newSheet[0];
+        getDOMStylesheet($newSheet, function(domStylesheetObject) {
           domStylesheetObjects[index] = domStylesheetObject;
         });
       if (++ index < numChunks) {
@@ -236,22 +230,31 @@ define(['$', 'page/style-service/css-aggregator', 'page/style-service/media-quer
   /**
    * Get the DOM object for the stylesheet that lets us traverse the style rules.
    * Annoying that we have to do this.
-   * TODO: should we remove it as soon as we find and hold onto the result?
+   * Uses callback instead of Promises because we want to be synchronous if possible.
+   * This allows us to disable style sheets before they can cause a rerendering
    * @param $stylesheet
    * @returns {*}
    */
   function getDOMStylesheet($stylesheet, callback) {
+    var cachedDOMStylesheet = $stylesheet.data(DOM_STYLESHEET_KEY);
+    if (cachedDOMStylesheet) {
+      callback(cachedDOMStylesheet);
+      return;
+    }
+
     var tries = 1,
       MAX_TRIES = 20,
       TRY_INTERVAL_MS = 10,
       id = $stylesheet[0].id;
     function getStyleSheet() {
       var i = 0,
-        numSheets = document.styleSheets.length;
+        numSheets = document.styleSheets.length,
+        domSheet;
       for (; i < numSheets; i++) {
-        if (document.styleSheets[i].ownerNode.id === id) {
-          // devlog('Found stylesheet %s after try#%d', id, tries);
-          callback(document.styleSheets[i]);
+        domSheet = document.styleSheets[i];
+        if (domSheet.ownerNode.id === id) {
+          $stylesheet.data(DOM_STYLESHEET_KEY, domSheet);
+          callback(domSheet);
           return;
         }
       }
@@ -263,6 +266,52 @@ define(['$', 'page/style-service/css-aggregator', 'page/style-service/media-quer
     }
 
     getStyleSheet();
+  }
+
+  /**
+   * Lazily get the style sheet to be used for applying the theme.
+   * @returns {jQuery}
+   */
+  function updateSheet(id, options) {
+    var $sheet = $('#' + id),
+      text = options.text,
+      doDisable = options.doDisable,
+      doCreate = !$sheet.length;
+
+    if (doCreate) {
+      // Create the stylesheet
+      // Note: be sure to insert text into stylesheet before inserting into DOM
+      // measured in IE11 to be more performant
+      $sheet = $('<style>')
+        .attr('id', id);
+    }
+
+
+    // Update text
+    if (typeof text === 'string') {
+      $sheet.text(text);
+    }
+
+    // Update disabled state
+    if (typeof doDisable === 'boolean') {
+      if (doDisable) {
+        // Same as disabling but works without access to DOMStyleSheet object, which is hard to get to
+        // This can always be done right away
+        // We use the media attribute as an easier cross-browser way to disable sheets
+        // Once IE11 goes away we may want to go back to using .disabled property access
+        $sheet.attr('media', '(max-width:0px)');
+      }
+      else {
+        $sheet.removeAttr('media');
+      }
+    }
+
+    if (doCreate) {
+      // Insert in DOM
+      $sheet.appendTo('html');
+    }
+
+    return $sheet;
   }
 
   /**
@@ -312,6 +361,7 @@ define(['$', 'page/style-service/css-aggregator', 'page/style-service/media-quer
     getAllMatchingStyles: getAllMatchingStyles,
     getAllMatchingStylesCustom: getAllMatchingStylesCustom,
     getDOMStylesheet: getDOMStylesheet,
+    updateSheet: updateSheet,
     getStyleText: getStyleText
   };
 });

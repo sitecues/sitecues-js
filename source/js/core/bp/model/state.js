@@ -15,6 +15,7 @@ define([], function() {
     doSuppressHovers        : false, // Suppress mouse hovers until next mousemove, because browser won't recompute them until then (useful for animations)
     isKeyboardMode          : false, // Show focus in this mode, support tab navigation
     isOpenedWithHover       : false, // If opened with the hover, then user should be able to close with mouse out
+    isOpenedWithScreenReader: false, // If opened with screen reader, be careful of spurious click events outside panel
     isMoreButtonVisible     : false, // Should the more button be shown?
     isPageBadge             : true,  // Is set to false if default badge is inserted
     isToolbarBadge          : false, // Set to true if using a badge toolbar. This may eventually become redundant with isPageBadge (the opposite of it) if we only use toolbar default badges.

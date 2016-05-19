@@ -182,8 +182,9 @@ define(['$', 'page/util/common', 'core/conf/user/manager', 'core/conf/site',
     var allAncestors = $(startElement).parentsUntil('body'),
       visibleAncestors = getVisibleAncestors(allAncestors),
       validAncestors = visibleAncestors.not(visibleAncestors.has('#sitecues-badge'));
+
     if (validAncestors.length === 0) {
-      return null;
+      return [ startElement ]; // Always at least one valid candidate -- the startElement
     }
     if (lastPicked) {
       var isAncestorOfLastPicked = false;

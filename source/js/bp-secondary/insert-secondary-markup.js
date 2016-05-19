@@ -104,7 +104,7 @@ htmlSecondary =
   <sc-p id="scp-feedback-prompt">{{rate_us_suggest}} {{rate_us_prompt}}</sc-p>\
   <textarea id="scp-feedback-textarea" class="scp-hand-cursor" data-allow-scroll="true" \
     aria-describedby="scp-feedback-prompt" data-visible-focus-on="scp-feedback-input-rect" placeholder="{{tell_us_something}}"></textarea>\
-  <sc-button id="scp-feedback-send-button" aria-disabled="true"><a class="scp-button-link" id="scp-feedback-send-link" class="scp-hand-cursor" data-mailto="mailto:support@sitecues.com">{{send}}</a></sc-button>.\
+  <sc-button id="scp-feedback-send-button" aria-disabled="true"><a class="scp-button-link scp-hand-cursor" id="scp-feedback-send-link" class="scp-hand-cursor" data-mailto="mailto:support@sitecues.com">{{send}}</a></sc-button>.\
 </sc>\
 <sc id="scp-feedback-thanks" class="scp-if-feedback-sent scp-secondary-feature" role="note" aria-label="{{thank_you}}">\
   <sc-h1>{{thank_you}}</sc-h1>\
@@ -112,7 +112,7 @@ htmlSecondary =
 <sc class="scp-about-teaser scp-if-about scp-transition-opacity scp-secondary-feature" role="group" aria-label="{{about}} sitecues">\
   <sc-p>\
     <sc-span id="scp-about-preamble">{{about_preamble}}</sc-span>\
-    <a class="scp-link" id="scp-about-sitecues-link" aria-describedby="scp-about-preamble scp-about-sitecues-link" target="_blank" href="https://sitecues.com?utm_source=sitecues-badge-panel&amp;utm_medium=bp3&amp;utm_campaign=BP_redirect&amp;utm_content=link">sitecues.com</a>.\
+    <a class="scp-link scp-hand-cursor" id="scp-about-sitecues-link" aria-describedby="scp-about-preamble scp-about-sitecues-link" target="_blank" href="https://sitecues.com?utm_source=sitecues-badge-panel&amp;utm_medium=bp3&amp;utm_campaign=BP_redirect&amp;utm_content=link">sitecues.com</a>.\
   </sc-p>\
   <sc-p id="scp-about-rate-footer">\
     <sc-span id="scp-rate-us-suggest" role="heading">{{about_rate_us}}</sc-span><br/>\

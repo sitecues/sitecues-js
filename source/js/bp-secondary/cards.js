@@ -1,8 +1,8 @@
 /**
  * Generic module for handling the cards used by tips and settings
  */
-define(['core/bp/constants', 'core/bp/helper', 'core/locale', 'core/bp/model/state', 'core/util/xhr', 'core/conf/urls', 'core/events'],
-  function (BP_CONST, helper, locale, state, xhr, urls, events) {
+define(['core/bp/constants', 'core/bp/helper', 'core/locale', 'core/bp/model/state', 'core/util/xhr', 'core/conf/urls', 'core/events', 'core/platform'],
+  function (BP_CONST, helper, locale, state, xhr, urls, events, platform) {
 
   var
     PANELS_WITH_CARDS = { tips: 1, settings: 1},
@@ -27,6 +27,7 @@ define(['core/bp/constants', 'core/bp/helper', 'core/locale', 'core/bp/model/sta
 
         htmlContainer.innerHTML = finalHTML;
         panelElement = htmlContainer.firstElementChild;
+        removeUnsupportedContent(panelElement);
         getContainer().appendChild(panelElement);
 
         toggleCardActive(panelElement.firstElementChild, true);
@@ -60,6 +61,28 @@ define(['core/bp/constants', 'core/bp/helper', 'core/locale', 'core/bp/model/sta
       .replace(/<\/sc-normal-range>/g, '</input>')
       .replace(/<sc-hue-range /g, '<input type="range"' + INTERACTIVE + ' scp-hue-range" ')
       .replace(/<\/sc-hue-range>/g, '</input>');
+  }
+
+  // Remove elements unless required by the site config
+  function removeAllElements(panelElement, elementsToRemoveSelector) {
+    function hide(elements) {
+      var index = elements.length,
+        element;
+      while (index--) {
+        element = elements[index];
+        element.parentNode.removeChild(element);
+      }
+    }
+
+    var elementsToRemove = panelElement.querySelectorAll(elementsToRemoveSelector);
+
+    hide(elementsToRemove);
+  }
+
+  function removeUnsupportedContent(panelElement) {
+    if (!platform.featureSupport.themes) {
+      removeAllElements(panelElement, '#scp-theme-settings,#scp-theme-settings-tab');
+    }
   }
 
   function onPanelUpdate() {

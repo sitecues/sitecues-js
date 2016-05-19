@@ -40,15 +40,20 @@ define(['core/bp/constants', 'core/bp/helper', 'core/conf/user/manager', 'core/b
 
     settingsPanel = byId(BP_CONST.SETTINGS_CONTENT_ID);
 
+    if (platform.featureSupport.themes) {
+      // MSIE/Edge -- no support yet
+      // TODO support themes in IE -- need to break up theme CSS into chunks for pages like atkratter.com,
+      // otherwise it locks up the page -- 537k of styles is a lot for IE to handle
+      require(['theme/theme'], function(theme) {
+        theme.init(true); // Preload theme code
+      });
+    }
+
     initButtons();
 
     initRanges();
 
     themeSlidersInit();
-
-    require(['theme/theme'], function(theme) {
-      theme.init(true); // Preload theme code
-    });
   }
 
   // Set up setting synchronization
