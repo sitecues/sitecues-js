@@ -32,7 +32,7 @@ define(['core/metric', 'core/conf/urls'], function(metric, urls) {
 
     logError({
       message: error.message,
-      source: filename, // JS file with error
+      filename: filename, // JS file with error
       lineno: event.lineno,
       colno: event.colno,
       stack: error.stack

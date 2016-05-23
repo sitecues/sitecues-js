@@ -40,6 +40,16 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
       data.zoomLevel = conf.get('zoom') || 1;
       data.ttsState = conf.get('ttsOn') || false;
       data.details = details;
+
+      // In dev, log field name collisions because the backend is going to flatten the metrics object
+      function logFieldNameCollision(propName) {
+        if (data.hasOwnProperty(propName)) {
+          console.error('Sitecues error: name collision in metrics for metric %s field name %s', name, propName);
+        }
+      }
+      if (SC_DEV) {
+        Object.keys(details).forEach(logFieldNameCollision);
+      }
     };
 
     Metric.prototype.send = function send() {
