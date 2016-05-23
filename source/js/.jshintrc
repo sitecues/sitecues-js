@@ -37,7 +37,8 @@
     "outerWidth"          : false,
     "outerHeight"         : false,
     "screenX"             : false,
-    "screenY"             : false
+    "screenY"             : false,
+    "performance"         : false
   },
 
   // Enforcing - Rules that cause the linter to complain more.

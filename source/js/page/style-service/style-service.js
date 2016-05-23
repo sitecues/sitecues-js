@@ -19,7 +19,8 @@ define(['$',
     isInitialized,
     isCssRequested,   // Have we even begun the init sequence?
     isCssComplete,      // Init sequence is complete
-    callbackFns = [];
+    callbackFns = [],
+    debugTime = {};
 
   function addChunk(css, chunks, start, end) {
     var newChunk = css.substring(start, end),
@@ -109,7 +110,7 @@ define(['$',
           domStylesheetObjects[index] = domStylesheetObject;
         });
       if (++ index < numChunks) {
-        // We must wait before fting the next stylesheet otherwise we overload IE11 and cause it to lockup
+        // We must wait before creating the next stylesheet otherwise we overload IE11 and cause it to lockup
         setTimeout(createNext, 0);
       }
       else {
@@ -121,11 +122,25 @@ define(['$',
   }
 
   // This is called() when all the CSS text of the document is available for processing
-  function onAllCssRetrieved(allCss) {
+  function retrievalComplete(allCss) {
+    if (SC_DEV) {
+      debugTime.retrievalComplete = performance.now();
+    }
+
     createCombinedStylesheets(allCss, function() {
       setTimeout(function () {
         isCssComplete = true;
         clearCallbacks();
+        if (SC_DEV) {
+          debugTime.processingComplete = performance.now();
+          console.log(
+            'Total: %d    Retrieve CSS: %d   Process CSS: %d',
+            debugTime.processingComplete - debugTime.begin,
+            debugTime.retrievalComplete - debugTime.begin,
+            debugTime.processingComplete - debugTime.retrievalComplete
+          );
+        }
+
       }, WAIT_BEFORE_USING_STYLESHEET_DATA);
     });
   }
@@ -139,6 +154,10 @@ define(['$',
       return;  // Only init once
     }
 
+    if (SC_DEV) {
+      debugTime.begin = performance.now();
+    }
+
     isCssRequested = true;
 
     // Create a <style id="sitecues-js-combined-css"> containing all relevant style rule in the right order.
@@ -146,7 +165,7 @@ define(['$',
     // any <style> or <link> that is not from sitecues, and create a combined stylesheet with those contents (in the right order).
 
     // This will initialize the composite stylesheet when finished and call style-service/ready
-    cssAggregator.collectAllCss(onAllCssRetrieved);
+    cssAggregator.collectAllCss(retrievalComplete);
   }
 
 
