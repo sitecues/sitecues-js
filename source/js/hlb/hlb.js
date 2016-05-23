@@ -391,9 +391,8 @@ define([
     $hlbWrapper = getOrCreateHLBWrapper();
 
     if (platform.browser.isIE && getEditableItems().length) {
-      // TODO try to remove these hacks
-      // Hack#1: IE + text fields -- avoid bug where textfield was locked
-      // Hack#2: Safari -- avoid bug where HLB is blurry, at least on tired.com (SC-3185)
+      // TODO try to remove this hack:
+      // IE + text fields -- avoid bug where textfield was locked
 
       if (SC_DEV && loggingEnabled) {
         console.log('SPECIAL CASE: HLB inside <body>');
