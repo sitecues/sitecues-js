@@ -436,7 +436,10 @@ define(['$',
           // Only cache for expensive operations, in order to save on storage space
           var imageClass = isReversible ? CLASS_INVERT : CLASS_NORMAL;
           // Use session storage instead of local storage so that we don't pollute too much
-          sessionStorage.setItem(storageKey, imageClass);
+          try {
+            sessionStorage.setItem(storageKey, imageClass);
+          }
+          catch(ex) {}
         }
 
         onImageClassified(img, isReversible, onShouldReverseImage);

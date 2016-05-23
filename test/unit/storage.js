@@ -15,7 +15,8 @@ define(
         suite('Storage', function () {
 
             beforeEach(function () {
-                localStorage.clear();
+                //localStorage.clear();
+                storage.clear();
             });
 
             test('.getAppData() returns what was stored', function () {

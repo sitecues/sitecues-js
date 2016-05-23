@@ -4,7 +4,7 @@
  */
 
 // IMPORTANT: The extension defines this module in order to override the mechanism
-define(['core/conf/urls', 'core/conf/site', 'Promise'], function (urls, site, Promise) {
+define(['core/conf/urls', 'core/conf/site', 'Promise', 'core/platform'], function (urls, site, Promise, platform) {
 
   var PATH = 'html/prefs.html',
     ID = 'sitecues-prefs',
@@ -175,7 +175,7 @@ define(['core/conf/urls', 'core/conf/site', 'Promise'], function (urls, site, Pr
 
 
   function init() {
-    IS_BACKUP_DISABLED = site.get('isStorageBackupDisabled');
+    IS_BACKUP_DISABLED = platform.isStorageUnsupported || site.get('isStorageBackupDisabled');
   }
 
   return {

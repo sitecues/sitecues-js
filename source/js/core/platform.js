@@ -244,6 +244,19 @@ define([], function() {
     }
   }
 
+  function isStorageUnsupported() {
+    var TEST_KEY = '-sc-storage-test';
+    if (localStorage.length === 0 && sessionStorage.length === 0) {
+      try {
+        sessionStorage.setItem(TEST_KEY, '');
+        sessionStorage.removeItem(TEST_KEY);
+      }
+      catch(ex) {
+        return true;
+      }
+    }
+  }
+
   // return truthy if platform is supported
   function init() {
     agent = navigator.userAgent || '';
@@ -254,6 +267,7 @@ define([], function() {
       return;
     }
 
+    exports.isStorageUnsupported = isStorageUnsupported();
     exports.canUseRetinaCursors = exports.browser.isChrome;
     exports.cssPrefix = getCssPrefix(exports.browser);
     exports.transformPropertyCss = exports.browser.isWebKit && !isCssPropSupported('transform')? '-webkit-transform' : 'transform';

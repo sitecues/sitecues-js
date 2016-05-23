@@ -35,7 +35,10 @@ define(['core/util/uuid'], function(uuid) {
   function createSessionId() {
     var sessionId = uuid();
     // Save session id and save for future page views of this site in this tab
-    window.sessionStorage.setItem(SESSION_ID_KEY, sessionId);
+    try {
+      window.sessionStorage.setItem(SESSION_ID_KEY, sessionId);
+    }
+    catch (ex) {}
     return sessionId;
   }
 

@@ -7,7 +7,7 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
 
     // IMPORTANT! Increment METRICS_VERSION this every time metrics change in any way
     // IMPORTANT! Have the backend team review all metrics changes!!!
-    var METRICS_VERSION = 12,
+    var METRICS_VERSION = 13,
         isInitialized,
         doSuppressMetrics,
         doLogMetrics,
@@ -21,7 +21,20 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
     }
 
     Metric.prototype.createDataJSON = function createDataJSON(name, details) {
-      var data = this.data = JSON.parse(JSON.stringify(this.sessionData)); // Copy sessionData to new object
+      function shallowCopyInto(source, dest) {
+        if (source) {
+          for (var keyName in source) {
+            if (source.hasOwnProperty(keyName)) {
+              dest[keyName] = source[keyName];
+            }
+          }
+        }
+      }
+
+      var sessionData = this.sessionData,
+        data = this.data = {};
+
+      shallowCopyInto(sessionData, data);
       data.name = name;
       data.clientTimeMs = Number(new Date()); // Epoch time in milliseconds  when the event occurred
       data.zoomLevel = conf.get('zoom') || 1;
