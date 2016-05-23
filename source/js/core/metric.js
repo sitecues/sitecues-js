@@ -47,7 +47,7 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
           console.error('Sitecues error: name collision in metrics for metric %s field name %s', name, propName);
         }
       }
-      if (SC_DEV) {
+      if (SC_DEV && details) {
         Object.keys(details).forEach(logFieldNameCollision);
       }
     };
