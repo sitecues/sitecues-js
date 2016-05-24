@@ -46,23 +46,10 @@
   top: 3px;
   width: 19px;
   height: 45px;
-  background: url('../images/settings/slider-thumb.svg');
+  background: url('../images/settings/slider-thumb.svg') no-repeat;
 }
 .scp-hue-range::-webkit-slider-thumb {
   background-image: url('../images/settings/slider-thumb-with-hole.svg') !important;
-}
-
-/* ---------- Two-tone range --------------- */
-
-.scp-normal-range::-webkit-slider-thumb::before {
-  content:"";
-  position: absolute;
-  left:-600px;
-  right:19px;
-  top:6px;
-  height:27px;
-  background: #538eca;
-  pointer-events: none;
 }
 
 /* ----------- Button hover ---------- */

@@ -116,7 +116,7 @@ define(['core/bp/constants', 'core/bp/helper', 'core/conf/user/manager', 'core/b
       rangeElem = rangeElems[index];
       settingName = rangeElem.getAttribute('data-setting-name');
       initRangeListener(settingName, rangeElem);
-      adjustRangeBackgroundForFirefox(rangeElem);
+      adjustRangeBackground(rangeElem);
     }
 
   }
@@ -186,9 +186,14 @@ define(['core/bp/constants', 'core/bp/helper', 'core/conf/user/manager', 'core/b
   }
 
   // Firefox doesn't have a pure CSS way of adjusting the background
-  function adjustRangeBackgroundForFirefox(slider) {
-    if (!platform.browser.isFirefox ||
-      slider.className.indexOf('scp-normal-range') < 0) {
+  function adjustRangeBackground(slider) {
+    if (platform.browser.isMS) {
+      // Not needed for IE/Edge, which do this via -ms- CSS
+      // We prefer CSS approach in IE, because JS may have trouble keeping up with slider thumb movements
+      return;
+    }
+
+    if (slider.className.indexOf('scp-normal-range') < 0) {
       return; // Don't do for hue ranges which have a rainbow bg
     }
     var value = + slider.value,
@@ -209,7 +214,7 @@ define(['core/bp/constants', 'core/bp/helper', 'core/conf/user/manager', 'core/b
   // For sliders, this occurs when thumb moves at all, it doesn't need to be dropped there
   // We don't want to update too much, hence the timer
   function onSettingsNativeInputChangeDrag(evt) {
-    adjustRangeBackgroundForFirefox(evt.target);
+    adjustRangeBackground(evt.target);
     var currTime = + Date.now();
     if (currTime - lastDragUpdateTime > SLIDER_DRAG_UPDATE_MIN_INTERVAL) {
       lastDragUpdateTime = currTime;
