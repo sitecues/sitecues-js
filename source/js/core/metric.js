@@ -7,7 +7,7 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
 
     // IMPORTANT! Increment METRICS_VERSION this every time metrics change in any way
     // IMPORTANT! Have the backend team review all metrics changes!!!
-    var METRICS_VERSION = 13,
+    var METRICS_VERSION = 14,
         isInitialized,
         doSuppressMetrics,
         doLogMetrics,
@@ -18,6 +18,30 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
     function Metric(name, details) {
       this.createDataJSON(name, details);
       this.sent = false;
+    }
+
+    function logNameCollisions(metricName, data, details) {
+      // In dev, log field name collisions because the backend is going to flatten the metrics object
+      function logFieldNameCollision(propName) {
+        if (data.hasOwnProperty(propName)) {
+          console.error('Sitecues error: name collision for metric ' + metricName + ' field name ' + propName);
+        }
+      }
+
+      Object.keys(details).forEach(logFieldNameCollision);
+    }
+
+    // Data must be of simple types
+    function logTypeErrors(metricName, data) {
+      function logFieldTypeError(propName) {
+        var value = data[propName],
+          type = typeof value;
+        if (value !== null && type !== 'boolean' && type !== 'number' && type !== 'string' && type !== 'undefined') {
+          console.error('Sitecues metrics type error: in metric ' + metricName + ', the ' + propName + ' details field must be a simple type');
+        }
+      }
+
+      Object.keys(data).forEach(logFieldTypeError);
     }
 
     Metric.prototype.createDataJSON = function createDataJSON(name, details) {
@@ -39,17 +63,19 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
       data.clientTimeMs = Number(new Date()); // Epoch time in milliseconds  when the event occurred
       data.zoomLevel = conf.get('zoom') || 1;
       data.ttsState = conf.get('ttsOn') || false;
-      data.details = details;
 
-      // In dev, log field name collisions because the backend is going to flatten the metrics object
-      function logFieldNameCollision(propName) {
-        if (data.hasOwnProperty(propName)) {
-          console.error('Sitecues error: name collision in metrics for metric %s field name %s', name, propName);
+      // Log errors
+      if (SC_DEV) {
+        // Check for type errors in session data
+        logTypeErrors(name, data);
+        // Check for field name collisions and type errors in details
+        if (details) {
+          logNameCollisions(name, data, details);
+          logTypeErrors(name, details);
         }
       }
-      if (SC_DEV && details) {
-        Object.keys(details).forEach(logFieldNameCollision);
-      }
+
+      data.details = details;
     };
 
     Metric.prototype.send = function send() {

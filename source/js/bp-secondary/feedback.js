@@ -156,7 +156,7 @@ define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/metr
       var details = {
         feedbackText: getFeedbackTextToSend(),
         rating: currentRating,  // 0 = no rating, otherwise 1-5 stars
-        status: currentStatus
+        statusText: JSON.stringify(currentStatus)
       };
 
       if (SC_DEV) {
