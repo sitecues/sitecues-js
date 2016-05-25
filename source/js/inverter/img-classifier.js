@@ -484,6 +484,8 @@ define(['$',
       isReversible = false;
     }
     else if (colorUtil.isOnDarkBackground(img, DARK_BG_THRESHOLD)) {
+      // TODO We need to make sure we use original background colors. After style-service inits,
+      // theme could store orig bg colors on elements that are styled with bg color, e.g. as $.data()
       // If already on a dark background, inverting won't help make it visible
       isReversible = false;
     }

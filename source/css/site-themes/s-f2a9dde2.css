@@ -3,7 +3,7 @@
 /* -------------- Dark theme --------------- */
 
 /* Avoid light bg which obscures light text */
-.sitecues-reverse-theme #subheader-slider * {
+.sitecues-dark-theme #subheader-slider * {
   background-image: none !important;
   background-color: black !important;
 }

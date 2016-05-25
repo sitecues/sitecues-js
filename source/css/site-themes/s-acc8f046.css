@@ -3,6 +3,6 @@
 /* -------------- Dark theme --------------- */
 
 /* Avoid light bg which obscures light text */
-.sitecues-reverse-theme #irwMenuTable a {
+.sitecues-dark-theme #irwMenuTable a {
   background-image: none !important;
 }

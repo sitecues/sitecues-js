@@ -25,17 +25,27 @@ function($,
     // Use proxy in IE and Safari, because: no css invert in IE, and it's extremely slow in Safari
     SHOULD_USE_PROXY,
     inverseSpriteSheet,
-    INVERSE_SPRITE_STYLESHEET_ID = 'sitecues-js-invert-sprites';
+    INVERSE_SPRITE_STYLESHEET_ID = 'sitecues-js-invert-sprites',
+    isCurrentlyInverting = false;
 
-  function toggle(doStart, doRefreshImages) {
-    if (doStart) {
-      start(doRefreshImages);
+  // This method is called when the site goes from dark to light or light to dark. When it goes to dark,
+  // it will analyze images if they haven't been analyzed before, and start a mutation observer so that
+  // new incoming images are also analyzed.
+  function toggle(doInversions) {
+    if (isCurrentlyInverting === doInversions) {
+      return; // Already working on inversions
+    }
+
+    isCurrentlyInverting = doInversions;
+
+    if (doInversions) {
+      start();
     }
     else {
       stop();
     }
 
-    toggleSheet(inverseSpriteSheet, !doStart);
+    toggleSheet(inverseSpriteSheet, !doInversions);
   }
 
   function stop() {
@@ -47,18 +57,12 @@ function($,
     }
   }
 
-  function start(doRefreshImages) {
+  function start() {
     refresh(document.body);
 
-    if (doRefreshImages) {
-      if (!mutationObserver) {
-        try {
-          mutationObserver = new MutationObserver(onMutation);
-          mutationObserver.observe(document.body, { childList: true, subtree: true });
-        }
-        catch (ex) {
-        }
-      }
+    if (!mutationObserver) {
+      mutationObserver = new MutationObserver(onMutation);
+      mutationObserver.observe(document.body, { childList: true, subtree: true });
     }
   }
 
@@ -171,15 +175,6 @@ function($,
         });
   }
 
-  function getReverseSpriteCssText(themeStyles) {
-    var reversibleBgStyles = themeStyles.filter(isReversibleBg);
-
-    return Promise.all(reversibleBgStyles.map(getCssForOneSprite))
-      .then(function(allCss) {
-        return allCss.join('\n');
-      });
-  }
-
   function getFilterProperty() {
     var div = document.createElement('div');
     div.style.filter = 'invert(1)';
@@ -228,11 +223,20 @@ function($,
     SHOULD_USE_PROXY = platform.browser.isIE || platform.browser.isSafari;
     filterProperty = getFilterProperty();
 
+    function getReverseSpriteCssText() {
+      var reversibleBgStyles = themeStyles.filter(isReversibleBg);
+
+      return Promise.all(reversibleBgStyles.map(getCssForOneSprite))
+        .then(function(allCss) {
+          return allCss.join('\n');
+        });
+    }
+
     // Create inverseSpriteSheet only once
     return classifyBgImages(themeStyles)
-      .then(getReverseSpriteCssText(themeStyles))
+      .then(getReverseSpriteCssText)
       .then(function(inverseSpriteCss) {
-        var $sheet = styleService.updateSheet(INVERSE_SPRITE_STYLESHEET_ID, { text : inverseSpriteCss });
+        var $sheet = styleService.updateSheet(INVERSE_SPRITE_STYLESHEET_ID, { text : inverseSpriteCss } );
         return new Promise(function(resolve) {
           styleService.getDOMStylesheet($sheet, resolve);
         });
@@ -244,8 +248,7 @@ function($,
 
   return {
     init: init,
-    toggle: toggle,
-    getReverseSpriteCssText: getReverseSpriteCssText
+    toggle: toggle
   };
 
 });
