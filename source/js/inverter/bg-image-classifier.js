@@ -1,4 +1,9 @@
-define(['page/util/color', 'inverter/img-classifier'], function(colorUtil, imgClassifier) {
+define([
+  'inverter/orig-bg-info',
+  'inverter/img-classifier'
+], function(
+  origBgInfo,
+  imgClassifier) {
   var BG_IMAGE_BONUS = 40,
     MAX_SCORE_CHECK_PIXELS = 200;
 
@@ -117,7 +122,7 @@ define(['page/util/color', 'inverter/img-classifier'], function(colorUtil, imgCl
       }
 
       if (sampleElement.elem) {
-        if (colorUtil.isOnDarkBackground(sampleElement.elem)) {
+        if (origBgInfo.wasOnDarkBackground(sampleElement.elem)) {
           // Already designed to show on a dark background
           onImageProcessed(false);
           return;

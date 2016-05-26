@@ -224,7 +224,7 @@ define([
 
     // Set the transition for every selector in the page that targets a background color
     cachedStyleInfo.forEach(function(themeStyle) {
-      var type = themeStyle.rule.value,
+      var type = themeStyle.value.prop,
         selectors;
       if (type === 'background' || type === 'background-color') {
         selectors = themeStyle.rule.selectorText.split(',');

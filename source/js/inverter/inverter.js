@@ -9,7 +9,8 @@ define([
   'page/style-service/style-service',
   'inverter/invert-url',
   'inverter/bg-image-classifier',
-  'inverter/img-classifier'
+  'inverter/img-classifier',
+  'inverter/orig-bg-info'
 ],
 function($,
          Promise,
@@ -17,7 +18,8 @@ function($,
          styleService,
          invertUrl,
          bgImgClassifier,
-         imgClassifier) {
+         imgClassifier,
+         origBgInfo) {
 
   var mutationObserver,
     $allReversibleElems = $(),
@@ -181,30 +183,6 @@ function($,
     return div.style.filter ? 'filter': platform.cssPrefix + 'filter';
   }
 
-  function classifyBgImages(themeStyles) {
-    return new Promise(function(resolve) {
-      // Update theme styles with bg info
-      var bgImageStyles = themeStyles.filter(isBgImageStyle),
-        numImagesRemainingToClassify = bgImageStyles.length;
-
-      function isBgImageStyle(info) {
-        return info.value.prop === 'background-image';
-      }
-
-      function nextImage() {
-        if (numImagesRemainingToClassify-- === 0) {
-          resolve();
-        }
-      }
-
-      nextImage();  // In case we started with zero images
-
-      bgImageStyles.forEach(function (bgImageInfo) {
-        bgImgClassifier.classifyBackgroundImage(bgImageInfo, nextImage);
-      });
-    });
-  }
-
   function toggleSheet(sheet, isDisabled) {
     sheet.disabled = isDisabled;
   }
@@ -223,6 +201,30 @@ function($,
     SHOULD_USE_PROXY = platform.browser.isIE || platform.browser.isSafari;
     filterProperty = getFilterProperty();
 
+    function classifyBgImages() {
+      return new Promise(function(resolve) {
+        // Update theme styles with bg info
+        var bgImageStyles = themeStyles.filter(isBgImageStyle),
+          numImagesRemainingToClassify = bgImageStyles.length;
+
+        function isBgImageStyle(info) {
+          return info.value.prop === 'background-image';
+        }
+
+        function nextImage() {
+          if (numImagesRemainingToClassify-- === 0) {
+            resolve();
+          }
+        }
+
+        nextImage();  // In case we started with zero images
+
+        bgImageStyles.forEach(function (bgImageInfo) {
+          bgImgClassifier.classifyBackgroundImage(bgImageInfo, nextImage);
+        });
+      });
+    }
+
     function getReverseSpriteCssText() {
       var reversibleBgStyles = themeStyles.filter(isReversibleBg);
 
@@ -233,7 +235,8 @@ function($,
     }
 
     // Create inverseSpriteSheet only once
-    return classifyBgImages(themeStyles)
+    return origBgInfo.init(themeStyles)
+      .then(classifyBgImages)
       .then(getReverseSpriteCssText)
       .then(function(inverseSpriteCss) {
         var $sheet = styleService.updateSheet(INVERSE_SPRITE_STYLESHEET_ID, { text : inverseSpriteCss } );
