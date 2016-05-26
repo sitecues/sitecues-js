@@ -358,13 +358,17 @@ var requirejs, require, define;
           }
         }
 
-        ary.forEach(function (item, i) {
-          prim.cast(item).then(function (v) {
-            resolved(i, v);
-          }, function (err) {
-            no(err);
+        if (!ary.length) {
+          yes([]);
+        } else {
+          ary.forEach(function (item, i) {
+            prim.cast(item).then(function (v) {
+              resolved(i, v);
+            }, function (err) {
+              no(err);
+            });
           });
-        });
+        }
       });
     };
 
