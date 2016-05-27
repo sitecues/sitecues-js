@@ -116,7 +116,7 @@ define([
     var doInvertImages = isDarkTheme(requestedThemeName);
     if (doInvertImages !== didInvertImages) {
       imageInverter.toggle(doInvertImages);
-      didInvertImages = true;
+      didInvertImages = doInvertImages;
     }
   }
 
