@@ -56,7 +56,7 @@ define(['core/conf/urls', 'core/conf/site', 'Promise', 'core/platform'], functio
         }
 
         if (event.origin !== scriptOrigin) {  // Best practice: check if message is from the expected origin
-          reject(new Error(ERROR_PREFIX + 'wrong origin'));
+          reject(new Error(ERROR_PREFIX + 'wrong origin: ' + event.origin + ' vs ' + scriptOrigin));
           return;
         }
 
