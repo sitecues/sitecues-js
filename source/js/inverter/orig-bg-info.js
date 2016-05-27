@@ -15,6 +15,8 @@
  *  Q. Why doesn't this damage the page view?
  *  A. CSS content rules do not affect normal elements, they only actually get used for ::before and ::after
  *     We automatically filter out those selectors when we create the style sheet with our hint rules.
+ *
+ *  We only create this sheet once.
  */
 
 define([
