@@ -12,16 +12,17 @@ define(['$',
   'page/util/color',
   'core/conf/site',
   'core/conf/urls',
-  'inverter/invert-url'
+  'inverter/invert-url',
+  'inverter/orig-bg-info'
 ],
   function($,
            colorUtil,
            site,
            urls,
-           invertUrl) {
+           invertUrl,
+           origBgInfo) {
   var REVERSIBLE_ATTR = 'data-sc-reversible',
     customSelectors = site.get('themes') || { },
-    DARK_BG_THRESHOLD = 0.6,
     BUTTON_BONUS = 50,
     SVG_BONUS = 999,
     MAX_SCORE_CHECK_PIXELS = 200,
@@ -436,7 +437,10 @@ define(['$',
           // Only cache for expensive operations, in order to save on storage space
           var imageClass = isReversible ? CLASS_INVERT : CLASS_NORMAL;
           // Use session storage instead of local storage so that we don't pollute too much
-          sessionStorage.setItem(storageKey, imageClass);
+          try {
+            sessionStorage.setItem(storageKey, imageClass);
+          }
+          catch(ex) {}
         }
 
         onImageClassified(img, isReversible, onShouldReverseImage);
@@ -480,8 +484,7 @@ define(['$',
     else if ($img.is(customSelectors.nonReversible)) {
       isReversible = false;
     }
-    else if (colorUtil.isOnDarkBackground(img, DARK_BG_THRESHOLD)) {
-      // If already on a dark background, inverting won't help make it visible
+    else if (origBgInfo.wasOnDarkBackground(img)) {
       isReversible = false;
     }
     else if (img.localName === 'svg') {

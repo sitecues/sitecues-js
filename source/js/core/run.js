@@ -245,6 +245,11 @@ define(['core/conf/user/manager', 'core/util/session', 'core/locale', 'core/metr
     initialPageVisitDetails.osVersion = platform.os.fullVersion;
     initialPageVisitDetails.browser = platform.browser.is;
     initialPageVisitDetails.browserVersion = platform.browser.version;
+    if (platform.isStorageUnsupported) {
+      // This occurs in Safari private browsing mode
+      // Leave field undefined in the edge case
+      initialPageVisitDetails.isStorageUnsupported = true;
+    }
 
     metric.init();
   }

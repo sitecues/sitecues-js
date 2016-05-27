@@ -109,10 +109,12 @@ define(['core/bp/constants',
 
   // Create an animation and store it in runningAnimations so we can cancel it if need be
   function createAnimation(elems, values, duration, onFinishFn) {
-    var newAnimation = animate.animateTransforms(elems, values, duration, onFinishFn);
+    setTimeout(function() {
+      var newAnimation = animate.animateTransforms(elems, values, duration, onFinishFn);
+      runningAnimations.push(newAnimation);
+  }, 18); // Wait one frame, for Firefox
 
-    runningAnimations.push(newAnimation);
-  }
+}
 
   // Move up to make sure we fit onscreen when the secondary feature expands
   function getAmountToShiftSecondaryTop() {
@@ -154,12 +156,10 @@ define(['core/bp/constants',
 
     transformUtil.setElemTransform(secondaryPanel, { translateY : fromTranslateY}); // Starting point
 
-    setTimeout(function() {
-      createAnimation(
-        [secondaryPanel, getMoreButton()],
-        [secondaryPanelTransform, moreButtonTransform],
-        BUTTON_DROP_ANIMATION_MS, onFinish);
-      }, 18); // Wait one frame, for Firefox
+    createAnimation(
+      [secondaryPanel, getMoreButton()],
+      [secondaryPanelTransform, moreButtonTransform],
+      BUTTON_DROP_ANIMATION_MS, onFinish);
   }
 
   function getGeometryTargets(featureName, menuButton) {

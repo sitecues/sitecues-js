@@ -18,37 +18,13 @@
 define(['core/util/uuid'], function(uuid) {
 
   var
-    NAMESPACE = 'sitecues';
+    NAMESPACE = 'sitecues',
+    cachedAppData;
 
-  /*
-   * Overwrite the entire namespace that we use for storing data.
-   * You should probably NOT use this! Prefer setAppData().
-   */
-  function setRawAppData(dataString) {
-    localStorage.setItem(NAMESPACE, dataString);
-  }
-
-  /*
-   * Get value of the entire namespace that we use for storing data.
-   * You should probably NOT use this! Prefer getAppData().
-   * @returns {DOMString or null}
-   */
-  function getRawAppData() {
-    return localStorage.getItem(NAMESPACE);
-  }
-
-  /*
-   * Get the final representation that we will put into storage.
-   */
-  function serialize(data) {
-    return JSON.stringify(data || {});
-  }
-
-  /*
-   * Get the normalized representation of what was in storage.
-   */
-  function deserialize(dataString) {
-    return dataString ? JSON.parse(dataString) : {};
+  // For tests only! Do not use in product as it could result in destroying user id in the middle of a page view, thus ruining metrics assumptions.
+  function clear() {
+    cachedAppData = undefined;
+    localStorage.removeItem('sitecues');
   }
 
   /*
@@ -57,8 +33,28 @@ define(['core/util/uuid'], function(uuid) {
    */
   function setAppData(data) {
 
-    var dataString = serialize(data);
+    /*
+     * Overwrite the entire namespace that we use for storing data.
+     */
+    function setRawAppData(dataString) {
+      try {
+        localStorage.setItem(NAMESPACE, dataString);
+      }
+      catch(ex) {}
+    }
 
+    /*
+     * Get the final representation that we will put into storage.
+     */
+    function serialize(data) {
+      return JSON.stringify(data || {});
+    }
+
+    // Saves data for this page view
+    cachedAppData = data;
+
+    // Tries to save data for future page views
+    var dataString = serialize(data);
     setRawAppData(dataString);
   }
 
@@ -67,6 +63,24 @@ define(['core/util/uuid'], function(uuid) {
    * If you can, use getPrefs(), instead.
    */
   function getAppData() {
+    /*
+     * Get value of the entire namespace that we use for storing data.
+     * @returns {DOMString or null}
+     */
+    function getRawAppData() {
+      return localStorage.getItem(NAMESPACE);
+    }
+
+    /*
+     * Get the normalized representation of what was in storage.
+     */
+    function deserialize(dataString) {
+      return dataString ? JSON.parse(dataString) : {};
+    }
+
+    if (cachedAppData) {
+      return cachedAppData;
+    }
 
     var dataString = getRawAppData();
     return deserialize(dataString);
@@ -133,6 +147,7 @@ define(['core/util/uuid'], function(uuid) {
     setPref: setPref,
     getPrefs: getPrefs,
     setAppData: setAppData,
-    getAppData: getAppData
+    getAppData: getAppData,
+    clear: clear
   };
 });

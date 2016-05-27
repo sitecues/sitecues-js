@@ -4,7 +4,7 @@
  */
 define(['$', 'core/conf/urls', 'core/conf/site', 'Promise' ], function ($, urls, site, Promise) {
 
-  var audioElements = [],
+  var audioElementsToPlay = [],
     ERR_NO_NETWORK_TTS = 'Sitecues network speech is not available on this website.';
 
   /**
@@ -17,7 +17,7 @@ define(['$', 'core/conf/urls', 'core/conf/site', 'Promise' ], function ($, urls,
       onStart = option.onStart,
       audioElement = new Audio();
 
-    audioElements.push(audioElement);
+    audioElementsToPlay.push(audioElement);
 
     return new Promise(function(resolve, reject) {
       getNetworkSpeechConfig(function (speechConfig, error) {
@@ -59,11 +59,14 @@ define(['$', 'core/conf/urls', 'core/conf/site', 'Promise' ], function ($, urls,
 
     function onCanPlay(event) {
       var audioElement = event.target;
-      audioElement.play();
+      if (audioElementsToPlay.indexOf(audioElement) >= 0) {
+        // Still in list of <audio> elements to play -- has not been stopped
+        audioElement.play();
+      }
     }
 
     function releaseAudioElement() {
-      audioElements.splice(audioElements.indexOf(audioElement), 1);
+      audioElementsToPlay.splice(audioElementsToPlay.indexOf(audioElement), 1);
     }
 
     function onEnded(event) {
@@ -75,7 +78,7 @@ define(['$', 'core/conf/urls', 'core/conf/site', 'Promise' ], function ($, urls,
 
   // Busy when 1) pending network request, or 2) currently playing audio
   function isBusy() {
-    return audioElements.length > 0;
+    return audioElementsToPlay.length > 0;
   }
 
   function removeListeners(audioElement) {
@@ -90,9 +93,10 @@ define(['$', 'core/conf/urls', 'core/conf/site', 'Promise' ], function ($, urls,
    * Stop any currently playing audio and abort the request
    */
   function stop() {
-    audioElements.forEach(function(audioElement) {
+    audioElementsToPlay.forEach(function(audioElement) {
       audioElement.pause();
     });
+    audioElementsToPlay.length = 0;
   }
 
   function getNetworkSpeechConfig(callbackFn) {

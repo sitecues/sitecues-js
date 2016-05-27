@@ -24,7 +24,6 @@ define([
            events) {
   var THEME_STYLESHEET_ID = 'sitecues-js-theme',
     TRANSITION_STYLESHEET_ID = 'sitecues-js-theme-transition',
-    themeSheet,
     REPAINT_MS = 40,
     cachedStyleInfo,
     // TODO remove once no longer necessary -- should be soon
@@ -34,15 +33,21 @@ define([
     isInitialized,
     originalBodyBackgroundColor,
     isOriginalThemeDark,
-    isInverted = false,   // Is dark theme currently applied
-    neverInverted = true,
+    isCurrentlyInverted = false,   // Is dark theme currently applied
+    didInvertImages = false, // Are images currently inverted
     finishThemeTimer,
-    oldTransitionMs, // Last transition speed
+    requestedThemeName,
+    requestedThemePower,
+    requestedThemeTextHue,
     currentThemeName,  // one of the theme names from color-choices.js
     currentThemePower,  // .01 - 1
     currentThemeTextHue,  // 0 - 1
+    basicThemeSupportReady,  // Promise that style info is ready
+    imageInversionSupportReady, // Promise that image inversion service is ready
+    imageInverter,
     MAX_USER_SPECIFIED_HUE = 1.03,   // If > 1.0 then use white
-    TRANSITION_CLASS = 'sc-animate-theme',
+    TRANSITION_CLASS_FAST = 'sc-animate-theme-fast',
+    TRANSITION_CLASS_SLOW = 'sc-animate-theme-slow',
     TRANSITION_MS_FAST = 300,
     TRANSITION_MS_SLOW = 1400,
     DEFAULT_INTENSITY = 0.61,  // Must match default slider position in settings-template.hbs #scp-theme-power
@@ -58,7 +63,7 @@ define([
     }
 
     // Only our color changes should use our transitions
-    $('html').removeClass(TRANSITION_CLASS);
+    $('html').removeClass(TRANSITION_CLASS_FAST + ' ' + TRANSITION_CLASS_SLOW);
 
     if (!SC_EXTENSION) {
       // Don't do this in extension -- there is no badge
@@ -74,127 +79,133 @@ define([
    */
   function onThemeChange() {
 
-    var
-      newThemeName = conf.get('themeName'),
-      newThemePower = conf.get('themePower'),
-      newThemeTextHue = conf.get('themeTextHue'),
-      colorMapFn,
-      willBeInverted,
-      isFlippingInversion,
-      doStartDisabled,
-      transitionMs;
+    // Requested theme name
+    requestedThemeName = conf.get('themeName');
+    requestedThemePower = conf.get('themePower') || DEFAULT_INTENSITY;
+    requestedThemeTextHue = conf.get('themeTextHue');
 
-    function prepareThemeCss() {
-      var
-        themeCss = colorMapFn ? getThemeCssText(colorMapFn, currentThemePower, currentThemeTextHue) : '',
-        $sheet = styleService.updateSheet(THEME_STYLESHEET_ID, {
-          text: themeCss,
-          doDisable: doStartDisabled
-        });
-
-      return new Promise(function (resolve) {
-        styleService.getDOMStylesheet($sheet, function (domSheet) {
-          themeSheet = domSheet;
-          resolve();
-        });
-      });
+    if (!requestedThemeName && !currentThemeName) {
+      return; // Still no theme -- power and hue changes do not matter
     }
 
-    function prepareTransition() {
-      // Create or update transition stylesheet if needed
-      if (transitionMs !== oldTransitionMs) {
-        console.log(transitionMs);
-        styleService.updateSheet(TRANSITION_STYLESHEET_ID, { text : getThemeTransitionCss(transitionMs) });
-        oldTransitionMs = transitionMs;
-      }
+    // Relevant theme -- has it changed?
+    if (needToApplyRequestedTheme()) {
+      // New theme settings are different -- apply them!
+      applyRequestedTheme();
     }
-
-    function toggleBodyClasses() {
-      // Allow web pages to create CSS rules that respond to reverse themes
-      $('body').toggleClass('sitecues-reverse-theme', willBeInverted);
-      // Set class sitecues-[themename]-theme on <body> and clear other theme classes
-      Object.keys(colorChoices).forEach(function(checkName) {
-        $('body').toggleClass('sitecues-' + checkName + '-theme', currentThemeName === checkName);
-      });
-    }
-
-    if (newThemeName === currentThemeName && newThemePower === currentThemePower && newThemeTextHue === currentThemeTextHue) {
-      return; // No change
-    }
-
-    if (!newThemeName && !currentThemeName) {
-      return; // Theme power and text hue changes are irrelevant when there is no theme
-    }
-
-    // New theme settings are different
-    currentThemeName = newThemeName;
-    currentThemePower = newThemePower || DEFAULT_INTENSITY;
-    currentThemeTextHue = newThemeTextHue;
-    colorMapFn = colorChoices[currentThemeName];
-    willBeInverted = isDarkTheme(colorMapFn);
-    isFlippingInversion = isInverted !== willBeInverted;
-    // First time inverting, do not enable new dark styles yet, so we can perform sprite calculations on original background
-    doStartDisabled = willBeInverted && neverInverted;
-    // We want to animate quickly between light themes, but slowly when performing a drastic change
-    // such as going from light to dark or vice-versa
-    transitionMs = isFlippingInversion ? TRANSITION_MS_SLOW : TRANSITION_MS_FAST;
-
-    initStyleService()
-      .then(prepareThemeCss)
-      .then(function() {
-        // Invert if necessary
-        if (isFlippingInversion) {
-          neverInverted = false;
-          return toggleInversion(willBeInverted);
-        }
-      })
-      .then(prepareTransition)
-      .then(function() {
-        // Finalize theme
-        if (doStartDisabled) {
-          styleService.updateSheet(THEME_STYLESHEET_ID, { doDisable : false });
-        }
-        toggleBodyClasses();
-
-        // Turn on transitions
-        $('html').addClass(TRANSITION_CLASS);
-        clearTimeout(finishThemeTimer);
-
-        finishThemeTimer = setTimeout(finalizeTheme, transitionMs);
-
-        isInverted = willBeInverted;
-      });
   }
 
-  function initStyleService() {
+  function getColorFn(themeName) {
+    return colorChoices[themeName];
+  }
+
+  function toggleBodyClasses() {
+   // Set class sitecues-[themename]-theme on <body> and clear other theme classes
+   Object.keys(colorChoices).forEach(function (checkName) {
+     $('body').toggleClass('sitecues-' + checkName + '-theme', currentThemeName === checkName);
+   });
+  }
+
+  function needToApplyImageInversion() {
+    var requestedImageInversion = isDarkTheme(requestedThemeName);
+    return requestedImageInversion !== didInvertImages;
+  }
+
+  // Apply image inversion if still necessary
+  function applyImageInversion() {
+    var doInvertImages = isDarkTheme(requestedThemeName);
+    if (doInvertImages !== didInvertImages) {
+      imageInverter.toggle(doInvertImages);
+      didInvertImages = doInvertImages;
+    }
+  }
+
+  function applyColors() {
+    var colorMapFn = getColorFn(requestedThemeName);
+
+    if (needToApplyRequestedTheme()) {
+      var themeCss = colorMapFn ? getThemeCssText(colorMapFn, requestedThemePower, requestedThemeTextHue) : '',
+        isInversionRequested = isDarkTheme(requestedThemeName),
+        isFastTransition = isCurrentlyInverted === isInversionRequested;
+
+      // Apply new CSS
+      styleService.updateSheet(THEME_STYLESHEET_ID, {text: themeCss});
+
+      currentThemeName = requestedThemeName;
+      currentThemePower = requestedThemePower || DEFAULT_INTENSITY;
+      currentThemeTextHue = requestedThemeTextHue;
+      isCurrentlyInverted = isInversionRequested;
+
+      // Turn on transitions
+      // We want to transition quickly between similar themes, but slowly when performing a drastic change
+      // such as going from light to dark or vice-versa
+      $('html').addClass(isFastTransition ? TRANSITION_CLASS_FAST : TRANSITION_CLASS_SLOW);
+
+      // Enable site-specific theme changes
+      toggleBodyClasses();
+
+      finishThemeTimer = setTimeout(finalizeTheme, isFastTransition ? TRANSITION_MS_FAST : TRANSITION_MS_SLOW);
+    }
+  }
+
+  function needToApplyRequestedTheme() {
+    return requestedThemeName !== currentThemeName ||
+      requestedThemePower !== currentThemePower ||
+      requestedThemeTextHue !== currentThemeTextHue;
+  }
+
+  // Apply colors and image inversion as necessary
+  function applyRequestedTheme() {
+
+    // Cancel previous theme application
+    clearTimeout(finishThemeTimer);
+
+    // Prepare style info
+    basicThemeSupportReady = basicThemeSupportReady || initThemeSupport();
+
+    // Apply image inversions if necessary (depending on most recently requested theme)
+    if (needToApplyImageInversion()) {
+      imageInversionSupportReady = imageInversionSupportReady || basicThemeSupportReady.then(initImageInversions);
+      imageInversionSupportReady.then(applyImageInversion);
+    }
+
+    // Apply the most recently requested new colors
+    var allRequestedThemeSupportReady = imageInversionSupportReady || basicThemeSupportReady;
+    allRequestedThemeSupportReady.then(applyColors);
+  }
+
+  function initThemeSupport() {
+    var bgStyles,
+      fgStyles,
+      bgImageStyles;
+
     return new Promise(function(resolve) {
       styleService.init(resolve);
+    }).then(function() {
+      bgStyles = styleService.getAllMatchingStylesCustom(getSignificantBgColor);
+    }).then(function() {
+      fgStyles = styleService.getAllMatchingStylesCustom(getFgColor);
+    }).then(function() {
+      bgImageStyles = styleService.getAllMatchingStylesCustom(getSignificantBgImageProperties);
+      cachedStyleInfo = bgStyles.concat(fgStyles).concat(bgImageStyles);
+    }).then(prepareTransitionCss);
+  }
+
+  function initImageInversions() {
+    return new Promise(function(resolve) {
+      require(['inverter/inverter'], function (inverter) {
+        imageInverter = inverter;
+        resolve();
+      });
+    })
+    .then(function() {
+      return imageInverter.init(cachedStyleInfo);
     });
   }
 
-  // Returns a Promise to toggle inversion on or off
-  function toggleInversion(willBeInverted) {
-    var inverter;
-
-    function initInversionSupport() {
-      return new Promise(function(resolve) {
-        require(['inverter/inverter'], function (_inverter) {
-          inverter = _inverter;
-          resolve();
-        });
-      })
-      .then(function() {
-        return inverter.init(getStyleInfo());
-      });
-    }
-
-    return initInversionSupport()
-      .then(function() {
-        inverter.toggle(willBeInverted);
-      });
-  }
-
-  function isDarkTheme(colorMapFn) {
+  // Returns true even if not 'dark', but page themed itself dark already
+  function isDarkTheme(themeName) {
+    var colorMapFn = getColorFn(themeName);
     if (!colorMapFn) {
       return isOriginalThemeDark;
     }
@@ -206,24 +217,31 @@ define([
     return colorUtil.isDarkColor(themedBg);
   }
 
-  function getThemeTransitionCss(transitionMs) {
-    var selectorBuilder = 'html.' + TRANSITION_CLASS +', html.' +
-          TRANSITION_CLASS + '> body',
+  function getThemeTransitionCss(transitionMs, className) {
+    var selectorBuilder = 'html.' + className +', html.' +
+          className + '> body',
       transitionCss = '{transition: background-color ' + transitionMs + 'ms;}\n\n';
 
     // Set the transition for every selector in the page that targets a background color
-    getStyleInfo().forEach(function(themeStyle) {
-      var type = themeStyle.rule.value,
+    cachedStyleInfo.forEach(function(themeStyle) {
+      var type = themeStyle.value.prop,
         selectors;
       if (type === 'background' || type === 'background-color') {
         selectors = themeStyle.rule.selectorText.split(',');
         selectors.forEach(function(bgSelector) {
-          selectorBuilder += ',.' + TRANSITION_CLASS + ' ' + bgSelector;
+          selectorBuilder += ',.' + className + ' ' + bgSelector;
         });
       }
     });
 
-    return selectorBuilder + transitionCss;
+    return '\n' + selectorBuilder + transitionCss;
+  }
+
+  function prepareTransitionCss() {
+    // Create or update transition stylesheet if needed
+    var css = getThemeTransitionCss(TRANSITION_MS_FAST, TRANSITION_CLASS_FAST) +
+        getThemeTransitionCss(TRANSITION_MS_SLOW, TRANSITION_CLASS_SLOW);
+    styleService.updateSheet(TRANSITION_STYLESHEET_ID, { text : css });
   }
 
   function createRule(prop, newValue, important) {
@@ -320,7 +338,7 @@ define([
     var styleSheetText = '';
 
     // Backgrounds
-    getStyleInfo().forEach(function(style) {
+    cachedStyleInfo.forEach(function(style) {
       var newRgba,
         newValue,
         selector = style.rule.selectorText,
@@ -495,17 +513,6 @@ define([
           }())
       };
     }
-  }
-
-  function getStyleInfo() {
-    if (!cachedStyleInfo) {
-      var bgStyles = styleService.getAllMatchingStylesCustom(getSignificantBgColor),
-        fgStyles = styleService.getAllMatchingStylesCustom(getFgColor),
-        bgImageStyles = styleService.getAllMatchingStylesCustom(getSignificantBgImageProperties);
-
-      cachedStyleInfo = bgStyles.concat(fgStyles).concat(bgImageStyles);
-    }
-    return cachedStyleInfo;
   }
 
   // Theme name must exist in colorChoices

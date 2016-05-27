@@ -410,7 +410,10 @@ define(
   // This language failed on the network -- disallow it for this tab (uses sessionStorage)
   function rerouteNetworkSpeechLang(lang) {
     // Set to any value to reroute this language to local speech
-    window.sessionStorage.setItem(getRerouteNetworkSpeechLangKey(lang), true);
+    try {
+      window.sessionStorage.setItem(getRerouteNetworkSpeechLangKey(lang), true);
+    }
+    catch(ex) {}
   }
 
   function getCueLanguage(lang) {

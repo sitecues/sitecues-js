@@ -7,7 +7,7 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
 
     // IMPORTANT! Increment METRICS_VERSION this every time metrics change in any way
     // IMPORTANT! Have the backend team review all metrics changes!!!
-    var METRICS_VERSION = 12,
+    var METRICS_VERSION = 14,
         isInitialized,
         doSuppressMetrics,
         doLogMetrics,
@@ -20,12 +20,61 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
       this.sent = false;
     }
 
+    function logNameCollisions(metricName, data, details) {
+      // In dev, log field name collisions because the backend is going to flatten the metrics object
+      function logFieldNameCollision(propName) {
+        if (data.hasOwnProperty(propName)) {
+          console.error('Sitecues error: name collision for metric ' + metricName + ' field name ' + propName);
+        }
+      }
+
+      Object.keys(details).forEach(logFieldNameCollision);
+    }
+
+    // Data must be of simple types
+    function logTypeErrors(metricName, data) {
+      function logFieldTypeError(propName) {
+        var value = data[propName],
+          type = typeof value;
+        if (value !== null && type !== 'boolean' && type !== 'number' && type !== 'string' && type !== 'undefined') {
+          console.error('Sitecues metrics type error: in metric ' + metricName + ', the ' + propName + ' details field must be a simple type');
+        }
+      }
+
+      Object.keys(data).forEach(logFieldTypeError);
+    }
+
     Metric.prototype.createDataJSON = function createDataJSON(name, details) {
-      var data = this.data = JSON.parse(JSON.stringify(this.sessionData)); // Copy sessionData to new object
+      function shallowCopyInto(source, dest) {
+        if (source) {
+          for (var keyName in source) {
+            if (source.hasOwnProperty(keyName)) {
+              dest[keyName] = source[keyName];
+            }
+          }
+        }
+      }
+
+      var sessionData = this.sessionData,
+        data = this.data = {};
+
+      shallowCopyInto(sessionData, data);
       data.name = name;
       data.clientTimeMs = Number(new Date()); // Epoch time in milliseconds  when the event occurred
       data.zoomLevel = conf.get('zoom') || 1;
       data.ttsState = conf.get('ttsOn') || false;
+
+      // Log errors
+      if (SC_DEV) {
+        // Check for type errors in session data
+        logTypeErrors(name, data);
+        // Check for field name collisions and type errors in details
+        if (details) {
+          logNameCollisions(name, data, details);
+          logTypeErrors(name, details);
+        }
+      }
+
       data.details = details;
     };
 
