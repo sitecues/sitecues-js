@@ -3,7 +3,7 @@
  *   1. Initialize settings and locale
  *   2. Initialize BP
  *   3. Listen to anything that should wake up sitecues features
- *   4. Fire sitecues ready callback and metric
+ *   4. Fire sitecues ready callback and page-visited metric
  */
 
 define(['core/conf/user/manager', 'core/util/session', 'core/locale', 'core/metric', 'core/platform', 'core/bp/bp',
