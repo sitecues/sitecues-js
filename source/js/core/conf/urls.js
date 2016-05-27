@@ -46,7 +46,8 @@ define(['core/conf/site' ], function(site) {
       protocol,
       path,
       hostname,
-      origin;
+      origin,
+      port;
 
     // Set up parser
     parser.href = urlStr;
@@ -65,12 +66,13 @@ define(['core/conf/site' ], function(site) {
     path = pathname.substring(0, lastSlashIndex);
     hostname = parser.hostname;
     origin = parser.origin;
-    if (!origin) {
+    if (!origin) {  // IE didn't give us the origin, so we construct it from the protocol, hostname and maybe the port
       origin = protocol + '//' + hostname;
+      port = parser.port;
       // Fallback approach for IE -- note this doesn't include @username or password info
-      // Add the port if it's specified in the url (80 is the default port, so only add that if it's really present in the url)
-      if (parser.port && parser.port !== '80' || urlStr.indexOf(':80/') > 0) {
-        origin += ':' + parser.port;  // Add :portnumber but only if it exists in urlstr
+      // Add the port if it's specified in the url (80/443 is the default port, so only add that if it's really present in the url)
+      if (port && urlStr.indexOf(':' + port + '/') > 0) {
+        origin += ':' + port;  // Add :portnumber but only if it exists in urlstr
       }
     }
 
