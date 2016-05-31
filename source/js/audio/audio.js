@@ -77,7 +77,7 @@ define(
     }
 
     var startRequestTime = Date.now(),
-      locale = getNodeAudioLocale(rootNode);
+      textLocale = getNodeAudioLocale(rootNode);
     addStopAudioHandlers();
 
     function onSpeechPlaying(isLocal) {
@@ -99,7 +99,7 @@ define(
         return localPlayer
           .speak({
             text: text,
-            locale: locale,
+            locale: textLocale,
             onStart: function () {
               onSpeechPlaying(true);
             }
@@ -114,11 +114,11 @@ define(
 
     function speakViaNetwork(onUnavailable) {
       var onUnavailableFn = onUnavailable || fireNotBusyEvent;
-      if (isNetworkSpeechAllowed(locale)) {
+      if (isNetworkSpeechAllowed(textLocale)) {
         lastPlayer = networkPlayer;
         fireBusyEvent();
 
-        var ttsUrl = getTTSUrl(text, locale);
+        var ttsUrl = getTTSUrl(text, textLocale);
 
         networkPlayer
           .play({
@@ -129,7 +129,7 @@ define(
           })
           .then(fireNotBusyEvent)
           .catch(function() {
-            rerouteNetworkSpeechLang(locale);
+            rerouteNetworkSpeechLang(textLocale);
             onUnavailableFn();
           });
       }
@@ -197,9 +197,9 @@ define(
       node = node.parentElement;
     }
     while (node) {
-      var lang = node.getAttribute('lang') || node.getAttribute('xml:lang');
-      if (lang) {
-        return locale.getAudioLocale(lang);
+      var nodeLocale = node.getAttribute('lang') || node.getAttribute('xml:lang');
+      if (nodeLocale) {
+        return locale.getAudioLocale(nodeLocale);
       }
       node = node.parentElement;
     }

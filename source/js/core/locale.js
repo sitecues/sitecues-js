@@ -86,7 +86,7 @@ define([ 'core/data-map', 'Promise' ], function(dataMap, Promise) {
   // However, if the fr-CA browser visits an en-US or en-UK page, the page's code is returned because the
   // user's preferred English accent in unknown
   function getAudioLocale(optionalStartingLocale) {
-    var localeToConvert = optionalStartingLocale || getLocale();
+    var localeToConvert = isValidLocale(optionalStartingLocale) ? optionalStartingLocale : getLocale();
 
     return extendLocaleWithBrowserCountry(localeToConvert);
   }
