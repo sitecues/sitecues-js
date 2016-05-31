@@ -117,6 +117,7 @@ define(['core/bp/helper', 'core/platform', 'core/conf/site'],
       // Fade in the badge when it appears
       '#scp-bp-container': {
         'position': 'fixed',
+        'direction': 'ltr !important',
         'z-index': '9999999',
         'transition': 'opacity 1.5s',
         'transform-origin': '0 0',
@@ -129,6 +130,7 @@ define(['core/bp/helper', 'core/platform', 'core/conf/site'],
       },
 
       '#scp-svg': {
+        'direction': 'ltr !important',
         'max-width': 'none',
         'overflow': 'hidden',
         'position': 'absolute'
@@ -163,7 +165,8 @@ define(['core/bp/helper', 'core/platform', 'core/conf/site'],
         'box-shadow': '1px 1px 15px 0 rgba(9, 9, 9, .5)',
         'padding': '6px 0 8px calc(50% - 66px)',
         'background-color': customBadgePalette.toolbar || '#f7fcff',  // Ensure our own theme engine doesn't turn the toolbar dark
-        'z-index': '9999999'
+        'z-index': '9999999',
+        'direction': 'ltr !important'
       },
 
       '.scp-toolbar > #scp-bp-container': {
