@@ -28,22 +28,28 @@ define([ 'core/data-map', 'Promise' ], function(dataMap, Promise) {
 
   // The the full xx-XX code for the website
   function getLocale() {
-    var docElem = document.documentElement;
+    var
+      docElem = document.documentElement,
+      docLocales = [docElem.lang, docElem.getAttribute('xml:lang'), getMetaTagLocale()],
+      validDocLocale;
 
-    return docElem.lang ||
-      docElem.getAttribute('xml:lang') ||
-      getMetaTagLocale() ||
-      mainBrowserLocale ||
-      DEFAULT_LOCALE;
+    docLocales.some(function (locale) {
+      if (isValidLocale(locale)) {
+        validDocLocale = locale;
+        return true;
+      }
+    });
+
+    return validDocLocale || mainBrowserLocale || DEFAULT_LOCALE;
+  }
+
+  function isValidLocale(locale) {
+    // Regex from http://stackoverflow.com/questions/3962543/how-can-i-validate-a-culture-code-with-a-regular-expression
+    var VALID_LOCALE_REGEX = /^[a-z]{2,3}(?:-[A-Z]{2,3}(?:-[a-zA-Z]{4})?)?$/;
+    return locale && locale.match(VALID_LOCALE_REGEX);
   }
 
   function getMetaTagLocale() {
-    function isValidLocale(locale) {
-      // Regex from http://stackoverflow.com/questions/3962543/how-can-i-validate-a-culture-code-with-a-regular-expression
-      var VALID_LOCALE_REGEX = /^[a-z]{2,3}(?:-[A-Z]{2,3}(?:-[a-zA-Z]{4})?)?$/;
-      return locale.match(VALID_LOCALE_REGEX);
-    }
-
     var META_LANG_SELECTOR = 'meta[name=language],meta[http-equiv=language],meta[name=Content-Language],meta[http-equiv=Content-Language]',
       metaLocaleElement = document.querySelector(META_LANG_SELECTOR),
       metaLocale;
