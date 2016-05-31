@@ -64,19 +64,20 @@ define(
 
     var text = builder.getText($content);
     if (text) {
-      speakText(text, getElementAudioLang($content[0]), triggerType);
+      speakText(text, $content[0], triggerType);
     }
   }
 
   // text and triggerType are optional
-  // @lang is the full or partial language for the speech as we know it, e.g. en-US or en
-  function speakText(text, lang, triggerType) {
+  // @rootNode is root node of the text to be spoken, if available -- it will be used to get the locale
+  function speakText(text, rootNode, triggerType) {
     stopAudio();  // Stop any currently playing audio and halt keydown listener until we're playing again
     if (!text.trim()) {
       return; // Nothing to speak
     }
 
-    var startRequestTime = Date.now();
+    var startRequestTime = Date.now(),
+      locale = getNodeAudioLocale(rootNode);
     addStopAudioHandlers();
 
     function onSpeechPlaying(isLocal) {
@@ -98,7 +99,7 @@ define(
         return localPlayer
           .speak({
             text: text,
-            locale: lang,
+            locale: locale,
             onStart: function () {
               onSpeechPlaying(true);
             }
@@ -113,11 +114,11 @@ define(
 
     function speakViaNetwork(onUnavailable) {
       var onUnavailableFn = onUnavailable || fireNotBusyEvent;
-      if (isNetworkSpeechAllowed(lang)) {
+      if (isNetworkSpeechAllowed(locale)) {
         lastPlayer = networkPlayer;
         fireBusyEvent();
 
-        var ttsUrl = getTTSUrl(text, lang);
+        var ttsUrl = getTTSUrl(text, locale);
 
         networkPlayer
           .play({
@@ -128,7 +129,7 @@ define(
           })
           .then(fireNotBusyEvent)
           .catch(function() {
-            rerouteNetworkSpeechLang(lang);
+            rerouteNetworkSpeechLang(locale);
             onUnavailableFn();
           });
       }
@@ -188,22 +189,26 @@ define(
     events.emit(AUDIO_BUSY_EVENT, false);
   }
 
-  // Get language that applies to element (optional param)
+  // Get language that applies to node (optional param)
   // Fallback on document and then browser default language
-  function getElementAudioLang(element) {
-    while (element) {
-      var lang = element.getAttribute('lang') || element.getAttribute('xml:lang');
+  function getNodeAudioLocale(node) {
+    if (node && node.nodeType !== node.ELEMENT_NODE) {
+      // May have started on text node
+      node = node.parentElement;
+    }
+    while (node) {
+      var lang = node.getAttribute('lang') || node.getAttribute('xml:lang');
       if (lang) {
         return locale.getAudioLocale(lang);
       }
-      element = element.parentElement;
+      node = node.parentElement;
     }
 
     return locale.getAudioLocale();
   }
 
   function getDocumentAudioLang() {
-    return getElementAudioLang(document.body);
+    return getNodeAudioLocale(document.body);
   }
 
   // Puts in delimiters on both sides of the parameter -- ? before and & after
