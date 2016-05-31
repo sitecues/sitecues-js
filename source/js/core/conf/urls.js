@@ -14,6 +14,18 @@ define(['core/conf/site' ], function(site) {
     return '//' + apiDomain + 'sitecues/api/' + restOfUrl;
   }
 
+  // Get an API like http://ws.sitecues.com/sitecues/api/css/passthrough/?url=http%3A%2F%2Fportal.dm.gov.ae%2FHappiness...
+  // We use this for the image and CSS proxy services
+  // Pass in the proxyApi, e.g. 'image/invert' or 'css/passthrough'
+  function getProxyApiUrl(proxyApi, url) {
+    var
+      protocol = parseUrl(url).protocol,  // The schemes must match
+      absoluteUrl = resolveUrl(url),
+      newUrl = protocol + getApiUrl(proxyApi + '/?url=' + encodeURIComponent(absoluteUrl));
+
+    return newUrl;
+  }
+
   // URL string for sitecues.js
   function getRawScriptUrl() {
     return site.get('scriptUrl') || site.get('script_url');
@@ -173,6 +185,7 @@ define(['core/conf/site' ], function(site) {
   return {
     init: init,
     getApiUrl: getApiUrl,
+    getProxyApiUrl: getProxyApiUrl,
     getScriptOrigin: getScriptOrigin,
     isValidLibraryUrl: isValidLibraryUrl,
     getRawScriptUrl: getRawScriptUrl,

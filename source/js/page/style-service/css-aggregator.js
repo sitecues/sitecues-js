@@ -72,10 +72,7 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/urls', 'page/style-
     if (url.indexOf('data:') === 0) {
       return url;
     }
-
-    var absoluteUrl = urls.resolveUrl(url);
-
-    return urls.getApiUrl('css/passthrough/?url=' + encodeURIComponent(absoluteUrl));
+    return urls.getProxyApiUrl('css/passthrough', url);
   }
 
   /**
