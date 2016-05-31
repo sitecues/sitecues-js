@@ -14,7 +14,7 @@ define([], function () {
     xhr.open(type, requestObj.url, true);
     if (contentType) {
       // If post, the content type is what we're sending, if get it's what we're receiving
-      xhr.setRequestHeader(postData ? 'Content-Type' : 'Accept', contentType); // Can be set on XHR but not XDomainRequest
+      xhr.setRequestHeader(postData ? 'Content-Type' : 'Accept', contentType);
     }
 
     xhr.onload = function() {
