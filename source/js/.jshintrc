@@ -5,7 +5,7 @@
   // Maximum number of rule violations to report before giving up.
   "maxerr"        : 100,
   // Which version of the language to target.
-  "esversion"     : 6,
+  "esversion"     : 5,
 
   // List of variables to assume are already defined. Set to `true` to tolerate assigments to those variables.
   "globals": {
