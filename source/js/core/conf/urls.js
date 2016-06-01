@@ -5,30 +5,36 @@ define(['core/conf/site' ], function(site) {
     BASE_RESOURCE_URL;
 
   function getBaseResourceUrl() {
-    var basis = SC_EXTENSION ? getRawScriptUrl() : sitecues.requirejs.nameToUrl('');
-    return basis.split('/js/')[0] + '/';
+    var basis = SC_EXTENSION ? getRawScriptUrl() : sitecues.require.toUrl(''),
+      unsecureBaseUrl = basis.substring(0, basis.lastIndexOf('/js/') + 1);
+
+    return enforceHttps(unsecureBaseUrl);
+  }
+
+  // Change http:// or protocol-relative (just //) urls to use https
+  // TODO Occasionally the sitecues.js core is loaded with http -- we will change that in the minicore. Remove this once we do that.
+  function enforceHttps(absoluteUrl) {
+    return 'https:' + absoluteUrl.replace(/^https?:/, '');
   }
 
   // URL string for API calls
   function getApiUrl(restOfUrl) {
-    return '//' + apiDomain + 'sitecues/api/' + restOfUrl;
+    return 'https://' + apiDomain + 'sitecues/api/' + restOfUrl;
   }
 
   // Get an API like http://ws.sitecues.com/sitecues/api/css/passthrough/?url=http%3A%2F%2Fportal.dm.gov.ae%2FHappiness...
   // We use this for the image and CSS proxy services
   // Pass in the proxyApi, e.g. 'image/invert' or 'css/passthrough'
   function getProxyApiUrl(proxyApi, url) {
-    var
-      protocol = parseUrl(url).protocol,  // The schemes must match
-      absoluteUrl = resolveUrl(url),
-      newUrl = protocol + getApiUrl(proxyApi + '/?url=' + encodeURIComponent(absoluteUrl));
+    var absoluteUrl = resolveUrl(url);
 
-    return newUrl;
+    return getApiUrl(proxyApi + '/?url=' + encodeURIComponent(absoluteUrl));
   }
 
   // URL string for sitecues.js
+  // Enforces https so that all the resources we fetch and origin checking also uses https
   function getRawScriptUrl() {
-    return site.get('scriptUrl') || site.get('script_url');
+    return enforceHttps(site.get('scriptUrl') || site.get('script_url'));
   }
 
   // Parsed URL object for sitecues.js
@@ -123,6 +129,7 @@ define(['core/conf/site' ], function(site) {
     return getParsedLibraryURL().hostname === 'js.sitecues.com';
   }
 
+  // Most sitecues scripts are loaded with https
   function getScriptOrigin() {
     if (!scriptOrigin) {
       scriptOrigin = getParsedLibraryURL().origin;
