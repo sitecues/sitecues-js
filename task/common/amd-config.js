@@ -8,6 +8,7 @@ var config = require('../build-config'),
   dataFolders = sourceConfig.dataFolders,
   sourceFolders = bundleFolders.concat(dataFolders),
   extend = require('extend'),
+  fs = require('fs'),
   JS_SOURCE_DIR = config.librarySourceDir + '/js',
   PATHS = {
     '$': 'empty:', 
@@ -35,7 +36,9 @@ var config = require('../build-config'),
         start:
         'if (sitecues && sitecues.exists) throw new Error("The sitecues library already exists on this page.");\n' +
         'Object.defineProperty(sitecues, "version", { value: "' + config.version + '", writable: false });\n' +
-        '"use strict";\n'
+        '"use strict";\n' +
+        fs.readFileSync(JS_SOURCE_DIR + '/core/util/custom-event-polyfill.js') +
+        fs.readFileSync(JS_SOURCE_DIR + '/core/alameda-config.js')
       },
       // Include alameda in core
       include: [ 'core/alameda-custom', 'core/errors' ],

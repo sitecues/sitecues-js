@@ -1,69 +1,274 @@
-// Custom version of Alameda, created by running sitecues through Nightly WebKit and looking for grayed out lines of
-// code, which aren't run. Most of these lines were removed unless they looked important for error handling.
-// Also ran it through jshint at the end to clean it up more.
-// Note: removes a lot of prim library as we're not using promises -- perhaps controversial as we may use promises in the future. Can add it back.
-
 /**
- * alameda 0.2.0 Copyright (c) 2011-2014, The Dojo Foundation All Rights Reserved.
- * Available via the MIT or new BSD license.
- * see: http://github.com/requirejs/alameda for details
+ * @license alameda-sitecues 0.0.1 Copyright jQuery Foundation and other contributors.
+ * Released under MIT license, http://github.com/requirejs/alameda/LICENSE
  */
+// Going sloppy because loader plugin execs may depend on non-strict execution.
+/*jslint sloppy: true, nomen: true, regexp: true */
+/*global document, navigator, importScripts, Promise, setTimeout */
 
-// Our linting config lets the library assume define and require are global constants, since the
-// build system is responsible for privately namespacing them. Here, we must undo that to avoid
-// erroneous re-definition errors.
+// Supports IE 11, Edge, Safari 8+, modern Chrome, modern Firefox
+// Only uses prim for IE11
+// No support for certain config options: packages, bundles, shim, deps
 
-/* globals -define, -require, SC_RESOURCE_FOLDER_NAME, importScripts */
-
+// ----- BEGIN SITECUES CUSTOM BLOCK -----
+// All custom sitecues code is marked this way
+/* globals -define, -require, importScripts, sc_require */
 /* jshint proto: true */
-
-var require = {
-  // Tell loader to never search for or execute a script with a "data-main"
-  // attribute, since this could have weird consequences on customer pages.
-  skipDataMain : true,
-  definePrim : 'Promise',  // Defines the module id that we want to expose Alameda's built-in prim library as
-  baseUrl: (function(config) {
-    var resourceFolderName = SC_RESOURCE_FOLDER_NAME,
-      scriptUrl = config.scriptUrl || config.script_url, // Old load script sometimes used underscore names, which is deprecated but still supported
-      folderOnly = scriptUrl.substring(0, scriptUrl.lastIndexOf('/js/')),
-      withVersionName = folderOnly + '/' + resourceFolderName + '/js/',
-      withLatestReplaced = withVersionName.replace('/latest/', '/' + resourceFolderName + '/');  // The /latest/ means the current version
-
-    return withLatestReplaced;  // Includes version name so that cached resources are only used with the appropriately matching sitecues.js
-  })(sitecues.everywhereConfig || sitecues.config),
-  map: {
-    '*': {
-      '$': 'page/jquery/jquery'
-    }
-  }
-};
-
-// https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent/CustomEvent
-// Currently only needed for IE11
-(function () {
-
-  if ( typeof window.CustomEvent === "function" ) {
-    return false;
-  }
-
-  function CustomEvent ( event, params ) {
-    params = params || { bubbles: false, cancelable: false, detail: undefined };
-    var evt = document.createEvent( 'CustomEvent' );
-    evt.initCustomEvent( event, params.bubbles, params.cancelable, params.detail );
-    return evt;
-  }
-
-  CustomEvent.prototype = window.Event.prototype;
-
-  window.CustomEvent = CustomEvent;
-})();
-
-
-// Alameda
+// TODO Once we kill off IE11 we can use alameda.js instead of alameda-prim.js (native promise only)
+var require = sc_require;
+// ----- END SITECUES CUSTOM BLOCK -----
 
 var requirejs, require, define;
-(function (global, undef) {
-  var prim, topReq, dataMain, src, subPath,
+(function (global, Promise, undef) {
+
+  // ----- BEGIN SITECUES CUSTOM BLOCK -----
+  function reportError(error) {
+    var event = new CustomEvent('SitecuesUnhandledRejection', {detail: error});
+    window.dispatchEvent(event);
+  }
+  // ----- END SITECUES CUSTOM BLOCK -----
+
+  if (!Promise) {
+    //START prim 1.0.0
+    /**
+     * Changes from baseline prim
+     * - removed UMD registration
+     * - Assigns Promise = prim at the bottom.
+     */
+    (function () {
+      'use strict';
+
+      var prim, waitingId, nextTick,
+        waiting = [];
+
+      function callWaiting() {
+        waitingId = 0;
+        var w = waiting;
+        waiting = [];
+        while (w.length) {
+          w.shift()();
+        }
+      }
+
+      function asyncTick(fn) {
+        waiting.push(fn);
+        if (!waitingId) {
+          waitingId = setTimeout(callWaiting, 0);
+        }
+      }
+
+      function isFunObj(x) {
+        var type = typeof x;
+        return type === 'object' || type === 'function';
+      }
+
+      // ----- BEGIN SITECUES CUSTOM BLOCK -----
+      nextTick = asyncTick;
+      // The below code caused SC-3449
+      // Trying to call nextTick() in IE11 on some websites even with the . bind()
+      // caused SCRIPT65535: Invalid calling object
+      //Use setImmediate.bind() because attaching it (or setTimeout directly
+      //to prim will result in errors. Noticed first on IE10,
+      //issue requirejs/alameda#2)
+      //nextTick = typeof setImmediate === 'function' ? setImmediate.bind() :
+      //  (typeof process !== 'undefined' && process.nextTick ?
+      //    process.nextTick : (typeof setTimeout !== 'undefined' ?
+      //    asyncTick : syncTick));
+      // ----- END SITECUES CUSTOM BLOCK -----
+
+      function notify(ary, value) {
+        prim.nextTick(function () {
+          ary.forEach(function (item) {
+            item(value);
+          });
+        });
+      }
+
+      function callback(p, ok, yes) {
+        if (p.hasOwnProperty('v')) {
+          prim.nextTick(function () {
+            yes(p.v);
+          });
+        } else {
+          ok.push(yes);
+        }
+      }
+
+      function errback(p, fail, no) {
+        if (p.hasOwnProperty('e')) {
+          prim.nextTick(function () {
+            no(p.e);
+          });
+        } else {
+          fail.push(no);
+        }
+      }
+
+      prim = function prim(fn) {
+        var promise, f,
+          p = {},
+          ok = [],
+          fail = [];
+
+        function makeFulfill() {
+          var f, f2,
+            called = false;
+
+          function fulfill(v, prop, listeners) {
+            if (called) {
+              return;
+            }
+            called = true;
+
+            if (promise === v) {
+              called = false;
+              f.reject(new TypeError('value is same promise'));
+              return;
+            }
+
+            try {
+              var then = v && v.then;
+              if (isFunObj(v) && typeof then === 'function' &&
+                  // if error, keep on error pathway if a promise,
+                  // 2.2.7.2 tests.
+                prop !== 'e') {
+                f2 = makeFulfill();
+                then.call(v, f2.resolve, f2.reject);
+              } else {
+                p[prop] = v;
+                notify(listeners, v);
+              }
+            } catch (e) {
+              called = false;
+              // ----- BEGIN SITECUES CUSTOM BLOCK -----
+              reportError(e);
+              // ----- END SITECUES CUSTOM BLOCK -----
+              f.reject(e);
+            }
+          }
+
+          f = {
+            resolve: function (v) {
+              fulfill(v, 'v', ok);
+            },
+            reject: function(e) {
+              fulfill(e, 'e', fail);
+            }
+          };
+          return f;
+        }
+
+        f = makeFulfill();
+
+        promise = {
+          then: function (yes, no) {
+            var next = prim(function (nextResolve, nextReject) {
+
+              function finish(fn, nextFn, v) {
+                try {
+                  if (fn && typeof fn === 'function') {
+                    v = fn(v);
+                    nextResolve(v);
+                  } else {
+                    nextFn(v);
+                  }
+                } catch (e) {
+                  // ----- BEGIN SITECUES CUSTOM BLOCK -----
+                  reportError(e);
+                  // ----- END SITECUES CUSTOM BLOCK -----
+                  nextReject(e);
+                }
+              }
+
+              callback(p, ok, finish.bind(undefined, yes, nextResolve));
+              errback(p, fail, finish.bind(undefined, no, nextReject));
+
+            });
+            return next;
+          },
+
+          catch: function (no) {
+            return promise.then(null, no);
+          }
+        };
+
+        try {
+          fn(f.resolve, f.reject);
+        } catch (e) {
+          // ----- BEGIN SITECUES CUSTOM BLOCK -----
+          reportError(e);
+          // ----- END SITECUES CUSTOM BLOCK -----
+          f.reject(e);
+        }
+
+        return promise;
+      };
+
+      prim.resolve = function (value) {
+        return prim(function (yes) {
+          yes(value);
+        });
+      };
+
+      prim.reject = function (err) {
+        return prim(function (yes, no) {
+          no(err);
+        });
+      };
+
+      prim.cast = function (x) {
+        // A bit of a weak check, want "then" to be a function,
+        // but also do not want to trigger a getter if accessing
+        // it. Good enough for now.
+        if (isFunObj(x) && 'then' in x) {
+          return x;
+        } else {
+          return prim(function (yes, no) {
+            if (x instanceof Error) {
+              no(x);
+            } else {
+              yes(x);
+            }
+          });
+        }
+      };
+
+      prim.all = function (ary) {
+        return prim(function (yes, no) {
+          var count = 0,
+            length = ary.length,
+            result = [];
+
+          function resolved(i, v) {
+            result[i] = v;
+            count += 1;
+            if (count === length) {
+              yes(result);
+            }
+          }
+
+          if (!ary.length) {
+            yes([]);
+          } else {
+            ary.forEach(function (item, i) {
+              prim.cast(item).then(function (v) {
+                resolved(i, v);
+              }, function (err) {
+                no(err);
+              });
+            });
+          }
+        });
+      };
+
+      prim.nextTick = nextTick;
+      Promise = prim;
+    }());
+    //END prim
+
+  }
+
+  var topReq,
     bootstrapConfig = requirejs || require,
     hasOwn = Object.prototype.hasOwnProperty,
     contexts = {},
@@ -71,10 +276,16 @@ var requirejs, require, define;
     currDirRegExp = /^\.\//,
     commentRegExp = /(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg,
     cjsRequireRegExp = /[^.]\s*require\s*\(\s*["']([^'"\s]+)["']\s*\)/g,
-    jsSuffixRegExp = /\.js$/;
+    jsSuffixRegExp = /\.js$/,
+    slice = Array.prototype.slice;
 
   if (typeof requirejs === 'function') {
     return;
+  }
+
+  // Could match something like ')//comment', do not lose the prefix to comment.
+  function commentReplace(match, multi, multiText, singlePrefix) {
+    return singlePrefix || '';
   }
 
   function hasProp(obj, prop) {
@@ -126,8 +337,8 @@ var requirejs, require, define;
     return target;
   }
 
-  //Allow getting a global that expressed in
-  //dot notation, like 'a.b.c'.
+  // Allow getting a global that expressed in
+  // dot notation, like 'a.b.c'.
   function getGlobal(value) {
     if (!value) {
       return value;
@@ -139,251 +350,19 @@ var requirejs, require, define;
     return g;
   }
 
-  //START prim 0.0.6
-  /**
-   * Changes from baseline prim
-   * - removed UMD registration
-   */
-  (function () {
-    'use strict';
-
-    var waitingId, nextTick,
-      waiting = [];
-
-    function callWaiting() {
-      waitingId = 0;
-      var w = waiting;
-      waiting = [];
-      while (w.length) {
-        w.shift()();
-      }
-    }
-
-    function asyncTick(fn) {
-      waiting.push(fn);
-      if (!waitingId) {
-        waitingId = setTimeout(callWaiting, 0);
-      }
-    }
-
-    // Unused
-    //function syncTick(fn) {
-    //  fn();
-    //}
-
-    function isFunObj(x) {
-      var type = typeof x;
-      return type === 'object' || type === 'function';
-    }
-
-    nextTick = asyncTick;
-    // The below code caused SC-3449
-    // Trying to call nextTick() in IE11 on some websites even with the . bind()
-    // caused SCRIPT65535: Invalid calling object
-    //nextTick = typeof setImmediate === 'function' ? setImmediate. bind () :
-    //  (typeof process !== 'undefined' && process.nextTick ?
-    //    process.nextTick : (typeof setTimeout !== 'undefined' ?
-    //    asyncTick : syncTick));
-
-    function notify(ary, value) {
-      prim.nextTick(function () {
-        ary.forEach(function (item) {
-          item(value);
-        });
-      });
-    }
-
-    function callback(p, ok, yes) {
-      if (p.hasOwnProperty('v')) {
-        prim.nextTick(function () {
-          yes(p.v);
-        });
-      } else {
-        ok.push(yes);
-      }
-    }
-
-    function errback(p, fail, no) {
-      if (p.hasOwnProperty('e')) {
-        prim.nextTick(function () {
-          no(p.e);
-        });
-      } else {
-        fail.push(no);
-      }
-    }
-
-    prim = function prim(fn) {
-      var promise, f,
-        p = {},
-        ok = [],
-        fail = [];
-
-      function reportError(error) {
-        var event = new CustomEvent('SitecuesPromiseError', {detail: error});
-        window.dispatchEvent(event);
-      }
-
-      function makeFulfill() {
-        var f, f2,
-          called = false;
-
-        function fulfill(v, prop, listeners) {
-          if (called) {
-            return;
-          }
-          called = true;
-
-          if (promise === v) {
-            called = false;
-            f.reject(new TypeError('value is same promise'));
-            return;
-          }
-
-          try {
-            var then = v && v.then;
-            if (isFunObj(v) && typeof then === 'function') {
-              f2 = makeFulfill();
-              then.call(v, f2.resolve, f2.reject);
-            } else {
-              p[prop] = v;
-              notify(listeners, v);
-            }
-          } catch (e) {
-            called = false;
-            reportError(e);
-            f.reject(e);
-          }
-        }
-
-        f = {
-          resolve: function (v) {
-            fulfill(v, 'v', ok);
-          },
-          reject: function(e) {
-            fulfill(e, 'e', fail);
-          }
-        };
-        return f;
-      }
-
-      f = makeFulfill();
-
-      promise = {
-        then: function (yes, no) {
-          var next = prim(function (nextResolve, nextReject) {
-
-            function finish(fn, nextFn, v) {
-              try {
-                if (fn && typeof fn === 'function') {
-                  v = fn(v);
-                  nextResolve(v);
-                } else {
-                  nextFn(v);
-                }
-              } catch (e) {
-                reportError(e);
-                nextReject(e);
-              }
-            }
-
-            callback(p, ok, function() {
-              var args = [yes, nextResolve].concat(Array.prototype.slice.call(arguments));
-              finish.apply(undefined, args);
-            });
-            errback(p, fail, function() {
-              var args = [no, nextReject].concat(Array.prototype.slice.call(arguments))
-              finish.apply(undefined, args);
-            });
-
-          });
-          return next;
-        },
-
-        catch: function (no) {
-          return promise.then(null, no);
-        }
-      };
-
-      try {
-        fn(f.resolve, f.reject);
-      } catch (e) {
-        reportError(e);
-        f.reject(e);
-      }
-
-      return promise;
-    };
-
-    prim.resolve = function (value) {
-      return prim(function (yes) {
-        yes(value);
-      });
-    };
-
-    prim.reject = function (err) {
-      return prim(function (yes, no) {
-        no(err);
-      });
-    };
-
-    prim.cast = function (x) {
-      // A bit of a weak check, want "then" to be a function,
-      // but also do not want to trigger a getter if accessing
-      // it. Good enough for now.
-      if (isFunObj(x) && 'then' in x) {
-        return x;
-      } else {
-        return prim(function (yes, no) {
-          if (x instanceof Error) {
-            no(x);
-          } else {
-            yes(x);
-          }
-        });
-      }
-    };
-
-    prim.all = function (ary) {
-      return prim(function (yes, no) {
-        var count = 0,
-          length = ary.length,
-          result = [];
-
-        function resolved(i, v) {
-          result[i] = v;
-          count += 1;
-          if (count === length) {
-            yes(result);
-          }
-        }
-
-        if (!ary.length) {
-          yes([]);
-        } else {
-          ary.forEach(function (item, i) {
-            prim.cast(item).then(function (v) {
-              resolved(i, v);
-            }, function (err) {
-              no(err);
-            });
-          });
-        }
-      });
-    };
-
-    prim.nextTick = nextTick;
-  }());
-  //END prim
-
   function newContext(contextName) {
     var req, main, makeMap, callDep, handlers, checkingLater, load, context,
       defined = {},
-      waiting = {},
+      // ----- BEGIN SITECUES CUSTOM BLOCK -----
+      //We want Promises to be treated as a module, whether they are native or prim,
+      //so that they can be used via define() and we do not have to change
+      //the global definition of Promise when we do use prim
+      waiting = { Promise:  ['Promise', [], function () { return Promise; }] },
+      // ----- END SITECUES CUSTOM BLOCK -----
       config = {
-        //Defaults. Do not set a default for map
-        //config to speed up normalize(), which
-        //will run faster if there is no default.
+        // Defaults. Do not set a default for map
+        // config to speed up normalize(), which
+        // will run faster if there is no default.
         baseUrl: './',
         paths: {},
         bundles: {},
@@ -401,7 +380,8 @@ var requirejs, require, define;
       errCount = 0,
       trackedErrors = {},
       urlFetched = {},
-      bundlesMap = {};
+      bundlesMap = {},
+      asyncResolve = Promise.resolve();
 
     /**
      * Trims the . and .. from an array of path segments.
@@ -420,14 +400,13 @@ var requirejs, require, define;
           ary.splice(i, 1);
           i -= 1;
         } else if (part === '..') {
-          if (i === 1 && (ary[2] === '..' || ary[0] === '..')) {
-            //End of the line. Keep at least one non-dot
-            //path segment at the front so it can be mapped
-            //correctly to disk. Otherwise, there is likely
-            //no path mapping for a path starting with '..'.
-            //This can still fail, but catches the most reasonable
-            //uses of ..
-            break;
+          // If at the start, or previous value is still ..,
+          // keep them so that when converted to a path it may
+          // still work when converted to a path, even though
+          // as an ID it is less than ideal. In larger point
+          // releases, may be better to just kick out an error.
+          if (i === 0 || (i === 1 && ary[2] === '..') || ary[i - 1] === '..') {
+            continue;
           } else if (i > 0) {
             ary.splice(i - 1, 2);
             i -= 2;
@@ -454,40 +433,36 @@ var requirejs, require, define;
         map = config.map,
         starMap = map && map['*'];
 
+
       //Adjust any relative paths.
-      if (name && name.charAt(0) === '.') {
-        //If have a base name, try to normalize against it,
-        //otherwise, assume it is a top-level require that will
-        //be relative to baseUrl in the end.
-        if (baseName) {
+      if (name) {
+        name = name.split('/');
+        lastIndex = name.length - 1;
+
+        // If wanting node ID compatibility, strip .js from end
+        // of IDs. Have to do this here, and not in nameToUrl
+        // because node allows either .js or non .js to map
+        // to same file.
+        if (config.nodeIdCompat && jsSuffixRegExp.test(name[lastIndex])) {
+          name[lastIndex] = name[lastIndex].replace(jsSuffixRegExp, '');
+        }
+
+        // Starts with a '.' so need the baseName
+        if (name[0].charAt(0) === '.' && baseParts) {
           //Convert baseName to array, and lop off the last part,
           //so that . matches that 'directory' and not name of the baseName's
           //module. For instance, baseName of 'one/two/three', maps to
           //'one/two/three.js', but we want the directory, 'one/two' for
           //this normalization.
           normalizedBaseParts = baseParts.slice(0, baseParts.length - 1);
-          name = name.split('/');
-          lastIndex = name.length - 1;
-
-          // If wanting node ID compatibility, strip .js from end
-          // of IDs. Have to do this here, and not in nameToUrl
-          // because node allows either .js or non .js to map
-          // to same file.
-          if (config.nodeIdCompat && jsSuffixRegExp.test(name[lastIndex])) {
-            name[lastIndex] = name[lastIndex].replace(jsSuffixRegExp, '');
-          }
-
           name = normalizedBaseParts.concat(name);
-          trimDots(name);
-          name = name.join('/');
-        } else if (name.indexOf('./') === 0) {
-          // No baseName, so this is ID is resolved relative
-          // to baseUrl, pull off the leading dot.
-          name = name.substring(2);
         }
+
+        trimDots(name);
+        name = name.join('/');
       }
 
-      //Apply map config if available.
+      // Apply map config if available.
       if (applyMap && map && (baseParts || starMap)) {
         nameParts = name.split('/');
 
@@ -495,17 +470,17 @@ var requirejs, require, define;
           nameSegment = nameParts.slice(0, i).join('/');
 
           if (baseParts) {
-            //Find the longest baseName segment match in the config.
-            //So, do joins on the biggest to smallest lengths of baseParts.
+            // Find the longest baseName segment match in the config.
+            // So, do joins on the biggest to smallest lengths of baseParts.
             for (j = baseParts.length; j > 0; j -= 1) {
               mapValue = getOwn(map, baseParts.slice(0, j).join('/'));
 
-              //baseName segment has config, find if it has one for
-              //this name.
+              // baseName segment has config, find if it has one for
+              // this name.
               if (mapValue) {
                 mapValue = getOwn(mapValue, nameSegment);
                 if (mapValue) {
-                  //Match, update name to the new value.
+                  // Match, update name to the new value.
                   foundMap = mapValue;
                   foundI = i;
                   break outerLoop;
@@ -514,9 +489,9 @@ var requirejs, require, define;
             }
           }
 
-          //Check for a star map match, but just hold on to it,
-          //if there is a shorter segment match later in a matching
-          //config, then favor over this star map.
+          // Check for a star map match, but just hold on to it,
+          // if there is a shorter segment match later in a matching
+          // config, then favor over this star map.
           if (!foundStarMap && starMap && getOwn(starMap, nameSegment)) {
             foundStarMap = getOwn(starMap, nameSegment);
             starI = i;
@@ -541,27 +516,30 @@ var requirejs, require, define;
       return pkgMain ? pkgMain : name;
     }
 
-    function makeShimExports(value) {
-      function fn() {
-        var ret;
-        if (value.init) {
-          ret = value.init.apply(global, arguments);
-        }
-        return ret || (value.exports && getGlobal(value.exports));
-      }
-      return fn;
-    }
+    // ----- BEGIN SITECUES CUSTOM BLOCK -----
+    // Shim is not supported
+    //function makeShimExports(value) {
+    //  function fn() {
+    //    var ret;
+    //    if (value.init) {
+    //      ret = value.init.apply(global, arguments);
+    //    }
+    //    return ret || (value.exports && getGlobal(value.exports));
+    //  }
+    //  return fn;
+    //}
+    // ----- END SITECUES CUSTOM BLOCK -----
 
     function takeQueue(anonId) {
       var i, id, args, shim;
       for (i = 0; i < queue.length; i += 1) {
-        //Peek to see if anon
+        // Peek to see if anon
         if (typeof queue[i][0] !== 'string') {
           if (anonId) {
             queue[i].unshift(anonId);
             anonId = undef;
           } else {
-            //Not our anon module, stop.
+            // Not our anon module, stop.
             break;
           }
         }
@@ -578,8 +556,8 @@ var requirejs, require, define;
         }
       }
 
-      //if get to the end and still have anonId, then could be
-      //a shimmed dependency.
+      // if get to the end and still have anonId, then could be
+      // a shimmed dependency.
       if (anonId) {
         shim = getOwn(config.shim, anonId) || {};
         main(anonId, shim.deps || [], shim.exportsFn);
@@ -598,53 +576,55 @@ var requirejs, require, define;
           if (handlers[deps]) {
             return handlers[deps](relName);
           }
-          //Just return the module wanted. In this scenario, the
-          //deps arg is the module name, and second arg (if passed)
-          //is just the relName.
-          //Normalize module name, if it contains . or ..
+          // Just return the module wanted. In this scenario, the
+          // deps arg is the module name, and second arg (if passed)
+          // is just the relName.
+          // Normalize module name, if it contains . or ..
           name = makeMap(deps, relName, true).id;
           if (!hasProp(defined, name)) {
             throw new Error('Not loaded: ' + name);
           }
           return defined[name];
         } else if (deps && !Array.isArray(deps)) {
-          //deps is a config object, not an array.
+          // deps is a config object, not an array.
           cfg = deps;
           deps = undef;
 
           if (Array.isArray(callback)) {
-            //callback is an array, which means it is a dependency list.
-            //Adjust args if there are dependencies
+            // callback is an array, which means it is a dependency list.
+            // Adjust args if there are dependencies
             deps = callback;
             callback = errback;
             errback = alt;
           }
 
           if (topLevel) {
-            //Could be a new context, so call returned require
+            // Could be a new context, so call returned require
             return req.config(cfg)(deps, callback, errback);
           }
         }
 
-        //Support require(['a'])
-        callback = callback || function () {};
+        // Support require(['a'])
+        callback = callback || function () {
+            // In case used later as a promise then value, return the
+            // arguments as an array.
+            return slice.call(arguments, 0);
+          };
 
-        //Simulate async callback;
-        prim.nextTick(function () {
-          //Grab any modules that were defined after a
-          //require call.
+        // Complete async to maintain expected execution semantics.
+        return asyncResolve.then(function () {
+          // Grab any modules that were defined after a require call.
           takeQueue();
-          main(undef, deps || [], callback, errback, relName);
-        });
 
-        return req;
+          return main(undef, deps || [], callback, errback, relName);
+        });
       };
 
       req.isBrowser = typeof document !== 'undefined' &&
         typeof navigator !== 'undefined';
 
+      // ----- BEGIN SITECUES CUSTOM BLOCK -----
       req.nameToUrl = function (moduleName, ext, skipExt) {
-
         var syms, url, bundleId = moduleName.split('/')[0];
 
         if (bundleId && bundleId !== 'locale-data') {  // locale-data is all in one subfolder
@@ -654,13 +634,15 @@ var requirejs, require, define;
         //A module that needs to be converted to a path.
         syms = moduleName.split('/');
 
-        //Join the path parts together, then figure out if baseUrl is needed.
+        // Join the path parts together, then figure out if baseUrl is needed.
         url = syms.join('/');
-        url += (ext || (/^data\:|\?/.test(url) || skipExt ? '' : '.js'));
-        url = (url.charAt(0) === '/' || url.match(/^[\w\+\.\-]+:/) ? '' : config.baseUrl) + url;
+        url += (ext || (/^data\:|^blob\:|\?/.test(url) || skipExt ? '' : '.js'));
+        url = (url.charAt(0) === '/' ||
+          url.match(/^[\w\+\.\-]+:/) ? '' : config.baseUrl) + url;
 
-        return url;
+        return config.urlArgs && !/^blob\:/.test(url) ? url + config.urlArgs(moduleName, url) : url;
       };
+      // ----- END SITECUES CUSTOM BLOCK -----
 
       /**
        * Converts a module name + .extension into an URL path.
@@ -673,8 +655,8 @@ var requirejs, require, define;
           segment = moduleNamePlusExt.split('/')[0],
           isRelative = segment === '.' || segment === '..';
 
-        //Have a file extension alias, and it is not the
-        //dots from a relative path.
+        // Have a file extension alias, and it is not the
+        // dots from a relative path.
         if (index !== -1 && (!isRelative || index > 1)) {
           ext = moduleNamePlusExt.substring(index, moduleNamePlusExt.length);
           moduleNamePlusExt = moduleNamePlusExt.substring(0, index);
@@ -719,8 +701,16 @@ var requirejs, require, define;
     }
 
     function defineModule(d) {
-      var name = d.map.id,
+      d.factoryCalled = true;
+
+      var ret,
+        name = d.map.id;
+
+      try {
         ret = d.factory.apply(defined[name], d.values);
+      } catch(err) {
+        return reject(d, err);
+      }
 
       if (name) {
         // Favor return value over exports. If node/cjs in play,
@@ -734,16 +724,16 @@ var requirejs, require, define;
           }
         }
       } else {
-        //Remove the require deferred from the list to
-        //make cycle searching faster. Do not need to track
-        //it anymore either.
+        // Remove the require deferred from the list to
+        // make cycle searching faster. Do not need to track
+        // it anymore either.
         requireDeferreds.splice(requireDeferreds.indexOf(d), 1);
       }
       resolve(name, d, ret);
     }
 
-    //This method is attached to every module deferred,
-    //so the "this" in here is the module deferred object.
+    // This method is attached to every module deferred,
+    // so the "this" in here is the module deferred object.
     function depFinished(val, i) {
       if (!this.rejected && !this.depDefined[i]) {
         this.depDefined[i] = true;
@@ -757,9 +747,14 @@ var requirejs, require, define;
 
     function makeDefer(name) {
       var d = {};
-      d.promise = prim(function (resolve, reject) {
+      d.promise = new Promise(function (resolve, reject) {
         d.resolve = resolve;
-        d.reject = reject;
+        d.reject = function(err) {
+          if (!name) {
+            requireDeferreds.splice(requireDeferreds.indexOf(d), 1);
+          }
+          reject(err);
+        };
       });
       d.map = name ? makeMap(name, null, true) : {};
       d.depCount = 0;
@@ -768,9 +763,9 @@ var requirejs, require, define;
       d.depDefined = [];
       d.depFinished = depFinished;
       if (d.map.pr) {
-        //Plugin resource ID, implicitly
-        //depends on plugin. Track it in deps
-        //so cycle breaking can work
+        // Plugin resource ID, implicitly
+        // depends on plugin. Track it in deps
+        // so cycle breaking can work
         d.deps = [makeMap(d.map.pr)];
       }
       return d;
@@ -805,8 +800,8 @@ var requirejs, require, define;
     function waitForDep(depMap, relName, d, i) {
       d.depMax += 1;
 
-      //Do the fail at the end to catch errors
-      //in the then callback execution.
+      // Do the fail at the end to catch errors
+      // in the then callback execution.
       callDep(depMap, relName).then(function (val) {
         d.depFinished(val, i);
       }, makeErrback(d, depMap.id)).catch(makeErrback(d, d.map.id));
@@ -815,8 +810,8 @@ var requirejs, require, define;
     function makeLoad(id) {
       var fromTextCalled;
       function load(value) {
-        //Protect against older plugins that call load after
-        //calling load.fromText
+        // Protect against older plugins that call load after
+        // calling load.fromText
         if (!fromTextCalled) {
           resolve(id, getDefer(id), value);
         }
@@ -834,37 +829,37 @@ var requirejs, require, define;
 
         fromTextCalled = true;
 
-        //Set up the factory just to be a return of the value from
-        //plainId.
+        // Set up the factory just to be a return of the value from
+        // plainId.
         d.factory = function (p, val) {
           return val;
         };
 
-        //As of requirejs 2.1.0, support just passing the text, to reinforce
-        //fromText only being called once per resource. Still
-        //support old style of passing moduleName but discard
-        //that moduleName in favor of the internal ref.
+        // As of requirejs 2.1.0, support just passing the text, to reinforce
+        // fromText only being called once per resource. Still
+        // support old style of passing moduleName but discard
+        // that moduleName in favor of the internal ref.
         if (textAlt) {
           text = textAlt;
         }
 
-        //Transfer any config to this other module.
+        // Transfer any config to this other module.
         if (hasProp(config.config, id)) {
           config.config[plainId] = config.config[id];
         }
 
-        //try {
+        try {
           req.exec(text);
-        //} catch (e) {
-        //  reject(d, new Error('fromText eval for ' + plainId +
-        //    ' failed: ' + e));
-        //}
+        } catch (e) {
+          reject(d, new Error('fromText eval for ' + plainId +
+            ' failed: ' + e));
+        }
 
-        //Execute any waiting define created by the plainId
+        // Execute any waiting define created by the plainId
         takeQueue(plainId);
 
-        //Mark this as a dependency for the plugin
-        //resource
+        // Mark this as a dependency for the plugin
+        // resource
         d.deps = [map];
         waitForDep(map, null, d, d.deps.length);
       };
@@ -880,8 +875,8 @@ var requirejs, require, define;
         }
         urlFetched[url] = true;
 
-        //Ask for the deferred so loading is triggered.
-        //Do this before loading, since loading is sync.
+        // Ask for the deferred so loading is triggered.
+        // Do this before loading, since loading is sync.
         getDefer(map.id);
         importScripts(url);
         takeQueue(map.id);
@@ -897,6 +892,10 @@ var requirejs, require, define;
         urlFetched[url] = true;
 
         script = document.createElement('script');
+        // ----- BEGIN SITECUES CUSTOM BLOCK -----
+        // We need this so that we have permission to log unhandled rejections/exceptions from our cross-domain scripts
+        script.setAttribute('crossorigin', 'anonymous');
+        // ----- END SITECUES CUSTOM BLOCK -----
         script.setAttribute('data-requiremodule', id);
         script.type = config.scriptType || 'text/javascript';
         script.charset = 'utf-8';
@@ -913,10 +912,11 @@ var requirejs, require, define;
           var err,
             pathConfig = getOwn(config.paths, id),
             d = getOwn(deferreds, id);
-          if (pathConfig && Array.isArray(pathConfig) && pathConfig.length > 1) {
+          if (pathConfig && Array.isArray(pathConfig) &&
+            pathConfig.length > 1) {
             script.parentNode.removeChild(script);
-            //Pop off the first array value, since it failed, and
-            //retry
+            // Pop off the first array value, since it failed, and
+            // retry
             pathConfig.shift();
             d.map = makeMap(id);
             load(d.map);
@@ -928,13 +928,12 @@ var requirejs, require, define;
         }, false);
 
         script.src = url;
-        script.setAttribute('crossorigin', 'anonymous');
 
         document.head.appendChild(script);
       };
 
     function callPlugin(plugin, map, relName) {
-      plugin.load(map.n, makeRequire(relName), makeLoad(map.id), {});
+      plugin.load(map.n, makeRequire(relName), makeLoad(map.id), config);
     }
 
     callDep = function (map, relName) {
@@ -948,20 +947,20 @@ var requirejs, require, define;
         main.apply(undef, args);
       } else if (!hasProp(deferreds, name)) {
         if (map.pr) {
-          //If a bundles config, then just load that file instead to
-          //resolve the plugin, as it is built into that bundle.
+          // If a bundles config, then just load that file instead to
+          // resolve the plugin, as it is built into that bundle.
           if ((bundleId = getOwn(bundlesMap, name))) {
             map.url = req.nameToUrl(bundleId);
             load(map);
           } else {
             return callDep(makeMap(map.pr)).then(function (plugin) {
-              //Redo map now that plugin is known to be loaded
+              // Redo map now that plugin is known to be loaded
               var newMap = makeMap(name, relName, true),
                 newId = newMap.id,
                 shim = getOwn(config.shim, newId);
 
-              //Make sure to only call load once per resource. Many
-              //calls could have been queued waiting for plugin to load.
+              // Make sure to only call load once per resource. Many
+              // calls could have been queued waiting for plugin to load.
               if (!hasProp(calledPlugin, newId)) {
                 calledPlugin[newId] = true;
                 if (shim && shim.deps) {
@@ -987,9 +986,9 @@ var requirejs, require, define;
       return getDefer(name).promise;
     };
 
-    //Turns a plugin!resource to [plugin, resource]
-    //with the plugin being undefined if the name
-    //did not have a plugin prefix.
+    // Turns a plugin!resource to [plugin, resource]
+    // with the plugin being undefined if the name
+    // did not have a plugin prefix.
     function splitPrefix(name) {
       var prefix,
         index = name ? name.indexOf('!') : -1;
@@ -1026,12 +1025,21 @@ var requirejs, require, define;
         plugin = hasProp(defined, prefix) && defined[prefix];
       }
 
-      //Normalize according
+      // Normalize according
       if (prefix) {
         if (plugin && plugin.normalize) {
           name = plugin.normalize(name, makeNormalize(relName));
         } else {
-          name = normalize(name, relName, applyMap);
+          // If nested plugin references, then do not try to
+          // normalize, as it will not normalize correctly. This
+          // places a restriction on resourceIds, and the longer
+          // term solution is not to normalize until plugins are
+          // loaded and all normalizations to allow for async
+          // loading of a loader plugin. But for now, fixes the
+          // common uses. Details in requirejs#1131
+          name = name.indexOf('!') === -1 ?
+            normalize(name, relName, applyMap) :
+            name;
         }
       } else {
         name = normalize(name, relName, applyMap);
@@ -1042,9 +1050,9 @@ var requirejs, require, define;
         url = req.nameToUrl(name);
       }
 
-      //Using ridiculous property names for space reasons
+      // Using ridiculous property names for space reasons
       result = {
-        id: prefix ? prefix + '!' + name : name, //fullName
+        id: prefix ? prefix + '!' + name : name, // fullName
         n: name,
         pr: prefix,
         url: url
@@ -1090,10 +1098,10 @@ var requirejs, require, define;
           var depId = depMap.id,
             dep = !hasProp(handlers, depId) && getDefer(depId);
 
-          //Only force things that have not completed
-          //being defined, so still in the registry,
-          //and only if it has not been matched up
-          //in the module already.
+          // Only force things that have not completed
+          // being defined, so still in the registry,
+          // and only if it has not been matched up
+          // in the module already.
           if (dep && !dep.finished && !processed[depId]) {
             if (hasProp(traced, depId)) {
               d.deps.forEach(function (depMap, i) {
@@ -1111,11 +1119,18 @@ var requirejs, require, define;
     }
 
     function check(d) {
+      var err,
+        notFinished = [],
+        waitInterval = config.waitSeconds * 1000,
+        // It is possible to disable the wait interval by using waitSeconds 0.
+        expired = waitInterval &&
+          (startTime + waitInterval) < (new Date()).getTime();
+
       if (loadCount === 0) {
-        //If passed in a deferred, it is for a specific require call.
-        //Could be a sync case that needs resolution right away.
-        //Otherwise, if no deferred, means a nextTick and all
-        //waiting require deferreds should be checked.
+        // If passed in a deferred, it is for a specific require call.
+        // Could be a sync case that needs resolution right away.
+        // Otherwise, if no deferred, means it was the last ditch
+        // timeout-based check, so check all waiting require deferreds.
         if (d) {
           if (!d.finished) {
             breakCycle(d, {}, {});
@@ -1127,31 +1142,51 @@ var requirejs, require, define;
         }
       }
 
+      // If still waiting on loads, and the waiting load is something
+      // other than a plugin resource, or there are still outstanding
+      // scripts, then just try back later.
+      if (expired) {
+        // If wait time expired, throw error of unloaded modules.
+        eachProp(deferreds, function (d) {
+          if (!d.finished) {
+            notFinished.push(d.map.id);
+          }
+        });
+        err = new Error('Timeout for modules: ' + notFinished);
+        err.requireModules = notFinished;
+        req.onError(err);
+      } else
       if (loadCount || requireDeferreds.length) {
-        //Something is still waiting to load. Wait for it, but only
-        //if a later check is not already scheduled.
+        // Something is still waiting to load. Wait for it, but only
+        // if a later check is not already scheduled. Using setTimeout
+        // because want other things in the event loop to happen,
+        // to help in dependency resolution, and this is really a
+        // last ditch check, mostly for detecting timeouts (cycles
+        // should come through the main() use of check()), so it can
+        // wait a bit before doing the final check.
         if (!checkingLater) {
           checkingLater = true;
-          prim.nextTick(function () {
+          setTimeout(function () {
             checkingLater = false;
             check();
-          });
+          }, 70);
         }
       }
     }
 
-    //Used to break out of the promise try/catch chains.
+    // Used to break out of the promise try/catch chains.
     function delayedError(e) {
-      prim.nextTick(function () {
+      setTimeout(function () {
         if (!e.dynaId || !trackedErrors[e.dynaId]) {
           trackedErrors[e.dynaId] = true;
           req.onError(e);
         }
       });
+      return e;
     }
 
     main = function (name, deps, factory, errback, relName) {
-      //Only allow main calling once per module.
+      // Only allow main calling once per module.
       if (name && hasProp(calledDefine, name)) {
         return;
       }
@@ -1159,45 +1194,57 @@ var requirejs, require, define;
 
       var d = getDefer(name);
 
-      //This module may not have dependencies
+      // This module may not have dependencies
       if (deps && !Array.isArray(deps)) {
-        //deps is not an array, so probably means
-        //an object literal or factory function for
-        //the value. Adjust args.
+        // deps is not an array, so probably means
+        // an object literal or factory function for
+        // the value. Adjust args.
         factory = deps;
         deps = [];
       }
 
-      d.promise.catch(errback || delayedError);
+      if (!errback) {
+        if (hasProp(config, 'defaultErrback')) {
+          if (config.defaultErrback) {
+            errback = config.defaultErrback;
+          }
+        } else {
+          errback = delayedError;
+        }
+      }
 
-      //Use name if no relName
+      if (errback) {
+        d.promise.catch(errback);
+      }
+
+      // Use name if no relName
       relName = relName || name;
 
-      //Call the factory to define the module, if necessary.
+      // Call the factory to define the module, if necessary.
       if (typeof factory === 'function') {
 
         if (!deps.length && factory.length) {
-          //Remove comments from the callback string,
-          //look for require calls, and pull them into the dependencies,
-          //but only if there are function args.
+          // Remove comments from the callback string,
+          // look for require calls, and pull them into the dependencies,
+          // but only if there are function args.
           factory
             .toString()
-            .replace(commentRegExp, '')
+            .replace(commentRegExp, commentReplace)
             .replace(cjsRequireRegExp, function (match, dep) {
               deps.push(dep);
             });
 
-          //May be a CommonJS thing even without require calls, but still
-          //could use exports, and module. Avoid doing exports and module
-          //work though if it just needs require.
-          //REQUIRES the function to expect the CommonJS variables in the
-          //order listed below.
+          // May be a CommonJS thing even without require calls, but still
+          // could use exports, and module. Avoid doing exports and module
+          // work though if it just needs require.
+          // REQUIRES the function to expect the CommonJS variables in the
+          // order listed below.
           deps = (factory.length === 1 ?
             ['require'] :
             ['require', 'exports', 'module']).concat(deps);
         }
 
-        //Save info for use later.
+        // Save info for use later.
         d.factory = factory;
         d.deps = deps;
 
@@ -1207,15 +1254,15 @@ var requirejs, require, define;
           deps[i] = depMap = makeMap(depName, relName, true);
           depName = depMap.id;
 
-          //Fast path CommonJS standard dependencies.
+          // Fast path CommonJS standard dependencies.
           if (depName === "require") {
             d.values[i] = handlers.require(name);
           } else if (depName === "exports") {
-            //CommonJS module spec 1.1
+            // CommonJS module spec 1.1
             d.values[i] = handlers.exports(name);
             d.usingExports = true;
           } else if (depName === "module") {
-            //CommonJS module spec 1.1
+            // CommonJS module spec 1.1
             d.values[i] = d.cjsModule = handlers.module(name);
           } else if (depName === undefined) {
             d.values[i] = undefined;
@@ -1225,14 +1272,14 @@ var requirejs, require, define;
         });
         d.depending = false;
 
-        //Some modules just depend on the require, exports, modules, so
-        //trigger their definition here if so.
+        // Some modules just depend on the require, exports, modules, so
+        // trigger their definition here if so.
         if (d.depCount === d.depMax) {
           defineModule(d);
         }
       } else if (name) {
-        //May just be an object definition for the module. Only
-        //worry about defining if have a module name.
+        // May just be an object definition for the module. Only
+        // worry about defining if have a module name.
         resolve(name, d, factory);
       }
 
@@ -1241,6 +1288,8 @@ var requirejs, require, define;
       if (!name) {
         check(d);
       }
+
+      return d.promise;
     };
 
     req = makeRequire(null, true);
@@ -1254,20 +1303,30 @@ var requirejs, require, define;
         return newContext(cfg.context).config(cfg);
       }
 
-      //Since config changed, mapCache may not be valid any more.
+      // Since config changed, mapCache may not be valid any more.
       mapCache = {};
 
-      //Make sure the baseUrl ends in a slash.
+      // Make sure the baseUrl ends in a slash.
       if (cfg.baseUrl) {
         if (cfg.baseUrl.charAt(cfg.baseUrl.length - 1) !== '/') {
           cfg.baseUrl += '/';
         }
       }
 
-      //Save off the paths and packages since they require special processing,
-      //they are additive.
-      var primId,
-        shim = config.shim,
+      // ----- BEGIN SITECUES CUSTOM BLOCK -----
+      // No support for urlArgs config
+      //// Convert old style urlArgs string to a function.
+      //if (typeof cfg.urlArgs === 'string') {
+      //  var urlArgs = cfg.urlArgs;
+      //  cfg.urlArgs = function(id, url) {
+      //    return (url.indexOf('?') === -1 ? '?' : '&') + urlArgs;
+      //  };
+      //}
+      // ----- END SITECUES CUSTOM BLOCK -----
+
+      // Save off the paths and packages since they require special processing,
+      // they are additive.
+      var // shim = config.shim,
         objs = {
           paths: true,
           bundles: true,
@@ -1286,70 +1345,67 @@ var requirejs, require, define;
         }
       });
 
-      //Reverse map the bundles
-      if (cfg.bundles) {
-        eachProp(cfg.bundles, function (value, prop) {
-          value.forEach(function (v) {
-            if (v !== prop) {
-              bundlesMap[v] = prop;
-            }
-          });
-        });
-      }
-
-      //Merge shim
-      if (cfg.shim) {
-        eachProp(cfg.shim, function (value, id) {
-          //Normalize the structure
-          if (Array.isArray(value)) {
-            value = {
-              deps: value
-            };
-          }
-          if ((value.exports || value.init) && !value.exportsFn) {
-            value.exportsFn = makeShimExports(value);
-          }
-          shim[id] = value;
-        });
-        config.shim = shim;
-      }
-
-      //Adjust packages if necessary.
-      if (cfg.packages) {
-        cfg.packages.forEach(function (pkgObj) {
-          var location, name;
-
-          pkgObj = typeof pkgObj === 'string' ? { name: pkgObj } : pkgObj;
-
-          name = pkgObj.name;
-          location = pkgObj.location;
-          if (location) {
-            config.paths[name] = pkgObj.location;
-          }
-
-          //Save pointer to main module ID for pkg name.
-          //Remove leading dot in main, so main paths are normalized,
-          //and remove any trailing .js, since different package
-          //envs have different conventions: some use a module name,
-          //some use a file name.
-          config.pkgs[name] = pkgObj.name + '/' + (pkgObj.main || 'main')
-              .replace(currDirRegExp, '')
-              .replace(jsSuffixRegExp, '');
-        });
-      }
-
-      //If want prim injected, inject it now.
-      primId = config.definePrim;
-      if (primId) {
-        waiting[primId] = [primId, [], function () { return prim; }];
-      }
-
-      //If a deps array or a config callback is specified, then call
-      //require with those args. This is useful when require is defined as a
-      //config object before require.js is loaded.
-      if (cfg.deps || cfg.callback) {
-        req(cfg.deps, cfg.callback);
-      }
+      // ----- BEGIN SITECUES CUSTOM BLOCK -----
+      // Removing unused code for bundles, shim, packages, deps
+      // Reverse map the bundles
+      //if (cfg.bundles) {
+      //  eachProp(cfg.bundles, function (value, prop) {
+      //    value.forEach(function (v) {
+      //      if (v !== prop) {
+      //        bundlesMap[v] = prop;
+      //      }
+      //    });
+      //  });
+      //}
+      //
+      //// Merge shim
+      //if (cfg.shim) {
+      //  eachProp(cfg.shim, function (value, id) {
+      //    // Normalize the structure
+      //    if (Array.isArray(value)) {
+      //      value = {
+      //        deps: value
+      //      };
+      //    }
+      //    if ((value.exports || value.init) && !value.exportsFn) {
+      //      value.exportsFn = makeShimExports(value);
+      //    }
+      //    shim[id] = value;
+      //  });
+      //  config.shim = shim;
+      //}
+      //
+      //// Adjust packages if necessary.
+      //if (cfg.packages) {
+      //  cfg.packages.forEach(function (pkgObj) {
+      //    var location, name;
+      //
+      //    pkgObj = typeof pkgObj === 'string' ? { name: pkgObj } : pkgObj;
+      //
+      //    name = pkgObj.name;
+      //    location = pkgObj.location;
+      //    if (location) {
+      //      config.paths[name] = pkgObj.location;
+      //    }
+      //
+      //    // Save pointer to main module ID for pkg name.
+      //    // Remove leading dot in main, so main paths are normalized,
+      //    // and remove any trailing .js, since different package
+      //    // envs have different conventions: some use a module name,
+      //    // some use a file name.
+      //    config.pkgs[name] = pkgObj.name + '/' + (pkgObj.main || 'main')
+      //        .replace(currDirRegExp, '')
+      //        .replace(jsSuffixRegExp, '');
+      //  });
+      //}
+      //
+      //// If a deps array or a config callback is specified, then call
+      //// require with those args. This is useful when require is defined as a
+      //// config object before require.js is loaded.
+      //if (cfg.deps || cfg.callback) {
+      //  req(cfg.deps, cfg.callback);
+      //}
+      // ----- END SITECUES CUSTOM BLOCK -----
 
       return req;
     };
@@ -1391,7 +1447,7 @@ var requirejs, require, define;
   topReq.contexts = contexts;
 
   define = function () {
-    queue.push([].slice.call(arguments, 0));
+    queue.push(slice.call(arguments, 0));
   };
 
   define.amd = {
@@ -1402,26 +1458,34 @@ var requirejs, require, define;
     topReq.config(bootstrapConfig);
   }
 
-  //data-main support.
-  if (topReq.isBrowser && !contexts._.config.skipDataMain) {
-    dataMain = document.querySelectorAll('script[data-main]')[0];
-    dataMain = dataMain && dataMain.getAttribute('data-main');
-    if (dataMain) {
-      //Strip off any trailing .js since dataMain is now
-      //like a module name.
-      dataMain = dataMain.replace(jsSuffixRegExp, '');
-
-      if (!bootstrapConfig || !bootstrapConfig.baseUrl) {
-        //Pull off the directory of data-main for use as the
-        //baseUrl.
-        src = dataMain.split('/');
-        dataMain = src.pop();
-        subPath = src.length ? src.join('/')  + '/' : './';
-
-        topReq.config({baseUrl: subPath});
-      }
-
-      topReq([dataMain]);
-    }
-  }
-}(this));
+  // ----- BEGIN SITECUES CUSTOM BLOCK -----
+  // Removing data-main support as it is not needed. In fact it is not acceptable because we are a 3rd party
+  // application and customers have no reason to assume we would run data-main scripts.
+  //// data-main support.
+  //if (topReq.isBrowser && !contexts._.config.skipDataMain) {
+  //  dataMain = document.querySelectorAll('script[data-main]')[0];
+  //  dataMain = dataMain && dataMain.getAttribute('data-main');
+  //  if (dataMain) {
+  //    // Strip off any trailing .js since dataMain is now
+  //    // like a module name.
+  //    dataMain = dataMain.replace(jsSuffixRegExp, '');
+  //
+  //    // Set final baseUrl if there is not already an explicit one,
+  //    // but only do so if the data-main value is not a loader plugin
+  //    // module ID.
+  //    if ((!bootstrapConfig || !bootstrapConfig.baseUrl) &&
+  //      dataMain.indexOf('!') === -1) {
+  //      // Pull off the directory of data-main for use as the
+  //      // baseUrl.
+  //      src = dataMain.split('/');
+  //      dataMain = src.pop();
+  //      subPath = src.length ? src.join('/')  + '/' : './';
+  //
+  //      topReq.config({baseUrl: subPath});
+  //    }
+  //
+  //    topReq([dataMain]);
+  //  }
+  //}
+// ----- END SITECUES CUSTOM BLOCK -----
+}(this, (typeof Promise !== 'undefined' ? Promise : undefined)));
