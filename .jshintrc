@@ -3,6 +3,7 @@
 {
   // Maximum number of rule violations to report before giving up.
   "maxerr"        : 100,
+  // Which version of the language to target.
   "esversion"     : 6,
 
   // Enforcing - Rules that cause the linter to complain more.
