@@ -4,6 +4,8 @@
 
   // Maximum number of rule violations to report before giving up.
   "maxerr"        : 100,
+  // Which version of the language to target.
+  "esversion"     : 5,
 
   // List of variables to assume are already defined. Set to `true` to tolerate assigments to those variables.
   "globals": {
@@ -91,8 +93,6 @@
   "debug"         : false,
   // Whether to tolerate use of `== null`, even though it does type coercion.
   "eqnull"        : false,
-  // Whether to tolerate use of ES6 syntax, like `const`, event though old browsers don't support it.
-  "esnext"        : false,
   // Whether to tolerate use of `eval` and `new Function()`, even though they can lead to security problems.
   "evil"          : false,
   // Whether to tolerate seemingly useless expressions, even though they are usually typos.
