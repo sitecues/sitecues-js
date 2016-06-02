@@ -105,7 +105,9 @@ define(
             }
           })
           .then(fireNotBusyEvent)
-          .catch(onUnavailableFn);
+          .catch(function() {
+            onUnavailableFn(); // Call with no arguments (don't pass on the error value)
+          });
       }
       else {
         onUnavailableFn();
@@ -130,7 +132,7 @@ define(
           .then(fireNotBusyEvent)
           .catch(function() {
             rerouteNetworkSpeechLang(textLocale);
-            onUnavailableFn();
+            onUnavailableFn();   // Call with no arguments (don't pass on the error value)
           });
       }
       else {
