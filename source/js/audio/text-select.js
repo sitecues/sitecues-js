@@ -14,7 +14,7 @@ define(['$', 'core/events'], function ($, events) {
   }
 
   function isInPanel(element) {
-    return $(element).closest('#sitecues-badge').length > 0;
+    return $(element).closest('#sitecues-badge,#scp-bp-container').length > 0;
   }
 
   function speakSelectedText() {
