@@ -86,7 +86,12 @@ define(
 
       var acceptableVoices = voices.filter(function (voice) {
           var voiceLocale = voice.lang;
-          return !voiceLocale || voiceLocale === lang || voiceLocale.startsWith(lang + '-');
+          // Allow universal speech engines, which exist on Windows. These can
+          // speak just about any language.
+          if (!voiceLocale) {
+            return true;
+          }
+          return voiceLocale === lang || voiceLocale.startsWith(lang + '-');
         }).filter(function (voice) {
           return SC_BROWSER_NETWORK_SPEECH || voice.localService;
         });
