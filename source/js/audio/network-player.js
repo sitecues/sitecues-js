@@ -66,7 +66,10 @@ define(['$', 'core/conf/urls', 'core/conf/site', 'Promise' ], function ($, urls,
     }
 
     function releaseAudioElement() {
-      audioElementsToPlay.splice(audioElementsToPlay.indexOf(audioElement), 1);
+      var index = audioElementsToPlay.indexOf(audioElement);
+      if (index >= 0) {
+        audioElementsToPlay.splice(index, 1);
+      }
     }
 
     function onEnded(event) {
@@ -94,9 +97,8 @@ define(['$', 'core/conf/urls', 'core/conf/site', 'Promise' ], function ($, urls,
    */
   function stop() {
     audioElementsToPlay.forEach(function(audioElement) {
-      audioElement.pause();
+      audioElement.pause();  // Will be removed by pause handler (onEnded)
     });
-    audioElementsToPlay.length = 0;
   }
 
   function getNetworkSpeechConfig(callbackFn) {
