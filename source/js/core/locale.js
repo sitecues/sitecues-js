@@ -14,7 +14,7 @@ define([ 'core/data-map', 'Promise' ], function(dataMap, Promise) {
     DEFAULT_LOCALE = 'en-us',
     LOCALE_DATA_PREFIX = 'locale-data/',
     AUDIO_CUE_DATA_PREFIX = LOCALE_DATA_PREFIX + 'cue/',
-    SUPPORTED_UI_LANGS = {'de':1, 'en':1, 'es':1, 'fr':1, 'pl':1},
+    SUPPORTED_UI_LANGS = {'de':1, 'en':1, 'es':1, 'fr':1, 'pl':1, 'sv':1 },
     // Countries which have localization files that are different from the default for that language
     // For example, en-us files use 'color' instead of the worldwide standard 'colour'
     COUNTRY_EXCEPTIONS = { 'en-US': 1 },
@@ -193,7 +193,7 @@ define([ 'core/data-map', 'Promise' ], function(dataMap, Promise) {
   }
 
   function init() {
-    return new Promise(function(resolve) {
+    return new Promise(function(resolve, reject) {
       mainBrowserLocale = getMainBrowserLocale();
 
       // On load fetch the translations only once
@@ -202,7 +202,13 @@ define([ 'core/data-map', 'Promise' ], function(dataMap, Promise) {
 
       dataMap.get(langModuleName, function (data) {
         translations = data;
-        resolve();
+        if (translations) {
+          resolve();
+        }
+        else {
+          // TODO solve this mystery error (this info should help)
+          reject(new Error('Translation not found for ' + lang));
+        }
       });
     });
   }

@@ -820,8 +820,9 @@ define(['$', 'page/util/common', 'page/util/element-classifier', 'page/highlight
   // Also considered to have it's own background if the item before or after does,
   // because many times colors are alternated by even/odd row
   function hasSiblingBackground(element, parentStyle, tag) {
+    // Note: don't use $.is() which uses matches with tag, since tag can be something with a : in it, and will cause an error
     var sibling = element.previousElementSibling || element.nextElementSibling,
-      hasSiblingBg = sibling && $(sibling).is(tag + ':not(:empty)') &&
+      hasSiblingBg = sibling && sibling.localName === tag && sibling.hasChildNodes() &&
       common.hasOwnBackground(sibling, traitcache.getStyle(sibling), parentStyle);
     return !!hasSiblingBg;
   }

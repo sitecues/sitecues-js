@@ -228,8 +228,9 @@ define(['$',
 
   function getImageSize(img) {
     return {
-      width: img.naturalWidth,
-      height: img.naturalHeight
+      // Sometimes naturalWidth, naturalHeight are not available, especially in the case of <input type="image">
+      width: img.naturalWidth || img.width,
+      height: img.naturalHeight || img.height
     };
   }
 
