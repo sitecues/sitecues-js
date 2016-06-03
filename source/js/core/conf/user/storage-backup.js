@@ -48,6 +48,9 @@ define(['core/conf/urls', 'core/conf/site', 'Promise', 'core/platform'], functio
           error = eventData.error;
 
         if (eventData.name !== 'sc-storage-reply') {
+          if (SC_DEV) {
+            console.log('Sitecues storage error -- event received by Sitecues is not for us (event name = %s)', eventData.name);
+          }
           return; // Not for us
         }
 

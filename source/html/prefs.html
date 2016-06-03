@@ -50,7 +50,7 @@
         return;
       }
 
-      event.source.postMessage({}, event.origin);
+      event.source.postMessage({ name: 'sc-storage-reply' }, event.origin);
     }
 
     // Load: Should only be called once, at the launch of Sitecues
@@ -84,6 +84,7 @@
     // Else event.data.prefs is falsey, and we are retrieving the data
     function handleRequest(event) {
       if (event.data.name !== 'sc-storage-command') {
+        // console.log('Sitecues storage error -- event received in prefs.html is not for us (event name = %s)', event.data.name);
         return;  // This event is not for us
       }
       if (event.data.prefs) {   // Parsed data received
