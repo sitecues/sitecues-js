@@ -81,12 +81,17 @@ define(
 
       var
         voices = option.voices,
-        locale = option.locale.toLowerCase(),
+        locale = option.locale,
         lang = locale.split('-')[0];
 
       var acceptableVoices = voices.filter(function (voice) {
-          var voiceLocale = voice.lang && voice.lang.toLowerCase();
-          return !voiceLocale || voiceLocale === lang || voiceLocale === locale;
+          var voiceLocale = voice.lang;
+          // Allow universal speech engines, which exist on Windows. These can
+          // speak just about any language.
+          if (!voiceLocale) {
+            return true;
+          }
+          return voiceLocale === lang || voiceLocale.startsWith(lang + '-');
         }).filter(function (voice) {
           return SC_BROWSER_NETWORK_SPEECH || voice.localService;
         });
@@ -98,18 +103,33 @@ define(
       throw new Error('No local voice available for ' + locale);
 
       function compareVoices(a, b) {
-        // Optimistically hope that the system has chosen reasonable defaults.
+
+        var
+          aLocale = a.lang,
+          bLocale = b.lang;
+
+        // Prefer voices with the perfect accent (or lack thereof).
+        if (aLocale === locale && bLocale !== locale) {
+          return -1;
+        }
+        if (bLocale === locale && aLocale !== locale) {
+          return 1;
+        }
+
+        // Prefer to respect the user's default voices.
         if (a.default && !b.default) {
           return -1;
         }
         if (b.default && !a.default) {
           return 1;
         }
-        // Prefer voices with an accent.
-        if (a.lang.includes('-') && !b.lang.includes('-')) {
+
+        // Prefer voices without an accent, to avoid mapping one accent to
+        // another if at all possible.
+        if (aLocale === lang && bLocale !== lang) {
           return -1;
         }
-        if (b.lang.includes('-') && !a.lang.includes('-')) {
+        if (bLocale === lang && aLocale !== lang) {
           return 1;
         }
       }
