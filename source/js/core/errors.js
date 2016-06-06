@@ -63,6 +63,7 @@ define(['core/metric', 'core/conf/urls'], function(metric, urls) {
   function onRequireFailure(event) {
     var detail = event.detail;
     logError({
+      type: 'require error',
       stack: detail.stack,
       message: 'Could not find module: ' + detail.requireModules
     });
