@@ -36,19 +36,26 @@ define(['core/conf/urls', 'core/conf/site', 'Promise', 'core/platform'], functio
 
       window.addEventListener('message', onMessageReceived);
 
-      iframe.contentWindow.postMessage(optionalDataToSend, scriptOrigin);
+      iframe.contentWindow.postMessage({ name: 'sc-storage-command', prefs: optionalDataToSend }, scriptOrigin);
       var timeout = setTimeout(
         onTimeout,  // Code to run when we are fed up with waiting.
         3000        // The browser has this long to get results from the iframe
       );
       
       function onMessageReceived(event) {
-        clearTimeout(timeout);
-        removeMessageListener();
-
         var eventData = event.data,
           receivedData = eventData.rawAppData,
           error = eventData.error;
+
+        if (eventData.name !== 'sc-storage-reply') {
+          if (SC_DEV) {
+            console.log('Sitecues storage error -- event received by Sitecues is not for us (event name = %s)', eventData.name);
+          }
+          return; // Not for us
+        }
+
+        clearTimeout(timeout);
+        removeMessageListener();
 
         if (error) {
           reject(new Error(ERROR_PREFIX + error));

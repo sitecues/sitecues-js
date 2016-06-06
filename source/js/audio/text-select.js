@@ -14,36 +14,23 @@ define(['$', 'core/events'], function ($, events) {
   }
 
   function isInPanel(element) {
-    return $(element).closest('#sitecues-badge').length > 0;
+    return $(element).closest('#sitecues-badge,#scp-bp-container').length > 0;
   }
 
   function speakSelectedText() {
-    var selectedText = getSelectedText();
+    // TODO get the selected nodes and concat all the text ourselves, so that we speak markup correctly, switch locales, etc.
+    // TODO this would also allow us to speak whole words (SC-3192)
+    var selection = window.getSelection(),
+      selectedText = selection.toString(),
+      focusNode = selection.focusNode;
     // Listeners: speech.js
     require(['audio/audio'], function(audio) {
-      audio.init();
+      // No need to init audio, because we're a dependency of it -- it inits us
       // Anything currently being spoken will be interrupted and the new text will be spoken instead.
       // This means that if an empty string is sent, speech will simply shut up.
       // As a result, clicking somewhere new in the page will quiet the current speech.
-      audio.speakText(selectedText || '', null, 'selection');
+      audio.speakText(selectedText || '', focusNode, 'selection');
     });
-  }
-
-  // Get selected text, if any...
-  // TODO would be better to get the selected nodes if we want to speak alternative text, switch languages, etc.
-  // TODO this would also allow us to speak whole words (SC-3192)
-  function getSelectedText() {
-
-    var result = '';
-
-    // WebKit and Gecko...
-    if (typeof window.getSelection !== 'undefined') {
-      result = window.getSelection().toString();
-    }
-    else if (document.selection) { // IEEEEE!
-      result = document.selection.createRange().text;
-    }
-    return result;
   }
 
   function refresh(isOn) {

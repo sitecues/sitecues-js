@@ -84,9 +84,7 @@ define([
         return getInvertedDataUrl(url, origElem);
       }
 
-      // Regular url
-      var absoluteUrl = urls.resolveUrl(url),
-        newUrl = urls.getApiUrl('image/invert/?url=' + encodeURIComponent(absoluteUrl));
+      var newUrl = urls.getProxyApiUrl('image/invert', url);
 
       return Promise.resolve(newUrl);
     }

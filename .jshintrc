@@ -3,6 +3,8 @@
 {
   // Maximum number of rule violations to report before giving up.
   "maxerr"        : 100,
+  // Which version of the language to target.
+  "esversion"     : 6,
 
   // Enforcing - Rules that cause the linter to complain more.
 
@@ -58,8 +60,6 @@
   "elision"       : false,
   // Whether to tolerate use of `== null`, even though it does type coercion.
   "eqnull"        : false,
-  // Whether to tolerate use of ES6 syntax, like `const`, event though old browsers don't support it.
-  "esnext"        : true,
   // Whether to tolerate use of `eval` and `new Function()`, even though they can lead to security problems.
   "evil"          : false,
   // Whether to tolerate seemingly useless expressions, even though they are usually typos.

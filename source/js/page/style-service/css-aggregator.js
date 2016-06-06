@@ -72,10 +72,7 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/urls', 'page/style-
     if (url.indexOf('data:') === 0) {
       return url;
     }
-
-    var absoluteUrl = urls.resolveUrl(url);
-
-    return urls.getApiUrl('css/passthrough/?url=' + encodeURIComponent(absoluteUrl));
+    return urls.getProxyApiUrl('css/passthrough', url);
   }
 
   /**
@@ -102,15 +99,8 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/urls', 'page/style-
     // Credit to Nicholas Zakas
     // http://www.nczonline.net/blog/2010/05/25/cross-domain-ajax-with-cross-origin-resource-sharing/
     var xhr = new XMLHttpRequest();
-
-    if ('withCredentials' in xhr) {
-      xhr.open('GET', url, true);
-      xhr.setRequestHeader('Accept', 'text/css,text/plain');
-    } else {
-      xhr = new XDomainRequest();
-      xhr.open('GET', url);
-    }
-
+    xhr.open('GET', url, true);
+    xhr.setRequestHeader('Accept', 'text/css,text/plain');
     return xhr;
   }
 

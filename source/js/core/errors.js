@@ -31,6 +31,7 @@ define(['core/metric', 'core/conf/urls'], function(metric, urls) {
     }
 
     logError({
+      type: 'exception',
       message: error.message,
       filename: filename, // JS file with error
       lineno: event.lineno,
@@ -40,14 +41,36 @@ define(['core/metric', 'core/conf/urls'], function(metric, urls) {
   }
 
 
-  function onPromiseCaught(event) {
+  function onPrimRejection(event) {
     var detail = event.detail;
     logError( {
+      type: 'prim rejection',
       message: detail.message,
       stack: detail.stack
     }, true);
   }
 
+  function onNativeRejection(event) {
+    // event.reason can be an object or value
+    var reason = event.reason || {};
+    logError({
+      type: 'native promise rejection',
+      message: reason.message || reason,
+      stack: reason.stack
+    });
+  }
+
+  function onRequireFailure(event) {
+    var detail = event.detail;
+    logError({
+      stack: detail.stack,
+      message: 'Could not find module: ' + detail.requireModules
+    });
+  }
+
   window.addEventListener('error', onError, true);   // May get both JS and resource errors
-  window.addEventListener('SitecuesPromiseError', onPromiseCaught, true);   // Thrown from prim library
+  window.addEventListener('SitecuesUnhandledRejection', onPrimRejection, true);   // Thrown from prim library
+  window.addEventListener('unhandledrejection', onNativeRejection);
+  window.addEventListener('rejectionhandled', onNativeRejection);
+  window.addEventListener('SitecuesRequireFailure', onRequireFailure, true);   // Thrown from prim library
 });

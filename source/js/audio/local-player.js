@@ -16,35 +16,29 @@ define(
     function getVoices() {
 
       var
-        voices,
         errMessage = {
           NO_VOICES : 'Sitecues cannot find voices to speak with.',
           TIMEOUT   : 'Timed out getting voices. The system may not have any.'
         };
 
       // Promise handler for when loading voices is asynchronous.
-      function waitForVoices(resolve) {
+      function waitForVoices(resolve, reject) {
         speechSynthesis.addEventListener('voiceschanged', onVoicesChanged, true);
 
-        var voicesTimeout = setTimeout(
-          onTimeout,  // Code to run when we are fed up with waiting.
-          3000        // The browser has this long to load voices.
-        );
+        // Don't wait forever for a voice.
+        var voicesTimeout = setTimeout(onTimeout, 3000);
 
         // Handle timeouts so we don't wait forever in any case where
         // the voiceschanged event never fires.
         function onTimeout() {
-          throw new Error(
-            errMessage.TIMEOUT
-          );
+          reject(new Error(errMessage.TIMEOUT));
         }
 
-        // At least one voice has loaded asynchronously.
-        // We don't know if/when any more will come in,
-        // so it is best to consider the job done here.
+        // At least one voice has loaded asynchronously. We don't know if/when
+        // any more will come in, so it is best to consider the job done here.
         function onVoicesChanged(event) {
-          // Give the available voices as the result.
           clearTimeout(voicesTimeout);
+          // Give the available voices as the result.
           resolve(speechSynthesis.getVoices());
           // Remove thyself.
           event.currentTarget.removeEventListener(event.type, onVoicesChanged, true);
@@ -55,7 +49,7 @@ define(
       // In some environments this happens synchronously and we can use the
       // result right away. In others, it returns an empty array and we will
       // take care of that during the voiceschanged event.
-      voices = speechSynthesis.getVoices();
+      var voices = speechSynthesis.getVoices();
 
       // If the browser has voices available right now, return those.
       // Safari gets voices synchronously, so will be true there.
@@ -63,71 +57,87 @@ define(
         return Promise.resolve(voices);
       }
 
-      // If the current browser gives us an empty voice list, it may just
-      // mean that an asynchronous load of voices is not yet complete.
-      // As recently as Chrome 44, this happens in a very annoying way:
-      // You must call speechSynthesis.getVoices() to trigger the loading
-      // of voices, but it returns a useless empty array synchronously,
-      // with no option for a callback or promise value. We must then
-      // listen to the 'voiceschanged' event to determine when at least
-      // one voice is ready. Who knows when they all are! Grrr.
+      // If the browser gave us an empty voice list, it may mean that an async
+      // load of voices is not yet complete. At least Chrome 44 does this in a
+      // very annoying way: we must call speechSynthesis.getVoices() to begin
+      // loading voices, but it returns a useless empty array synchronously,
+      // with no option for a callback or promise. We must then listen to the
+      // 'voiceschanged' event to determine when at least one voice is ready.
+      // Who knows when they all are! Grrr. See errata 11 in the spec:
+      // https://dvcs.w3.org/hg/speech-api/raw-file/tip/speechapi-errata.html
       else if (typeof speechSynthesis.addEventListener === 'function') {
         return new Promise(waitForVoices);
       }
 
-      // In theory, a platform could support the synthesis API but not
-      // have any voices available, or all existing voices could
-      // suddenly be uninstalled. No such situation has been
-      // encountered, but we try to take care of that here.
+      // In theory, a platform could support the synthesis API but not have any
+      // voices available. Or all the voices could suddenly be uninstalled.
+      // We have not encountered that, but we try to take care of it here.
       throw new Error(errMessage.NO_VOICES);
     }
 
-    // Based on a given set of voice and language restrictions,
-    // get sitecues' favorite voice.
+    // Based on a given set of voices and locale restrictions, get sitecues'
+    // favorite voice. We want to sound the best.
     function getBestVoice(option) {
 
       var
         voices = option.voices,
         locale = option.locale,
-        localeHasAccent = locale && locale.indexOf('-'),
-        lang,
-        localeVoices,
-        langVoices,
-        filteredVoices,
-        bestVoice;
-
-      localeVoices = voices.filter(function (voice) {
-        return voice.lang.indexOf(locale) === 0 && (SC_BROWSER_NETWORK_SPEECH || voice.localService);
-      });
-
-      // If the incoming locale has an accent but we couldn't find any
-      // voices for it, we might still be able to find a voice for the
-      // correct language.
-      if (localeHasAccent && localeVoices.length < 1) {
         lang = locale.split('-')[0];
-        langVoices = voices.filter(function (voice) {
-          return voice.lang.indexOf(lang) === 0 && (SC_BROWSER_NETWORK_SPEECH || voice.localService);
+
+      var acceptableVoices = voices.filter(function (voice) {
+          var voiceLocale = voice.lang;
+          // Allow universal speech engines, which exist on Windows. These can
+          // speak just about any language.
+          if (!voiceLocale) {
+            return true;
+          }
+          return voiceLocale === lang || voiceLocale.startsWith(lang + '-');
+        }).filter(function (voice) {
+          return SC_BROWSER_NETWORK_SPEECH || voice.localService;
         });
-        filteredVoices = langVoices;
-      }
-      else {
-        filteredVoices = localeVoices;
-      }
 
-      if (filteredVoices.length < 1) {
-        throw new Error('No local voice available for ' + (lang || locale));
+      if (acceptableVoices.length > 0) {
+        return acceptableVoices.sort(compareVoices)[0];
       }
 
-      // Voices come in ordered from most preferred to least, so using the
-      // first voice chooses the user's favorite.
-      bestVoice = filteredVoices[0];
+      throw new Error('No local voice available for ' + locale);
 
-      return bestVoice;
+      function compareVoices(a, b) {
+
+        var
+          aLocale = a.lang,
+          bLocale = b.lang;
+
+        // Prefer voices with the perfect accent (or lack thereof).
+        if (aLocale === locale && bLocale !== locale) {
+          return -1;
+        }
+        if (bLocale === locale && aLocale !== locale) {
+          return 1;
+        }
+
+        // Prefer to respect the user's default voices.
+        if (a.default && !b.default) {
+          return -1;
+        }
+        if (b.default && !a.default) {
+          return 1;
+        }
+
+        // Prefer voices without an accent, to avoid mapping one accent to
+        // another if at all possible.
+        if (aLocale === lang && bLocale !== lang) {
+          return -1;
+        }
+        if (bLocale === lang && aLocale !== lang) {
+          return 1;
+        }
+      }
     }
 
+    // Stop speech. This method is idempotent. It does not matter if we are
+    // currently playing or not.
     function stop() {
-      // It is safe to call cancel() regardless of whether speech is
-      // currently playing. Checking beforehand would be wasteful.
       speechSynthesis.cancel();
     }
 
@@ -135,23 +145,20 @@ define(
     function speak(option) {
 
       var
-        text    = option.text,
-        locale  = option.locale,
-        voice   = option.voice,
-        polite  = option.polite,
-        onStart = option.onStart,
-        prom    = Promise.resolve();
+        // TODO: Replace this poor excuse for a speech dictionary.
+        text = option.text.replace(/sitecues/gi, 'sightcues').trim(),
+        locale  = option.locale;
 
-      // TODO: Replace this poor excuse for a speech dictionary.
-      text = option.text.replace(/sitecues/gi, 'sightcues').trim();
+      var
+        voice = option.voice,
+        prom = Promise.resolve();
 
       if (!text) {
         return prom;
       }
 
       if (!voice) {
-        prom = getVoices()
-          .then(function (voices) {
+        prom = getVoices().then(function (voices) {
             return getBestVoice({
               voices : voices,
               locale : locale
@@ -164,7 +171,7 @@ define(
 
       // By default, the Web Speech API queues up synthesis requests.
       // But this is typically not what is desired by sitecues.
-      if (!polite) {
+      if (!option.polite) {
         // Immediately discontinue any currently playing speech.
         stop();
       }
@@ -172,11 +179,10 @@ define(
       // When and if we have a voice to use, finish setting up
       // and then play speech.
       prom = prom.then(function () {
-        return new Promise(function(resolve) {
+        return new Promise(function (resolve, reject) {
+
           var speech = new SpeechSynthesisUtterance(text);
-          if (SC_DEV) {
-            console.log('Using voice:', voice);
-          }
+
           speech.voice = voice;
           // Note: Some voices do not support altering these settings and will break silently!
           speech.lang = locale;
@@ -186,6 +192,8 @@ define(
           // speech.pitch  = 1;  // float from 0 to 2, default is 1
 
           // Event listeners...
+
+          var onStart = option.onStart;
 
           if (onStart) {
             speech.addEventListener('start', onStart);
@@ -197,7 +205,6 @@ define(
             }
             speech.removeEventListener('end', onSpeechEnd);
             speech.removeEventListener('error', onSpeechError);
-            speech.removeEventListener('pause', onSpeechPause);
           }
 
           function onSpeechEnd() {
@@ -210,19 +217,11 @@ define(
 
           function onSpeechError(event) {
             removeListeners();
-            throw event.error;
+            reject(event.error);
           }
 
-          function onSpeechPause() {
-            if (SC_DEV) {
-              console.log('Speech was paused.');
-            }
-            removeListeners();
-            resolve();
-          }
           speech.addEventListener('end', onSpeechEnd);
           speech.addEventListener('error', onSpeechError);
-          speech.addEventListener('pause', onSpeechPause);
 
           // Examples of other things we could do:
           // speech.addEventListener('resume', function onSpeechResume(event) {
@@ -237,7 +236,6 @@ define(
 
           speechSynthesis.speak(speech);
         });
-
       });
 
       return prom;
@@ -251,6 +249,8 @@ define(
       speak(option);
     }
 
+    // NOTE: This method will be fooled by another app besides sitecues speaking.
+    //       Prefer to keep track of state based on the promise from speak().
     function isBusy() {
       return speechSynthesis.pending || speechSynthesis.speaking;
     }

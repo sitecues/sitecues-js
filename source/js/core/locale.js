@@ -14,7 +14,7 @@ define([ 'core/data-map', 'Promise' ], function(dataMap, Promise) {
     DEFAULT_LOCALE = 'en-us',
     LOCALE_DATA_PREFIX = 'locale-data/',
     AUDIO_CUE_DATA_PREFIX = LOCALE_DATA_PREFIX + 'cue/',
-    SUPPORTED_UI_LANGS = {'de':1, 'en':1, 'es':1, 'fr':1, 'pl':1},
+    SUPPORTED_UI_LANGS = {'de':1, 'en':1, 'es':1, 'fr':1, 'pl':1, 'sv':1 },
     // Countries which have localization files that are different from the default for that language
     // For example, en-us files use 'color' instead of the worldwide standard 'colour'
     COUNTRY_EXCEPTIONS = { 'en-US': 1 },
@@ -28,22 +28,28 @@ define([ 'core/data-map', 'Promise' ], function(dataMap, Promise) {
 
   // The the full xx-XX code for the website
   function getLocale() {
-    var docElem = document.documentElement;
+    var
+      docElem = document.documentElement,
+      docLocales = [docElem.lang, docElem.getAttribute('xml:lang'), getMetaTagLocale()],
+      validDocLocale;
 
-    return docElem.lang ||
-      docElem.getAttribute('xml:lang') ||
-      getMetaTagLocale() ||
-      mainBrowserLocale ||
-      DEFAULT_LOCALE;
+    docLocales.some(function (locale) {
+      if (isValidLocale(locale)) {
+        validDocLocale = locale;
+        return true;
+      }
+    });
+
+    return validDocLocale || mainBrowserLocale || DEFAULT_LOCALE;
+  }
+
+  function isValidLocale(locale) {
+    // Regex from http://stackoverflow.com/questions/3962543/how-can-i-validate-a-culture-code-with-a-regular-expression
+    var VALID_LOCALE_REGEX = /^[a-z]{2,3}(?:-[A-Z]{2,3}(?:-[a-zA-Z]{4})?)?$/;
+    return locale && locale.match(VALID_LOCALE_REGEX);
   }
 
   function getMetaTagLocale() {
-    function isValidLocale(locale) {
-      // Regex from http://stackoverflow.com/questions/3962543/how-can-i-validate-a-culture-code-with-a-regular-expression
-      var VALID_LOCALE_REGEX = /^[a-z]{2,3}(?:-[A-Z]{2,3}(?:-[a-zA-Z]{4})?)?$/;
-      return locale.match(VALID_LOCALE_REGEX);
-    }
-
     var META_LANG_SELECTOR = 'meta[name=language],meta[http-equiv=language],meta[name=Content-Language],meta[http-equiv=Content-Language]',
       metaLocaleElement = document.querySelector(META_LANG_SELECTOR),
       metaLocale;
@@ -80,7 +86,7 @@ define([ 'core/data-map', 'Promise' ], function(dataMap, Promise) {
   // However, if the fr-CA browser visits an en-US or en-UK page, the page's code is returned because the
   // user's preferred English accent in unknown
   function getAudioLocale(optionalStartingLocale) {
-    var localeToConvert = optionalStartingLocale || getLocale();
+    var localeToConvert = isValidLocale(optionalStartingLocale) ? optionalStartingLocale : getLocale();
 
     return extendLocaleWithBrowserCountry(localeToConvert);
   }
@@ -187,7 +193,7 @@ define([ 'core/data-map', 'Promise' ], function(dataMap, Promise) {
   }
 
   function init() {
-    return new Promise(function(resolve) {
+    return new Promise(function(resolve, reject) {
       mainBrowserLocale = getMainBrowserLocale();
 
       // On load fetch the translations only once
@@ -196,7 +202,13 @@ define([ 'core/data-map', 'Promise' ], function(dataMap, Promise) {
 
       dataMap.get(langModuleName, function (data) {
         translations = data;
-        resolve();
+        if (translations) {
+          resolve();
+        }
+        else {
+          // TODO solve this mystery error (this info should help)
+          reject(new Error('Translation not found for ' + lang));
+        }
       });
     });
   }

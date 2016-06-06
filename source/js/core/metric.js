@@ -7,7 +7,7 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
 
     // IMPORTANT! Increment METRICS_VERSION this every time metrics change in any way
     // IMPORTANT! Have the backend team review all metrics changes!!!
-    var METRICS_VERSION = 14,
+    var METRICS_VERSION = 15,
         isInitialized,
         doSuppressMetrics,
         doLogMetrics,
@@ -28,20 +28,22 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
         }
       }
 
-      Object.keys(details).forEach(logFieldNameCollision);
+      if (details) {
+        Object.keys(details).forEach(logFieldNameCollision);
+      }
     }
 
     // Data must be of simple types
-    function logTypeErrors(metricName, data) {
-      function logFieldTypeError(propName) {
+    function flattenData(data) {
+      function flattenDataField(propName) {
         var value = data[propName],
           type = typeof value;
         if (value !== null && type !== 'boolean' && type !== 'number' && type !== 'string' && type !== 'undefined') {
-          console.error('Sitecues metrics type error: in metric ' + metricName + ', the ' + propName + ' details field must be a simple type');
+          data[propName] = JSON.stringify(data[propName]);
         }
       }
 
-      Object.keys(data).forEach(logFieldTypeError);
+      Object.keys(data).forEach(flattenDataField);
     }
 
     Metric.prototype.createDataJSON = function createDataJSON(name, details) {
@@ -64,15 +66,15 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
       data.zoomLevel = conf.get('zoom') || 1;
       data.ttsState = conf.get('ttsOn') || false;
 
-      // Log errors
+      // Ensure data we send has simple types
+      flattenData(data);
+      if (details) {
+        flattenData(details);
+      }
+
+      // Log errors -- check for field name collisions and type errors in details
       if (SC_DEV) {
-        // Check for type errors in session data
-        logTypeErrors(name, data);
-        // Check for field name collisions and type errors in details
-        if (details) {
-          logNameCollisions(name, data, details);
-          logTypeErrors(name, details);
-        }
+        logNameCollisions(name, data, details);
       }
 
       data.details = details;
