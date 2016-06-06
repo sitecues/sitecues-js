@@ -72,7 +72,7 @@ define(['hlb/dimmer', 'page/util/common', 'hlb/positioning', 'core/platform', '$
 
     // Animate fromCss -> toCss
     fromCss = {
-      transition: '',
+      transitionProperty: 'none',
       transform: 'scale(' + startScale + ') ' + translateCSS
     };
     $hlbElement.css(fromCss);
