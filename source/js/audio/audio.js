@@ -30,17 +30,12 @@ define(
   var ttsOn = false,
     lastPlayer,
     isInitialized,
-    // TODO add more trigger types, e.g. shift+arrow, shift+space
-    TRIGGER_TYPES = {
-      LENS: 'space',
-      HIGHLIGHT: 'shift'
-    },
     AUDIO_BUSY_EVENT = 'audio/did-toggle',
     speechStrategy = constant.speechStrategy;
 
   function onLensOpened(lensContent, fromHighlight) {
     if (ttsOn) {
-      speakContentImpl(fromHighlight.picked, TRIGGER_TYPES.LENS);
+      speakContentImpl(fromHighlight.picked, constant.TRIGGER_TYPES.LENS);
     }
   }
 
@@ -56,7 +51,7 @@ define(
       return; // Nothing to read
     }
 
-    speakContentImpl(content, TRIGGER_TYPES.HIGHLIGHT);
+    speakContentImpl(content, constant.TRIGGER_TYPES.HIGHLIGHT);
   }
 
   function speakContentImpl($content, triggerType) {
