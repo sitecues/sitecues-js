@@ -12,6 +12,8 @@ define(['core/bp/helper', 'core/platform', 'core/conf/site'],
 
     doWebKitPrefix,
 
+    MAX_ZINDEX       = 2147483647,
+
     BASE_SHEET_ID    = 'sitecues-js-bp-css',
 
     BASE_CSS;
@@ -118,7 +120,7 @@ define(['core/bp/helper', 'core/platform', 'core/conf/site'],
       '#scp-bp-container': {
         'position': 'fixed',
         'direction': 'ltr !important',
-        'z-index': '9999999',
+        'z-index': MAX_ZINDEX,
         'transition': 'opacity 1.5s',
         'transform-origin': '0 0',
         'text-align': 'left', // To prevent style pollution found on http://codecanyon.net/
@@ -165,7 +167,7 @@ define(['core/bp/helper', 'core/platform', 'core/conf/site'],
         'box-shadow': '1px 1px 15px 0 rgba(9, 9, 9, .5)',
         'padding': '6px 0 8px calc(50% - 66px)',
         'background-color': customBadgePalette.toolbar || '#f7fcff',  // Ensure our own theme engine doesn't turn the toolbar dark
-        'z-index': '9999999',
+        'z-index': MAX_ZINDEX,
         'direction': 'ltr !important'
       },
 

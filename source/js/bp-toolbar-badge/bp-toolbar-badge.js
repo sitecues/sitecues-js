@@ -37,7 +37,7 @@ define([
       docElem = document.documentElement;
 
     docElem.setAttribute('data-sitecues-toolbar', ''); // Enable default.css rules
-    docElem.insertBefore(toolbarElement, docElem.childNodes[0]);
+    docElem.appendChild(toolbarElement);
 
     helper.setAttributes(toolbarElement, BP_CONST.DEFAULT_TOOLBAR_ATTRS);
 
