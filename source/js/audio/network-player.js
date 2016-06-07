@@ -99,6 +99,7 @@ define(['$', 'core/conf/urls', 'core/conf/site', 'Promise' ], function ($, urls,
     audioElementsToPlay.forEach(function(audioElement) {
       audioElement.pause();  // Will be removed by pause handler (onEnded)
     });
+    audioElementsToPlay.length = 0; // Need to remove synchronously so that we don't accidentally get double speech
   }
 
   function getNetworkSpeechConfig(callbackFn) {
