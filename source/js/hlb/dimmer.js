@@ -102,27 +102,33 @@ define([ '$', 'hlb/constants' ], function($, constants) {
   // Then we fill in the outline around it using CSS:
   //
   //      OOOOOOOOOOOOOOOOO
-  //      O---------------O
+  //      O---------------O   Wider than tall -- use thin horizontal line
   //      OOOOOOOOOOOOOOOOO
+  //
+  //      OOO
+  //      O|O
+  //      O|O                 Taller than wide -- use thin vertical line
+  //      O|O
+  //      OOO
   //
   function drawRect(absRect, color) {
     var useCss = {
         position: 'absolute',
-        outlineOffset: '-1px',  // Fill in extra space in middle of outline
         outlineColor: color,
-        outlineStyle: 'solid'
+        outlineStyle: 'solid',
+        pointerEvents: 'none'
       },
       useOutlineWidth;
 
     if (absRect.width > absRect.height) {   // Wider than tall: draw horizontal line
       useOutlineWidth = absRect.height / 2;
       useCss.width = absRect.width - 2 * useOutlineWidth + 'px';
-      useCss.height = '1px';
+      useCss.height = '0.01px';
     }
     else {   // Taller than wide: draw vertical line
       useOutlineWidth = absRect.width / 2;
       useCss.height = absRect.height - 2 * useOutlineWidth + 'px';
-      useCss.width = '1px';
+      useCss.width = '0.01px';
     }
 
     useCss.left = Math.round(absRect.left + useOutlineWidth) + 'px';
