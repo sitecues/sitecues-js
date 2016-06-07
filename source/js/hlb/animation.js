@@ -61,7 +61,9 @@ define(['hlb/dimmer', 'page/util/common', 'hlb/positioning', 'core/platform', '$
   function animateCss(hlbElement, startScale, endScale, speed, translateCSS, onCompleteFn) {
     var $hlbElement = $(hlbElement),
       fromCss,
-      toCss = { transition: '', transform : 'scale(' + endScale + ') ' + translateCSS };
+      toCss = { transform : 'scale(' + endScale + ') ' + translateCSS };
+
+    $hlbElement.css('transitionProperty', 'none'); // Clear any existing transition
 
     if (!speed) {
       // No animation -- do it immediately and return
@@ -72,7 +74,6 @@ define(['hlb/dimmer', 'page/util/common', 'hlb/positioning', 'core/platform', '$
 
     // Animate fromCss -> toCss
     fromCss = {
-      transitionProperty: 'none',
       transform: 'scale(' + startScale + ') ' + translateCSS
     };
     $hlbElement.css(fromCss);
