@@ -1,15 +1,13 @@
 /**
  * BackgroundDimmer can dim all content in the page behind a given z-index.
  */
-define(['$' ], function($) {
+define([ '$', 'hlb/constants' ], function($, constants) {
 
   //////////////////////////////
   // PRIVATE VARIABLES
   /////////////////////////////
 
   var DIMMER_ID = 'sitecues-background-dimmer',
-
-      DIMMER_Z_INDEX = 2147483643,
 
       DIMMER_MIN_OPACITY = 0,
       DIMMER_MAX_OPACITY = 0.65,
@@ -25,7 +23,7 @@ define(['$' ], function($) {
    * @param  {number}        inflationSpeed      The duration of the opacity transition
    * @param  {Object} (optional) $parentOfDimmer  A selector describing the node that should parent the dimmer
    */
-  function dimBackgroundContent(inflationSpeed, $parentOfDimmer) {
+  function dimBackgroundContent(inflationSpeed) {
 
     if (getDimmerElement()) {
       return; // Background already dimmed
@@ -40,16 +38,16 @@ define(['$' ], function($) {
         width: width,
         height: height
       },
-      $dimmerElement = drawRect(rect, '#000', $parentOfDimmer);
+      $dimmerElement = drawRect(rect, '#000');
 
     $dimmerElement
       .attr('id', DIMMER_ID)
       .css({
-        zIndex: DIMMER_Z_INDEX,
+        zIndex: constants.MAX_ZINDEX,
         willChange: 'opacity'
       });
 
-      animateOpacity($dimmerElement[0], DIMMER_MIN_OPACITY, DIMMER_MAX_OPACITY, inflationSpeed);
+    animateOpacity($dimmerElement[0], DIMMER_MIN_OPACITY, DIMMER_MAX_OPACITY, inflationSpeed);
   }
 
   function animateOpacity(dimmerElement, startOpacity, endOpacity, speed, onCompleteFn) {
@@ -107,7 +105,7 @@ define(['$' ], function($) {
   //      O---------------O
   //      OOOOOOOOOOOOOOOOO
   //
-  function drawRect(absRect, color, optionalParent) {
+  function drawRect(absRect, color) {
     var useCss = {
         position: 'absolute',
         outlineOffset: '-1px',  // Fill in extra space in middle of outline
@@ -134,7 +132,7 @@ define(['$' ], function($) {
 
     return $('<sc>')
       .css(useCss)
-      .appendTo(optionalParent || 'html');
+      .insertBefore('#' + constants.HLB_WRAPPER_ID);
   }
 
   return {

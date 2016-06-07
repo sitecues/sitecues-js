@@ -3,8 +3,8 @@
 //   sets background, sets default styles, computes some styles,
 //   and cloned child styles from the original element to the HLB.
 //  */
-define(['$', 'core/platform', 'page/util/common', 'core/conf/user/manager'],
-  function ($, platform, common, conf) {
+define(['$', 'core/platform', 'page/util/common', 'core/conf/user/manager', 'hlb/constants'],
+  function ($, platform, common, conf, constants) {
 
   ///////////////////////////
   // PUBLIC PROPERTIES
@@ -23,8 +23,7 @@ define(['$', 'core/platform', 'page/util/common', 'core/conf/user/manager'],
   // PRIVATE VARIABLES
   ///////////////////////////
 
-  var HLB_Z_INDEX = 2147483644,
-
+  var
       // How many ancestors do we move up the chain until we find a background image
       // to use for the $hlb background image.
       BACKGROUND_IMAGE_ANCESTOR_TRAVERSAL_COUNT = 0,
@@ -81,7 +80,7 @@ define(['$', 'core/platform', 'page/util/common', 'core/conf/user/manager'],
       // Default css styles for HLB
       defaultHLBStyles  = {
         'position'         : 'absolute',   // Doesn't interfere with document flow
-        'zIndex'           : HLB_Z_INDEX,  // Max z-index for HLB overlay
+        'zIndex'           : constants.MAX_ZINDEX,  // Max z-index for HLB overlay
         'border'           : defaultBorder + 'px solid #000',
         'padding'          : defaultPadding,
         'margin'           : 0,            // Margin isn't necessary and only adds complexity

@@ -18,7 +18,7 @@ define(['hlb/dimmer', 'page/util/common', 'hlb/positioning', 'core/platform', '$
   function transitionInHLB(doShowQuickly, data) {
 
     // Dim the background!
-    dimmer.dimBackgroundContent(INFLATION_SPEED, data.$hlb.parent());
+    dimmer.dimBackgroundContent(INFLATION_SPEED);
 
     var $hlb = data.$hlb,
       speed = doShowQuickly ? INFLATION_SPEED_FAST : INFLATION_SPEED,
