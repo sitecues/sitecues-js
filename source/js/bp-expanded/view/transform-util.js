@@ -7,7 +7,9 @@
 
 define([ 'core/platform' ], function(platform) {
 
-  var SHOULD_USE_CSS_TRANSFORM_IN_SVG = !platform.browser.isMS;
+  var SHOULD_USE_CSS_TRANSFORM_IN_SVG =
+    !platform.browser.isMS &&       // MS does not support CSS in SVG
+    !platform.browser.isFirefox;    // FF breaks getBoundingClientRect() when CSS transform is used
 
   // Skips past non-numeric characters and get the next number as type 'number'
   // It will include a negative sign and decimal point if it exists in the string
