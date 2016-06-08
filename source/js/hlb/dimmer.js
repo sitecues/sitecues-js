@@ -92,49 +92,17 @@ define([ '$', 'hlb/constants' ], function($, constants) {
   }
 
   // Draw a rectangle that does not capture any mouse events
-  // Implemented via zero-area element and CSS outline
-  // Used to be necessary because IE9/10 does not have pointer-events: none
-  // We could replace this with a div at this point, but it works fine.
-  // For example, if drawing a horizontal box we draw a line that is 0px high:
-  //
-  //       ---------------
-  //
-  // Then we fill in the outline around it using CSS:
-  //
-  //      OOOOOOOOOOOOOOOOO
-  //      O---------------O   Wider than tall -- use thin horizontal line
-  //      OOOOOOOOOOOOOOOOO
-  //
-  //      OOO
-  //      O|O
-  //      O|O                 Taller than wide -- use thin vertical line
-  //      O|O
-  //      OOO
-  //
   function drawRect(absRect, color) {
     var useCss = {
+        display: 'block',
         position: 'absolute',
-        outlineColor: color,
-        outlineStyle: 'solid',
+        top: absRect.top + 'px',
+        left: absRect.left + 'px',
+        width: absRect.width + 'px',
+        height: absRect.height + 'px',
+        backgroundColor: color,
         pointerEvents: 'none'
-      },
-      useOutlineWidth;
-
-    if (absRect.width > absRect.height) {   // Wider than tall: draw horizontal line
-      useOutlineWidth = absRect.height / 2;
-      useCss.width = absRect.width - 2 * useOutlineWidth + 'px';
-      useCss.height = '0.01px';
-    }
-    else {   // Taller than wide: draw vertical line
-      useOutlineWidth = absRect.width / 2;
-      useCss.height = absRect.height - 2 * useOutlineWidth + 'px';
-      useCss.width = '0.01px';
-    }
-
-    useCss.left = Math.round(absRect.left + useOutlineWidth) + 'px';
-    useCss.top = Math.round(absRect.top + useOutlineWidth) + 'px';
-    useCss.outlineWidth = Math.round(useOutlineWidth + 1) + 'px'; // Must round otherwise we get an outline in the middle
-    useCss.display = 'block';
+      };
 
     return $('<sc>')
       .css(useCss)
