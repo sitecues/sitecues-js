@@ -1531,7 +1531,7 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
     // Get first visible text and start from there
     function isAcceptableTextLeaf(node) {
       // Logic to determine whether to accept, reject or skip node
-      if (common.isEmpty(node)) {
+      if (common.isWhitespaceOrPunct(node)) {
         return; // Only whitespace or punctuation
       }
       var rect = traitcache.getScreenRect(node.parentNode);

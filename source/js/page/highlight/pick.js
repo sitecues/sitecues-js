@@ -445,7 +445,7 @@ define(['$', 'page/util/common', 'core/conf/user/manager', 'core/conf/site',
 
     function isAcceptableTextLeaf(node) {
       // Logic to determine whether to accept, reject or skip node
-      if (common.isEmpty(node)) {
+      if (common.isWhitespaceOrPunct(node)) {
         return; // Only whitespace or punctuation
       }
       var element = node.parentNode;

@@ -4,13 +4,20 @@
 define(['page/util/element-classifier', 'core/platform'], function (elemClassifier, platform) {
 
   /**
-   * Checks if the text in a text node given is empty or not.
+   * Checks if the text in a text node given has any characters that appear as text.
+   * The picker uses this to determine if a text node has content worth highlighting --
+   * we require at least one letter or number as punctuation marks are often used as decorative separators.
+   * We use unicode ranges to ensure that characters from foreign alphabets are included,
+   * otherwise the picker will not pick text from languages with non-roman alphabets.
+   * This is a close approximation to that -- we kept the regex simple and the number of ranges smaller;
+   * there may be some very rare characters where the regex is not perfect. That should generally be
+   * ok, because it only needs one word character in a text node to make it pickable.
    */
-   //TODO: Clarify intended purpose of function: if non-empty strings containing punctuation characters
-  // should return true consider renaming
-  function isEmpty(textNode) {
-    var val = textNode.data;
-    return !val || /^\W*$/.test(val);  // Only whitespace or punctuation
+  function isWhitespaceOrPunct(textNode) {
+    var val = textNode.data,
+      WORD_PATTERN = /[\w\u0100-\u024f\u0370-\u1fff\u2e80-\ufeff]/;
+
+    return !val || !WORD_PATTERN.test(val);  // Only whitespace or punctuation
   }
 
   // Return true if there is a visual sub-box of content
@@ -162,7 +169,7 @@ define(['page/util/element-classifier', 'core/platform'], function (elemClassifi
    * @private
    */
   function isNonEmptyTextNode(node) {
-    return node.nodeType === 3 /* Text node */ && !isEmpty(node);
+    return node.nodeType === 3 /* Text node */ && !isWhitespaceOrPunct(node);
   }
 
   function hasBorder(style) {
@@ -197,7 +204,7 @@ define(['page/util/element-classifier', 'core/platform'], function (elemClassifi
 
   return {
     getEmsToPx: getEmsToPx,
-    isEmpty: isEmpty,
+    isWhitespaceOrPunct: isWhitespaceOrPunct,
     isVisualRegion: isVisualRegion,
     hasRaisedZIndex: hasRaisedZIndex,
     isSprite: isSprite,

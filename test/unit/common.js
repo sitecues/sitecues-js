@@ -96,31 +96,50 @@ define(
                 );
             });
 
-            test('.isEmpty() checks if a text node is empty / has blank space / punctuation characters', function () {
+            test('.isWhitespaceOrPunct() checks if a text node is empty / has blank space / punctuation characters', function () {
                 var textNode = document.createTextNode('.');
 
                 assert.isTrue(
-                    common.isEmpty(textNode),
-                    'Non empty strings with punctuation return true.'
+                    common.isWhitespaceOrPunct(textNode),
+                    'A . is punctuation'
                 );
 
                 textNode.data = '';
                 assert.isTrue(
-                    common.isEmpty(textNode),
-                    'Empty strings return true.'
+                    common.isWhitespaceOrPunct(textNode),
+                    'Empty are whitespace-only'
                 );
 
                 textNode.data = 'abc123';
                 assert.isFalse(
-                    common.isEmpty(textNode),
-                    'Alphanumeric characters return false.'
+                    common.isWhitespaceOrPunct(textNode),
+                    'Alphanumeric characters are not whitespace/punctuation.'
                 );
 
                 textNode.data = 0;
                 assert.isFalse(
-                    common.isEmpty(textNode),
-                    'Numeric zero is not an empty string'
+                    common.isWhitespaceOrPunct(textNode),
+                    'Numeric zero is not whitespace/punctuation'
                 );
+
+                textNode.data = ' й ';
+                assert.isFalse(
+                  common.isWhitespaceOrPunct(textNode),
+                  'Cyrillic characters are not whitespace/punctuation'
+                );
+
+                textNode.data = 'الزيتون';
+                assert.isFalse(
+                  common.isWhitespaceOrPunct(textNode),
+                  'Arabic characters are not whitespace/punctuation'
+                );
+
+                textNode.data = ' ⁘⇋␥⸪⁜ ';
+                assert.isTrue(
+                  common.isWhitespaceOrPunct(textNode),
+                  'Unicode punctuation is punctuation'
+                );
+
             });
 
             test('.isVisualRegion()', function () {
