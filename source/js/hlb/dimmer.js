@@ -25,29 +25,37 @@ define([ '$', 'hlb/constants' ], function($, constants) {
    */
   function dimBackgroundContent(inflationSpeed) {
 
-    if (getDimmerElement()) {
-      return; // Background already dimmed
+    function createDimmerElement() {
+      var documentElement = document.documentElement,
+        width = Math.max(documentElement.scrollWidth, window.innerWidth),
+        height = Math.max(documentElement.scrollHeight, window.innerHeight),
+        // Draw a rectangle that does not capture any mouse events
+        useCss = {
+          display: 'block',
+          position: 'absolute',
+          zIndex: constants.MAX_ZINDEX,
+          top: 0,
+          left: 0,
+          width: width + 'px',
+          height: height + 'px',
+          backgroundColor: '#000',
+          pointerEvents: 'none',
+          willChange: 'opacity'
+        },
+        newDimmer = $('<sc>')
+          .css(useCss)
+          .attr('id', DIMMER_ID)[0];
+
+      animateOpacity(newDimmer, DIMMER_MIN_OPACITY, DIMMER_MAX_OPACITY, inflationSpeed);
+
+      return newDimmer;
     }
 
-    var documentElement = document.documentElement,
-      width = Math.max(documentElement.scrollWidth, window.innerWidth),
-      height = Math.max(documentElement.scrollHeight, window.innerHeight),
-      rect = {
-        left: 0,
-        top: 0,
-        width: width,
-        height: height
-      },
-      $dimmerElement = drawRect(rect, '#000');
+    var dimmerElement = getDimmerElement() || createDimmerElement();
 
-    $dimmerElement
-      .attr('id', DIMMER_ID)
-      .css({
-        zIndex: constants.MAX_ZINDEX,
-        willChange: 'opacity'
-      });
-
-    animateOpacity($dimmerElement[0], DIMMER_MIN_OPACITY, DIMMER_MAX_OPACITY, inflationSpeed);
+    // If created before, will ensure it's moved before the current hlb wrapper
+    $(dimmerElement)
+      .insertBefore('#' + constants.HLB_WRAPPER_ID);
   }
 
   function animateOpacity(dimmerElement, startOpacity, endOpacity, speed, onCompleteFn) {
@@ -89,24 +97,6 @@ define([ '$', 'hlb/constants' ], function($, constants) {
 
   function getDimmerElement() {
     return document.getElementById(DIMMER_ID);
-  }
-
-  // Draw a rectangle that does not capture any mouse events
-  function drawRect(absRect, color) {
-    var useCss = {
-        display: 'block',
-        position: 'absolute',
-        top: absRect.top + 'px',
-        left: absRect.left + 'px',
-        width: absRect.width + 'px',
-        height: absRect.height + 'px',
-        backgroundColor: color,
-        pointerEvents: 'none'
-      };
-
-    return $('<sc>')
-      .css(useCss)
-      .insertBefore('#' + constants.HLB_WRAPPER_ID);
   }
 
   return {
