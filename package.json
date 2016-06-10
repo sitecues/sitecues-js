@@ -9,14 +9,14 @@
   "main": "source/js/sitecues.js",
   "private": true,
   "engines": {
-    "node": "^5.7.0",
-    "npm": "^3.7.5"
+    "node": "^6.2.1",
+    "npm": "^3.9.5"
   },
   "bin": "binary/web.js",
   "scripts": {
-    "pretest": "selenium-server -port 4447 > /dev/null 2>&1 &",
-    "test": "intern-runner",
-    "posttest": "kill $(lsof -t -i:4447)"
+    "test": "node node_modules/.bin/grunt test",
+    "test-cloud": "node node_modules/.bin/intern-runner config=config/intern-cloud",
+    "test-ci": "node node_modules/.bin/intern-runner config=config/intern-ci"
   },
   "dependencies": {
     "bg-runner": "https://s3.amazonaws.com/npm.sitecues.com/bg-runner-0.0.2.tgz",
@@ -57,8 +57,8 @@
     "handlebars": "4.0.5",
     "html-minifier": "0.8.0",
     "htmlclean": "2.7.7",
-    "intern": "3.2.0",
-    "jshint": "2.9.1",
+    "intern": "3.2.3",
+    "jshint": "2.9.2",
     "jshint-stylish": "2.1.0",
     "mkdirp": "0.5.1",
     "requirejs": "2.1.22"

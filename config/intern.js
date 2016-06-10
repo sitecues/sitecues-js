@@ -1,5 +1,5 @@
 // This is the base configuration for the testing framework.
-// You can extend this for special use cases.
+// You can import and extend it for special use cases.
 
 define(
     [],
@@ -27,33 +27,30 @@ define(
                 { browserName : 'chrome' }
             ],
 
-            maxConcurrency : 1,  // how many browsers may be open at once
+            // How many browsers may be open at once.
+            maxConcurrency : 1,
 
-            // Specify which AMD module loader to use...
+            // Use a custom AMD module loader.
             // loaders : {
             //
             // },
-            // Options to pass to the AMD module loader...
+            // Configure the AMD module loader.
             loaderOptions : {
                 baseUrl : 'source/js',
                 packages : [
-                    { name: 'test', location: testDir },
-                    { name: UNIT_PKG, location: testDir + 'unit' },
-                    { name: FUNC_PKG, location: testDir + 'functional' },
-                    { name: 'page-object', location: testDir + 'page-object', main: 'index' },
-                    { name: 'utility', location: testDir + 'util', main: 'index' }
+                    { name : 'test',        location: testDir },
+                    { name : UNIT_PKG,      location: testDir + 'unit' },
+                    { name : FUNC_PKG,      location: testDir + 'functional' },
+                    { name : 'page-object', location: testDir + 'page-object', main : 'index' },
+                    { name : 'utility',     location: testDir + 'util',        main : 'index' }
                 ]
             },
 
-            // Each cloud testing service has their own weird quirks and different APIs,
-            // so load up the necessary configuration to talk to them...
-            tunnel : 'NullTunnel',         // no tunnel (default, if none provided)
-            // tunnel : 'BrowserStackTunnel', // BrowserStack
-            // tunnel : 'SauceLabsTunnel',    // SauceLabs
-            // tunnel : 'TestingBotTunnel',   // TestingBot
+            // The provider for a WebDriver server.
+            // tunnel : 'NullTunnel',  // no tunnel (default, if none provided)
+
             tunnelOptions : {
                 host : 'localhost:4447'  // custom location to find the selenium server
-                // verbose : true           // more logging, only supported by BrowserStack
             },
 
             // Which unit test suite files to load. These check our APIs.
