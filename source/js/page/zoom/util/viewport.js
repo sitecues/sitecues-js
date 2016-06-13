@@ -37,12 +37,23 @@ define(
       winHeight = window.innerHeight,
       winWidth = window.innerWidth;
 
+    // -- Clear the scrollbars --
+    $('html').css({
+      overflow: 'hidden'
+    });
+
+    // -- Set the scrollbars after a delay --
     // If the right side of the visible content is beyond the window width,
     // or the visible content is wider than the window width, show the scrollbars.
-    $('html').css({
-      overflowX: right > winWidth ? 'scroll' : 'hidden',
-      overflowY: bottom > winHeight ? 'scroll' : 'hidden'
-    });
+    // Doing this after a timeout fixes SC-3722 for some reason -- the toolbar was moving up and down by the height
+    // of the horizontal scrollbar. It's as if doing it on a delay gives IE/Edge a chance to
+    // deal with zoom first, and then scrollbars separately
+    setTimeout(function() {
+      $('html').css({
+        overflowX: right > winWidth ? 'scroll' : 'hidden',
+        overflowY: bottom > winHeight ? 'scroll' : 'hidden'
+      });
+    }, 0);
   }
 
   // After the user's initial zoom we need to realign any location hash target to the top of the screen
@@ -82,7 +93,9 @@ define(
   }
 
   function init() {
-    shouldManuallyAddScrollbars = platform.browser.isIE;
+    // IE doesn't know when to put in scrollbars after CSS transform
+    // Edge does, but we need to do this because of SC-3722 -- jiggling of Sitecues toolbar during vertical scrolls
+    shouldManuallyAddScrollbars = platform.browser.isMS;
   }
 
   return {
