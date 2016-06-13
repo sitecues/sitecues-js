@@ -180,7 +180,7 @@ define(
         config.isFluid = bodyGeo.isFluidLayout();
       }
 
-      $(window).resize(onResize);
+      $(window).on('resize', onResize);
 
       animation.fixZoomBodyCss(); // Get it read as soon as zoom might be used
 

@@ -276,9 +276,14 @@ define(
       }
 
       // No document.body yet
-      $(document).ready(function() {
+      if (document.readyState !== 'loading') {
         init(callback);
-      });
+      }
+      else {
+        document.addEventListener('DOMContentLoaded', function() {
+          init(callback);
+        });
+      }
 
       // Not necessary to use CSS will-change with element.animate()
       // Putting this on the <body> is too much. We saw the following message in Firefox's console:

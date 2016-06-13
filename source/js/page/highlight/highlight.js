@@ -1351,8 +1351,8 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
       // handle mouse move on body
       $(document)
         .on('mousemove', onMouseMove)
-        .on('focusin focusout', testFocus)
-        .ready(testFocus);
+        .on('focusin focusout', testFocus);
+
       if (platform.browser.isFirefox) {
         $(document).on('mouseover', onMouseMove); // Mitigate lack of mousemove events when scroll finishes
       }
@@ -1677,6 +1677,9 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
     conf.get('ttsOn', onSpeechChanged);
 
     testFocus(); // Set initial focus state
+    if (document.readyState !== 'loading') {  // Focus is set again when document finishes loading
+      document.addEventListener('DOMContentLoaded', testFocus);
+    }
 
     refreshEventListeners();  // First time we initialize, highlighting should be turned on
   }

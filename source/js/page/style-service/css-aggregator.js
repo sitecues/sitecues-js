@@ -284,7 +284,12 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/urls', 'page/style-
   function collectAllCss(cssReadyCallbackFn) {
     onCssReadyFn = cssReadyCallbackFn;
 
-    $(document).ready(collectAllCssImpl);
+    if (document.readyState !== 'loading') {
+      collectAllCssImpl();
+    }
+    else {
+      document.addEventListener('DOMContentLoaded', collectAllCssImpl);
+    }
   }
 
   function isUsableCssUrl(url) {
