@@ -105,10 +105,7 @@ define(['$',
         text: cssChunks[index],
         doDisable: true
       });
-        elems[index] = $newSheet[0];
-        getDOMStylesheet($newSheet, function(domStylesheetObject) {
-          domStylesheetObjects[index] = domStylesheetObject;
-        });
+      elems[index] = $newSheet[0];
       if (++ index < numChunks) {
         // We must wait before creating the next stylesheet otherwise we overload IE11 and cause it to lockup
         setTimeout(createNext, 0);
@@ -121,26 +118,40 @@ define(['$',
     createNext();
   }
 
+  function getDOMStyleSheetObjects(styleElems, callback) {
+    var numRemaining = styleElems.length;
+    styleElems.forEach(function(styleElem, index) {
+      getDOMStylesheet($(styleElem), function(domStylesheetObject) {
+        domStylesheetObjects[index] = domStylesheetObject;
+        if (-- numRemaining === 0) {
+          callback();
+        }
+      });
+    });
+  }
+
   // This is called() when all the CSS text of the document is available for processing
   function retrievalComplete(allCss) {
     if (SC_DEV) {
       debugTime.retrievalComplete = performance.now();
     }
 
-    createCombinedStylesheets(allCss, function() {
+    createCombinedStylesheets(allCss, function(styleElems) {
       setTimeout(function () {
-        isCssComplete = true;
-        clearCallbacks();
-        if (SC_DEV) {
-          debugTime.processingComplete = performance.now();
-          console.log(
-            'Total: %d    Retrieve CSS: %d   Process CSS: %d',
-            debugTime.processingComplete - debugTime.begin,
-            debugTime.retrievalComplete - debugTime.begin,
-            debugTime.processingComplete - debugTime.retrievalComplete
-          );
-        }
+        getDOMStyleSheetObjects(styleElems, function() {
+          isCssComplete = true;
+          clearCallbacks();
 
+          if (SC_DEV) {
+            debugTime.processingComplete = performance.now();
+            console.log(
+              'Total: %d    Retrieve CSS: %d   Process CSS: %d',
+              debugTime.processingComplete - debugTime.begin,
+              debugTime.retrievalComplete - debugTime.begin,
+              debugTime.processingComplete - debugTime.retrievalComplete
+            );
+          }
+        });
       }, WAIT_BEFORE_USING_STYLESHEET_DATA);
     });
   }

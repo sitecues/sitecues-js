@@ -84,7 +84,11 @@ define([ '$', 'hlb/constants' ], function($, constants) {
    */
   function undimBackgroundContent(deflationSpeed) {
 
-    animateOpacity(getDimmerElement(), DIMMER_MAX_OPACITY, DIMMER_MIN_OPACITY, deflationSpeed, onDimmerClosed);
+    var dimmer = getDimmerElement();
+
+    if (dimmer) { // Still there
+      animateOpacity(dimmer, DIMMER_MAX_OPACITY, DIMMER_MIN_OPACITY, deflationSpeed, onDimmerClosed);
+    }
 
   }
 

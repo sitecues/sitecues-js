@@ -16,7 +16,8 @@ define([], function () {
     var ev, list, tail;
     events = events.split(/\s+/);
     var calls = this._events || (this._events = {});
-    while ((ev = events.shift())) {
+    // The events.length check before events.shift() protects us against prototype.js
+    while (events.length && (ev = events.shift())) {
       // create an immutable callback list, allowing traversal during
       // modification. the tail is an empty object that will always be used
       // as the next node
@@ -42,7 +43,7 @@ define([], function () {
       delete this._events;
     } else if (calls) {
       events = events.split(/\s+/);
-      while ((ev = events.shift())) {
+      while (events.length && (ev = events.shift())) {
         node = calls[ev];
         delete calls[ev];
         if (!callback || !node) {
@@ -74,7 +75,7 @@ define([], function () {
     (events = events.split(/\s+/)).push(null);
 
     // save references to the current heads & tails
-    while ((event = events.shift())) {
+    while (events.length && (event = events.shift())) {
       if (!(node = calls[event])) {
         continue;
       }

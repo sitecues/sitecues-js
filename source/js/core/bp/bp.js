@@ -99,6 +99,11 @@ define([
   */
 
   function isDocReady() {
+    if (!document.body) {
+      // Pages that contain parsing errors may not have a body --
+      // don't load Sitecues unless there is a body
+      return false;
+    }
     var readyState = document.readyState;
     return readyState === 'complete' || readyState === 'interactive';
   }

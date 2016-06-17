@@ -15,9 +15,15 @@ define(['$', 'core/conf/urls', 'core/conf/site', 'Promise' ], function ($, urls,
     var
       url = option.url,
       onStart = option.onStart,
-      audioElement = new Audio();
+      audioElement = new Audio(),
+      isSpeech = option.isSpeech;
 
     audioElementsToPlay.push(audioElement);
+
+    if (!isSpeech) {
+      // No need to check network speech config for playing earcons
+      return new Promise(beginRequest);
+    }
 
     return new Promise(function(resolve, reject) {
       getNetworkSpeechConfig(function (speechConfig, error) {

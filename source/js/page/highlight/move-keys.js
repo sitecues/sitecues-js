@@ -37,7 +37,6 @@ define(['$', 'page/highlight/highlight', 'page/util/common',
     ONE_ANIMATION_FRAME_MS = 16,  // 16ms is about 60fps
     // Method for animation
     requestFrame = window.requestAnimationFrame,
-    getHighlight = mh.getHighlight,
     isNavigationEnabled = true,// labs.isEnabled('arrowKeyNav'), // We no longer use labs here, it is on by default
     SAFE_ZONE = 30; // Begin scrolling when we get this close to window edge
 
@@ -243,7 +242,15 @@ define(['$', 'page/highlight/highlight', 'page/util/common',
     }
   }
 
+  function getHighlight() {
+    var highlight = mh.getHighlight();
+    return highlight && highlight.isVisible && highlight;
+  }
+
   function performMovement(nextMove) {
+    if (!getHighlight()) {
+      return;  // Sanity check
+    }
     prepareMovement();
 
     var type = nextMove.keyName,
@@ -760,7 +767,7 @@ define(['$', 'page/highlight/highlight', 'page/util/common',
   }
 
   function onSpace(doSpeakText) {
-    if (hlbElement || getHighlight().isVisible) {
+    if (hlbElement || getHighlight()) {
       // Has an HLB or a highlight -- toggle HLB
       toggleHLB();
     }

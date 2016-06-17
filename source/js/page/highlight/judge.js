@@ -422,6 +422,23 @@ define(['$', 'page/util/common', 'page/util/element-classifier', 'page/highlight
     cellLayoutJudgements.hasSimilarSiblingCells = false;
     cellLayoutJudgements.hasUniformlySizedSiblingCells = false;
 
+    function getNumChildrenWithTag(parentElem, tag) {
+      if (!parentElem) {
+        return 0;
+      }
+      var children = parentElem.children,
+        index = children.length,
+        numWithTag = 0;
+
+      while (index -- ) {
+        if (children[index].localName === tag) {
+          ++ numWithTag;
+        }
+      }
+
+      return numWithTag;
+    }
+
     function isPossibleCell() {
 
       var numSiblings = parentTraits.childCount;
@@ -461,7 +478,7 @@ define(['$', 'page/util/common', 'page/util/element-classifier', 'page/highlight
 
       // Do almost all of the siblings have the same tag name?
       var $parent = $(node).parent(),
-        numSiblingsSameTag = $parent.children(traits.tag).length,
+        numSiblingsSameTag = getNumChildrenWithTag($parent[0], traits.tag),
         numSiblingsOtherTagAllowed = Math.min(2, Math.floor(numSiblingsSameTag * 0.33));
       if (numSiblingsSameTag < numSiblings - numSiblingsOtherTagAllowed) {
         return false;

@@ -294,6 +294,7 @@ define(
         var url = getAudioKeyUrl(key, lang);
         networkPlayer
           .play({
+            isSpeech: true,
             url: url
           })
           .then(fireNotBusyEvent)

@@ -42,14 +42,14 @@ define([
   // The bpContainer lives just inside the badge placeholder, contains all the visible BP content, and can change size
   function createBpContainer() {
     // Create the svg container
-    var bpContainer = document.createElement('sc');
+    var bpContainerElem = document.createElement('sc');
 
     // Set attributes
-    helper.setAttributes(bpContainer, BP_CONST.PANEL_CONTAINER_ATTRS);
+    helper.setAttributes(bpContainerElem, BP_CONST.PANEL_CONTAINER_ATTRS);
 
-    bpContainer.innerHTML = bpSVG();
+    bpContainerElem.innerHTML = bpSVG();
 
-    return bpContainer;
+    return bpContainerElem;
   }
 
   // Can get SVG element whether currently attached to document or not

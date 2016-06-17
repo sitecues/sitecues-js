@@ -104,7 +104,13 @@ define(['$',
 
     function onReadableImageAvailable(readableImg, isInverted) {
       ctx = canvas.getContext('2d');
-      ctx.drawImage(readableImg, top, left, width, height);
+      try {
+        ctx.drawImage(readableImg, top, left, width, height);
+      }
+      catch(ex) {
+        processImageData(); // No data -- probably a broken image
+        return;
+      }
       imageData = ctx.getImageData(0, 0, width, height).data;
       processImageData(imageData, isInverted);
     }
@@ -456,16 +462,16 @@ define(['$',
       // Use cached result if available
       onImageClassified(img, cachedResult === CLASS_INVERT, onShouldReverseImage);
     }
-    else if (!img.complete) {
+    else if (img.complete) {
+      //Image is loaded and ready for processing -- after slight delay
+      setTimeout(classifyLoadedImage, 0);
+    }
+    else {
       // Too early to tell anything
       // Wait until image loaded
       $(img)
         .on('load', classifyLoadedImage)
         .on('error', imageLoadError);
-    }
-    else {
-      //Image is loaded and ready for processing -- after slight delay
-      setTimeout(classifyLoadedImage, 0);
     }
   }
 
