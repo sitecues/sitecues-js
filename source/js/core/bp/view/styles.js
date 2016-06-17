@@ -16,11 +16,20 @@ define(['core/bp/helper', 'core/platform', 'core/conf/site'],
 
     BASE_SHEET_ID    = 'sitecues-js-bp-css',
 
+    HIDE_IN_PRINT_MEDIA =
+      // Turn off toolbar, dimmer, lens and zoom
+      // TODO needs more work to reset body width if page sets it to something different
+      '@media print { ' +
+      '.scp-toolbar, #sitecues-background-dimmer, #sitecues-hlb-wrapper { display: none !important; } ' +
+      'body { transform: none !important; width: auto !important; } ' +
+      '}',
+
     BASE_CSS;
 
   function toCSS(jsonObject) {
 
-    var styles = '';
+    var styles = HIDE_IN_PRINT_MEDIA;
+
     var isTransformPrefixNeeded = document.createElement('p').style.transform === undefined;
 
     for (var selector in jsonObject) {

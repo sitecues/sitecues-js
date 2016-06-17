@@ -129,6 +129,7 @@ define([
         isFastTransition = isCurrentlyInverted === isInversionRequested;
 
       // Apply new CSS
+      themeCss = '@media screen {\n' + themeCss + '\n}'; // Do not use in print!
       styleService.updateSheet(THEME_STYLESHEET_ID, {text: themeCss});
 
       currentThemeName = requestedThemeName;

@@ -239,6 +239,7 @@ function($,
       .then(classifyBgImages)
       .then(getReverseSpriteCssText)
       .then(function(inverseSpriteCss) {
+        inverseSpriteCss = '@media screen {\n' + inverseSpriteCss + '\n}'; // Do not use in print!
         var $sheet = styleService.updateSheet(INVERSE_SPRITE_STYLESHEET_ID, { text : inverseSpriteCss } );
         return new Promise(function(resolve) {
           styleService.getDOMStylesheet($sheet, resolve);
