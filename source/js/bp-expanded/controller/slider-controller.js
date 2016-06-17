@@ -5,7 +5,8 @@ define(['core/bp/constants', 'page/zoom/constants', 'core/bp/helper', 'core/plat
         'page/zoom/animation', 'core/events'],
   function (BP_CONST, ZOOM_CONST, helper, platform, state, sliderView, zoomMod, animation, events) {
 
-  var isListeningToWindowMouseEvents,
+  var isListeningToWindowMouseMoveEvents,
+    isListeningToWindowMouseUpEvents,
     isInitialized;
 
     /**
@@ -20,23 +21,36 @@ define(['core/bp/constants', 'page/zoom/constants', 'core/bp/helper', 'core/plat
 
     moveThumb(evt);
 
-    addWindowMouseMoveListeners();
+    addWindowMouseMoveListener();
+    addWindowMouseUpListener();
   }
 
-  function addWindowMouseMoveListeners() {
-
-    if (!isListeningToWindowMouseEvents) {
-      isListeningToWindowMouseEvents = true;
-      window.addEventListener('mousemove', moveThumb);
-      window.addEventListener('mouseup', finishZoomChanges);
+  function addWindowMouseMoveListener() {
+    if (!isListeningToWindowMouseMoveEvents) {
+      isListeningToWindowMouseMoveEvents = true;
+      // Be a capturing listener so that we get events before any especially "creative" page scripts
+      window.addEventListener('mousemove', moveThumb, true);
     }
   }
 
-  function removeWindowMouseMoveListeners() {
-    if (isListeningToWindowMouseEvents) {
-      window.removeEventListener('mousemove', moveThumb);
-      isListeningToWindowMouseEvents = false;
+  function addWindowMouseUpListener() {
+    if (!isListeningToWindowMouseUpEvents) {
+      window.addEventListener('mouseup', finishZoomChanges, true);
+      isListeningToWindowMouseUpEvents = true;
     }
+  }
+
+
+  function removeWindowMouseListeners() {
+    if (isListeningToWindowMouseMoveEvents) {
+      window.removeEventListener('mousemove', moveThumb, true);
+      isListeningToWindowMouseMoveEvents = false;
+    }
+    if (isListeningToWindowMouseMoveEvents) {
+      window.removeEventListener('mouseup', finishZoomChanges, true);
+      isListeningToWindowMouseUpEvents = false;
+    }
+
   }
 
   // Mouse button was pressed down over slider and mouse cursor has moved
@@ -67,7 +81,7 @@ define(['core/bp/constants', 'page/zoom/constants', 'core/bp/helper', 'core/plat
     var target = helper.getEventTarget(evt),
         isDecrease   = (target.id === BP_CONST.SMALL_A_ID);
 
-    window.addEventListener('mouseup', finishZoomChanges);
+    addWindowMouseUpListener();
 
     if (isDecrease) {
       zoomMod.beginZoomDecrease(evt);
@@ -80,7 +94,7 @@ define(['core/bp/constants', 'page/zoom/constants', 'core/bp/helper', 'core/plat
 
   function finishZoomChanges() {
     zoomMod.zoomStopRequested();
-    removeWindowMouseMoveListeners();
+    removeWindowMouseListeners();
   }
 
   function init() {
