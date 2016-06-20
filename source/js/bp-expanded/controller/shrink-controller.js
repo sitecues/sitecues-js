@@ -1,8 +1,21 @@
 /*
  Panel Controller
  */
-define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metric', 'core/bp/view/view', 'core/events'],
-  function (BP_CONST, state, helper, metric, view, events) {
+define([
+  'core/bp/constants',
+  'core/bp/model/state',
+  'core/bp/helper',
+  'core/metric',
+  'core/bp/view/view',
+  'core/events',
+  'core/dom-events'],
+  function (BP_CONST,
+            state,
+            helper,
+            metric,
+            view,
+            events,
+            domEvents) {
 
     var MIN_DISTANCE = 75, // Min distance before shrink
       mouseLeaveShrinkTimer,  // How long we wait before shrinking BP from any mouseout (even only just barely outside panel)
@@ -214,17 +227,16 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
     // These listeners are temporary – only bound when the panel is open.
     // Good for performance – it prevents extra code from being run on every mouse move/click when we don't need it
     function toggleListeners(doTurnOn) {
-      var addOrRemoveFn = window[doTurnOn ? 'addEventListener' : 'removeEventListener'];
+      var addOrRemoveFn = doTurnOn ? domEvents.on : domEvents.off;
+      addOrRemoveFn(window, 'mousedown', winMouseDown);
 
-      // Pressing tab or shift tab when panel is open switches it to keyboard mode
-      addOrRemoveFn('mousedown', winMouseDown);
       if (!state.get('isOpenedWithScreenReader')) {
         // Mousemove can close panel after mouseout, unless opened with a screen reader
-        addOrRemoveFn('mousemove', winMouseMove);
+        addOrRemoveFn(window, 'mousemove', winMouseMove);
       }
-      addOrRemoveFn('mouseout', winMouseLeave);
-      addOrRemoveFn('blur', maybeShrinkPanel);
-      addOrRemoveFn('resize', maybeShrinkPanel); // Don't allow user to resize window in middle of using panel, leads to layout issues
+      addOrRemoveFn(window, 'mouseout', winMouseLeave);
+      addOrRemoveFn(window, 'blur', maybeShrinkPanel);
+      addOrRemoveFn(window, 'resize', maybeShrinkPanel); // Don't allow user to resize window in middle of using panel, leads to layout issues
     }
 
     function refresh() {

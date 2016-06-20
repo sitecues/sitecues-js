@@ -97,19 +97,21 @@ define(
         return;  // Not an unpinch event
       }
 
-      var delta = -event.deltaY * UNPINCH_FACTOR;
-      var targetZoom = animation.isZoomOperationRunning() ? state.currentTargetZoom + delta : state.completedZoom + delta;
-
-      clearTimeout(unpinchEndTimer);
-      unpinchEndTimer = setTimeout(animation.finishZoomOperation, UNPINCH_END_DELAY);
-      if (!animation.isZoomOperationRunning()) {
-        // 1st call -- we will glide to it, it may be far away from previous zoom value
-        animation.beginZoomOperation(targetZoom, {isUnpinch: true}); // Get ready for more slider updates
-      }
-
-      state.currentTargetZoom = restrictZoom.toValidRange(targetZoom); // Change target
-      animation.performInstantZoomOperation();
       event.preventDefault();
+      setTimeout(function() {
+        var delta = -event.deltaY * UNPINCH_FACTOR;
+        var targetZoom = animation.isZoomOperationRunning() ? state.currentTargetZoom + delta : state.completedZoom + delta;
+
+        clearTimeout(unpinchEndTimer);
+        unpinchEndTimer = setTimeout(animation.finishZoomOperation, UNPINCH_END_DELAY);
+        if (!animation.isZoomOperationRunning()) {
+          // 1st call -- we will glide to it, it may be far away from previous zoom value
+          animation.beginZoomOperation(targetZoom, {isUnpinch: true}); // Get ready for more slider updates
+        }
+
+        state.currentTargetZoom = restrictZoom.toValidRange(targetZoom); // Change target
+        animation.performInstantZoomOperation();
+      }, 0);
     }
 
     function zoomStopRequested() {

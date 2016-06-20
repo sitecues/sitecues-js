@@ -1,4 +1,12 @@
-define(['core/conf/user/manager', 'page/zoom/util/body-geometry', 'core/events'], function (conf, bodyGeo, events) {
+define([
+  'core/conf/user/manager',
+  'page/zoom/util/body-geometry',
+  'core/events',
+  'core/dom-events'
+], function (conf,
+             bodyGeo,
+             events,
+             domEvents) {
   var isOn = false,
     isHlbOn = false,
     isPanelOpen = false,
@@ -117,10 +125,10 @@ define(['core/conf/user/manager', 'page/zoom/util/body-geometry', 'core/events']
 
     if (doTurnOn !== isOn) {
       if (doTurnOn) {
-        document.addEventListener('mousemove', mousemove, false);
+        domEvents.on(document, 'mousemove', mousemove);
       }
       else {
-        document.removeEventListener('mousemove', mousemove, false);
+        domEvents.off(document, 'mousemove', mousemove);
         xLastPos = undefined;
       }
     }

@@ -1,9 +1,28 @@
 /*
  Slider Controller
  */
-define(['core/bp/constants', 'page/zoom/constants', 'core/bp/helper', 'core/platform', 'core/bp/model/state', 'bp-expanded/view/slider', 'page/zoom/zoom',
-        'page/zoom/animation', 'core/events'],
-  function (BP_CONST, ZOOM_CONST, helper, platform, state, sliderView, zoomMod, animation, events) {
+define([
+  'core/bp/constants',
+  'page/zoom/constants',
+  'core/bp/helper',
+  'core/platform',
+  'core/bp/model/state',
+  'bp-expanded/view/slider',
+  'page/zoom/zoom',
+  'page/zoom/animation',
+  'core/events',
+  'core/dom-events'
+],
+  function (BP_CONST,
+            ZOOM_CONST,
+            helper,
+            platform,
+            state,
+            sliderView,
+            zoomMod,
+            animation,
+            events,
+            domEvents) {
 
   var isListeningToWindowMouseMoveEvents,
     isListeningToWindowMouseUpEvents,
@@ -29,13 +48,13 @@ define(['core/bp/constants', 'page/zoom/constants', 'core/bp/helper', 'core/plat
     if (!isListeningToWindowMouseMoveEvents) {
       isListeningToWindowMouseMoveEvents = true;
       // Be a capturing listener so that we get events before any especially "creative" page scripts
-      window.addEventListener('mousemove', moveThumb, true);
+      domEvents.on(window, 'mousemove', moveThumb, { passive: false });
     }
   }
 
   function addWindowMouseUpListener() {
     if (!isListeningToWindowMouseUpEvents) {
-      window.addEventListener('mouseup', finishZoomChanges, true);
+      domEvents.on(window, 'mouseup', finishZoomChanges, { passive : false });
       isListeningToWindowMouseUpEvents = true;
     }
   }
@@ -43,11 +62,11 @@ define(['core/bp/constants', 'page/zoom/constants', 'core/bp/helper', 'core/plat
 
   function removeWindowMouseListeners() {
     if (isListeningToWindowMouseMoveEvents) {
-      window.removeEventListener('mousemove', moveThumb, true);
+      domEvents.off(window, 'mousemove', moveThumb, { passive: false });
       isListeningToWindowMouseMoveEvents = false;
     }
     if (isListeningToWindowMouseMoveEvents) {
-      window.removeEventListener('mouseup', finishZoomChanges, true);
+      domEvents.off(window, 'mouseup', finishZoomChanges, { passive : false });
       isListeningToWindowMouseUpEvents = false;
     }
 
@@ -115,11 +134,11 @@ define(['core/bp/constants', 'page/zoom/constants', 'core/bp/helper', 'core/plat
         largeA       = helper.byId(BP_CONST.LARGE_A_ID),
         zoomLabel    = helper.byId(BP_CONST.ZOOM_LABEL_ID);
 
-    sliderTarget.addEventListener('mousedown', initialMouseDown);
-    sliderThumb.addEventListener('mousedown', initialMouseDown);
-    smallA.addEventListener('mousedown', handleAButtonsPress);
-    largeA.addEventListener('mousedown', handleAButtonsPress);
-    zoomLabel.addEventListener('mousedown', handleAButtonsPress);
+    domEvents.on(sliderTarget, 'mousedown', initialMouseDown, { passive : false });
+    domEvents.on(sliderThumb, 'mousedown', initialMouseDown, { passive : false });
+    domEvents.on(smallA, 'mousedown', handleAButtonsPress);
+    domEvents.on(largeA, 'mousedown', handleAButtonsPress);
+    domEvents.on(zoomLabel, 'mousedown', handleAButtonsPress);
 
     events.on('bp/will-shrink', finishZoomChanges);
 

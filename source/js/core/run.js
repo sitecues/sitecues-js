@@ -7,8 +7,8 @@
  */
 
 define(['core/conf/user/manager', 'core/util/session', 'core/locale', 'core/metric', 'core/platform', 'core/bp/bp',
-        'core/constants', 'core/events', 'Promise'],
-  function (conf, session, locale, metric, platform, bp, CORE_CONST, events, Promise) {
+        'core/constants', 'core/events', 'core/dom-events', 'Promise'],
+  function (conf, session, locale, metric, platform, bp, CORE_CONST, events, domEvents, Promise) {
   var
     areZoomEnhancementsInitialized,
     isZoomInitialized,
@@ -269,6 +269,7 @@ define(['core/conf/user/manager', 'core/util/session', 'core/locale', 'core/metr
 
     // Start initialization
     if (platform.init()) {
+      domEvents.init();
       // Supported platform: continue to init Sitecues
       Promise.all([initConfAndMetrics(), locale.init()])
         .then(bp.init)

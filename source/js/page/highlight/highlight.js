@@ -4,8 +4,8 @@
 /*jshint -W072 */ //Currently there are too many dependencies, so we need to tell JSHint to ignore it for now
 define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 'page/highlight/traitcache',
         'page/highlight/highlight-position', 'page/util/common', 'page/util/color', 'page/util/geo', 'page/util/element-classifier',
-        'core/platform', 'page/highlight/constants', 'core/events', 'page/zoom/util/body-geometry'],
-  function($, conf, zoomMod, picker, traitcache, mhpos, common, colorUtil, geo, elementClassifier, platform, constants, events,
+        'core/platform', 'page/highlight/constants', 'core/events', 'core/dom-events', 'page/zoom/util/body-geometry'],
+  function($, conf, zoomMod, picker, traitcache, mhpos, common, colorUtil, geo, elementClassifier, platform, constants, events, domEvents,
            bodyGeo) {
 /*jshint +W072 */
   var
@@ -358,7 +358,7 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
 
     // Add event listeners to keep overlay view up-to-date
     addMouseWheelListener();
-    addEventListener('mouseout', onLeaveWindow);
+    addEventListener('mouseout', onLeaveWindow, { passive : true });
 
     // Update state
     didToggleVisibility(true);
@@ -1198,7 +1198,7 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
     // because listening to mousewheel can cause bad performance.
 
     if (!isTrackingWheelEvents) {
-      document.addEventListener('wheel', correctHighlightScreenRects);
+      domEvents.on(document, 'wheel', correctHighlightScreenRects);
       isTrackingWheelEvents = true;
     }
     traitcache.updateCachedViewPosition();
@@ -1206,7 +1206,7 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
 
   function removeMouseWheelListener() {
     if (isTrackingWheelEvents) {
-      document.removeEventListener('wheel', correctHighlightScreenRects);
+      domEvents.off(document, 'wheel', correctHighlightScreenRects);
       isTrackingWheelEvents = false;
     }
   }
@@ -1347,34 +1347,21 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
     }
     isTrackingMouse = doTrackMouse;
 
-    if (isTrackingMouse) {
-      // handle mouse move on body
-      $(document)
-        .on('mousemove', onMouseMove)
-        .on('focusin focusout', testFocus);
+    var addOrRemoveFn = isTrackingMouse ? domEvents.on : domEvents.off;
+    addOrRemoveFn(document, 'mousemove', onMouseMove);
+    if (platform.browser.isFirefox) {
+      // Mitigate lack of mousemove events when scroll finishes
+      addOrRemoveFn(document, 'mouseover', onMouseMove);
+    }
 
-      if (platform.browser.isFirefox) {
-        $(document).on('mouseover', onMouseMove); // Mitigate lack of mousemove events when scroll finishes
-      }
-      $(window)
-        .on('focus', onFocusWindow)
-        .on('blur', onBlurWindow)
-        .on('resize', hide);
-    } else {
-      // remove mousemove listener from body
-      $(document)
-        .off('mousemove', onMouseMove)
-        .off('focusin focusout', testFocus);
+    addOrRemoveFn(document, 'focusin', testFocus);
+    addOrRemoveFn(document, 'focusout', testFocus);
+    addOrRemoveFn(window, 'focus', onFocusWindow);
+    addOrRemoveFn(window, 'blur', onBlurWindow);
+    addOrRemoveFn(window, 'resize', hide);
 
+    if (!isTrackingMouse) {
       removeMouseWheelListener();
-
-      if (platform.browser.isFirefox) {
-        $(document).off('mouseover', onMouseMove); // Mitigate lack of mousemove events when scroll finishes
-      }
-      $(window)
-        .off('focus', onFocusWindow)
-        .off('blur', onBlurWindow)
-        .off('resize', hide);
     }
 
     return isTrackingMouse;
