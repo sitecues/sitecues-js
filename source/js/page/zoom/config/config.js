@@ -44,6 +44,8 @@ define(['$', 'core/conf/site'], function ($, site) {
       // e.g. '#pageWrapper, body>table'
       visibleRoots: site.get('visibleRoots')
     });
+    // Use this value for Best Friends
+    // config.leftMarginOffset = 150;
   }
 
   return config;

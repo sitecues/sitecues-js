@@ -8,15 +8,20 @@
   // List of variables to assume are already defined. Set to `true` to tolerate assigments to those variables.
   "globals": {
     // sitecues specific
-    "sitecues"           : false,
-    "sitecuesEverywhere" : false,
-    "SC_DEV"             : false,
-    "SC_LOCAL"           : false,
-    "SC_BROWSER_NETWORK_SPEECH": false,
-    "SC_EXTENSION"       : false,
-    "SC_VERSION"         : false,
+    "sitecues"                  : false,
+    "sitecuesEverywhere"        : false,
+    "SC_DEV"                    : false,
+    "SC_LOCAL"                  : false,
+    "SC_BROWSER_NETWORK_SPEECH" : false,
+    "SC_EXTENSION"              : false,
+    "SC_VERSION"                : false,
 
-    "console": false,
+    "console" : false,
+
+    // ES6
+    "Set"     : false,
+    "WeakMap" : false,
+    "Map"     : false,
 
     // AMD
     "require" : false,

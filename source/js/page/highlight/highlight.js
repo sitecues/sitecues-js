@@ -1349,10 +1349,10 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
 
     var addOrRemoveFn = isTrackingMouse ? domEvents.on : domEvents.off;
     addOrRemoveFn(document, 'mousemove', onMouseMove);
-    if (platform.browser.isFirefox) {
+      if (platform.browser.isFirefox) {
       // Mitigate lack of mousemove events when scroll finishes
       addOrRemoveFn(document, 'mouseover', onMouseMove);
-    }
+      }
 
     addOrRemoveFn(document, 'focusin', testFocus);
     addOrRemoveFn(document, 'focusout', testFocus);

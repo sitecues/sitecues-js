@@ -33,9 +33,9 @@ define(['core/conf/user/manager', 'core/util/session', 'core/locale', 'core/metr
   }
 
   function initZoomEnhancingFeatures() {
-    require([ 'page/hpan/hpan', 'page/zoom/fixed-position-fixer', 'page/focus/focus', 'page/cursor/cursor' ], function (hpan, fixer, focus, cursor) {
+    require([ 'page/hpan/hpan', 'page/positioner/positioner', 'page/focus/focus', 'page/cursor/cursor' ], function (hpan, positioner, focus, cursor) {
       hpan.init();
-      fixer.init();
+      positioner.init();
       focus.init();
       cursor.init();
     });

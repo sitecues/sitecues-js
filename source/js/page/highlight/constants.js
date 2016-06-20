@@ -6,6 +6,7 @@ define([], function() {
     constants.HIGHLIGHT_OUTLINE_ATTR    = 'data-sc-overlay';
     constants.HIGHLIGHT_STYLESHEET_NAME = 'sitecues-js-highlight';
     constants.HIGHLIGHT_TOGGLE_EVENT    = 'mh/did-toggle-visibility';
+    constants.POINTER_ATTR              = 'data-sc-pointer-events';
 
     return constants;
 });

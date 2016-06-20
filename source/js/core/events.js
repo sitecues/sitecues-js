@@ -98,15 +98,15 @@ define([], function () {
     return this;
   }
 
-  manager.on   = function() {
+  manager.on = function () {
     var args = Array.prototype.slice.call(arguments);
     on.apply(manager, args);
   };
-  manager.off  = function() {
+  manager.off = function () {
     var args = Array.prototype.slice.call(arguments);
     off.apply(manager, args);
   };
-  manager.emit = function() {
+  manager.emit = function () {
     var args = Array.prototype.slice.call(arguments);
     emit.apply(manager, args);
   };
@@ -116,5 +116,4 @@ define([], function () {
     off  : manager.off,
     emit : manager.emit
   };
-
 });

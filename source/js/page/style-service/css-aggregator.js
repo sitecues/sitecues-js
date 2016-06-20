@@ -9,7 +9,8 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/urls', 'page/style-
     sheets = [],
     onCssReadyFn,
     INLINE_ID_ATTR = 'data-sc-inline', // Allow each element with inline @style to have own ID for use with stylesheets
-    TIMEOUT_MS = 2000;
+    //This kept timing out at 2 seconds
+    TIMEOUT_MS = 6000;
 
   /**
    * StyleSheet object constructor. This object represents one stylesheet on the page,

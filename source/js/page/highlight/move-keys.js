@@ -1,6 +1,24 @@
-define(['$', 'page/highlight/highlight', 'page/util/common',
-  'page/highlight/pick', 'page/zoom/util/body-geometry', 'page/util/geo', 'page/zoom/fixed-position-fixer', 'core/events'],
-  function($, mh, common, picker, bodyGeo, geo, fixedFixer, events) {
+define(
+  [
+    '$',
+    'page/highlight/highlight',
+    'page/util/common',
+    'page/highlight/pick',
+    'page/zoom/util/body-geometry',
+    'page/util/geo',
+    'core/events',
+    'page/highlight/fixed-elements'
+  ],
+  function (
+    $,
+    mh,
+    common,
+    picker,
+    bodyGeo,
+    geo,
+    events,
+    fixedElements
+  ) {
 
   var STEP_SIZE_VERT = 18,
     STEP_SIZE_HORIZ = 24,  // Different step sizes because content tends to be wider than tall (lines of text)
@@ -283,7 +301,8 @@ define(['$', 'page/highlight/highlight', 'page/util/common',
     if (hlbElement) {
       hlbElement.style.display = 'none';
     }
-    fixedFixer.setAllowMouseEvents(false);
+
+    fixedElements.disableMouseEvents();
 
     // Pre-require audio
     require(['audio/audio'], function(audio) {
@@ -299,7 +318,7 @@ define(['$', 'page/highlight/highlight', 'page/util/common',
 
     // Restore mouse events and highlighting
     mh.setScrollTracking(true);
-    fixedFixer.setAllowMouseEvents(true);
+    fixedElements.enableMouseEvents();
 
     // Make lens visible again
     if (hlbElement) {
@@ -328,7 +347,7 @@ define(['$', 'page/highlight/highlight', 'page/util/common',
   function succeed(doAllowRepeat, doSpeakText) {
     if (SC_DEV) { console.log('Succeed'); }
 
-    fixedFixer.setAllowMouseEvents(true);
+    fixedElements.enableMouseEvents();
 
     if (doSpeakText) {
       speakHighlight();   // Shift+arrow
@@ -797,6 +816,9 @@ define(['$', 'page/highlight/highlight', 'page/util/common',
       return;
     }
     isInitialized = true;
+
+    fixedElements.init();
+
     $(window).on('keyup', function () {
       clearTimeout(repeatDelayTimer);
       isKeyStillDown = false;

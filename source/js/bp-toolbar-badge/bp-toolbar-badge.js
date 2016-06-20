@@ -19,16 +19,12 @@ define([
   var TOOLBAR_HEIGHT = 38;
 
   function adjustFixedElementsBelowToolbar() {
-    // TODO Make this work better:
-    // - it doesn't work that well across sites
-    // - it's heavy in the page
-    // - it causes us to load the page-features module just because we have a toolbar
-    require(['page/zoom/fixed-position-fixer'], function(fixer) {
-      // However, in the case of the toolbar, we must always move fixed position elements
-      // down. As this process requires the style-service, when the toolbar is inserted,
-      // we will initialize the style service immediately.
-      document.body.style.position = 'relative';
-      fixer.init(TOOLBAR_HEIGHT);
+    require(['page/zoom/util/body-geometry', 'page/positioner/positioner'], function (bodyGeo, positioner) {
+      // In the case of the toolbar, we must always move fixed position elements
+      // down, so that they are not obscured by our toolbar.
+      bodyGeo.init(function () {
+        positioner.init(TOOLBAR_HEIGHT);
+      });
     });
   }
 
@@ -55,4 +51,5 @@ define([
   return {
     init: init
   };
+
 });

@@ -2,29 +2,32 @@
  *  Used for dark themes.
  */
 
-define([
-  '$',
-  'Promise',
-  'core/platform',
-  'page/style-service/style-service',
-  'inverter/invert-url',
-  'inverter/bg-image-classifier',
-  'inverter/img-classifier',
-  'inverter/orig-bg-info'
-],
-function($,
-         Promise,
-         platform,
-         styleService,
-         invertUrl,
-         bgImgClassifier,
-         imgClassifier,
-         origBgInfo) {
+define(
+  [
+    '$',
+    'Promise',
+    'core/platform',
+    'page/style-service/style-service',
+    'inverter/invert-url',
+    'inverter/bg-image-classifier',
+    'inverter/img-classifier',
+    'inverter/orig-bg-info'
+  ],
+  function (
+    $,
+    Promise,
+    platform,
+    styleService,
+    invertUrl,
+    bgImgClassifier,
+    imgClassifier,
+    origBgInfo
+  ) {
 
   var mutationObserver,
     $allReversibleElems = $(),
     filterProperty,
-    // Use proxy in IE and Safari, because: no css invert in IE, and it's extremely slow in Safari
+  // Use proxy in IE and Safari, because: no css invert in IE, and it's extremely slow in Safari
     SHOULD_USE_PROXY,
     inverseSpriteSheet,
     INVERSE_SPRITE_STYLESHEET_ID = 'sitecues-js-invert-sprites',
@@ -139,7 +142,7 @@ function($,
 
   function classifyIframes(root, reverseCallbackFn) {
     var $root = $(root),
-      //NOT_REVERSIBLE_FRAME_REGEX = /.*youtube|.*\.vine\.|\.eplayer/,
+    //NOT_REVERSIBLE_FRAME_REGEX = /.*youtube|.*\.vine\.|\.eplayer/,
       REVERSIBLE_FRAME_REGEX = /twitter/,
       $iframes;
 
@@ -174,7 +177,7 @@ function($,
         return selector + '{\n' +
           'background-image: url(' + newUrl + ') !important;\n' +
           '}\n';
-        });
+      });
   }
 
   function getFilterProperty() {
@@ -254,5 +257,4 @@ function($,
     init: init,
     toggle: toggle
   };
-
 });

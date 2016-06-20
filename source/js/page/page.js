@@ -7,7 +7,7 @@ define([
   'page/highlight/move-keys',
   'page/zoom/zoom',
   'page/hpan/hpan',
-  'page/zoom/fixed-position-fixer',
+  'page/positioner/positioner',
   'page/focus/focus',
   'page/cursor/cursor',
   'page/zoom/util/body-geometry',
@@ -16,6 +16,7 @@ define([
   'page/zoom/config/config',
   'page/zoom/animation',
   'page/zoom/constants',
-  'page/zoom/state'
-  ], function() { }
+  'page/zoom/state',
+  'page/zoom/style'
+  ], function () {}
 );

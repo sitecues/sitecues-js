@@ -55,7 +55,7 @@ define([
   /**
    * initializeBPFeature is the main initialization function that is run when the
    * BP feature is ready to be enabled.  It creates the necessary elements,
-   * renders them, and emits events for the rest of the application to
+   * renders them, and emits events for the rest of the application too
    */
   function initBPView() {
     if (!SC_EXTENSION && !isToolbarUIRequested()) {
@@ -166,6 +166,7 @@ define([
   //It's possible that the transformations we apply to the body disrupt absolutely positioned elements
   //contained by the initial containing block. This is a hacky solution to the problem, but it is much cheaper
   //than analyzing the page and manually repositioning absolute elements.
+  //TODO: Check client site CNIB's absolutely positioned elements if this gets changed
   function fixDimensionsOfBody() {
     var body = document.body,
       bodyStyle   = getComputedStyle(body),

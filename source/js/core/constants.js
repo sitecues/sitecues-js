@@ -3,8 +3,9 @@ define([], function () {
   var constants = {};
 
   constants.READY_STATE = {
-    INITIALIZING: 0,
-    COMPLETE: 1
+    UNINITIALIZED: 0,
+    INITIALIZING: 1,
+    COMPLETE: 2
   };
 
   constants.METRIC_NAME = {

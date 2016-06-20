@@ -156,6 +156,7 @@ define(['$', 'page/zoom/zoom'], function($, zoomMod) {
     cachedViewSize.width = window.innerWidth;
     cachedViewSize.zoom = zoomMod.getCompletedZoom();
   }
+
   return {
     resetCache: resetCache,
     updateCachedViewPosition: updateCachedViewPosition,

@@ -1,12 +1,18 @@
-define([
-  'core/conf/user/manager',
-  'page/zoom/util/body-geometry',
-  'core/events',
-  'core/dom-events'
-], function (conf,
-             bodyGeo,
-             events,
-             domEvents) {
+define(
+  [
+    'core/conf/user/manager',
+    'page/zoom/util/body-geometry',
+    'core/events',
+    'page/zoom/util/viewport',
+    'core/dom-events'
+  ],
+  function (
+    conf,
+    bodyGeo,
+    events,
+    viewport,
+    domEvents
+  ) {
   var isOn = false,
     isHlbOn = false,
     isPanelOpen = false,
@@ -29,8 +35,10 @@ define([
       // Right side of body in absolute coordinates
       bodyRight = bodyGeo.getBodyRight(),
 
+      pageXOffset = viewport.getPageXOffset(),
+
       // Width of window
-      winWidth = window.innerWidth,
+      winWidth = viewport.getInnerWidth(),
 
       // Amount of content that didn't fit in the window
       ratioContentToWindowWidth = bodyRight / winWidth,
@@ -54,7 +62,7 @@ define([
 
     var
       // How far into the panning zone are we?
-      pixelsUntilMouseAtWindowEdge = (direction === 1 ? window.innerWidth - evt.clientX : evt.clientX),
+      pixelsUntilMouseAtWindowEdge = (direction === 1 ? winWidth - evt.clientX : evt.clientX),
       pixelsIntoPanningZone = (edgeSize - pixelsUntilMouseAtWindowEdge),
       percentageIntoPanningZone = pixelsIntoPanningZone / edgeSize,  // .5 = 50%, 1 = 100%, etc.
 
@@ -65,16 +73,19 @@ define([
       extraMovement = Math.max(0.5, (ratioContentToWindowWidth - 0.3) * SPEED_FACTOR * (percentageIntoPanningZone + 0.5)),
 
       // How far can we move until we reach the right edge of the visible content
-      maxMovementUntilRightEdge = bodyRight - winWidth - window.pageXOffset,
+      maxMovementUntilRightEdge = bodyRight - winWidth - pageXOffset,
 
       // Calculate movement size: amount of mouse movement + extraMovement
       movementSize = Math.min(Math.round(Math.abs(movementX) * extraMovement), MAX_SPEED),
 
-      // Finally, calculate the total movement -- do not allow move past right edge
+      // Finally, calculate the total movement -- do not allow move past right or left edge
       movement = Math.min(direction * movementSize, maxMovementUntilRightEdge);
+      movement = Math.max(movement, -pageXOffset);
 
     // Scroll it
-    window.scrollBy(movement, 0);
+    if (movement >= 1 || movement <= -1) {
+      window.scrollBy(movement, 0);
+    }
   }
 
   function getBackfillMovementX(evt) {
@@ -101,7 +112,6 @@ define([
 
   function onZoomBegin() {
     isZooming = true;
-    refresh();
   }
 
   function onZoomChange(zoomLevel) {
@@ -121,11 +131,12 @@ define([
 
     // Turn on if zoom is > 1 and content overflows window more than a tiny amount
     var zoom = getZoom(),
-      doTurnOn = zoom > 1 && bodyGeo.getBodyRight() / window.innerWidth > 1.02 && !isHlbOn && !isPanelOpen && !isZooming;
+      doTurnOn = zoom > 1 && bodyGeo.getBodyRight() / viewport.getInnerWidth() > 1.02 && !isHlbOn && !isPanelOpen && !isZooming;
 
     if (doTurnOn !== isOn) {
       if (doTurnOn) {
         domEvents.on(document, 'mousemove', mousemove);
+
       }
       else {
         domEvents.off(document, 'mousemove', mousemove);
@@ -159,7 +170,7 @@ define([
       refresh();
     });
 
-    events.on('zoom', onZoomBegin);
+    events.on('zoom/begin', onZoomBegin);
 
     // react on any zoom change
     events.on('zoom', onZoomChange);
