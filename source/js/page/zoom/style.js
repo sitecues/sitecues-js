@@ -189,9 +189,10 @@ define(
     if (!shouldRepaintOnZoomChange) {
       return;
     }
-    body.setAttribute(CRISPING_ATTRIBUTE, '');
+    var $body = $('body'); // Make sure we get clone body as well, if present
+    $body.attr(CRISPING_ATTRIBUTE, '');
     setTimeout(function() {
-      body.removeAttribute(CRISPING_ATTRIBUTE);
+      $body.removeAttr(CRISPING_ATTRIBUTE);
     }, REPAINT_FOR_CRISP_TEXT_DELAY);
 
     var MAX_ZINDEX = 2147483647,
