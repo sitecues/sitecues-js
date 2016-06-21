@@ -162,7 +162,7 @@ define(
       // Documents designed to fit the width of the page still will
       $body.css('width', bodyGeo.getRestrictedBodyWidth(state.completedZoom));
     }
-    viewport.determineScrollbars();
+    bodyGeo.determineScrollbars();
     events.emit('resize');
   }
 

@@ -1,9 +1,8 @@
 /*
 * Targets
 *
-* This modules keeps track of absolute and fixed transform targets, and applies and removes the styles necessary for the transform logic
-* to function correctly. Targets are 'cleaned' when removed, we clear all of its cached information and remove transform and transformOrigin.
-* Transform handlers are fun when we add targets.
+* This modules keeps track of fixed transform target elements
+* Transform handlers are run when we add and remove targets
 * */
 define(
   [
