@@ -21,6 +21,8 @@ define(
 
   var
     body,
+    $zoomStyleSheet,            // <style> element we insert to correct form issues in WebKit
+    $zoomFormsStyleSheet,       // <style> element we insert to correct form issues in WebKit
     TRANSFORM_PROP_CSS,
     // We store their current applied transition shorthand property, to revert to when we finish the zoom operation
     cachedTransitionValue,
@@ -33,7 +35,8 @@ define(
     // other method, which is to overlay a transparent div and then remove it)
     shouldRepaintOnZoomChange,
     // Key frame animations
-    $zoomStyleSheet, // <style> element we insert for animations (and additional fixes for zoom)
+    SITECUES_ZOOM_ID       = constants.SITECUES_ZOOM_ID,
+    SITECUES_ZOOM_FORMS_ID = constants.SITECUES_ZOOM_FORMS_ID,
     CRISPING_ATTRIBUTE   = constants.CRISPING_ATTRIBUTE,
     MAX                  = constants.MAX_ZOOM,
     MIN                  = constants.MIN_ZOOM,
@@ -85,10 +88,46 @@ define(
       var styleSheetText = additionalCss || '';
       if (styleSheetText) {
         if (!$zoomStyleSheet) {
-          $zoomStyleSheet = $('<style>').appendTo('head')
-            .attr('id', KEYFRAMES_ID);
+          $zoomStyleSheet = $('<style>')
+            .text(styleSheetText)
+            .attr('id', SITECUES_ZOOM_ID)
+            .appendTo('head');
+        }
+        else {
+          $zoomStyleSheet.text(styleSheetText);
         }
         $zoomStyleSheet.text(styleSheetText);
+      }
+    }
+
+    function applyZoomFormFixes(zoom) {
+      if (platform.browser.isWebKit) {
+        // Add useful zoom fixes for forms that render incorrectly with CSS transform
+        // We turn them off when data-sc-dropdown-fix off is set (need to temporarily turn off for highlight position calculation elsewhere)
+        var css =
+          'select[size="1"]:not([data-sc-dropdown-fix-off]),select:not([size]):not([data-sc-dropdown-fix-off]){' +
+          platform.transformPropertyCss + ':scale(' + 1 / zoom + ') !important;' +
+          'transform-origin:0% 62% !important;' +
+          'margin-right:' + (13 * (1 - zoom)) + '% !important;' +
+          'margin-top:' + (8 * (1-zoom)) + 'px !important;' +
+          'margin-bottom:' + (8 * (1-zoom)) + 'px !important;' +
+          'zoom:' + zoom + ' !important;}';
+
+        // Turn off any page transitions for select during zoom, otherwise it will potentially animate the above changes
+        css +=
+          '\nbody[data-sc-zooming] select { transition-property: none !important; }';
+
+        // Don't use any of these rules in print
+        css = '@media screen {\n' + css + '\n}';
+        if (!$zoomFormsStyleSheet) {
+          $zoomFormsStyleSheet = $('<style>')
+            .text(css)
+            .attr('id', SITECUES_ZOOM_FORMS_ID)
+            .appendTo('head');
+        }
+        else {
+          $zoomFormsStyleSheet.text(css);
+        }
       }
     }
 
@@ -272,6 +311,7 @@ define(
     repaintToEnsureCrispText: repaintToEnsureCrispText,
     fixBodyTransitions: fixBodyTransitions,
     restoreBodyTransitions: restoreBodyTransitions,
+    applyZoomFormFixes: applyZoomFormFixes,
     init: init
   };
 });
