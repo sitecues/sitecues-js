@@ -145,6 +145,19 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
       return 'page';
     }
 
+    function getPageUrl(source) {
+      if (source === 'reverse-proxy') {
+        // We want the viewed page's target url, not the url for the proxy itself
+        var targetUrl = location.pathname + location.search + location.hash;
+        // TODO: Remove page/ replacement once the proxy stops using this route prefix in Fall 2016. We'll still need to remove the extra / at the start.
+        targetUrl = targetUrl.replace(/^\/(?:page\/)?/, '');
+        targetUrl = decodeURIComponent(targetUrl);  // In case target url was escaped
+        return targetUrl;
+      }
+
+      return location.href;
+    }
+
     function init() {
 
       if (isInitialized) {
@@ -154,6 +167,8 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
 
       doSuppressMetrics = site.get('suppressMetrics');
 
+      var source = getSource();
+
       Metric.prototype.sessionData = {
         scVersion: sitecues.getVersion(),
         metricVersion: METRICS_VERSION,
@@ -161,11 +176,11 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
         pageViewId: session.pageViewId,
         siteId: site.getSiteId(),
         userId: conf.getUserId(),
-        pageUrl: location.href,
+        pageUrl: getPageUrl(source),
         browserUserAgent: navigator.userAgent,
         isClassicMode: classicMode(),
         clientLanguage: locale.getBrowserLang(),
-        source: getSource(),
+        source: source,
         isTester: isTester()
       };
     }
