@@ -12,7 +12,6 @@ define(
     'page/zoom/state',
     'page/zoom/constants',
     'page/zoom/config/config',
-    'page/zoom/util/viewport',
     'page/zoom/util/restrict-zoom',
     'page/zoom/style'
   ],
@@ -25,7 +24,6 @@ define(
     state,
     constants,
     config,
-    viewport,
     restrictZoom,
     style
   ) {
