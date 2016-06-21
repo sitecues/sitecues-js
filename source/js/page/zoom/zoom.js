@@ -12,7 +12,6 @@ define(
     'page/zoom/state',
     'page/zoom/constants',
     'page/zoom/config/config',
-    'page/zoom/util/viewport',
     'page/zoom/util/restrict-zoom',
     'page/zoom/style'
   ],
@@ -25,7 +24,6 @@ define(
     state,
     constants,
     config,
-    viewport,
     restrictZoom,
     style
   ) {
@@ -97,21 +95,22 @@ define(
       return;  // Not an unpinch event
     }
 
-      event.preventDefault();
-      setTimeout(function() {
-    var delta = -event.deltaY * UNPINCH_FACTOR;
-    var targetZoom = animation.isZoomOperationRunning() ? state.currentTargetZoom + delta : state.completedZoom + delta;
+    event.preventDefault();
 
-    clearTimeout(unpinchEndTimer);
-    unpinchEndTimer = setTimeout(animation.finishZoomOperation, UNPINCH_END_DELAY);
-    if (!animation.isZoomOperationRunning()) {
-      // 1st call -- we will glide to it, it may be far away from previous zoom value
-      animation.beginZoomOperation(targetZoom, {isUnpinch: true}); // Get ready for more slider updates
-    }
+    setTimeout(function () {
+      var delta = -event.deltaY * UNPINCH_FACTOR;
+      var targetZoom = animation.isZoomOperationRunning() ? state.currentTargetZoom + delta : state.completedZoom + delta;
 
-    state.currentTargetZoom = restrictZoom.toValidRange(targetZoom); // Change target
-    animation.performInstantZoomOperation();
-      }, 0);
+      clearTimeout(unpinchEndTimer);
+      unpinchEndTimer = setTimeout(animation.finishZoomOperation, UNPINCH_END_DELAY);
+      if (!animation.isZoomOperationRunning()) {
+        // 1st call -- we will glide to it, it may be far away from previous zoom value
+        animation.beginZoomOperation(targetZoom, {isUnpinch: true}); // Get ready for more slider updates
+      }
+
+      state.currentTargetZoom = restrictZoom.toValidRange(targetZoom); // Change target
+      animation.performInstantZoomOperation();
+    }, 0);
   }
 
   function zoomStopRequested() {
@@ -162,7 +161,7 @@ define(
       // Documents designed to fit the width of the page still will
       $body.css('width', bodyGeo.getRestrictedBodyWidth(state.completedZoom));
     }
-    viewport.determineScrollbars();
+    bodyGeo.determineScrollbars();
     events.emit('resize');
   }
 
@@ -184,7 +183,7 @@ define(
       config.isFluid = bodyGeo.isFluidLayout();
     }
 
-      $(window).on('resize', onResize);
+    $(window).on('resize', onResize);
 
     style.fixZoomBodyCss(); // Get it read as soon as zoom might be used
 
