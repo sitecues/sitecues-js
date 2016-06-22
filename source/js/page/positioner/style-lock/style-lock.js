@@ -1,8 +1,8 @@
 /*
 * Style-Lock
 *
-* The style-lock gets elements mutating to certain style values, and 'locks' that value by applying a data attribute that
-* is tied to a rule applying the current style value with importance. Handlers are run before and after allowing the
+* The style-lock gets elements mutating to certain style values, and 'locks' that value by applying a data attribute
+* tied to a rule applying the current style value with importance. Handlers are run before and after allowing the
 * style mutation to take effect.
 * e.g.
 * We request position: fixed styles to be locked

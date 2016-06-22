@@ -40,6 +40,7 @@ define(
   var
     shouldRepaintOnZoomChange,
     transformProperty, transformOriginProperty,
+    animationFrame         = null,
     lastRepaintZoomLevel   = null,
     resizeTimer            = null,
     toolbarHeight          = 0,
@@ -243,9 +244,9 @@ define(
       lastPageYOffset     = elementMap.getField(element, 'lastPageYOffset') || currentPageYOffset,
       viewportWidth       = viewportDims.width,
       viewportHeight      = viewportDims.height,
-    // If we've never scaled this element before, it's possible that this element is inheriting a transformation from the original body
-    // It's important that we know the resolved transformation so that we can calculate the element's untransformed dimensions.
-    // This method is less expensive than computing the resolved transformation, and the math is simpler
+      // If we've never scaled this element before, it's possible that this element is inheriting a transformation from the original body
+      // It's important that we know the resolved transformation so that we can calculate the element's untransformed dimensions.
+      // This method is less expensive than computing the resolved transformation, and the math is simpler
       currentScale        = elementInfo.getScale(element),
       translationValues   = getTranslationValues(element),
       currentXTranslation = translationValues.x,
@@ -398,7 +399,12 @@ define(
   function refreshScrollListener(newElement) {
 
     function scrollHandler() {
-      transformAllTargets({});
+      if (animationFrame) {
+        cancelAnimationFrame(animationFrame);
+      }
+      animationFrame = requestAnimationFrame(function () {
+        transformAllTargets({});
+      });
     }
 
     // TODO: filter scroll events by vertical and horizontal scrolling

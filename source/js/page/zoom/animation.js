@@ -37,9 +37,6 @@ define(
   var
     isInitialized,
     body, $body,
-    // We save the inline overflow style of the document, which we overwrite when zooming,
-    // so that we can restore it when we zoom out
-    documentOverflow = null,
     // Zoom operation state
     minZoomChangeTimer,      // Keep zooming at least for this long, so that a glide does a minimum step
     zoomAnimator,            // Frame request ID that can be cancelled
@@ -425,15 +422,6 @@ define(
       // Fixed elements are broken when we apply a transformation, and it takes work for us to correct that, so we remove the transformation
       // from the body when possible
       body.style.transform = '';
-      if (documentOverflow !== null) {
-        document.documentElement.style.overflow = documentOverflow;
-        documentOverflow = null;
-      }
-    }
-    else if (documentOverflow === null) {
-      // Setting scroll on the document allows users to scroll around when we zoom in
-      documentOverflow = document.documentElement.style.overflow;
-      document.documentElement.style.overflow = 'scroll';
     }
 
     // Un-Blur text in Chrome
