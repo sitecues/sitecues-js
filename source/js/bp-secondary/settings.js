@@ -1,13 +1,14 @@
 define(['core/bp/constants', 'core/bp/helper', 'core/conf/user/manager', 'core/bp/model/state', 'core/metric', 'core/platform',
-        'page/cursor/cursor', 'core/events'],
-  function (BP_CONST, helper, conf, state, metric, platform, cursor, events) {
+        'page/cursor/cursor', 'core/events', 'core/dom-events'],
+  function (BP_CONST, helper, conf, state, metric, platform, cursor, events, domEvents) {
 
   var byId = helper.byId,
     isActive = false,
     isInitialized,
     settingsPanel,
     lastDragUpdateTime = 0,
-    SLIDER_DRAG_UPDATE_MIN_INTERVAL= 50;
+    SLIDER_DRAG_UPDATE_MIN_INTERVAL= 50,
+    rangeValueMap = {};
 
   function onPanelUpdate() {
 
@@ -116,6 +117,8 @@ define(['core/bp/constants', 'core/bp/helper', 'core/conf/user/manager', 'core/b
       rangeElem = rangeElems[index];
       settingName = rangeElem.getAttribute('data-setting-name');
       initRangeListener(settingName, rangeElem);
+      domEvents.on(rangeElem, 'blur', fireInputRangeMetric);
+      rangeValueMap[settingName] = conf.get(settingName);
       adjustRangeBackground(rangeElem);
     }
 
@@ -161,14 +164,22 @@ define(['core/bp/constants', 'core/bp/helper', 'core/conf/user/manager', 'core/b
     }
   }
 
-  function fireInputRangeMetric(id, settingName, newValue) {
-    var oldValue = conf.get(settingName);
-    new metric.SliderSettingChange({
-      id: id.split('scp-')[1] || id,  // Trim off scp- prefix
-      settingName: settingName,
-      old: oldValue,
-      new: newValue
-    }).send();
+  function fireInputRangeMetric(event) {
+    var target = event.target,
+      id = target.id,
+      settingName = target.getAttribute('data-setting-name'),
+      oldValue = rangeValueMap[settingName],
+      newValue = conf.get(settingName);
+
+    if (oldValue !== newValue) { // Only fire on change
+      rangeValueMap[settingName] = newValue;
+      new metric.SliderSettingChange({
+        id: id.split('scp-')[1] || id,  // Trim off scp- prefix
+        settingName: settingName,
+        old: oldValue,
+        new: newValue
+      }).send();
+    }
   }
 
   // Use native value for things like <input type="range">
@@ -179,7 +190,6 @@ define(['core/bp/constants', 'core/bp/helper', 'core/conf/user/manager', 'core/b
       var settingName = target.getAttribute('data-setting-name'),
         newValue = + target.value;
       if (settingName) {
-        fireInputRangeMetric(target.id, settingName, newValue);
         conf.set(settingName, newValue);
       }
     }
