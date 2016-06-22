@@ -150,15 +150,12 @@ define(
 
 
       if (shouldUseElementDotAnimate) {
-        if (SC_DEV) { console.log('Begin element.animate zoom'); }
         performElementDotAnimateZoomOperation();
       }
       else if (shouldUseKeyFramesAnimation()) {
-        if (SC_DEV) { console.log('Begin keyframes zoom'); }
         performKeyFramesZoomOperation();
       }
       else {
-        if (SC_DEV) { console.log('Begin JS zoom'); }
         performJsAnimateZoomOperation();
       }
 

@@ -384,9 +384,9 @@ define(
       if (getClientSpeechStrategy.cached === speechStrategy.AUTO) {
         getClientSpeechStrategy.cached = constant.autoStrategy;
       }
-      if (SC_DEV) {
-        console.log('Speech strategy: ' + getClientSpeechStrategy.cached);
-      }
+      // if (SC_DEV) {
+      //   console.log('Speech strategy: ' + getClientSpeechStrategy.cached);
+      // }
     }
 
     return getClientSpeechStrategy.cached;

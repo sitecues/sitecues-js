@@ -107,7 +107,7 @@ define(['Promise', 'core/conf/user/storage', 'core/conf/user/storage-backup' ], 
 
   function createUser() {
     if (SC_DEV) {
-      console.log('New Sitecues user created');
+      //console.log('New Sitecues user created');
     }
     storage.createUser();
     saveToBackup();

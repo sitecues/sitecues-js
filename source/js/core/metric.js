@@ -49,6 +49,10 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
     }
 
     Metric.prototype.createDataJSON = function createDataJSON(name, details) {
+      if (doLogMetrics) {
+        console.log('Metric / %s', name + (details ? ' / ' + JSON.stringify(details) : ''));
+      }
+
       function shallowCopyInto(source, dest) {
         if (source) {
           for (var keyName in source) {
@@ -87,10 +91,6 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
     };
 
     Metric.prototype.send = function send() {
-      if (doLogMetrics) {
-        console.log('Metric / %s\n%o', this.data.name, this.data);
-      }
-
       if (SC_LOCAL || doSuppressMetrics) {   // No metric events in local mode
         return;
       }

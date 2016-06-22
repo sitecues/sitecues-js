@@ -86,8 +86,6 @@ define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/plat
 
     badgeElement.appendChild(bpElement);
 
-    if (SC_DEV) { console.log('BP reparented as badge child'); }
-
     currentBPParent = BADGE_PARENT;
 
     repositionBPOverBadge();
@@ -104,8 +102,6 @@ define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/plat
     // HTML_PARENT
     // Case 3. Insert outside body (as a child of <html>)
     documentElement.insertBefore(bpElement, documentElement.childNodes[0]);
-
-    if (SC_DEV) { console.log('BP reparented as <html> child'); }
 
     currentBPParent = HTML_PARENT;
 

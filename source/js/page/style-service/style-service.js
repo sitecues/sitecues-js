@@ -142,15 +142,15 @@ define(['$',
           isCssComplete = true;
           clearCallbacks();
 
-          if (SC_DEV) {
-            debugTime.processingComplete = performance.now();
-            console.log(
-              'Total: %d    Retrieve CSS: %d   Process CSS: %d',
-              debugTime.processingComplete - debugTime.begin,
-              debugTime.retrievalComplete - debugTime.begin,
-              debugTime.processingComplete - debugTime.retrievalComplete
-            );
-          }
+          // if (SC_DEV) {
+          //   debugTime.processingComplete = performance.now();
+          //   console.log(
+          //     'Performance for style-service |    Total: %d    Retrieve CSS: %d   Process CSS: %d     |',
+          //     debugTime.processingComplete - debugTime.begin,
+          //     debugTime.retrievalComplete - debugTime.begin,
+          //     debugTime.processingComplete - debugTime.retrievalComplete
+          //   );
+          // }
         });
       }, WAIT_BEFORE_USING_STYLESHEET_DATA);
     });

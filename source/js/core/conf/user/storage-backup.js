@@ -9,6 +9,7 @@ define(['core/conf/urls', 'core/conf/site', 'Promise', 'core/platform'], functio
   var PATH = 'html/prefs.html',
     ID = 'sitecues-prefs',
     iframe,
+    doLogStorageBackup,
     isIframeLoaded,
     ERROR_PREFIX = 'Sitecues storage backup - ',
     IS_BACKUP_DISABLED;
@@ -17,15 +18,15 @@ define(['core/conf/urls', 'core/conf/site', 'Promise', 'core/platform'], functio
   function postMessageToIframe(optionalDataToSend) {
     var scriptOrigin = urls.getScriptOrigin();
 
-    if (!urls.isProduction()) {
+    if (doLogStorageBackup) {
       // Trying to debug uncommon iframe errors (e.g. in SC-3307):
-      // Failed to execute 'postMessage' on 'DOMWindow': The target origin provided ('https://js.sitecues.com') does not match the recipieient window's origin ('http://www.fullerton.edu').
+      // Failed to execute 'postMessage' on 'DOMWindow': The target origin provided ('https://js.sitecues.com') does not match the recipient window's origin ('http://www.fullerton.edu').
       console.log('Attempting to communicate with storage backup, script origin = ' + scriptOrigin);
       console.log('Prefs iframe: ' + iframe.src);
     }
 
     return new Promise(function(resolve, reject) {
-      if (SC_DEV) {
+      if (doLogStorageBackup) {
         if (optionalDataToSend) {
           console.log('Saving data to Sitecues storage backup: %o', optionalDataToSend);
         }
@@ -48,7 +49,7 @@ define(['core/conf/urls', 'core/conf/site', 'Promise', 'core/platform'], functio
           error = eventData.error;
 
         if (eventData.name !== 'sc-storage-reply') {
-          if (SC_DEV) {
+          if (doLogStorageBackup) {
             console.log('Sitecues storage error -- event received by Sitecues is not for us (event name = %s)', eventData.name);
           }
           return; // Not for us
@@ -67,7 +68,7 @@ define(['core/conf/urls', 'core/conf/site', 'Promise', 'core/platform'], functio
           return;
         }
 
-        if (SC_DEV) {
+        if (doLogStorageBackup) {
           if (optionalDataToSend) {
             console.log('Saved data to Sitecues storage backup');
           }
@@ -184,6 +185,11 @@ define(['core/conf/urls', 'core/conf/site', 'Promise', 'core/platform'], functio
   function init() {
     IS_BACKUP_DISABLED = platform.isStorageUnsupported || site.get('isStorageBackupDisabled');
   }
+
+  sitecues.toggleLogStorageBackup = function toggleLogStorageBackup() {
+    doLogStorageBackup = !doLogStorageBackup;
+    return doLogStorageBackup;
+  };
 
   return {
     init: init,
