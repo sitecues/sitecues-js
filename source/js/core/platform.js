@@ -21,6 +21,7 @@ define([], function() {
     init: init
   },
   agent,
+  isInitialized,
   isRetinaDisplay;    // Is the current display a retina display?
 
 
@@ -259,18 +260,26 @@ define([], function() {
 
   // return truthy if platform is supported
   function init() {
+    if (isInitialized) {
+      return;
+    }
+
+    isInitialized = true;
+
     agent = navigator.userAgent || '';
     exports.browser = getBrowser(agent);
     exports.os = getOS(agent, getOSStr(navigator.platform.toLowerCase()));
     exports.nativeZoom = getNativeZoom();
+
     if (!isSupported(exports.os, exports.browser)) {
+      exports.isUnsupportedPlatform = true;
       return;
     }
 
     exports.isStorageUnsupported = isStorageUnsupported();
     exports.canUseRetinaCursors = exports.browser.isChrome;
     exports.cssPrefix = getCssPrefix(exports.browser);
-    exports.transformPropertyCss = exports.browser.isWebKit && !isCssPropSupported('transform')? '-webkit-transform' : 'transform';
+    exports.transformPropertyCss = exports.browser.isWebKit && !isCssPropSupported('transform') ? '-webkit-transform' : 'transform';
     exports.transformProperty = exports.transformPropertyCss.replace('-t', 'T').replace('-', '');
     exports.transformOriginProperty = exports.transformProperty + 'Origin';
     exports.transitionEndEvent = exports.browser.isWebKit ? 'webkitTransitionEnd' : 'transitionend';
@@ -284,8 +293,6 @@ define([], function() {
     addEventListener('resize', function () {
       isRetinaDisplay = undefined;
     });
-
-    return true;
   }
 
   return exports;

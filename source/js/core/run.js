@@ -243,10 +243,6 @@ define(['core/conf/user/manager', 'core/util/session', 'core/locale', 'core/metr
     // Add platform details
     initialPageVisitDetails.nativeZoom = platform.nativeZoom;
     initialPageVisitDetails.isRetina = platform.isRetina();
-    initialPageVisitDetails.os = platform.os.is;
-    initialPageVisitDetails.osVersion = platform.os.fullVersion;
-    initialPageVisitDetails.browser = platform.browser.is;
-    initialPageVisitDetails.browserVersion = platform.browser.version;
     if (platform.isStorageUnsupported) {
       // This occurs in Safari private browsing mode
       // Leave field undefined in the edge case
@@ -268,19 +264,20 @@ define(['core/conf/user/manager', 'core/util/session', 'core/locale', 'core/metr
     events.on('zoom/ready', onZoomInitialized);
 
     // Start initialization
-    if (platform.init()) {
-      domEvents.init();
-      // Supported platform: continue to init Sitecues
-      Promise.all([initConfAndMetrics(), locale.init()])
-        .then(bp.init)
-        .then(initPageFeatureListeners);
-    }
-    else {
+    platform.init();
+    if (platform.isUnsupportedPlatform) {
       // Unsupported platform: fail early but fire page-visited metric
       initMetrics({
         isUnsupportedPlatform: true
       });
       firePageVisitedMetric();
+    }
+    else {
+      domEvents.init();
+      // Supported platform: continue to init Sitecues
+      Promise.all([initConfAndMetrics(), locale.init()])
+        .then(bp.init)
+        .then(initPageFeatureListeners);
     }
   }
 
