@@ -8,12 +8,10 @@ define(['core/metric', 'core/conf/urls'], function(metric, urls) {
     return urls.parseUrl(source).origin === urls.getScriptOrigin();
   }
 
-  function logError(detail, doLogToConsole) {
-    if (doLogToConsole) {
-      console.log('%cSitecues Error %s', 'color: orange', detail.message);
-      if (detail.stack) {
-        console.log(detail.stack);
-      }
+  function logError(detail) {
+    console.log('%cSitecues Error %s', 'color: orange', detail.message);
+    if (detail.stack) {
+      console.log(detail.stack);
     }
 
     // detail object contains everything we need (message, line, col, etc.)
@@ -69,9 +67,9 @@ define(['core/metric', 'core/conf/urls'], function(metric, urls) {
     });
   }
 
-  window.addEventListener('error', onError, true);   // May get both JS and resource errors
-  window.addEventListener('SitecuesUnhandledRejection', onPrimRejection, true);   // Thrown from prim library
+  window.addEventListener('error', onError);   // May get both JS and resource errors
+  window.addEventListener('SitecuesUnhandledRejection', onPrimRejection);   // Thrown from prim library
   window.addEventListener('unhandledrejection', onNativeRejection);
   window.addEventListener('rejectionhandled', onNativeRejection);
-  window.addEventListener('SitecuesRequireFailure', onRequireFailure, true);   // Thrown from prim library
+  window.addEventListener('SitecuesRequireFailure', onRequireFailure);   // Thrown from prim library
 });
