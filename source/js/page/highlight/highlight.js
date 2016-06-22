@@ -1357,7 +1357,7 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
     addOrRemoveFn(document, 'focusin', testFocus);
     addOrRemoveFn(document, 'focusout', testFocus);
     addOrRemoveFn(window, 'focus', onFocusWindow);
-    addOrRemoveFn(window, 'blur', onBlurWindow);
+    addOrRemoveFn(window, 'blur', onBlur);
     addOrRemoveFn(window, 'resize', hide);
 
     if (!isTrackingMouse) {
@@ -1437,7 +1437,10 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
     testFocus();
   }
 
-  function onBlurWindow() {
+  function onBlur(event) {
+    if (event.target !== window) {
+      return;
+    }
     isWindowFocused = false;
     isAppropriateFocus = false;
     // When the user blurs (unfocuses) the window, we should
