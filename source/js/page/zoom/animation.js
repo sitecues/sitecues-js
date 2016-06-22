@@ -105,6 +105,9 @@ define(
       pointerEvents: 'none'
     });
 
+    // Temporarily indicate that zooming is in progress -- this is used by the sitecues-zoom-form-fix stylesheet
+    $body.attr('data-sc-zooming', '');
+
     events.emit('zoom/begin');
 
     if (animationReadyCallback) {
@@ -381,14 +384,12 @@ define(
     // Restore mouse cursor events and CSS behavior
     $body.css('pointerEvents', '');
 
-    if (platform.browser.isWebKit || platform.browser.isFirefox) {
-      state.hasFormsToFix = state.hasFormsToFix || document.querySelector('select,body>input,button');
-      if (state.hasFormsToFix) {
-        require(['zoom-forms/zoom-forms'], function (zoomForms) {
-          zoomForms.applyZoomFixes(state.completedZoom);
-        });
-      }
-    }
+    style.applyZoomFormFixes(state.completedZoom);
+
+    // Indicate that zooming has finished -- this is used by the sitecues-zoom-form-fix stylesheet
+    setTimeout(function() {
+      $body.removeAttr('data-sc-zooming');
+    }, 0);
 
     // notify all about zoom change
     events.emit('zoom', state.completedZoom);

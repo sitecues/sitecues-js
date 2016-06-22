@@ -134,6 +134,12 @@ define([
       }
     }
 
+    function onBlur(event) {
+      if (event.target === window) {
+        maybeShrinkPanel();
+      }
+    }
+    
     function maybeShrinkPanel() {
       if (SC_DEV && isSticky()) {
         return;
@@ -235,7 +241,7 @@ define([
         addOrRemoveFn(window, 'mousemove', winMouseMove);
       }
       addOrRemoveFn(window, 'mouseout', winMouseLeave);
-      addOrRemoveFn(window, 'blur', maybeShrinkPanel);
+      addOrRemoveFn(window, 'blur', onBlur);
       addOrRemoveFn(window, 'resize', maybeShrinkPanel); // Don't allow user to resize window in middle of using panel, leads to layout issues
     }
 

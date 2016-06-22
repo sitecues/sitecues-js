@@ -2,17 +2,19 @@
  * Basic metrics logger
  */
 define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/locale', 'core/util/xhr',
-        'core/conf/urls', 'core/constants', 'core/bp/model/classic-mode' ],
-  function (conf, session, site, locale, xhr, urls, constants, classicMode) {
+        'core/conf/urls', 'core/constants', 'core/bp/model/classic-mode', 'core/platform' ],
+  function (conf, session, site, locale, xhr, urls, constants, classicMode, platform) {
 
     // IMPORTANT! Increment METRICS_VERSION this every time metrics change in any way
     // IMPORTANT! Have the backend team review all metrics changes!!!
-    var METRICS_VERSION = 15,
+    var METRICS_VERSION = 16,
         isInitialized,
         doSuppressMetrics,
         doLogMetrics,
         name = constants.METRIC_NAME,
-        metricHistory = [];
+        metricHistory = [],
+        platformData,
+        sessionData;
 
 
     function Metric(name, details) {
@@ -57,20 +59,24 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
         }
       }
 
-      var sessionData = this.sessionData,
-        data = this.data = {};
+      var data = this.data = {};
 
+      // Session data
       shallowCopyInto(sessionData, data);
+
+      // Common fields
       data.name = name;
       data.clientTimeMs = Number(new Date()); // Epoch time in milliseconds  when the event occurred
       data.zoomLevel = conf.get('zoom') || 1;
       data.ttsState = conf.get('ttsOn') || false;
 
+      // Platform data -- goes into details field for historical reason
+      details = details || {};
+      shallowCopyInto(platformData, details);
+
       // Ensure data we send has simple types
       flattenData(data);
-      if (details) {
-        flattenData(details);
-      }
+      flattenData(details);
 
       // Log errors -- check for field name collisions and type errors in details
       if (SC_DEV) {
@@ -169,7 +175,7 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
 
       var source = getSource();
 
-      Metric.prototype.sessionData = {
+      sessionData = {
         scVersion: sitecues.getVersion(),
         metricVersion: METRICS_VERSION,
         sessionId: session.sessionId,
@@ -182,6 +188,15 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
         clientLanguage: locale.getBrowserLang(),
         source: source,
         isTester: isTester()
+      };
+
+      platform.init();
+      platformData = {
+        os: platform.os.is,
+        osVersion: platform.os.fullVersion,
+        browser: platform.browser.is,
+        browserVersion: platform.browser.version,
+        isUnsupportedPlatform: platform.isUnsupportedPlatform ? true : undefined  // Don't export field when supported
       };
     }
 

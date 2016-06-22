@@ -54,8 +54,8 @@ define([
 
   function addWindowMouseUpListener() {
     if (!isListeningToWindowMouseUpEvents) {
-      domEvents.on(window, 'mouseup', finishZoomChanges, { passive : false });
       isListeningToWindowMouseUpEvents = true;
+      domEvents.on(window, 'mouseup', finishZoomChanges, { passive : false });
     }
   }
 

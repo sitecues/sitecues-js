@@ -262,7 +262,7 @@ define(
 
   function getHighlight() {
     var highlight = mh.getHighlight();
-    return highlight && highlight.isVisible && highlight;
+    return highlight && (highlight.isVisible || hlbElement) && highlight;
   }
 
   function performMovement(nextMove) {

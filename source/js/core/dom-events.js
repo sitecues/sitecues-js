@@ -33,7 +33,7 @@ define([], function () {
   }
 
   function off(target, type, fn, opts) {
-    target.addEventListener(type, fn, getThirdParam(opts));
+    target.removeEventListener(type, fn, getThirdParam(opts));
   }
 
   function init() {

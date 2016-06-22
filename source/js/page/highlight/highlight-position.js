@@ -72,6 +72,9 @@ define(['$', 'page/util/common', 'page/util/element-classifier', 'page/zoom/zoom
     }
 
     var contentsRangeRect = $.extend({}, range.getBoundingClientRect());
+    if (!contentsRangeRect.width || !contentsRangeRect.height) {
+      return;
+    }
 
     if (!isElement) {
       var textVerticalClipRect = getTextVerticalClipping(node, contentsRangeRect, range);
@@ -103,8 +106,8 @@ define(['$', 'page/util/common', 'page/util/element-classifier', 'page/zoom/zoom
       left: rect.left + paddingLeft,
       width: rect.width - paddingLeft - paddingRight,
       height: rect.height - paddingTop - paddingBottom,
-      right: rect.top + rect.height - paddingRight,   // In case rect.right not set
-      bottom: rect.left + rect.width - paddingBottom  // In case rect.bottom not set
+      bottom: rect.top + rect.height - paddingBottom,   // In case rect.right not set
+      right: rect.left + rect.width - paddingRight  // In case rect.bottom not set
     };
   }
 
@@ -347,9 +350,16 @@ define(['$', 'page/util/common', 'page/util/element-classifier', 'page/zoom/zoom
         return;
       }
 
-      // --- Visible border or form controls ---
-      if (common.isVisualRegion(this, style, traitcache.getStyle(this.parentNode)) ||
-        elemClassifier.isFormControl(this)) {
+      // --- Form controls ---
+      if (elemClassifier.isFormControl(this)) {
+        if (this.matches('select[size="1"],select:not([size])')) {
+          addRect(allRects, getComboboxRect(this));
+          return; // Don't walk into options
+        }
+        addRect(allRects, thisRect); // Make it all visible, including padding and border
+      }
+      // --- Visible border ---
+      else if (common.isVisualRegion(this, style, traitcache.getStyle(this.parentNode))) {
         addRect(allRects, thisRect); // Make it all visible, including padding and border
         // Keep iterating: there may be some content outside
       }
@@ -404,6 +414,29 @@ define(['$', 'page/util/common', 'page/util/element-classifier', 'page/zoom/zoom
       }
       return clipInfo;
     }
+  }
+
+  // Our hacky zoom combobox fixes can mess up highlight rects -- this corrects for that case
+  function getComboboxRect(comboElem, comboRect) {
+    var isHackedCombobox = traitcache.getStyleProp(comboElem, 'zoom') > 1,
+      oldTransitionProp;
+    if (isHackedCombobox) {
+      // Turn off zoom CSS hacks for comboboxes
+      comboElem.setAttribute('data-sc-dropdown-fix-off', '');
+      // Turn off transition temporarily if it's there, otherwise it prevents us from getting the correct rect
+      oldTransitionProp = comboElem.style.transitionProperty;
+      comboElem.style.transitionProperty = 'none';
+      // Get what the rect would have been
+      comboRect = comboElem.getBoundingClientRect();
+      // Restore CSS
+      setTimeout(function() {
+        // Do this on a timeout otherwise it may animate our return changes
+        comboElem.style.transitionProperty = oldTransitionProp;
+      }, 0);
+      comboElem.removeAttribute('data-sc-dropdown-fix');
+    }
+
+    return comboRect;
   }
 
   /**

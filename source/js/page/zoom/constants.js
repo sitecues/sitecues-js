@@ -28,6 +28,9 @@ define([], function () {
   constants.ZOOM_TARGET_SELECTOR  = '[' + constants.ZOOM_TARGET_ATTR + ']';
   constants.ZOOM_TARGET_ID        = 'sitecues-zoom-targets';
 
+  constants.SITECUES_ZOOM_ID = 'sitecues-js-zoom';
+  constants.SITECUES_ZOOM_FORMS_ID = 'sitecues-js-zoom-form-fix';
+
   constants.UNPINCH_FACTOR = 0.015; // How much the unpinch delta affects zoom
 
   constants.MAX_ZOOM = 3;

@@ -15,8 +15,7 @@
     "info",
     "pick-debug",
     "labs",
-    "inverter",
-    "zoom-forms"
+    "inverter"
   ],
   "dataFolders": [
     "locale-data"
