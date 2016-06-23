@@ -131,7 +131,7 @@ define(
   }
 
   function isSitecuesElement(element, value) {
-    return getOrSet(element, 'sitecuesElement', value) || element.tagName === 'sc';
+    return getOrSet(element, 'sitecuesElement', value) || element.localName === 'sc';
   }
 
   function isTransplantRoot(element, value) {

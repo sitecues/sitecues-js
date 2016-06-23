@@ -187,7 +187,7 @@ define(
       $clone      = $(clone),
       traitFields = ['complement', 'isRoot'],
       traitValues = [clone, isRoot],
-      tagName     = element.tagName.toLowerCase();
+      tagName     = element.localName;
 
     switch (tagName) {
       // TODO: nested script elements are currently not being disabled. Not very common, and a little expensive to check for
