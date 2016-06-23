@@ -236,7 +236,7 @@ define(['$',
           //      we won't have those rules anymore. Do we reanalyze at that point?
           var media = getMediaTypeFromCssText(rule);
           if (mediaQueries.isActiveMediaQuery(media)) {
-            if (SC_DEV) { console.log('@media matched: ' + media); }
+            // if (SC_DEV) { console.log('@media matched: ' + media); }
             addMatchingRules(rule);    // Recursive
           }
 //          else {
