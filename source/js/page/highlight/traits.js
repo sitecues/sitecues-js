@@ -118,10 +118,13 @@ define(
       }
       else {
         var lineHeight = getApproximateLineHeight() * zoom;
-        if (height < lineHeight && mhpos.getContentsRangeRect(node.parentNode).height < lineHeight) {
-          // Treat single line inlines that are part of another single-line element as inline-block.
-          // This allows them to be picked -- they may be a row of buttons or part of a menubar.
-          doTreatAsInlineBlock = true;
+        if (height < lineHeight) {
+          var parentRect = mhpos.getContentsRangeRect(node.parentNode);
+          if (parentRect && parentRect.height < lineHeight) {
+            // Treat single line inlines that are part of another single-line element as inline-block.
+            // This allows them to be picked -- they may be a row of buttons or part of a menubar.
+            doTreatAsInlineBlock = true;
+          }
         }
       }
     }
