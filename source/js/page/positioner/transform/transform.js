@@ -46,7 +46,7 @@ define(
     cachedXOffset          = null,
     cachedYOffset          = null,
     animationFrame         = null,
-    //lastRepaintZoomLevel   = null,
+    lastRepaintZoomLevel   = null,
     resizeTimer            = null,
     toolbarHeight          = 0,
     MARGIN_FROM_EDGE       = 15,
@@ -173,17 +173,17 @@ define(
     // If the fixed element is wider than the viewport
     if (elementWidth > viewportWidth) {
       var
-        scrollDifference  = currentPageXOffset - lastPageXOffset,
-        correctedXOffset  = currentXTranslation,
-        xTranslationLimit = viewportWidth - elementWidth,
-        scrollLimit       = scrollWidth - viewportWidth,
-        offsetRemaining   = Math.abs(xTranslationLimit - currentXTranslation),
-        scrollRemaining   = scrollLimit - currentPageXOffset,
-        scrollPercent     = currentPageXOffset / scrollLimit;
+        scrollDifference     = currentPageXOffset - lastPageXOffset,
+        correctedXOffset     = currentXTranslation,
+        xTranslationLimit    = viewportWidth - elementWidth,
+        scrollLimit          = scrollWidth - viewportWidth,
+        offsetRemaining      = Math.abs(xTranslationLimit - currentXTranslation),
+        rightScrollRemaining = scrollLimit - currentPageXOffset,
+        scrollPercent        = currentPageXOffset / scrollLimit;
 
       // If the scroll distance to the edge of the page is less than the distance required to translate the
       // fixed element completely into the viewport, set the current x offset to a proportional value to the current pageXOffset
-      if (offsetRemaining > scrollRemaining) {
+      if (offsetRemaining > rightScrollRemaining) {
         correctedXOffset = xTranslationLimit * scrollPercent;
       }
 
@@ -296,10 +296,10 @@ define(
       transformFixedElement(element, opts);
     });
 
-    //if (lastRepaintZoomLevel !== state.completedZoom && shouldRepaintOnZoomChange) {
-    //  lastRepaintZoomLevel = state.completedZoom;
-    //  zoomStyle.repaintToEnsureCrispText();
-    //}
+    if (lastRepaintZoomLevel !== state.completedZoom && shouldRepaintOnZoomChange) {
+      lastRepaintZoomLevel = state.completedZoom;
+      zoomStyle.repaintToEnsureCrispText();
+    }
   }
 
   function refreshResizeListener() {
@@ -418,6 +418,23 @@ define(
       doTransformOnHorizontalScroll = Boolean(wideElements.length),
       doTransformOnVerticalScroll   = Boolean(tallElements.length),
       doTransformOnScroll           = doTransformOnHorizontalScroll || doTransformOnVerticalScroll;
+
+    console.log('doTransformOnVerticalScroll:', doTransformOnVerticalScroll);
+    console.log('doTransformOnHorizontal:', doTransformOnHorizontalScroll);
+
+    if (doTransformOnHorizontalScroll) {
+      document.documentElement.style.overflowX = 'scroll';
+    }
+    else {
+      document.documentElement.style.overflowX = '';
+    }
+
+    if (doTransformOnVerticalScroll) {
+      document.documentElement.style.overflowY = 'scroll';
+    }
+    else {
+      document.documentElement.style.overflowY = '';
+    }
 
     if (doTransformOnScroll && !isTransformingOnScroll) {
       domEvents.on(window, 'scroll', onScroll, { capture: false });
