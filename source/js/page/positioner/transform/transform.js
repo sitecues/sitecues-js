@@ -13,7 +13,6 @@
  * */
 define(
   [
-    'core/bp/helper',
     'page/positioner/util/element-map',
     'page/zoom/util/body-geometry',
     'page/zoom/state',
@@ -21,11 +20,11 @@ define(
     'page/zoom/util/viewport',
     'page/positioner/util/element-info',
     'core/platform',
-    'page/zoom/style',
-    'page/positioner/util/rect-cache'
+    'page/positioner/util/rect-cache',
+    'core/dom-events',
+    'page/positioner/util/array-utility'
   ],
   function (
-    helper,
     elementMap,
     bodyGeo,
     state,
@@ -33,14 +32,21 @@ define(
     viewport,
     elementInfo,
     platform,
-    zoomStyle,
-    rectCache
+    rectCache,
+    domEvents,
+    arrayUtil
   ) {
   var
     shouldRepaintOnZoomChange,
     transformProperty, transformOriginProperty,
+    // Fixed elements taller than the viewport
+    tallElements           = [],
+    // Fixed elements wider than the viewport
+    wideElements           = [],
+    cachedXOffset          = null,
+    cachedYOffset          = null,
     animationFrame         = null,
-    lastRepaintZoomLevel   = null,
+    //lastRepaintZoomLevel   = null,
     resizeTimer            = null,
     toolbarHeight          = 0,
     MARGIN_FROM_EDGE       = 15,
@@ -87,8 +93,6 @@ define(
       translationValues        = getTranslationValues(element),
       currentXTranslation      = translationValues.x,
       currentYTranslation      = translationValues.y,
-      newXTranslation          = currentXTranslation,
-      newYTranslation          = currentYTranslation,
       verticalScrollDifference = currentPageYOffset - lastPageYOffset;
 
     // On zoom we should reset the current translations to
@@ -97,14 +101,14 @@ define(
     if (resetCurrentTranslation) {
       unscaledRect.left -= currentXTranslation;
       unscaledRect.top  -= currentYTranslation;
-      newXTranslation = 0;
-      newYTranslation = 0;
       currentYTranslation = 0;
       currentXTranslation = 0;
-      elementMap.flushField(element, 'isShifted');
     }
 
-    var newScale = restrictScale(unscaledRect, opts.onResize);
+    var
+      newScale        = restrictScale(unscaledRect, opts.onResize),
+      newXTranslation = currentXTranslation,
+      newYTranslation = currentYTranslation;
     elementMap.setField(element, 'scale', newScale);
 
     if (!unscaledRect.width || !unscaledRect.height) {
@@ -133,7 +137,6 @@ define(
     });
     
     newYTranslation = calculateYTranslation({
-      element: element,
       dimensions: rect,
       currentYTranslation: currentYTranslation,
       viewportHeight: viewportHeight,
@@ -197,7 +200,6 @@ define(
 
   function calculateYTranslation(args) {
     var
-      element                 = args.element,
       viewportHeight          = args.viewportHeight,
       currentYTranslation     = args.currentYTranslation,
       currentPageYOffset      = args.currentPageYOffset,
@@ -215,7 +217,6 @@ define(
     if (resetCurrentTranslation && toolbarHeight) {
       if (shouldVerticallyShiftFixedElement(top, bottom, viewportHeight, elementHeight)) {
         currentYTranslation += toolbarHeight;
-        elementMap.setField(element, 'isShifted', true);
       }
       top    += toolbarHeight;
       bottom += toolbarHeight;
@@ -295,18 +296,10 @@ define(
       transformFixedElement(element, opts);
     });
 
-    if (lastRepaintZoomLevel !== state.completedZoom && shouldRepaintOnZoomChange) {
-      lastRepaintZoomLevel = state.completedZoom;
-      zoomStyle.repaintToEnsureCrispText();
-    }
-  }
-    
-  function calculateRenderedBoundingRect(element) {
-    var inlineDisplay = element.style.display;
-    element.style.display = 'block';
-    var rect = helper.getRect(element);
-    element.style.display = inlineDisplay;
-    return rect;
+    //if (lastRepaintZoomLevel !== state.completedZoom && shouldRepaintOnZoomChange) {
+    //  lastRepaintZoomLevel = state.completedZoom;
+    //  zoomStyle.repaintToEnsureCrispText();
+    //}
   }
 
   function refreshResizeListener() {
@@ -339,7 +332,7 @@ define(
       resetTranslation: true
     });
     refreshScrollListener(this);
-    refreshResizeListener(this);
+    refreshResizeListener();
   }
 
   function onTargetAdded(element) {
@@ -350,21 +343,20 @@ define(
   }
 
   function onTargetRemoved(element) {
-    element.style[transformProperty] = '';
+    element.style[transformProperty]       = '';
     element.style[transformOriginProperty] = '';
     // This is the cached metadata we used for transforming the element. We need to clear it now that
     // the information is stale
     elementMap.flushField(element, [
-      'isUnrendered', 'lastPageXOffset', 'lastPageYOffset',
-      'unscaledRect', 'scale'
+      'lastPageXOffset', 'lastPageYOffset', 'scale'
     ]);
     refreshResizeListener(element);
     refreshScrollListener();
   }
 
-  function refreshScrollListener(newElement) {
+  function onScroll() {
 
-    function scrollHandler() {
+    function transformOnScroll() {
       if (animationFrame) {
         cancelAnimationFrame(animationFrame);
       }
@@ -373,36 +365,66 @@ define(
       });
     }
 
-    // TODO: filter scroll events by vertical and horizontal scrolling
-    function mustTransformOnScroll(element) {
-      var
-        rect            = calculateRenderedBoundingRect(element),
-        height          = rect.height,
-        width           = rect.width,
-        viewportDims    = viewport.getInnerDimensions(),
-        viewportHeight  = viewportDims.height,
-        viewportWidth   = viewportDims.width;
+    var
+      currentOffsets        = viewport.getPageOffsets(),
+      xDelta                = currentOffsets.x - cachedXOffset,
+      yDelta                = currentOffsets.y - cachedYOffset,
+      doVerticalTransform   = Boolean(tallElements.length),
+      doHorizontalTransform = Boolean(wideElements.length);
+    if ((xDelta && doHorizontalTransform) || (yDelta && doVerticalTransform)) {
+      transformOnScroll();
+    }
+  }
 
-      return height > viewportHeight || width > viewportWidth;
+  function refreshScrollListener(element) {
+    var
+      viewportDims   = viewport.getInnerDimensions(),
+      viewportHeight = viewportDims.height,
+      viewportWidth  = viewportDims.width;
+
+    function identifyTallOrWideElement(element) {
+      var
+        rect   = rectCache.getRect(element),
+        height = rect.height,
+        width  = rect.width;
+
+      if (height > viewportHeight) {
+        arrayUtil.addUnique(tallElements, element);
+      }
+      else {
+        tallElements = arrayUtil.remove(tallElements, element);
+      }
+
+      if (width > viewportWidth) {
+        arrayUtil.addUnique(wideElements, element);
+      }
+      else {
+        wideElements = arrayUtil.remove(wideElements, element);
+      }
     }
 
-    var doTransformOnScroll;
-
     // If this function is called when we add a transform target, evaluate the new target
-    if (newElement) {
-      doTransformOnScroll = isTransformingOnScroll || mustTransformOnScroll(newElement);
+    if (element) {
+      identifyTallOrWideElement(element);
     }
     // If this function is called at the end of a zoom, evaluate all fixed targets
     else {
-      doTransformOnScroll = targets.get().some(mustTransformOnScroll);
+      tallElements = [];
+      wideElements = [];
+      targets.get().forEach(identifyTallOrWideElement);
     }
 
+    var
+      doTransformOnHorizontalScroll = Boolean(wideElements.length),
+      doTransformOnVerticalScroll   = Boolean(tallElements.length),
+      doTransformOnScroll           = doTransformOnHorizontalScroll || doTransformOnVerticalScroll;
+
     if (doTransformOnScroll && !isTransformingOnScroll) {
-      window.addEventListener('scroll', scrollHandler);
+      domEvents.on(window, 'scroll', onScroll, { capture: false });
       isTransformingOnScroll = true;
     }
     else if (!doTransformOnScroll && isTransformingOnScroll) {
-      window.removeEventListener('scroll', scrollHandler);
+      domEvents.off(window, 'scroll', onScroll, { capture: false });
       isTransformingOnScroll = false;
     }
   }

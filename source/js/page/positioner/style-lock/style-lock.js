@@ -62,11 +62,6 @@ define(
           beforeHandlers   = propertyHandlers.before,
           afterHandlers    = propertyHandlers.after;
 
-        console.log('onPropertyMutation:', element);
-        console.log('property:', property);
-        console.log('fromValue:', opts.fromValue);
-        console.log('toValue:', value);
-
         for (var i = 0, beforeCount = beforeHandlers.length; i < beforeCount; i++) {
           results.push(beforeHandlers[i].call(this, opts));
         }
@@ -215,9 +210,6 @@ define(
       attributeLocks[value] = valueLock;
       lockSelectorMap[lockAttribute] = attributeLocks;
     }
-    console.log('lock element:', element);
-    console.log('lock attribute:', lockAttribute);
-    console.log('lock value:', value);
     element.setAttribute(lockAttribute, value);
   }
   

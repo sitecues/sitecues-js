@@ -82,6 +82,18 @@ define([], function () {
     return results;
   }
 
+  // Removes all elements matching @element from the @array, returns a new array
+  function remove(array, element) {
+    var index;
+    do {
+      index = array.indexOf(element);
+      if (index !== -1) {
+        array = array.splice(index, 1);
+      }
+    } while (index !== -1);
+    return array;
+  }
+
   function fromSet(set) {
     var arr = [];
     set.forEach(function (member) {
@@ -91,6 +103,7 @@ define([], function () {
   }
 
   return {
+    remove: remove,
     addUnique: addUnique,
     unique: unique,
     symmetricDifference: symmetricDifference,
