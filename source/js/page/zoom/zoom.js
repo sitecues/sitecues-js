@@ -30,7 +30,7 @@ define(
 
   var isInitialized,  // Is the zoom module already initialized?
     isReady,        // Are the dependencies initialized
-    $body, body,
+    $origBody, body,
     unpinchEndTimer,
     UNPINCH_FACTOR    = constants.UNPINCH_FACTOR,
     UNPINCH_END_DELAY = constants.UNPINCH_END_DELAY,
@@ -149,17 +149,17 @@ define(
    * sizes of the body and window.
    */
   function onResize() {
-    if (!$body) {
+    if (!$origBody) {
       return;
     }
 
-    $body.css({width: '', transform: ''});
+    $origBody.css({width: '', transform: ''});
     bodyGeo.refreshBodyInfo();
-    $body.css(style.getZoomCss(state.completedZoom));
+    $origBody.css(style.getZoomCss(state.completedZoom));
     if (config.shouldRestrictWidth) {
       // Restrict the width of the body so that it works similar to browser zoom
       // Documents designed to fit the width of the page still will
-      $body.css('width', bodyGeo.getRestrictedBodyWidth(state.completedZoom));
+      $origBody.css('width', bodyGeo.getRestrictedBodyWidth(state.completedZoom));
     }
     bodyGeo.determineScrollbars();
     events.emit('resize');
@@ -171,7 +171,7 @@ define(
 
     //This callback will only be called when body is parsed
     body  = document.body;
-    $body = $(body);
+    $origBody = $(body);
 
     // Use conf module for sharing current zoom level value
     conf.def('zoom', restrictZoom.toValidRange);

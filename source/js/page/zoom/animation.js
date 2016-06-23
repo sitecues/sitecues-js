@@ -36,7 +36,7 @@ define(
 
   var
     isInitialized,
-    body, $body,
+    body, $origBody,
     // We save the inline overflow style of the document, which we overwrite when zooming,
     // so that we can restore it when we zoom out
     documentOverflow = null,
@@ -103,13 +103,11 @@ define(
     // Correct the start zoom time with the real starting time
     state.startZoomTime = Date.now();
 
-    // Temporarily disable mouse cursor events and CSS behavior, to help with zoom performance
-    $body.css({
-      pointerEvents: 'none'
-    });
-
-    // Temporarily indicate that zooming is in progress -- this is used by the sitecues-zoom-form-fix stylesheet
-    $body.attr('data-sc-zooming', '');
+    $('body')
+      // Temporarily disable mouse cursor events and CSS behavior, to help with zoom performance
+      .css('pointer-events', 'none')
+      // Temporarily indicate that zooming is in progress -- this is used by the sitecues-zoom-form-fix stylesheet
+      .attr('data-sc-zooming', '');
 
     events.emit('zoom/begin');
 
@@ -210,7 +208,7 @@ define(
   function performJsAnimateZoomOperation() {
     function jsZoomStep() {  // Firefox passes in a weird startZoomTime that can't be compared with Date.now()
       var midAnimationZoom = getMidAnimationZoom();
-      $body.css(style.getZoomCss(midAnimationZoom));
+      $origBody.css(style.getZoomCss(midAnimationZoom));
       if (midAnimationZoom === state.currentTargetZoom && !isSliderActive()) {
         zoomAnimator = requestFrame(finishZoomOperation);
       }
@@ -239,10 +237,10 @@ define(
       };
 
     // Apply the new CSS
-    $body.css(animationCss);
+    $origBody.css(animationCss);
 
     // No zoomStopRequested() received for initial zoom
-    $body.one(ANIMATION_END_EVENTS, onGlideStopped);
+    $origBody.one(ANIMATION_END_EVENTS, onGlideStopped);
   }
 
   function getAnimationKeyFrames(targetZoom, doEase, doIncludeTimePercent) {
@@ -290,7 +288,7 @@ define(
         });
     }
     else {
-      $body.css(zoomCss);
+      $origBody.css(zoomCss);
     }
     if (thumbChangeListener) {
       thumbChangeListener(state.currentTargetZoom);
@@ -352,7 +350,7 @@ define(
       elementDotAnimatePlayer.cancel();
       elementDotAnimatePlayer = null;
     }
-    $body
+    $origBody
       .css(style.getZoomCss(state.currentTargetZoom))
       .css('animation', '');
     finishZoomOperation();
@@ -362,7 +360,7 @@ define(
   function finishZoomOperation() {
     if (elementDotAnimatePlayer) {
       // Can't leave animation player around, as it will prevent future animations
-      $body.css(style.getZoomCss(state.currentTargetZoom));
+      $origBody.css(style.getZoomCss(state.currentTargetZoom));
       elementDotAnimatePlayer.onfinish = null;
       elementDotAnimatePlayer.cancel();
     }
@@ -382,13 +380,13 @@ define(
     bodyGeo.determineScrollbars();
 
     // Restore mouse cursor events and CSS behavior
-    $body.css('pointerEvents', '');
+    $('body').css('pointerEvents', '');
 
     style.applyZoomFormFixes(state.completedZoom);
 
     // Indicate that zooming has finished -- this is used by the sitecues-zoom-form-fix stylesheet
     setTimeout(function() {
-      $body.removeAttr('data-sc-zooming');
+      $('body').removeAttr('data-sc-zooming');
     }, 0);
 
     // notify all about zoom change
@@ -454,7 +452,7 @@ define(
     clearTimeout(minZoomChangeTimer);
     clearTimeout(zoomBeginTimer);
     cancelGlideChangeTimer();
-    $body.off(ANIMATION_END_EVENTS, onGlideStopped);
+    $origBody.off(ANIMATION_END_EVENTS, onGlideStopped);
     $(window).off('keyup', finishGlideIfEnough);
   }
 
@@ -479,7 +477,7 @@ define(
 
   function freezeZoom() {
     state.currentTargetZoom = getActualZoom();
-    $body.css(style.getZoomCss(state.currentTargetZoom));
+    $origBody.css(style.getZoomCss(state.currentTargetZoom));
     if (elementDotAnimatePlayer) {
       elementDotAnimatePlayer.onfinish = null;
       elementDotAnimatePlayer.cancel();
@@ -520,7 +518,7 @@ define(
     zoomAnimator = requestFrame(function () {
       // Stop the key-frame animation at the current zoom level
       // Yes, it's crazy, but this sequence helps the zoom stop where it is supposed to, and not jump back a little
-      $body.css({
+      $origBody.css({
         animationPlayState: 'paused'
       });
       zoomAnimator = requestFrame(function() {
@@ -561,7 +559,7 @@ define(
     viewport.init();
     //This module is initialized after body has been parsed
     body = document.body;
-    $body = $(body);
+    $origBody = $(body);
     shouldUseElementDotAnimate = platform.browser.isChrome && body.animate;
   }
 

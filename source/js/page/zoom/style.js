@@ -228,10 +228,10 @@ define(
     if (!shouldRepaintOnZoomChange) {
       return;
     }
-    var $body = $('body'); // Make sure we get clone body as well, if present
-    $body.attr(CRISPING_ATTRIBUTE, '');
+    var $anyBody = $('body'); // Make sure we get clone body as well, if present
+    $anyBody.attr(CRISPING_ATTRIBUTE, '');
     setTimeout(function() {
-      $body.removeAttr(CRISPING_ATTRIBUTE);
+      $anyBody.removeAttr(CRISPING_ATTRIBUTE);
     }, REPAINT_FOR_CRISP_TEXT_DELAY);
 
     var MAX_ZINDEX = 2147483647,

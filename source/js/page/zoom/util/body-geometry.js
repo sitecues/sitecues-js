@@ -22,7 +22,7 @@ define(
 
   'use strict';
 
-  var body, $body, docElem,
+  var body, $origBody, docElem,
     isInitialized = false,
     callbacks = [],
     cachedDocumentScrollWidth,
@@ -393,7 +393,7 @@ define(
       shouldManuallyAddScrollbars = platform.browser.isMS;
       body = document.body;
       docElem = document.documentElement;
-      $body = $(body);
+      $origBody = $(body);
       refreshBodyInfo();
       executeCallbacks();
       return;
