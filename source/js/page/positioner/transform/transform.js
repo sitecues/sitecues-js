@@ -82,7 +82,7 @@ define(
       lastPageYOffset          = elementMap.getField(element, 'lastPageYOffset') || currentPageYOffset,
       viewportWidth            = viewportDims.width,
       viewportHeight           = viewportDims.height,
-      currentScale             = elementInfo.getScale(element),
+      currentScale             = elementInfo.getScale(element, 'fixed'),
       unscaledRect             = rectCache.getUnscaledRect(element, currentScale),
       translationValues        = getTranslationValues(element),
       currentXTranslation      = translationValues.x,
