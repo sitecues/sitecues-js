@@ -5,13 +5,15 @@
 // TODO add a close button
 
 define([
+  'Promise',
   'core/bp/constants',
   'core/bp/model/state',
   'core/bp/helper',
   'core/bp/view/palette',
   'core/bp/view/view'
 ],
-  function(BP_CONST,
+  function(Promise,
+           BP_CONST,
            state,
            helper,
            palette,
@@ -19,11 +21,11 @@ define([
   var TOOLBAR_HEIGHT = 38;
 
   function adjustFixedElementsBelowToolbar() {
-    require(['page/zoom/util/body-geometry', 'page/positioner/positioner'], function (bodyGeo, positioner) {
-      // In the case of the toolbar, we must always move fixed position elements
-      // down, so that they are not obscured by our toolbar.
-      bodyGeo.init(function () {
-        positioner.init(TOOLBAR_HEIGHT);
+    return new Promise(function(resolve) {
+      require(['page/positioner/positioner'], function (positioner) {
+        // In the case of the toolbar, we must always move fixed position elements
+        // down, so that they are not obscured by our toolbar.
+        positioner.initFromToolbar(resolve, TOOLBAR_HEIGHT);
       });
     });
   }
@@ -40,9 +42,7 @@ define([
     state.set('isPageBadge', false);
     state.set('isToolbarBadge', true);
 
-    adjustFixedElementsBelowToolbar();
-
-    return palette.init(null)
+    return Promise.all([adjustFixedElementsBelowToolbar(), palette.init(null)])
       .then(function() {
         baseView.init(toolbarElement);
       });

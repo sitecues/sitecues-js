@@ -73,8 +73,7 @@ define([
     return new Promise(function(resolve) {
       require(['bp-toolbar-badge/bp-toolbar-badge'], function (toolbarView) {
         badgeView = toolbarView;
-        badgeView.init();
-        resolve();
+        badgeView.init().then(resolve);
       });
     });
   }

@@ -14,6 +14,7 @@
     'page/positioner/util/element-info',
     'page/positioner/util/element-map',
     'page/positioner/constants',
+    'page/zoom/util/body-geometry',
     'core/events'
   ],
   function (
@@ -26,6 +27,7 @@
     elementInfo,
     elementMap,
     constants,
+    bodyGeo,
     events
   ) {
   var originalBody, docElem, unprocessedTransplantCandidates,
@@ -247,11 +249,22 @@
     }
   }
 
-  function init(toolbarHeight) {
-    if (isInitialized) {
-      return;
-    }
+  function init(callback) {
     isInitialized = true;
+
+    function onBodyGeoInitialized() {
+
+      elementInfo.init();
+
+      if (doUseTransplantOperation) {
+        unprocessedTransplantCandidates = new Set();
+        transplant.init();
+      }
+
+      events.on('zoom', onZoom);
+
+      callback();
+    }
 
     // Internet Explorer doesn't require us to use the transplant algorithm because transformed elements do not create new
     // containing blocks for fixed descendants, and fixed descendants do not inherit transformations
@@ -259,34 +272,40 @@
     docElem      = document.documentElement;
     originalBody = document.body;
 
-    var
-      isZoomed = state.completedZoom > 1,
-      // The toolbar may overlap with fixed elements so we'll need to transform them immediately
-      doTransformFixedElementsOnLoad = Boolean(toolbarHeight);
+    return bodyGeo.init(onBodyGeoInitialized);
+  }
 
-    elementInfo.init();
-    transform.init(toolbarHeight);
-
-    if (doUseTransplantOperation) {
-      unprocessedTransplantCandidates = new Set();
-      transplant.init();
+  function initFromToolbar(callback, toolbarHeight) {
+    if (isInitialized) {
+      callback();
+      return;
     }
 
-    if (doTransformFixedElementsOnLoad) {
+    transform.init(toolbarHeight);
+    init(function() {
+      // The toolbar may overlap with fixed elements so we'll need to transform them immediately
       // Fixed position elements are located and their position locked, so that we can run handlers before
       // and after the element's position changes.
-      styleLock.init(initFixedPositionListener);
-    }
+      styleLock.init(function() {
+        initFixedPositionListener();
+        callback();
+      });
+    });
+  }
 
-    // We only need to use the transplant algorithm once we've applied a transformation on the body, i.e. when we've zoomed
-    if (isZoomed) {
-      setTimeout(onZoom, 0, state.completedZoom);
+  function initFromZoom() {
+    if (!isInitialized) {
+      transform.init();
+      init(function () {
+        // We only need to use the transplant algorithm once we've applied a transformation on the body, i.e. when we've zoomed
+        setTimeout(onZoom, 0, state.completedZoom);
+      });
     }
-    events.on('zoom', onZoom);
   }
 
   return {
-    init: init,
+    initFromZoom: initFromZoom,
+    initFromToolbar: initFromToolbar,
     unlockPositionedElements: unlockPositionedElements
   };
 });
