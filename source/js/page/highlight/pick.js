@@ -817,7 +817,7 @@ define(['$', 'page/util/common', 'core/conf/user/manager', 'core/conf/site',
     // Check for nodeType of 1, which is an element
     // If not, use the parent of the node
     var element = node.nodeType === 1 ? node : node.parentNode;
-    return ! $.contains(document.body, element) || // Is not in the <body>
+    return ! $(element).closest('body').length ||  // Is not in the <body> (must also check clone body)
       $(element).closest('#sitecues-badge,#scp-bp-container').length;
   }
 
