@@ -738,7 +738,8 @@ define(
       // Search one more time, from beginning instead of mid-point.
       // Wraps to beginning/end of document depending on direction.
       // This doesn't happen often so code here is optimized for size rather than speed.
-      treeWalker.currentNode = isReverse ? treeWalker.currentNode = $('body').find('*').last()[0] : document.body;
+      // Don't try to use H command to navigate headings in the fixed areas.
+      treeWalker.currentNode = isReverse ? treeWalker.currentNode = $(document.body).find('*').last()[0] : document.body;
       if (!searchDocument()) {
         fail();
         return;

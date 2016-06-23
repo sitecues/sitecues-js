@@ -2,10 +2,37 @@
 // TODO Test! Especially in IE
 //TODO: Break this module down a bit, there are too many dependencies and it is huge
 /*jshint -W072 */ //Currently there are too many dependencies, so we need to tell JSHint to ignore it for now
-define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 'page/highlight/traitcache',
-        'page/highlight/highlight-position', 'page/util/common', 'page/util/color', 'page/util/geo', 'page/util/element-classifier',
-        'core/platform', 'page/highlight/constants', 'core/events', 'core/dom-events', 'page/zoom/util/body-geometry'],
-  function($, conf, zoomMod, picker, traitcache, mhpos, common, colorUtil, geo, elementClassifier, platform, constants, events, domEvents,
+define([
+  '$',
+  'core/conf/user/manager',
+  'page/highlight/pick',
+  'page/highlight/traitcache',
+  'page/highlight/highlight-position',
+  'page/util/common',
+  'page/util/color',
+  'page/util/geo',
+  'page/util/element-classifier',
+  'core/platform',
+  'page/highlight/constants',
+  'core/events',
+  'core/dom-events',
+  'page/zoom/zoom',
+  'page/zoom/util/body-geometry'
+],
+  function($,
+           conf,
+           picker,
+           traitcache,
+           mhpos,
+           common,
+           colorUtil,
+           geo,
+           elementClassifier,
+           platform,
+           constants,
+           events,
+           domEvents,
+           zoomMod,
            bodyGeo) {
 /*jshint +W072 */
   var
@@ -229,7 +256,7 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
   // The smaller the number, the less visible the highlight is
   function getHighlightVisibilityFactor() {
     var MIN_VISIBILITY_FACTOR_WITH_TTS = 2.1,
-        vizFactor = (state.zoom + 0.6) * 0.9;
+        vizFactor = (zoomMod.getCompletedZoom() + 0.6) * 0.9;
     if (isSpeechEnabled && vizFactor < MIN_VISIBILITY_FACTOR_WITH_TTS) {
       vizFactor = MIN_VISIBILITY_FACTOR_WITH_TTS;
     }
@@ -242,14 +269,14 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
       return DARK_BG_BORDER_COLOR;
     }
 
-    var viz = getHighlightVisibilityFactor(),
+    var viz = state.highlightIntensity,
       colorMultiplier = -80,
       color = Math.round(Math.max(0, 200 + viz * colorMultiplier));
     return 'rgb(' + color + ',' + color + ',' + (color + 30) +')';
   }
 
   function getHighlightBorderWidth() {
-    var viz = getHighlightVisibilityFactor(),
+    var viz = state.highlightIntensity,
         borderWidth = viz + 0.33 + (state.hasDarkBackgroundColor ? EXTRA_DARK_BG_BORDER_WIDTH : 0);
     return Math.max(1, borderWidth) * state.zoom;
   }
@@ -259,7 +286,7 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
     // change it drastically
     // This lightens at higher levels of zoom
     var maxViz = state.hasDarkBackgroundColor || state.hasLightText ? 1 : 9,
-      viz = Math.min(getHighlightVisibilityFactor(), maxViz),
+      viz = Math.min(state.highlightIntensity, maxViz),
       alpha = 0.11 * viz;
     return 'rgba(240, 240, 180, ' + alpha + ')'; // Works with any background -- lightens it slightly
   }
@@ -267,7 +294,7 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
   function getOpaqueBackgroundColor() {
     // Best to use opaque color, because inner overlay doesn't match up perfectly causing overlaps and gaps
     // It lightens at higher levels of zoom
-    var viz = getHighlightVisibilityFactor(),
+    var viz = state.highlightIntensity,
         decrement = viz * 1.4,
         red = Math.round(255 - decrement),
         green = red,
@@ -323,8 +350,8 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
     }
 
     // Update state to ensure it is current
-    state.zoom = zoomMod.getCompletedZoom();
     state.styles = getAncestorStyles(state.picked[0], document.documentElement);
+    state.highlightIntensity = getHighlightVisibilityFactor();
 
     updateColorApproach(state.picked, state.styles);
 
@@ -868,6 +895,20 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
     return svg;
   }
 
+  // TODO Make this robust -- what if the page itself is putting in a transform?
+  function getZoom(overlayContainerElem) {
+    var isFixed = traitcache.getStyleProp(overlayContainerElem, 'position') === 'fixed';
+
+    if (isFixed) {
+      var elemTransform = overlayContainerElem.style[platform.transformProperty],
+        scaleSplit = elemTransform.split('scale(');
+      return parseFloat(scaleSplit[1]) || 1;
+    }
+
+    // Not a fixed element, so use the current zoom level on the body
+    return zoomMod.getCompletedZoom();
+  }
+
   function getOverlayRect() {
     var mainFixedRect = state.fixedContentRect,
       overlayRect = {
@@ -930,8 +971,10 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
     while (++ index < numAncestors - 1) {
       ancestor = ancestor.parentElement;
       ancestorStyle = state.styles[index];
-      if (ancestorStyle.position !== 'static' && ancestorStyle.position !== 'relative' &&
-        hasVerticalOverflow()) {
+      if (ancestorStyle.position === 'fixed') {
+        return ancestor;  // fixed elements have their own zoom and panning
+      }
+      if (ancestorStyle.position === 'absolute' && hasVerticalOverflow()) {
         return ancestor;
       }
       // Don't tie to horizontal scroll -- these tend to not scrolled via
@@ -995,6 +1038,9 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
       return;
     }
 
+    state.overlayContainer = getBestOverlayContainer();
+    state.zoom = getZoom(state.overlayContainer);
+
     mhpos.combineIntersectingRects(fixedRects, 99999); // Merge all boxes
     var mainFixedRect = fixedRects[0]; // For now just use 1
     state.fixedContentRect = roundRectCoordinates(mainFixedRect);
@@ -1019,7 +1065,6 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
 
     state.isCreated = true;
 
-    state.overlayContainer = getBestOverlayContainer();
     state.overlayRect = getOverlayRect();
     state.absoluteRect = getAbsoluteRect();
 
@@ -1349,10 +1394,10 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
 
     var addOrRemoveFn = isTrackingMouse ? domEvents.on : domEvents.off;
     addOrRemoveFn(document, 'mousemove', onMouseMove);
-      if (platform.browser.isFirefox) {
+    if (platform.browser.isFirefox) {
       // Mitigate lack of mousemove events when scroll finishes
       addOrRemoveFn(document, 'mouseover', onMouseMove);
-      }
+    }
 
     addOrRemoveFn(document, 'focusin', testFocus);
     addOrRemoveFn(document, 'focusout', testFocus);

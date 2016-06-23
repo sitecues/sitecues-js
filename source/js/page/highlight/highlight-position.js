@@ -178,7 +178,7 @@ define(['$', 'page/util/common', 'page/util/element-classifier', 'page/zoom/zoom
   }
 
   function getOverflowRect(element, style) {
-    if (element === document.body) {
+    if (element.localName === 'body') {
       return; // The <body> element is generally reporting a different scroll width than client width
     }
     var clientHeight = element.clientHeight;

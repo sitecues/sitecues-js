@@ -750,7 +750,7 @@ define(['$', 'page/util/common', 'core/conf/user/manager', 'core/conf/site',
       ancestorRect,
       isInWideContainer = 0,
       isInTallContainer = 0;
-    while (ancestor !== document.body) {
+    while (ancestor.localName !== 'body') {
       ancestorRect = traitcache.getScreenRect(ancestor);
       portionOfBodyWidth = ancestorRect.width / bodyWidth;
       portionOfBodyHeight = ancestorRect.height / bodyHeight;
