@@ -21,7 +21,8 @@ define(
     'page/zoom/util/viewport',
     'page/positioner/util/element-info',
     'core/platform',
-    'page/zoom/style'
+    'page/zoom/style',
+    'page/positioner/util/rect-cache'
   ],
   function (
     helper,
@@ -32,11 +33,9 @@ define(
     viewport,
     elementInfo,
     platform,
-    zoomStyle
+    zoomStyle,
+    rectCache
   ) {
-
-  'use strict';
-
   var
     shouldRepaintOnZoomChange,
     transformProperty, transformOriginProperty,
@@ -48,6 +47,114 @@ define(
     isTransformingOnResize = false,
     // If we're using the toolbar, we need to transform fixed elements immediately or they may cover the toolbar / be covered
     isTransformingOnScroll = false;
+
+  // This function scales and translates fixed elements as needed, e.g. if we've zoomed and the body is wider than the element
+  function transformFixedElement(element, opts) {
+
+    function getTranslationValues(element) {
+      var
+        split  = element.style[transformProperty].split(/(?:\()|(?:px,*)/),
+        index  = split.indexOf('translate3d'),
+        values = { x: 0, y: 0 };
+      if (index >= 0) {
+        values.x = parseFloat(split[index + 1]);
+        values.y = parseFloat(split[index + 2]);
+      }
+      return values;
+    }
+
+    function cachePageOffsets(element, xOffset, yOffset) {
+      elementMap.setField(element, 'lastPageXOffset', xOffset);
+      elementMap.setField(element, 'lastPageYOffset', yOffset);
+    }
+
+    function setNewTransform(element, translateX, translateY, scale) {
+      element.style[transformProperty] = 'translate3d(' + translateX + 'px, ' + translateY + 'px, 0) scale(' + scale + ')';
+    }
+
+    var
+      resetCurrentTranslation  = opts.resetTranslation,
+      pageOffsets              = viewport.getPageOffsets(),
+      viewportDims             = viewport.getInnerDimensions(),
+      currentPageXOffset       = pageOffsets.x,
+      currentPageYOffset       = pageOffsets.y,
+      lastPageXOffset          = elementMap.getField(element, 'lastPageXOffset') || currentPageXOffset,
+      lastPageYOffset          = elementMap.getField(element, 'lastPageYOffset') || currentPageYOffset,
+      viewportWidth            = viewportDims.width,
+      viewportHeight           = viewportDims.height,
+      currentScale             = elementInfo.getScale(element),
+      unscaledRect             = rectCache.getUnscaledRect(element, currentScale),
+      translationValues        = getTranslationValues(element),
+      currentXTranslation      = translationValues.x,
+      currentYTranslation      = translationValues.y,
+      newXTranslation          = currentXTranslation,
+      newYTranslation          = currentYTranslation,
+      verticalScrollDifference = currentPageYOffset - lastPageYOffset;
+
+    // On zoom we should reset the current translations to
+    // 1. reassess if we should shift the element vertically down by the toolbar offset
+    // 2. we may not need to horizontally pan the element depending on its new width
+    if (resetCurrentTranslation) {
+      unscaledRect.left -= currentXTranslation;
+      unscaledRect.top  -= currentYTranslation;
+      newXTranslation = 0;
+      newYTranslation = 0;
+      currentYTranslation = 0;
+      currentXTranslation = 0;
+      elementMap.flushField(element, 'isShifted');
+    }
+
+    var newScale = restrictScale(unscaledRect, opts.onResize);
+    elementMap.setField(element, 'scale', newScale);
+
+    if (!unscaledRect.width || !unscaledRect.height) {
+      setNewTransform(element, 0, 0, newScale);
+      cachePageOffsets(element, currentPageXOffset, currentPageYOffset);
+      return;
+    }
+
+    // Calculate the dimensions of the fixed element after we apply the next scale transform
+    var rect = {
+      width: unscaledRect.width * newScale,
+      height: unscaledRect.height * newScale,
+      top: unscaledRect.top,
+      left: unscaledRect.left
+    };
+    rect.bottom = rect.top  + rect.height;
+    rect.right  = rect.left + rect.width;
+
+    newXTranslation = calculateXTranslation({
+      dimensions: rect,
+      currentXTranslation: currentXTranslation,
+      viewportWidth: viewportWidth,
+      scrollDifference: currentPageXOffset - lastPageXOffset,
+      currentPageXOffset: currentPageXOffset,
+      lastPageXOffset: lastPageXOffset
+    });
+    
+    newYTranslation = calculateYTranslation({
+      element: element,
+      dimensions: rect,
+      currentYTranslation: currentYTranslation,
+      viewportHeight: viewportHeight,
+      scrollDifference: verticalScrollDifference,
+      currentPageYOffset: currentPageYOffset,
+      resetCurrentTranslation: resetCurrentTranslation
+    });
+
+    var
+      xDelta = resetCurrentTranslation ? newXTranslation : newXTranslation - currentXTranslation,
+      yDelta = resetCurrentTranslation ? newYTranslation : newYTranslation - currentYTranslation;
+
+    rect.top    += yDelta;
+    rect.bottom += yDelta;
+    rect.left   += xDelta;
+    rect.right  += xDelta;
+
+    setNewTransform(element, newXTranslation, newYTranslation, newScale);
+    cachePageOffsets(element, currentPageXOffset, currentPageYOffset);
+    rectCache.update(element, rect);
+  }
 
   function calculateXTranslation(args) {
     var
@@ -110,8 +217,8 @@ define(
         currentYTranslation += toolbarHeight;
         elementMap.setField(element, 'isShifted', true);
       }
-      top    += currentYTranslation;
-      bottom += currentYTranslation;
+      top    += toolbarHeight;
+      bottom += toolbarHeight;
     }
 
     var
@@ -170,17 +277,6 @@ define(
     return Math.min(state.fixedZoom, scrollWidth / dimensions.width);
   }
 
-  // Divide the bounding rectangle dimensions by the element's transform scale
-  function calculateUnscaledRect(element, scale) {
-    var rect = calculateRenderedBoundingRect(element);
-    return {
-      width: rect.width / scale,
-      height: rect.height / scale,
-      left: rect.left,
-      top: rect.top
-    };
-  }
-
   function shouldVerticallyShiftFixedElement(top, bottom, viewportHeight, elementHeight) {
     var
       isOverlappingToolbar = top < toolbarHeight,
@@ -192,142 +288,6 @@ define(
     // Fixed elements that are close to the bottom or top are much more likely to be part of fixed menus that are
     // intended to be flush with the edges of the viewport
     return isTallerThanViewport || isOverlappingToolbar || isInMiddle;
-  }
-
-  // This function scales and translates fixed elements as needed, e.g. if we've zoomed and the body is wider than the element
-  function transformFixedElement(element, opts) {
-
-    function shouldShiftUnrenderedElement(element) {
-      var originalDisplay = element.style.display;
-
-      element.style.display = 'block';
-
-      var
-        rect           = element.getBoundingClientRect(),
-        top            = rect.top,
-        bottom         = rect.bottom,
-        height         = rect.height,
-        viewportHeight = viewport.getInnerHeight();
-
-      element.style.display = originalDisplay;
-      return shouldVerticallyShiftFixedElement(top, bottom, viewportHeight, height);
-    }
-
-    function getTranslationValues(element) {
-      var
-        split  = element.style[transformProperty].split(/(?:\()|(?:px,*)/),
-        index  = split.indexOf('translate3d'),
-        values = { x: 0, y: 0 };
-      if (index >= 0) {
-        values.x = parseFloat(split[index + 1]);
-        values.y = parseFloat(split[index + 2]);
-      }
-      return values;
-    }
-
-    function cachePageOffsets(element, xOffset, yOffset) {
-      elementMap.setField(element, 'lastPageXOffset', xOffset);
-      elementMap.setField(element, 'lastPageYOffset', yOffset);
-    }
-
-    function setNewTransform(element, translateX, translateY, scale) {
-      element.style[transformProperty] = 'translate3d(' + translateX + 'px, ' + translateY + 'px, 0) scale(' + scale + ')';
-    }
-
-    var unscaledRect,
-      resetCurrentTranslation = opts.resetTranslation,
-      pageOffsets         = viewport.getPageOffsets(),
-      viewportDims        = viewport.getInnerDimensions(),
-      currentPageXOffset  = pageOffsets.x,
-      currentPageYOffset  = pageOffsets.y,
-      lastPageXOffset     = elementMap.getField(element, 'lastPageXOffset') || currentPageXOffset,
-      lastPageYOffset     = elementMap.getField(element, 'lastPageYOffset') || currentPageYOffset,
-      viewportWidth       = viewportDims.width,
-      viewportHeight      = viewportDims.height,
-      // If we've never scaled this element before, it's possible that this element is inheriting a transformation from the original body
-      // It's important that we know the resolved transformation so that we can calculate the element's untransformed dimensions.
-      // This method is less expensive than computing the resolved transformation, and the math is simpler
-      currentScale        = elementInfo.getScale(element),
-      translationValues   = getTranslationValues(element),
-      currentXTranslation = translationValues.x,
-      currentYTranslation = translationValues.y,
-      verticalScrollDifference = currentPageYOffset - lastPageYOffset;
-
-    // If we haven't vertically scrolled, we can cache the bounding rectangle of the fixed element.
-    // The reasoning for this is that fixed elements typically aren't dynamically fixed/unfixed on horizontal scroll,
-    // and by caching the rectangle our performance in IE is significantly improved
-    if (verticalScrollDifference || resetCurrentTranslation) {
-      unscaledRect = calculateUnscaledRect(element, currentScale);
-      elementMap.setField(element, 'unscaledRect', unscaledRect);
-    }
-    else {
-      unscaledRect = elementMap.getField(element, 'unscaledRect') || calculateUnscaledRect(element, currentScale);
-    }
-
-    // On zoom we should reset the current translations to
-    // 1. reassess if we should shift the element vertically down by the toolbar offset
-    // 2. we may not need to horizontally pan the element depending on its new width
-    if (resetCurrentTranslation) {
-      unscaledRect.left -= currentXTranslation;
-      unscaledRect.top  -= currentYTranslation;
-      currentXTranslation = 0;
-      currentYTranslation = 0;
-      elementMap.flushField(element, 'isShifted');
-    }
-
-    var newScale = restrictScale(unscaledRect, opts.onResize);
-    elementMap.setField(element, 'scale', newScale);
-
-    if (!unscaledRect.width || !unscaledRect.height) {
-      elementMap.setField(element, 'isDimensionless', true);
-
-      // We don't run a handler when elements become visible, so to be safe shift the fixed element below the toolbar
-      if (resetCurrentTranslation && !elementMap.getField(element, 'isShifted') && shouldShiftUnrenderedElement(element)) {
-        currentYTranslation += toolbarHeight;
-        elementMap.setField(element, 'isShifted', true);
-      }
-
-      setNewTransform(element, currentXTranslation, currentYTranslation, newScale);
-      cachePageOffsets(element, currentPageXOffset, currentPageYOffset);
-      return;
-    }
-
-    if (elementMap.getField(element, 'isDimensionless')) {
-      resetCurrentTranslation = true;
-      elementMap.flushField(element, 'isDimensionless');
-    }
-
-    // Calculate the dimensions of the fixed element after we apply the next scale transform
-    var rect = {
-      width: unscaledRect.width * newScale,
-      height: unscaledRect.height * newScale,
-      top: unscaledRect.top,
-      left: unscaledRect.left
-    };
-    rect.bottom = rect.top  + rect.height;
-    rect.right  = rect.left + rect.width;
-
-    var
-      newXTranslation = calculateXTranslation({
-        dimensions: rect,
-        currentXTranslation: currentXTranslation,
-        viewportWidth: viewportWidth,
-        scrollDifference: currentPageXOffset - lastPageXOffset,
-        currentPageXOffset: currentPageXOffset,
-        lastPageXOffset: lastPageXOffset
-      }),
-      newYTranslation = calculateYTranslation({
-        element: element,
-        dimensions: rect,
-        currentYTranslation: currentYTranslation,
-        viewportHeight: viewportHeight,
-        scrollDifference: verticalScrollDifference,
-        currentPageYOffset: currentPageYOffset,
-        resetCurrentTranslation: resetCurrentTranslation
-      });
-
-    setNewTransform(element, newXTranslation, newYTranslation, newScale);
-    cachePageOffsets(element, currentPageXOffset, currentPageYOffset);
   }
 
   function transformAllTargets(opts) {
@@ -374,13 +334,19 @@ define(
     }
   }
 
-  function onTargetAdded(element) {
-    element.style[transformOriginProperty] = '0 0';
-    transformFixedElement(element, {
+  function refreshElementTransform() {
+    transformFixedElement(this, {
       resetTranslation: true
     });
-    refreshScrollListener(element);
-    refreshResizeListener(element);
+    refreshScrollListener(this);
+    refreshResizeListener(this);
+  }
+
+  function onTargetAdded(element) {
+    element.style[transformOriginProperty] = '0 0';
+    // This handler runs when a style relevant to @element's bounding rectangle has mutated
+    rectCache.listenForMutatedRect(element, refreshElementTransform);
+    refreshElementTransform.call(element);
   }
 
   function onTargetRemoved(element) {
@@ -389,7 +355,7 @@ define(
     // This is the cached metadata we used for transforming the element. We need to clear it now that
     // the information is stale
     elementMap.flushField(element, [
-      'isDimensionless', 'lastPageXOffset', 'lastPageYOffset',
+      'isUnrendered', 'lastPageXOffset', 'lastPageYOffset',
       'unscaledRect', 'scale'
     ]);
     refreshResizeListener(element);
@@ -452,6 +418,7 @@ define(
     if (toolbarHght) {
       toolbarHeight = toolbarHght;
     }
+    rectCache.init();
     // In Chrome we have to trigger a repaint after we transform elements because it causes blurriness
     shouldRepaintOnZoomChange = platform.browser.isChrome;
     transformProperty         = platform.transformProperty;

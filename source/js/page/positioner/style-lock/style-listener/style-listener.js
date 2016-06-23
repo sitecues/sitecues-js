@@ -62,7 +62,7 @@ define(
     *   elementReference: { property: [handler] }
     * }
     * */
-    elementHandlerMap = new WeakMap();
+    elementPropertyHandlerMap = new WeakMap();
 
 
     function onMutations(mutations) {
@@ -160,6 +160,7 @@ define(
         lockValue      = element.getAttribute(lockAttribute),
         cachedValue    = elementInfo.getCacheValue(element, property);
 
+
       if (lockValue) {
         // This attribute 'reinforces' the value this element previously resolved to by applying it with importance
         // We need to remove it in order to compute the intended resolved value
@@ -168,13 +169,22 @@ define(
 
       var
         resolvedValue    = style[property],
-        elementHandlers  = elementHandlerMap.get(element),
-        propertyHandlers = elementHandlers && elementHandlers[property];
+        elementHandlers  = elementPropertyHandlerMap.get(element),
+        propertyHandlers = elementHandlers && elementHandlers[property],
+        opts             = {
+          property  : property,
+          toValue   : resolvedValue,
+          fromValue : cachedValue
+        };
+
+      if (lockValue) {
+        element.setAttribute(lockAttribute, lockValue);
+      }
 
       if (propertyHandlers && cachedValue !== resolvedValue) {
         // These element handlers run when the element's resolved value for a given style property has mutated from its cached value
         propertyHandlers.forEach(function (fn) {
-          fn.call(this);
+          fn.call(element, opts);
         });
       }
 
@@ -186,8 +196,7 @@ define(
           resolvedElements = resolvedElementsMap[declarationKey] || [],
           isMatching       = resolvedValue === observedValue,
           elementIndex     = resolvedElements.indexOf(element),
-          wasMatching      = elementIndex !== -1,
-          opts             = { property: property, toValue: resolvedValue, fromValue: elementInfo.getCacheValue(element, property) };
+          wasMatching      = elementIndex !== -1;
 
         if (isMatching && !wasMatching) {
           handlerKey = 'to_' + declarationKey;
@@ -208,10 +217,6 @@ define(
       }
 
       elementInfo.setCacheValue(element, property, resolvedValue);
-
-      if (lockValue) {
-        element.setAttribute(lockAttribute, lockValue);
-      }
     });
     runHandlers(fromHandlers);
     runHandlers(toHandlers);
@@ -284,12 +289,12 @@ define(
   }
 
   // Runs the passed handler when @element's resolved @property value has changed
-  function registerElementMutationHandler(element, property, handler) {
+  function registerPropertyMutationHandler(element, declaration, handler) {
     var
-      style              = getComputedStyle(element),
-      value              = style[property],
+      property           = declaration.property,
+      value              = declaration.value,
       isPropertyObserved = observedProperties.indexOf(property) !== -1,
-      handlers           = elementHandlerMap.get(element) || {};
+      handlers           = elementPropertyHandlerMap.get(element) || {};
 
     // If we've already attached handlers to run when this element's resolved property mutates,
     // we know that we're already listening for relevant document mutations
@@ -303,7 +308,7 @@ define(
       }
     }
     addToResolvedElementsMap(element, property, value);
-    elementHandlerMap.set(element, handlers);
+    elementPropertyHandlerMap.set(element, handlers);
   }
 
   // This map caches elements we know have a given resolved value
@@ -400,7 +405,7 @@ define(
   }
 
   return {
-    registerElementMutationHandler: registerElementMutationHandler,
+    registerPropertyMutationHandler: registerPropertyMutationHandler,
     registerToResolvedValueHandler: registerToResolvedValueHandler,
     registerFromResolvedValueHandler: registerFromResolvedValueHandler,
     getElementsWithResolvedValue: getElementsWithResolvedValue,

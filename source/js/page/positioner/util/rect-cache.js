@@ -1,40 +1,54 @@
 define(
   [
+    '$',
     'core/bp/helper',
-    'page/positioner/style-lock/style-listener/style-listener'
+    'page/positioner/style-lock/style-lock',
+    'core/events',
+    'core/dom-events'
   ],
   function (
+    $,
     helper,
-    styleListener
+    styleLock,
+    events,
+    domEvents
   ) {
-
-  'use strict';
-
   var
     // For convenience this map keeps track of which elements we're currently observing
     observedElementMap = new WeakMap(),
     // This map caches the bounding rectangle for each element
     elementToRectMap   = new WeakMap();
 
+  function clearCache() {
+    if (this && this.nodeType === Node.ELEMENT_NODE) {
+      elementToRectMap.set(this, null);
+    }
+    else {
+      elementToRectMap = new WeakMap();
+    }
+  }
+
+  function getUnscaledRect(element, scale) {
+    var rect = $.extend({}, getRect(element));
+    rect.height /= scale;
+    rect.width  /= scale;
+    rect.right  = null;
+    rect.bottom = null;
+    return rect;
+  }
+
   function getRect(element) {
     var
       rect              = elementToRectMap.get(element),
       isElementObserved = observedElementMap.get(element);
-
-    console.log('getRect:', element);
-    console.log('rect:', rect);
 
     if (rect) {
       return rect;
     }
 
     rect = helper.getRect(element);
-    console.log('new rect:', rect);
 
-    if (!isElementObserved) {
-      listenForRectangleMutations(element);
-    }
-    else {
+    if (isElementObserved) {
       elementToRectMap.set(element, rect);
     }
 
@@ -43,27 +57,43 @@ define(
 
   function updateRect(element, rect) {
     var currentRect = elementToRectMap.get(element);
+    // The rect may have been invalidated already, in which case we should recalculate the bounding rectangle
     if (currentRect) {
       elementToRectMap.set(element, rect);
     }
   }
 
-  // We need to listen for style mutations that will impact the
-  function listenForRectangleMutations(element) {
-    styleListener.init(function () {
-      styleListener.registerElementMutationHandler(element, 'display', function () {
-        elementToRectMap.set(element, null);
+  // listen for style mutations that will impact the element's bounding rectangle
+  function listenForMutatedRect(element, handler) {
+    styleLock.init(function () {
+      // We only allow a single handler to be attached
+      if (observedElementMap.get(element)) {
+        return;
+      }
+
+      styleLock(element, 'display', {
+        before: clearCache,
+        after: handler
       });
-      styleListener.registerElementMutationHandler(element, 'position', function () {
-        console.log('position change:', element);
-        elementToRectMap.set(element, null);
+
+      styleLock(element, 'position', {
+        before: clearCache
       });
+
       observedElementMap.set(element, true);
     });
   }
 
+  function init() {
+    events.on('zoom', clearCache);
+    domEvents.on(window, 'resize', clearCache, { passive: false });
+  }
+
   return {
-    get: getRect,
-    update: updateRect
+    listenForMutatedRect: listenForMutatedRect,
+    getUnscaledRect: getUnscaledRect,
+    getRect: getRect,
+    update: updateRect,
+    init: init
   };
 });

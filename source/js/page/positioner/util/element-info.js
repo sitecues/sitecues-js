@@ -16,8 +16,12 @@ define(
 
 
   function getScale(element, position) {
+    // If we've never scaled this element before, it's possible that this element is inheriting a transformation from the original body
+    // It's important that we know the resolved transformation so that we can calculate the element's untransformed dimensions.
+    // This method is less expensive than computing the resolved transformation, and the math is simpler
     var
       fixed          = position === 'fixed',
+      // In IE, fixed elements do not inherit transformations
       inheritedScale = !(fixed && platform.browser.isIE) && isInOriginalBody(element);
     return elementMap.getField(element, 'scale') || (inheritedScale ? state.completedZoom : 1);
   }
@@ -27,11 +31,11 @@ define(
   }
 
   function getPosition(element) {
-    return getCacheValue(element, 'cache_position');
+    return getCacheValue(element, 'position');
   }
 
   function setPosition(element, value) {
-    setCacheValue(element, 'cache_position', value);
+    setCacheValue(element, 'position', value);
   }
 
   function getCacheValue(element, property) {

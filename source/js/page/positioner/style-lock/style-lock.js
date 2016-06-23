@@ -23,9 +23,9 @@ define(
     coreConstants,
     elementInfo
   ) {
-
   var stylesheet,
     noop                  = function () {},
+    elementHandlerMap     = new WeakMap(),
     declarationHandlerMap = {},
     initCallbacks         = [],
     lockSelectorMap       = {},
@@ -34,9 +34,78 @@ define(
     READY_STATE           = coreConstants.READY_STATE,
     readyState            = READY_STATE.UNINITIALIZED;
 
-  // Before and after handlers will run respectively before and after we remove the data-attribute stabilizing the style value
+  // This function is the entry point for the module. Depending on the arguments passed to the function, it will either
+  // lock a single element's resolved property value, or lock all elements in the document matching a given resolved declaration
+  function lock() {
+    var
+      args = Array.prototype.slice.call(arguments, 0),
+      arg3 = args[2];
+    // Three arguments means an element is meant to be locked
+    if (typeof arg3 === 'object') {
+      lockElementProperty.apply(null, args);
+    }
+    else {
+      lockResolvedDeclaration.apply(null, args);
+    }
+  }
+
+  // The handlers are run before and after the property's resolved value mutates
+  function lockElementProperty(element, property, handlers) {
+    styleListener.init(function () {
+
+      function onPropertyMutation(opts) {
+        var
+          value            = opts.toValue,
+          results          = [],
+          elementHandlers  = elementHandlerMap.get(this),
+          propertyHandlers = elementHandlers[opts.property],
+          beforeHandlers   = propertyHandlers.before,
+          afterHandlers    = propertyHandlers.after;
+
+        console.log('onPropertyMutation:', element);
+        console.log('property:', property);
+        console.log('fromValue:', opts.fromValue);
+        console.log('toValue:', value);
+
+        for (var i = 0, beforeCount = beforeHandlers.length; i < beforeCount; i++) {
+          results.push(beforeHandlers[i].call(this, opts));
+        }
+
+        lockStyle(this, property, value);
+
+        for (var j = 0, afterCount = afterHandlers.length; j < afterCount; j++) {
+          afterHandlers[j].call(this, results[j]);
+        }
+      }
+
+      var
+        before           = handlers.before || noop,
+        after            = handlers.after  || noop,
+        currentValue     = getComputedStyle(element)[property],
+        declaration      = { property: property, value: currentValue },
+        elementHandlers  = elementHandlerMap.get(element) || {},
+        propertyHandlers = elementHandlers[property];
+
+      if (propertyHandlers) {
+        propertyHandlers.before.push(before);
+        propertyHandlers.after.push(after);
+      }
+      else {
+        elementHandlers[property] = {
+          after  : [after],
+          before : [before]
+        };
+      }
+      elementHandlerMap.set(element, elementHandlers);
+      lockStyle(element, property, currentValue);
+      styleListener.registerPropertyMutationHandler(element, declaration, onPropertyMutation);
+    });
+  }
+
+  // Before and after handlers will run respectively before and after a non-sitecues element's resolved value mutates
+  // to and from the declaration
   // The initial handler will run when we identify elements with a resolved value matching the declaration
-  function attachHandlers(declaration, handlers) {
+  function lockResolvedDeclaration(declaration, handlers) {
     styleListener.init(function () {
       var
         initial  = handlers.initial || noop,
@@ -58,12 +127,6 @@ define(
             value    = args.fromValue,
             key      = property + '_' + value,
             handlers = declarationHandlerMap[key];
-
-          // If we unlocked the style prematurely because we unzoomed,
-          // we no longer have the previous style value to reference
-          if (!handlers) {
-            return;
-          }
 
           var
             beforeHandlers = handlers.before,
@@ -97,9 +160,10 @@ define(
         }
       }
 
-      if (declarationHandlerMap[key]) {
+      var declarationHandlers = declarationHandlerMap[key];
+
+      if (declarationHandlers) {
         // We're already listening for when elements lose or gain this resolved style value, add additional handlers
-        var declarationHandlers = declarationHandlerMap[key];
         declarationHandlers.before.push(before);
         declarationHandlers.after.push(after);
         declarationHandlers.initial.push(initial);
@@ -142,13 +206,18 @@ define(
 
   function lockStyle(element, property, value) {
     var
-      lockAttribute = LOCK_ATTR + property,
-      lockSelector  = lockSelectorMap[lockAttribute];
-    if (!lockSelector) {
-      lockSelector = '[' + lockAttribute + '="' + value + '"]';
-      appendStylesheet(lockSelector + ' { ' + property + ': ' + value + ' !important; }\n');
-      lockSelectorMap[lockAttribute] = lockSelector;
+      lockAttribute  = LOCK_ATTR + property,
+      attributeLocks = lockSelectorMap[lockAttribute] || {},
+      valueLock      = attributeLocks[value];
+    if (!valueLock) {
+      valueLock = '[' + lockAttribute + '="' + value + '"]';
+      appendStylesheet(valueLock + ' { ' + property + ': ' + value + ' !important; }\n');
+      attributeLocks[value] = valueLock;
+      lockSelectorMap[lockAttribute] = attributeLocks;
     }
+    console.log('lock element:', element);
+    console.log('lock attribute:', lockAttribute);
+    console.log('lock value:', value);
     element.setAttribute(lockAttribute, value);
   }
   
@@ -213,7 +282,8 @@ define(
     }
   }
 
-  attachHandlers.init = init;
-  attachHandlers.unlockStyle = unlockStyle;
-  return attachHandlers;
+  lock.init        = init;
+  lock.unlockStyle = unlockStyle;
+
+  return lock;
 });
