@@ -80,7 +80,7 @@ define(
 
       // This listener is a hacky way to detect if jQuery.fadeIn / fadeOut has been called on an element
       // We need to unlock display in this case, otherwise we see a flicker when opacity is removed but before
-      // the display style lock is removed.
+      // the display style lock is removed. This is an issue on TICC.com
       styleListener.registerPropertyMutationHandler(element, 'opacity', function () {
         styleLock.unlockStyle(this, 'display');
       });
