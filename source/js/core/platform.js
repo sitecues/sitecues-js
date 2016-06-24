@@ -31,7 +31,7 @@ define([], function() {
         agent.indexOf(' Firefox/') > 0 ? 'Firefox' :
         agent.indexOf(' Chrome') > 0 ? 'Chrome' :
         agent.indexOf(' Safari') > 0 ? 'Safari' :
-        (agent.indexOf(' Opera/') > 0 || agent.indexOf(' Presto/')) > 0 ? 'Opera' :
+        (agent.indexOf(' Opera/') > 0 || agent.indexOf(' Presto/') > 0) ? 'Opera' :
       '';
   }
 
