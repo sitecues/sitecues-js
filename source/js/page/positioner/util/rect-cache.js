@@ -3,6 +3,7 @@ define(
     '$',
     'core/bp/helper',
     'page/positioner/style-lock/style-lock',
+    'page/positioner/style-lock/style-listener/style-listener',
     'core/events',
     'core/dom-events'
   ],
@@ -10,6 +11,7 @@ define(
     $,
     helper,
     styleLock,
+    styleListener,
     events,
     domEvents
   ) {
@@ -74,6 +76,13 @@ define(
       styleLock(element, 'display', {
         before: clearCache,
         after: handler
+      });
+
+      // This listener is a hacky way to detect if jQuery.fadeIn / fadeOut has been called on an element
+      // We need to unlock display in this case, otherwise we see a flicker when opacity is removed but before
+      // the display style lock is removed.
+      styleListener.registerPropertyMutationHandler(element, 'opacity', function () {
+        styleLock.unlockStyle(this, 'display');
       });
 
       styleLock(element, 'position', {
