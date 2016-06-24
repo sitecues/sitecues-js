@@ -1,6 +1,5 @@
 define(
   [
-    'core/conf/user/manager',
     'page/zoom/util/body-geometry',
     'core/events',
     'page/zoom/util/viewport',
@@ -8,7 +7,6 @@ define(
     'page/zoom/zoom'
   ],
   function (
-    conf,
     bodyGeo,
     events,
     viewport,
