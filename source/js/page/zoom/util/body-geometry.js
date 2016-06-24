@@ -334,7 +334,8 @@ define(
 
     // -- Clear the scrollbars --
     $('html').css({
-      overflow: 'hidden'
+      overflowX: 'hidden',
+      overflowY: 'hidden'
     });
 
     // -- Set the scrollbars after a delay --
