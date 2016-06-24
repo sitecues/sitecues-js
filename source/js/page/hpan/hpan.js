@@ -4,14 +4,16 @@ define(
     'page/zoom/util/body-geometry',
     'core/events',
     'page/zoom/util/viewport',
-    'core/dom-events'
+    'core/dom-events',
+    'page/zoom/zoom'
   ],
   function (
     conf,
     bodyGeo,
     events,
     viewport,
-    domEvents
+    domEvents,
+    zoomMod
   ) {
   var isOn = false,
     isHlbOn = false,
@@ -124,7 +126,7 @@ define(
   }
 
   function getZoom() {
-    return conf.get('zoom') || 1;
+    return zoomMod.getCompletedZoom() || 1;
   }
 
   function refresh() {
