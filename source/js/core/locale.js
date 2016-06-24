@@ -51,6 +51,8 @@ define([ 'core/data-map', 'Promise' ], function(dataMap, Promise) {
 
   function getMetaTagLocale() {
     var META_LANG_SELECTOR = 'meta[name=language],meta[http-equiv=language],meta[name=Content-Language],meta[http-equiv=Content-Language]',
+      // TODO Once we kill of Safari 8, Firefox < 47 and Chrome < 49 we can do a case insensitive check:
+      // 'meta[name=language i],meta[http-equiv=language i],meta[name=Content-Language i],meta[http-equiv=Content-Language i]',
       metaLocaleElement = document.querySelector(META_LANG_SELECTOR),
       metaLocale;
 
