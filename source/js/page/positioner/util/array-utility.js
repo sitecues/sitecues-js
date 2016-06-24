@@ -88,7 +88,7 @@ define([], function () {
     do {
       index = array.indexOf(element);
       if (index !== -1) {
-        array = array.splice(index, 1);
+        array.splice(index, 1);
       }
     } while (index !== -1);
     return array;

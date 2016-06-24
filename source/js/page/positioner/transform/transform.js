@@ -22,7 +22,8 @@ define(
     'core/platform',
     'page/positioner/util/rect-cache',
     'core/dom-events',
-    'page/positioner/util/array-utility'
+    'page/positioner/util/array-utility',
+    'page/zoom/style'
   ],
   function (
     elementMap,
@@ -34,7 +35,8 @@ define(
     platform,
     rectCache,
     domEvents,
-    arrayUtil
+    arrayUtil,
+    zoomStyle
   ) {
   var
     shouldRepaintOnZoomChange,
@@ -418,9 +420,6 @@ define(
       doTransformOnHorizontalScroll = Boolean(wideElements.length),
       doTransformOnVerticalScroll   = Boolean(tallElements.length),
       doTransformOnScroll           = doTransformOnHorizontalScroll || doTransformOnVerticalScroll;
-
-    console.log('doTransformOnVerticalScroll:', doTransformOnVerticalScroll);
-    console.log('doTransformOnHorizontal:', doTransformOnHorizontalScroll);
 
     if (doTransformOnHorizontalScroll) {
       document.documentElement.style.overflowX = 'scroll';
