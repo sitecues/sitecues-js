@@ -2,37 +2,39 @@
 define(
   [
     'page/positioner/constants',
-    'page/positioner/style-lock/style-listener/style-listener'
+    'page/positioner/style-lock/style-listener/style-listener',
+    'page/positioner/util/array-utility'
   ],
   function (
     constants,
-    styleListener
+    styleListener,
+    arrayUtil
   ) {
   var docElem, fixedElements,
     doDisable        = false,
     POINTER_SHEET_ID = 'sitecues-js-disable-pointer-events',
     POINTER_ATTR     = constants.POINTER_ATTR;
 
-  function enableMouseEvents(element) {
+  function enableMouseEventsForElement(element) {
     element.removeAttribute(POINTER_ATTR);
   }
 
   function enableMouseEventsForAll() {
     doDisable = false;
-    fixedElements.forEach(enableMouseEvents);
+    fixedElements.forEach(enableMouseEventsForElement);
   }
 
-  function disableMouseEvents(element) {
+  function disableMouseEventsForElement(element) {
     element.setAttribute(POINTER_ATTR);
   }
 
   function disableMouseEventsForAll() {
     doDisable = true;
-    fixedElements.forEach(disableMouseEvents);
+    fixedElements.forEach(disableMouseEventsForElement);
   }
 
   function get() {
-    return fixedElements;
+    return arrayUtil.fromSet(fixedElements);
   }
 
   function has(element) {
@@ -44,7 +46,7 @@ define(
     elements.forEach(function (element) {
       fixedElements.add(element);
       if (doDisable) {
-        disableMouseEvents(element);
+        disableMouseEventsForElement(element);
       }
     });
   }
@@ -52,7 +54,7 @@ define(
   function remove() {
     fixedElements.delete(this);
     if (doDisable) {
-      enableMouseEvents(this);
+      enableMouseEventsForElement(this);
     }
   }
 

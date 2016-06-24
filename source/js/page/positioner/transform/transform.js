@@ -44,6 +44,8 @@ define(
   var
     shouldRepaintOnZoomChange,
     transformProperty, transformOriginProperty,
+    originalXOverflow      = null,
+    originalYOverflow      = null,
     // Fixed elements taller than the viewport
     tallElements           = [],
     // Fixed elements wider than the viewport
@@ -222,9 +224,9 @@ define(
     if (resetCurrentTranslation && toolbarHeight) {
       if (shouldVerticallyShiftFixedElement(top, bottom, viewportHeight, elementHeight)) {
         currentYTranslation += toolbarHeight;
+        top    += toolbarHeight;
+        bottom += toolbarHeight;
       }
-      top    += toolbarHeight;
-      bottom += toolbarHeight;
     }
 
     var
@@ -273,7 +275,6 @@ define(
         }
       }
     }
-
     return newYTranslation;
   }
 
@@ -427,17 +428,25 @@ define(
       doTransformOnScroll           = doTransformOnHorizontalScroll || doTransformOnVerticalScroll;
 
     if (doTransformOnHorizontalScroll) {
+      originalXOverflow = document.documentElement.style.overflowX;
       document.documentElement.style.overflowX = 'scroll';
     }
     else {
-      document.documentElement.style.overflowX = '';
+      if (originalXOverflow !== null) {
+        document.documentElement.style.overflowX = originalXOverflow;
+      }
+      originalXOverflow = null
     }
 
     if (doTransformOnVerticalScroll) {
+      originalYOverflow = document.documentElement.style.overflowY;
       document.documentElement.style.overflowY = 'scroll';
     }
     else {
-      document.documentElement.style.overflowY = '';
+      if (originalYOverflow !== null) {
+        document.documentElement.style.overflowY = originalYOverflow;
+      }
+      originalYOverflow = null;
     }
 
     if (doTransformOnScroll && !isTransformingOnScroll) {
