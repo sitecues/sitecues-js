@@ -15,6 +15,9 @@ define(
     events,
     domEvents
   ) {
+
+  'use strict';
+
   var
     // For convenience this map keeps track of which elements we're currently observing
     observedElementMap = new WeakMap(),
@@ -22,12 +25,14 @@ define(
     elementToRectMap   = new WeakMap();
 
   function clearCache() {
+    /*jshint validthis: true */
     if (this && this.nodeType === Node.ELEMENT_NODE) {
       elementToRectMap.set(this, null);
     }
     else {
       elementToRectMap = new WeakMap();
     }
+    /*jshint validthis: true */
   }
 
   function getUnscaledRect(element, scale) {
@@ -82,7 +87,9 @@ define(
       // We need to unlock display in this case, otherwise we see a flicker when opacity is removed but before
       // the display style lock is removed. This is an issue on TICC.com
       styleListener.registerPropertyMutationHandler(element, 'opacity', function () {
+        /*jshint validthis: true */
         styleLock.unlockStyle(this, 'display');
+        /*jshint validthis: false */
       });
 
       styleLock(element, 'position', {
@@ -95,7 +102,7 @@ define(
 
   function init() {
     events.on('zoom', clearCache);
-    domEvents.on(window, 'resize', clearCache, { passive: false });
+    domEvents.on(window, 'resize', clearCache);
   }
 
   return {

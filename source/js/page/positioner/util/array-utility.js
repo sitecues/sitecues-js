@@ -1,4 +1,7 @@
 define([], function () {
+
+  'use strict';
+
   // Return an array with the members of arr1 that aren't in arr2, and the members of arr2 that aren't in arr1
   // NOTE: if elements aren't unique in an array, they will be repeated in the difference
   function symmetricDifference(arr1, arr2) {

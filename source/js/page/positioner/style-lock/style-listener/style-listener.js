@@ -30,6 +30,9 @@ define(
     constants,
     coreConstants
   ) {
+
+  'use strict';
+
   var domObserver, docElem,
     observedProperties  = [],
     callbacks           = [],

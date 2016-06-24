@@ -85,11 +85,11 @@ define(
     domEvents.on(window, 'scroll', function () {
       refreshFlags.pageXOffset = true;
       refreshFlags.pageYOffset = true;
-    }, { passive: false });
+    });
 
     domEvents.on(window, 'resize', function () {
       cachedWindowValues = {};
-    }, { passive: false });
+    });
   }
 
   return {

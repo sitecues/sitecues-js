@@ -14,6 +14,9 @@ define(
     selectorMap,
     arrayUtil
   ) {
+
+  'use strict';
+
   var
     resultsHandler,
     refreshTimer,

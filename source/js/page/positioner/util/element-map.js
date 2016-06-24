@@ -6,6 +6,9 @@
  * TODO can we just set properties directly in the same way $.data() does? E.g. element.scdata.computedStyle = {}
  */
 define([], function () {
+
+  'use strict';
+
   var map = new WeakMap();
 
   function setField(element, fields, values) {

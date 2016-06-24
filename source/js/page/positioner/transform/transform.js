@@ -38,6 +38,9 @@ define(
     arrayUtil,
     zoomStyle
   ) {
+
+  'use strict';
+
   var
     shouldRepaintOnZoomChange,
     transformProperty, transformOriginProperty,
@@ -330,11 +333,13 @@ define(
   }
 
   function refreshElementTransform() {
+    /*jshint validthis: true */
     transformFixedElement(this, {
       resetTranslation: true
     });
     refreshScrollListener(this);
     refreshResizeListener();
+    /*jshint validthis: false */
   }
 
   function onTargetAdded(element) {

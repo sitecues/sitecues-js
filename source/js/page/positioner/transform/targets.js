@@ -12,6 +12,8 @@ define(
     arrayUtil
   ) {
 
+  'use strict';
+
   var
     addHandler,
     removeHandler,

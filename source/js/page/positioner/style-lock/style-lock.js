@@ -23,6 +23,9 @@ define(
     coreConstants,
     elementInfo
   ) {
+
+  'use strict';
+
   var stylesheet,
     noop                  = function () {},
     elementHandlerMap     = new WeakMap(),
@@ -54,6 +57,7 @@ define(
     styleListener.init(function () {
 
       function onPropertyMutation(opts) {
+        /*jshint validthis: true */
         var
           value            = opts.toValue,
           results          = [],
@@ -71,6 +75,7 @@ define(
         for (var j = 0, afterCount = afterHandlers.length; j < afterCount; j++) {
           afterHandlers[j].call(this, results[j]);
         }
+        /*jshint validthis: false */
       }
 
       var
@@ -115,6 +120,7 @@ define(
       }
 
       function fromHandler(args) {
+        /*jshint validthis: true */
         if (isValidLockTarget(this)) {
           var
             results  = [],
@@ -137,9 +143,11 @@ define(
             afterHandlers[j].call(this, results[j]);
           }
         }
+        /*jshint validthis: false */
       }
 
       function toHandler(args) {
+        /*jshint validthis: true */
         if (isValidLockTarget(this)) {
           var
             property        = args.property,
@@ -153,6 +161,7 @@ define(
             initialHandlers[i].call(this, args);
           }
         }
+        /*jshint validthis: false */
       }
 
       var declarationHandlers = declarationHandlerMap[key];

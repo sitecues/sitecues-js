@@ -19,6 +19,8 @@ define(
     elementInfo
   ) {
 
+  'use strict';
+
   var
     docElem,
     originalBody,

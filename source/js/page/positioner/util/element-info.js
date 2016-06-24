@@ -12,6 +12,8 @@ define(
     platform
   ) {
 
+  'use strict';
+
   var originalBody, auxiliaryBody, docElem;
 
   function getScale(element, position) {

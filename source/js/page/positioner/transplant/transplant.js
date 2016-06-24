@@ -23,6 +23,9 @@ define(
     elementInfo,
     graft
   ) {
+
+  'use strict';
+
   var originalBody, elementQuerySelectorAll, documentQuerySelectorAll, getElementsByClassName,
     transplantAnchors      = [],
     TRANSPLANT_STATE       = constants.TRANSPLANT_STATE,
@@ -38,6 +41,7 @@ define(
     documentQuerySelectorAll = Document.prototype.querySelectorAll;
 
     function scElementQuerySelectorAll(selector) {
+      /*jshint validthis: true */
       var complement = clone.get(this);
       if (complement) {
         var
@@ -47,6 +51,7 @@ define(
         return results.filter(elementInfo.isOriginal);
       }
       return elementQuerySelectorAll.call(this, selector);
+      /*jshint validthis: false */
     }
 
     function scDocumentQuerySelectorAll(selector) {
