@@ -23,7 +23,7 @@ define(
   }
 
   function disableMouseEvents(element) {
-    element.setAttribute(POINTER_ATTR);
+    element.setAttribute(POINTER_ATTR, '');
   }
 
   function disableMouseEventsForAll() {
