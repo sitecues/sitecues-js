@@ -1,4 +1,7 @@
 define([], function () {
+
+  'use strict';
+
   var constants = {};
 
   constants.TRANSPLANT_STATE = {

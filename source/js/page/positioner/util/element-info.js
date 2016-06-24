@@ -12,12 +12,17 @@ define(
     platform
   ) {
 
+  'use strict';
+
   var originalBody, auxiliaryBody, docElem;
 
-
   function getScale(element, position) {
+    // If we've never scaled this element before, it's possible that this element is inheriting a transformation from the original body
+    // It's important that we know the resolved transformation so that we can calculate the element's untransformed dimensions.
+    // This method is less expensive than computing the resolved transformation, and the math is simpler
     var
       fixed          = position === 'fixed',
+      // In IE, fixed elements do not inherit transformations
       inheritedScale = !(fixed && platform.browser.isIE) && isInOriginalBody(element);
     return elementMap.getField(element, 'scale') || (inheritedScale ? state.completedZoom : 1);
   }
@@ -27,11 +32,11 @@ define(
   }
 
   function getPosition(element) {
-    return getCacheValue(element, 'cache_position');
+    return getCacheValue(element, 'position');
   }
 
   function setPosition(element, value) {
-    setCacheValue(element, 'cache_position', value);
+    setCacheValue(element, 'position', value);
   }
 
   function getCacheValue(element, property) {
@@ -113,7 +118,7 @@ define(
           return auxiliaryBody;
         }
       } while (ancestor !== originalBody && ancestor !== docElem);
-      return ancestor === originalBody ? originalBody : null;
+      body = ancestor === originalBody ? originalBody : null;
     }
     return body;
   }
@@ -177,33 +182,33 @@ define(
   }
 
   return {
-    getScale: getScale,
-    setScale: setScale,
-    getCacheValue: getCacheValue,
-    setCacheValue: setCacheValue,
-    getPosition: getPosition,
-    setPosition: setPosition,
-    getHostBody: getHostBody,
-    setHostBody: setHostBody,
-    getPlaceholder: getPlaceholder,
-    setPlaceholder: setPlaceholder,
-    getPlaceholderOwner: getPlaceholderOwner,
-    getRoot: getRoot,
-    setRoot: setRoot,
-    clearSubroots: clearSubroots,
-    getSubroots: getSubroots,
-    setSubroots: setSubroots,
-    addSubroots: addSubroots,
-    removeSubroots: removeSubroots,
-    isClone: isClone,
-    isOriginal: isOriginal,
-    isSitecuesElement: isSitecuesElement,
-    isPlaceholder: isPlaceholder,
-    hasBeenTransplanted: hasBeenTransplanted,
-    isTransplantRoot: isTransplantRoot,
-    isTransplantAnchor: isTransplantAnchor,
-    isInOriginalBody: isInOriginalBody,
-    setAuxiliaryBody: setAuxiliaryBody,
-    init: init
+    getScale            : getScale,
+    setScale            : setScale,
+    getCacheValue       : getCacheValue,
+    setCacheValue       : setCacheValue,
+    getPosition         : getPosition,
+    setPosition         : setPosition,
+    getHostBody         : getHostBody,
+    setHostBody         : setHostBody,
+    getPlaceholder      : getPlaceholder,
+    setPlaceholder      : setPlaceholder,
+    getPlaceholderOwner : getPlaceholderOwner,
+    getRoot             : getRoot,
+    setRoot             : setRoot,
+    clearSubroots       : clearSubroots,
+    getSubroots         : getSubroots,
+    setSubroots         : setSubroots,
+    addSubroots         : addSubroots,
+    removeSubroots      : removeSubroots,
+    isClone             : isClone,
+    isOriginal          : isOriginal,
+    isSitecuesElement   : isSitecuesElement,
+    isPlaceholder       : isPlaceholder,
+    hasBeenTransplanted : hasBeenTransplanted,
+    isTransplantRoot    : isTransplantRoot,
+    isTransplantAnchor  : isTransplantAnchor,
+    isInOriginalBody    : isInOriginalBody,
+    setAuxiliaryBody    : setAuxiliaryBody,
+    init                : init
   };
 });

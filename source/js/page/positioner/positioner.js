@@ -30,6 +30,9 @@
     bodyGeo,
     events
   ) {
+
+  'use strict';
+
   var originalBody, docElem, unprocessedTransplantCandidates,
     // Should we transplant elements from the original body to the auxiliary body
     isTransplanting                = false,
@@ -107,6 +110,7 @@
 
   // This handler runs when we find an element with a resolved fixed or absolute position
   function toPositionHandler(args) {
+    /*jshint validthis: true */
     var
       position    = args.toValue,
       oldPosition = args.fromValue,
@@ -158,11 +162,13 @@
       transformTargets.add(this);
     }
     unlockIfNotZoomed(this);
+    /*jshint validthis: false */
   }
 
   // This handler runs when the document is mutated such that an element no longer resolves to the specified style value
   // Since we've applied a 'locking' style, that resolved style hasn't taken effect yet when this handler runs
   function fromPositionBeforeHandler(args) {
+    /*jshint validthis: true */
     var
       oldPosition        = args.fromValue,
       position           = args.toValue,
@@ -214,11 +220,13 @@
     return {
       flags: flags
     };
+    /*jshint validthis: false */
   }
 
   // This handler runs after we've unlocked the style value on the element, so that its new resolved value takes effect
   // e.g., if we we're applying 'position: absolute !important', that style has now been removed and the element's true position is in effect
   function fromPositionAfterHandler(opts) {
+    /*jshint validthis: true */
     var
       flags                = opts.flags,
       didPrepareTransplant = opts.didPrepareTransplant;
@@ -233,6 +241,7 @@
     }
 
     unlockIfNotZoomed(this);
+    /*jshint validthis: false */
   }
 
   // Applies or removes transformation from element, based on position and transplant status

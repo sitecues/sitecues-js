@@ -11,36 +11,39 @@ define(
   ],
   function (
     elementInfo
-  ) {
-    // Caches references to elements that were selected the last time we queried the selector
-    // Note: elements selected by fixed selectors are probably fixed, but haven't had their styles computed
-    var selectorToElementsMap = {};
+) {
 
-    // Private utility method
-    function querySelector(selector) {
-      return Array.prototype.slice.call(document.querySelectorAll(selector), 0)
-        .filter(elementInfo.isOriginal);  // Only original elements be considered for processing
-    }
+  'use strict';
 
-    function getCachedQuery(selector) {
-      return selectorToElementsMap[selector] || [];
-    }
+  // Caches references to elements that were selected the last time we queried the selector
+  // Note: elements selected by fixed selectors are probably fixed, but haven't had their styles computed
+  var selectorToElementsMap = {};
 
-    // if @selector is undefined, query all fixed selectors
-    function makeNewQuery(selector) {
-      selectorToElementsMap[selector] = querySelector(selector);
-      return selectorToElementsMap[selector];
-    }
+  // Private utility method
+  function querySelector(selector) {
+    return Array.prototype.slice.call(document.querySelectorAll(selector), 0)
+      .filter(elementInfo.isOriginal);  // Only original elements be considered for processing
+  }
 
-    function cacheInitialQueries(selectors) {
-      selectors.forEach(function (selector) {
-        makeNewQuery(selector);
-      });
-    }
+  function getCachedQuery(selector) {
+    return selectorToElementsMap[selector] || [];
+  }
 
-    return {
-      cacheInitialQueries: cacheInitialQueries,
-      makeNewQuery: makeNewQuery,
-      getCachedQuery: getCachedQuery
-    };
+  // if @selector is undefined, query all fixed selectors
+  function makeNewQuery(selector) {
+    selectorToElementsMap[selector] = querySelector(selector);
+    return selectorToElementsMap[selector];
+  }
+
+  function cacheInitialQueries(selectors) {
+    selectors.forEach(function (selector) {
+      makeNewQuery(selector);
+    });
+  }
+
+  return {
+    cacheInitialQueries: cacheInitialQueries,
+    makeNewQuery: makeNewQuery,
+    getCachedQuery: getCachedQuery
+  };
 });

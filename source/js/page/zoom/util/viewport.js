@@ -1,6 +1,10 @@
 define(
-  [],
-  function () {
+  [
+    'core/dom-events'
+  ],
+  function (
+    domEvents
+  ) {
 
   'use strict';
 
@@ -78,14 +82,14 @@ define(
   }
 
   function init() {
-    window.addEventListener('scroll', function () {
+    domEvents.on(window, 'scroll', function () {
       refreshFlags.pageXOffset = true;
       refreshFlags.pageYOffset = true;
-    }, true);
+    });
 
-    window.addEventListener('resize', function () {
+    domEvents.on(window, 'resize', function () {
       cachedWindowValues = {};
-    }, true);
+    });
   }
 
   return {

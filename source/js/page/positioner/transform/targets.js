@@ -12,6 +12,8 @@ define(
     arrayUtil
   ) {
 
+  'use strict';
+
   var
     addHandler,
     removeHandler,
@@ -25,8 +27,10 @@ define(
   }
 
   function addTarget(element) {
-    fixedTargets.add(element);
-    addHandler(element);
+    if (!fixedTargets.has(element)) {
+      fixedTargets.add(element);
+      addHandler(element);
+    }
   }
 
   function getTargets() {

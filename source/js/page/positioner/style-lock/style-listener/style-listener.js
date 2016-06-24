@@ -30,32 +30,42 @@ define(
     constants,
     coreConstants
   ) {
+
+  'use strict';
+
   var domObserver, docElem,
-    callbacks                = [],
-    READY_STATE              = coreConstants.READY_STATE,
-    readyState               = READY_STATE.UNINITIALIZED,
-    LOCK_ATTR                = constants.LOCK_ATTR,
+    observedProperties  = [],
+    callbacks           = [],
+    READY_STATE         = coreConstants.READY_STATE,
+    readyState          = READY_STATE.UNINITIALIZED,
+    LOCK_ATTR           = constants.LOCK_ATTR,
     // We always need to listen for inline style mutations
-    attributesToObserve      = [ 'style' ],
+    observedAttributes = ['style'],
     /*
      * {
      *   property: ['valueA', 'valueB']
      * }
      * */
     // Declarations that we're listening for
-    propertyToObservedValues = {},
+    observedPropertyToValues = {},
     /*
     * {
     *   property_value: [elementA, elementB]
     * }
     * */
-    resolvedElementsMap      = {},
+    resolvedElementsMap = {},
     /*
      * {
      *   direction_property_value: [handlerA, handlerB]
      * }
      * */
-    handlerMap               = {};
+    handlerMap = {},
+    /*
+    * {
+    *   elementReference: { property: [handler] }
+    * }
+    * */
+    elementPropertyHandlerMap = new WeakMap();
 
 
     function onMutations(mutations) {
@@ -99,7 +109,6 @@ define(
             break;
 
           case 'style':
-            var observedProperties = Object.keys(propertyToObservedValues);
             for (var j = 0, propertyCount = observedProperties.length; j < propertyCount; j++) {
               var
                 property       = observedProperties[j],
@@ -149,9 +158,11 @@ define(
 
     properties.forEach(function (property) {
       var handlerKey,
-        observedValues = propertyToObservedValues[property],
+        observedValues = observedPropertyToValues[property] || [],
         lockAttribute  = LOCK_ATTR + property,
-        lockValue      = element.getAttribute(lockAttribute);
+        lockValue      = element.getAttribute(lockAttribute),
+        cachedValue    = elementInfo.getCacheValue(element, property);
+
 
       if (lockValue) {
         // This attribute 'reinforces' the value this element previously resolved to by applying it with importance
@@ -159,19 +170,36 @@ define(
         element.setAttribute(lockAttribute, '');
       }
 
+      var
+        resolvedValue    = style[property],
+        elementHandlers  = elementPropertyHandlerMap.get(element),
+        propertyHandlers = elementHandlers && elementHandlers[property],
+        opts             = {
+          property  : property,
+          toValue   : resolvedValue,
+          fromValue : cachedValue
+        };
+
+      if (lockValue) {
+        element.setAttribute(lockAttribute, lockValue);
+      }
+
+      if (propertyHandlers && cachedValue !== resolvedValue) {
+        // These element handlers run when the element's resolved value for a given style property has mutated from its cached value
+        propertyHandlers.forEach(function (fn) {
+          fn.call(element, opts);
+        });
+      }
+
       for (var i = 0, valueCount = observedValues.length; i < valueCount; i++) {
         var handlers,
           // Style value we're listening for, e.g. 'fixed' or 'absolute'
           observedValue    = observedValues[i],
-          resolvedValue    = style[property],
           declarationKey   = property + '_' + observedValue,
           resolvedElements = resolvedElementsMap[declarationKey] || [],
           isMatching       = resolvedValue === observedValue,
           elementIndex     = resolvedElements.indexOf(element),
-          wasMatching      = elementIndex !== -1,
-          opts             = { property: property, toValue: resolvedValue, fromValue: elementInfo.getCacheValue(element, property) };
-
-        elementInfo.setCacheValue(element, property, resolvedValue);
+          wasMatching      = elementIndex !== -1;
 
         if (isMatching && !wasMatching) {
           handlerKey = 'to_' + declarationKey;
@@ -191,16 +219,15 @@ define(
         }
       }
 
-      if (lockValue) {
-        element.setAttribute(lockAttribute, lockValue);
-      }
+      elementInfo.setCacheValue(element, property, resolvedValue);
     });
     runHandlers(fromHandlers);
     runHandlers(toHandlers);
   }
 
-  function listenForDynamicStyling(propertySelectors) {
+  function listenForDynamicStyling(property) {
     var
+      propertySelectors   = selectors.getForProperty(property),
       mutationRecords     = domObserver.takeRecords(),
       compositeAttributes = selectors.getCompositeAttributes(propertySelectors);
 
@@ -212,49 +239,91 @@ define(
       }, 0, mutationRecords);
     }
 
-    attributesToObserve = arrayUtil.union(attributesToObserve, compositeAttributes);
+    observedAttributes = arrayUtil.union(observedAttributes, compositeAttributes);
+    observedProperties = arrayUtil.addUnique(observedProperties, property);
 
     domObserver.disconnect();
     domObserver.observe(docElem, {
       attributes: true,
       attributeOldValue: true,
       subtree: true,
-      attributeFilter: attributesToObserve
+      attributeFilter: observedAttributes
     });
   }
 
   function getDeclarationKey(declaration) {
-    return declaration.property + '_' + declaration.value;
+    return getPropertyValueKey(declaration.property, declaration.value);
+  }
+
+  function getPropertyValueKey(property, value) {
+    return property + '_' + value;
   }
 
   function addHandlerToMap(handler, key) {
-    handlerMap[key] = handlerMap[key] || [];
+    if (!handlerMap[key]) {
+      handlerMap[key] = [];
+    }
     handlerMap[key].push(handler);
   }
     
   function registerResolvedValueHandler(declaration, handlerKey, handler) {
     var
-      property = declaration.property,
-      value    = declaration.value;
-    // If we're already observing this style property, we don't need to reparse & listen for selectors
-    if (propertyToObservedValues[property]) {
-      if (propertyToObservedValues[property].indexOf(value) === -1) {
-        propertyToObservedValues[property].push(value);
-      }
-      addHandlerToMap(handler, handlerKey);
-    }
-    else {
-      var propertySelectors = selectors.getForProperty(property);
-      propertyToObservedValues[property] = [];
-      propertyToObservedValues[property].push(value);
-      // Getting all elements with a resolved value is expensive so do it asynchronously
+      property           = declaration.property,
+      value              = declaration.value,
+      observedValues     = observedPropertyToValues[value],
+      key                = getPropertyValueKey(property, value),
+      isPropertyObserved = observedProperties.indexOf(property) !== -1,
+      isValueObserved    = observedValues && observedValues.indexOf(value) !== -1;
+
+    if (!isValueObserved) {
       setTimeout(function () {
-        // By caching the elements we know currently have the resolved value, we can handle when elements mutate to or from that value
-        resolvedElementsMap[getDeclarationKey(declaration)] = getElementsWithResolvedValue(declaration);
-        listenForDynamicStyling(propertySelectors);
-        addHandlerToMap(handler, handlerKey);
+        resolvedElementsMap[key] = getElementsWithResolvedValue(declaration);
+        if (isPropertyObserved) {
+          observedPropertyToValues[property].push(value);
+          observedProperties.push(property);
+        }
+        else {
+          observedPropertyToValues[property] = [value];
+          listenForDynamicStyling(property);
+        }
       }, 0);
     }
+    addHandlerToMap(handler, handlerKey);
+  }
+
+  // Runs the passed handler when @element's resolved @property value has changed
+  function registerPropertyMutationHandler(element, declaration, handler) {
+    var
+      property           = declaration.property,
+      value              = declaration.value,
+      isPropertyObserved = observedProperties.indexOf(property) !== -1,
+      handlers           = elementPropertyHandlerMap.get(element) || {};
+
+    // If we've already attached handlers to run when this element's resolved property mutates,
+    // we know that we're already listening for relevant document mutations
+    if (handlers[property]) {
+      handlers[property].push(handler);
+    }
+    else {
+      handlers[property] = [handler];
+      if (!isPropertyObserved) {
+        listenForDynamicStyling(property);
+      }
+    }
+    addToResolvedElementsMap(element, property, value);
+    elementPropertyHandlerMap.set(element, handlers);
+  }
+
+  // This map caches elements we know have a given resolved value
+  function addToResolvedElementsMap(element, property, value) {
+    var key = getPropertyValueKey(property, value);
+    if (resolvedElementsMap[key]) {
+      resolvedElementsMap[key] = arrayUtil.addUnique(resolvedElementsMap[key], element);
+    }
+    else {
+      resolvedElementsMap[key] = [element];
+    }
+    elementInfo.setCacheValue(element, property, value);
   }
 
   // When an element is mutated such that its computed style matches the declaration, pass it to the handler
@@ -277,10 +346,11 @@ define(
     var
       property       = declaration.property,
       value          = declaration.value,
+      observedValues = observedPropertyToValues[property],
       declarationKey = getDeclarationKey(declaration);
 
     // If we're already listening for elements with this resolved style value, return the list
-    if (propertyToObservedValues[property].indexOf(value) >= 0 && resolvedElementsMap[declarationKey]) {
+    if (observedValues && observedValues.indexOf(value) >= 0 && resolvedElementsMap[declarationKey]) {
       return resolvedElementsMap[declarationKey];
     }
 
@@ -338,6 +408,7 @@ define(
   }
 
   return {
+    registerPropertyMutationHandler: registerPropertyMutationHandler,
     registerToResolvedValueHandler: registerToResolvedValueHandler,
     registerFromResolvedValueHandler: registerFromResolvedValueHandler,
     getElementsWithResolvedValue: getElementsWithResolvedValue,

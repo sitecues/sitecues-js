@@ -19,6 +19,8 @@ define(
     elementInfo
   ) {
 
+  'use strict';
+
   var
     docElem,
     originalBody,
@@ -259,8 +261,7 @@ define(
       auxiliaryBody = cloneElement(originalBody);
       auxiliaryBody.style.visibility    = 'hidden';
       auxiliaryBody.style.transform     = 'none';
-      // TODO: best friends modal isn't disabling correctly
-      //auxiliaryBody.style.pointerEvents = 'none';
+      auxiliaryBody.style.pointerEvents = '';
       auxiliaryBody.style.zIndex        = '99999999';
       docElem.appendChild(auxiliaryBody);
     }
