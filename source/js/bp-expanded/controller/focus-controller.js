@@ -136,8 +136,6 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
 
   function showFocus() {
 
-    new metric.PanelFocusMove().send();
-
     updateDOMFocusState();
 
     if (!tabbedElement || !isKeyboardMode()) {
@@ -493,6 +491,7 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
     if (keyCode === TAB) {
       turnOnKeyboardMode();
       navigateInDirection(evt.shiftKey ? -1 : 1);
+      new metric.PanelFocusMove().send();
       return;
     }
 
