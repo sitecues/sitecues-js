@@ -30,6 +30,7 @@ define(
     cachedBoundingBodyWidth,
     cachedBoundingBodyHeight,
     zoomLevelWhenCached,
+    doDebugVisibleRects,
     // Should document scrollbars be calculated by us?
     // Should always be true for IE, because it fixes major positioning bugs
     shouldManuallyAddScrollbars,
@@ -184,6 +185,10 @@ define(
     var newRect = getAbsoluteRect(node),
       style = getComputedStyle(node);
     if (willAddRect(newRect, node, style, parentStyle, isStrict)) {
+      if (doDebugVisibleRects && node.nodeType === Node.ELEMENT_NODE) {
+        node.style.outline = '9px solid rgba(0,255,0,.5)';
+        node.style.outlineOffset = '-5px';
+      }
       addRect(sumRect, newRect);
       visibleNodes.push({ domNode: node, rect: newRect });
       return;  // Valid rectangle added. No need to walk into children.
@@ -417,6 +422,11 @@ define(
     // ignored when over budget.
     // shouldUseWillChangeOptimization =
     // typeof body.style.willChange === 'string' && !shouldUseElementDotAnimate;
+  }
+
+  sitecues.debugVisibleRects = function() {
+    doDebugVisibleRects = true;
+    computeBodyInfo();
   }
 
   return {
