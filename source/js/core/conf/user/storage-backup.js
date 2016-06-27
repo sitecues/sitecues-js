@@ -183,7 +183,11 @@ define(['core/conf/urls', 'core/conf/site', 'Promise', 'core/platform'], functio
 
 
   function init() {
-    IS_BACKUP_DISABLED = platform.isStorageUnsupported || site.get('isStorageBackupDisabled');
+    IS_BACKUP_DISABLED =
+      platform.isStorageUnsupported ||
+      site.get('isStorageBackupDisabled') ||
+      // Disable for numeric ip addresses because we get strange origin mismatch errors with https
+      (SC_DEV && urls.getScriptOrigin().match(/https:\/\/\d/));
   }
 
   sitecues.toggleLogStorageBackup = function toggleLogStorageBackup() {
