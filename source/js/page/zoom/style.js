@@ -87,16 +87,15 @@ define(
     function applyZoomStyleSheet(additionalCss) {
       var styleSheetText = additionalCss || '';
       if (styleSheetText) {
-        if (!$zoomStyleSheet) {
+        if ($zoomStyleSheet) {
+          $zoomStyleSheet.text(styleSheetText);
+        }
+        else {
           $zoomStyleSheet = $('<style>')
             .text(styleSheetText)
             .attr('id', SITECUES_ZOOM_ID)
             .appendTo('head');
         }
-        else {
-          $zoomStyleSheet.text(styleSheetText);
-        }
-        $zoomStyleSheet.text(styleSheetText);
       }
     }
 
