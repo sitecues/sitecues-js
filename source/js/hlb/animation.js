@@ -1,4 +1,4 @@
-a/*
+/*
   This module animates the HLB.  Depending on the browser, the mechanism
   of animation is either CSS3 Transitions or jQuery.animate.
  */

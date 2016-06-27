@@ -435,7 +435,7 @@ define(
       if (originalXOverflow !== null) {
         document.documentElement.style.overflowX = originalXOverflow;
       }
-      originalXOverflow = null
+      originalXOverflow = null;
     }
 
     if (doTransformOnVerticalScroll) {

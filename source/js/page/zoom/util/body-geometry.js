@@ -427,7 +427,7 @@ define(
   sitecues.debugVisibleRects = function() {
     doDebugVisibleRects = true;
     computeBodyInfo();
-  }
+  };
 
   return {
     isFluidLayout: isFluidLayout,
