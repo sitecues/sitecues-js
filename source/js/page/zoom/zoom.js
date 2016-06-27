@@ -13,7 +13,8 @@ define(
     'page/zoom/constants',
     'page/zoom/config/config',
     'page/zoom/util/restrict-zoom',
-    'page/zoom/style'
+    'page/zoom/style',
+    'page/viewport/scrollbars'
   ],
   function (
     $,
@@ -25,7 +26,8 @@ define(
     constants,
     config,
     restrictZoom,
-    style
+    style,
+    scrollbars
   ) {
 
   var isInitialized,  // Is the zoom module already initialized?
@@ -161,7 +163,8 @@ define(
       // Documents designed to fit the width of the page still will
       $origBody.css('width', bodyGeo.getRestrictedBodyWidth(state.completedZoom));
     }
-    bodyGeo.determineScrollbars();
+    // TODO computeBodyInfo() is doing a lot of work that refreshBodyInfo() did -- at least it should share which nodes to iterate over
+    scrollbars.onBodyRectChange(bodyGeo.computeBodyInfo());
     events.emit('resize');
   }
 

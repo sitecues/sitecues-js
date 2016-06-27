@@ -10,10 +10,11 @@ define(
     'page/zoom/state',
     'page/zoom/constants',
     'page/zoom/config/config',
-    'page/zoom/util/viewport',
+    'page/viewport/viewport',
     'page/zoom/util/body-geometry',
     'page/zoom/util/restrict-zoom',
-    'page/zoom/style'
+    'page/zoom/style',
+    'page/viewport/scrollbars'
   ],
   function (
     $,
@@ -28,7 +29,8 @@ define(
     viewport,
     bodyGeo,
     restrictZoom,
-    style
+    style,
+    scrollbars
   ) {
 /*jshint +W072 */
 
@@ -131,6 +133,7 @@ define(
       }
       input.isLongGlide = true; // Default, assume glide will not be cut off early
       beginZoomOperation(targetZoom, input, beginGlideAnimation);  // Provide callback for when animation can actually start
+
       $(window).one('keyup', finishGlideIfEnough);
     }
 
@@ -374,7 +377,7 @@ define(
 
     // Remove and re-add scrollbars -- we will re-add them after zoom if content is large enough
     // Only determine scrollbars for IE
-    bodyGeo.determineScrollbars();
+    scrollbars.onBodyRectChange(bodyGeo.computeBodyInfo());
 
     // Restore mouse cursor events and CSS behavior
     $('body').css('pointerEvents', '');

@@ -7,7 +7,7 @@ define(
     'page/zoom/state',
     'page/zoom/util/restrict-zoom',
     'core/platform',
-    'page/zoom/util/viewport'
+    'page/viewport/viewport'
   ],
   function (
     $,
@@ -31,9 +31,6 @@ define(
     cachedBoundingBodyHeight,
     zoomLevelWhenCached,
     doDebugVisibleRects,
-    // Should document scrollbars be calculated by us?
-    // Should always be true for IE, because it fixes major positioning bugs
-    shouldManuallyAddScrollbars,
     originalBodyInfo, // The info we have on the body, including the rect and mainNode
     MIN_RECT_SIDE  = constants.MIN_RECT_SIDE,
     ZOOM_PRECISION = constants.ZOOM_PRECISION;
@@ -317,46 +314,6 @@ define(
     callbacks = [];
   }
 
-  // We are going to remove scrollbars and re-add them ourselves, because we can do a better job
-  // of knowing when the visible content is large enough to need scrollbars.
-  // This also corrects the dreaded IE scrollbar bug, where fixed position content
-  // and any use of getBoundingClientRect() was off by the height of the horizontal scrollbar, or the
-  // width of the vertical scroll bar, but only when the user scrolled down or to the right.
-  // By controlling the visibility of the scrollbars ourselves, the bug magically goes away.
-  // This is also good because we're better than IE at determining when content is big enough to need scrollbars.
-  function determineScrollbars() {
-    if (!shouldManuallyAddScrollbars) {
-      return;
-    }
-
-    // Use scrollbars if necessary for size of content
-    // Get the visible content rect (as opposed to element rect which contains whitespace)
-    var rect = computeBodyInfo(),
-      right = Math.max(rect.right, rect.width),
-      bottom = Math.max(rect.bottom, rect.height),
-      winHeight = window.innerHeight,
-      winWidth = window.innerWidth;
-
-    // -- Clear the scrollbars --
-    $('html').css({
-      overflowX: 'hidden',
-      overflowY: 'hidden'
-    });
-
-    // -- Set the scrollbars after a delay --
-    // If the right side of the visible content is beyond the window width,
-    // or the visible content is wider than the window width, show the scrollbars.
-    // Doing this after a timeout fixes SC-3722 for some reason -- the toolbar was moving up and down by the height
-    // of the horizontal scrollbar. It's as if doing it on a delay gives IE/Edge a chance to
-    // deal with zoom first, and then scrollbars separately
-    setTimeout(function() {
-      $('html').css({
-        overflowX: right > winWidth ? 'scroll' : 'hidden',
-        overflowY: bottom > winHeight ? 'scroll' : 'hidden'
-      });
-    }, 0);
-  }
-
   // Scroll content to maximize the use of screen real estate, showing as much content as possible.
   // In effect, stretch the bottom-right corner of the visible content down and/or right
   // to meet the bottom-right corner of the window.
@@ -394,9 +351,6 @@ define(
     // (perhaps future extension will init and call us very early).
     if (document.body) {
       isInitialized = true;
-      // IE doesn't know when to put in scrollbars after CSS transform
-      // Edge does, but we need to do this because of SC-3722 -- jiggling of Sitecues toolbar during vertical scrolls
-      shouldManuallyAddScrollbars = platform.browser.isMS;
       body = document.body;
       docElem = document.documentElement;
       $origBody = $(body);
@@ -443,7 +397,6 @@ define(
     refreshBodyInfo: refreshBodyInfo,
     getFormattedTranslateX: getFormattedTranslateX,
     maximizeContentVisibility: maximizeContentVisibility,
-    determineScrollbars: determineScrollbars,
     init: init
   };
 });

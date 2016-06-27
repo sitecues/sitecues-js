@@ -17,13 +17,14 @@ define(
     'page/zoom/util/body-geometry',
     'page/zoom/state',
     'page/positioner/transform/targets',
-    'page/zoom/util/viewport',
+    'page/viewport/viewport',
     'page/positioner/util/element-info',
     'core/platform',
     'page/positioner/util/rect-cache',
     'core/dom-events',
     'page/positioner/util/array-utility',
-    'page/zoom/style'
+    'page/zoom/style',
+    'page/viewport/scrollbars'
   ],
   function (
     elementMap,
@@ -36,7 +37,8 @@ define(
     rectCache,
     domEvents,
     arrayUtil,
-    zoomStyle
+    zoomStyle,
+    scrollbars
   ) {
 
   'use strict';
@@ -44,8 +46,6 @@ define(
   var
     shouldRepaintOnZoomChange,
     transformProperty, transformOriginProperty,
-    originalXOverflow      = null,
-    originalYOverflow      = null,
     // Fixed elements taller than the viewport
     tallElements           = [],
     // Fixed elements wider than the viewport
@@ -425,37 +425,14 @@ define(
     var
       doTransformOnHorizontalScroll = Boolean(wideElements.length),
       doTransformOnVerticalScroll   = Boolean(tallElements.length),
-      doTransformOnScroll           = doTransformOnHorizontalScroll || doTransformOnVerticalScroll;
+      doTransformOnScroll           = doTransformOnHorizontalScroll || doTransformOnVerticalScroll,
+      addOrRemoveFn;
 
-    if (doTransformOnHorizontalScroll) {
-      originalXOverflow = document.documentElement.style.overflowX;
-      document.documentElement.style.overflowX = 'scroll';
-    }
-    else {
-      if (originalXOverflow !== null) {
-        document.documentElement.style.overflowX = originalXOverflow;
-      }
-      originalXOverflow = null;
-    }
-
-    if (doTransformOnVerticalScroll) {
-      originalYOverflow = document.documentElement.style.overflowY;
-      document.documentElement.style.overflowY = 'scroll';
-    }
-    else {
-      if (originalYOverflow !== null) {
-        document.documentElement.style.overflowY = originalYOverflow;
-      }
-      originalYOverflow = null;
-    }
-
-    if (doTransformOnScroll && !isTransformingOnScroll) {
-      domEvents.on(window, 'scroll', onScroll, { capture: false });
-      isTransformingOnScroll = true;
-    }
-    else if (!doTransformOnScroll && isTransformingOnScroll) {
-      domEvents.off(window, 'scroll', onScroll, { capture: false });
-      isTransformingOnScroll = false;
+    if (doTransformOnScroll !== isTransformingOnScroll) {
+      scrollbars.forceScrollbars(doTransformOnHorizontalScroll, doTransformOnVerticalScroll);
+      addOrRemoveFn = doTransformOnScroll ? domEvents.on : domEvents.off;
+      addOrRemoveFn(window, 'scroll', onScroll, {capture: false});
+      isTransformingOnScroll = doTransformOnScroll;
     }
   }
 

@@ -2,7 +2,7 @@ define(
   [
     'page/zoom/util/body-geometry',
     'core/events',
-    'page/zoom/util/viewport',
+    'page/viewport/viewport',
     'core/dom-events',
     'page/zoom/zoom'
   ],
