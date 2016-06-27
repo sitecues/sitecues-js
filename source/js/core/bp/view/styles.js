@@ -20,7 +20,7 @@ define(['core/bp/helper', 'core/platform', 'core/conf/site'],
       // Turn off toolbar, dimmer, lens and zoom
       // TODO needs more work to reset body width if page sets it to something different
       '@media print { ' +
-      '.scp-toolbar, #sitecues-background-dimmer, #sitecues-hlb-wrapper { display: none !important; } ' +
+      '.scp-toolbar, #scp-bp-container, #sitecues-background-dimmer, #sitecues-hlb-wrapper { display: none !important; } ' +
       'body { transform: none !important; width: auto !important; } ' +
       '}',
 
