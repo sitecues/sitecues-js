@@ -428,8 +428,8 @@ define(
       doTransformOnScroll           = doTransformOnHorizontalScroll || doTransformOnVerticalScroll,
       addOrRemoveFn;
 
+    scrollbars.forceScrollbars(doTransformOnHorizontalScroll, doTransformOnVerticalScroll);
     if (doTransformOnScroll !== isTransformingOnScroll) {
-      scrollbars.forceScrollbars(doTransformOnHorizontalScroll, doTransformOnVerticalScroll);
       addOrRemoveFn = doTransformOnScroll ? domEvents.on : domEvents.off;
       addOrRemoveFn(window, 'scroll', onScroll, {capture: false});
       isTransformingOnScroll = doTransformOnScroll;
