@@ -54,6 +54,10 @@ define(
     // State to help with animation optimizations and will-change
     zoomBeginTimer, // Timer before zoom can actually begin (waiting for browser to create composite layer)
 
+    // Finish the glide if no more key down events during this period
+    edgeKeyGlideTimer,
+    EDGE_CONTINUE_KEY_GLIDE_WAIT_MS = 500,
+
     // Should we use the Web Animations API (element.animate) ?
     shouldUseElementDotAnimate,
 
@@ -119,7 +123,11 @@ define(
   // If no smooth zoom, apply an instant zoom change to increase or decrease zoom by a constant amount.
   // If we are zooming with +/- or clicking A/a
   function beginGlide(targetZoom, event) {
-    if (!isZoomOperationRunning() && targetZoom !== state.completedZoom) {
+    if (targetZoom === state.completedZoom) {
+      return;
+    }
+
+    if (!isZoomOperationRunning()) {
       var input = {};
       if (event) {
         if (event.keyCode) {
@@ -135,6 +143,15 @@ define(
       beginZoomOperation(targetZoom, input, beginGlideAnimation);  // Provide callback for when animation can actually start
 
       $(window).one('keyup', finishGlideIfEnough);
+    }
+
+    if (platform.browser.isEdge && event && event.keyCode) {
+      // SC-3615: Microsoft Edge not always firing keyup! Still true as of Edge 14 beta.
+      // We must simulate something close to a keyup with a timer.
+      // The timer will keep resetting as long as key repeat is active. The zoom glide
+      // will end shortly after the last keydown event.
+      clearTimeout(edgeKeyGlideTimer);
+      edgeKeyGlideTimer = setTimeout(finishGlideIfEnough, EDGE_CONTINUE_KEY_GLIDE_WAIT_MS);
     }
 
     function beginGlideAnimation() {
@@ -197,7 +214,7 @@ define(
 
     var restrictingWidthInSafari = platform.browser.isSafari && config.shouldRestrictWidth;
 
-    return !platform.browser.isIE &&  // IE/Edge are working better with JS animation
+    return !platform.browser.isMS &&  // IE/Edge are working better with JS animation (keyframes even taking too long to start/stop, not really smoother)
       !restrictingWidthInSafari &&  // Safari is herky jerky if animating the width and using key frames
       !shouldUseElementDotAnimate;  // Chrome will use element.animate();
   }
@@ -442,6 +459,7 @@ define(
     cancelFrame();
     clearTimeout(minZoomChangeTimer);
     clearTimeout(zoomBeginTimer);
+    clearTimeout(edgeKeyGlideTimer);
     cancelGlideChangeTimer();
     $origBody.off(ANIMATION_END_EVENTS, onGlideStopped);
     $(window).off('keyup', finishGlideIfEnough);
