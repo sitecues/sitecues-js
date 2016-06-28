@@ -214,7 +214,7 @@ define(
 
     var restrictingWidthInSafari = platform.browser.isSafari && config.shouldRestrictWidth;
 
-    return !platform.browser.isMS &&  // IE/Edge are working better with JS animation
+    return !platform.browser.isMS &&  // IE/Edge are working better with JS animation (keyframes even taking too long to start/stop, not really smoother)
       !restrictingWidthInSafari &&  // Safari is herky jerky if animating the width and using key frames
       !shouldUseElementDotAnimate;  // Chrome will use element.animate();
   }
