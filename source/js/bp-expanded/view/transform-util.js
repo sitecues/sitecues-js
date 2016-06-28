@@ -76,8 +76,9 @@ define([ 'core/platform' ], function(platform) {
       transformValues;
 
     if (hasTranslate) {
-
-      transformValues = transformString.split(/[, ]/);  // Attributes split by space, CSS by comma
+      // translate is always first
+      var separator = transformString.indexOf(',') > 0 ? ',' : ' ';  // Attributes split by space, CSS by comma
+      transformValues = transformString.split(separator);
       translateX = transformValues[0] || 0;
       translateY = hasScale ? transformValues[1].split('scale')[0] : transformValues[1] || 0;
 
