@@ -26,6 +26,7 @@ define([ 'core/platform', 'page/viewport/viewport' ], function (platform, viewpo
     shouldComputeMainBodyScrollbars = platform.browser.isMS;
 
     if (shouldComputeMainBodyScrollbars) {
+      resetScrollbars();
       determineScrollbars();
     }
   }
@@ -74,7 +75,6 @@ define([ 'core/platform', 'page/viewport/viewport' ], function (platform, viewpo
     if (!isInitialized) {
       if (shouldComputeMainBodyScrollbars) {
         defaultOverflowX = defaultOverflowY = 'hidden';
-        resetScrollbars();
       }
       else {
         defaultOverflowX = docElemStyle.overflowX;
