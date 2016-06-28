@@ -8,7 +8,7 @@ define(['core/bp/constants', 'core/bp/helper', 'bp-expanded/view/transform-util'
         'bp-expanded/view/transform-hovers', 'core/bp/model/state', 'core/events'],
   function (BP_CONST, helper, transformUtil, animate, hovers, state, events) {
 
-  var BUTTON_ENTER_ANIMATION_DURATION = 800, // Milliseconds
+  var BUTTON_ENTER_ANIMATION_DURATION = 700, // Milliseconds
       NO_INPUT_TIMEOUT                = 7000,
       userInputTimeoutId,
       doAlwaysShowButton,
@@ -74,9 +74,10 @@ define(['core/bp/constants', 'core/bp/helper', 'bp-expanded/view/transform-util'
     if (!doAlwaysShowButton && !useInstantTransition) {
 
       transformUtil.setElemTransform(moreButtonContainer, { scale: 0.5 }); // Starting point
-      setTimeout(function() {
+      requestAnimationFrame(function() {
+        getComputedStyle(moreButtonContainer); // Force layout update
         animate.animateTransformLinear(moreButtonContainer, { scale: 1 }, BUTTON_ENTER_ANIMATION_DURATION);
-      }, 0);
+      });
     }
 
     // Once we show the button, always show it.

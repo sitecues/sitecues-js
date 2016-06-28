@@ -9,6 +9,7 @@ define([ 'core/platform' ], function(platform) {
 
   var SHOULD_USE_CSS_TRANSFORM_IN_SVG =
     !platform.browser.isMS &&       // MS does not support CSS in SVG
+    !platform.browser.isSafari &&   // Safari CSS animations are actually slower
     !platform.browser.isFirefox;    // FF breaks getBoundingClientRect() when CSS transform is used
 
   // Skips past non-numeric characters and get the next number as type 'number'

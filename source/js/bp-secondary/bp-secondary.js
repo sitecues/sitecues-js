@@ -418,7 +418,7 @@ define(['core/bp/constants',
 
   function resetStyles() {
     var moreButton = getMoreButton(),
-      HEIGHT_RELATED_ELEMS = [ getSecondary(), moreButton, getBottom(), getOutlineFill(), getSecondaryOutline(), getShadow()];
+      HEIGHT_RELATED_ELEMS = [ getSecondary(), getBottom(), getOutlineFill(), getSecondaryOutline(), getShadow()];
 
     HEIGHT_RELATED_ELEMS.forEach(function(elem) {
       transformUtil.setElemTransform(elem, {});

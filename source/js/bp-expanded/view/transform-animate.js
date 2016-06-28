@@ -175,7 +175,8 @@ define(['bp-expanded/view/transform-util', 'core/platform'], function (transform
     function beginTransition() {
       addTransitionEndListener();
       initTransitionStyles(platform.transformPropertyCss + ' ' + duration + 'ms');
-      initTransforms();
+      getComputedStyle(elements[0]);  // Force layout update
+      requestAnimationFrame(initTransforms);
     }
 
 
