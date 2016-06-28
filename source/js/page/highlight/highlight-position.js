@@ -352,7 +352,7 @@ define(['$', 'page/util/common', 'page/util/element-classifier', 'page/zoom/zoom
 
       // --- Form controls ---
       if (elemClassifier.isFormControl(this)) {
-        if (this.matches('select[size="1"],select:not([size])')) {
+        if ($(this).is('select[size="1"],select:not([size])')) {
           addRect(allRects, getComboboxRect(this));
           return; // Don't walk into options
         }
