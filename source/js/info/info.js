@@ -183,11 +183,14 @@ define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 
 
   function enableScrolling(doEnable) {
     if (doEnable) {
-      document.documentElement.style.overflow = enableScrolling.origOverflow;
+      document.documentElement.style.overflowX = enableScrolling.origOverflowX;
+      document.documentElement.style.overflowY = enableScrolling.origOverflowY;
     }
     else {
-      enableScrolling.origOverflow = document.documentElement.style.overflow;
-      document.documentElement.style.overflow = 'hidden';
+      enableScrolling.origOverflowX = document.documentElement.style.overflowX;
+      enableScrolling.origOverflowY = document.documentElement.style.overflowY;
+      document.documentElement.style.overflowX = 'hidden';
+      document.documentElement.style.overflowY = 'hidden';
     }
   }
 
