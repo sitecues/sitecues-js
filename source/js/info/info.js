@@ -64,7 +64,7 @@ define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 
 
     window.removeEventListener('message', checkCloseMessage);
 
-    document.body.removeEventListener('wheel', preventScroll);
+    document.documentElement.removeEventListener('wheel', preventScroll);
 
     enableWebPagePointerEvents(true);
 
@@ -122,7 +122,7 @@ define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 
 
     enableWebPagePointerEvents(false);
 
-    document.body.addEventListener('wheel', preventScroll);
+    document.documentElement.addEventListener('wheel', preventScroll);
 
     dimmer.dimBackgroundContent(DIMMER_SPEED, $iframe);
 
