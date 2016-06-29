@@ -2,8 +2,8 @@
   This module animates the HLB.  Depending on the browser, the mechanism
   of animation is either CSS3 Transitions or jQuery.animate.
  */
-define(['hlb/dimmer', 'page/util/common', 'hlb/positioning', 'core/platform', '$'],
-  function (dimmer, common, hlbPositioning, platform, $) {
+define(['hlb/dimmer', 'page/util/common', 'hlb/positioning', 'core/platform', '$', 'hlb/constants'],
+  function (dimmer, common, hlbPositioning, platform, $, constants) {
 
   var INFLATION_SPEED = 400, // Default inflation duration
       INFLATION_SPEED_FAST = 0, // Inflation duration when retargeting -- need > 0 so that animation end fires correctly
@@ -18,7 +18,7 @@ define(['hlb/dimmer', 'page/util/common', 'hlb/positioning', 'core/platform', '$
   function transitionInHLB(doShowQuickly, data) {
 
     // Dim the background!
-    dimmer.dimBackgroundContent(INFLATION_SPEED);
+    dimmer.dimBackgroundContent(INFLATION_SPEED, $('#' + constants.HLB_WRAPPER_ID));
 
     var $hlb = data.$hlb,
       speed = doShowQuickly ? INFLATION_SPEED_FAST : INFLATION_SPEED,
