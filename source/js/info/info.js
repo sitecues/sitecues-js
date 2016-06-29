@@ -64,7 +64,7 @@ define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 
 
     window.removeEventListener('message', checkCloseMessage);
 
-    document.documentElement.removeEventListener('wheel', preventScroll);
+    enableScrolling(true);
 
     enableWebPagePointerEvents(true);
 
@@ -122,7 +122,7 @@ define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 
 
     enableWebPagePointerEvents(false);
 
-    document.documentElement.addEventListener('wheel', preventScroll);
+    enableScrolling(false);
 
     dimmer.dimBackgroundContent(DIMMER_SPEED, $iframe);
 
@@ -140,14 +140,6 @@ define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 
     addCloseButtonTimer = setTimeout(addCloseButton, INITIAL_DELAY + INFLATION_SPEED + 100);
 
     isModalOpen = true;
-  }
-
-  function preventScroll(evt) {
-    evt.stopPropagation();
-    evt.stopImmediatePropagation();
-    evt.preventDefault();
-    evt.returnValue = false;
-    return false;
   }
 
   function checkCloseMessage(evt) {
@@ -187,6 +179,16 @@ define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 
   function enableWebPagePointerEvents(doEnable) {
     $('body,#scp-bp-container')
       .css('pointerEvents', doEnable ? '' : 'none');
+  }
+
+  function enableScrolling(doEnable) {
+    if (doEnable) {
+      document.documentElement.style.overflow = enableScrolling.origOverflow;
+    }
+    else {
+      enableScrolling.origOverflow = document.documentElement.style.overflow;
+      document.documentElement.style.overflow = 'hidden';
+    }
   }
 
   // jumpTo can be to a named anchor or id in the document, e.g. #keyboard
