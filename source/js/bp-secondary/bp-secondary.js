@@ -418,7 +418,7 @@ define(['core/bp/constants',
 
   function resetStyles() {
     var moreButton = getMoreButton(),
-      HEIGHT_RELATED_ELEMS = [ getSecondary(), getBottom(), getOutlineFill(), getSecondaryOutline(), getShadow()];
+      HEIGHT_RELATED_ELEMS = [ getSecondary(), moreButton, getBottom(), getOutlineFill(), getSecondaryOutline(), getShadow()];
 
     HEIGHT_RELATED_ELEMS.forEach(function(elem) {
       transformUtil.setElemTransform(elem, {});
@@ -486,8 +486,7 @@ define(['core/bp/constants',
 
       // Insert the markup for the secondary panel
       markup.init();
-      // Add mouse listeners once BP is ready
-      resetStyles();
+      resetButtonStyles();
 
       origOutlineHeight = getCurrentOutlineHeight();
       origFillHeight = parseFloat(getOutlineFill().getAttribute('height'));
