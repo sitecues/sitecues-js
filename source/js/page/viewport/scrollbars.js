@@ -26,7 +26,6 @@ define([ 'core/platform', 'page/viewport/viewport' ], function (platform, viewpo
     shouldComputeMainBodyScrollbars = platform.browser.isMS;
 
     if (shouldComputeMainBodyScrollbars) {
-      resetScrollbars();
       determineScrollbars();
     }
   }
@@ -54,10 +53,14 @@ define([ 'core/platform', 'page/viewport/viewport' ], function (platform, viewpo
     }
   }
 
-  function resetScrollbars() {
+  function setOverflow(overflowX, overflowY) {
     var docElemStyle = document.documentElement.style;
-    docElemStyle.overflowX = 'hidden';
-    docElemStyle.overflowY = 'hidden';
+    if (docElemStyle.overflowX !== overflowX) {
+      docElemStyle.overflowX = overflowX;
+    }
+    if (docElemStyle.overflowY !== overflowY) {
+      docElemStyle.overflowY = overflowY;
+    }
   }
 
   // We are going to remove scrollbars and re-add them ourselves, because we can do a better job
@@ -91,20 +94,20 @@ define([ 'core/platform', 'page/viewport/viewport' ], function (platform, viewpo
     // deal with zoom first, and then scrollbars separately
     // The delay also allows us to collect several concurrent requests and handle them once.
     clearTimeout(finalizeScrollbarsTimer);
-    finalizeScrollbarsTimer = setTimeout(function() {
-      // Use scrollbars if necessary for size of content
-      var doUseHorizScrollbar = doForceHorizScrollbar || isBodyTooWide(),
-        doUseVertScrollbar = doForceVertScrollbar || isBodyTooTall(),
-        newOverflowX = doUseHorizScrollbar ? 'scroll' : defaultOverflowX,
-        newOverflowY = doUseVertScrollbar ? 'scroll' : defaultOverflowY;
+    var doUseHorizScrollbar = doForceHorizScrollbar || isBodyTooWide(),
+      doUseVertScrollbar = doForceVertScrollbar || isBodyTooTall(),
+      newOverflowX = doUseHorizScrollbar ? 'scroll' : defaultOverflowX,
+      newOverflowY = doUseVertScrollbar ? 'scroll' : defaultOverflowY;
 
-      if (docElemStyle.overflowX !== newOverflowX) {
-        docElemStyle.overflowX = newOverflowX;
+    if (newOverflowX !== docElemStyle.overflowX || newOverflowY !== docElemStyle.overflowY) {
+      if (shouldComputeMainBodyScrollbars) {
+        // MS browsers need to reset first, otherwise causes SC-3722
+        setOverflow('hidden', 'hidden');
       }
-      if (docElemStyle.overflowY !== newOverflowY) {
-        docElemStyle.overflowY = newOverflowY;
-      }
-    }, 0);
+      finalizeScrollbarsTimer = setTimeout(function() {
+        setOverflow(newOverflowX, newOverflowY);
+      }, 0);
+    }
   }
 
   return {
