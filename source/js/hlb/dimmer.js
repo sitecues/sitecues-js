@@ -23,7 +23,7 @@ define([ '$', 'hlb/constants' ], function($, constants) {
    * @param  {number}        inflationSpeed      The duration of the opacity transition
    * @param  {Object} (optional) $parentOfDimmer  A selector describing the node that should parent the dimmer
    */
-  function dimBackgroundContent(inflationSpeed) {
+  function dimBackgroundContent(inflationSpeed, $foreground) {
 
     function createDimmerElement() {
       var documentElement = document.documentElement,
@@ -54,8 +54,7 @@ define([ '$', 'hlb/constants' ], function($, constants) {
     var dimmerElement = getDimmerElement() || createDimmerElement();
 
     // If created before, will ensure it's moved before the current hlb wrapper
-    $(dimmerElement)
-      .insertBefore('#' + constants.HLB_WRAPPER_ID);
+    $(dimmerElement).insertBefore($foreground);
   }
 
   function animateOpacity(dimmerElement, startOpacity, endOpacity, speed, onCompleteFn) {

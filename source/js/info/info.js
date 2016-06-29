@@ -3,6 +3,7 @@ define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 
 
   var $iframe = $(),
     $closeButton = $(),
+    MAX_ZINDEX = 2147483647,
     INITIAL_CSS = {
       position: 'fixed',
       left: '15%',
@@ -15,7 +16,7 @@ define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 
       borderRadius: '8px',
       transition: 'opacity .9s, transform 1s',
       opacity: 0,
-      zIndex: 2147483645
+      zIndex: MAX_ZINDEX
     },
     ENLARGED_CSS = {
       opacity: 1,
@@ -32,7 +33,7 @@ define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 
       display: 'block',
       lineHeight: '0px',
       position: 'fixed',
-      zIndex: 2147483646,
+      zIndex: MAX_ZINDEX,
       margin: '8px',
       width: BUTTON_SIZE + 'px',
       height: BUTTON_SIZE + 'px',
@@ -63,8 +64,7 @@ define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 
 
     window.removeEventListener('message', checkCloseMessage);
 
-    $('html')
-      .off('DOMMouseScroll mousewheel wheel', preventScroll);
+    document.documentElement.removeEventListener('wheel', preventScroll);
 
     enableWebPagePointerEvents(true);
 
@@ -84,11 +84,7 @@ define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 
 
       $(window).one('focus', close);
 
-
       window.addEventListener('message', checkCloseMessage);
-
-      $('html')
-        .on('DOMMouseScroll mousewheel wheel', preventScroll);
     }, 0);
 
   }
@@ -126,7 +122,9 @@ define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 
 
     enableWebPagePointerEvents(false);
 
-    dimmer.dimBackgroundContent(DIMMER_SPEED);
+    document.documentElement.addEventListener('wheel', preventScroll);
+
+    dimmer.dimBackgroundContent(DIMMER_SPEED, $iframe);
 
     setTimeout(function() {
       $iframe.css(ENLARGED_CSS);
@@ -146,6 +144,7 @@ define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 
 
   function preventScroll(evt) {
     evt.stopPropagation();
+    evt.stopImmediatePropagation();
     evt.preventDefault();
     evt.returnValue = false;
     return false;
