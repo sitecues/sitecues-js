@@ -13,7 +13,10 @@ define([
   'core/conf/site',
   'core/bp/view/panel/panel-classes',
   'core/bp/view/badge/badge-classes',
-  'core/events'], function(BP_CONST,
+  'core/events',
+  'core/history-change-events'
+],
+  function(BP_CONST,
             helper,
             bpSVG,
             placement,
@@ -24,7 +27,8 @@ define([
             site,
             panelClasses,
             badgeClasses,
-            events) {
+            events,
+            historyChange) {
 
   var byId = helper.byId,
     bpContainer,
@@ -121,6 +125,31 @@ define([
     badgeElement.setAttribute('class', newBadgeClassAttr);
   }
 
+  // Location of page has changed via history API.
+  // We must update our hashes so that they are not pointing to the wrong place,
+  // otherwise the badge/panel will show up empty (SC-3797)
+  function updateSvgHashes(oldPath, newPath) {
+    function updateAttribute(element, attribute) {
+      var oldValue = element.getAttribute(attribute),
+        newValue = oldValue.replace(oldPath + '#', newPath + '#');
+
+      element.setAttribute(attribute, newValue);
+    }
+
+    function updateElements(selector, attribute) {
+      var elements = svgElement.querySelectorAll(selector),
+        index = elements.length;
+
+      while (index --) {
+        updateAttribute(elements[index], attribute);
+      }
+
+    }
+    updateElements('use', 'xlink:href');
+    updateElements('a', 'href');
+    updateElements('[filter]', 'filter');
+  }
+
   // This function augments the badge placement element, which is passed in.
   // This is an element that will have <svg> and other markup inserted inside of it.
   //
@@ -134,6 +163,8 @@ define([
     badgeElement = badgePlacementElem;
     bpContainer = createBpContainer();
     svgElement = getSVGElement(bpContainer);
+
+    historyChange.on(updateSvgHashes);
 
     // Real settings or fake initial settings?
     if (!SC_EXTENSION) {
