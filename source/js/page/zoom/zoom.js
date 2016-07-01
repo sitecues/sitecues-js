@@ -7,6 +7,7 @@ define(
     '$',
     'core/conf/user/manager',
     'core/events',
+    'core/modifier-key-state',
     'page/zoom/animation',
     'page/zoom/util/body-geometry',
     'page/zoom/state',
@@ -20,6 +21,7 @@ define(
     $,
     conf,
     events,
+    modifierKeyState,
     animation,
     bodyGeo,
     state,
@@ -99,15 +101,19 @@ define(
 
     event.preventDefault();
 
+    function getWheelEventInputInfo() {
+      return modifierKeyState.isCtrlKeyDown() ? { isCtrlWheel: true } : { isUnpinch: true };
+    }
+
     setTimeout(function () {
-      var delta = -event.deltaY * UNPINCH_FACTOR;
-      var targetZoom = animation.isZoomOperationRunning() ? state.currentTargetZoom + delta : state.completedZoom + delta;
+      var delta = -event.deltaY * UNPINCH_FACTOR,
+        targetZoom = animation.isZoomOperationRunning() ? state.currentTargetZoom + delta : state.completedZoom + delta;
 
       clearTimeout(unpinchEndTimer);
       unpinchEndTimer = setTimeout(animation.finishZoomOperation, UNPINCH_END_DELAY);
       if (!animation.isZoomOperationRunning()) {
         // 1st call -- we will glide to it, it may be far away from previous zoom value
-        animation.beginZoomOperation(targetZoom, {isUnpinch: true}); // Get ready for more slider updates
+        animation.beginZoomOperation(targetZoom, getWheelEventInputInfo()); // Get ready for more slider updates
       }
 
       state.currentTargetZoom = restrictZoom.toValidRange(targetZoom); // Change target

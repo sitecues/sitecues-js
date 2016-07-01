@@ -7,8 +7,8 @@
  */
 
 define(['core/conf/user/manager', 'core/util/session', 'core/locale', 'core/metric', 'core/platform', 'core/bp/bp',
-        'core/constants', 'core/events', 'core/dom-events', 'Promise'],
-  function (conf, session, locale, metric, platform, bp, CORE_CONST, events, domEvents, Promise) {
+        'core/constants', 'core/events', 'core/dom-events', 'Promise', 'core/modifier-key-state'],
+  function (conf, session, locale, metric, platform, bp, CORE_CONST, events, domEvents, Promise, modifierKeyState) {
   var
     areZoomEnhancementsInitialized,
     isZoomInitialized,
@@ -163,6 +163,8 @@ define(['core/conf/user/manager', 'core/util/session', 'core/locale', 'core/metr
     if (!isZoomInitialized) {
       window.addEventListener('wheel', onPossibleScreenPinch);
     }
+
+    modifierKeyState.init();
 
     onSitecuesReady();
   }

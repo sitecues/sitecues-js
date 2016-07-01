@@ -85,6 +85,8 @@ define(
       isLongGlide: false,              // Key or A button held down to glide extra
       isKey: false,
       isButtonPress: false,            // Small or large A in panel
+      isUnpinch: false,                // Trackpad unpinch
+      isCtrlWheel: false,              // Ctrl+mousewheel
       fromZoom: state.completedZoom    // Old zoom value
     }, input);
 

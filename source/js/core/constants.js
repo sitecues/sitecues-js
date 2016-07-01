@@ -54,6 +54,7 @@ define([], function () {
     DOWN: 40,
     LETTER_H: 72,
     SHIFT: 16,
+    CTRL: 17,
     F8: 119,
     TAB: 9,
     ENTER: 13
