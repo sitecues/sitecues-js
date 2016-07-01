@@ -120,15 +120,16 @@ define([], function() {
   }
 
   // Determine which operating system is being used
-  function getOSStr(platform) {
-    return platform.indexOf('mac') > -1 ? 'mac' :
-        platform.indexOf('win') > -1 ? 'win' :
-        platform.indexOf('linux') > -1 ? 'linux' :
-      '';
+  function getOSStr(agent) {
+    return agent.indexOf('Mac OS X ') > -1 ? 'mac' :
+        agent.indexOf('Windows NT') > -1 ? 'win' :
+        agent.indexOf('Linux') > -1 ? 'linux' :
+      'other';
   }
 
   // Set globally accessible operating system constants
-  function getOS(agent, osStr) {
+  function getOS(agent) {
+    var osStr = getOSStr(agent);
     var os = {
       is: osStr,
       isMac: osStr === 'mac',
@@ -268,7 +269,7 @@ define([], function() {
 
     agent = navigator.userAgent || '';
     exports.browser = getBrowser(agent);
-    exports.os = getOS(agent, getOSStr(navigator.platform.toLowerCase()));
+    exports.os = getOS(agent);
     exports.nativeZoom = getNativeZoom();
 
     if (!isSupported(exports.os, exports.browser)) {

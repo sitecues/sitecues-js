@@ -196,6 +196,7 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
         osVersion: platform.os.fullVersion,
         browser: platform.browser.is,
         browserVersion: platform.browser.version,
+        navPlatform: navigator.platform, // For debugging -- we no longer use it to determine OS
         isUnsupportedPlatform: platform.isUnsupportedPlatform ? true : undefined  // Don't export field when supported
       };
     }
