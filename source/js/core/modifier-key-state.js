@@ -9,20 +9,17 @@ define([ 'core/dom-events', 'core/constants' ], function(domEvents, constants) {
   
   function onKeyDown(event) {
     if (event.keyCode === CTRL_KEY_CODE) {
-      console.log('down');
       isCtrlKeyDownNow = true;
     }
   }
 
   function onKeyUp(event) {
     if (event.keyCode === CTRL_KEY_CODE) {
-      console.log('up');
       isCtrlKeyDownNow = false;
     }
   }
 
   function isCtrlKeyDown() {
-    console.log('isdown ' +isCtrlKeyDownNow);
     return isCtrlKeyDownNow;
   }
 
