@@ -86,34 +86,36 @@ define([], function() {
 
   // Set globally accessible version constants
   function getVersion(agent, browser) {
+    var charIndex;
+  
     // If IE is being used, determine which version
-    var charIndex = agent.indexOf('rv:');
-    if (charIndex === -1) {
-      if (browser.isChrome) {
-        charIndex = agent.indexOf('Chrome/');
-        if (charIndex > 0) {
-          charIndex += 7;
-        }
-      }
-      else if (browser.isSafari) {
-        charIndex = agent.indexOf('Version/');
-        if (charIndex > 0) {
-          charIndex += 8;
-        }
-      }
-      else if (browser.isMS) {
-        // Use MSIE XX.X
-        charIndex = agent.indexOf('MSIE');
-        if (charIndex < 0) {
-          charIndex = agent.indexOf('Edge');
-        }
-        if (charIndex > 0) {
-          charIndex += 5;  // MSIE #
-        }
+    if (browser.isChrome) {
+      charIndex = agent.indexOf('Chrome/');
+      if (charIndex > 0) {
+        charIndex += 7;
       }
     }
-    else {
-      charIndex += 3;   // rv:#
+    else if (browser.isSafari) {
+      charIndex = agent.indexOf('Version/');
+      if (charIndex > 0) {
+        charIndex += 8;
+      }
+    }
+    else if (browser.isMS) {
+      // Use MSIE XX.X
+      charIndex = agent.indexOf('MSIE');
+      if (charIndex < 0) {
+        charIndex = agent.indexOf('Edge');
+      }
+      if (charIndex > 0) {
+        charIndex += 5;  // MSIE #
+      }
+    }
+    if (charIndex < 0) {
+      charIndex = agent.indexOf('rv:');
+      if (charIndex > 0) {
+        charIndex += 3;   // rv:#
+      }
     }
 
     return charIndex < 0 ? 0 : parseInt(agent.substring(charIndex));  // Returns 0 for unknown version
