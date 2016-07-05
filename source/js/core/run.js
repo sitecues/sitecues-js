@@ -267,6 +267,7 @@ define(['core/conf/user/manager', 'core/util/session', 'core/locale', 'core/metr
 
     // Start initialization
     platform.init();
+
     if (platform.isUnsupportedPlatform) {
       // Unsupported platform: fail early but fire page-visited metric
       initMetrics({

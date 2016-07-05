@@ -86,7 +86,7 @@ define([], function() {
 
   // Set globally accessible version constants
   function getVersion(agent, browser) {
-    var charIndex;
+    var charIndex = -1;
   
     // If IE is being used, determine which version
     if (browser.isChrome) {
