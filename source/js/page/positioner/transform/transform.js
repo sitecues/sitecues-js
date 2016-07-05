@@ -11,6 +11,7 @@
  *     that have already been shifted down by the toolbar height. We don't shift down fixed elements close to the top or bottom of the viewport
  *     because they are more likely to be part of a fixed menu that we shouldn't shift down (like a drop down menu)
  * */
+/*jshint -W072 */
 define(
   [
     'page/positioner/util/element-map',
@@ -20,11 +21,13 @@ define(
     'page/viewport/viewport',
     'page/positioner/util/element-info',
     'core/platform',
-    'page/positioner/util/rect-cache',
+    'page/positioner/transform/rect-cache',
     'core/dom-events',
     'page/positioner/util/array-utility',
     'page/zoom/style',
-    'page/viewport/scrollbars'
+    'page/viewport/scrollbars',
+    'page/zoom/config/config',
+    'core/events'
   ],
   function (
     elementMap,
@@ -38,31 +41,123 @@ define(
     domEvents,
     arrayUtil,
     zoomStyle,
-    scrollbars
+    scrollbars,
+    config,
+    events
   ) {
+    /*jshint +W072 */
 
-  'use strict';
+    'use strict';
 
-  var
-    shouldRepaintOnZoomChange,
-    transformProperty, transformOriginProperty,
+    var
+      shouldRestrictWidth, originalBody,
+      isTransformXOriginCentered,
+      shouldRepaintOnZoomChange,
+      transformProperty, transformOriginProperty,
     // Fixed elements taller than the viewport
-    tallElements           = [],
+      tallElements             = [],
     // Fixed elements wider than the viewport
-    wideElements           = [],
-    cachedXOffset          = null,
-    cachedYOffset          = null,
-    animationFrame         = null,
-    lastRepaintZoomLevel   = null,
-    resizeTimer            = null,
-    toolbarHeight          = 0,
-    MARGIN_FROM_EDGE       = 15,
-    isTransformingOnResize = false,
+      wideElements             = [],
+      cachedXOffset            = null,
+      cachedYOffset            = null,
+      animationFrame           = null,
+      lastRepaintZoomLevel     = null,
+      resizeTimer              = null,
+      toolbarHeight            = 0,
+      MARGIN_FROM_EDGE         = 15,
+      isTransformingOnResize   = false,
     // If we're using the toolbar, we need to transform fixed elements immediately or they may cover the toolbar / be covered
-    isTransformingOnScroll = false;
+      isTransformingOnScroll   = false;
 
-  // This function scales and translates fixed elements as needed, e.g. if we've zoomed and the body is wider than the element
-  function transformFixedElement(element, opts) {
+    // This function scales and translates fixed elements as needed, e.g. if we've zoomed and the body is wider than the element
+    function transformFixedElement(element, opts) {
+
+      function getRectLeft(left, width, scale) {
+        // Since transform origin 50 0 splits the scaled width evenly between the left and right sides, we need to subtract
+        // half of the difference between the scaled and unscaled width from the left side
+        return isTransformXOriginCentered ? left - width * (scale - 1) / 2 : left;
+      }
+
+      var
+        resetCurrentTranslation = opts.resetTranslation,
+        pageOffsets             = viewport.getPageOffsets(),
+        viewportDims            = viewport.getInnerDimensions(),
+        currentPageXOffset      = pageOffsets.x,
+        currentPageYOffset      = pageOffsets.y,
+        lastPageXOffset         = elementMap.getField(element, 'lastPageXOffset') || cachedXOffset,
+        lastPageYOffset         = elementMap.getField(element, 'lastPageYOffset') || cachedYOffset,
+        viewportWidth           = viewportDims.width,
+        viewportHeight          = viewportDims.height,
+        currentScale            = elementInfo.getScale(element, 'fixed'),
+        unscaledRect            = rectCache.getUnscaledRect(element, 'fixed', currentScale),
+        translationValues       = getTranslationValues(element),
+        currentXTranslation     = translationValues.x,
+        currentYTranslation     = translationValues.y;
+
+      // On zoom we should reset the current translations to
+      // 1. reassess if we should shift the element vertically down by the toolbar offset
+      // 2. we may not need to horizontally pan the element depending on its new width
+      if (resetCurrentTranslation) {
+        unscaledRect.left -= currentXTranslation;
+        unscaledRect.top  -= currentYTranslation;
+        currentYTranslation = 0;
+        currentXTranslation = 0;
+      }
+
+      var
+        newScale        = getRestrictedScale(unscaledRect, opts.onResize),
+        newXTranslation = currentXTranslation,
+        newYTranslation = currentYTranslation;
+      elementInfo.setScale(element, newScale);
+
+      if (!unscaledRect.width || !unscaledRect.height) {
+        setNewTransform(element, 0, 0, newScale);
+        cachePageOffsets(element, currentPageXOffset, currentPageYOffset);
+        return;
+      }
+
+      // Calculate the dimensions of the fixed element after we apply the next scale transform
+      var rect = {
+        width  : unscaledRect.width * newScale,
+        height : unscaledRect.height * newScale,
+        top    : unscaledRect.top
+      };
+      rect.left   = getRectLeft(unscaledRect.left, unscaledRect.width, newScale);
+      rect.bottom = rect.top  + rect.height;
+      rect.right  = rect.left + rect.width;
+
+      newXTranslation = calculateXTranslation({
+        scale               : newScale,
+        dimensions          : rect,
+        viewportWidth       : viewportWidth,
+        lastPageXOffset     : lastPageXOffset,
+        scrollDifference    : currentPageXOffset - lastPageXOffset,
+        currentPageXOffset  : currentPageXOffset,
+        currentXTranslation : currentXTranslation
+      });
+
+      newYTranslation = calculateYTranslation({
+        dimensions              : rect,
+        viewportHeight          : viewportHeight,
+        scrollDifference        : currentPageYOffset - lastPageYOffset,
+        currentPageYOffset      : currentPageYOffset,
+        currentYTranslation     : currentYTranslation,
+        resetCurrentTranslation : resetCurrentTranslation
+      });
+
+      var
+        xDelta = resetCurrentTranslation ? newXTranslation : newXTranslation - currentXTranslation,
+        yDelta = resetCurrentTranslation ? newYTranslation : newYTranslation - currentYTranslation;
+
+      rect.top    += yDelta;
+      rect.bottom += yDelta;
+      rect.left   += xDelta;
+      rect.right  += xDelta;
+
+      setNewTransform(element, newXTranslation, newYTranslation, newScale);
+      cachePageOffsets(element, currentPageXOffset, currentPageYOffset);
+      rectCache.update(element, rect);
+    }
 
     function getTranslationValues(element) {
       var
@@ -85,381 +180,343 @@ define(
       element.style[transformProperty] = 'translate3d(' + translateX + 'px, ' + translateY + 'px, 0) scale(' + scale + ')';
     }
 
-    var
-      resetCurrentTranslation  = opts.resetTranslation,
-      pageOffsets              = viewport.getPageOffsets(),
-      viewportDims             = viewport.getInnerDimensions(),
-      currentPageXOffset       = pageOffsets.x,
-      currentPageYOffset       = pageOffsets.y,
-      lastPageXOffset          = elementMap.getField(element, 'lastPageXOffset') || currentPageXOffset,
-      lastPageYOffset          = elementMap.getField(element, 'lastPageYOffset') || currentPageYOffset,
-      viewportWidth            = viewportDims.width,
-      viewportHeight           = viewportDims.height,
-      currentScale             = elementInfo.getScale(element, 'fixed'),
-      unscaledRect             = rectCache.getUnscaledRect(element, currentScale),
-      translationValues        = getTranslationValues(element),
-      currentXTranslation      = translationValues.x,
-      currentYTranslation      = translationValues.y,
-      verticalScrollDifference = currentPageYOffset - lastPageYOffset;
-
-    // On zoom we should reset the current translations to
-    // 1. reassess if we should shift the element vertically down by the toolbar offset
-    // 2. we may not need to horizontally pan the element depending on its new width
-    if (resetCurrentTranslation) {
-      unscaledRect.left -= currentXTranslation;
-      unscaledRect.top  -= currentYTranslation;
-      currentYTranslation = 0;
-      currentXTranslation = 0;
-    }
-
-    var
-      newScale        = restrictScale(unscaledRect, opts.onResize),
-      newXTranslation = currentXTranslation,
-      newYTranslation = currentYTranslation;
-    elementMap.setField(element, 'scale', newScale);
-
-    if (!unscaledRect.width || !unscaledRect.height) {
-      setNewTransform(element, 0, 0, newScale);
-      cachePageOffsets(element, currentPageXOffset, currentPageYOffset);
-      return;
-    }
-
-    // Calculate the dimensions of the fixed element after we apply the next scale transform
-    var rect = {
-      width: unscaledRect.width * newScale,
-      height: unscaledRect.height * newScale,
-      top: unscaledRect.top,
-      left: unscaledRect.left
-    };
-    rect.bottom = rect.top  + rect.height;
-    rect.right  = rect.left + rect.width;
-
-    newXTranslation = calculateXTranslation({
-      dimensions: rect,
-      currentXTranslation: currentXTranslation,
-      viewportWidth: viewportWidth,
-      scrollDifference: currentPageXOffset - lastPageXOffset,
-      currentPageXOffset: currentPageXOffset,
-      lastPageXOffset: lastPageXOffset
-    });
-    
-    newYTranslation = calculateYTranslation({
-      dimensions: rect,
-      currentYTranslation: currentYTranslation,
-      viewportHeight: viewportHeight,
-      scrollDifference: verticalScrollDifference,
-      currentPageYOffset: currentPageYOffset,
-      resetCurrentTranslation: resetCurrentTranslation
-    });
-
-    var
-      xDelta = resetCurrentTranslation ? newXTranslation : newXTranslation - currentXTranslation,
-      yDelta = resetCurrentTranslation ? newYTranslation : newYTranslation - currentYTranslation;
-
-    rect.top    += yDelta;
-    rect.bottom += yDelta;
-    rect.left   += xDelta;
-    rect.right  += xDelta;
-
-    setNewTransform(element, newXTranslation, newYTranslation, newScale);
-    cachePageOffsets(element, currentPageXOffset, currentPageYOffset);
-    rectCache.update(element, rect);
-  }
-
-  function calculateXTranslation(args) {
-    var
-      currentXTranslation = args.currentXTranslation,
-      elementWidth        = args.dimensions.width,
-      right               = args.dimensions.right,
-      viewportWidth       = args.viewportWidth,
-      lastPageXOffset     = args.lastPageXOffset,
-      currentPageXOffset  = args.currentPageXOffset,
-      newXTranslation     = currentXTranslation,
-      scrollWidth         = bodyGeo.getScrollWidth();
-
-    // If the fixed element is wider than the viewport
-    if (elementWidth > viewportWidth) {
+    function calculateXTranslation(args) {
       var
-        scrollDifference     = currentPageXOffset - lastPageXOffset,
-        correctedXOffset     = currentXTranslation,
-        xTranslationLimit    = viewportWidth - elementWidth,
-        scrollLimit          = scrollWidth - viewportWidth,
-        offsetRemaining      = Math.abs(xTranslationLimit - currentXTranslation),
-        rightScrollRemaining = scrollLimit - currentPageXOffset,
-        scrollPercent        = currentPageXOffset / scrollLimit;
+        currentXTranslation = args.currentXTranslation,
+        elementWidth        = args.dimensions.width,
+        right               = args.dimensions.right,
+        left                = args.dimensions.left,
+        viewportWidth       = args.viewportWidth,
+        currentPageXOffset  = args.currentPageXOffset,
+        scrollDifference    = args.scrollDifference,
+        offLeft             = elementWidth > viewportWidth ? left - scrollDifference : left,
+        offRight            = elementWidth - viewportWidth + offLeft,
+        newXTranslation     = elementWidth > viewportWidth ? currentXTranslation - scrollDifference : currentXTranslation,
+        scrollWidth         = bodyGeo.getScrollWidth();
 
-      // If the scroll distance to the edge of the page is less than the distance required to translate the
-      // fixed element completely into the viewport, set the current x offset to a proportional value to the current pageXOffset
-      if (offsetRemaining > rightScrollRemaining) {
-        correctedXOffset = xTranslationLimit * scrollPercent;
-      }
+      var
+        bodyRect    = rectCache.getRect(originalBody),
+        percentOff  = (bodyRect.left + currentPageXOffset) / bodyRect.width,
+        intendedOff = elementWidth * percentOff;
 
-      // Translate the fixed element to pan 1:1 with the page scroll
-      newXTranslation = Math.min(Math.max(correctedXOffset - scrollDifference, xTranslationLimit), 0);
-    }
-    // If the fixed element's right edge is outside of the viewport, we need to shift it back inside the viewport
-    else if ((right + currentXTranslation) > viewportWidth) {
-      newXTranslation = (-right + currentXTranslation + viewportWidth - MARGIN_FROM_EDGE);
-    }
+      // Shift fixed elements out of the viewport by the same proportion as the body
+      offLeft     -= intendedOff;
+      scrollWidth -= intendedOff;
 
-    return newXTranslation;
-  }
-
-  function calculateYTranslation(args) {
-    var
-      viewportHeight          = args.viewportHeight,
-      currentYTranslation     = args.currentYTranslation,
-      currentPageYOffset      = args.currentPageYOffset,
-      resetCurrentTranslation = args.resetCurrentTranslation,
-      elementHeight           = args.dimensions.height,
-      bottom                  = args.dimensions.bottom,
-      top                     = args.dimensions.top,
-      scrollDifference        = args.scrollDifference,
-      scrollHeight            = bodyGeo.getScrollHeight(),
-      isTallerThanViewport    = elementHeight > viewportHeight - toolbarHeight;
-
-    // This clause shifts fixed elements if necessary. We shift fixed elements if they are clipping the boundaries of the toolbar
-    // or if they are positioned in the middle 60% of the viewport height. This heuristic works pretty well, we don't shift elements that
-    // are near the bottom of the screen, and we don't shift dropdown fixed menus that are intended to be flush with the top menu
-    if (resetCurrentTranslation && toolbarHeight) {
-      if (shouldVerticallyShiftFixedElement(top, bottom, viewportHeight, elementHeight)) {
-        currentYTranslation += toolbarHeight;
-        top    += toolbarHeight;
-        bottom += toolbarHeight;
-      }
-    }
-
-    var
-      newYTranslation = currentYTranslation,
-      bottomOutOfView = bottom > viewportHeight,
-      topOutOfView    = top < toolbarHeight;
-
-    if (resetCurrentTranslation) {
-      // On reset, translate fixed elements below the toolbar
-      // or if they're below the viewport, translate them into view
-      if (isTallerThanViewport) {
+      // If the fixed element is wider than the viewport
+      if (elementWidth > viewportWidth) {
         var
-          correctedYTranslation = currentYTranslation,
-          yTranslationLimit = viewportHeight - elementHeight - toolbarHeight,
-          scrollLimit       = scrollHeight - viewportHeight,
-          offsetRemaining   = Math.abs(yTranslationLimit - currentYTranslation),
-          scrollRemaining   = scrollLimit - currentPageYOffset,
-          scrollPercent     = currentPageYOffset / scrollLimit;
+          scrollLimit     = scrollWidth - viewportWidth,
+          remainingScroll = scrollLimit - currentPageXOffset;
 
-        // If the scroll distance to the edge of the page is less than the distance required to translate the
-        // fixed element completely into the viewport, set the current y offset to a proportional value to the current pageYOffset
-        if (offsetRemaining > scrollRemaining) {
-          correctedYTranslation = yTranslationLimit * scrollPercent;
+        // If the length of the element outside of the right side of the viewport is greater than the remaining scroll width, shift
+        // the element the difference between the two values (so that we can pan the entire element into view)
+        if (offRight > remainingScroll) {
+          newXTranslation -= offRight - remainingScroll;
         }
-
-        newYTranslation = correctedYTranslation;
-      }
-      else if (topOutOfView) {
-        newYTranslation += toolbarHeight - top;
-      }
-      else if (bottomOutOfView) {
-        newYTranslation += viewportHeight - bottom;
-      }
-    }
-    else if (isTallerThanViewport) {
-      // If we've scrolled down
-      if (scrollDifference > 0) {
-        if (bottomOutOfView) {
-          newYTranslation -= Math.min(scrollDifference, bottom - viewportHeight);
+        // If the right side of the element is within the viewport, translate it over by its distance from the viewport
+        else if (offRight < 0) {
+          newXTranslation -= offRight;
+        }
+        // If the left side of the element is off by more than we scroll in to view
+        else if (offLeft < -currentPageXOffset) {
+          // Add the difference between the scroll distance and the offset element width to the translation
+          newXTranslation += Math.abs(offLeft) - currentPageXOffset;
+        }
+        // If the left side of the element is visible in the viewport
+        else if (offLeft > 0) {
+          // Shift the element to the left side of the viewport
+          newXTranslation -= offLeft;
         }
       }
-      // If we've scrolled up
-      else if (scrollDifference < 0) {
-        if (topOutOfView) {
-          newYTranslation += Math.min(-scrollDifference, toolbarHeight - top);
+      // If the fixed element's right edge is outside of the viewport, we need to shift it back inside the viewport
+      else if (offRight > 0) {
+        newXTranslation = (-right + currentXTranslation + viewportWidth - MARGIN_FROM_EDGE);
+      }
+
+      return newXTranslation;
+    }
+
+    function calculateYTranslation(args) {
+      var
+        viewportHeight          = args.viewportHeight,
+        currentYTranslation     = args.currentYTranslation,
+        currentPageYOffset      = args.currentPageYOffset,
+        resetCurrentTranslation = args.resetCurrentTranslation,
+        elementHeight           = args.dimensions.height,
+        bottom                  = args.dimensions.bottom,
+        top                     = args.dimensions.top,
+        scrollDifference        = args.scrollDifference,
+        scrollHeight            = bodyGeo.getScrollHeight(),
+        isTallerThanViewport    = elementHeight > viewportHeight - toolbarHeight;
+
+      // This clause shifts fixed elements if necessary. We shift fixed elements if they are clipping the boundaries of the toolbar
+      // or if they are positioned in the middle 60% of the viewport height. This heuristic works pretty well, we don't shift elements that
+      // are near the bottom of the screen, and we don't shift dropdown fixed menus that are intended to be flush with the top menu
+      if (resetCurrentTranslation && toolbarHeight) {
+        if (shouldVerticallyShiftFixedElement(top, bottom, viewportHeight, elementHeight)) {
+          currentYTranslation += toolbarHeight;
+          top    += toolbarHeight;
+          bottom += toolbarHeight;
         }
       }
-    }
-    return newYTranslation;
-  }
 
-  function restrictScale(dimensions, onResize) {
-    var scrollWidth = bodyGeo.getScrollWidth(onResize);
-    // If the fixed element is wider than the body, scale it back down to fit the body
-    return Math.min(state.fixedZoom, scrollWidth / dimensions.width);
-  }
+      var
+        newYTranslation = currentYTranslation,
+        bottomOutOfView = bottom > viewportHeight,
+        topOutOfView    = top < toolbarHeight;
 
-  function shouldVerticallyShiftFixedElement(top, bottom, viewportHeight, elementHeight) {
-    var
-      isOverlappingToolbar = top < toolbarHeight,
-      closeToTop           = viewportHeight * 0.2 > top,
-      closeToBottom        = viewportHeight * 0.8 < bottom,
-      isInMiddle           = !closeToTop && !closeToBottom,
-      isTallerThanViewport = elementHeight > viewportHeight;
+      if (resetCurrentTranslation) {
+        // On reset, translate fixed elements below the toolbar
+        // or if they're below the viewport, translate them into view
+        if (isTallerThanViewport) {
+          var
+            correctedYTranslation = currentYTranslation,
+            yTranslationLimit = viewportHeight - elementHeight - toolbarHeight,
+            scrollLimit       = scrollHeight - viewportHeight,
+            offsetRemaining   = Math.abs(yTranslationLimit - currentYTranslation),
+            scrollRemaining   = scrollLimit - currentPageYOffset,
+            scrollPercent     = currentPageYOffset / scrollLimit;
 
-    // Fixed elements that are close to the bottom or top are much more likely to be part of fixed menus that are
-    // intended to be flush with the edges of the viewport
-    return isTallerThanViewport || isOverlappingToolbar || isInMiddle;
-  }
+          // If the scroll distance to the edge of the page is less than the distance required to translate the
+          // fixed element completely into the viewport, set the current y offset to a proportional value to the current pageYOffset
+          if (offsetRemaining > scrollRemaining) {
+            correctedYTranslation = yTranslationLimit * scrollPercent;
+          }
 
-  function transformAllTargets(opts) {
-    targets.forEach(function (element) {
-      transformFixedElement(element, opts);
-    });
-
-    if (lastRepaintZoomLevel !== state.completedZoom && shouldRepaintOnZoomChange) {
-      lastRepaintZoomLevel = state.completedZoom;
-      zoomStyle.repaintToEnsureCrispText();
-    }
-  }
-
-  function refreshResizeListener() {
-
-    function onResize() {
-      if (resizeTimer) {
-        clearTimeout(resizeTimer);
+          newYTranslation = correctedYTranslation;
+        }
+        else if (topOutOfView) {
+          newYTranslation += toolbarHeight - top;
+        }
+        else if (bottomOutOfView) {
+          newYTranslation += viewportHeight - bottom;
+        }
       }
-      resizeTimer = setTimeout(function () {
-        transformAllTargets({
-          resetTranslation: true,
-          onResize: true
+      else if (isTallerThanViewport) {
+        // If we've scrolled down
+        if (scrollDifference > 0) {
+          if (bottomOutOfView) {
+            newYTranslation -= Math.min(scrollDifference, bottom - viewportHeight);
+          }
+        }
+        // If we've scrolled up
+        else if (scrollDifference < 0) {
+          if (topOutOfView) {
+            newYTranslation += Math.min(-scrollDifference, toolbarHeight - top);
+          }
+        }
+      }
+      return newYTranslation;
+    }
+
+    function getRestrictedScale(dimensions, onResize) {
+      var
+        scrollWidth  = bodyGeo.getScrollWidth(onResize),
+        elementWidth = dimensions.width;
+      return Math.min(state.fixedZoom, scrollWidth / elementWidth);
+    }
+
+    function shouldVerticallyShiftFixedElement(top, bottom, viewportHeight, elementHeight) {
+      var
+        isOverlappingToolbar = top < toolbarHeight,
+        closeToTop           = viewportHeight * 0.2 > top,
+        closeToBottom        = viewportHeight * 0.8 < bottom,
+        isInMiddle           = !closeToTop && !closeToBottom,
+        isTallerThanViewport = elementHeight > viewportHeight;
+
+      // Fixed elements that are close to the bottom or top are much more likely to be part of fixed menus that are
+      // intended to be flush with the edges of the viewport
+      return isTallerThanViewport || isOverlappingToolbar || isInMiddle;
+    }
+
+    function transformAllTargets(opts) {
+      targets.forEach(function (element) {
+        transformFixedElement(element, opts);
+      });
+
+      if (lastRepaintZoomLevel !== state.completedZoom && shouldRepaintOnZoomChange) {
+        lastRepaintZoomLevel = state.completedZoom;
+        zoomStyle.repaintToEnsureCrispText();
+      }
+    }
+
+    function refreshResizeListener() {
+
+      function onResize() {
+        if (resizeTimer) {
+          clearTimeout(resizeTimer);
+        }
+        resizeTimer = setTimeout(function () {
+          transformAllTargets({
+            resetTranslation: true,
+            onResize: true
+          });
+        }, 200);
+      }
+
+      var doTransformOnResize = Boolean(targets.getCount());
+
+      if (!isTransformingOnResize && doTransformOnResize) {
+        // There may be css media rules that radically change the positioning when the viewport is resized
+        window.addEventListener('resize', onResize);
+      }
+      else if (isTransformingOnResize && !doTransformOnResize) {
+        window.removeEventListener('resize', onResize);
+      }
+    }
+
+    function refreshElementTransform() {
+      /*jshint validthis: true */
+      transformFixedElement(this, {
+        resetTranslation: true
+      });
+      refreshScrollListener(this);
+      refreshResizeListener();
+      /*jshint validthis: false */
+    }
+
+    function onTargetAdded(element) {
+      element.style[transformOriginProperty] = isTransformXOriginCentered ? '50% 0' : '0 0';
+      // This handler runs when a style relevant to @element's bounding rectangle has mutated
+      rectCache.listenForMutatedRect(element, refreshElementTransform);
+      rectCache.listenForMutatedRect(originalBody);
+      refreshElementTransform.call(element);
+    }
+
+    function onTargetRemoved(element) {
+      element.style[transformProperty]       = '';
+      element.style[transformOriginProperty] = '';
+      rectCache.delete(element);
+      // This is the cached metadata we used for transforming the element. We need to clear it now that
+      // the information is stale
+      elementMap.flushField(element, [
+        'lastPageXOffset', 'lastPageYOffset', 'scale'
+      ]);
+      refreshResizeListener();
+      refreshScrollListener(element);
+    }
+
+    function onScroll() {
+
+      function transformOnScroll() {
+        if (animationFrame) {
+          cancelAnimationFrame(animationFrame);
+        }
+        animationFrame = requestAnimationFrame(function () {
+          transformAllTargets({});
         });
-      }, 200);
-    }
-
-    var doTransformOnResize = Boolean(targets.getCount());
-
-    if (!isTransformingOnResize && doTransformOnResize) {
-      // There may be css media rules that radically change the positioning when the viewport is resized
-      window.addEventListener('resize', onResize);
-    }
-    else if (isTransformingOnResize && !doTransformOnResize) {
-      window.removeEventListener('resize', onResize);
-    }
-  }
-
-  function refreshElementTransform() {
-    /*jshint validthis: true */
-    transformFixedElement(this, {
-      resetTranslation: true
-    });
-    refreshScrollListener(this);
-    refreshResizeListener();
-    /*jshint validthis: false */
-  }
-
-  function onTargetAdded(element) {
-    element.style[transformOriginProperty] = '0 0';
-    // This handler runs when a style relevant to @element's bounding rectangle has mutated
-    rectCache.listenForMutatedRect(element, refreshElementTransform);
-    refreshElementTransform.call(element);
-  }
-
-  function onTargetRemoved(element) {
-    element.style[transformProperty]       = '';
-    element.style[transformOriginProperty] = '';
-    // This is the cached metadata we used for transforming the element. We need to clear it now that
-    // the information is stale
-    elementMap.flushField(element, [
-      'lastPageXOffset', 'lastPageYOffset', 'scale'
-    ]);
-    refreshResizeListener(element);
-    refreshScrollListener();
-  }
-
-  function onScroll() {
-
-    function transformOnScroll() {
-      if (animationFrame) {
-        cancelAnimationFrame(animationFrame);
       }
-      animationFrame = requestAnimationFrame(function () {
-        transformAllTargets({});
+
+      var
+        currentOffsets        = viewport.getPageOffsets(),
+        xDelta                = currentOffsets.x - cachedXOffset,
+        yDelta                = currentOffsets.y - cachedYOffset,
+        doVerticalTransform   = Boolean(tallElements.length),
+        doHorizontalTransform = Boolean(wideElements.length);
+      cachedXOffset = currentOffsets.x;
+      cachedYOffset = currentOffsets.y;
+      if ((xDelta && doHorizontalTransform) || (yDelta && doVerticalTransform)) {
+        transformOnScroll();
+      }
+    }
+
+    function refreshScrollListener(element) {
+      var
+        viewportDims   = viewport.getInnerDimensions(),
+        viewportHeight = viewportDims.height,
+        viewportWidth  = viewportDims.width;
+
+      function identifyTallOrWideElement(element) {
+        var
+          rect   = rectCache.getRect(element, 'fixed'),
+          height = rect.height,
+          width  = rect.width;
+
+        if (height > viewportHeight) {
+          arrayUtil.addUnique(tallElements, element);
+        }
+        else {
+          tallElements = arrayUtil.remove(tallElements, element);
+        }
+
+        if (width > viewportWidth) {
+          arrayUtil.addUnique(wideElements, element);
+        }
+        else {
+          wideElements = arrayUtil.remove(wideElements, element);
+        }
+      }
+
+      // If this function is called when we add a transform target, evaluate the new target
+      if (element) {
+        identifyTallOrWideElement(element);
+      }
+      // If this function is called at the end of a zoom, evaluate all fixed targets
+      else {
+        tallElements = [];
+        wideElements = [];
+        targets.get().forEach(identifyTallOrWideElement);
+      }
+
+      var
+        doTransformOnHorizontalScroll = Boolean(wideElements.length),
+        doTransformOnVerticalScroll   = Boolean(tallElements.length),
+        doTransformOnScroll           = doTransformOnHorizontalScroll || doTransformOnVerticalScroll,
+        addOrRemoveFn;
+
+      scrollbars.forceScrollbars(doTransformOnHorizontalScroll, doTransformOnVerticalScroll);
+      if (doTransformOnScroll !== isTransformingOnScroll) {
+        addOrRemoveFn = doTransformOnScroll ? domEvents.on : domEvents.off;
+        addOrRemoveFn(window, 'scroll', onScroll, { capture: false });
+        isTransformingOnScroll = doTransformOnScroll;
+      }
+    }
+
+    function onZoom() {
+      setTimeout(refresh, 0);
+    }
+
+    // Typically these are shift transforms that assume that the body is untransformed. Once we transform the body, these fixed elements will effectively
+    // be absolutely positioned relative to the body and thus do not need to be specifically shifted. We'll update these transformations once they've been
+    // transplanted.
+    function clearInvalidTransforms() {
+      targets.forEach(function (element) {
+        if (!platform.browser.isIE && state.completedZoom === 1 && elementInfo.isInOriginalBody(element)) {
+          element.style[transformProperty] = '';
+        }
       });
     }
 
-    var
-      currentOffsets        = viewport.getPageOffsets(),
-      xDelta                = currentOffsets.x - cachedXOffset,
-      yDelta                = currentOffsets.y - cachedYOffset,
-      doVerticalTransform   = Boolean(tallElements.length),
-      doHorizontalTransform = Boolean(wideElements.length);
-    if ((xDelta && doHorizontalTransform) || (yDelta && doVerticalTransform)) {
-      transformOnScroll();
+    function refresh() {
+      transformAllTargets({
+        resetTranslation: true
+      });
+      refreshScrollListener();
     }
-  }
 
-  function refreshScrollListener(element) {
-    var
-      viewportDims   = viewport.getInnerDimensions(),
-      viewportHeight = viewportDims.height,
-      viewportWidth  = viewportDims.width;
-
-    function identifyTallOrWideElement(element) {
-      var
-        rect   = rectCache.getRect(element),
-        height = rect.height,
-        width  = rect.width;
-
-      if (height > viewportHeight) {
-        arrayUtil.addUnique(tallElements, element);
+    function init(toolbarHght) {
+      if (toolbarHght) {
+        toolbarHeight = toolbarHght;
       }
-      else {
-        tallElements = arrayUtil.remove(tallElements, element);
-      }
-
-      if (width > viewportWidth) {
-        arrayUtil.addUnique(wideElements, element);
-      }
-      else {
-        wideElements = arrayUtil.remove(wideElements, element);
-      }
+      originalBody               = document.body;
+      shouldRestrictWidth        = config.shouldRestrictWidth;
+      isTransformXOriginCentered = !shouldRestrictWidth;
+      rectCache.init(isTransformXOriginCentered);
+      // In Chrome we have to trigger a repaint after we transform elements because it causes blurriness
+      shouldRepaintOnZoomChange  = platform.browser.isChrome;
+      transformProperty          = platform.transformProperty;
+      transformOriginProperty    = platform.transformOriginProperty;
+      targets.init();
+      targets.registerAddHandler(onTargetAdded);
+      targets.registerRemoveHandler(onTargetRemoved);
+      events.on('zoom', onZoom);
+      events.on('zoom/begin', clearInvalidTransforms);
     }
 
-    // If this function is called when we add a transform target, evaluate the new target
-    if (element) {
-      identifyTallOrWideElement(element);
-    }
-    // If this function is called at the end of a zoom, evaluate all fixed targets
-    else {
-      tallElements = [];
-      wideElements = [];
-      targets.get().forEach(identifyTallOrWideElement);
-    }
-
-    var
-      doTransformOnHorizontalScroll = Boolean(wideElements.length),
-      doTransformOnVerticalScroll   = Boolean(tallElements.length),
-      doTransformOnScroll           = doTransformOnHorizontalScroll || doTransformOnVerticalScroll,
-      addOrRemoveFn;
-
-    scrollbars.forceScrollbars(doTransformOnHorizontalScroll, doTransformOnVerticalScroll);
-    if (doTransformOnScroll !== isTransformingOnScroll) {
-      addOrRemoveFn = doTransformOnScroll ? domEvents.on : domEvents.off;
-      addOrRemoveFn(window, 'scroll', onScroll, {capture: false});
-      isTransformingOnScroll = doTransformOnScroll;
-    }
-  }
-
-  function refresh() {
-    transformAllTargets({
-      resetTranslation: true
-    });
-    refreshScrollListener();
-  }
-
-  function init(toolbarHght) {
-    if (toolbarHght) {
-      toolbarHeight = toolbarHght;
-    }
-    rectCache.init();
-    // In Chrome we have to trigger a repaint after we transform elements because it causes blurriness
-    shouldRepaintOnZoomChange = platform.browser.isChrome;
-    transformProperty         = platform.transformProperty;
-    transformOriginProperty   = platform.transformOriginProperty;
-    targets.init();
-    targets.registerAddHandler(onTargetAdded);
-    targets.registerRemoveHandler(onTargetRemoved);
-  }
-
-  return {
-    init: init,
-    refresh: refresh,
-    allTargets: transformAllTargets
-  };
-});
+    return {
+      init: init,
+      refresh: refresh,
+      allTargets: transformAllTargets
+    };
+  });

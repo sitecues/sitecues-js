@@ -34,6 +34,7 @@ define(
   'use strict';
 
   var domObserver, docElem,
+    originalBody,
     observedProperties  = [],
     callbacks           = [],
     READY_STATE         = coreConstants.READY_STATE,
@@ -65,10 +66,19 @@ define(
     *   elementReference: { property: [handler] }
     * }
     * */
-    elementPropertyHandlerMap = new WeakMap();
+    elementPropertyHandlerMap = new WeakMap(),
+    observerOptions = {
+      attributes        : true,
+      attributeOldValue : true,
+      subtree           : true,
+      attributeFilter   : observedAttributes
+    };
 
 
-    function onMutations(mutations) {
+
+    // This handler is run on mutated elements /intended/ to be in the original body, which is to say elements currently nested in the
+    // original body and original elements currently nested in the clone body
+    function onBodyDescendantMutations(mutations) {
       var
         len = mutations.length,
         selectorsToRefresh = [];
@@ -96,7 +106,8 @@ define(
         switch (attribute) {
           case 'class':
             var
-              newClasses     = Array.prototype.slice.call(target.classList, 0),
+              // SVG elements in IE11 do not define classList
+              newClasses     = target.classList ? Array.prototype.slice.call(target.classList, 0) : target.className.baseVal.split(' '),
               oldClasses     = oldValue ? oldValue.split(' ') : [],
               changedClasses = arrayUtil.symmetricDifference(newClasses, oldClasses);
             if (changedClasses.length) {
@@ -225,30 +236,39 @@ define(
     runHandlers(toHandlers);
   }
 
+  function disconnectDOMObserver() {
+    var mutationRecords = domObserver.takeRecords();
+    // Handle the remaining queued mutation records
+    if (mutationRecords.length) {
+      setTimeout(function (mutationRecords) {
+        onBodyDescendantMutations(mutationRecords);
+      }, 0, mutationRecords);
+    }
+
+    domObserver.disconnect();
+  }
+
+  function observeOriginalElements() {
+    transplant.getAnchors().forEach(function (element) {
+      domObserver.observe(element, observerOptions);
+    });
+
+    domObserver.observe(originalBody, observerOptions);
+  }
+
   function listenForDynamicStyling(property) {
     var
       propertySelectors   = selectors.getForProperty(property),
-      mutationRecords     = domObserver.takeRecords(),
       compositeAttributes = selectors.getCompositeAttributes(propertySelectors);
 
     selectorMap.cacheInitialQueries(propertySelectors);
 
-    if (mutationRecords.length) {
-      setTimeout(function (mutationRecords) {
-        onMutations(mutationRecords);
-      }, 0, mutationRecords);
-    }
-
     observedAttributes = arrayUtil.union(observedAttributes, compositeAttributes);
     observedProperties = arrayUtil.addUnique(observedProperties, property);
+    observerOptions.attributeFilter = observedAttributes;
 
-    domObserver.disconnect();
-    domObserver.observe(docElem, {
-      attributes: true,
-      attributeOldValue: true,
-      subtree: true,
-      attributeFilter: observedAttributes
-    });
+    disconnectDOMObserver();
+    observeOriginalElements();
   }
 
   function getDeclarationKey(declaration) {
@@ -326,7 +346,7 @@ define(
     elementInfo.setCacheValue(element, property, value);
   }
 
-  // When an element is mutated such that its computed style matches the declaration, pass it to the handler
+  // When the document is mutated such that an element's computed style matches the declaration, pass it to the handler
   function registerToResolvedValueHandler(declaration, handler) {
     var
       declarationKey = getDeclarationKey(declaration),
@@ -334,7 +354,7 @@ define(
     registerResolvedValueHandler(declaration, handlerKey, handler);
   }
 
-  // When an element's computed style was matching the passed declaration, and it is mutated such that it no longer matches
+  // When an element's computed style was matching the passed declaration, and the document is mutated such that it no longer matches
   function registerFromResolvedValueHandler(declaration, handler) {
     var
       declarationKey = getDeclarationKey(declaration),
@@ -356,17 +376,17 @@ define(
 
     var
       transplantAnchors = transplant.getAnchors(),
-      allElements       = Array.prototype.slice.call(document.body.getElementsByTagName('*'), 0);
+      allBodyElements   = Array.prototype.slice.call(document.body.getElementsByTagName('*'), 0);
 
     resolvedElementsMap[declarationKey] = [];
 
     // If original elements are transplanted to the auxiliary body, include them in the search
     transplantAnchors.forEach(function (anchor) {
-      allElements = allElements.concat(Array.prototype.slice.call(anchor.getElementsByTagName('*'), 0));
+      allBodyElements = allBodyElements.concat(Array.prototype.slice.call(anchor.getElementsByTagName('*'), 0));
     });
 
-    for (var i = 0, elementCount = allElements.length; i < elementCount; i++) {
-      var element = allElements[i];
+    for (var i = 0, elementCount = allBodyElements.length; i < elementCount; i++) {
+      var element = allBodyElements[i];
       if (getComputedStyle(element)[property] === value) {
         resolvedElementsMap[declarationKey].push(element);
         elementInfo.setCacheValue(element, property, value);
@@ -374,6 +394,17 @@ define(
     }
 
     return resolvedElementsMap[declarationKey];
+  }
+
+  function onNewTransplantAnchor() {
+    /*jshint validthis: true */
+    domObserver.observe(this, observerOptions);
+    /*jshint validthis: false */
+  }
+
+  function onRemovedTransplantAnchor() {
+    disconnectDOMObserver();
+    observeOriginalElements();
   }
 
   function executeCallbacks() {
@@ -387,14 +418,19 @@ define(
     switch (readyState) {
       case READY_STATE.UNINITIALIZED:
         callbacks.push(callback);
-        readyState  = READY_STATE.INITIALIZING;
-        docElem     = document.documentElement;
-        domObserver = new MutationObserver(onMutations);
+        readyState   = READY_STATE.INITIALIZING;
+        docElem      = document.documentElement;
+        originalBody = document.body;
+        domObserver  = new MutationObserver(onBodyDescendantMutations);
+
         selectors.init(function () {
           readyState = READY_STATE.COMPLETE;
           queryManager.init(evaluateResolvedValue);
           executeCallbacks();
         });
+
+        transplant.registerAddAnchorHandler(onNewTransplantAnchor);
+        transplant.registerRemoveAnchorHandler(onRemovedTransplantAnchor);
         break;
 
       case READY_STATE.INITIALIZING:

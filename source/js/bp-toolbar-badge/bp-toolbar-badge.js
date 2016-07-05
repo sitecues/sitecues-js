@@ -21,7 +21,7 @@ define([
   var TOOLBAR_HEIGHT = 38;
 
   function adjustFixedElementsBelowToolbar() {
-    return new Promise(function(resolve) {
+    return new Promise(function (resolve) {
       require(['page/positioner/positioner'], function (positioner) {
         // In the case of the toolbar, we must always move fixed position elements
         // down, so that they are not obscured by our toolbar.
@@ -42,10 +42,11 @@ define([
     state.set('isPageBadge', false);
     state.set('isToolbarBadge', true);
 
-    return Promise.all([adjustFixedElementsBelowToolbar(), palette.init(null)])
+    return palette.init(null)
       .then(function() {
         baseView.init(toolbarElement);
-      });
+      })
+      .then(adjustFixedElementsBelowToolbar);
   }
 
   return {

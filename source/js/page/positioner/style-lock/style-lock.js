@@ -42,9 +42,9 @@ define(
   function lock() {
     var
       args = Array.prototype.slice.call(arguments, 0),
-      arg3 = args[2];
+      arg1 = args[0];
     // Three arguments means an element is meant to be locked
-    if (typeof arg3 === 'object') {
+    if (typeof arg1 === null || arg1.nodeType === Node.ELEMENT_NODE) {
       lockElementProperty.apply(null, args);
     }
     else {
@@ -54,6 +54,7 @@ define(
 
   // The handlers are run before and after the property's resolved value mutates
   function lockElementProperty(element, property, handlers) {
+    handlers = handlers || {};
     styleListener.init(function () {
 
       function onPropertyMutation(opts) {
@@ -102,10 +103,11 @@ define(
     });
   }
 
-  // Before and after handlers will run respectively before and after a non-sitecues element's resolved value mutates
-  // to and from the declaration
+  // Before and after handlers will run respectively before and after a non-sitecues element's resolved style value mutates
+  // to or from the declaration
   // The initial handler will run when we identify elements with a resolved value matching the declaration
   function lockResolvedDeclaration(declaration, handlers) {
+    handlers = handlers || {};
     styleListener.init(function () {
       var
         initial  = handlers.initial || noop,

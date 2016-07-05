@@ -24,7 +24,6 @@ define(
     var originalBody, 
       rejectionListenerMap;
 
-    //TODO: this should take domPosition
     function implantNodeStructure(element, parent, sibling) {
       if (sibling) {
         parent.insertBefore(element, sibling);

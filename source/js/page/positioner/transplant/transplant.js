@@ -28,6 +28,8 @@ define(
 
   var originalBody, elementQuerySelectorAll, documentQuerySelectorAll, getElementsByClassName,
     transplantAnchors      = [],
+    addAnchorHandlers      = [],
+    removeAnchorHandlers   = [],
     TRANSPLANT_STATE       = constants.TRANSPLANT_STATE,
     ORIGINAL_STYLESHEET_ID = 'sitecues-js-originals',
     ROOT_ATTR              = constants.ROOT_ATTR,
@@ -130,8 +132,19 @@ define(
   // Returns falsey if there isn't a root in the element's ancestor chain
   function getClosestRoot(element) {
     var
-      ancestor = element.parentElement;
-    while (ancestor && ancestor !== originalBody && ancestor !== clone.getAuxiliaryBody()) {
+      ancestor           = element.parentElement,
+      cloneBody          = clone.get(originalBody),
+      doesCloneBodyExist = Boolean(cloneBody);
+
+    function elementIsBody(element) {
+      var isOriginalBody = element === originalBody;
+      if (doesCloneBodyExist) {
+        return isOriginalBody || element === cloneBody;
+      }
+      return isOriginalBody;
+    }
+
+    while (ancestor && !elementIsBody(ancestor)) {
       if (elementInfo.isTransplantRoot(ancestor)) {
         return ancestor;
       }
@@ -320,6 +333,7 @@ define(
           parent: insertionGroup.nearestAncestorClone
         });
       }
+      addTransplantAnchor(subroot);
       elementMap.setField(subroot, 'wasReplanted', true);
       elementInfo.setRoot(subroot, null);
       insertPlaceholder(subroot, subrootParent, subrootSibling);
@@ -402,6 +416,7 @@ define(
       // heredity body intact so that we can rely on its structure if we have to replant the anchor root
       graft.implantNodeStructure(cloneRoot, cloneParent, cloneSibling);
 
+      removeTransplantAnchor(element);
       elementInfo.addSubroots(element, transplantedRoot);
       elementInfo.setRoot(transplantedRoot, element);
       elementMap.setField(transplantedRoot, 'wasReplanted', true);
@@ -493,14 +508,28 @@ define(
       .insertBefore(document.head.firstChild);
   }
 
+  function registerAddAnchorHandler(fn) {
+    addAnchorHandlers.push(fn);
+  }
+
+  function registerRemoveAnchorHandler(fn) {
+    removeAnchorHandlers.push(fn);
+  }
+
   function addTransplantAnchor(element) {
     transplantAnchors.push(element);
+    addAnchorHandlers.forEach(function (fn) {
+      fn.call(element);
+    });
   }
 
   function removeTransplantAnchor(element) {
     var index = transplantAnchors.indexOf(element);
     if (index >= 0) {
       transplantAnchors.splice(index, 1);
+      removeAnchorHandlers.forEach(function (fn) {
+        fn.call(element);
+      });
     }
   }
   
@@ -521,6 +550,8 @@ define(
     performOperation: performOperation,
     postOperation: postOperation,
     getAnchors: getTransplantAnchors,
+    registerAddAnchorHandler: registerAddAnchorHandler,
+    registerRemoveAnchorHandler: registerRemoveAnchorHandler,
     init: init
   };
 });

@@ -37,7 +37,6 @@ define(
       wordyOpts.isRoot                      = opts.isRoot;
       // Defined if @target is nested in the subtree of an ancestor transplant root
       wordyOpts.superRoot                   = opts.superRoot;
-      wordyOpts.doCloneTargetSubtree        = opts.subtree;
       // Do not clone @target
       wordyOpts.doExcludeTargetElement      = opts.excludeTarget;
       // An element's heredity structure is:
@@ -51,50 +50,19 @@ define(
       // We save a little work with this option, because we already need to find it when cloning heredityStructure from the body
       wordyOpts.doGetNearestAncestorClone   = opts.getNearestAncestorClone;
 
-    if (wordyOpts.doCloneTargetSubtree) {
-      resultWrapper.clone = cloneSubtree(target, wordyOpts);
-    }
-    else if (!wordyOpts.doExcludeTargetElement) {
+    if (!wordyOpts.doExcludeTargetElement) {
       resultWrapper.clone = cloneElement(target, wordyOpts);
     }
     
     if (wordyOpts.doCloneHeredityStructure) {
       var results = cloneHeredityStructure(target, wordyOpts);
-      resultWrapper.heredityStructure      = results.heredityStructure;
+      resultWrapper.heredityStructure    = results.heredityStructure;
       // This could conceivably be undefined, but there aren't any code paths currently where that is true
       resultWrapper.nearestAncestorClone = results.nearestAncestorClone;
       return resultWrapper;
     }
 
     return resultWrapper.clone;
-  }
-    
-  function cloneSubtree(element, opts) {
-    var subtreeOpts = {
-      deepClone: true,
-      isRoot: opts.isRoot
-    };
-
-    // Clone @element's subtree inclusively
-    if (!opts.doExcludeTargetElement) {
-      return cloneElement(element, subtreeOpts);
-    }
-
-    //Clone just the element's children's subtrees, and return a document fragment containing them in order
-    var
-      fragment = document.createDocumentFragment(),
-      children = Array.prototype.slice.call(element.children, 0),
-      length   = children.length;
-
-    subtreeOpts.isRoot    = false;
-    subtreeOpts.superRoot = opts.superRoot || element;
-
-    for (var i = 0; i < length; i++) {
-      var child = children[i];
-      fragment.appendChild(cloneElement(child, subtreeOpts));
-    }
-
-    return fragment;
   }
 
   // Clone all the children of each of the element's ancestors until the body, or until a generation that has already been cloned
@@ -178,13 +146,11 @@ define(
     opts = opts || {};
 
     var len, i,
-      // Should we also clone the subtree of @element
-      deepClone   = opts.deepClone,
       // If @element should be considered the root element for its subtree
       isRoot      = opts.isRoot,
       // The closest ancestor root of @element
       superRoot   = opts.superRoot,
-      clone       = element.cloneNode(deepClone),
+      clone       = element.cloneNode(),
       $element    = $(element),
       $clone      = $(clone),
       traitFields = ['complement', 'isRoot'],
@@ -192,7 +158,6 @@ define(
       tagName     = element.localName;
 
     switch (tagName) {
-      // TODO: nested script elements are currently not being disabled. Not very common, and a little expensive to check for
       case 'script':
         // This prevents clone script tags from running when we insert them into the DOM
         clone.type = 'application/json';
@@ -204,27 +169,17 @@ define(
         clone.src = '';
         clone.load();
         break;
+
+      case 'link':
+        // Don't reload link tags
+        clone.href = '';
+        break;
     }
 
     if (superRoot) {
       elementInfo.isTransplantRoot(superRoot, true);
       if (isRoot) {
         elementInfo.addToSubroots(superRoot, element);
-      }
-    }
-
-    if (deepClone) {
-      var
-        cloneSet    = $clone.find('*').get(),
-        originalSet = $element.find('*').get();
-
-      len = cloneSet.length;
-      for (i = 0; i < len; i++) {
-        var
-          nestedClone    = cloneSet[i],
-          nestedOriginal = originalSet[i];
-        elementMap.setField(nestedOriginal, ['complement'], [nestedClone]);
-        elementMap.setField(nestedClone, ['isClone', 'complement'], [true, nestedOriginal]);
       }
     }
 

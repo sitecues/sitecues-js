@@ -12,7 +12,6 @@
     'page/zoom/state',
     'page/positioner/style-lock/style-lock',
     'page/positioner/util/element-info',
-    'page/positioner/util/element-map',
     'page/positioner/constants',
     'page/zoom/util/body-geometry',
     'core/events'
@@ -25,7 +24,6 @@
     state,
     styleLock,
     elementInfo,
-    elementMap,
     constants,
     bodyGeo,
     events
@@ -35,28 +33,29 @@
 
   var originalBody, docElem, unprocessedTransplantCandidates,
     // Should we transplant elements from the original body to the auxiliary body
-    isTransplanting                = false,
+    isTransplanting            = false,
+    isTransplantInitialized    = false,
     // Should we replant elements from the auxiliary body to the original body
-    isReplanting                   = false,
-    // Do we ever use the transplant operation (browser flag)
-    doUseTransplantOperation       = false,
-    isInitialized                  = false,
+    isReplanting               = false,
+    // Do we ever use the transplant operation (not IE browser flag)
+    doUseTransplantOperation   = false,
+    isInitialized              = false,
     // If there's a toolbar we need to translate fixed elements down
-    areFixedHandlersRegistered     = false,
-    isFirstZoom                    = true,
-    TRANSPLANT_STATE               = constants.TRANSPLANT_STATE;
+    areFixedHandlersRegistered = false,
+    isFirstZoom                = true,
+    TRANSPLANT_STATE           = constants.TRANSPLANT_STATE;
 
   function onZoom(completedZoom) {
+    isTransplanting = Boolean(completedZoom > 1 && doUseTransplantOperation);
+    if (isTransplanting) {
+      initializeTransplant();
+      processTransplantCandidates();
+    }
+
     // If we we're listening for fixed positioning, initialize the listener
     if (isFirstZoom) {
       onFirstZoom();
     }
-
-    isTransplanting = Boolean(completedZoom > 1 && doUseTransplantOperation);
-    if (isTransplanting) {
-      processTransplantCandidates();
-    }
-    setTimeout(transform.refresh, 0);
   }
 
   function onFirstZoom() {
@@ -69,6 +68,13 @@
     // where we have to replant an element back to the original body
     isReplanting = doUseTransplantOperation;
     isFirstZoom  = false;
+  }
+
+  function initializeTransplant() {
+    if (!isTransplantInitialized) {
+      transplant.init();
+      isTransplantInitialized = true;
+    }
   }
 
   function processTransplantCandidates() {
@@ -86,12 +92,12 @@
 
   function initFixedPositionListener() {
     styleLock({
-      property : 'position',
-      value    : 'fixed'
-    }, {
-      initial  : toPositionHandler,
-      before   : fromPositionBeforeHandler,
-      after    : fromPositionAfterHandler
+        property : 'position',
+        value    : 'fixed'
+      }, {
+        initial  : toPositionHandler,
+        before   : fromPositionBeforeHandler,
+        after    : fromPositionAfterHandler
     });
     areFixedHandlersRegistered = true;
   }
@@ -120,8 +126,6 @@
     if (wasFixed) {
       return;
     }
-
-    elementMap.setField(this, 'positionChanged', true);
 
     var
       isFixed          = position === 'fixed',
@@ -191,8 +195,6 @@
         wasFixed: wasFixed
       };
 
-    elementMap.setField(this, 'positionChanged', true);
-
     if (isReplanting) {
       var results = transplant.evaluateCandidate(this, flags);
       if (results) {
@@ -258,19 +260,46 @@
     }
   }
 
+  function initFromToolbar(callback, toolbarHeight) {
+    if (isInitialized) {
+      callback();
+      return;
+    }
+
+    init(function() {
+      // The toolbar may overlap with fixed elements so we'll need to transform them immediately
+      // Fixed position elements are located and their position locked, so that we can run handlers before
+      // and after the element's position changes.
+      events.on('zoom', onZoom);
+      transform.init(toolbarHeight);
+
+      styleLock.init(function() {
+        initFixedPositionListener();
+        callback();
+      });
+    });
+  }
+
+  function initFromZoom() {
+    if (!isInitialized) {
+      init(function () {
+        events.on('zoom', onZoom);
+        transform.init();
+        // We only need to use the transplant algorithm once we've applied a transformation on the body, i.e. when we've zoomed
+        setTimeout(onZoom, 0, state.completedZoom);
+      });
+    }
+  }
+
   function init(callback) {
     isInitialized = true;
 
     function onBodyGeoInitialized() {
-
       elementInfo.init();
 
       if (doUseTransplantOperation) {
         unprocessedTransplantCandidates = new Set();
-        transplant.init();
       }
-
-      events.on('zoom', onZoom);
 
       callback();
     }
@@ -282,34 +311,6 @@
     originalBody = document.body;
 
     return bodyGeo.init(onBodyGeoInitialized);
-  }
-
-  function initFromToolbar(callback, toolbarHeight) {
-    if (isInitialized) {
-      callback();
-      return;
-    }
-
-    transform.init(toolbarHeight);
-    init(function() {
-      // The toolbar may overlap with fixed elements so we'll need to transform them immediately
-      // Fixed position elements are located and their position locked, so that we can run handlers before
-      // and after the element's position changes.
-      styleLock.init(function() {
-        initFixedPositionListener();
-        callback();
-      });
-    });
-  }
-
-  function initFromZoom() {
-    if (!isInitialized) {
-      transform.init();
-      init(function () {
-        // We only need to use the transplant algorithm once we've applied a transformation on the body, i.e. when we've zoomed
-        setTimeout(onZoom, 0, state.completedZoom);
-      });
-    }
   }
 
   return {

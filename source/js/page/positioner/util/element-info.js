@@ -174,8 +174,10 @@ define(
     originalBody = document.body;
     docElem      = document.documentElement;
 
-    var sitecuesSet = $(docElem).find('#sitecues-badge').find('*').addBack().get(),
+    var
+      sitecuesSet = $(docElem).find('#sitecues-badge').find('*').addBack().get(),
       length = sitecuesSet.length;
+
     for (var i = 0; i < length; i++) {
       isSitecuesElement(sitecuesSet[i], true);
     }

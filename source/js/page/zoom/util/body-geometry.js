@@ -6,8 +6,9 @@ define(
     'page/zoom/constants',
     'page/zoom/state',
     'page/zoom/util/restrict-zoom',
-    'core/platform',
-    'page/viewport/viewport'
+    'page/viewport/viewport',
+    'core/dom-events',
+    'core/events'
   ],
   function (
     $,
@@ -16,8 +17,9 @@ define(
     constants,
     state,
     restrictZoom,
-    platform,
-    viewport
+    viewport,
+    domEvents,
+    events
   ) {
 
   'use strict';
@@ -25,11 +27,8 @@ define(
   var body, $origBody, docElem,
     isInitialized = false,
     callbacks = [],
-    cachedDocumentScrollWidth,
-    cachedDocumentScrollHeight,
-    cachedBoundingBodyWidth,
-    cachedBoundingBodyHeight,
-    zoomLevelWhenCached,
+    cachedDocumentScrollWidth  = null,
+    cachedDocumentScrollHeight = null,
     doDebugVisibleRects,
     originalBodyInfo, // The info we have on the body, including the rect and mainNode
     MIN_RECT_SIDE  = constants.MIN_RECT_SIDE,
@@ -128,13 +127,10 @@ define(
       }
     });
 
-    bodyInfo.mainNode = mainNode || document.body;
-    bodyInfo.leftMostNode = leftMostNode;
-    bodyInfo.rightMostNode = rightMostNode;
-    cachedBoundingBodyWidth = body.getBoundingClientRect().width;
-    cachedDocumentScrollWidth = docElem.scrollWidth;
-    zoomLevelWhenCached = state.completedZoom;
-    bodyInfo.transformOriginX = cachedBoundingBodyWidth / 2;
+    bodyInfo.mainNode         = mainNode || document.body;
+    bodyInfo.leftMostNode     = leftMostNode;
+    bodyInfo.rightMostNode    = rightMostNode;
+    bodyInfo.transformOriginX = body.getBoundingClientRect().width / 2;
 
     return bodyInfo;
   }
@@ -220,11 +216,12 @@ define(
   // Does not use getBoundingClientRect because we need size to include overflow
   function getAbsoluteRect(node) {
     var
-      clientRect = node.getBoundingClientRect(),
-      width = clientRect.width, //  Math.max(node.scrollWidth, clientRect.width),
-      height = Math.max(node.scrollHeight, clientRect.height),
-      left = clientRect.left + window.pageXOffset,
-      top = clientRect.top + window.pageYOffset;
+      clientRect  = node.getBoundingClientRect(),
+      pageOffsets = viewport.getPageOffsets(),
+      width       = clientRect.width, //  Math.max(node.scrollWidth, clientRect.width),
+      height      = Math.max(node.scrollHeight, clientRect.height),
+      left        = clientRect.left + pageOffsets.x,
+      top         = clientRect.top + pageOffsets.y;
     return {
       left: left,
       top: top,
@@ -240,12 +237,13 @@ define(
     if (config.shouldRestrictWidth) {
       return '';  // For fluid layouts, we use an transform-origin of 0% 0%, so we don't need this
     }
-    var zoomOriginX = Math.max(window.innerWidth, originalBodyInfo.transformOriginX) / 2, // X-coordinate origin of transform
-      bodyLeft = originalBodyInfo.left,
-      halfOfBody = (zoomOriginX - bodyLeft) * targetZoom,
+    var
+      zoomOriginX         = Math.max(viewport.getInnerWidth(), originalBodyInfo.transformOriginX) / 2, // X-coordinate origin of transform
+      bodyLeft            = originalBodyInfo.left,
+      halfOfBody          = (zoomOriginX - bodyLeft) * targetZoom,
       pixelsOffScreenLeft = (halfOfBody - zoomOriginX) + config.leftMarginOffset,
-      pixelsToShiftRight = Math.max(0, pixelsOffScreenLeft),
-      translateX = pixelsToShiftRight / targetZoom;
+      pixelsToShiftRight  = Math.max(0, pixelsOffScreenLeft),
+      translateX          = pixelsToShiftRight / targetZoom;
 
     // Need to shift entire zoom image to the right so that start of body fits on screen
     return 'translateX(' + translateX.toFixed(ZOOM_PRECISION) + 'px)';
@@ -257,7 +255,7 @@ define(
     // However, that change led to SC-3191
     //var winWidth = originalBodyInfo.width;
 
-    return window.innerWidth / restrictZoom.forFluidWidth(currZoom) + 'px';
+    return viewport.getInnerWidth() / restrictZoom.forFluidWidth(currZoom) + 'px';
   }
 
   // Return cached body info or undefined if unknown
@@ -265,42 +263,18 @@ define(
     return originalBodyInfo;
   }
 
-  function getScrollWidth(onResize) {
-    var
-      isIE  = platform.browser.isIE,
-      width = isIE ? cachedDocumentScrollWidth : cachedBoundingBodyWidth;
-
-    if (onResize || !width || state.completedZoom !== zoomLevelWhenCached) {
-      if (isIE) {
-        cachedDocumentScrollWidth = docElem.scrollWidth;
-        width = cachedDocumentScrollWidth;
-      }
-      else {
-        cachedBoundingBodyWidth = body.getBoundingClientRect().width;
-        width = cachedBoundingBodyWidth;
-      }
-      zoomLevelWhenCached = state.completedZoom;
+  function getScrollWidth(isOnResize) {
+    if (cachedDocumentScrollWidth === null || isOnResize) {
+      cachedDocumentScrollWidth = docElem.scrollWidth;
     }
-    return width;
+    return cachedDocumentScrollWidth;
   }
   
-  function getScrollHeight(onResize) {
-    var
-      isIE  = platform.browser.isIE,
-      height = isIE ? cachedDocumentScrollHeight : cachedBoundingBodyHeight;
-  
-    if (onResize || !height || state.completedZoom !== zoomLevelWhenCached) {
-      if (isIE) {
-        cachedDocumentScrollHeight = docElem.scrollHeight;
-        height = cachedDocumentScrollHeight;
-      }
-      else {
-        cachedBoundingBodyHeight = body.getBoundingClientRect().height;
-        height = cachedBoundingBodyHeight;
-      }
-      zoomLevelWhenCached = state.completedZoom;
+  function getScrollHeight(isOnResize) {
+    if (cachedDocumentScrollHeight === null || isOnResize) {
+      cachedDocumentScrollHeight = docElem.scrollHeight;
     }
-    return height;
+    return cachedDocumentScrollHeight;
   }
 
   function refreshBodyInfo() {
@@ -356,6 +330,17 @@ define(
       $origBody = $(body);
       refreshBodyInfo();
       executeCallbacks();
+
+      domEvents.on(window, 'resize', function () {
+        cachedDocumentScrollHeight = null;
+        cachedDocumentScrollWidth  = null;
+      });
+
+      events.on('zoom', function () {
+        cachedDocumentScrollHeight = null;
+        cachedDocumentScrollWidth  = null;
+      });
+
       return;
     }
 
