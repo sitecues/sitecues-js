@@ -814,9 +814,7 @@ define(['$', 'page/util/common', 'core/conf/user/manager', 'core/conf/site',
   // Return true if the element is part of the sitecues user interface
   // Everything inside the <body> other than the page-inserted badge
   function isInSitecuesUI(node) {
-    // Check for nodeType of 1, which is an element
-    // If not, use the parent of the node
-    var element = node.nodeType === 1 ? node : node.parentNode;
+    var element = node.nodeType === Node.ELEMENT_NODE ? node : node.parentNode;
     return ! $(element).closest('body').length ||  // Is not in the <body> (must also check clone body)
       $(element).closest('#sitecues-badge,#scp-bp-container').length;
   }

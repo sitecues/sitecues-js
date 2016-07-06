@@ -16,7 +16,7 @@ define(
         suite('Common', function () {
 
             before(function () {
-              platform.init();
+                platform.init();
             });
 
             test('.isTransparentColor() cares about colors', function () {
@@ -34,65 +34,6 @@ define(
                 assert.isFalse(
                   common.isTransparentColor('rgba(4,4,4,.5)'),
                   'Explicit lack of alpha transparency is considered opaque'
-                );
-            });
-
-            test('.createSVGFragment() makes useful markup', function () {
-                var // Testing weird markup, since it should be agnostic.
-                    content   = '!,2.y+',
-                    className = 'blah',
-                    fragment  = common.createSVGFragment(content, className),
-                    // Using .childNodes over .children because we specifically
-                    // do not expect an immediate text node child.
-                    svg = fragment.childNodes[0];
-
-                assert.strictEqual(
-                    fragment.nodeType,
-                    Node.DOCUMENT_FRAGMENT_NODE,
-                    'must return an actual fragment node'
-                );
-
-                assert.strictEqual(
-                    svg.nodeName,
-                    'svg',
-                    'the fragment must contain an SVG'
-                );
-
-                assert.strictEqual(
-                    svg.namespaceURI,
-                    'http://www.w3.org/2000/svg',
-                    'the fragment\'s SVG must be namespaced as an SVG'
-                );
-
-                assert.strictEqual(
-                    svg.getAttribute('class'),
-                    className,
-                    'the fragment\'s SVG must have the requested class name'
-                );
-
-                assert.strictEqual(
-                    svg.innerHTML,
-                    content,
-                    'the fragment\'s SVG must have the requested inner markup'
-                );
-            });
-
-            test('.hasRaisedZIndex() checks if the child has a greater z index than its parent', function () {
-                var childStyle = {},
-                    parentStyle = {};
-                childStyle.zIndex = 3;
-                parentStyle.zIndex = 2;
-
-                assert.isTrue(
-                    common.hasRaisedZIndex(childStyle, parentStyle),
-                    'The child element has a greater z index than its parent'
-                );
-
-                childStyle.zIndex = -1;
-                parentStyle.zIndex = 0;
-                assert.isFalse(
-                    common.hasRaisedZIndex(childStyle, parentStyle),
-                    'The parent element has a greater z index than its child'
                 );
             });
 
@@ -139,7 +80,6 @@ define(
                   common.isWhitespaceOrPunct(textNode),
                   'Unicode punctuation is punctuation'
                 );
-
             });
 
             test('.isVisualRegion()', function () {
@@ -181,6 +121,25 @@ define(
                 assert.isTrue(
                     common.isVisualRegion(element, style, parentStyle),
                     'Element has non-zero border width, should return true'
+                );
+            });
+
+            test('.hasRaisedZIndex() checks if the child has a greater z index than its parent', function () {
+                var childStyle = {},
+                    parentStyle = {};
+                childStyle.zIndex = 3;
+                parentStyle.zIndex = 2;
+
+                assert.isTrue(
+                    common.hasRaisedZIndex(childStyle, parentStyle),
+                    'The child element has a greater z index than its parent'
+                );
+
+                childStyle.zIndex = -1;
+                parentStyle.zIndex = 0;
+                assert.isFalse(
+                    common.hasRaisedZIndex(childStyle, parentStyle),
+                    'The parent element has a greater z index than its child'
                 );
             });
 
@@ -266,38 +225,73 @@ define(
             });
 
             test('.hasVisibleContent()', function () {
-                // Checks for size of media content box
-                // Checks if (max 10) text node children are empty
-                var element = document.createElement('textarea'),
-                    text = document.createTextNode('\n\n\n\n\n\n\n\n\n');
-                element.appendChild(text);
+                 var element = document.createElement('p');
+                 element.textContent = 'abc123';
+                 assert.isTrue(
+                    common.hasVisibleContent(element),
+                    'Element with non-empty text node children has visible content'
+                );
+
+                element = document.createElement('textarea'),
+                element.textContent = 'weee';
                 document.body.appendChild(element);
                 element.style.display = 'none';
                 assert.isFalse(
                     common.hasVisibleContent(element),
                     'Element with display set to none has no visible content'
                 );
-
-                 element = document.createElement('p1');
-                 text = document.createTextNode('abc123');
-                 element.appendChild(text);
-                 assert.isTrue(
-                    common.hasVisibleContent(element),
-                    'Element with non-empty text node children has visible content'
-                );
             });
 
             test('.isEmptyBgImage()', function () {
-                var imgSrc = 'url(\"test.com/test.png\")';
 
                 assert.isFalse(
-                    common.isEmptyBgImage(imgSrc),
+                    common.isEmptyBgImage('url(\"test.com/test.png\")'),
                     'Non-empty src string should return false'
                 );
 
                 assert.isTrue(
                     common.isEmptyBgImage(''),
                     'Empty string should return true'
+                );
+            });
+
+            test('.createSVGFragment() makes useful markup', function () {
+                var // Testing weird markup, since it should be agnostic.
+                    content   = '!,2.y+',
+                    className = 'blah',
+                    fragment  = common.createSVGFragment(content, className),
+                    // Using .childNodes over .children because we specifically
+                    // do not expect an immediate text node child.
+                    svg = fragment.childNodes[0];
+
+                assert.strictEqual(
+                    fragment.nodeType,
+                    Node.DOCUMENT_FRAGMENT_NODE,
+                    'must return an actual fragment node'
+                );
+
+                assert.strictEqual(
+                    svg.nodeName,
+                    'svg',
+                    'the fragment must contain an SVG'
+                );
+
+                assert.strictEqual(
+                    svg.namespaceURI,
+                    'http://www.w3.org/2000/svg',
+                    'the fragment\'s SVG must be namespaced as an SVG'
+                );
+
+                assert.strictEqual(
+                    svg.getAttribute('class'),
+                    className,
+                    'the fragment\'s SVG must have the requested class name'
+                );
+
+                assert.strictEqual(
+                    svg.innerHTML,
+                    content,
+                    'the fragment\'s SVG must have the requested inner markup'
                 );
             });
 
@@ -362,19 +356,19 @@ define(
             test('.getComputedScale()', function () {
                 var div = document.createElement('div');
                 document.body.appendChild(div);
-                div.style.transform = 'scale(5,5) ';
+                // NOTE: If an asymmetrical scale has been applied, only returns x scaling factor
+                div.style.transform = 'scale(5,5)';
                 assert.strictEqual(
                     common.getComputedScale(div),
                     5,
                     'Should return inline scale if it is the only applied style'
                 );
-                div.style[platform.transformProperty] += 'scale(5,5) ';
+                div.style[platform.transformProperty] += 'scale(5,5)';
                 assert.strictEqual(
                     common.getComputedScale(div),
                     25,
                     'Should return the multiplied inline scale'
                 );
-                // If an asymmetrical scale has been applied, only returns x scaling factor
             });
         });
     }

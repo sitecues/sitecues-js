@@ -190,7 +190,7 @@ define(
       //For some reason, Edge will run this function despite there not being any element children belonging to the element. Edge...
       //TODO: Remove this conditional if Edge ever gets its act together. Reproducible here: www.njstatelib.org
       //NOTE: Does not reproduce when the console is open. Yeah that was a fun one to figure out
-      if (this.nodeType === 1) {
+      if (this.nodeType === Node.ELEMENT_NODE) {
         getBodyRectImpl(this, sumRect, visibleNodes, style, isStrict);
       }
     });
@@ -269,7 +269,7 @@ define(
     }
     return cachedDocumentScrollWidth;
   }
-  
+
   function getScrollHeight(isOnResize) {
     if (cachedDocumentScrollHeight === null || isOnResize) {
       cachedDocumentScrollHeight = docElem.scrollHeight;
