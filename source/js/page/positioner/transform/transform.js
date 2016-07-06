@@ -218,7 +218,7 @@ define(
         else if (offRight < 0) {
           newXTranslation -= offRight;
         }
-        // If the left side of the element is off by more than we scroll in to view
+        // If the left side of the element is off by more than we can scroll in to view
         else if (offLeft < -currentPageXOffset) {
           // Add the difference between the scroll distance and the offset element width to the translation
           newXTranslation += Math.abs(offLeft) - currentPageXOffset;
@@ -250,9 +250,6 @@ define(
         scrollHeight            = bodyGeo.getScrollHeight(),
         isTallerThanViewport    = elementHeight > viewportHeight - toolbarHeight;
 
-      // This clause shifts fixed elements if necessary. We shift fixed elements if they are clipping the boundaries of the toolbar
-      // or if they are positioned in the middle 60% of the viewport height. This heuristic works pretty well, we don't shift elements that
-      // are near the bottom of the screen, and we don't shift dropdown fixed menus that are intended to be flush with the top menu
       if (resetCurrentTranslation && toolbarHeight) {
         if (shouldVerticallyShiftFixedElement(top, bottom, viewportHeight, elementHeight)) {
           currentYTranslation += toolbarHeight;
@@ -272,11 +269,11 @@ define(
         if (isTallerThanViewport) {
           var
             correctedYTranslation = currentYTranslation,
-            yTranslationLimit = viewportHeight - elementHeight - toolbarHeight,
-            scrollLimit       = scrollHeight - viewportHeight,
-            offsetRemaining   = Math.abs(yTranslationLimit - currentYTranslation),
-            scrollRemaining   = scrollLimit - currentPageYOffset,
-            scrollPercent     = currentPageYOffset / scrollLimit;
+            yTranslationLimit     = viewportHeight - elementHeight - toolbarHeight,
+            scrollLimit           = scrollHeight - viewportHeight,
+            offsetRemaining       = Math.abs(yTranslationLimit - currentYTranslation),
+            scrollRemaining       = scrollLimit - currentPageYOffset,
+            scrollPercent         = currentPageYOffset / scrollLimit;
 
           // If the scroll distance to the edge of the page is less than the distance required to translate the
           // fixed element completely into the viewport, set the current y offset to a proportional value to the current pageYOffset
@@ -318,6 +315,9 @@ define(
     }
 
     function shouldVerticallyShiftFixedElement(top, bottom, viewportHeight, elementHeight) {
+      // We shift fixed elements if they are clipping the boundaries of the toolbar
+      // or if they are positioned in the middle 60% of the viewport height. This heuristic works pretty well, we don't shift elements that
+      // are near the bottom of the screen, and we don't shift dropdown fixed menus that are intended to be flush with the top menu
       var
         isOverlappingToolbar = top < toolbarHeight,
         closeToTop           = viewportHeight * 0.2 > top,
@@ -358,7 +358,7 @@ define(
       var doTransformOnResize = Boolean(targets.getCount());
 
       if (!isTransformingOnResize && doTransformOnResize) {
-        // There may be css media rules that radically change the positioning when the viewport is resized
+        // There may be css media rules that change the positioning when the viewport is resized
         window.addEventListener('resize', onResize);
       }
       else if (isTransformingOnResize && !doTransformOnResize) {
@@ -456,7 +456,7 @@ define(
       else {
         tallElements = [];
         wideElements = [];
-        targets.get().forEach(identifyTallOrWideElement);
+        targets.forEach(identifyTallOrWideElement);
       }
 
       var

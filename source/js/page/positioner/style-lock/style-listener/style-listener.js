@@ -35,11 +35,11 @@ define(
 
   var domObserver, docElem,
     originalBody,
-    observedProperties  = [],
-    callbacks           = [],
-    READY_STATE         = coreConstants.READY_STATE,
-    readyState          = READY_STATE.UNINITIALIZED,
-    LOCK_ATTR           = constants.LOCK_ATTR,
+    observedProperties = [],
+    callbacks          = [],
+    READY_STATE        = coreConstants.READY_STATE,
+    readyState         = READY_STATE.UNINITIALIZED,
+    LOCK_ATTR          = constants.LOCK_ATTR,
     // We always need to listen for inline style mutations
     observedAttributes = ['style'],
     /*
@@ -78,7 +78,7 @@ define(
 
     // This handler is run on mutated elements /intended/ to be in the original body, which is to say elements currently nested in the
     // original body and original elements currently nested in the clone body
-    function onBodyDescendantMutations(mutations) {
+    function onOriginalElementMutations(mutations) {
       var
         len = mutations.length,
         selectorsToRefresh = [];
@@ -174,7 +174,6 @@ define(
         lockValue      = element.getAttribute(lockAttribute),
         cachedValue    = elementInfo.getCacheValue(element, property);
 
-
       if (lockValue) {
         // This attribute 'reinforces' the value this element previously resolved to by applying it with importance
         // We need to remove it in order to compute the intended resolved value
@@ -241,7 +240,7 @@ define(
     // Handle the remaining queued mutation records
     if (mutationRecords.length) {
       setTimeout(function (mutationRecords) {
-        onBodyDescendantMutations(mutationRecords);
+        onOriginalElementMutations(mutationRecords);
       }, 0, mutationRecords);
     }
 
@@ -263,8 +262,7 @@ define(
 
     selectorMap.cacheInitialQueries(propertySelectors);
 
-    observedAttributes = arrayUtil.union(observedAttributes, compositeAttributes);
-    observedProperties = arrayUtil.addUnique(observedProperties, property);
+    observedAttributes              = arrayUtil.union(observedAttributes, compositeAttributes);
     observerOptions.attributeFilter = observedAttributes;
 
     disconnectDOMObserver();
@@ -290,20 +288,22 @@ define(
     var
       property           = declaration.property,
       value              = declaration.value,
-      observedValues     = observedPropertyToValues[value],
+      observedValues     = observedPropertyToValues[property] || [],
       key                = getPropertyValueKey(property, value),
       isPropertyObserved = observedProperties.indexOf(property) !== -1,
-      isValueObserved    = observedValues && observedValues.indexOf(value) !== -1;
+      isValueObserved    = observedValues.indexOf(value) !== -1;
 
     if (!isValueObserved) {
+      observedValues.push(value);
+      observedPropertyToValues[property] = observedValues;
+
+      if (!isPropertyObserved) {
+        observedProperties.push(property);
+      }
+
       setTimeout(function () {
         resolvedElementsMap[key] = getElementsWithResolvedValue(declaration);
-        if (isPropertyObserved) {
-          observedPropertyToValues[property].push(value);
-          observedProperties.push(property);
-        }
-        else {
-          observedPropertyToValues[property] = [value];
+        if (!isPropertyObserved) {
           listenForDynamicStyling(property);
         }
       }, 0);
@@ -312,8 +312,9 @@ define(
   }
 
   // Runs the passed handler when @element's resolved @property value has changed
-  function registerPropertyMutationHandler(element, declaration, handler) {
+  function registerPropertyMutationHandler(element, declarationOrProperty, handler) {
     var
+      declaration        = typeof declarationOrProperty === 'object' ? declarationOrProperty : { property: declarationOrProperty },
       property           = declaration.property,
       value              = declaration.value,
       isPropertyObserved = observedProperties.indexOf(property) !== -1,
@@ -328,6 +329,7 @@ define(
       handlers[property] = [handler];
       if (!isPropertyObserved) {
         listenForDynamicStyling(property);
+        observedProperties.push(property);
       }
     }
     addToResolvedElementsMap(element, property, value);
@@ -421,7 +423,7 @@ define(
         readyState   = READY_STATE.INITIALIZING;
         docElem      = document.documentElement;
         originalBody = document.body;
-        domObserver  = new MutationObserver(onBodyDescendantMutations);
+        domObserver  = new MutationObserver(onOriginalElementMutations);
 
         selectors.init(function () {
           readyState = READY_STATE.COMPLETE;
