@@ -12,13 +12,17 @@ define(['Promise', 'core/conf/user/storage', 'core/conf/user/storage-backup' ], 
     return storage.getUserId();
   }
 
+  function copyFields(obj) {
+    return JSON.parse(JSON.stringify(obj));
+  }
+
   // get preferences value(s)
   // key is optional -- if not provided returns all settings
   // callback is optional -- if provided is called back for initial setting and whenever setting changes
   function get(key, callback) {
 
     // handle sync getting of value
-    var settings = storage.getPrefs(),
+    var settings = copyFields(storage.getPrefs()), // For safety, ensure we don't pass back object that we don't want written to
       value;
 
     if (!key) {

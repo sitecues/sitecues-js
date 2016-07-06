@@ -1,9 +1,26 @@
 /**
  * Basic metrics logger
  */
-define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/locale', 'core/util/xhr',
-        'core/conf/urls', 'core/constants', 'core/bp/model/classic-mode', 'core/platform' ],
-  function (conf, session, site, locale, xhr, urls, constants, classicMode, platform) {
+define(
+  [
+    'core/conf/user/manager',
+    'core/util/session',
+    'core/conf/site',
+    'core/locale',
+    'core/util/xhr',
+    'core/conf/urls',
+    'core/constants',
+    'core/bp/model/classic-mode',
+    'core/platform' ],
+  function (conf,
+            session,
+            site,
+            locale,
+            xhr,
+            urls,
+            constants,
+            classicMode,
+            platform) {
 
     // IMPORTANT! Increment METRICS_VERSION this every time metrics change in any way
     // IMPORTANT! Have the backend team review all metrics changes!!!
@@ -63,7 +80,8 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
         }
       }
 
-      var data = this.data = {};
+      var data = this.data = {},
+        settings = conf.get(); // Gets all prefs
 
       // Session data
       shallowCopyInto(sessionData, data);
@@ -81,6 +99,7 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
       // Ensure data we send has simple types
       flattenData(data);
       flattenData(details);
+      flattenData(settings);  // Should already be flat, but we're being extra careful about superfluous fields
 
       // Log errors -- check for field name collisions and type errors in details
       if (SC_DEV) {
@@ -88,6 +107,7 @@ define(['core/conf/user/manager', 'core/util/session', 'core/conf/site', 'core/l
       }
 
       data.details = details;
+      data.settings = settings;
     };
 
     Metric.prototype.send = function send() {
