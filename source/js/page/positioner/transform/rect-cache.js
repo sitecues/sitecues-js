@@ -73,9 +73,11 @@ define(
     }
 
     if (rect) {
+
       if (isFixed) {
         return rect;
       }
+
       offsetDeltas = getOffsetDeltas(viewport.getPageOffsets(), rectData.offsets);
       rect.top    += offsetDeltas.y;
       rect.bottom += offsetDeltas.y;
@@ -114,12 +116,12 @@ define(
 
   // listen for style mutations that will impact the element's bounding rectangle
   function listenForMutatedRect(element, handler) {
-    styleLock.init(function () {
-      // We only allow a single handler to be attached
-      if (observedElementMap.get(element)) {
-        return;
-      }
+    // We only allow a single handler to be attached
+    if (observedElementMap.get(element)) {
+      return;
+    }
 
+    styleLock.init(function () {
       styleListener.registerPropertyMutationHandler(element, 'width', function () {
         /*jshint validthis: true */
         clearCache.call(this);

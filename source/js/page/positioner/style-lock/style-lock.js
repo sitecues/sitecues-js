@@ -184,25 +184,25 @@ define(
         styleListener.registerFromResolvedValueHandler(declaration, fromHandler);
       }
 
-      // Handle elements that initially match the declaration
-      if (initial !== noop) {
-        // We run this asynchronously because it is an expensive operation
-        // and we want to allow the browser to run other events before we begin it
-        setTimeout(function () {
-          var elements = styleListener.getElementsWithResolvedValue(declaration);
+      // We run this asynchronously because it is an expensive operation
+      // and we want to allow the browser to run other events before we begin it
+      setTimeout(function () {
+        var elements = styleListener.getElementsWithResolvedValue(declaration);
 
-          function runHandler(element) {
-            toHandler.call(element, { toValue: value, property: property });
-          }
+        function runHandler(element) {
+          toHandler.call(element, { toValue: value, property: property });
+        }
 
-          for (var i = 0, elementCount = elements.length; i < elementCount; i++) {
-            if (isValidLockTarget(this)) {
-              // Likewise each initial handler call is potentially expensive if we have to transplant the target
-              setTimeout(runHandler, 0, elements[i]);
-            }
+        for (var i = 0, elementCount = elements.length; i < elementCount; i++) {
+          if (initial !== noop) {
+            // Likewise each initial handler call is potentially expensive if we have to transplant the target
+            setTimeout(runHandler, 0, elements[i]);
           }
-        }, 0);
-      }
+          else {
+            lockStyle(elements[i], property, value);
+          }
+        }
+      }, 0);
     });
   }
 
@@ -212,23 +212,23 @@ define(
 
   function lockStyle(element, property, value) {
     var
-      lockAttribute  = LOCK_ATTR + property,
-      attributeLocks = lockSelectorMap[lockAttribute] || {},
-      valueLock      = attributeLocks[value];
-    if (!valueLock) {
-      valueLock = '[' + lockAttribute + '="' + value + '"]';
-      appendStylesheet(valueLock + ' { ' + property + ': ' + value + ' !important; }\n');
-      attributeLocks[value] = valueLock;
-      lockSelectorMap[lockAttribute] = attributeLocks;
+      attributeName = LOCK_ATTR + property,
+      valueLocks    = lockSelectorMap[attributeName] || {},
+      lockSelector  = valueLocks[value];
+    if (!lockSelector) {
+      lockSelector = '[' + attributeName + '="' + value + '"]';
+      appendStylesheet(lockSelector + ' { ' + property + ': ' + value + ' !important; }\n');
+      valueLocks[value] = lockSelector;
+      lockSelectorMap[attributeName] = valueLocks;
     }
-    element.setAttribute(lockAttribute, value);
+    element.setAttribute(attributeName, value);
   }
   
   function unlockStyle(element, property) {
     var lockAttribute = LOCK_ATTR + property;
 
-    if (element) {
-      element.setAttribute(lockAttribute, '');
+    if (element && element.nodeType === Node.ELEMENT_NODE) {
+      element.removeAttribute(lockAttribute);
       return;
     }
 
@@ -237,14 +237,14 @@ define(
       elements             = document.querySelectorAll(propertyLockSelector);
 
     for (var i = 0, elementCount = elements.length; i < elementCount; i++) {
-      elements[i].setAttribute(lockAttribute, '');
+      elements[i].removeAttribute(lockAttribute);
     }
   }
 
   function insertStylesheet(css) {
     stylesheet = document.createElement('style');
     stylesheet.id = stylesheetId;
-    stylesheet.innerHTML = css;
+    stylesheet.textContent = css;
     document.head.appendChild(stylesheet);
   }
 
@@ -253,7 +253,7 @@ define(
       insertStylesheet(css);
     }
     else {
-      stylesheet.innerHTML += css;
+      stylesheet.textContent += css;
     }
   }
 
