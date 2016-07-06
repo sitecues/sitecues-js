@@ -250,6 +250,10 @@ define(['core/conf/user/manager', 'core/util/session', 'core/locale', 'core/metr
       // Leave field undefined in the edge case
       initialPageVisitDetails.isStorageUnsupported = true;
     }
+    var badgeElem = document.getElementById('sitecues-badge');
+    if (!badgeElem || badgeElem.getBoundingClientRect().width === 0) {
+      initialPageVisitDetails.isBadgeHidden = true;
+    }
 
     metric.init();
   }
