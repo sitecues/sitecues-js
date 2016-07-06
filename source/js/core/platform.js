@@ -18,6 +18,8 @@ define([], function() {
     isRetina: isRetina,
     isCssPropSupported: isCssPropSupported,
     getCssProp: getCssProp,
+    isUnsupportedPlatform: false,
+    platformWarning: null,
     init: init
   },
   agent,
@@ -226,26 +228,33 @@ define([], function() {
     return isRetinaDisplay;
   }
 
-  // Returns truthy value if the current OS/browser combo is supported
-  function isSupported(os, browser) {
-    if (os.isWin || os.isMac) {
-      var version = browser.version;
-      if (browser.isIE) {
-        return version === 11;
-      }
-      if (browser.isEdge) {
-        return version > 12;
-      }
-      if (browser.isFirefox) {
-        return version > 33;
-      }
-      if (browser.isSafari) {
-        return version > 7;
-      }
-      if (browser.isChrome) {
-        return version > 40;
-      }
+  // Returns a string if the current OS/browser combo is not supported.
+  // The reason string is human-readable description as to why the platform is not supported
+  // TODO localize
+  function getPlatformWarning(os, browser) {
+    if (!os.isWin && !os.isMac) {
+      return 'Microsoft Windows or Mac OS X is required';
     }
+
+
+    var version = browser.version;
+    if (browser.isIE) {
+      return version !== 11 && 'for Internet Explorer, version 11 is required';
+    }
+    if (browser.isEdge) {
+      return version < 13 && 'for Microsoft Edge, version 13 or later is required';
+    }
+    if (browser.isFirefox) {
+      return version < 34 && 'for Firefox, version 34 or later is required';
+    }
+    if (browser.isSafari) {
+      return version < 8 && 'for Safari, version 8 or later is required';
+    }
+    if (browser.isChrome) {
+      return version < 41 && 'for Chrome, version 41 or later is required';
+    }
+
+    return 'IE, Firefox, Chrome or Safari is required';
   }
 
   function isStorageUnsupported() {
@@ -274,7 +283,9 @@ define([], function() {
     exports.os = getOS(agent);
     exports.nativeZoom = getNativeZoom();
 
-    if (!isSupported(exports.os, exports.browser)) {
+    var platformWarning = getPlatformWarning(exports.os, exports.browser);
+    if (platformWarning) {
+      exports.platformWarning = platformWarning;
       exports.isUnsupportedPlatform = true;
       return;
     }

@@ -278,6 +278,7 @@ define(['core/conf/user/manager', 'core/util/session', 'core/locale', 'core/metr
         isUnsupportedPlatform: true
       });
       firePageVisitedMetric();
+      console.log('Note: Sitecues is not supported on this platform: ' + platform.platformWarning);
     }
     else {
       domEvents.init();
