@@ -21,15 +21,14 @@ define(['core/util/uuid'], function(uuid) {
     NAMESPACE = 'sitecues',
     cachedAppData;
 
-  // For tests only! Do not use in product as it could result in destroying user id in the middle of a page view, thus ruining metrics assumptions.
-  function clear() {
+  // For tests only! Do not use in product as it could result in poor performance.
+  function clearCache() {
     cachedAppData = undefined;
-    localStorage.removeItem('sitecues');
   }
 
   /*
    * Friendly API for overwriting all data we have put into storage.
-   * If you can, use clear() or setPref() instead.
+   * If you can, use clearCache() or setPref() instead.
    */
   function setAppData(data) {
 
@@ -90,9 +89,8 @@ define(['core/util/uuid'], function(uuid) {
    * Overwrite only the userId portion of the data currently in storage.
    */
   function createUser() {
-    var appData = {},
-      userId = uuid();
-    appData.userId = userId;
+    var userId = uuid(),
+      appData = { userId : userId };
     appData[userId] = {};
     setAppData(appData);
   }
@@ -148,6 +146,6 @@ define(['core/util/uuid'], function(uuid) {
     getPrefs: getPrefs,
     setAppData: setAppData,
     getAppData: getAppData,
-    clear: clear
+    clearCache: clearCache
   };
 });

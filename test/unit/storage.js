@@ -15,8 +15,8 @@ define(
         suite('Storage', function () {
 
             beforeEach(function () {
-                //localStorage.clear();
-                storage.clear();
+                localStorage.clear();
+                storage.clearCache();
             });
 
             test('.getAppData() returns what was stored', function () {
@@ -41,6 +41,31 @@ define(
                 );
             });
 
+            test('.getAppData() uses cached data from what was set', function () {
+
+                var
+                    fakeUserId = 'test-id',
+                    expected = {
+                        userId : fakeUserId
+                    },
+                    fakePreference = {
+                        zoom  : 2,
+                        ttsOn : false
+                    };
+
+                expected[fakeUserId] = fakePreference;
+
+                storage.setAppData(expected);
+
+                localStorage.clear();
+
+                assert.deepEqual(
+                    storage.getAppData(),
+                    expected,
+                    'The retrieved preferences must be cached'
+                );
+            });
+
             test('.setAppData() stores data for later retrieval', function () {
 
                 var
@@ -62,6 +87,17 @@ define(
                     localStorage.getItem('sitecues'),
                     expectedString,
                     'The app data must be stored without modification'
+                );
+            });
+
+            test('.setAppData() assumes an empty object for convenience', function () {
+
+                storage.setAppData();
+
+                assert.deepEqual(
+                    localStorage.getItem('sitecues'),
+                    '{}',
+                    'A default must be assumed for convenience'
                 );
             });
 
@@ -102,6 +138,14 @@ define(
                     storage.getUserId(),
                     fakeUserId,
                     'The retrieved User ID must be identical to when it was stored.'
+                );
+            });
+
+            test('.setPref() demands an existing User ID for safety', function () {
+                assert.throws(
+                    storage.setPref,
+                    Error,
+                    'No user ID'
                 );
             });
 
@@ -163,6 +207,14 @@ define(
                     storage.getPrefs(),
                     expectedPreference,
                     'The retrieved preferences must be identical to when they were stored'
+                );
+            });
+
+            test('.getPrefs() assumes an empty object for convenience', function () {
+                assert.deepEqual(
+                    storage.getPrefs(),
+                    {},
+                    'A default must be assumed for convenience'
                 );
             });
         });

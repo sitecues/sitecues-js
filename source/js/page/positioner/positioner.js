@@ -56,6 +56,8 @@
     if (isFirstZoom) {
       onFirstZoom();
     }
+
+    unlockPositionIfNotZoomed();
   }
 
   function onFirstZoom() {
@@ -64,6 +66,7 @@
         initFixedPositionListener();
       });
     }
+
     // This flag means that we should run the transplant operation even if we're aren't zoomed in cases
     // where we have to replant an element back to the original body
     isReplanting = doUseTransplantOperation;
@@ -82,7 +85,7 @@
       // TODO: order these initial position handlers by distance from body, closest distance runs first
       setTimeout(function (candidate) {
         var position = getComputedStyle(candidate).position;
-        if (position === 'fixed' || position === 'absolute') {
+        if (position === 'fixed') {
           toPositionHandler.call(candidate, { toValue : position });
         }
       }, 0, candidate);
@@ -102,14 +105,11 @@
     areFixedHandlersRegistered = true;
   }
 
-  function unlockPositionedElements() {
-    styleLock.unlockStyle(null, 'position');
-  }
-
-  function unlockIfNotZoomed(element) {
+  function unlockPositionIfNotZoomed(element) {
     // If we haven't zoomed we haven't applied a horizontal translation to the fixed element, so it isn't worth the delay
     // to unlock the element (there is a slight blink on chicagolighthouse's fixed navbar without this)
     if (state.completedZoom === 1) {
+      // If @element is undefined, unlocks all elements with a locked position
       styleLock.unlockStyle(element, 'position');
     }
   }
@@ -165,7 +165,7 @@
     if (isFixed && !isTransplanting) {
       transformTargets.add(this);
     }
-    unlockIfNotZoomed(this);
+    unlockPositionIfNotZoomed(this);
     /*jshint validthis: false */
   }
 
@@ -242,7 +242,7 @@
       transformElement(this, flags);
     }
 
-    unlockIfNotZoomed(this);
+    unlockPositionIfNotZoomed(this);
     /*jshint validthis: false */
   }
 
@@ -267,13 +267,11 @@
     }
 
     init(function() {
-      // The toolbar may overlap with fixed elements so we'll need to transform them immediately
-      // Fixed position elements are located and their position locked, so that we can run handlers before
-      // and after the element's position changes.
-      events.on('zoom', onZoom);
       transform.init(toolbarHeight);
-
       styleLock.init(function() {
+        // The toolbar may overlap with fixed elements so we'll need to transform them immediately
+        // Fixed position elements are located and their position locked, so that we can run handlers before
+        // and after the element's position changes.
         initFixedPositionListener();
         callback();
       });
@@ -281,14 +279,15 @@
   }
 
   function initFromZoom() {
-    if (!isInitialized) {
-      init(function () {
-        events.on('zoom', onZoom);
-        transform.init();
-        // We only need to use the transplant algorithm once we've applied a transformation on the body, i.e. when we've zoomed
-        setTimeout(onZoom, 0, state.completedZoom);
-      });
+    if (isInitialized) {
+      return;
     }
+
+    init(function () {
+      transform.init();
+      // We only need to use the transplant algorithm once we've applied a transformation on the body, i.e. when we've zoomed
+      setTimeout(onZoom, 0, state.completedZoom);
+    });
   }
 
   function init(callback) {
@@ -301,21 +300,21 @@
         unprocessedTransplantCandidates = new Set();
       }
 
+      events.on('zoom', onZoom);
       callback();
     }
 
     // Internet Explorer doesn't require us to use the transplant algorithm because transformed elements do not create new
     // containing blocks for fixed descendants, and fixed descendants do not inherit transformations
     doUseTransplantOperation = !platform.browser.isIE;
-    docElem      = document.documentElement;
-    originalBody = document.body;
+    docElem                  = document.documentElement;
+    originalBody             = document.body;
 
     return bodyGeo.init(onBodyGeoInitialized);
   }
 
   return {
     initFromZoom: initFromZoom,
-    initFromToolbar: initFromToolbar,
-    unlockPositionedElements: unlockPositionedElements
+    initFromToolbar: initFromToolbar
   };
 });
