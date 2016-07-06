@@ -40,13 +40,13 @@ describe('audio', function() {
       done();
     });
   });
-  describe('#speakByKey() for html5 audio player', function() {
+  describe('#speakCueByName() for html5 audio player', function() {
     it('should not throw an exception', function(done) {
-      audio.speakByKey("[key]");
+      audio.speakCueByName("[key]");
       done();
     });
   });
-  describe('#speakByKey() for Safari', function() {
+  describe('#speakCueByName() for Safari', function() {
     var safariSandbox;
 
     before(function() {
@@ -59,7 +59,7 @@ describe('audio', function() {
       });
     });
     it('should not throw an exception', function(done) {
-      audio.speakByKey("[key]");
+      audio.speakCueByName("[key]");
       done();
     });
     after(function() {

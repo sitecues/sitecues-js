@@ -21,11 +21,12 @@ define(
     'core/metric',
     'core/conf/urls',
     'audio/text-select',
+    'core/data-map',
     'core/events',
     'audio/local-player',
     'audio/network-player'
   ],
-  function(constant, conf, site, $, builder, locale, metric, urls, textSelect, events, localPlayer, networkPlayer) {
+  function(constant, conf, site, $, builder, locale, metric, urls, textSelect, dataMap, events, localPlayer, networkPlayer) {
 
   var ttsOn = false,
     lastPlayer,
@@ -72,7 +73,7 @@ define(
     }
 
     var startRequestTime = Date.now(),
-      textLocale = getNodeAudioLocale(rootNode);
+      textLocale = getAudioLocale(rootNode);
     addStopAudioHandlers();
 
     function onSpeechPlaying(isLocal) {
@@ -186,48 +187,77 @@ define(
     events.emit(AUDIO_BUSY_EVENT, false);
   }
 
-  // Get language that applies to node (optional param)
-  // Fallback on document and then browser default language
-  function getNodeAudioLocale(node) {
-    if (node && node.nodeType !== node.ELEMENT_NODE) {
+  // Get language that applies to node (optional param), otherwise the document body
+  // If no locale found, falls back on document and then browser default language
+  // Returns a full country-affected language, like en-CA when the browser's language matches the site's language prefix.
+  // For example, if an fr-CA browser visits an fr-FR website, then fr-CA is returned instead of the page code,
+  // because that is the preferred accent for French.
+  // However, if the fr-CA browser visits an en-US or en-UK page, the page's code is returned because the
+  // user's preferred English accent in unknown
+  function getAudioLocale(optionalStartNode) {
+    function toPreferredRegion(contentLocale) {
+      return locale.swapToPreferredRegion(contentLocale);
+    }
+
+    var node = optionalStartNode || document.body;
+
+    if (node.nodeType !== node.ELEMENT_NODE) {
       // May have started on text node
       node = node.parentElement;
     }
+
     while (node) {
       var nodeLocale = node.getAttribute('lang') || node.getAttribute('xml:lang');
-      if (nodeLocale) {
-        return locale.getAudioLocale(nodeLocale);
+      if (nodeLocale && locale.isValidLocale(nodeLocale)) {
+        return toPreferredRegion(nodeLocale);
       }
       node = node.parentElement;
     }
 
-    return locale.getAudioLocale();
+    return toPreferredRegion(locale.getPageLocale());
   }
 
-  function getDocumentAudioLang() {
-    return getNodeAudioLocale(document.body);
+  function getAudioCueTextAsync(cueName, cueTextLocale, callback) {
+    var
+      AUDIO_CUE_DATA_PREFIX = 'locale-data/cue/',
+      cueModuleName = AUDIO_CUE_DATA_PREFIX + cueTextLocale;
+
+    dataMap.get(cueModuleName, function(data) {
+      callback(data[cueName] || '');
+    });
+  }
+
+  function toCueTextLocale(cueAudioLocale) {
+    var locale = cueAudioLocale.toLowerCase(),
+      lang = locale.split('-')[0];
+
+    function useIfAvailable(tryLocale) {
+      return constant.AVAILABLE_CUES[tryLocale] && tryLocale;
+    }
+
+    return useIfAvailable(locale) || useIfAvailable(lang);
   }
 
   // Puts in delimiters on both sides of the parameter -- ? before and & after
-  // lang is an optional parameter. If it doesn't exist, the document language will be used.
-  function getLanguageParameter(lang) {
-    return '?l=' + (lang || getDocumentAudioLang()) + '&';
+  // locale is a required parameter
+  function getLocaleParameter(locale) {
+    return '?l=' + locale + '&';
   }
 
-  function getAudioKeyUrl(key, lang) {  // TODO why does an audio cue need the site id?
+  function getCueUrl(name, locale) {  // TODO why does an audio cue need the site id?
     var restOfUrl = 'cue/site/' + site.getSiteId() + '/' +
-      key + '.' + getMediaTypeForNetworkAudio() + getLanguageParameter(lang);
+      name + '.' + getMediaTypeForNetworkAudio() + getLocaleParameter(locale);
     return urls.getApiUrl(restOfUrl);
   }
 
   /**
    * Get URL for speaking text
    * @param text  Text to be spoken
-   * @param lang  Optional language parameter -- defaults to document language
+   * @param locale  required locale parameter
    * @returns {string} url
    */
-  function getTTSUrl(text, lang) {
-    var restOfUrl = 'tts/site/' + site.getSiteId() + '/tts.' + getMediaTypeForNetworkAudio() + getLanguageParameter(lang) + 't=' + encodeURIComponent(text);
+  function getTTSUrl(text, locale) {
+    var restOfUrl = 'tts/site/' + site.getSiteId() + '/tts.' + getMediaTypeForNetworkAudio() + getLocaleParameter(locale) + 't=' + encodeURIComponent(text);
     return urls.getApiUrl(restOfUrl);
   }
 
@@ -253,26 +283,26 @@ define(
   }
 
   /*
-   * Uses a provisional player to play back audio by key, used for audio cues.
+   * Uses a provisional player to play back audio by cue name, used for audio cues.
    */
-  function speakByKey(key) {
+  function speakCueByName(name) {
     stopAudio();  // Stop any currently playing audio
 
-    var lang = getDocumentAudioLang(); // Use document language for cues, e.g. en-US or en
+    var cueAudioLocale = getAudioLocale(); // Use document language for cue voice, e.g. en-US or en
     addStopAudioHandlers();
 
     function speakLocally(onUnavailable) {
       var onUnavailableFn = onUnavailable || fireNotBusyEvent,
-        cueLang = getCueLanguage(lang);
-      if (cueLang && isLocalSpeechAllowed()) {
+        cueTextLocale = toCueTextLocale(cueAudioLocale);  // Locale for text (likely just the 2-letter lang prefix)
+      if (cueTextLocale && isLocalSpeechAllowed()) {
         lastPlayer = localPlayer;
         fireBusyEvent();
-        locale.getAudioCueTextAsync(key, function (cueText) {
+        getAudioCueTextAsync(name, cueTextLocale, function (cueText) {
           if (cueText) {
             localPlayer
               .speak({
                 text: cueText,
-                locale: cueLang
+                locale: cueAudioLocale
               })
               .then(fireNotBusyEvent)
               .catch(function() {
@@ -288,10 +318,10 @@ define(
 
     function speakViaNetwork(onUnavailable) {
       var onUnavailableFn = onUnavailable || fireNotBusyEvent;
-      if (isNetworkSpeechAllowed(lang)) {
+      if (isNetworkSpeechAllowed(cueAudioLocale)) {
         lastPlayer = networkPlayer;
         fireBusyEvent();
-        var url = getAudioKeyUrl(key, lang);
+        var url = getCueUrl(name, cueAudioLocale);
         networkPlayer
           .play({
             isSpeech: true,
@@ -419,19 +449,6 @@ define(
     catch(ex) {}
   }
 
-  function getCueLanguage(lang) {
-    var longLang = lang.toLowerCase(),
-      shortLang;
-
-    function useIfAvailable(tryLang) {
-      return constant.AVAILABLE_CUES[tryLang] && tryLang;
-    }
-
-    shortLang = longLang.split('-')[0];
-
-    return useIfAvailable(longLang) || useIfAvailable(shortLang);
-  }
-
   function init() {
 
     if (isInitialized) {
@@ -477,7 +494,7 @@ define(
     setSpeechState: setSpeechState,
     toggleSpeech: toggleSpeech,
     isSpeechEnabled: isSpeechEnabled,
-    speakByKey: speakByKey,
+    speakCueByName: speakCueByName,
     speakContent: speakContent,
     speakText: speakText,
     playEarcon: playEarcon,

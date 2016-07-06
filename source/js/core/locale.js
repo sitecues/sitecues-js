@@ -13,7 +13,6 @@ define([ 'core/data-map', 'Promise' ], function(dataMap, Promise) {
   var translations = {},
     DEFAULT_LOCALE = 'en-us',
     LOCALE_DATA_PREFIX = 'locale-data/',
-    AUDIO_CUE_DATA_PREFIX = LOCALE_DATA_PREFIX + 'cue/',
     SUPPORTED_UI_LANGS = {'de':1, 'en':1, 'es':1, 'fr':1, 'pl':1, 'sv':1 },
     // Countries which have localization files that are different from the default for that language
     // For example, en-us files use 'color' instead of the worldwide standard 'colour'
@@ -26,8 +25,8 @@ define([ 'core/data-map', 'Promise' ], function(dataMap, Promise) {
     return locale.split('-')[0];
   }
 
-  // The the full xx-XX code for the website
-  function getLocale() {
+  // The the full xx-XX code for the web page
+  function getPageLocale() {
     var
       docElem = document.documentElement,
       docLocales = [docElem.lang, docElem.getAttribute('xml:lang'), getMetaTagLocale()],
@@ -70,7 +69,7 @@ define([ 'core/data-map', 'Promise' ], function(dataMap, Promise) {
    * @returns String
    */
   function getLang() {
-    var websiteLanguage = getLocale();
+    var websiteLanguage = getPageLocale();
     return getLanguageFromLocale(websiteLanguage);
   }
 
@@ -80,19 +79,6 @@ define([ 'core/data-map', 'Promise' ], function(dataMap, Promise) {
     return SUPPORTED_UI_LANGS[lang] ? lang : DEFAULT_LOCALE;
   }
 
-  // The language for audio
-  // Takes an optional parameter for a lang (e.g. from an element to be spoken). If not provided, assumes the doc language.
-  // Returns a full country-affected language, like en-CA when the browser's language matches the site's language prefix.
-  // For example, if an fr-CA browser visits an fr-FR website, then fr-CA is returned instead of the page code,
-  // because that is the preferred accent for French.
-  // However, if the fr-CA browser visits an en-US or en-UK page, the page's code is returned because the
-  // user's preferred English accent in unknown
-  function getAudioLocale(optionalStartingLocale) {
-    var localeToConvert = isValidLocale(optionalStartingLocale) ? optionalStartingLocale : getLocale();
-
-    return extendLocaleWithBrowserCountry(localeToConvert);
-  }
-
   // If document is in the same language as the browser, then
   // we should prefer to use the browser's country-specific version of that language.
   // This helps make sure UK users get a UK accent on all English sites, for example.
@@ -100,7 +86,7 @@ define([ 'core/data-map', 'Promise' ], function(dataMap, Promise) {
   // @param countriesWhiteList -- if provided, it is the list of acceptable fully country codes, e.g. en-US.
   // If not provided, all countries and langs are acceptable
   // @param langsWhiteList -- if provided, it is the list of acceptable languages.
-  function extendLocaleWithBrowserCountry(locale, countriesWhiteList, langsWhiteList) {
+  function swapToPreferredRegion(locale, countriesWhiteList, langsWhiteList) {
 
     var langPrefix = getLanguageFromLocale(locale),
       prioritizedBrowserLocales = (function() {
@@ -174,20 +160,12 @@ define([ 'core/data-map', 'Promise' ], function(dataMap, Promise) {
   function getUiLocale() {
     var langOnly = getSupportedUiLang();
 
-    return extendLocaleWithBrowserCountry(langOnly, COUNTRY_EXCEPTIONS, SUPPORTED_UI_LANGS).toLowerCase();
+    return swapToPreferredRegion(langOnly, COUNTRY_EXCEPTIONS, SUPPORTED_UI_LANGS).toLowerCase();
   }
 
   // The preferred language of the current browser
   function getBrowserLocale() {
     return mainBrowserLocale;
-  }
-
-  function getAudioCueTextAsync(key, callback) {
-    var lang = getLang(),
-      langModuleName = AUDIO_CUE_DATA_PREFIX + lang;
-    dataMap.get(langModuleName, function(data) {
-      callback(data[key] || '');
-    });
   }
 
   function getMainBrowserLocale() {
@@ -217,10 +195,11 @@ define([ 'core/data-map', 'Promise' ], function(dataMap, Promise) {
 
   return {
     getLang: getLang,
-    getAudioLocale: getAudioLocale,
     getBrowserLang: getBrowserLocale,
+    getPageLocale: getPageLocale,
     getUiLocale: getUiLocale,
-    getAudioCueTextAsync: getAudioCueTextAsync,
+    isValidLocale: isValidLocale,
+    swapToPreferredRegion: swapToPreferredRegion,
     translate: translate,
     localizeStrings: localizeStrings,
     translateNumber: translateNumber,
