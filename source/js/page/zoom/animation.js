@@ -6,6 +6,7 @@ define(
     'core/platform',
     'core/events',
     'core/metric',
+    'core/errors',
     'page/util/common',
     'page/zoom/state',
     'page/zoom/constants',
@@ -22,6 +23,7 @@ define(
     platform,
     events,
     metric,
+    errors,
     common,
     state,
     constants,
@@ -77,6 +79,10 @@ define(
 
   // Must be called to set up any type of zoom operation
   function beginZoomOperation(targetZoom, input, animationReadyCallback) {
+    if (isZoomOperationRunning()) {
+      errors.report(new Error('zoom begin repeated'));
+    }
+
     // Initialize zoom input info
     state.zoomInput = $.extend({
       isSlider: false,                  // Slider in panel
@@ -377,6 +383,10 @@ define(
 
   // Must be called at the end of a zoom operation.
   function finishZoomOperation() {
+    if (!isZoomOperationRunning()) {
+      errors.report(new Error('zoom finish before start'));
+    }
+
     if (elementDotAnimatePlayer) {
       // Can't leave animation player around, as it will prevent future animations
       $origBody.css(style.getZoomCss(state.currentTargetZoom));
@@ -417,6 +427,9 @@ define(
         require(['audio-cues/audio-cues'], function (audioCues) {
           audioCues.playZoomCue(state.completedZoom);
         });
+      }
+      if (JSON.stringify(state.zoomInput) === '{}') {
+        errors.report(new Error('zoom metric empty details'));
       }
       new metric.ZoomChange(state.zoomInput).send();
     }

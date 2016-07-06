@@ -67,9 +67,21 @@ define(['core/metric', 'core/conf/urls'], function(metric, urls) {
     });
   }
 
+  function report(error) {
+    logError({
+      type: 'non-fatal error',
+      stack: error.stack,
+      message: error.message
+    });
+  }
+
   window.addEventListener('error', onError);   // May get both JS and resource errors
   window.addEventListener('SitecuesUnhandledRejection', onPrimRejection);   // Thrown from prim library
   window.addEventListener('unhandledrejection', onNativeRejection);
   window.addEventListener('rejectionhandled', onNativeRejection);
   window.addEventListener('SitecuesRequireFailure', onRequireFailure);   // Thrown from prim library
+
+  return {
+    report: report
+  };
 });
