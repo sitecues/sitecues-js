@@ -236,7 +236,7 @@ define(
                 );
 
                 // Cleanup side effects from the test.
-                document.body.removeChild(textArea);
+                textArea.remove();
             });
 
             test('.isEmptyBgImage()', function () {
@@ -325,7 +325,7 @@ define(
                 );
 
                 // Cleanup side effects from the test.
-                document.body.removeChild(textArea);
+                textArea.remove();
             });
 
             test('.getBulletWidth()', function () {
@@ -349,8 +349,8 @@ define(
                 );
 
                 // Cleanup side effects from the test.
-                document.body.removeChild(ul);
-                document.body.removeChild(ol);
+                ul.remove();
+                ol.remove();
             });
 
             test('.getComputedScale()', function () {
@@ -374,7 +374,7 @@ define(
                 );
 
                 // Cleanup side effects from the test.
-                document.body.removeChild(div);
+                div.remove();
             });
         });
     }
