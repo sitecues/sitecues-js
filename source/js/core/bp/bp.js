@@ -14,23 +14,29 @@
 // bp/will-shrink  -- BP is about to shrink
 // bp/did-shrink   -- BP has finished shrinking
 
-define([
-  'core/bp/controller/bp-controller',
-  'core/bp/model/state',
-  'core/bp/helper',
-  'core/bp/constants',
-  'core/conf/site',
-  'core/bp/model/classic-mode',
-  'core/bp/view/badge/page-badge',
-  'Promise'
-], function(bpController,
-           state,
-           helper,
-           BP_CONST,
-           site,
-           classicMode,
-           pageBadgeView,
-           Promise) {
+define(
+  [
+    'core/bp/controller/bp-controller',
+    'core/bp/model/state',
+    'core/bp/helper',
+    'core/bp/constants',
+    'core/conf/site',
+    'core/bp/model/classic-mode',
+    'core/bp/view/badge/page-badge',
+    'Promise',
+    'core/native-functions'
+  ],
+  function (
+    bpController,
+    state,
+    helper,
+    BP_CONST,
+    site,
+    classicMode,
+    pageBadgeView,
+    Promise,
+    nativeFn
+  ) {
 
   /*
    *** Public methods ***
@@ -146,7 +152,7 @@ define([
         if (document.body) {
           resolve();
         } else {
-          setTimeout(checkBody, CHECK_BODY_INTERVAL);
+          nativeFn.setTimeout(checkBody, CHECK_BODY_INTERVAL);
         }
       }
       checkBody();

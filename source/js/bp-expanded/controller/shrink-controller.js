@@ -1,21 +1,28 @@
 /*
  Panel Controller
  */
-define([
-  'core/bp/constants',
-  'core/bp/model/state',
-  'core/bp/helper',
-  'core/metric',
-  'core/bp/view/view',
-  'core/events',
-  'core/dom-events'],
-  function (BP_CONST,
-            state,
-            helper,
-            metric,
-            view,
-            events,
-            domEvents) {
+define(
+  [
+    'core/bp/constants',
+    'core/bp/model/state',
+    'core/bp/helper',
+    'core/metric',
+    'core/bp/view/view',
+    'core/events',
+    'core/dom-events',
+    'core/native-functions'
+  ],
+  function (
+    BP_CONST,
+    state,
+    helper,
+    metric,
+    view,
+    events,
+    domEvents,
+    nativeFn
+  ) {
+  'use strict';
 
     var MIN_DISTANCE = 75, // Min distance before shrink
       mouseLeaveShrinkTimer,  // How long we wait before shrinking BP from any mouseout (even only just barely outside panel)
@@ -46,7 +53,7 @@ define([
     // We don't know anything about the mouse other than the fact that it left the window
     function winMouseLeave(evt) {
       if (helper.getEventTarget(evt).id === BP_CONST.BADGE_ID) {
-        mouseLeaveShrinkTimer = setTimeout(shrinkPanel, BP_CONST.MOUSELEAVE_DELAY_SHRINK_BP);
+        mouseLeaveShrinkTimer = nativeFn.setTimeout(shrinkPanel, BP_CONST.MOUSELEAVE_DELAY_SHRINK_BP);
       }
     }
 

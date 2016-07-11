@@ -4,7 +4,21 @@
  */
 
 // IMPORTANT: The extension defines this module in order to override the mechanism
-define(['core/conf/urls', 'core/conf/site', 'Promise', 'core/platform'], function (urls, site, Promise, platform) {
+define(
+  [
+    'core/conf/urls',
+    'core/conf/site',
+    'Promise',
+    'core/platform',
+    'core/native-functions'
+  ],
+  function (
+    urls,
+    site,
+    Promise,
+    platform,
+    nativeFn
+  ) {
 
   var PATH = 'html/prefs.html',
     ID = 'sitecues-prefs',
@@ -38,7 +52,7 @@ define(['core/conf/urls', 'core/conf/site', 'Promise', 'core/platform'], functio
       window.addEventListener('message', onMessageReceived);
 
       iframe.contentWindow.postMessage({ name: 'sc-storage-command', prefs: optionalDataToSend }, scriptOrigin);
-      var timeout = setTimeout(
+      var timeout = nativeFn.setTimeout(
         onTimeout,  // Code to run when we are fed up with waiting.
         3000        // The browser has this long to get results from the iframe
       );
@@ -139,7 +153,7 @@ define(['core/conf/urls', 'core/conf/site', 'Promise', 'core/platform'], functio
       }
 
       function addListeners() {
-        timeout = setTimeout(
+        timeout = nativeFn.setTimeout(
           onTimeout,  // Code to run when we are fed up with waiting.
           3000        // The browser has this long to get results from the iframe
         );

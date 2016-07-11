@@ -27,7 +27,8 @@ define(
     'page/zoom/style',
     'page/viewport/scrollbars',
     'page/zoom/config/config',
-    'core/events'
+    'core/events',
+    'core/native-functions'
   ],
   function (
     elementMap,
@@ -43,10 +44,10 @@ define(
     zoomStyle,
     scrollbars,
     config,
-    events
+    events,
+    nativeFn
   ) {
     /*jshint +W072 */
-
     'use strict';
 
     var
@@ -54,20 +55,20 @@ define(
       isTransformXOriginCentered,
       shouldRepaintOnZoomChange,
       transformProperty, transformOriginProperty,
-    // Fixed elements taller than the viewport
-      tallElements             = [],
-    // Fixed elements wider than the viewport
-      wideElements             = [],
-      cachedXOffset            = null,
-      cachedYOffset            = null,
-      animationFrame           = null,
-      lastRepaintZoomLevel     = null,
-      resizeTimer              = null,
-      toolbarHeight            = 0,
-      MARGIN_FROM_EDGE         = 15,
-      isTransformingOnResize   = false,
-    // If we're using the toolbar, we need to transform fixed elements immediately or they may cover the toolbar / be covered
-      isTransformingOnScroll   = false;
+      // Fixed elements taller than the viewport
+      tallElements           = [],
+      // Fixed elements wider than the viewport
+      wideElements           = [],
+      cachedXOffset          = null,
+      cachedYOffset          = null,
+      animationFrame         = null,
+      lastRepaintZoomLevel   = null,
+      resizeTimer            = null,
+      toolbarHeight          = 0,
+      MARGIN_FROM_EDGE       = 15,
+      isTransformingOnResize = false,
+      // If we're using the toolbar, we need to transform fixed elements immediately or they may cover the toolbar / be covered
+      isTransformingOnScroll = false;
 
     // This function scales and translates fixed elements as needed, e.g. if we've zoomed and the body is wider than the element
     function transformFixedElement(element, opts) {
@@ -219,9 +220,9 @@ define(
           newXTranslation -= offRight;
         }
         // If the left side of the element is off by more than we can scroll in to view
-        else if (offLeft < -currentPageXOffset) {
+        else if ((currentPageXOffset >= 0 && currentPageXOffset < -offLeft) || (currentPageXOffset < 0 && -currentPageXOffset !== offLeft)) {
           // Add the difference between the scroll distance and the offset element width to the translation
-          newXTranslation += Math.abs(offLeft) - currentPageXOffset;
+          newXTranslation -= offLeft + currentPageXOffset;
         }
         // If the left side of the element is visible in the viewport
         else if (offLeft > 0) {
@@ -347,7 +348,7 @@ define(
         if (resizeTimer) {
           clearTimeout(resizeTimer);
         }
-        resizeTimer = setTimeout(function () {
+        resizeTimer = nativeFn.setTimeout(function () {
           transformAllTargets({
             resetTranslation: true,
             onResize: true
@@ -474,7 +475,7 @@ define(
     }
 
     function onZoom() {
-      setTimeout(refresh, 0);
+      nativeFn.setTimeout(refresh, 0);
     }
 
     // Typically these are shift transforms that assume that the body is untransformed. Once we transform the body, these fixed elements will effectively

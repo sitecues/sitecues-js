@@ -3,7 +3,6 @@
 define(
   [
     '$',
-    'core/platform',
     'page/positioner/util/element-map',
     'page/positioner/transplant/clone',
     'page/positioner/constants',
@@ -14,7 +13,6 @@ define(
   ],
   function (
     $,
-    platform,
     elementMap,
     clone,
     constants,
@@ -77,17 +75,15 @@ define(
   // into the auxiliary body, we need to recreate the normal flow by explicitly specifying its intended vertical
   // position
   function fixVerticalPosition(element) {
-    var inlinePosition,
-      rect = helper.getRect(element),
-      // In firefox the computed style of an element returns the used position values rather than 'auto'
-      // if the style is unspecified on a fixed element. Applying a 'static' position allows us to
-      // distinguish specified values from used values.
-      doUnpositionElement = platform.browser.isFirefox;
-
-    if (doUnpositionElement) {
+    var
+      inlineTransform = element.style.transform,
       inlinePosition = element.style.position;
-      element.style.position = 'static';
-    }
+
+    element.style.transform = '';
+
+    var rect = helper.getRect(element);
+
+    element.style.position = 'static';
 
     var
       style  = getComputedStyle(element),
@@ -97,12 +93,12 @@ define(
     // If there isn't a vertical position specified, we need to explicitly specify the used top value so that the
     // intended position is maintained when we transplant the fixed element
     if (Number.isNaN(top) && Number.isNaN(bottom)) {
-      var topOffset,
-        usedTop           = rect.top,
+      var
         marginTop         = parseFloat(style.marginTop),
         bodyStyle         = getComputedStyle(originalBody),
         bodyHeight        = parseFloat(bodyStyle.height),
-        isBodyTransformed = bodyStyle.transform !== 'none';
+        isBodyTransformed = bodyStyle.transform !== 'none',
+        usedTop           = isBodyTransformed ? rect.top - helper.getRect(originalBody).top : rect.top;
 
       if (!Number.isNaN(marginTop)) {
         var isPercent = style.marginTop.indexOf('%') >= 0;
@@ -117,16 +113,14 @@ define(
         }
         usedTop -= marginTop;
       }
-      // we need to account for the distance we've scrolled when the fixed element
-      // is positioned relative to the body instead of the viewport
-      topOffset = isBodyTransformed ? usedTop + window.pageYOffset : usedTop;
+      //// we need to account for the distance we've scrolled when the fixed element
+      //// is positioned relative to the body instead of the viewport
+      //topOffset = isBodyTransformed ? usedTop + window.pageYOffset : usedTop;
 
-      element.style.top = topOffset;
+      element.style.top = usedTop;
     }
-
-    if (doUnpositionElement) {
-      element.style.position = inlinePosition;
-    }
+    element.style.transform = inlineTransform;
+    element.style.position  = inlinePosition;
   }
 
   // Returns falsey if there isn't a root in the element's ancestor chain

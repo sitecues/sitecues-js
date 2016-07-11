@@ -2,14 +2,22 @@
  * Service that lazily gets user agent and page stylesheets
  * and provides information about them.
  */
-define(['$',
-  'page/style-service/css-aggregator',
-  'page/style-service/media-queries',
-  'core/platform'],
-  function ($,
-            cssAggregator,
-            mediaQueries,
-            platform) {
+define(
+  [
+    '$',
+    'page/style-service/css-aggregator',
+    'page/style-service/media-queries',
+    'core/platform',
+    'core/native-functions'
+  ],
+  function (
+    $,
+    cssAggregator,
+    mediaQueries,
+    platform,
+    nativeFn
+  ) {
+  'use strict';
 
   var domStylesheetObjects = [],
     SITECUES_COMBINED_CSS_ID = 'sitecues-js-combined-css',
@@ -108,7 +116,7 @@ define(['$',
       elems[index] = $newSheet[0];
       if (++ index < numChunks) {
         // We must wait before creating the next stylesheet otherwise we overload IE11 and cause it to lockup
-        setTimeout(createNext, 0);
+        nativeFn.setTimeout(createNext, 0);
       }
       else {
         callback(elems);
@@ -137,7 +145,7 @@ define(['$',
     }
 
     createCombinedStylesheets(allCss, function(styleElems) {
-      setTimeout(function () {
+      nativeFn.setTimeout(function () {
         getDOMStyleSheetObjects(styleElems, function() {
           isCssComplete = true;
           clearCallbacks();
@@ -291,7 +299,7 @@ define(['$',
 
       if (++ tries <= MAX_TRIES) {
         if (SC_DEV) { console.log('Could not find stylesheet ' + id); }
-        setTimeout(getStyleSheet, TRY_INTERVAL_MS);
+        nativeFn.setTimeout(getStyleSheet, TRY_INTERVAL_MS);
       }
     }
 

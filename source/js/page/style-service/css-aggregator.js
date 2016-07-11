@@ -2,8 +2,22 @@
  * This module collects all the relevant CSS for the entire web page into one large string.
  */
 
-define(['$', 'page/style-service/user-agent-css', 'core/conf/urls', 'page/style-service/media-queries'],
-  function ($, UA_CSS, urls, mediaQueries) {
+define(
+  [
+    '$',
+    'page/style-service/user-agent-css',
+    'core/conf/urls',
+    'page/style-service/media-queries',
+    'core/native-functions'
+  ],
+  function (
+    $,
+    UA_CSS,
+    urls,
+    mediaQueries,
+    nativeFn
+  ) {
+  'use strict';
 
   var numPending = 0,
     sheets = [],
@@ -50,7 +64,7 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/urls', 'page/style-
         // otherwise the numPending will not return to 0 and we will never finish aggregating the CSS
         markReady(currentSheet);
       };
-      currentSheet.errorTimeout = setTimeout(function() {
+      currentSheet.errorTimeout = nativeFn.setTimeout(function() {
         markReady(currentSheet);
       }, TIMEOUT_MS);
       request.send();
@@ -59,7 +73,7 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/urls', 'page/style-
       // A <style> already has it's text --
       // as opposed to a <link href> which will be marked ready after it's loaded
       currentSheet.text = (text || '');
-      setTimeout(function () {
+      nativeFn.setTimeout(function () {
         // Use the setTimeout as a fake fetch that will simply provide the text we already have.
         // (We don't want to mark ready until all the sheets are added to the queue, otherwise we could finish too early)
         markReady(currentSheet);

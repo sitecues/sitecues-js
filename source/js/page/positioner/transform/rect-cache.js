@@ -21,6 +21,7 @@ define(
   'use strict';
 
   var isTransformXOriginCentered,
+    noop                 = function () {},
     // For convenience this map keeps track of which elements we're currently observing
     observedElementMap   = new WeakMap(),
     // This map caches the bounding rectangle for observed elements
@@ -116,6 +117,8 @@ define(
 
   // listen for style mutations that will impact the element's bounding rectangle
   function listenForMutatedRect(element, handler) {
+    handler = handler || noop;
+
     // We only allow a single handler to be attached
     if (observedElementMap.get(element)) {
       return;

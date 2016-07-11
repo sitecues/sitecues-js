@@ -1,6 +1,29 @@
-define(['core/bp/constants', 'core/bp/helper', 'core/conf/user/manager', 'core/bp/model/state', 'core/metric', 'core/platform',
-        'page/cursor/cursor', 'core/events', 'core/dom-events'],
-  function (BP_CONST, helper, conf, state, metric, platform, cursor, events, domEvents) {
+define(
+  [
+    'core/bp/constants',
+    'core/bp/helper',
+    'core/conf/user/manager',
+    'core/bp/model/state',
+    'core/metric',
+    'core/platform',
+    'page/cursor/cursor',
+    'core/events',
+    'core/dom-events',
+    'core/native-functions'
+  ],
+  function (
+    BP_CONST,
+    helper,
+    conf,
+    state,
+    metric,
+    platform,
+    cursor,
+    events,
+    domEvents,
+    nativeFn
+  ) {
+  'use strict';
 
   var byId = helper.byId,
     isActive = false,
@@ -228,7 +251,7 @@ define(['core/bp/constants', 'core/bp/helper', 'core/conf/user/manager', 'core/b
     var currTime = + Date.now();
     if (currTime - lastDragUpdateTime > SLIDER_DRAG_UPDATE_MIN_INTERVAL) {
       lastDragUpdateTime = currTime;
-      setTimeout(function() { onSettingsNativeInputChange(evt);}, 0 );
+      nativeFn.setTimeout(function() { onSettingsNativeInputChange(evt);}, 0 );
     }
   }
 

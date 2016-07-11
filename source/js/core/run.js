@@ -6,9 +6,37 @@
  *   4. Fire sitecues ready callback and page-visited metric
  */
 
-define(['core/conf/user/manager', 'core/util/session', 'core/locale', 'core/metric', 'core/platform', 'core/bp/bp',
-        'core/constants', 'core/events', 'core/dom-events', 'Promise', 'core/modifier-key-state'],
-  function (conf, session, locale, metric, platform, bp, CORE_CONST, events, domEvents, Promise, modifierKeyState) {
+define(
+  [
+    'core/conf/user/manager',
+    'core/util/session',
+    'core/locale',
+    'core/metric',
+    'core/platform',
+    'core/bp/bp',
+    'core/constants',
+    'core/events',
+    'core/dom-events',
+    'Promise',
+    'core/modifier-key-state',
+    'core/native-functions'
+  ],
+  function (
+    conf,
+    session,
+    locale,
+    metric,
+    platform,
+    bp,
+    CORE_CONST,
+    events,
+    domEvents,
+    Promise,
+    modifierKeyState,
+    nativeFn
+  ) {
+  'use strict';
+
   var
     areZoomEnhancementsInitialized,
     isZoomInitialized,
@@ -271,6 +299,7 @@ define(['core/conf/user/manager', 'core/util/session', 'core/locale', 'core/metr
 
     // Start initialization
     platform.init();
+    nativeFn.init();
 
     if (platform.isUnsupportedPlatform) {
       // Unsupported platform: fail early but fire page-visited metric

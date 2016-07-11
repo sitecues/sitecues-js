@@ -6,8 +6,26 @@
  * - switches custom cursor image when hover over elements that demand certain - not default or auto - cursor;
  * - attaches correspondent window events so that handle custom cursor events.
  */
-define(['$', 'page/style-service/style-service', 'core/conf/user/manager', 'page/cursor/cursor-css', 'core/platform', 'core/events'],
-  function ($, styleService, conf, cursorCss, platform, events) {
+define(
+  [
+    '$',
+    'page/style-service/style-service',
+    'core/conf/user/manager',
+    'page/cursor/cursor-css',
+    'core/platform',
+    'core/events',
+    'core/native-functions'
+  ],
+  function (
+    $,
+    styleService,
+    conf,
+    cursorCss,
+    platform,
+    events,
+    nativeFn
+  ) {
+  'use strict';
 
   var isInitialized,
       // Regexp is used to match URL in the string given(see below).
@@ -240,7 +258,7 @@ define(['$', 'page/style-service/style-service', 'core/conf/user/manager', 'page
     // Refresh document cursor stylesheet if we're using one
     if (cursorStylesheetObject) {
       refreshCursorStyles(cursorStylesheetObject, cursorTypeUrls);
-      setTimeout(toggleZoomOptimization, REENABLE_CURSOR_MS);
+      nativeFn.setTimeout(toggleZoomOptimization, REENABLE_CURSOR_MS);
     }
 
     // Refresh BP cursor stylesheet

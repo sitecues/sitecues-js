@@ -25,9 +25,28 @@
  * For more details see https://equinox.atlassian.net/wiki/display/EN/Picker+v2+Architecture
  */
 
-define(['$', 'page/util/common', 'core/conf/user/manager', 'core/conf/site',
-    'page/highlight/traitcache', 'page/highlight/traits', 'page/highlight/judge'],
-  function($, common, conf, site, traitcache, traits, judge) {
+define(
+  [
+    '$',
+    'page/util/common',
+    'core/conf/user/manager',
+    'core/conf/site',
+    'page/highlight/traitcache',
+    'page/highlight/traits',
+    'page/highlight/judge',
+    'core/native-functions'
+  ],
+  function (
+    $,
+    common,
+    conf,
+    site,
+    traitcache,
+    traits,
+    judge,
+    nativeFn
+  ) {
+  'use strict';
 
   var UNUSABLE_SCORE = -99999,       // A score so low there is no chance of picking the item
     MAX_ANCESTORS_TO_ANALYZE = 14,   // Maximum ancestors to climb looking for start.
@@ -373,7 +392,7 @@ define(['$', 'page/util/common', 'core/conf/user/manager', 'core/conf/site',
         console.log('Extra work ' + extraWork);
         candidates[bestIndex].style.outline = (extraWork * 4) + 'px solid orange';
       }
-      setTimeout(function () {
+      nativeFn.setTimeout(function () {
         candidates[origBestIndex].style.outline = '';
         candidates[bestIndex].style.outline = '';
       }, 1000);

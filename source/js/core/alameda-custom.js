@@ -268,20 +268,36 @@ var requirejs, require, define;
 
   }
 
-  var topReq,
+  var topReq, setTimeout, slice, hasOwn,
     bootstrapConfig = requirejs || require,
-    hasOwn = Object.prototype.hasOwnProperty,
     contexts = {},
     queue = [],
     currDirRegExp = /^\.\//,
     commentRegExp = /(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg,
     cjsRequireRegExp = /[^.]\s*require\s*\(\s*["']([^'"\s]+)["']\s*\)/g,
-    jsSuffixRegExp = /\.js$/,
-    slice = Array.prototype.slice;
+    jsSuffixRegExp = /\.js$/;
 
   if (typeof requirejs === 'function') {
     return;
   }
+
+  // ----- BEGIN SITECUES CUSTOM BLOCK -----
+  // Recover potentially overridden window methods from a nested browsing context
+  function cacheNativeFnReferences() {
+    var
+      frameId = 'sitecues-native-context',
+      frame   = document.querySelector('#' + frameId);
+    if (!frame) {
+      frame = document.createElement('iframe');
+      frame.style.cssText = 'position:absolute;width:1px;height:1px;left:-9999px;visibility:hidden;';
+      frame.id = frameId;
+      document.documentElement.appendChild(frame);
+    }
+    hasOwn     = frame.contentWindow.Object.prototype.hasOwnProperty;
+    setTimeout = frame.contentWindow.setTimeout.bind(window);
+    slice      = frame.contentWindow.Array.prototype.slice;
+  }
+  // ----- END SITECUES CUSTOM BLOCK -----
 
   // Could match something like ')//comment', do not lose the prefix to comment.
   function commentReplace(match, multi, multiText, singlePrefix) {
@@ -353,12 +369,12 @@ var requirejs, require, define;
   function newContext(contextName) {
     var req, main, makeMap, callDep, handlers, checkingLater, load, context,
       defined = {},
-      // ----- BEGIN SITECUES CUSTOM BLOCK -----
-      //We want Promises to be treated as a module, whether they are native or prim,
-      //so that they can be used via define() and we do not have to change
-      //the global definition of Promise when we do use prim
+    // ----- BEGIN SITECUES CUSTOM BLOCK -----
+    //We want Promises to be treated as a module, whether they are native or prim,
+    //so that they can be used via define() and we do not have to change
+    //the global definition of Promise when we do use prim
       waiting = { Promise:  ['Promise', [], function () { return Promise; }] },
-      // ----- END SITECUES CUSTOM BLOCK -----
+    // ----- END SITECUES CUSTOM BLOCK -----
       config = {
         // Defaults. Do not set a default for map
         // config to speed up normalize(), which
@@ -1122,7 +1138,7 @@ var requirejs, require, define;
       var err,
         notFinished = [],
         waitInterval = config.waitSeconds * 1000,
-        // It is possible to disable the wait interval by using waitSeconds 0.
+      // It is possible to disable the wait interval by using waitSeconds 0.
         expired = waitInterval &&
           (startTime + waitInterval) < (new Date()).getTime();
 
@@ -1426,6 +1442,10 @@ var requirejs, require, define;
 
     return req;
   }
+
+  // ----- BEGIN SITECUES CUSTOM BLOCK -----
+  cacheNativeFnReferences();
+  // ----- END SITECUES CUSTOM BLOCK -----
 
   requirejs = topReq = newContext('_');
 

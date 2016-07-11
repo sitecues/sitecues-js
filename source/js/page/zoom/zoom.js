@@ -15,7 +15,8 @@ define(
     'page/zoom/config/config',
     'page/zoom/util/restrict-zoom',
     'page/zoom/style',
-    'page/viewport/scrollbars'
+    'page/viewport/scrollbars',
+    'core/native-functions'
   ],
   function (
     $,
@@ -29,8 +30,10 @@ define(
     config,
     restrictZoom,
     style,
-    scrollbars
+    scrollbars,
+    nativeFn
   ) {
+  'use strict';
 
   var isInitialized,  // Is the zoom module already initialized?
     isReady,        // Are the dependencies initialized
@@ -105,12 +108,12 @@ define(
       return modifierKeyState.isCtrlKeyDown() ? { isCtrlWheel: true } : { isUnpinch: true };
     }
 
-    setTimeout(function () {
+    nativeFn.setTimeout(function () {
       var delta = -event.deltaY * UNPINCH_FACTOR,
         targetZoom = animation.isZoomOperationRunning() ? state.currentTargetZoom + delta : state.completedZoom + delta;
 
       clearTimeout(unpinchEndTimer);
-      unpinchEndTimer = setTimeout(animation.finishZoomOperation, UNPINCH_END_DELAY);
+      unpinchEndTimer = nativeFn.setTimeout(animation.finishZoomOperation, UNPINCH_END_DELAY);
       if (!animation.isZoomOperationRunning()) {
         // 1st call -- we will glide to it, it may be far away from previous zoom value
         animation.beginZoomOperation(targetZoom, getWheelEventInputInfo()); // Get ready for more slider updates

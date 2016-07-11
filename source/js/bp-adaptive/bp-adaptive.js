@@ -8,7 +8,21 @@
  * For theme changes implemented by sitecues:
  * - Get notification of theme change via onSitecuesThemeChange()
  */
-define(['core/bp/model/state', 'core/bp/view/view', 'core/bp/constants'], function(state, bpView, BP_CONST) {
+define(
+  [
+    'core/bp/model/state',
+    'core/bp/view/view',
+    'core/bp/constants',
+    'core/native-functions'
+  ],
+  function (
+    state,
+    bpView,
+    BP_CONST,
+    nativeFn
+  ) {
+  'use strict';
+
   var lastBgColor;
 
   function getBadgeElem() {
@@ -59,7 +73,7 @@ define(['core/bp/model/state', 'core/bp/view/view', 'core/bp/constants'], functi
   // Input event has occurred that may trigger a theme change produced from the website code
   // (as opposed to sitecues-based themes). For example, harpo.com, cnib.ca, lloydsbank have their own themes.
   function onPossibleWebpageThemeChange() {
-    setTimeout(function() {
+    nativeFn.setTimeout(function () {
       checkBackgroundColorChange(bpView.update);
     }, 0);
   }

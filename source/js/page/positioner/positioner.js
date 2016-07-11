@@ -3,7 +3,7 @@
    * for the current zoom and scroll position in the window.
    *
    */
-  define(
+define(
   [
     'core/platform',
     'page/positioner/transplant/transplant',
@@ -14,7 +14,8 @@
     'page/positioner/util/element-info',
     'page/positioner/constants',
     'page/zoom/util/body-geometry',
-    'core/events'
+    'core/events',
+    'core/native-functions'
   ],
   function (
     platform,
@@ -26,9 +27,9 @@
     elementInfo,
     constants,
     bodyGeo,
-    events
+    events,
+    nativeFn
   ) {
-
   'use strict';
 
   var originalBody, docElem, unprocessedTransplantCandidates,
@@ -83,7 +84,7 @@
   function processTransplantCandidates() {
     unprocessedTransplantCandidates.forEach(function (candidate) {
       // TODO: order these initial position handlers by distance from body, closest distance runs first
-      setTimeout(function (candidate) {
+      nativeFn.setTimeout(function (candidate) {
         var position = getComputedStyle(candidate).position;
         if (position === 'fixed') {
           toPositionHandler.call(candidate, { toValue : position });
@@ -286,7 +287,7 @@
     init(function () {
       transform.init();
       // We only need to use the transplant algorithm once we've applied a transformation on the body, i.e. when we've zoomed
-      setTimeout(onZoom, 0, state.completedZoom);
+      nativeFn.setTimeout(onZoom, 0, state.completedZoom);
     });
   }
 

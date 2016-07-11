@@ -1,5 +1,29 @@
-define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 'core/locale', 'page/util/color', 'core/events', 'core/util/session'],
-  function($, site, urls, dimmer, platform, locale, colorUtil, events, session) {
+define(
+  [
+    '$',
+    'core/conf/site',
+    'core/conf/urls',
+    'hlb/dimmer',
+    'core/platform',
+    'core/locale',
+    'page/util/color',
+    'core/events',
+    'core/util/session',
+    'core/native-functions'
+  ],
+  function (
+    $,
+    site,
+    urls,
+    dimmer,
+    platform,
+    locale,
+    colorUtil,
+    events,
+    session,
+    nativeFn
+  ) {
+  'use strict';
 
   var $iframe = $(),
     $closeButton = $(),
@@ -53,7 +77,7 @@ define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 
 
   function close() {
     $iframe.css(INITIAL_CSS);
-    setTimeout(function() {
+    nativeFn.setTimeout(function() {
       $iframe.remove();
       $iframe = $();
       isModalOpen = false;
@@ -75,7 +99,7 @@ define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 
 
   function onload() {
     // Try to focus iframe
-    setTimeout(function() {
+    nativeFn.setTimeout(function () {
       var iframe = $iframe[0];
       try {
         iframe.contentWindow.focus();
@@ -126,7 +150,7 @@ define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 
 
     dimmer.dimBackgroundContent(DIMMER_SPEED, $iframe);
 
-    setTimeout(function() {
+    nativeFn.setTimeout(function () {
       $iframe.css(ENLARGED_CSS);
       var iframeEl = $iframe[0];
       if (iframeEl.contentWindow) {
@@ -137,7 +161,7 @@ define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 
       }
     }, INITIAL_DELAY); // Waiting helps animation performance
 
-    addCloseButtonTimer = setTimeout(addCloseButton, INITIAL_DELAY + INFLATION_SPEED + 100);
+    addCloseButtonTimer = nativeFn.setTimeout(addCloseButton, INITIAL_DELAY + INFLATION_SPEED + 100);
 
     isModalOpen = true;
   }
@@ -163,7 +187,7 @@ define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 
         .appendTo('html')
         .one('click', close);
 
-    addCloseButtonTimer = setTimeout(function() {
+    addCloseButtonTimer = nativeFn.setTimeout(function () {
       $closeButton.css('opacity', 1);
     }, 100);
   }

@@ -21,8 +21,18 @@ define(
 
   // Private utility method
   function querySelector(selector) {
-    return Array.prototype.slice.call(document.querySelectorAll(selector), 0)
-      .filter(elementInfo.isOriginal);  // Only original elements be considered for processing
+    var results;
+    // Safari is incapable of processing certain selectors
+    // example from chicagolighthouse.org :
+    // input[type=\"number\"]::-webkit-inner-spin-button, input[type=\"number\"]::-webkit-outer-spin-button"
+    try {
+      results = Array.prototype.slice.call(document.querySelectorAll(selector), 0)
+        .filter(elementInfo.isOriginal); // Only original elements be considered for processing
+      return results;
+    }
+    catch (e) {
+      return [];
+    }
   }
 
   function getCachedQuery(selector) {

@@ -2,26 +2,33 @@
  *  Support color themes in page
  */
 
-define([
-  '$',
-  'Promise',
-  'core/conf/user/manager',
-  'page/style-service/style-service',
-  'core/platform',
-  'theme/color-choices',
-  'page/util/color',
-  'theme/custom-site-theme',
-  'core/events'
-],
-  function($,
-           Promise,
-           conf,
-           styleService,
-           platform,
-           colorChoices,
-           colorUtil,
-           customTheme,
-           events) {
+define(
+  [
+    '$',
+    'Promise',
+    'core/conf/user/manager',
+    'page/style-service/style-service',
+    'core/platform',
+    'theme/color-choices',
+    'page/util/color',
+    'theme/custom-site-theme',
+    'core/events',
+    'core/native-functions'
+  ],
+  function(
+    $,
+    Promise,
+    conf,
+    styleService,
+    platform,
+    colorChoices,
+    colorUtil,
+    customTheme,
+    events,
+    nativeFn
+  ) {
+  'use strict';
+
   var THEME_STYLESHEET_ID = 'sitecues-js-theme',
     TRANSITION_STYLESHEET_ID = 'sitecues-js-theme-transition',
     REPAINT_MS = 40,
@@ -145,7 +152,7 @@ define([
       // Enable site-specific theme changes
       toggleBodyClasses();
 
-      finishThemeTimer = setTimeout(finalizeTheme, isFastTransition ? TRANSITION_MS_FAST : TRANSITION_MS_SLOW);
+      finishThemeTimer = nativeFn.setTimeout(finalizeTheme, isFastTransition ? TRANSITION_MS_FAST : TRANSITION_MS_SLOW);
     }
   }
 
@@ -385,7 +392,7 @@ define([
     }
     else {
       document.documentElement.style.transform = 'translateY(0.01px)';
-      setTimeout(function () {
+      nativeFn.setTimeout(function () {
         document.documentElement.style.transform = '';
       }, REPAINT_MS);
     }

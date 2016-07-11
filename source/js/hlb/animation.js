@@ -2,8 +2,26 @@
   This module animates the HLB.  Depending on the browser, the mechanism
   of animation is either CSS3 Transitions or jQuery.animate.
  */
-define(['hlb/dimmer', 'page/util/common', 'hlb/positioning', 'core/platform', '$', 'hlb/constants'],
-  function (dimmer, common, hlbPositioning, platform, $, constants) {
+define(
+  [
+    'hlb/dimmer',
+    'page/util/common',
+    'hlb/positioning',
+    'core/platform',
+    '$',
+    'hlb/constants',
+    'core/native-functions'
+  ],
+  function (
+    dimmer,
+    common,
+    hlbPositioning,
+    platform,
+    $,
+    constants,
+    nativeFn
+  ) {
+  'use strict';
 
   var INFLATION_SPEED = 400, // Default inflation duration
       INFLATION_SPEED_FAST = 0, // Inflation duration when retargeting -- need > 0 so that animation end fires correctly
@@ -85,7 +103,7 @@ define(['hlb/dimmer', 'page/util/common', 'hlb/positioning', 'core/platform', '$
 
     // Allow the from CSS to register so that setting the toCss actually animates there
     // rather than just setting the toCss and ignoring the fromCss
-    setTimeout(function() {
+    nativeFn.setTimeout(function() {
       toCss.transition = platform.transformProperty + ' ' + speed + 'ms ease-in-out';
       $hlbElement.css(toCss);
       hlbElement.addEventListener(platform.transitionEndEvent, onTransitionEnd);
