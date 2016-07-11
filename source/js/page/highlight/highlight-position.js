@@ -74,7 +74,7 @@ define(
     var range = document.createRange(),
       parent,
       // ********** Some browsers are fine **********
-      isElement = node.nodeType === 1;
+      isElement = node.nodeType === Node.ELEMENT_NODE;
 
     if (isElement) {
       // Case 1: element -- get the rect for the element's descendant contents
@@ -296,11 +296,11 @@ define(
       viewPos = traitcache.getCachedViewPosition();
 
     $selector.each(function () {
-      var isElement = this.nodeType === 1;
+      var isElement = this.nodeType === Node.ELEMENT_NODE;
 
       // --- Leaf nodes ---
       if (!isElement) {
-        if (this.nodeType === 3 && this.data.trim() !== '') { /* Non-empty text node */
+        if (this.nodeType === Node.TEXT_NODE && this.data.trim() !== '') { /* Non-empty text node */
           // ----------------------------------------------------------------------------------------------------
           // --- FAST PATH -- REMOVED BECAUSE SOME CHILD ELEMENTS MAY USING CLIPPING! SC-2047 --
           // Fast path for text containers:
