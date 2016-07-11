@@ -8,7 +8,8 @@ define(
     'page/zoom/state',
     'page/zoom/constants',
     'page/zoom/util/body-geometry',
-    'page/zoom/config/config'
+    'page/zoom/config/config',
+    'core/native-functions'
   ],
   function (
     $,
@@ -16,8 +17,10 @@ define(
     state,
     constants,
     bodyGeo,
-    config
+    config,
+    nativeFn
   ) {
+  'use strict';
 
   var
     body,
@@ -229,7 +232,7 @@ define(
     }
     var $anyBody = $('body'); // Make sure we get clone body as well, if present
     $anyBody.attr(CRISPING_ATTRIBUTE, '');
-    setTimeout(function() {
+    nativeFn.setTimeout(function() {
       $anyBody.removeAttr(CRISPING_ATTRIBUTE);
     }, REPAINT_FOR_CRISP_TEXT_DELAY);
 
@@ -247,7 +250,7 @@ define(
           pointerEvents: 'none'
         })
         .appendTo('html');
-    setTimeout(function () {
+    nativeFn.setTimeout(function () {
       appendedDiv.remove();
     }, 0);
   }

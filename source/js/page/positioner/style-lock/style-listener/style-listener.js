@@ -17,7 +17,8 @@ define(
     'page/positioner/transplant/transplant',
     'page/positioner/util/element-map',
     'page/positioner/constants',
-    'core/constants'
+    'core/constants',
+    'core/native-functions'
   ],
   function (
     queryManager,
@@ -28,9 +29,9 @@ define(
     transplant,
     elementMap,
     constants,
-    coreConstants
+    coreConstants,
+    nativeFn
   ) {
-
   'use strict';
 
   var domObserver, docElem,
@@ -130,7 +131,7 @@ define(
 
               if (didChange) {
                 elementMap.setField(target, inlineKey, inlineValue);
-                setTimeout(evaluateProperty, 0, target, property);
+                nativeFn.setTimeout(evaluateProperty, 0, target, property);
               }
             }
             break;
@@ -147,8 +148,8 @@ define(
 
   function evaluateResolvedValue(element, opts) {
     var properties,
-      fromHandlers = new Map(),
-      toHandlers   = new Map(),
+      fromHandlers = new nativeFn.Map(),
+      toHandlers   = new nativeFn.Map(),
       style        = getComputedStyle(element);
 
     function runHandlers(directionHandlers) {
@@ -239,7 +240,7 @@ define(
     var mutationRecords = domObserver.takeRecords();
     // Handle the remaining queued mutation records
     if (mutationRecords.length) {
-      setTimeout(function (mutationRecords) {
+      nativeFn.setTimeout(function (mutationRecords) {
         onOriginalElementMutations(mutationRecords);
       }, 0, mutationRecords);
     }
@@ -301,7 +302,7 @@ define(
         observedProperties.push(property);
       }
 
-      setTimeout(function () {
+      nativeFn.setTimeout(function () {
         resolvedElementsMap[key] = getElementsWithResolvedValue(declaration);
         if (!isPropertyObserved) {
           listenForDynamicStyling(property);

@@ -54,9 +54,24 @@
 // enough that all such attempts are guarded in a try block.
   "use strict";
 
+  function cacheSetTimeoutReference() {
+    var
+      frameId = 'sitecues-native-context',
+      frame   = document.querySelector('#' + frameId);
+    if (!frame) {
+      frame = document.createElement('iframe');
+      frame.id = frameId;
+      frame.style.cssText = 'position:absolute;width:1px;height:1px;left:-9999px;visibility:hidden;';
+      document.documentElement.appendChild(frame);
+    }
+    return setTimeout = frame.contentWindow.setTimeout.bind(window);
+  }
+
   var arr = [];
 
   var document = window.document;
+
+  var setTimeout = cacheSetTimeoutReference();
 
   var getProto = Object.getPrototypeOf;
 
@@ -79,8 +94,6 @@
   var ObjectFunctionString = fnToString.call( Object );
 
   var support = {};
-
-
 
   function DOMEval( code, doc ) {
     doc = doc || document;
@@ -4614,7 +4627,7 @@
 
       // Prevent errors from freezing future callback execution (gh-1823)
       // Not backwards-compatible as this does not execute sync
-      window.setTimeout( function() {
+      setTimeout( function() {
         fn.call( document, jQuery );
       } );
     };
@@ -4697,7 +4710,7 @@
     ( document.readyState !== "loading" && !document.documentElement.doScroll ) ) {
 
     // Handle it asynchronously to allow scripts the opportunity to delay ready
-    window.setTimeout( jQuery.ready );
+    setTimeout( jQuery.ready );
 
   } else {
 

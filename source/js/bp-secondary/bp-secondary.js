@@ -1,7 +1,9 @@
 /**
  * Secondary panel including animations
  */
-define(['core/bp/constants',
+define(
+  [
+    'core/bp/constants',
     'core/bp/model/state',
     'core/bp/view/view',
     'core/bp/helper',
@@ -11,18 +13,24 @@ define(['core/bp/constants',
     'core/platform',
     'bp-secondary/insert-secondary-markup',
     'bp-secondary/bp-secondary-features',
-    'core/events'],
-  function (BP_CONST,
-            state,
-            view,
-            helper,
-            animate,
-            transformUtil,
-            locale,
-            platform,
-            markup,
-            secondaryFeatures,
-            events) {
+    'core/events',
+    'core/native-functions'
+  ],
+  function (
+    BP_CONST,
+    state,
+    view,
+    helper,
+    animate,
+    transformUtil,
+    locale,
+    platform,
+    markup,
+    secondaryFeatures,
+    events,
+    nativeFn
+  ) {
+  'use strict';
 
   var BUTTON_DROP_ANIMATION_MS = 800,
     ENABLED_PANEL_TRANSLATE_Y = 0,
@@ -109,7 +117,7 @@ define(['core/bp/constants',
 
   // Create an animation and store it in runningAnimations so we can cancel it if need be
   function createAnimation(elems, values, duration, onFinishFn) {
-    setTimeout(function() {
+    nativeFn.setTimeout(function() {
       var newAnimation = animate.animateTransforms(elems, values, duration, onFinishFn);
       runningAnimations.push(newAnimation);
   }, 18); // Wait one frame, for Firefox
@@ -217,7 +225,7 @@ define(['core/bp/constants',
       animationsCompleteMs = Math.max(openFeatureDuration, heightAnimationDelay + heightAnimationDuration);  // When is feature fully visible
 
     function fadeInTextContentWhenLargeEnough() {
-      fadeInTimer = setTimeout(function () {
+      fadeInTimer = nativeFn.setTimeout(function () {
         state.set('isSecondaryExpanding', false);
         view.update();
       }, heightAnimationDelay + heightAnimationDuration * 0.7);
@@ -297,9 +305,9 @@ define(['core/bp/constants',
     openFeatureAnimation();
 
     // Animate the height at the right time
-    animateHeightTimer = setTimeout(animateHeight, heightAnimationDelay);
+    animateHeightTimer = nativeFn.setTimeout(animateHeight, heightAnimationDelay);
 
-    animationsCompleteTimer = setTimeout(onAnimationsComplete, animationsCompleteMs);
+    animationsCompleteTimer = nativeFn.setTimeout(onAnimationsComplete, animationsCompleteMs);
 
     fadeInTextContentWhenLargeEnough();
 
@@ -356,7 +364,7 @@ define(['core/bp/constants',
   }
 
   function updateMoreButtonLabel(doPointToMainPanel) {
-    setTimeout(function() {
+    nativeFn.setTimeout(function() {
       var labelName = doPointToMainPanel ? 'sitecues_main_panel' : 'more_features',
         localizedLabel = locale.translate(labelName);
       byId(BP_CONST.MORE_BUTTON_GROUP_ID).setAttribute('aria-label', localizedLabel);

@@ -7,7 +7,8 @@ define(
     'page/zoom/util/body-geometry',
     'page/util/geo',
     'core/events',
-    'page/highlight/fixed-elements'
+    'page/highlight/fixed-elements',
+    'core/native-functions'
   ],
   function (
     $,
@@ -17,8 +18,10 @@ define(
     bodyGeo,
     geo,
     events,
-    fixedElements
+    fixedElements,
+    nativeFn
   ) {
+  'use strict';
 
   var STEP_SIZE_VERT = 18,
     STEP_SIZE_HORIZ = 24,  // Different step sizes because content tends to be wider than tall (lines of text)
@@ -364,7 +367,7 @@ define(
         repeatDelay = isFirstRepeat ? HIGHLIGHT_MOVE_FIRST_REPEAT_DELAY_MS : HIGHLIGHT_MOVE_NEXT_REPEAT_DELAY_MS;
       // Repeat last command if key is still pressed down
       isKeyRepeating = true;
-      repeatDelayTimer = setTimeout(function() {
+      repeatDelayTimer = nativeFn.setTimeout(function() {
         onMovementCommand(lastMoveCommand);
       }, repeatDelay);
       return;

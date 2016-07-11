@@ -1,7 +1,26 @@
 /* Focus Controller */
-define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metric', 'core/bp/view/view', 'core/events',
-        'core/constants'],
-  function (BP_CONST, state, helper, metric, view, events, CORE_CONST) {
+define(
+  [
+    'core/bp/constants',
+    'core/bp/model/state',
+    'core/bp/helper',
+    'core/metric',
+    'core/bp/view/view',
+    'core/events',
+    'core/constants',
+    'core/native-functions'
+  ],
+  function (
+    BP_CONST,
+    state,
+    helper,
+    metric,
+    view,
+    events,
+    CORE_CONST,
+    nativeFn
+  ) {
+  'use strict';
 
   var savedDocumentFocus,
     tabbedElement,
@@ -183,7 +202,7 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
 
   function focusFirstItem() {
     if (isKeyboardMode()) {
-      setTimeout(function() {
+      nativeFn.setTimeout(function() {
         navigateInDirection(1, true);
       }, 0);
     }

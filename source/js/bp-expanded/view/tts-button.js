@@ -1,5 +1,26 @@
-define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/locale', 'core/conf/user/manager', 'core/events', 'core/platform'],
-  function (BP_CONST, helper, state, locale, conf, events, platform) {
+define(
+  [
+    'core/bp/constants',
+    'core/bp/helper',
+    'core/bp/model/state',
+    'core/locale',
+    'core/conf/user/manager',
+    'core/events',
+    'core/platform',
+    'core/native-functions'
+  ],
+  function (
+    BP_CONST,
+    helper,
+    state,
+    locale,
+    conf,
+    events,
+    platform,
+    nativeFn
+  ) {
+  'use strict';
+
   var
     waveAnimationTimer,
     waveAnimationStepNum,
@@ -101,7 +122,7 @@ define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/loca
 
     if (++ waveAnimationStepNum < opacityData[0].length) {
       // Not finished with animation, do it again
-      waveAnimationTimer = setTimeout(nextWaveAnimationStep, BP_CONST.ANIMATE_WAVES_STEP_DURATION);
+      waveAnimationTimer = nativeFn.setTimeout(nextWaveAnimationStep, BP_CONST.ANIMATE_WAVES_STEP_DURATION);
     }
     else {
       endWaveAnimation();

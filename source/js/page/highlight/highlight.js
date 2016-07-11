@@ -2,39 +2,46 @@
 // TODO Test! Especially in IE
 //TODO: Break this module down a bit, there are too many dependencies and it is huge
 /*jshint -W072 */ //Currently there are too many dependencies, so we need to tell JSHint to ignore it for now
-define([
-  '$',
-  'core/conf/user/manager',
-  'page/highlight/pick',
-  'page/highlight/traitcache',
-  'page/highlight/highlight-position',
-  'page/util/common',
-  'page/util/color',
-  'page/util/geo',
-  'page/util/element-classifier',
-  'core/platform',
-  'page/highlight/constants',
-  'core/events',
-  'core/dom-events',
-  'page/zoom/zoom',
-  'page/zoom/util/body-geometry'
-],
-  function($,
-           conf,
-           picker,
-           traitcache,
-           mhpos,
-           common,
-           colorUtil,
-           geo,
-           elementClassifier,
-           platform,
-           constants,
-           events,
-           domEvents,
-           zoomMod,
-           bodyGeo) {
+define(
+  [
+    '$',
+    'core/conf/user/manager',
+    'page/highlight/pick',
+    'page/highlight/traitcache',
+    'page/highlight/highlight-position',
+    'page/util/common',
+    'page/util/color',
+    'page/util/geo',
+    'page/util/element-classifier',
+    'core/platform',
+    'page/highlight/constants',
+    'core/events',
+    'core/dom-events',
+    'page/zoom/zoom',
+    'page/zoom/util/body-geometry',
+    'core/native-functions'
+  ],
+  function (
+    $,
+    conf,
+    picker,
+    traitcache,
+    mhpos,
+    common,
+    colorUtil,
+    geo,
+    elementClassifier,
+    platform,
+    constants,
+    events,
+    domEvents,
+    zoomMod,
+    bodyGeo,
+    nativeFn
+  ) {
 /*jshint +W072 */
+  'use strict';
+
   var
 
   isInitialized,
@@ -1339,7 +1346,7 @@ define([
       hide();
     }
 
-    pickFromMouseTimer = setTimeout(function () {
+    pickFromMouseTimer = nativeFn.setTimeout(function () {
       // In case doesn't move after fast velocity, check in a moment and update highlight if no movement
       pickFromMouseTimer = 0;
       pickFromMouse(event);

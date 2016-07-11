@@ -15,7 +15,8 @@ define(
     'page/zoom/util/body-geometry',
     'page/zoom/util/restrict-zoom',
     'page/zoom/style',
-    'page/viewport/scrollbars'
+    'page/viewport/scrollbars',
+    'core/native-functions'
   ],
   function (
     $,
@@ -32,10 +33,10 @@ define(
     bodyGeo,
     restrictZoom,
     style,
-    scrollbars
+    scrollbars,
+    nativeFn
   ) {
 /*jshint +W072 */
-
   'use strict';
 
   var
@@ -159,7 +160,7 @@ define(
       // The timer will keep resetting as long as key repeat is active. The zoom glide
       // will end shortly after the last keydown event.
       clearTimeout(edgeKeyGlideTimer);
-      edgeKeyGlideTimer = setTimeout(finishGlideIfEnough, EDGE_CONTINUE_KEY_GLIDE_WAIT_MS);
+      edgeKeyGlideTimer = nativeFn.setTimeout(finishGlideIfEnough, EDGE_CONTINUE_KEY_GLIDE_WAIT_MS);
     }
 
     function beginGlideAnimation() {
@@ -168,9 +169,8 @@ define(
         // Button/key was already released, zoom only for long enough to get minimum zoom
         var delta = MIN_ZOOM_PER_CLICK * (state.completedZoom < targetZoom ? 1 : -1);
         state.currentTargetZoom = restrictZoom.toValidRange(state.completedZoom + delta);
-        minZoomChangeTimer = setTimeout(finishZoomOperation, MIN_ZOOM_PER_CLICK * getMsPerXZoom());
+        minZoomChangeTimer = nativeFn.setTimeout(finishZoomOperation, MIN_ZOOM_PER_CLICK * getMsPerXZoom());
       }
-
 
       if (shouldUseElementDotAnimate) {
         performElementDotAnimateZoomOperation();
@@ -414,7 +414,7 @@ define(
     style.applyZoomFormFixes(state.completedZoom);
 
     // Indicate that zooming has finished -- this is used by the sitecues-zoom-form-fix stylesheet
-    setTimeout(function() {
+    nativeFn.setTimeout(function() {
       $('body').removeAttr('data-sc-zooming');
     }, 0);
 
@@ -445,7 +445,7 @@ define(
 
     // Get next forward/backward glide animations ready.
     // Doing it now helps with performance, because stylesheet will be parsed and ready for next zoom.
-    setTimeout(style.setupNextZoomStyleSheet, 0, null, shouldUseKeyFramesAnimation());
+    nativeFn.setTimeout(style.setupNextZoomStyleSheet, 0, null, shouldUseKeyFramesAnimation());
 
     style.restoreBodyTransitions();
 
@@ -496,7 +496,7 @@ define(
 
     state.zoomInput.isLongGlide = timeRemaining === 0;
 
-    minZoomChangeTimer = setTimeout(finishGlideEarly, timeRemaining);
+    minZoomChangeTimer = nativeFn.setTimeout(finishGlideEarly, timeRemaining);
   }
 
   function freezeZoom() {

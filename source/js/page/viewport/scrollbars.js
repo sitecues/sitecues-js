@@ -6,7 +6,18 @@
  *   determine the scrollbars)
  */
 
-define([ 'core/platform', 'page/viewport/viewport' ], function (platform, viewport) {
+define(
+  [
+    'core/platform',
+    'page/viewport/viewport',
+    'core/native-functions'
+  ],
+  function (
+    platform,
+    viewport,
+    nativeFn
+  ) {
+  'use strict';
 
   var mainBodyRect,
     shouldComputeMainBodyScrollbars,
@@ -104,7 +115,7 @@ define([ 'core/platform', 'page/viewport/viewport' ], function (platform, viewpo
         // MS browsers need to reset first, otherwise causes SC-3722
         setOverflow('hidden', 'hidden');
       }
-      finalizeScrollbarsTimer = setTimeout(function() {
+      finalizeScrollbarsTimer = nativeFn.setTimeout(function() {
         setOverflow(newOverflowX, newOverflowY);
       }, 0);
     }

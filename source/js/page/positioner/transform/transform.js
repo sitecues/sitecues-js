@@ -27,7 +27,8 @@ define(
     'page/zoom/style',
     'page/viewport/scrollbars',
     'page/zoom/config/config',
-    'core/events'
+    'core/events',
+    'core/native-functions'
   ],
   function (
     elementMap,
@@ -43,10 +44,10 @@ define(
     zoomStyle,
     scrollbars,
     config,
-    events
+    events,
+    nativeFn
   ) {
     /*jshint +W072 */
-
     'use strict';
 
     var
@@ -54,20 +55,20 @@ define(
       isTransformXOriginCentered,
       shouldRepaintOnZoomChange,
       transformProperty, transformOriginProperty,
-    // Fixed elements taller than the viewport
-      tallElements             = [],
-    // Fixed elements wider than the viewport
-      wideElements             = [],
-      cachedXOffset            = null,
-      cachedYOffset            = null,
-      animationFrame           = null,
-      lastRepaintZoomLevel     = null,
-      resizeTimer              = null,
-      toolbarHeight            = 0,
-      MARGIN_FROM_EDGE         = 15,
-      isTransformingOnResize   = false,
-    // If we're using the toolbar, we need to transform fixed elements immediately or they may cover the toolbar / be covered
-      isTransformingOnScroll   = false;
+      // Fixed elements taller than the viewport
+      tallElements           = [],
+      // Fixed elements wider than the viewport
+      wideElements           = [],
+      cachedXOffset          = null,
+      cachedYOffset          = null,
+      animationFrame         = null,
+      lastRepaintZoomLevel   = null,
+      resizeTimer            = null,
+      toolbarHeight          = 0,
+      MARGIN_FROM_EDGE       = 15,
+      isTransformingOnResize = false,
+      // If we're using the toolbar, we need to transform fixed elements immediately or they may cover the toolbar / be covered
+      isTransformingOnScroll = false;
 
     // This function scales and translates fixed elements as needed, e.g. if we've zoomed and the body is wider than the element
     function transformFixedElement(element, opts) {
@@ -219,9 +220,9 @@ define(
           newXTranslation -= offRight;
         }
         // If the left side of the element is off by more than we can scroll in to view
-        else if (offLeft < -currentPageXOffset) {
+        else if ((currentPageXOffset >= 0 && currentPageXOffset < -offLeft) || (currentPageXOffset < 0 && -currentPageXOffset !== offLeft)) {
           // Add the difference between the scroll distance and the offset element width to the translation
-          newXTranslation += Math.abs(offLeft) - currentPageXOffset;
+          newXTranslation -= offLeft + currentPageXOffset;
         }
         // If the left side of the element is visible in the viewport
         else if (offLeft > 0) {
@@ -320,14 +321,12 @@ define(
       // are near the bottom of the screen, and we don't shift dropdown fixed menus that are intended to be flush with the top menu
       var
         isOverlappingToolbar = top < toolbarHeight,
-        closeToTop           = viewportHeight * 0.2 > top,
         closeToBottom        = viewportHeight * 0.8 < bottom,
-        isInMiddle           = !closeToTop && !closeToBottom,
         isTallerThanViewport = elementHeight > viewportHeight;
 
       // Fixed elements that are close to the bottom or top are much more likely to be part of fixed menus that are
       // intended to be flush with the edges of the viewport
-      return isTallerThanViewport || isOverlappingToolbar || isInMiddle;
+      return isTallerThanViewport || isOverlappingToolbar || !closeToBottom;
     }
 
     function transformAllTargets(opts) {
@@ -344,14 +343,15 @@ define(
     function refreshResizeListener() {
 
       function onResize() {
-        if (resizeTimer) {
-          clearTimeout(resizeTimer);
-        }
-        resizeTimer = setTimeout(function () {
+        clearTimeout(resizeTimer);
+        resizeTimer = nativeFn.setTimeout(function () {
+          targets.forEach(cacheUnscaledTop);
+          targets.forEach(scaleTop);
           transformAllTargets({
             resetTranslation: true,
             onResize: true
           });
+          refreshScrollListener();
         }, 200);
       }
 
@@ -376,22 +376,40 @@ define(
       /*jshint validthis: false */
     }
 
+    function cacheUnscaledTop(element) {
+      // Clear the scaled top value
+      if (elementInfo.getCacheValue(element, 'unscaledTop')) {
+        element.style.top = '';
+      }
+      var unscaledTop = parseFloat(getComputedStyle(element).top);
+      elementInfo.setCacheValue(element, 'unscaledTop', unscaledTop);
+    }
+
+    function scaleTop(element) {
+      var unscaledTop = elementInfo.getCacheValue(element, 'unscaledTop');
+      var scaledTop = unscaledTop * state.fixedZoom;
+      element.style.top = scaledTop + 'px';
+    }
+
     function onTargetAdded(element) {
       element.style[transformOriginProperty] = isTransformXOriginCentered ? '50% 0' : '0 0';
       // This handler runs when a style relevant to @element's bounding rectangle has mutated
       rectCache.listenForMutatedRect(element, refreshElementTransform);
       rectCache.listenForMutatedRect(originalBody);
+      cacheUnscaledTop(element);
+      scaleTop(element);
       refreshElementTransform.call(element);
     }
 
     function onTargetRemoved(element) {
       element.style[transformProperty]       = '';
       element.style[transformOriginProperty] = '';
+      element.style.top = elementInfo.getCacheValue(element, 'unscaledTop');
       rectCache.delete(element);
       // This is the cached metadata we used for transforming the element. We need to clear it now that
       // the information is stale
       elementMap.flushField(element, [
-        'lastPageXOffset', 'lastPageYOffset', 'scale'
+        'lastPageXOffset', 'lastPageYOffset', 'scale', 'unscaledTop'
       ]);
       refreshResizeListener();
       refreshScrollListener(element);
@@ -474,7 +492,8 @@ define(
     }
 
     function onZoom() {
-      setTimeout(refresh, 0);
+      nativeFn.setTimeout(refresh, 0);
+      targets.forEach(scaleTop);
     }
 
     // Typically these are shift transforms that assume that the body is untransformed. Once we transform the body, these fixed elements will effectively

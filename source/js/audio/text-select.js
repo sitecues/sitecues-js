@@ -2,14 +2,27 @@
  * If speech is on, automatically speak newly selected regions in document.
  * Created by akhabibullina on 8/3/2015.
  */
-define(['$', 'core/events', 'audio/constant' ], function ($, events, constant) {
+define(
+  [
+    '$',
+    'core/events',
+    'audio/constant',
+    'core/native-functions'
+  ],
+  function (
+    $,
+    events,
+    constant,
+    nativeFn
+  ) {
+  'use strict';
 
   var wasOn = false;
 
   // Speaking on a delay after mouseup avoids speaking the same thing twice
   function speakSelectedTextOnDelay(event) {
     if (!isInPanel(event.target)) {
-      setTimeout(speakSelectedText, 0);
+      nativeFn.setTimeout(speakSelectedText, 0);
     }
   }
 

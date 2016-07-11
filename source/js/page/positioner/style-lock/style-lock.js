@@ -15,15 +15,16 @@ define(
     'page/positioner/style-lock/style-listener/style-listener',
     'page/positioner/constants',
     'core/constants',
-    'page/positioner/util/element-info'
+    'page/positioner/util/element-info',
+    'core/native-functions'
   ],
   function (
     styleListener,
     constants,
     coreConstants,
-    elementInfo
+    elementInfo,
+    nativeFn
   ) {
-
   'use strict';
 
   var stylesheet,
@@ -186,7 +187,7 @@ define(
 
       // We run this asynchronously because it is an expensive operation
       // and we want to allow the browser to run other events before we begin it
-      setTimeout(function () {
+      nativeFn.setTimeout(function () {
         var elements = styleListener.getElementsWithResolvedValue(declaration);
 
         function runHandler(element) {
@@ -196,7 +197,7 @@ define(
         for (var i = 0, elementCount = elements.length; i < elementCount; i++) {
           if (initial !== noop) {
             // Likewise each initial handler call is potentially expensive if we have to transplant the target
-            setTimeout(runHandler, 0, elements[i]);
+            nativeFn.setTimeout(runHandler, 0, elements[i]);
           }
           else {
             lockStyle(elements[i], property, value);

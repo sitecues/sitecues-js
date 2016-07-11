@@ -8,19 +8,27 @@
  *    }
  */
 
-define(['$',
-  'page/util/color',
-  'core/conf/site',
-  'core/conf/urls',
-  'inverter/invert-url',
-  'inverter/orig-bg-info'
-],
-  function($,
-           colorUtil,
-           site,
-           urls,
-           invertUrl,
-           origBgInfo) {
+define(
+  [
+    '$',
+    'page/util/color',
+    'core/conf/site',
+    'core/conf/urls',
+    'inverter/invert-url',
+    'inverter/orig-bg-info',
+    'core/native-functions'
+  ],
+  function (
+    $,
+    colorUtil,
+    site,
+    urls,
+    invertUrl,
+    origBgInfo,
+    nativeFn
+  ) {
+  'use strict';
+
   var REVERSIBLE_ATTR = 'data-sc-reversible',
     customSelectors = site.get('themes') || { },
     BUTTON_BONUS = 50,
@@ -464,7 +472,7 @@ define(['$',
     }
     else if (img.complete) {
       //Image is loaded and ready for processing -- after slight delay
-      setTimeout(classifyLoadedImage, 0);
+      nativeFn.setTimeout(classifyLoadedImage, 0);
     }
     else {
       // Too early to tell anything

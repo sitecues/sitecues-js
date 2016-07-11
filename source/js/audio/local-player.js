@@ -1,13 +1,15 @@
+// This module is responsible for creating audio snippets of synthetic speech,
+// natively in the browser, completely offline.
 define(
   [
-    'Promise'
+    'Promise',
+    'core/native-functions'
   ],
-  function (Promise) {
-
-    // This module is responsible for creating audio snippets of synthetic speech,
-    // natively in the browser, completely offline.
-
-    'use strict';
+  function (
+    Promise,
+    nativeFn
+  ) {
+  'use strict';
 
     var
       speechSynthesis = window.speechSynthesis,
@@ -26,7 +28,7 @@ define(
         speechSynthesis.addEventListener('voiceschanged', onVoicesChanged, true);
 
         // Don't wait forever for a voice.
-        var voicesTimeout = setTimeout(onTimeout, 3000);
+        var voicesTimeout = nativeFn.setTimeout(onTimeout, 3000);
 
         // Handle timeouts so we don't wait forever in any case where
         // the voiceschanged event never fires.

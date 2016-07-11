@@ -2,7 +2,8 @@
  * This is the box that appears when the user asks to read the highlighted text in a page.
  * Documentation: https://equinox.atlassian.net/wiki/display/EN/HLB3
  */
-define([
+define(
+  [
     '$',
     'hlb/event-handlers',
     'hlb/positioning',
@@ -14,8 +15,9 @@ define([
     'page/util/geo',
     'core/metric',
     'hlb/constants',
-    'core/events'],
-  function(
+    'core/events'
+  ],
+  function (
     $,
     eventHandlers,
     hlbPositioning,
@@ -27,7 +29,9 @@ define([
     geo,
     metric,
     constants,
-    events) {
+    events
+  ) {
+  'use strict';
 
   /////////////////////////
   // PRIVATE VARIABLES
@@ -360,12 +364,12 @@ define([
       'transitionProperty' : hlbStyling.transitionProperty
     };
 
-    // setTimeout MIGHT be necessary for the browser to complete the rendering and positioning
+    // .setTimeout MIGHT be necessary for the browser to complete the rendering and positioning
     // of the HLB.  Before we scale, it absolutely must be positioned correctly.
     // Note: Interestingly enough, this timeout is unnecessary if we comment out the
     // background dimmer in transitionInHLB(), because the operation took long enough
     // for the browser to update/render the DOM.  This is here for safety (until proven otherwise).
-    // If we use a setTimeout, we have to solve the problem of functions being added to the stack before
+    // If we use a .setTimeout, we have to solve the problem of functions being added to the stack before
     // the timeout completes...its a pain.
     hlbAnimation.transitionInHLB(isRetargeting, viewData);
   }
@@ -431,10 +435,12 @@ define([
 
     // Copies form values from the foundation to the HLB
     // Need to do this on a timeout in order to enable Safari input fix hack
-    // Commenting out setTimeout fixes problem on TexasAT
-    // setTimeout(function() {
+    // Commenting out .setTimeout fixes problem on TexasAT
+    // .setTimeout(function() {
     mapForm($foundation, $hlb);
     // }, 0);
+
+    hlbStyling.filter.bind(mapForm);
 
     // Clone styles of HLB and children of HLB, so layout is preserved
     hlbStyling.initializeStyles($foundation, $hlb, initialHLBRect);

@@ -2,7 +2,15 @@
  * Allow listening to changes in browser location that occur via history APIc
  */
 
-define([], function () {
+define(
+  [
+    'core/native-functions'
+  ],
+  function (
+    nativeFn
+  ) {
+  'use strict';
+
   var listeners,
     origPath;
 
@@ -30,7 +38,7 @@ define([], function () {
   }
 
   function onClick() {
-    setTimeout(triggerIfPathChanged, 0);
+    nativeFn.setTimeout(triggerIfPathChanged, 0);
   }
 
   function on(fn) {

@@ -4,9 +4,28 @@
  *  keyboard commands.
  */
 
-define(['core/bp/constants', 'core/bp/helper', 'bp-expanded/view/transform-util', 'bp-expanded/view/transform-animate',
-        'bp-expanded/view/transform-hovers', 'core/bp/model/state', 'core/events'],
-  function (BP_CONST, helper, transformUtil, animate, hovers, state, events) {
+define(
+  [
+    'core/bp/constants',
+    'core/bp/helper',
+    'bp-expanded/view/transform-util',
+    'bp-expanded/view/transform-animate',
+    'bp-expanded/view/transform-hovers',
+    'core/bp/model/state',
+    'core/events',
+    'core/native-functions'
+  ],
+  function (
+    BP_CONST,
+    helper,
+    transformUtil,
+    animate,
+    hovers,
+    state,
+    events,
+    nativeFn
+  ) {
+  'use strict';
 
   var BUTTON_ENTER_ANIMATION_DURATION = 700, // Milliseconds
       NO_INPUT_TIMEOUT                = 7000,
@@ -139,7 +158,7 @@ define(['core/bp/constants', 'core/bp/helper', 'bp-expanded/view/transform-util'
 
     // After NO_INPUT_TIMEOUT, we will be able to determine if the user has
     // pressed their mouse button.  If they have not, show the additional button.
-    userInputTimeoutId = setTimeout(showButtonIfNoUserInput, NO_INPUT_TIMEOUT);
+    userInputTimeoutId = nativeFn.setTimeout(showButtonIfNoUserInput, NO_INPUT_TIMEOUT);
   }
 
   function init() {

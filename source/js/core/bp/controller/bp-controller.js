@@ -1,21 +1,27 @@
 /*
 BP Controller
  */
-define([
-  'core/bp/constants',
-  'core/bp/model/state',
-  'core/bp/helper',
-  'core/metric',
-  'core/conf/user/manager',
-  'core/bp/view/view',
-  'core/events'],
-  function (BP_CONST,
-            state,
-            helper,
-            metric,
-            conf,
-            view,
-            events) {
+define(
+  [
+    'core/bp/constants',
+    'core/bp/model/state',
+    'core/bp/helper',
+    'core/metric',
+    'core/conf/user/manager',
+    'core/bp/view/view',
+    'core/events',
+    'core/native-functions'
+  ],
+  function (
+    BP_CONST,
+    state,
+    helper,
+    metric,
+    conf,
+    view,
+    events,
+    nativeFn
+  ) {
 
   // How long we wait before expanding BP
   var hoverDelayTimer,
@@ -89,7 +95,7 @@ define([
 
     // Use the event
     if (isInToolbar || isInBadge) {
-      hoverDelayTimer = setTimeout(changeModeToPanel,
+      hoverDelayTimer = nativeFn.setTimeout(changeModeToPanel,
         isInBadge ? BP_CONST.HOVER_DELAY_BADGE : BP_CONST.HOVER_DELAY_TOOLBAR);
     }
   }
@@ -168,7 +174,7 @@ define([
         badgeElem.focus();
 
         // Opened with click means opened with keyboard in screen reader
-        setTimeout(function() {
+        nativeFn.setTimeout(function() {
           changeModeToPanel(true);
           // Set screen reader flag for the life of this page view
           state.set('isOpenedWithScreenReader', true);

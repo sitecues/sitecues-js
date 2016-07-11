@@ -3,13 +3,17 @@ define(
   [
     'page/positioner/constants',
     'page/positioner/style-lock/style-listener/style-listener',
-    'page/positioner/util/array-utility'
+    'page/positioner/util/array-utility',
+    'core/native-functions'
   ],
   function (
     constants,
     styleListener,
-    arrayUtil
+    arrayUtil,
+    nativeFn
   ) {
+  'use strict';
+
   var docElem, fixedElements,
     doDisable        = false,
     POINTER_SHEET_ID = 'sitecues-js-disable-pointer-events',
@@ -42,6 +46,7 @@ define(
   }
 
   function add() {
+    /*jshint validthis: true */
     var elements = Array.isArray(this) ? this : [this];
     elements.forEach(function (element) {
       fixedElements.add(element);
@@ -49,13 +54,16 @@ define(
         disableMouseEventsForElement(element);
       }
     });
+    /*jshint validthis: false */
   }
 
   function remove() {
+    /*jshint validthis: true */
     fixedElements.delete(this);
     if (doDisable) {
       enableMouseEventsForElement(this);
     }
+    /*jshint validthis: false */
   }
 
   function insertStylesheet() {
@@ -77,7 +85,7 @@ define(
     styleListener.init(function () {
       styleListener.registerToResolvedValueHandler(declaration, add);
       styleListener.registerFromResolvedValueHandler(declaration, remove);
-      setTimeout(function () {
+      nativeFn.setTimeout(function () {
         add.call(styleListener.getElementsWithResolvedValue(declaration));
       }, 0);
     });
