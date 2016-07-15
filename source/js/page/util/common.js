@@ -3,6 +3,22 @@
  */
 define(['page/util/element-classifier', 'core/platform'], function (elemClassifier, platform) {
 
+  function isTransparentColor(color) {
+    // NOTE: Doesn't check HSLA colors for transparency
+    return color === 'transparent' || color.match(/^rgba.*0\)$/);
+  }
+
+  /**
+   * @private
+   */
+  function isNonEmptyTextNode(node) {
+    return node.nodeType === Node.TEXT_NODE && !isWhitespaceOrPunct(node);
+  }
+
+  function hasBorder(style) {
+    return parseFloat(style.borderRightWidth) || parseFloat(style.borderBottomWidth);
+  }
+
   /**
    * Checks if the text in a text node given has any characters that appear as text.
    * The picker uses this to determine if a text node has content worth highlighting --
@@ -31,7 +47,7 @@ define(['page/util/element-classifier', 'core/platform'], function (elemClassifi
       hasRaisedZIndex(style, parentStyle) ||
       hasOwnBackground(element, style, parentStyle);
 
-    return !!isVisRegion;
+    return Boolean(isVisRegion);
   }
 
   function hasRaisedZIndex(style, parentStyle) {
@@ -125,8 +141,8 @@ define(['page/util/element-classifier', 'core/platform'], function (elemClassifi
     var frag = document.createDocumentFragment();
     var child = temp.firstChild;
     while (child) {
-            frag.appendChild(child);
-            child = child.nextSibling;
+      frag.appendChild(child);
+      child = child.nextSibling;
     }
     return frag;
   }
@@ -135,8 +151,8 @@ define(['page/util/element-classifier', 'core/platform'], function (elemClassifi
    * A version of elementFromPoint() that restricts the point to the viewport
    */
   function elementFromPoint(x, y) {
-    var maxX = window.innerWidth - 1,
-      maxY = window.innerHeight - 1;
+    var maxX = innerWidth - 1,
+      maxY = innerHeight - 1;
 
     x = Math.min(maxX, Math.max(0, x));
     y = Math.min(maxY, Math.max(0, y));
@@ -151,34 +167,22 @@ define(['page/util/element-classifier', 'core/platform'], function (elemClassifi
     return el.clientHeight < el.scrollHeight;
   }
 
-  var MONOSPACE_BULLET_TYPES = { circle: 1, square: 1, disc: 1, none: 1 };
   function getBulletWidth(listElement, style) {
-    var bulletType = style.listStyleType,
-      ems = 2.5;  // Browsers seem use max of 2.5 em for bullet width -- use as a default
+
+    var MONOSPACE_BULLET_TYPES = { circle: 1, square: 1, disc: 1, none: 1 },
+      bulletType = style.listStyleType,
+      ems = 2.5;  // Browsers seem to use max of 2.5 em for bullet width -- use as a default
+
     if (MONOSPACE_BULLET_TYPES.hasOwnProperty(bulletType)) {
       ems = 1.6; // Simple bullet
-    } else if (bulletType === 'decimal') {
+    }
+    else if (bulletType === 'decimal') {
       var start = parseInt(listElement.getAttribute('start'), 10),
         end = (start || 1) + listElement.childElementCount - 1;
       ems = (0.9 + 0.5 * end.toString().length);
     }
+
     return getEmsToPx(style.fontSize, ems);
-  }
-
-  /**
-   * @private
-   */
-  function isNonEmptyTextNode(node) {
-    return node.nodeType === 3 /* Text node */ && !isWhitespaceOrPunct(node);
-  }
-
-  function hasBorder(style) {
-    return parseFloat(style.borderRightWidth) || parseFloat(style.borderBottomWidth);
-  }
-
-    //Doesn't check HSLA colors for transparency
-  function isTransparentColor(color) {
-    return color === 'transparent' || color.match(/^rgba.*0\)$/);
   }
 
   function getEmsToPx(fontSize, ems) {
@@ -203,7 +207,6 @@ define(['page/util/element-classifier', 'core/platform'], function (elemClassifi
   }
 
   return {
-    getEmsToPx: getEmsToPx,
     isWhitespaceOrPunct: isWhitespaceOrPunct,
     isVisualRegion: isVisualRegion,
     hasRaisedZIndex: hasRaisedZIndex,
@@ -216,7 +219,7 @@ define(['page/util/element-classifier', 'core/platform'], function (elemClassifi
     elementFromPoint: elementFromPoint,
     hasVertScroll: hasVertScroll,
     getBulletWidth: getBulletWidth,
+    getEmsToPx: getEmsToPx,
     getComputedScale: getComputedScale
   };
-
 });
