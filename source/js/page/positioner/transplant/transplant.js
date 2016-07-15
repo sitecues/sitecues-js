@@ -9,7 +9,8 @@ define(
     'core/bp/helper',
     'page/positioner/util/array-utility',
     'page/positioner/util/element-info',
-    'page/positioner/transplant/graft'
+    'page/positioner/transplant/graft',
+    'page/positioner/transplant/anchors'
   ],
   function (
     $,
@@ -19,15 +20,13 @@ define(
     helper,
     arrayUtil,
     elementInfo,
-    graft
+    graft,
+    anchors
   ) {
 
   'use strict';
 
   var originalBody, elementQuerySelectorAll, documentQuerySelectorAll, getElementsByClassName,
-    transplantAnchors      = [],
-    addAnchorHandlers      = [],
-    removeAnchorHandlers   = [],
     TRANSPLANT_STATE       = constants.TRANSPLANT_STATE,
     ORIGINAL_STYLESHEET_ID = 'sitecues-js-originals',
     ROOT_ATTR              = constants.ROOT_ATTR,
@@ -68,59 +67,6 @@ define(
     Document.prototype.querySelectorAll       = scDocumentQuerySelectorAll;
     Element.prototype.querySelectorAll        = scElementQuerySelectorAll;
     Document.prototype.getElementsByClassName = scGetElementsByClassName;
-  }
-  
-  // Uncommonly, a fixed element will not have a top/bottom vertical position style applied. In this case
-  // the element is rendered in the normal flow of the document. When we transplant the element
-  // into the auxiliary body, we need to recreate the normal flow by explicitly specifying its intended vertical
-  // position
-  function fixVerticalPosition(element) {
-    var
-      inlineTransform = element.style.transform,
-      inlinePosition = element.style.position;
-
-    element.style.transform = '';
-
-    var rect = helper.getRect(element);
-
-    element.style.position = 'static';
-
-    var
-      style  = getComputedStyle(element),
-      top    = parseFloat(style.top),
-      bottom = parseFloat(style.bottom);
-
-    // If there isn't a vertical position specified, we need to explicitly specify the used top value so that the
-    // intended position is maintained when we transplant the fixed element
-    if (Number.isNaN(top) && Number.isNaN(bottom)) {
-      var
-        marginTop         = parseFloat(style.marginTop),
-        bodyStyle         = getComputedStyle(originalBody),
-        bodyHeight        = parseFloat(bodyStyle.height),
-        isBodyTransformed = bodyStyle.transform !== 'none',
-        usedTop           = isBodyTransformed ? rect.top - helper.getRect(originalBody).top : rect.top;
-
-      if (!Number.isNaN(marginTop)) {
-        var isPercent = style.marginTop.indexOf('%') >= 0;
-        // If the original body has been transformed, the fixed element's containing block is the body
-        // rather than the initial container (the viewport). In the case where the specified margin top
-        // is a percentage value, we need to consider the element's current containing block
-        if (isPercent && isBodyTransformed) {
-          marginTop = (marginTop / 100) * bodyHeight;
-        }
-        else if (isPercent) {
-          marginTop = (marginTop / 100) * window.innerHeight;
-        }
-        usedTop -= marginTop;
-      }
-      //// we need to account for the distance we've scrolled when the fixed element
-      //// is positioned relative to the body instead of the viewport
-      //topOffset = isBodyTransformed ? usedTop + window.pageYOffset : usedTop;
-
-      element.style.top = usedTop;
-    }
-    element.style.transform = inlineTransform;
-    element.style.position  = inlinePosition;
   }
 
   // Returns falsey if there isn't a root in the element's ancestor chain
@@ -221,16 +167,6 @@ define(
       return results;
     }
   }
-  
-  function prepareCandidate(element, opts) {
-    // If the element has been previously transplanted, we've already checked its vertical positioning
-    // and applied a top value if necessary
-    if (!elementInfo.hasBeenTransplanted()) {
-      fixVerticalPosition(element);
-    }
-
-    opts.didPrepareTransplant = true;
-  }
 
   // If an element hasn't been cloned, we need to clone the rest of its heredity structure (which at a minimum is its own generation), insert the
   // root element into the node structure, and graft the structure to the element's closest clone ancestor
@@ -327,7 +263,7 @@ define(
           parent: insertionGroup.nearestAncestorClone
         });
       }
-      addTransplantAnchor(subroot);
+      anchors.add(subroot);
       elementMap.setField(subroot, 'wasReplanted', true);
       elementInfo.setRoot(subroot, null);
       insertPlaceholder(subroot, subrootParent, subrootSibling);
@@ -360,7 +296,7 @@ define(
     elementInfo.addSubroots(superRoot, subroots);
   }
 
-  // Identifying a nested element as a transplant root doesn't require us to move the element's position in the DOM, we just need to set the
+  // Identifying a nested element as a transplant root doesn't require us to move the element's position in the DOM, we just need to update the
   // cached transplant information
   function addNestedRoot(element) {
     var
@@ -410,7 +346,7 @@ define(
       // heredity body intact so that we can rely on its structure if we have to replant the anchor root
       graft.implantNodeStructure(cloneRoot, cloneParent, cloneSibling);
 
-      removeTransplantAnchor(element);
+      anchors.remove(element);
       elementInfo.addSubroots(element, transplantedRoot);
       elementInfo.setRoot(transplantedRoot, element);
       elementMap.setField(transplantedRoot, 'wasReplanted', true);
@@ -475,10 +411,10 @@ define(
       if (!elementQuerySelectorAll) {
         rerouteDOMQueries();
       }
-      addTransplantAnchor(element);
+      anchors.add(element);
     }
     else if (flags.wasTransplantAnchor) {
-      removeTransplantAnchor(element);
+      anchors.remove(element);
     }
 
     if (flags.isTransplantRoot) {
@@ -486,7 +422,7 @@ define(
       elementInfo.isTransplantRoot(element, true);
     }
     else if (flags.wasTransplantRoot) {
-      element.setAttribute(ROOT_ATTR, '');
+      element.removeAttribute(ROOT_ATTR);
       elementInfo.isTransplantRoot(element, false);
     }
   }
@@ -502,35 +438,6 @@ define(
       .insertBefore(document.head.firstChild);
   }
 
-  function registerAddAnchorHandler(fn) {
-    addAnchorHandlers.push(fn);
-  }
-
-  function registerRemoveAnchorHandler(fn) {
-    removeAnchorHandlers.push(fn);
-  }
-
-  function addTransplantAnchor(element) {
-    transplantAnchors.push(element);
-    addAnchorHandlers.forEach(function (fn) {
-      fn.call(element);
-    });
-  }
-
-  function removeTransplantAnchor(element) {
-    var index = transplantAnchors.indexOf(element);
-    if (index >= 0) {
-      transplantAnchors.splice(index, 1);
-      removeAnchorHandlers.forEach(function (fn) {
-        fn.call(element);
-      });
-    }
-  }
-  
-  function getTransplantAnchors() {
-    return transplantAnchors;
-  }
-
   function init() {
     originalBody = document.body;
     insertStylesheet();
@@ -540,12 +447,8 @@ define(
 
   return {
     evaluateCandidate: evaluateCandidate,
-    prepareCandidate: prepareCandidate,
     performOperation: performOperation,
     postOperation: postOperation,
-    getAnchors: getTransplantAnchors,
-    registerAddAnchorHandler: registerAddAnchorHandler,
-    registerRemoveAnchorHandler: registerRemoveAnchorHandler,
     init: init
   };
 });

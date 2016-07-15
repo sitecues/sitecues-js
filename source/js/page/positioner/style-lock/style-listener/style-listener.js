@@ -14,11 +14,11 @@ define(
     'page/positioner/style-lock/style-listener/selectors',
     'page/positioner/util/array-utility',
     'page/positioner/util/element-info',
-    'page/positioner/transplant/transplant',
     'page/positioner/util/element-map',
     'page/positioner/constants',
     'core/constants',
-    'core/native-functions'
+    'core/native-functions',
+    'page/positioner/transplant/anchors'
   ],
   function (
     queryManager,
@@ -26,11 +26,11 @@ define(
     selectors,
     arrayUtil,
     elementInfo,
-    transplant,
     elementMap,
     constants,
     coreConstants,
-    nativeFn
+    nativeFn,
+    anchors
   ) {
   'use strict';
 
@@ -249,7 +249,7 @@ define(
   }
 
   function observeOriginalElements() {
-    transplant.getAnchors().forEach(function (element) {
+    anchors.forEach(function (element) {
       domObserver.observe(element, observerOptions);
     });
 
@@ -378,7 +378,7 @@ define(
     }
 
     var
-      transplantAnchors = transplant.getAnchors(),
+      transplantAnchors = anchors.get(),
       allBodyElements   = Array.prototype.slice.call(document.body.getElementsByTagName('*'), 0);
 
     resolvedElementsMap[declarationKey] = [];
@@ -431,9 +431,8 @@ define(
           queryManager.init(evaluateResolvedValue);
           executeCallbacks();
         });
-
-        transplant.registerAddAnchorHandler(onNewTransplantAnchor);
-        transplant.registerRemoveAnchorHandler(onRemovedTransplantAnchor);
+        anchors.registerNewAnchorHandler(onNewTransplantAnchor);
+        anchors.registerRemovedAnchorHandler(onRemovedTransplantAnchor);
         break;
 
       case READY_STATE.INITIALIZING:

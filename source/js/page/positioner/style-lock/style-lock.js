@@ -226,19 +226,36 @@ define(
   }
   
   function unlockStyle(element, property) {
-    var lockAttribute = LOCK_ATTR + property;
 
-    if (element && element.nodeType === Node.ELEMENT_NODE) {
-      element.removeAttribute(lockAttribute);
+    function removeLock(element, attribute) {
+      element.removeAttribute(attribute);
+    }
+
+    // Remove all of the style locks for @element
+    // if @property is undefined
+    if (!property) {
+      var attributes = Object.keys(lockSelectorMap);
+      attributes.forEach(function (attribute) {
+        removeLock(element, attribute);
+      });
       return;
     }
 
+    var lockAttribute = LOCK_ATTR + property;
+
+    // If @element and @property are defined, remove the property lock from @element
+    if (element && element.nodeType === Node.ELEMENT_NODE) {
+      removeLock(element, lockAttribute);
+      return;
+    }
+
+    //If @element is undefined, unlock all elements with @property locks
     var
       propertyLockSelector = '[' + lockAttribute + ']',
       elements             = document.querySelectorAll(propertyLockSelector);
 
     for (var i = 0, elementCount = elements.length; i < elementCount; i++) {
-      elements[i].removeAttribute(lockAttribute);
+      removeLock(elements[i], lockAttribute);
     }
   }
 

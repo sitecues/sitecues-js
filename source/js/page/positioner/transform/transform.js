@@ -76,7 +76,7 @@ define(
       function getRectLeft(left, width, scale) {
         // Since transform origin 50 0 splits the scaled width evenly between the left and right sides, we need to subtract
         // half of the difference between the scaled and unscaled width from the left side
-        return isTransformXOriginCentered ? left - width * (scale - 1) / 2 : left;
+        return (isTransformXOriginCentered ? left - width * (scale - 1) / 2 : left);
       }
 
       var
@@ -119,9 +119,9 @@ define(
 
       // Calculate the dimensions of the fixed element after we apply the next scale transform
       var rect = {
-        width  : unscaledRect.width * newScale,
-        height : unscaledRect.height * newScale,
-        top    : unscaledRect.top
+        width  : (unscaledRect.width * newScale),
+        height : (unscaledRect.height * newScale),
+        top    : (unscaledRect.top)
       };
       rect.left   = getRectLeft(unscaledRect.left, unscaledRect.width, newScale);
       rect.bottom = rect.top  + rect.height;
@@ -184,8 +184,7 @@ define(
     function calculateXTranslation(args) {
       var
         currentXTranslation = args.currentXTranslation,
-        elementWidth        = args.dimensions.width,
-        right               = args.dimensions.right,
+        elementWidth        = Math.round(args.dimensions.width),
         left                = args.dimensions.left,
         viewportWidth       = args.viewportWidth,
         currentPageXOffset  = args.currentPageXOffset,
@@ -205,7 +204,7 @@ define(
       scrollWidth -= intendedOff;
 
       // If the fixed element is wider than the viewport
-      if (elementWidth > viewportWidth) {
+      if (elementWidth >= viewportWidth) {
         var
           scrollLimit     = scrollWidth - viewportWidth,
           remainingScroll = scrollLimit - currentPageXOffset;
@@ -232,7 +231,11 @@ define(
       }
       // If the fixed element's right edge is outside of the viewport, we need to shift it back inside the viewport
       else if (offRight > 0) {
-        newXTranslation = (-right + currentXTranslation + viewportWidth - MARGIN_FROM_EDGE);
+        newXTranslation = -offRight + currentXTranslation - MARGIN_FROM_EDGE;
+      }
+      // If the fixed element's left edge is outside of the viewport, shift it back in
+      else if (offLeft < 0) {
+        newXTranslation = -offLeft + currentXTranslation + MARGIN_FROM_EDGE;
       }
 
       return newXTranslation;
@@ -308,9 +311,9 @@ define(
       return newYTranslation;
     }
 
-    function getRestrictedScale(dimensions, onResize) {
+    function getRestrictedScale(dimensions, isOnResize) {
       var
-        scrollWidth  = bodyGeo.getScrollWidth(onResize),
+        scrollWidth  = bodyGeo.getScrollWidth(isOnResize),
         elementWidth = dimensions.width;
       return Math.min(state.fixedZoom, scrollWidth / elementWidth);
     }
@@ -321,12 +324,13 @@ define(
       // are near the bottom of the screen, and we don't shift dropdown fixed menus that are intended to be flush with the top menu
       var
         isOverlappingToolbar = top < toolbarHeight,
+        isFlushWithToolbar   = top === toolbarHeight,
         closeToBottom        = viewportHeight * 0.8 < bottom,
         isTallerThanViewport = elementHeight > viewportHeight;
 
       // Fixed elements that are close to the bottom or top are much more likely to be part of fixed menus that are
       // intended to be flush with the edges of the viewport
-      return isTallerThanViewport || isOverlappingToolbar || !closeToBottom;
+      return isTallerThanViewport || isOverlappingToolbar || (!isFlushWithToolbar && !closeToBottom);
     }
 
     function transformAllTargets(opts) {
@@ -345,7 +349,6 @@ define(
       function onResize() {
         clearTimeout(resizeTimer);
         resizeTimer = nativeFn.setTimeout(function () {
-          targets.forEach(cacheUnscaledTop);
           targets.forEach(scaleTop);
           transformAllTargets({
             resetTranslation: true,
@@ -366,45 +369,77 @@ define(
       }
     }
 
-    function refreshElementTransform() {
-      /*jshint validthis: true */
-      transformFixedElement(this, {
+    function refreshElementTransform(element) {
+      transformFixedElement(element, {
         resetTranslation: true
       });
-      refreshScrollListener(this);
+      refreshScrollListener(element);
       refreshResizeListener();
-      /*jshint validthis: false */
-    }
-
-    function cacheUnscaledTop(element) {
-      // Clear the scaled top value
-      if (elementInfo.getCacheValue(element, 'unscaledTop')) {
-        element.style.top = '';
-      }
-      var unscaledTop = parseFloat(getComputedStyle(element).top);
-      elementInfo.setCacheValue(element, 'unscaledTop', unscaledTop);
     }
 
     function scaleTop(element) {
-      var unscaledTop = elementInfo.getCacheValue(element, 'unscaledTop');
-      var scaledTop = unscaledTop * state.fixedZoom;
-      element.style.top = scaledTop + 'px';
+      var
+        currentInlinePosition = element.style.position,
+        currentInlineTop      = element.style.top,
+        cachedInitialTop      = elementMap.getField(element, 'initialTop'),
+        cachedAppliedTop      = elementMap.getField(element, 'appliedTop');
+
+      if (currentInlineTop !== cachedAppliedTop) {
+        cachedInitialTop = currentInlineTop;
+      }
+
+      element.style.top      = cachedInitialTop;
+      // Absolute elements return the used top value if there isn't one specified. Setting the position to static ensures
+      // that only specified top values are returned with the computed style
+      element.style.position = 'static';
+
+      var
+        specifiedTop   = getComputedStyle(element).top,
+        specifiedValue = parseFloat(specifiedTop);
+
+      if (!Number.isNaN(specifiedValue) && specifiedTop.indexOf('px') >= 0) {
+        element.style.top = (specifiedValue * state.fixedZoom) + 'px';
+      }
+
+      element.style.position = currentInlinePosition;
+      cachedAppliedTop       = element.style.top;
+      elementMap.setField(element, 'initialTop', cachedInitialTop);
+      elementMap.setField(element, 'appliedTop', cachedAppliedTop);
+    }
+
+    function restoreTop(element) {
+      var
+        currentInlineTop = element.style.top,
+        cachedInitialTop = elementMap.getField(element, 'initialTop'),
+        cachedAppliedTop = elementMap.getField(element, 'appliedTop');
+
+      // The inline top value has mutated from what we've set, so keep the current value
+      if (currentInlineTop !== cachedAppliedTop) {
+        return;
+      }
+
+      element.style.top = cachedInitialTop;
     }
 
     function onTargetAdded(element) {
       element.style[transformOriginProperty] = isTransformXOriginCentered ? '50% 0' : '0 0';
       // This handler runs when a style relevant to @element's bounding rectangle has mutated
-      rectCache.listenForMutatedRect(element, refreshElementTransform);
+      rectCache.listenForMutatedRect(element, function () {
+        /*jshint validthis: true */
+        if (targets.has(this)) {
+          scaleTop(element);
+          refreshElementTransform(this);
+        }
+        /*jshint validthis: false */
+      });
       rectCache.listenForMutatedRect(originalBody);
-      cacheUnscaledTop(element);
-      scaleTop(element);
-      refreshElementTransform.call(element);
+      refreshElementTransform(element);
     }
 
     function onTargetRemoved(element) {
       element.style[transformProperty]       = '';
       element.style[transformOriginProperty] = '';
-      element.style.top = elementInfo.getCacheValue(element, 'unscaledTop');
+      restoreTop(element);
       rectCache.delete(element);
       // This is the cached metadata we used for transforming the element. We need to clear it now that
       // the information is stale
@@ -434,6 +469,7 @@ define(
         doHorizontalTransform = Boolean(wideElements.length);
       cachedXOffset = currentOffsets.x;
       cachedYOffset = currentOffsets.y;
+
       if ((xDelta && doHorizontalTransform) || (yDelta && doVerticalTransform)) {
         transformOnScroll();
       }
@@ -484,6 +520,7 @@ define(
         addOrRemoveFn;
 
       scrollbars.forceScrollbars(doTransformOnHorizontalScroll, doTransformOnVerticalScroll);
+
       if (doTransformOnScroll !== isTransformingOnScroll) {
         addOrRemoveFn = doTransformOnScroll ? domEvents.on : domEvents.off;
         addOrRemoveFn(window, 'scroll', onScroll, { capture: false });
@@ -492,8 +529,10 @@ define(
     }
 
     function onZoom() {
-      nativeFn.setTimeout(refresh, 0);
-      targets.forEach(scaleTop);
+      nativeFn.setTimeout(function () {
+        targets.forEach(scaleTop);
+        refresh();
+      }, 0);
     }
 
     // Typically these are shift transforms that assume that the body is untransformed. Once we transform the body, these fixed elements will effectively

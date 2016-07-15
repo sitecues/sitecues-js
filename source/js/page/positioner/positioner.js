@@ -147,7 +147,6 @@ define(
             transplantState === TRANSPLANT_STATE.MIXED;
 
         if (!needsTransplant || (needsTransplant && isTransplanting)) {
-          transplant.prepareCandidate(this, results);
           transplant.performOperation(this, results);
           transformElement(this, flags);
           transplant.postOperation(this, results);
@@ -207,7 +206,7 @@ define(
             transplantState === TRANSPLANT_STATE.MIXED;
 
         if (!needsTransplant || (needsTransplant && isTransplanting)) {
-          transplant.prepareCandidate(this, results);
+          results.doPerformTransplant = true;
           return results;
         }
         else {
@@ -231,10 +230,10 @@ define(
   function fromPositionAfterHandler(opts) {
     /*jshint validthis: true */
     var
-      flags                = opts.flags,
-      didPrepareTransplant = opts.didPrepareTransplant;
+      flags               = opts.flags,
+      doPerformTransplant = opts.doPerformTransplant;
 
-    if (didPrepareTransplant) {
+    if (doPerformTransplant) {
       transplant.performOperation(this, opts);
       transformElement(this, flags);
       transplant.postOperation(this, opts);

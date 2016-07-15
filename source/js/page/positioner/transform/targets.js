@@ -20,17 +20,21 @@ define(
     fixedTargets;
 
   function removeTarget(element) {
-    if (fixedTargets.has(element)) {
+    if (hasElement(element)) {
       fixedTargets.delete(element);
       removeHandler(element);
     }
   }
 
   function addTarget(element) {
-    if (!fixedTargets.has(element)) {
+    if (!hasElement(element)) {
       fixedTargets.add(element);
       addHandler(element);
     }
+  }
+
+  function hasElement(element) {
+    return fixedTargets.has(element);
   }
 
   function getTargets() {
@@ -64,6 +68,7 @@ define(
     init                  : init,
     add                   : addTarget,
     get                   : getTargets,
+    has                   : hasElement,
     forEach               : forEach,
     remove                : removeTarget,
     registerAddHandler    : registerAddHandler,

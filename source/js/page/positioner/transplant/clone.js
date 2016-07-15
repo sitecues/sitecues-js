@@ -11,12 +11,18 @@ define(
   [
     '$',
     'page/positioner/util/element-map',
-    'page/positioner/util/element-info'
+    'page/positioner/util/element-info',
+    'page/positioner/style-lock/style-lock',
+    'page/positioner/constants',
+    'page/viewport/viewport'
   ],
   function (
     $,
     elementMap,
-    elementInfo
+    elementInfo,
+    styleLock,
+    constants,
+    viewport
   ) {
 
   'use strict';
@@ -46,7 +52,7 @@ define(
       // Insert @target into its clone's position in the heredity structure
       wordyOpts.doInsertTargetIntoCloneTree = opts.insertTargetIntoCloneTree;
       // Return a reference to the nearest ancestor clone of the target
-      // That's probably where we want to insert our clone tree
+      // That's probably where we want to insert the heredity tree
       // We save a little work with this option, because we already need to find it when cloning heredityStructure from the body
       wordyOpts.doGetNearestAncestorClone   = opts.getNearestAncestorClone;
 
@@ -201,6 +207,11 @@ define(
       $sitecuesCloneSet.attr('id', '').attr('class', '');
     }
 
+    // We don't want clone elements to be visible
+    clone.removeAttribute(constants.ROOT_ATTR);
+    // Remove all the style-locks from the clone element
+    styleLock.unlockStyle(clone);
+
     elementMap.setField(element, traitFields, traitValues);
     elementMap.setField(clone, ['isClone', 'complement'], [true, element]);
     return clone;
@@ -214,10 +225,15 @@ define(
   function getAuxiliaryBody() {
     if (!auxiliaryBody) {
       auxiliaryBody = cloneElement(originalBody);
+      // Removes position lock from clone
+      styleLock.unlockStyle(auxiliaryBody);
       auxiliaryBody.style.visibility    = 'hidden';
       auxiliaryBody.style.transform     = 'none';
       auxiliaryBody.style.pointerEvents = '';
-      auxiliaryBody.style.zIndex        = '99999999';
+      auxiliaryBody.style.position      = 'absolute';
+      auxiliaryBody.style.top           = 0;
+      auxiliaryBody.style.height        = viewport.getInnerHeight();
+      auxiliaryBody.style.width         = viewport.getInnerWidth();
       docElem.appendChild(auxiliaryBody);
     }
     return auxiliaryBody;
