@@ -312,7 +312,7 @@ define(
     addHandlerToMap(handler, handlerKey);
   }
 
-  // Runs the passed handler when @element's resolved @property value has changed
+  // Runs the passed handler when @element's resolved style @property value has changed
   function registerPropertyMutationHandler(element, declarationOrProperty, handler) {
     var
       declaration        = typeof declarationOrProperty === 'object' ? declarationOrProperty : { property: declarationOrProperty },
@@ -321,7 +321,7 @@ define(
       isPropertyObserved = observedProperties.indexOf(property) !== -1,
       handlers           = elementPropertyHandlerMap.get(element) || {};
 
-    // If we've already attached handlers to run when this element's resolved property mutates,
+    // If we've already attached handlers to run when this element's resolved property value mutates,
     // we know that we're already listening for relevant document mutations
     if (handlers[property]) {
       handlers[property].push(handler);

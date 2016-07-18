@@ -31,7 +31,8 @@ define(
     ROOT_SELECTOR          = constants.ROOT_SELECTOR;
 
   // When we transplant elements into the auxiliary body, we need to re-direct queries in the original body to include
-  // the original element's new position in the DOM tree
+  // the original element's new position in the DOM tree, and to exclude clone elements in the heredity tree
+  // TODO: If we ever drop IE11, use a Proxy intercept to accomplish this
   function rerouteDOMQueries() {
     getElementsByClassName   = Document.prototype.getElementsByClassName;
     elementQuerySelectorAll  = Element.prototype.querySelectorAll;

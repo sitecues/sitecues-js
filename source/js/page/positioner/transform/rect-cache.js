@@ -125,6 +125,7 @@ define(
     }
 
     styleLock.init(function () {
+      // We don't want to lock width or height because they are styles that a commonly animated, so a lock is impractical
       styleListener.registerPropertyMutationHandler(element, 'width', function () {
         /*jshint validthis: true */
         clearCache.call(this);
