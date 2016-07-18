@@ -12,25 +12,25 @@ define(
     'page/positioner/style-lock/style-listener/query-manager',
     'page/positioner/style-lock/style-listener/selector-map',
     'page/positioner/style-lock/style-listener/selectors',
+    'page/positioner/transplant/anchors',
     'page/positioner/util/array-utility',
     'page/positioner/util/element-info',
     'page/positioner/util/element-map',
     'page/positioner/constants',
     'core/constants',
-    'core/native-functions',
-    'page/positioner/transplant/anchors'
+    'core/native-functions'
   ],
   function (
     queryManager,
     selectorMap,
     selectors,
+    anchors,
     arrayUtil,
     elementInfo,
     elementMap,
     constants,
     coreConstants,
-    nativeFn,
-    anchors
+    nativeFn
   ) {
   'use strict';
 

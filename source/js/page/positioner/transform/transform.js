@@ -119,9 +119,9 @@ define(
 
       // Calculate the dimensions of the fixed element after we apply the next scale transform
       var rect = {
-        width  : (unscaledRect.width * newScale),
-        height : (unscaledRect.height * newScale),
-        top    : (unscaledRect.top)
+        width  : unscaledRect.width * newScale,
+        height : unscaledRect.height * newScale,
+        top    : unscaledRect.top
       };
       rect.left   = getRectLeft(unscaledRect.left, unscaledRect.width, newScale);
       rect.bottom = rect.top  + rect.height;
@@ -325,7 +325,7 @@ define(
       var
         isOverlappingToolbar = top < toolbarHeight,
         isFlushWithToolbar   = top === toolbarHeight,
-        closeToBottom        = viewportHeight * 0.8 < bottom,
+        isCloseToBottom      = viewportHeight * 0.8 < bottom,
         isTallerThanViewport = elementHeight > viewportHeight;
 
       // Fixed elements that are close to the bottom or top are much more likely to be part of fixed menus that are

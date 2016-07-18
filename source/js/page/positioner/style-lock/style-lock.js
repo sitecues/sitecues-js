@@ -249,7 +249,7 @@ define(
       return;
     }
 
-    //If @element is undefined, unlock all elements with @property locks
+    // If @element is undefined, unlock all elements with @property locks
     var
       propertyLockSelector = '[' + lockAttribute + ']',
       elements             = document.querySelectorAll(propertyLockSelector);
