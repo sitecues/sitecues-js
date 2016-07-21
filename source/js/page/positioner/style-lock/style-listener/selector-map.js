@@ -27,7 +27,7 @@ define(
     // input[type=\"number\"]::-webkit-inner-spin-button, input[type=\"number\"]::-webkit-outer-spin-button"
     try {
       results = Array.prototype.slice.call(document.querySelectorAll(selector), 0)
-        .filter(elementInfo.isOriginal); // Only original elements be considered for processing
+        .filter(elementInfo.isOriginal); // Only original elements are considered for processing
       return results;
     }
     catch (e) {

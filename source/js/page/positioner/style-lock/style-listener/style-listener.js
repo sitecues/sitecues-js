@@ -47,28 +47,37 @@ define(
      * {
      *   property: ['valueA', 'valueB']
      * }
+     *
+     * Declarations we're listening for
      * */
-    // Declarations that we're listening for
     observedPropertyToValues = {},
     /*
     * {
     *   property_value: [elementA, elementB]
     * }
+    *
+    * List of elements that have resolved to this declaration
     * */
     resolvedElementsMap = {},
     /*
      * {
      *   direction_property_value: [handlerA, handlerB]
      * }
+     *
+     * Handlers keyed with their directional style hooks
+     * e.g. to_position_fixed: [handlerFn]
      * */
     handlerMap = {},
     /*
     * {
     *   elementReference: { property: [handler] }
     * }
+    *
+    * The outer map keys an element reference to a map of the properties we're listening for specifically for this element, and the handlers that fire when
+    * this property mutates
     * */
     elementPropertyHandlerMap = new WeakMap(),
-    observerOptions = {
+    observerOptions           = {
       attributes        : true,
       attributeOldValue : true,
       subtree           : true,
@@ -103,7 +112,7 @@ define(
           continue;
         }
 
-        // This switch evaluates attribute mutations by their potential impact on fixed positioning
+        // This switch evaluates attribute mutations for their styling impact
         switch (attribute) {
           case 'class':
             var

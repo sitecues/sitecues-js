@@ -150,6 +150,8 @@ define(
         xDelta = resetCurrentTranslation ? newXTranslation : newXTranslation - currentXTranslation,
         yDelta = resetCurrentTranslation ? newYTranslation : newYTranslation - currentYTranslation;
 
+      // Translate the rectangle by our transformation, so that we can update the cached rectangle for this element. This allows us to avoid re-calculating
+      // the binding rectangle on scroll, which is a very expensive operation
       rect.top    += yDelta;
       rect.bottom += yDelta;
       rect.left   += xDelta;
@@ -377,6 +379,16 @@ define(
       refreshResizeListener();
     }
 
+    function fixZIndex(element) {
+      // In IE, transformed fixed elements show up underneath other elements on the page when we apply a transformation
+      if (platform.browser.isIE) {
+        var zIndex = getComputedStyle(element).zIndex;
+        if (zIndex === 'auto') {
+          element.style.zIndex = '999999';
+        }
+      }
+    }
+
     function scaleTop(element) {
       var
         currentInlinePosition = element.style.position,
@@ -391,13 +403,17 @@ define(
       element.style.top      = cachedInitialTop;
       // Absolute elements return the used top value if there isn't one specified. Setting the position to static ensures
       // that only specified top values are returned with the computed style
-      element.style.position = 'static';
+      // EXCEPTION: IE returns the used value for both
+      if (!platform.browser.isIE) {
+        element.style.position = 'static';
+      }
 
       var
         specifiedTop   = getComputedStyle(element).top,
         specifiedValue = parseFloat(specifiedTop);
 
-      if (!Number.isNaN(specifiedValue) && specifiedTop.indexOf('px') >= 0) {
+
+      if (!isNaN(specifiedValue) && specifiedTop.indexOf('px') >= 0) {
         element.style.top = (specifiedValue * state.fixedZoom) + 'px';
       }
 
@@ -428,6 +444,7 @@ define(
         /*jshint validthis: true */
         if (targets.has(this)) {
           scaleTop(element);
+          fixZIndex(element);
           refreshElementTransform(this);
         }
         /*jshint validthis: false */
