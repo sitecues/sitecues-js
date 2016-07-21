@@ -1,6 +1,6 @@
 # Sitecues Changelog
 
-## 4.1.1
+## 4.1.0
 
 ### Compatibility
 * Much better handling of fixed positioned content, by moving content out of the body during zoom where it can remain fixed. Docs at https://equinox.atlassian.net/wiki/display/EN/Positioner
