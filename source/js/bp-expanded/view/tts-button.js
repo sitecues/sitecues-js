@@ -33,7 +33,7 @@ define(
     require(['audio/audio'], function(audio) {
       // We do a timeout here so that this occurs after any key handlers that stop speech
       // Otherwise, the same Enter/space press that starts speaking the cue could immediately silence the same cue
-      setTimeout(audio.toggleSpeech, 0);
+      nativeFn.setTimeout(audio.toggleSpeech, 0);
     });
   }
 
