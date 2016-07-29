@@ -215,7 +215,7 @@ define(
       viewInfo.badgeHeight = Math.round(rect.height);
       viewInfo.badgeTop = Math.round(rect.top - window.pageYOffset);
       viewInfo.badgeLeft = Math.round(rect.left - window.pageXOffset);
-    };
+    }
 
     return viewInfo;
   }
