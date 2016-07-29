@@ -10,12 +10,6 @@ define(['core/bp/constants', 'core/bp/model/state'], function(BP_CONST, state) {
     var classBuilder = '',
       isSecondary = state.isSecondaryPanelRequested(); // Is or will be secondary panel
 
-    // Choose the 'settings' icon look (we can probably remove this choice after we settle one)
-    classBuilder += ' scp-btn-choice-settings' + state.get('settingsIconVersion');
-
-    // Choose the 'about' icon look (we can probably remove this choice after we settle one)
-    classBuilder += ' scp-btn-choice-about' + state.get('aboutIconVersion');
-
     // In enlarged view we always show the real settings.
     // See badge.js for more about real vs fake settings.
     classBuilder += ' scp-realsettings';
