@@ -278,10 +278,6 @@ define(
       // Leave field undefined in the edge case
       initialPageVisitDetails.isStorageUnsupported = true;
     }
-    var badgeElem = document.getElementById('sitecues-badge');
-    if (!badgeElem || badgeElem.getBoundingClientRect().width === 0) {
-      initialPageVisitDetails.isBadgeHidden = true;
-    }
 
     metric.init();
   }
@@ -314,6 +310,7 @@ define(
       // Supported platform: continue to init Sitecues
       Promise.all([initConfAndMetrics(), locale.init()])
         .then(bp.init)
+        .then(metric.initViewInfo)
         .then(initPageFeatureListeners);
     }
   }

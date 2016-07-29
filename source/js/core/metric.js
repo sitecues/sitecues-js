@@ -65,19 +65,19 @@ define(
       Object.keys(data).forEach(flattenDataField);
     }
 
+    function shallowCopyInto(source, dest) {
+      if (source) {
+        for (var keyName in source) {
+          if (source.hasOwnProperty(keyName)) {
+            dest[keyName] = source[keyName];
+          }
+        }
+      }
+    }
+
     Metric.prototype.createDataJSON = function createDataJSON(name, details) {
       if (doLogMetrics) {
         console.log('Metric / %s', name + (details ? ' / ' + JSON.stringify(details) : ''));
-      }
-
-      function shallowCopyInto(source, dest) {
-        if (source) {
-          for (var keyName in source) {
-            if (source.hasOwnProperty(keyName)) {
-              dest[keyName] = source[keyName];
-            }
-          }
-        }
       }
 
       var data = this.data = {},
@@ -204,6 +204,13 @@ define(
       return location.href;
     }
 
+    // This info is not available right away -- we add to session data as soon as available
+    function initViewInfo(viewInfo) {
+      if (viewInfo) {
+        shallowCopyInto(viewInfo, sessionData);
+      }
+    }
+
     function init() {
 
       if (isInitialized) {
@@ -248,6 +255,7 @@ define(
 
     return {
       init: init,
+      initViewInfo: initViewInfo,
       getMetricHistory: getMetricHistory,
       BadgeHover: wrap(name.BADGE_HOVER),
       Error: wrap(name.ERROR),

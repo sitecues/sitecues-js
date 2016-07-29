@@ -89,6 +89,7 @@ define(
       .then(function() {
         bpController.init();
         fixDimensionsOfBody();
+        return getViewInfo();
       });
   }
 
@@ -189,6 +190,34 @@ define(
       //so we get all the margins and set our own inline shorthand margin
       body.style.margin = topMargin + ' ' + rightMargin + ' 0px ' + leftMargin;
     }
+  }
+
+  function getViewInfo() {
+    var badgeElem = document.getElementById('sitecues-badge'),
+      rect = badgeElem ? badgeElem.getBoundingClientRect() : {};
+
+    if (!rect.height) {
+      return {
+        isBadgeHidden: true
+      };
+    }
+
+    var isToolbar = state.get('isToolbarBadge'),
+      hasCustomPalette = typeof site.get('palette') === 'object',
+      viewInfo = {
+        badgePalette: hasCustomPalette ? 'custom' : state.get('defaultPaletteKey') || BP_CONST.PALETTE_NAME_NORMAL
+      };
+
+    if (isToolbar) {
+      viewInfo.isToolbar = true;
+    }
+    else {
+      viewInfo.badgeHeight = Math.round(rect.height);
+      viewInfo.badgeTop = Math.round(rect.top - window.pageYOffset);
+      viewInfo.badgeLeft = Math.round(rect.left - window.pageXOffset);
+    };
+
+    return viewInfo;
   }
 
   /**
