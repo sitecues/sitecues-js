@@ -19,6 +19,7 @@ define(
     'core/native-functions',
     'page/zoom/flash'
   ],
+  /*jshint -W072 */ //Currently there are too many dependencies, so we need to tell JSHint to ignore it for now
   function (
     $,
     conf,
@@ -35,6 +36,7 @@ define(
     nativeFn,
     flash
   ) {
+  /*jshint +W072 */
   'use strict';
 
   var isInitialized,  // Is the zoom module already initialized?
