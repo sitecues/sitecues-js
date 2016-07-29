@@ -10,6 +10,7 @@
 define(
   [
     '$',
+    'core/conf/site',
     'page/positioner/util/element-map',
     'page/positioner/util/element-info',
     'page/positioner/style-lock/style-lock',
@@ -18,6 +19,7 @@ define(
   ],
   function (
     $,
+    site,
     elementMap,
     elementInfo,
     styleLock,
@@ -227,7 +229,7 @@ define(
       auxiliaryBody = cloneElement(originalBody);
       // Removes position lock from clone
       styleLock.unlockStyle(auxiliaryBody);
-      auxiliaryBody.style.visibility    = 'hidden';
+      auxiliaryBody.style.visibility    = site.get('visibleCloneBody') ? '' : 'hidden';
       auxiliaryBody.style.transform     = 'none';
       auxiliaryBody.style.pointerEvents = '';
       auxiliaryBody.style.position      = 'absolute';
