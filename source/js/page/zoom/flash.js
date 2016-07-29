@@ -1,9 +1,7 @@
 define(
   [
     'core/events',
-    'page/zoom/state',
-    'core/native-functions',
-    'core/conf/urls'
+    'page/zoom/state'
   ],
   function (
     events,
