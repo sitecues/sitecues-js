@@ -10,7 +10,6 @@
 define(
   [
     '$',
-    'core/conf/site',
     'page/positioner/util/element-map',
     'page/positioner/util/element-info',
     'page/positioner/style-lock/style-lock',
@@ -19,7 +18,6 @@ define(
   ],
   function (
     $,
-    site,
     elementMap,
     elementInfo,
     styleLock,
@@ -229,7 +227,9 @@ define(
       auxiliaryBody = cloneElement(originalBody);
       // Removes position lock from clone
       styleLock.unlockStyle(auxiliaryBody);
-      auxiliaryBody.style.visibility    = site.get('visibleCloneBody') ? '' : 'hidden';
+      // Strange bug, don't really understand it, but visible elements nested in hidden elements don't show up as
+      // expected when the original body has overflowY set to scroll (reproduces on Desire To Learn)
+      auxiliaryBody.style.visibility    = getComputedStyle(originalBody).overflowY === 'scroll' ? '' : 'hidden';
       auxiliaryBody.style.transform     = 'none';
       auxiliaryBody.style.pointerEvents = '';
       auxiliaryBody.style.position      = 'absolute';
