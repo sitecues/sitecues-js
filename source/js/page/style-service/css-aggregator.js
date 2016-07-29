@@ -101,7 +101,7 @@ define(
     // Unsafe cross-origin request
     // - Will run into cross-domain restrictions because URL is from different domain
     // This is not an issue with the extension, because the content script doesn't have cross-domain restrictions
-    var isUnsafeRequest = !SC_EXTENSION && urls.isOnDifferentDomain(url);
+    var isUnsafeRequest = !SC_EXTENSION && urls.isCrossDomain(url);
 
     if (isUnsafeRequest) {
       if (SC_DEV) {

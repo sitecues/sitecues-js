@@ -178,11 +178,15 @@ define(['core/conf/site' ], function(site) {
     return urlStr;
   }
 
-  function isOnDifferentDomain(url) {
+  function isCrossDomain(url) {
     // Will cross-domain restrictions possibly burn us?
     var hostName = parseUrl(url).hostname;
     // For our purposes, hostname is the same as the domain
     return hostName !== document.location.hostname;
+  }
+
+  function isSameDomain(url) {
+    return !isCrossDomain(url);
   }
 
   function init() {
@@ -200,7 +204,8 @@ define(['core/conf/site' ], function(site) {
     getRawScriptUrl: getRawScriptUrl,
     resolveResourceUrl: resolveResourceUrl,
     parseUrl: parseUrl,
-    isOnDifferentDomain: isOnDifferentDomain,
+    isCrossDomain: isCrossDomain,
+    isSameDomain: isSameDomain,
     isProduction: isProduction,
     resolveUrl: resolveUrl
   };

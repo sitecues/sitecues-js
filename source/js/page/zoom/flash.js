@@ -1,16 +1,22 @@
 define(
   [
     'core/events',
-    'page/zoom/state'
+    'page/zoom/state',
+    'core/conf/urls'
   ],
   function (
     events,
-    state
+    state,
+    urls
   ) {
 
   'use strict';
 
   var dimensionsMap = new WeakMap();
+
+  function isInteger(number) {
+    return !isNaN(number) && Math.floor(number) === number;
+  }
 
   function fixFlashElements() {
     var elements = findFlashElements();
@@ -53,10 +59,10 @@ define(
       width  = Math.round(width * state.completedZoom);
       height = Math.round(height * state.completedZoom);
 
-      if (!isNaN(width)) {
+      if (isInteger(width)) {
         element.setAttribute('width', width + widthUnit);
       }
-      if (!isNaN(height)) {
+      if (isInteger(height)) {
         element.setAttribute('height', height + heightUnit);
       }
     });
@@ -67,16 +73,16 @@ define(
       flashSelector     = 'object, embed',
       frameSelector     = 'iframe, frame',
       flashElements     = [],
-      documentsToSearch = [document];
+      documentsToSearch = [window.top.document];
 
     function searchDocument(document) {
       var nestedFrames = Array.prototype.slice.call(document.querySelectorAll(frameSelector), 0);
       flashElements    = flashElements.concat(Array.prototype.slice.call(document.querySelectorAll(flashSelector)));
+      console.log('flash elements:', flashElements);
       nestedFrames.forEach(function (frame) {
-        try {
+        if (!frame.src || urls.isSameDomain(frame.src)) {
           documentsToSearch.push(frame.contentDocument);
         }
-        catch (e) {}
       });
     }
 
@@ -95,16 +101,7 @@ define(
   }
 
   function isTransformable(element) {
-    var name = element.localName;
-    switch (name) {
-      case 'object':
-        return false;
-      case 'embed':
-        return false;
-      case 'param':
-        return false;
-    }
-    return true;
+    return ['object', 'embed', 'param'].indexOf(element.localName) === -1;
   }
 
   function init() {
