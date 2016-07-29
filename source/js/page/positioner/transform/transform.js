@@ -330,7 +330,7 @@ define(
 
       // Fixed elements that are close to the bottom or top are much more likely to be part of fixed menus that are
       // intended to be flush with the edges of the viewport
-      return isTallerThanViewport || isOverlappingToolbar || (!isFlushWithToolbar && !closeToBottom);
+      return isTallerThanViewport || isOverlappingToolbar || (!isFlushWithToolbar && !isCloseToBottom);
     }
 
     function transformAllTargets(opts) {

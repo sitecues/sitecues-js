@@ -16,7 +16,8 @@ define(
     'page/zoom/util/restrict-zoom',
     'page/zoom/style',
     'page/viewport/scrollbars',
-    'core/native-functions'
+    'core/native-functions',
+    'page/zoom/flash'
   ],
   function (
     $,
@@ -31,7 +32,8 @@ define(
     restrictZoom,
     style,
     scrollbars,
-    nativeFn
+    nativeFn,
+    flash
   ) {
   'use strict';
 
@@ -180,6 +182,7 @@ define(
   function bodyGeometryInitialized(wheelEvent) {
     style.init();
     animation.init();
+    flash.init();
 
     //This callback will only be called when body is parsed
     body  = document.body;
