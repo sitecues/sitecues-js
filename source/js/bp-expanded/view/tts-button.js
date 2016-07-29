@@ -31,7 +31,9 @@ define(
 
   function toggleSpeech() {
     require(['audio/audio'], function(audio) {
-      audio.toggleSpeech();
+      // We do a timeout here so that this occurs after any key handlers that stop speech
+      // Otherwise, the same Enter/space press that starts speaking the cue could immediately silence the same cue
+      nativeFn.setTimeout(audio.toggleSpeech, 0);
     });
   }
 

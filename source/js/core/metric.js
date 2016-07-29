@@ -24,7 +24,7 @@ define(
 
     // IMPORTANT! Increment METRICS_VERSION this every time metrics change in any way
     // IMPORTANT! Have the backend team review all metrics changes!!!
-    var METRICS_VERSION = 17,
+    var METRICS_VERSION = 18,
         isInitialized,
         doSuppressMetrics,
         doLogMetrics,
@@ -81,7 +81,7 @@ define(
       }
 
       var data = this.data = {},
-        settings = conf.get(); // Gets all prefs
+        settings = getSettings(); // Gets all prefs
 
       // Session data
       shallowCopyInto(sessionData, data);
@@ -155,6 +155,26 @@ define(
     // TODO Should go away once we go to the new extension which is entirely in a content script
     function isOldExtension() {
       return sitecues.everywhereConfig;
+    }
+
+    // Return settings we care about
+    function getSettings() {
+      var settings = conf.get(),
+        BLACKLIST = {
+          'firstHighZoom': 1, // Not interesting
+          'firstSpeechOn': 1, // Not interesting
+          'isTester': 1,  // Redundant with field on main object
+          'ttsOn': 1,  // Redundant with field on main object
+          'zoom': 1  // Redundant with field on main object
+        },
+        reducedSettings = {};
+
+      Object.keys(settings).forEach(function(settingName){
+        if (!BLACKLIST[settingName]) {
+          reducedSettings[settingName] = settings[settingName];
+        }
+      });
+      return reducedSettings;
     }
 
     function getSource() {

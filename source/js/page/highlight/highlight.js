@@ -160,9 +160,15 @@ define(
       var childNodes = this.childNodes,
         numChildNodes = childNodes.length,
         index,
-        testNode;
+        testNode,
+        css;
       if (this.childElementCount === numChildNodes) {
         return false; // Same number of elements as child nodes -- doesn't have it's own text nodes
+      }
+
+      css = traitcache.getStyle(this);
+      if (parseInt(css.textIndent) < -99) {
+        return false; // Used to hide text in conjunction with background image
       }
 
       for (index = 0; index < numChildNodes; index ++) {
