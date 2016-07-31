@@ -12,14 +12,53 @@ define(
 
   'use strict';
 
-  var dimensionsMap = new WeakMap();
+  var flashObserver,
+    dimensionsMap     = new WeakMap(),
+    observedDocuments = new WeakMap();
 
   function isInteger(number) {
     return !isNaN(number) && Math.floor(number) === number;
   }
 
-  function fixFlashElements() {
-    var elements = findFlashElements();
+  function onDocumentMutation(mutations) {
+    mutations.forEach(function (mutation) {
+      mutation.addedNodes.forEach(function (node) {
+        if (isFlashElement(node)) {
+          fixFlashElements(node);
+        }
+      });
+    });
+  }
+
+  function observeDocument(document) {
+    if (observedDocuments.get(document)) {
+      return;
+    }
+
+    var opts = {
+      subtree   : true,
+      childList : true
+    };
+
+    flashObserver.observe(document, opts);
+  }
+
+  function fixFlashElements(documentOrElement) {
+    var elements;
+
+    if (documentOrElement) {
+      elements = documentOrElement.nodeType === Node.ELEMENT_NODE ? [documentOrElement] : findFlashElements(documentOrElement);
+    }
+    else {
+      elements = findFlashElements();
+    }
+
+    function setDimension(element, dimension, value, unit) {
+      if (isInteger(value)) {
+        element.setAttribute(dimension, value + unit);
+      }
+    }
+
     elements.forEach(function (element) {
       var
         zoomReciprocal = 1 / state.completedZoom,
@@ -59,26 +98,24 @@ define(
       width  = Math.round(width * state.completedZoom);
       height = Math.round(height * state.completedZoom);
 
-      if (isInteger(width)) {
-        element.setAttribute('width', width + widthUnit);
-      }
-      if (isInteger(height)) {
-        element.setAttribute('height', height + heightUnit);
-      }
+      setDimension(element, 'width', width, widthUnit);
+      setDimension(element, 'height', height, heightUnit);
     });
   }
 
-  function findFlashElements() {
+  function findFlashElements(document) {
     var
-      flashSelector     = 'object, embed',
+      embedSelector     = 'object, embed',
       frameSelector     = 'iframe, frame',
-      flashElements     = [],
-      documentsToSearch = [window.top.document];
+      embedElements     = [],
+      documentsToSearch = [document || window.top.document];
 
     function searchDocument(document) {
       var nestedFrames = Array.prototype.slice.call(document.querySelectorAll(frameSelector), 0);
-      flashElements    = flashElements.concat(Array.prototype.slice.call(document.querySelectorAll(flashSelector)));
-      console.log('flash elements:', flashElements);
+      embedElements    = embedElements.concat(Array.prototype.slice.call(document.querySelectorAll(embedSelector)));
+
+      observeDocument(document);
+
       nestedFrames.forEach(function (frame) {
         if (!frame.src || urls.isSameDomain(frame.src)) {
           documentsToSearch.push(frame.contentDocument);
@@ -90,14 +127,18 @@ define(
       searchDocument(documentsToSearch.shift());
     }
 
-    flashElements = flashElements.filter(function (element) {
-      var
-        swfSrc  = element.src  && element.src.indexOf('swf')  >= 0,
-        swfData = element.data && element.data.indexOf('swf') >= 0;
-      return swfSrc || swfData;
-    });
+    return embedElements.filter(isFlashElement);
+  }
 
-    return flashElements;
+  function isFlashElement(element) {
+    if (element.type === 'application/x-shockwave-flash') {
+      return true;
+    }
+
+    var
+      swfSrc  = element.src  && element.src.indexOf('swf')  >= 0,
+      swfData = element.data && element.data.indexOf('swf') >= 0;
+    return swfSrc || swfData;
   }
 
   function isTransformable(element) {
@@ -105,7 +146,10 @@ define(
   }
 
   function init() {
-    events.on('zoom', fixFlashElements);
+    flashObserver = new MutationObserver(onDocumentMutation);
+    events.on('zoom', function () {
+      fixFlashElements();
+    });
   }
 
   return {
