@@ -10,7 +10,7 @@ All notable changes to this project will be documented here.
 
 ## [Unreleased]
 ### Added
- - Support for Flash elements
+ - Support for Flash elements.
 
 ### Changed
  - Toggling audio with a keyboard command now waits until all key handlers are called before triggering on / off audio cue
