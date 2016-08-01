@@ -16,8 +16,10 @@ define(
     'page/zoom/util/restrict-zoom',
     'page/zoom/style',
     'page/viewport/scrollbars',
-    'core/native-functions'
+    'core/native-functions',
+    'page/zoom/flash'
   ],
+  /*jshint -W072 */ //Currently there are too many dependencies, so we need to tell JSHint to ignore it for now
   function (
     $,
     conf,
@@ -31,8 +33,10 @@ define(
     restrictZoom,
     style,
     scrollbars,
-    nativeFn
+    nativeFn,
+    flash
   ) {
+  /*jshint +W072 */
   'use strict';
 
   var isInitialized,  // Is the zoom module already initialized?
@@ -180,6 +184,7 @@ define(
   function bodyGeometryInitialized(wheelEvent) {
     style.init();
     animation.init();
+    flash.init();
 
     //This callback will only be called when body is parsed
     body  = document.body;
