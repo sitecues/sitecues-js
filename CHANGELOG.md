@@ -8,8 +8,8 @@ All notable changes to this project will be documented here.
  - **Removed**    : Disabled or deleted within the source code.
 
 ## [Unreleased]
-### Changed
- -
+### Added
+ - Support for Flash elements
 
 ## [4.1.2] - 2016-07-21
 ### Changed
