@@ -11,6 +11,11 @@ All notable changes to this project will be documented here.
 ### Added
  - Support for Flash elements
 
+### Changed
+ - Toggling audio with a keyboard command now waits until all key handlers are called before triggering on / off audio cue
+ - Remove redundant metrics fields from the object before firing the network request
+ - Prevent highlighting of alt-text hidden with text-indent styling
+
 ## [4.1.2] - 2016-07-21
 ### Changed
  - Ensure fixed positioned elements have a higher z-index than static content.
