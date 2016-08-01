@@ -10,7 +10,7 @@ All notable changes to this project will be documented here.
 
 ## [Unreleased]
 ### Added
- - Support for Flash elements
+ - Support for Flash elements.
 
 ## [4.1.2] - 2016-07-21
 ### Changed
