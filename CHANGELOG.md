@@ -2,14 +2,15 @@
 
 All notable changes to this project will be documented here.
 
- - **Added**      : New functionality or something very noteworthy.
- - **Changed**    : Updates to an existing system or feature.
+ - **Fixed**      : Bug fixes to align with expected behavior.
+ - **Added**      : New features.
+ - **Changed**    : Updates to expected behavior.
  - **Deprecated** : Planned for removal in the near future.
  - **Removed**    : Disabled or deleted within the source code.
 
 ## [Unreleased]
 ### Added
- - Support for Flash elements
+ - Support for Flash elements.
 
 ### Changed
  - Toggling audio with a keyboard command now waits until all key handlers are called before triggering on / off audio cue
