@@ -23,8 +23,6 @@ define([], function() {
     paletteKey              : '',    // Current palette See BP_CONST.PALETTE_NAME_MAP for possible keys.
     defaultPaletteKey       : '',    // Palette to use if sitecues theme determines that default palette should be used based on the background behind the badge.
     isAdaptivePalette       : false, // Is an adaptive palette name
-    settingsIconVersion     : 1,     // Which settings icon to use?
-    aboutIconVersion        : 1,     // Which about icon to use?
     isShrinkingFromKeyboard : false, // Is the panel shrinking because of a keyboard command?
     isFeedbackSent          : false, // Is the feedback sent?
     ratioOfSVGToVisibleBadgeSize: undefined // ratio of svg to visible badge size
