@@ -52,7 +52,7 @@ define(
     // - Will run into cross-domain restrictions because URL is from different domain
     // This is not an issue with the extension, because the content script doesn't have cross-domain restrictions
     var url = src || img.getAttribute('src'),
-      isSafeRequest = !urls.isOnDifferentDomain(url),
+      isSafeRequest = !urls.isCrossDomain(url),
       safeUrl;
 
     function returnImageWhenComplete(loadableImg, isInverted) {
