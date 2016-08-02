@@ -9,6 +9,11 @@ All notable changes to this project will be documented here.
  - **Removed**    : Disabled or deleted within the source code.
 
 ## [Unreleased]
+### Fixed
+ -
+ -
+
+## [4.2.1] - 2016-08-02
 ### Added
  - Support for Flash elements.
 
@@ -53,5 +58,6 @@ All notable changes to this project will be documented here.
 
 
 [Unreleased]: https://bitbucket.org/ai_squared/sitecues-js/commits/branch/dev
+[4.2.1]:      https://bitbucket.org/ai_squared/sitecues-js/commits/79da45fdc3928821852f0e55a89acc7abe991739?at=release-4.2
 [4.1.2]:      https://bitbucket.org/ai_squared/sitecues-js/commits/5b257009e1979cbca9cab6eb53aafe52c8b4d5b2?at=release-4.1
 [4.1.1]:      https://bitbucket.org/ai_squared/sitecues-js/commits/c792d3364843a2c1ecee03bbcec3dfdd042b2fd5?at=release-4.1
