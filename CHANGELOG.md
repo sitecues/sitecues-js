@@ -30,7 +30,7 @@ All notable changes to this project will be documented here.
 ## [4.1.1] - 2016-07-13
 ### Compatibility
  - Much better handling of fixed positioned content, by moving content out of the body during zoom where it can remain fixed. Docs at https://equinox.atlassian.net/wiki/display/EN/Positioner
- - SC-3797: compatible with the history API: h`ttps://developer.mozilla.org/en-US/docs/Web/API/History_API
+ - SC-3797: compatible with the history API: https://developer.mozilla.org/en-US/docs/Web/API/History_API
  - SC-3722: fix toolbar jiggle issues in IE and Edge
  - Differentiate between unpinch and ctrl+mousewheel, at least on Mac Chrome -- not possible on other browsers
  - SC-3788: couldn't highlight forms in IE/Edge
