@@ -108,21 +108,32 @@ define(
       embedSelector     = 'object, embed',
       frameSelector     = 'iframe, frame',
       embedElements     = [],
-      documentsToSearch = [document || getStartingDocument()];
+      documentsToSearch = [document || getHighestPermittedDocument()];
 
-    function getStartingDocument() {
-      var
+    function getHighestPermittedDocument() {
+      var docRef,
+        refSucceeded  = false,
         highestWindow = window,
         document      = window.document;
-      // Wrap this in a try block to avoid cross-origin Errors halting the script
-      try {
-        while (highestWindow !== highestWindow.parent) {
-          var referenceTest = highestWindow.parent.document;
-          highestWindow     = highestWindow.parent;
-          document          = referenceTest;
+      while (highestWindow !== highestWindow.parent) {
+
+        try {
+          // wrapped in a try block to avoid cross-origin Errors halting the script
+          docRef       = highestWindow.parent.document;
+          refSucceeded = true;
         }
+        catch (e) {}
+
+        if (refSucceeded) {
+          highestWindow = highestWindow.parent;
+          document      = docRef;
+          refSucceeded  = false;
+        }
+        else {
+          break;
+        }
+
       }
-      catch (e) {}
       return document;
     }
 
