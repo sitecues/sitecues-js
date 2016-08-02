@@ -10,8 +10,7 @@ All notable changes to this project will be documented here.
 
 ## [Unreleased]
 ### Fixed
- -
- -
+ - When search for flash elements in nested browsing contexts, wrap document references in try/catch block to prevent cross origin errors from throwing
 
 ## [4.2.1] - 2016-08-02
 ### Added
