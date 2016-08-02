@@ -108,7 +108,23 @@ define(
       embedSelector     = 'object, embed',
       frameSelector     = 'iframe, frame',
       embedElements     = [],
-      documentsToSearch = [document || window.top.document];
+      documentsToSearch = [document || getStartingDocument()];
+
+    function getStartingDocument() {
+      var
+        highestWindow = window,
+        document      = window.document;
+      // Wrap this in a try block to avoid cross-origin Errors halting the script
+      try {
+        while (highestWindow !== highestWindow.parent) {
+          var referenceTest = highestWindow.parent.document;
+          highestWindow     = highestWindow.parent;
+          document          = referenceTest;
+        }
+      }
+      catch (e) {}
+      return document;
+    }
 
     function searchDocument(document) {
       var nestedFrames = Array.prototype.slice.call(document.querySelectorAll(frameSelector), 0);
