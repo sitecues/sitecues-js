@@ -108,7 +108,34 @@ define(
       embedSelector     = 'object, embed',
       frameSelector     = 'iframe, frame',
       embedElements     = [],
-      documentsToSearch = [document || window.top.document];
+      documentsToSearch = [document || getHighestPermittedDocument()];
+
+    function getHighestPermittedDocument() {
+      var docRef,
+        refSucceeded  = false,
+        highestWindow = window,
+        document      = window.document;
+      while (highestWindow !== highestWindow.parent) {
+
+        try {
+          // wrapped in a try block to avoid cross-origin Errors halting the script
+          docRef       = highestWindow.parent.document;
+          refSucceeded = true;
+        }
+        catch (e) {}
+
+        if (refSucceeded) {
+          highestWindow = highestWindow.parent;
+          document      = docRef;
+          refSucceeded  = false;
+        }
+        else {
+          break;
+        }
+
+      }
+      return document;
+    }
 
     function searchDocument(document) {
       var nestedFrames = Array.prototype.slice.call(document.querySelectorAll(frameSelector), 0);

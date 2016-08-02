@@ -10,8 +10,7 @@ All notable changes to this project will be documented here.
 
 ## [Unreleased]
 ### Fixed
- -
- -
+ - Only search for flash elements in valid documents
 
 ## [4.2.1] - 2016-08-02
 ### Added
