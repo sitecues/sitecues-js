@@ -6,8 +6,8 @@ define([], function () {
   // NOTE: if elements aren't unique in an array, they will be repeated in the difference
   function symmetricDifference(arr1, arr2) {
     var difference,
-      array1 = Array.prototype.slice.call(arr1, 0),
-      array2 = Array.prototype.slice.call(arr2, 0);
+      array1 = toArray(arr1),
+      array2 = toArray(arr2);
     
     if (array1.length) {
       difference = array2.filter(function (member) {
@@ -33,7 +33,7 @@ define([], function () {
   function union() {
     var
       set        = new Set(),
-      arrays     = Array.prototype.slice.call(arguments, 0),
+      arrays     = toArray(arguments),
       arrayCount = arrays.length;
 
     for (var i = 0; i < arrayCount; i++) {
@@ -105,6 +105,10 @@ define([], function () {
     return arr;
   }
 
+  function toArray(arrayLike) {
+    return Array.prototype.slice.call(arrayLike, 0);
+  }
+
   return {
     remove: remove,
     addUnique: addUnique,
@@ -112,6 +116,7 @@ define([], function () {
     symmetricDifference: symmetricDifference,
     union: union,
     intersection: intersection,
-    fromSet: fromSet
+    fromSet: fromSet,
+    toArray: toArray
   };
 });

@@ -2,12 +2,14 @@ define(
   [
     'core/events',
     'page/zoom/state',
-    'core/conf/urls'
+    'core/conf/urls',
+    'page/positioner/util/array-utility'
   ],
   function (
     events,
     state,
-    urls
+    urls,
+    arrayUtil
   ) {
 
   'use strict';
@@ -22,7 +24,7 @@ define(
 
   function onDocumentMutation(mutations) {
     mutations.forEach(function (mutation) {
-      mutation.addedNodes.forEach(function (node) {
+      arrayUtil.toArray(mutation.addedNodes).forEach(function (node) {
         if (isFlashElement(node)) {
           fixFlashElements(node);
         }
