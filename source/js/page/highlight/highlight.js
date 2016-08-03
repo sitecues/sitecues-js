@@ -1039,6 +1039,8 @@ define(
 
     element = state.picked[0];
     elementRect = element.getBoundingClientRect(); // Rough bounds
+    state.overlayContainer = getBestOverlayContainer();
+    state.zoom = getZoom(state.overlayContainer);
 
     // Get exact bounds
     var mhPositionInfo = mhpos.getHighlightPositionInfo(element, 0, stretchForSprites),
@@ -1050,9 +1052,6 @@ define(
       // No valid highlighted content rectangles or cursor not inside of them
       return;
     }
-
-    state.overlayContainer = getBestOverlayContainer();
-    state.zoom = getZoom(state.overlayContainer);
 
     mhpos.combineIntersectingRects(fixedRects, 99999); // Merge all boxes
     var mainFixedRect = fixedRects[0]; // For now just use 1

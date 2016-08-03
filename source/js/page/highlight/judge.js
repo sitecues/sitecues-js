@@ -12,10 +12,21 @@
  * Note: "Growth" is a synonym for "Expansion" -- very intuitive for Aaron but no one else!
  */
 
-define(['$', 'page/util/common', 'page/util/element-classifier', 'page/highlight/traitcache'],
-  function($, common, elemClassifier, traitcache) {
+define(
+  [
+    '$',
+    'page/util/common',
+    'page/util/element-classifier',
+    'page/highlight/traitcache'
+  ],
+  function(
+    $,
+    common,
+    elemClassifier,
+    traitcache
+  ) {
 
-    'use strict';
+  'use strict';
 
   // ** Semantic constants ***
   // For ARIA roles other tags could be used, but this is most likely and more performant than checking all possibilities
