@@ -133,9 +133,12 @@ define(
   }
 
   function reverseElems($elems, doReverse) {
-    $elems.each(function() {
+    $elems.each(function () {
       var src = this.getAttribute('src'),
-        reverseElem = (src && SHOULD_USE_PROXY) ? reverseElemProxy : reverseElemCss;
+          ext = imgClassifier.getImageExtension(src),
+          // The image proxy can't handle svg images
+          isSVG = ext && ext === '.svg',
+        reverseElem = (src && !isSVG && SHOULD_USE_PROXY) ? reverseElemProxy : reverseElemCss;
       reverseElem($(this), doReverse, src);
     });
   }
