@@ -13,6 +13,7 @@ All notable changes to this project will be documented here.
  - Only search for flash elements in valid documents
  - When checking whether inserted elements are flash elements, convert the collection to an array before using array specific methods
  - Combo-boxes can now be highlighted
+ - Always invert SVG images with CSS
 
 ## [4.2.1] - 2016-08-02
 ### Added
