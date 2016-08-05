@@ -32,22 +32,28 @@ define(
   var
     REVERSIBLE_ATTR = 'data-sc-reversible',
     customSelectors = site.get('themes') || {},
-    SVG_BONUS       = 999,
+    SVG_SCORE       = 999,
+    JPG_SCORE       = -50,
     isDebuggingOn   = true,
     CLASS_INVERT    = 'i',
     CLASS_NORMAL    = 'n',
     MAX_SCORE_CHECK_PIXELS = 200,
     imageScores     = {
       '.png'  : 50,
-      '.jpg'  : -50,
-      '.jpeg' : -50,
+      '.jpg'  : JPG_SCORE,
+      '.jpeg' : JPG_SCORE,
       '.gif'  : -35,
-      '.svg'  : SVG_BONUS
+      '.svg'  : SVG_SCORE
     };
 
   function isImageExtension(ext) {
     var imgExts = Object.keys(imageScores);
     return imgExts.indexOf(ext) !== -1;
+  }
+
+  function isSVGSource(src) {
+    var ext = urls.extname(src);
+    return '.svg' === ext;
   }
 
   // Get <img> that can have its pixel data read --
@@ -303,7 +309,7 @@ define(
 
   function getExtensionScore(imageExt) {
     var defaultValue = -70;
-    return imageScores[imageExt] ? imageScores[imageExt] : defaultValue;
+    return typeof imageScores[imageExt] !== 'undefined' ? imageScores[imageExt] : defaultValue;
   }
 
   // Either pass img or src, but not both
@@ -409,7 +415,7 @@ define(
       case 'input':
         return BUTTON_BONUS;
       case 'svg':
-        return SVG_BONUS;
+        return SVG_SCORE;
       default:
         return 0;
     }
@@ -615,6 +621,7 @@ define(
     getSizeScore: getSizeScore,
     getExtensionScore: getExtensionScore,
     getPixelInfoScore: getPixelInfoScore,
-    isImageExtension: isImageExtension
+    isImageExtension: isImageExtension,
+    isSVGSource: isSVGSource
   };
 });

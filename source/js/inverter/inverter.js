@@ -135,10 +135,10 @@ define(
 
   function reverseElems($elems, doReverse) {
     $elems.each(function () {
-      var src = this.getAttribute('src'),
-          ext = imgClassifier.getImageExtension(src),
-          // The image proxy can't handle svg images
-          isSVG = ext && ext === '.svg',
+      var
+        src = this.getAttribute('src'),
+        // The image proxy can't handle svg images
+        isSVG = imgClassifier.isSVGSource(src),
         reverseElem = (src && !isSVG && SHOULD_USE_PROXY) ? reverseElemProxy : reverseElemCss;
       reverseElem($(this), doReverse, src);
     });
