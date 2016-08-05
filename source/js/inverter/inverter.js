@@ -23,15 +23,16 @@ define(
     imgClassifier,
     origBgInfo
   ) {
+  'use strict';
 
   var mutationObserver,
     $allReversibleElems = $(),
     filterProperty,
-  // Use proxy in IE and Safari, because: no css invert in IE, and it's extremely slow in Safari
+    // Use proxy in IE and Safari, because: no css invert in IE, and it's extremely slow in Safari
     SHOULD_USE_PROXY,
     inverseSpriteSheet,
     INVERSE_SPRITE_STYLESHEET_ID = 'sitecues-js-invert-sprites',
-    isCurrentlyInverting = false;
+    isCurrentlyInverting         = false;
 
   // This method is called when the site goes from dark to light or light to dark. When it goes to dark,
   // it will analyze images if they haven't been analyzed before, and start a mutation observer so that
