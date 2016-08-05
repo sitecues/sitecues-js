@@ -303,7 +303,7 @@ define(
 
   function getExtensionScore(imageExt) {
     var defaultValue = -70;
-    return imageScores[imageExt] ? imageScores : defaultValue;
+    return imageScores[imageExt] ? imageScores[imageExt] : defaultValue;
   }
 
   // Either pass img or src, but not both
