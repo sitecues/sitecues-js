@@ -53,7 +53,7 @@ define(
 
   function isSVGSource(src) {
     var ext = urls.extname(src);
-    return '.svg' === ext;
+    return ext === '.svg';
   }
 
   // Get <img> that can have its pixel data read --
@@ -309,7 +309,7 @@ define(
 
   function getExtensionScore(imageExt) {
     var defaultValue = -70;
-    return typeof imageScores[imageExt] !== 'undefined' ? imageScores[imageExt] : defaultValue;
+    return typeof imageScores[imageExt] === 'number' ? imageScores[imageExt] : defaultValue;
   }
 
   // Either pass img or src, but not both
