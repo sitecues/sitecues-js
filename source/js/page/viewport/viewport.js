@@ -67,18 +67,22 @@ define(
 
   // After the user's initial zoom we need to realign any location hash target to the top of the screen
   function jumpToLocationHash() {
-    var hash = document.location.hash,
+    var
+      hash = location.hash,
       EXTRA_SPACE_SCROLL_TOP = 60;
-    if (hash) {
-      try {  // Not all ids are necessarily valid -- protect against that
-        var elem = document.querySelector(hash + ',[name="' + hash.substring(1) + '"]');
-        if (elem) {
-          elem.scrollIntoView(true);
-          window.scrollBy(0, -EXTRA_SPACE_SCROLL_TOP);
-        }
-      }
-      catch(ex) {}
+
+    if (!hash) {
+      return;
     }
+
+    try {  // Not all ids are necessarily valid -- protect against that
+      var elem = document.querySelector(hash + ',[name="' + hash.substring(1) + '"]');
+      if (elem) {
+        elem.scrollIntoView(true);
+        window.scrollBy(0, -EXTRA_SPACE_SCROLL_TOP);
+      }
+    }
+    catch(ex) {}
   }
 
   function init() {
