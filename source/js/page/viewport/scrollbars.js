@@ -10,12 +10,14 @@ define(
   [
     'core/platform',
     'page/viewport/viewport',
-    'core/native-functions'
+    'core/native-functions',
+    'page/zoom/util/body-geometry'
   ],
   function (
     platform,
     viewport,
-    nativeFn
+    nativeFn,
+    bodyGeo
   ) {
   'use strict';
 
@@ -29,13 +31,7 @@ define(
     defaultOverflowX,
     defaultOverflowY;
 
-  function onBodyRectChange(newBodyRect) {
-    // We use visible content rect (as opposed to element bounding client rect which contains whitespace)
-    mainBodyRect = newBodyRect;
-    // IE/Edge don't know when to put in scrollbars after CSS transform
-    // Edge does, but we need to do this because of SC-3722 -- jiggling of Sitecues toolbar during vertical scrolls
-    shouldComputeMainBodyScrollbars = platform.browser.isMS;
-
+  function onBodyRectChange() {
     if (shouldComputeMainBodyScrollbars) {
       determineScrollbars();
     }
@@ -83,6 +79,8 @@ define(
   // This is also good because we're better than IE at determining when content is big enough to need scrollbars.
   function determineScrollbars() {
 
+    mainBodyRect = bodyGeo.getCurrentBodyInfo();
+
     var docElemStyle = document.documentElement.style;
 
     // -- Clear the scrollbars --
@@ -121,8 +119,15 @@ define(
     }
   }
 
+  function init() {
+    // IE/Edge don't know when to put in scrollbars after CSS transform
+    // Edge does, but we need to do this because of SC-3722 -- jiggling of Sitecues toolbar during vertical scrolls
+    shouldComputeMainBodyScrollbars = platform.browser.isMS;
+  }
+
   return {
     onBodyRectChange: onBodyRectChange,
-    forceScrollbars: forceScrollbars
+    forceScrollbars: forceScrollbars,
+    init: init
   };
 });

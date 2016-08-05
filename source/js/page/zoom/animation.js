@@ -387,6 +387,8 @@ define(
       errors.report(new Error('zoom finish before start'));
     }
 
+    bodyGeo.invalidateBodyInfo();
+
     if (elementDotAnimatePlayer) {
       // Can't leave animation player around, as it will prevent future animations
       $origBody.css(style.getZoomCss(state.currentTargetZoom));
@@ -406,7 +408,7 @@ define(
 
     // Remove and re-add scrollbars -- we will re-add them after zoom if content is large enough
     // Only determine scrollbars for IE
-    scrollbars.onBodyRectChange(bodyGeo.computeBodyInfo());
+    scrollbars.onBodyRectChange();
 
     // Restore mouse cursor events and CSS behavior
     $('body').css('pointerEvents', '');
