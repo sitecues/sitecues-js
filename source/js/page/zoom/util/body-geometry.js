@@ -31,6 +31,7 @@ define(
     cachedDocumentScrollHeight = null,
     doDebugVisibleRects,
     originalBodyInfo, // The info we have on the body, including the rect and mainNode
+    currentBodyInfo,
     MIN_RECT_SIDE  = constants.MIN_RECT_SIDE,
     ZOOM_PRECISION = constants.ZOOM_PRECISION;
 
@@ -55,7 +56,7 @@ define(
   function getBodyLeft() {
     init();
 
-    return originalBodyInfo.leftMostNode.getBoundingClientRect().left + window.pageXOffset;
+    return originalBodyInfo.leftMostNode.getBoundingClientRect().left + viewport.getPageXOffset();
   }
 
   function getMainNode() {
@@ -66,7 +67,7 @@ define(
 
   // Is it a fluid layout?
   function isFluidLayout() {
-    if (originalBodyInfo.width === window.outerWidth) {
+    if (originalBodyInfo.width === viewport.getOuterWidth()) {
       // Handle basic case -- this works for duxburysystems.com, where the visible body content
       // spans the entire width of the available space
       return true;
@@ -263,6 +264,17 @@ define(
     return originalBodyInfo;
   }
 
+  function getCurrentBodyInfo() {
+    if (!currentBodyInfo) {
+      currentBodyInfo = computeBodyInfo();
+    }
+    return currentBodyInfo;
+  }
+
+  function invalidateBodyInfo() {
+    currentBodyInfo = null;
+  }
+
   function getScrollWidth(isOnResize) {
     if (cachedDocumentScrollWidth === null || isOnResize) {
       cachedDocumentScrollWidth = docElem.scrollWidth;
@@ -277,8 +289,9 @@ define(
     return cachedDocumentScrollHeight;
   }
 
-  function refreshBodyInfo() {
+  function refreshOriginalBodyInfo() {
     originalBodyInfo = computeBodyInfo();
+    currentBodyInfo  = originalBodyInfo;
   }
 
   function executeCallbacks() {
@@ -328,7 +341,7 @@ define(
       body = document.body;
       docElem = document.documentElement;
       $origBody = $(body);
-      refreshBodyInfo();
+      refreshOriginalBodyInfo();
       executeCallbacks();
 
       domEvents.on(window, 'resize', function () {
@@ -376,10 +389,11 @@ define(
     getBodyLeft: getBodyLeft,
     getMainNode: getMainNode,
     getOriginalBodyInfo: getOriginalBodyInfo,
+    getCurrentBodyInfo: getCurrentBodyInfo,
+    invalidateBodyInfo: invalidateBodyInfo,
     getScrollWidth: getScrollWidth,
     getScrollHeight: getScrollHeight,
-    computeBodyInfo: computeBodyInfo,
-    refreshBodyInfo: refreshBodyInfo,
+    refreshOriginalBodyInfo: refreshOriginalBodyInfo,
     getFormattedTranslateX: getFormattedTranslateX,
     maximizeContentVisibility: maximizeContentVisibility,
     init: init
