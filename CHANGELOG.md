@@ -15,6 +15,9 @@ All notable changes to this project will be documented here.
  - Combo-boxes can now be highlighted
  - Always invert SVG images with CSS
 
+### Changed
+ - Fire panel-clicked metric when Enter or Space used to trigger item in panel
+
 ## [4.2.1] - 2016-08-02
 ### Added
  - Support for Flash elements.

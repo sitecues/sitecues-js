@@ -144,6 +144,25 @@ define(['core/bp/constants'], function(BP_CONST) {
     });
   }
 
+  // This will roughly help us group similar types of element clicks
+  function getAriaOrNativeRole(elem) {
+    var role = elem.getAttribute('role'),
+      tag;
+    if (!role) {
+      // No role: use tag name
+      tag = elem.localName;
+      if (tag === 'input') {
+        // Tag name is input, use @type
+        role = elem.getAttribute('type');
+      }
+      else if (tag === 'g' || tag === 'div') {
+        // Tag name is g|div, use 'group'
+        role = 'group';
+      }
+    }
+    return role;
+  }
+
   return {
     byId: byId,
     invalidateId: invalidateId,
@@ -154,6 +173,7 @@ define(['core/bp/constants'], function(BP_CONST) {
     getNumberFromString: getNumberFromString,
     getEventTarget: getEventTarget,
     cancelEvent: cancelEvent,
-    fixTextAnchors: fixTextAnchors
+    fixTextAnchors: fixTextAnchors,
+    getAriaOrNativeRole: getAriaOrNativeRole
   };
 });
