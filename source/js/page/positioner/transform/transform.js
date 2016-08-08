@@ -221,12 +221,12 @@ define(
           newXTranslation -= offRight;
         }
         // If the left side of the element is off by more than we can scroll in to view
-        else if ((currentPageXOffset >= 0 && currentPageXOffset < -offLeft) || (currentPageXOffset < 0 && -currentPageXOffset !== offLeft)) {
-          // Add the difference between the scroll distance and the offset element width to the translation
+        else if ((currentPageXOffset >= 0 && currentPageXOffset < -offLeft) || (currentPageXOffset < 0 && currentPageXOffset !== -offLeft)) {
+          // Subtract
           newXTranslation -= offLeft + currentPageXOffset;
         }
         // If the left side of the element is visible in the viewport
-        else if (offLeft > 0) {
+        else if (offLeft > 0 && currentPageXOffset >= 0) {
           // Shift the element to the left side of the viewport
           newXTranslation -= offLeft;
         }
@@ -381,6 +381,8 @@ define(
 
     function fixZIndex(element) {
       // In IE, transformed fixed elements show up underneath other elements on the page when we apply a transformation
+      // This is because we don't transplant fixed elements in IE, so the new containing blocks created by the transformation
+      // are layered within the original body
       if (platform.browser.isIE) {
         var zIndex = getComputedStyle(element).zIndex;
         if (zIndex === 'auto') {

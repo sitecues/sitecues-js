@@ -29,18 +29,31 @@ define(
   ) {
   'use strict';
 
-  var REVERSIBLE_ATTR = 'data-sc-reversible',
-    customSelectors = site.get('themes') || { },
-    BUTTON_BONUS = 50,
-    SVG_BONUS = 999,
+  var
+    REVERSIBLE_ATTR = 'data-sc-reversible',
+    customSelectors = site.get('themes') || {},
+    SVG_SCORE       = 999,
+    JPG_SCORE       = -50,
+    isDebuggingOn   = true,
+    CLASS_INVERT    = 'i',
+    CLASS_NORMAL    = 'n',
     MAX_SCORE_CHECK_PIXELS = 200,
-    isDebuggingOn = true,
-    CLASS_INVERT = 'i',
-    CLASS_NORMAL = 'n';
+    imageScores     = {
+      '.png'  : 50,
+      '.jpg'  : JPG_SCORE,
+      '.jpeg' : JPG_SCORE,
+      '.gif'  : -35,
+      '.svg'  : SVG_SCORE
+    };
 
-  function getImageExtension(src) {
-    var imageExtension = src.match(/\.png|\.jpg|\.jpeg|\.gif|\.svg/i);
-    return imageExtension && imageExtension[0];
+  function isImageExtension(ext) {
+    var imgExts = Object.keys(imageScores);
+    return imgExts.indexOf(ext) !== -1;
+  }
+
+  function isSVGSource(src) {
+    var ext = urls.extname(src);
+    return ext === '.svg';
   }
 
   // Get <img> that can have its pixel data read --
@@ -52,7 +65,7 @@ define(
     // - Will run into cross-domain restrictions because URL is from different domain
     // This is not an issue with the extension, because the content script doesn't have cross-domain restrictions
     var url = src || img.getAttribute('src'),
-      isSafeRequest = !urls.isOnDifferentDomain(url),
+      isSafeRequest = urls.isSameDomain(url),
       safeUrl;
 
     function returnImageWhenComplete(loadableImg, isInverted) {
@@ -128,7 +141,6 @@ define(
     }
 
     getReadableImage(img, src, onReadableImageAvailable, onImageError);
-
   }
 
   // Either pass img or src, but not both
@@ -296,19 +308,8 @@ define(
   }
 
   function getExtensionScore(imageExt) {
-    switch (imageExt) {
-      case '.png':
-        return 50;
-      case '.svg':
-        return SVG_BONUS;
-      case '.gif':
-        return -35;
-      case '.jpg':
-      case '.jpeg':
-        return -50;
-      default:
-        return -70;
-    }
+    var defaultValue = -70;
+    return typeof imageScores[imageExt] === 'number' ? imageScores[imageExt] : defaultValue;
   }
 
   // Either pass img or src, but not both
@@ -409,11 +410,12 @@ define(
   }
 
   function getElementTypeScore(img) {
+    var BUTTON_BONUS = 50;
     switch (img.localName) {
       case 'input':
         return BUTTON_BONUS;
       case 'svg':
-        return SVG_BONUS;
+        return SVG_SCORE;
       default:
         return 0;
     }
@@ -542,9 +544,9 @@ define(
       return false; // Image has no source -- don't invert
     }
 
-    var imageExt = getImageExtension(src);
+    var imageExt = urls.extname(src);
 
-    if (!imageExt) {
+    if (!isImageExtension(imageExt)) {
       return false;  // Not a normal image extension -- don't invert
     }
 
@@ -617,8 +619,9 @@ define(
   return {
     classify: classify,
     getSizeScore: getSizeScore,
-    getImageExtension: getImageExtension,
     getExtensionScore: getExtensionScore,
-    getPixelInfoScore: getPixelInfoScore
+    getPixelInfoScore: getPixelInfoScore,
+    isImageExtension: isImageExtension,
+    isSVGSource: isSVGSource
   };
 });

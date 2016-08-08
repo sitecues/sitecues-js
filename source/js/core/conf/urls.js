@@ -1,4 +1,11 @@
-define(['core/conf/site' ], function(site) {
+define(
+  [
+    'core/conf/site'
+  ],
+  function (
+    site
+  ) {
+  'use strict';
 
   var apiDomain,  // Either ws.sitecues.com/ or ws.dev.sitecues.com/
     scriptOrigin,  // Either http[s]://js.sitecues.com/ or http[s]://js.dev.sitecues.com/
@@ -178,11 +185,21 @@ define(['core/conf/site' ], function(site) {
     return urlStr;
   }
 
-  function isOnDifferentDomain(url) {
+  function isCrossDomain(url) {
     // Will cross-domain restrictions possibly burn us?
-    var hostName = parseUrl(url).hostname;
+    var hostName = parseUrl(url).origin;
     // For our purposes, hostname is the same as the domain
-    return hostName !== document.location.hostname;
+    return hostName !== window.location.origin;
+  }
+
+  function isSameDomain(url) {
+    return !isCrossDomain(url);
+  }
+
+  // Returns the resource file extension, or an empty string if one isn't found
+  function extname(url) {
+    var index = url.lastIndexOf('.');
+    return index >= 0 ? url.substring(index) : '';
   }
 
   function init() {
@@ -200,9 +217,10 @@ define(['core/conf/site' ], function(site) {
     getRawScriptUrl: getRawScriptUrl,
     resolveResourceUrl: resolveResourceUrl,
     parseUrl: parseUrl,
-    isOnDifferentDomain: isOnDifferentDomain,
+    isCrossDomain: isCrossDomain,
+    isSameDomain: isSameDomain,
     isProduction: isProduction,
-    resolveUrl: resolveUrl
+    resolveUrl: resolveUrl,
+    extname: extname
   };
-
 });

@@ -23,15 +23,16 @@ define(
     imgClassifier,
     origBgInfo
   ) {
+  'use strict';
 
   var mutationObserver,
     $allReversibleElems = $(),
     filterProperty,
-  // Use proxy in IE and Safari, because: no css invert in IE, and it's extremely slow in Safari
+    // Use proxy in IE and Safari, because: no css invert in IE, and it's extremely slow in Safari
     SHOULD_USE_PROXY,
     inverseSpriteSheet,
     INVERSE_SPRITE_STYLESHEET_ID = 'sitecues-js-invert-sprites',
-    isCurrentlyInverting = false;
+    isCurrentlyInverting         = false;
 
   // This method is called when the site goes from dark to light or light to dark. When it goes to dark,
   // it will analyze images if they haven't been analyzed before, and start a mutation observer so that
@@ -133,9 +134,12 @@ define(
   }
 
   function reverseElems($elems, doReverse) {
-    $elems.each(function() {
-      var src = this.getAttribute('src'),
-        reverseElem = (src && SHOULD_USE_PROXY) ? reverseElemProxy : reverseElemCss;
+    $elems.each(function () {
+      var
+        src = this.getAttribute('src') || '',
+        // The image proxy can't handle svg images
+        isSVG = imgClassifier.isSVGSource(src),
+        reverseElem = (src && !isSVG && SHOULD_USE_PROXY) ? reverseElemProxy : reverseElemCss;
       reverseElem($(this), doReverse, src);
     });
   }

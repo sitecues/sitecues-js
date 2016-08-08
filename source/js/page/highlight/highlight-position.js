@@ -68,6 +68,12 @@ define(
     return zoomMod.getCompletedZoom();
   }
 
+  function hasUnrenderedDescendants(node) {
+    // Select elements have `option` descendants that don't have rendered dimensions until the dropdown menu is opened
+    var tagNames = ['select'];
+    return tagNames.indexOf(node.localName) !== -1;
+  }
+
   // Get the rect for the contents of a node (text node or contents inside element node)
   // @param node -- an element that contains visible content, or a text node
   function getContentsRangeRect(node) {
@@ -76,7 +82,7 @@ define(
       // ********** Some browsers are fine **********
       isElement = node.nodeType === Node.ELEMENT_NODE;
 
-    if (isElement) {
+    if (isElement && !hasUnrenderedDescendants(node)) {
       // Case 1: element -- get the rect for the element's descendant contents
       parent = node;
       range.selectNodeContents(node);
@@ -369,7 +375,7 @@ define(
       // --- Form controls ---
       if (elemClassifier.isFormControl(this)) {
         if ($(this).is('select[size="1"],select:not([size])')) {
-          addRect(allRects, getComboboxRect(this));
+          addRect(allRects, getComboboxRect(this, thisRect));
           return; // Don't walk into options
         }
         addRect(allRects, thisRect); // Make it all visible, including padding and border

@@ -463,6 +463,8 @@ define(
     // initMouseEvent instead of initEvent
     event.initEvent('click', true, true);
     element.dispatchEvent(event);
+
+    new metric.PanelClick({ target: element.id, role: helper.getAriaOrNativeRole(element) }).send();
   }
 
   function onZoomKeyUp() {

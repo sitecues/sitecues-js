@@ -16,8 +16,10 @@ define(
     'page/zoom/util/restrict-zoom',
     'page/zoom/style',
     'page/viewport/scrollbars',
-    'core/native-functions'
+    'core/native-functions',
+    'page/zoom/flash'
   ],
+  /*jshint -W072 */ //Currently there are too many dependencies, so we need to tell JSHint to ignore it for now
   function (
     $,
     conf,
@@ -31,8 +33,10 @@ define(
     restrictZoom,
     style,
     scrollbars,
-    nativeFn
+    nativeFn,
+    flash
   ) {
+  /*jshint +W072 */
   'use strict';
 
   var isInitialized,  // Is the zoom module already initialized?
@@ -108,20 +112,18 @@ define(
       return modifierKeyState.isCtrlKeyDown() ? { isCtrlWheel: true } : { isUnpinch: true };
     }
 
-    nativeFn.setTimeout(function () {
-      var delta = -event.deltaY * UNPINCH_FACTOR,
-        targetZoom = animation.isZoomOperationRunning() ? state.currentTargetZoom + delta : state.completedZoom + delta;
+    var delta = -event.deltaY * UNPINCH_FACTOR,
+      targetZoom = animation.isZoomOperationRunning() ? state.currentTargetZoom + delta : state.completedZoom + delta;
 
-      clearTimeout(unpinchEndTimer);
-      unpinchEndTimer = nativeFn.setTimeout(animation.finishZoomOperation, UNPINCH_END_DELAY);
-      if (!animation.isZoomOperationRunning()) {
-        // 1st call -- we will glide to it, it may be far away from previous zoom value
-        animation.beginZoomOperation(targetZoom, getWheelEventInputInfo()); // Get ready for more slider updates
-      }
+    clearTimeout(unpinchEndTimer);
+    unpinchEndTimer = nativeFn.setTimeout(animation.finishZoomOperation, UNPINCH_END_DELAY);
+    if (!animation.isZoomOperationRunning()) {
+      // 1st call -- we will glide to it, it may be far away from previous zoom value
+      animation.beginZoomOperation(targetZoom, getWheelEventInputInfo()); // Get ready for more slider updates
+    }
 
-      state.currentTargetZoom = restrictZoom.toValidRange(targetZoom); // Change target
-      animation.performInstantZoomOperation();
-    }, 0);
+    state.currentTargetZoom = restrictZoom.toValidRange(targetZoom); // Change target
+    animation.performInstantZoomOperation();
   }
 
   function zoomStopRequested() {
@@ -165,21 +167,24 @@ define(
     }
 
     $origBody.css({width: '', transform: ''});
-    bodyGeo.refreshBodyInfo();
+    bodyGeo.refreshOriginalBodyInfo();
     $origBody.css(style.getZoomCss(state.completedZoom));
     if (config.shouldRestrictWidth) {
       // Restrict the width of the body so that it works similar to browser zoom
       // Documents designed to fit the width of the page still will
       $origBody.css('width', bodyGeo.getRestrictedBodyWidth(state.completedZoom));
     }
+    bodyGeo.invalidateBodyInfo();
     // TODO computeBodyInfo() is doing a lot of work that refreshBodyInfo() did -- at least it should share which nodes to iterate over
-    scrollbars.onBodyRectChange(bodyGeo.computeBodyInfo());
+    scrollbars.onBodyRectChange();
     events.emit('resize');
   }
 
   function bodyGeometryInitialized(wheelEvent) {
+    scrollbars.init();
     style.init();
     animation.init();
+    flash.init();
 
     //This callback will only be called when body is parsed
     body  = document.body;

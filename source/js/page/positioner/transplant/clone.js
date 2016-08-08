@@ -227,7 +227,9 @@ define(
       auxiliaryBody = cloneElement(originalBody);
       // Removes position lock from clone
       styleLock.unlockStyle(auxiliaryBody);
-      auxiliaryBody.style.visibility    = 'hidden';
+      // Strange bug, don't really understand it, but visible elements nested in hidden elements don't show up as
+      // expected when the original body has overflowY set to scroll (reproduces on Desire To Learn)
+      auxiliaryBody.style.visibility    = getComputedStyle(originalBody).overflowY === 'scroll' ? '' : 'hidden';
       auxiliaryBody.style.transform     = 'none';
       auxiliaryBody.style.pointerEvents = '';
       auxiliaryBody.style.position      = 'absolute';

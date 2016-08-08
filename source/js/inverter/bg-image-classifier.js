@@ -1,16 +1,24 @@
-define([
-  'inverter/orig-bg-info',
-  'inverter/img-classifier'
-], function(
-  origBgInfo,
-  imgClassifier) {
-  var BG_IMAGE_BONUS = 40,
+define(
+  [
+    'core/conf/urls',
+    'inverter/orig-bg-info',
+    'inverter/img-classifier'
+  ],
+  function(
+    urls,
+    origBgInfo,
+    imgClassifier
+  ) {
+  'use strict';
+
+  var
+    BG_IMAGE_BONUS = 40,
     MAX_SCORE_CHECK_PIXELS = 200;
 
   function shouldInvertBackgroundImage(src, size, onInversionDecision) {
-    var imageExt = imgClassifier.getImageExtension(src);
+    var imageExt = urls.extname(src);
 
-    if (!imageExt) {
+    if (!imgClassifier.isImageExtension(imageExt)) {
       onInversionDecision(false);  // Not a normal image extension -- don't invert
       return;
     }
@@ -136,5 +144,4 @@ define([
   return {
     classifyBackgroundImage: classifyBackgroundImage
   };
-
 });
