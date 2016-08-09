@@ -17,6 +17,7 @@ All notable changes to this project will be documented here.
 
 ### Changed
  - Fire panel-clicked metric when Enter or Space used to trigger item in panel
+ - More careful about not firing multiple key-command metric for repeated keys across varied systems
 
 ## [4.2.1] - 2016-08-02
 ### Added
