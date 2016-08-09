@@ -1,6 +1,6 @@
 define(['page/util/element-classifier', 'page/keys/commands', 'core/metric', 'core/events', 'page/highlight/constants',
-        'core/constants'],
-  function(elemClassifier, commands, metric, events, HIGHLIGHT_CONST, CORE_CONST) {
+        'core/constants', 'core/native-functions'],
+  function(elemClassifier, commands, metric, events, HIGHLIGHT_CONST, CORE_CONST, nativeFn) {
 
   var
     // KEY_TESTS defines keys used to bind actions to hotkeys.
@@ -269,7 +269,7 @@ define(['page/util/element-classifier', 'page/keys/commands', 'core/metric', 'co
     }
 
     clearTimeout(fakeKeyRepeatTimer);
-    fakeKeyRepeatTimer = setTimeout(function() {
+    fakeKeyRepeatTimer = nativeFn.setTimeout(function() {
       // If the next key is the same and occurs quickly after the last keyup, it will be considered a key repeat,
       // because some configurations on Windows seem to fire multiple keyups (and probably keydowns) for key repeats
       // Once this timer fires, we clear a flag that allows even the same key to be fired as a new metric
