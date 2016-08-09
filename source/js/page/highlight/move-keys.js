@@ -314,8 +314,6 @@ define(
   }
 
   function fail(origPanX, origPanY) {
-    if (SC_DEV) { console.log('Fail'); }
-
     // Don't process the rest of the command queue
     navQueue = [];
 
@@ -348,8 +346,6 @@ define(
   }
 
   function succeed(doAllowRepeat, doSpeakText) {
-    if (SC_DEV) { console.log('Succeed'); }
-
     fixedElements.enableMouseEvents();
 
     if (doSpeakText) {

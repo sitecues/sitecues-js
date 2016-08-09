@@ -1,6 +1,6 @@
 define(['page/util/element-classifier', 'page/keys/commands', 'core/metric', 'core/events', 'page/highlight/constants',
-        'core/constants'],
-  function(elemClassifier, commands, metric, events, HIGHLIGHT_CONST, CORE_CONST) {
+        'core/constants', 'core/native-functions'],
+  function(elemClassifier, commands, metric, events, HIGHLIGHT_CONST, CORE_CONST, nativeFn) {
 
   var
     // KEY_TESTS defines keys used to bind actions to hotkeys.
@@ -27,8 +27,10 @@ define(['page/util/element-classifier', 'page/keys/commands', 'core/metric', 'co
     isLensVisible,
     isSitecuesOn = true,  // Init called when sitecues turned on for the first time
     isAudioPlaying,
-    lastKeyInfo,
+    lastKeyInfo = {},
     isInitialized,
+    didFireLastKeyInfoMetric,
+    fakeKeyRepeatTimer,
 
     KEY_TESTS = {
       'space': function(event) {
@@ -188,10 +190,12 @@ define(['page/util/element-classifier', 'page/keys/commands', 'core/metric', 'co
     // Emit event defined for key
     commands[commandName](event, keyName);
 
-    if (lastKeyInfo && lastKeyInfo.keyName === keyName) {
-      ++ lastKeyInfo.repeatCount;
-    }
-    else {
+    // Ready metric info to be fired during keyup
+    var isDifferentKey = lastKeyInfo.keyName !== keyName;
+
+    if (isDifferentKey) {
+      // Different key from last time -- fire no matter what
+      didFireLastKeyInfoMetric = false;
       lastKeyInfo = {
         keyName: keyName,
         shiftKey: event.shiftKey,
@@ -200,6 +204,10 @@ define(['page/util/element-classifier', 'page/keys/commands', 'core/metric', 'co
         ctrlKey: event.ctrlKey,
         repeatCount: 0
       };
+    }
+    else {
+      // Same key
+      ++ lastKeyInfo.repeatCount;
     }
   }
 
@@ -254,11 +262,20 @@ define(['page/util/element-classifier', 'page/keys/commands', 'core/metric', 'co
   }
 
   function fireLastCommandMetric() {
-    if (lastKeyInfo) {
-      // Clear queue -- we do this here so that we don't repeat key events with key repeat presses
+    if (!didFireLastKeyInfoMetric && lastKeyInfo.keyName) {
+      // Fire key metric, but only if it wasn't fired for this key yet (we don't fire multiple events for key repeats)
       new metric.KeyCommand(lastKeyInfo).send();
-      lastKeyInfo = null;
+      didFireLastKeyInfoMetric = true;
     }
+
+    clearTimeout(fakeKeyRepeatTimer);
+    fakeKeyRepeatTimer = nativeFn.setTimeout(function() {
+      // If the next key is the same and occurs quickly after the last keyup, it will be considered a key repeat,
+      // because some configurations on Windows seem to fire multiple keyups and keydowns for key repeats
+      // Once this timer fires, we clear a flag that allows even the same key to be fired as a new metric
+      didFireLastKeyInfoMetric = false;
+      lastKeyInfo = {}; // Force key info to be updated on next keydown
+    }, CORE_CONST.MIN_TIME_BETWEEN_KEYS);
   }
 
   // Track to find out whether the shift key is pressed by itself

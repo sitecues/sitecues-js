@@ -77,6 +77,8 @@ define([], function () {
   constants.INIT_CODES = [constants.KEY_CODE.QUOTE]
     .concat(constants.ZOOM_IN_CODES, constants.ZOOM_OUT_CODES);
 
+  constants.MIN_TIME_BETWEEN_KEYS = 80; // How quickly might humans reasonably repeat keys
+
   return constants;
 
 });
