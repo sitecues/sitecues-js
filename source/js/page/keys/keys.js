@@ -27,8 +27,10 @@ define(['page/util/element-classifier', 'page/keys/commands', 'core/metric', 'co
     isLensVisible,
     isSitecuesOn = true,  // Init called when sitecues turned on for the first time
     isAudioPlaying,
-    lastKeyInfo,
+    lastKeyInfo = {},
     isInitialized,
+    didFireLastKeyInfoMetric,
+    fakeKeyRepeatTimer,
 
     KEY_TESTS = {
       'space': function(event) {
@@ -188,10 +190,12 @@ define(['page/util/element-classifier', 'page/keys/commands', 'core/metric', 'co
     // Emit event defined for key
     commands[commandName](event, keyName);
 
-    if (lastKeyInfo && lastKeyInfo.keyName === keyName) {
-      ++ lastKeyInfo.repeatCount;
-    }
-    else {
+    // Ready metric info to be fired during keyup
+    var isDifferentKey = lastKeyInfo.keyName !== keyName;
+
+    if (isDifferentKey) {
+      // Different key from last time -- fire no matter what
+      didFireLastKeyInfoMetric = false;
       lastKeyInfo = {
         keyName: keyName,
         shiftKey: event.shiftKey,
@@ -200,6 +204,10 @@ define(['page/util/element-classifier', 'page/keys/commands', 'core/metric', 'co
         ctrlKey: event.ctrlKey,
         repeatCount: 0
       };
+    }
+    else {
+      // Same key
+      ++ lastKeyInfo.repeatCount;
     }
   }
 
@@ -254,11 +262,18 @@ define(['page/util/element-classifier', 'page/keys/commands', 'core/metric', 'co
   }
 
   function fireLastCommandMetric() {
-    if (lastKeyInfo) {
+    if (!didFireLastKeyInfoMetric && lastKeyInfo.keyName) {
       // Clear queue -- we do this here so that we don't repeat key events with key repeat presses
       new metric.KeyCommand(lastKeyInfo).send();
-      lastKeyInfo = null;
+      didFireLastKeyInfoMetric = true;
     }
+    // Require a minimum amount of time between keyup events before firing a metric,
+    // because some configurations on Windows seem to fire multiple keyups (and probably keydowns) for key repeats
+    clearTimeout(fakeKeyRepeatTimer);
+    fakeKeyRepeatTimer = setTimeout(function() {
+      didFireLastKeyInfoMetric = false;
+      lastKeyInfo = {}; // Force key info to be updated on next keydown
+    }, CORE_CONST.MIN_TIME_BETWEEN_KEYS);
   }
 
   // Track to find out whether the shift key is pressed by itself
