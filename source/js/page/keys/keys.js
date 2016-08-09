@@ -263,14 +263,16 @@ define(['page/util/element-classifier', 'page/keys/commands', 'core/metric', 'co
 
   function fireLastCommandMetric() {
     if (!didFireLastKeyInfoMetric && lastKeyInfo.keyName) {
-      // Clear queue -- we do this here so that we don't repeat key events with key repeat presses
+      // Fire key metric, but only if it wasn't fired for this key yet (we don't fire multiple events for key repeats)
       new metric.KeyCommand(lastKeyInfo).send();
       didFireLastKeyInfoMetric = true;
     }
-    // Require a minimum amount of time between keyup events before firing a metric,
-    // because some configurations on Windows seem to fire multiple keyups (and probably keydowns) for key repeats
+
     clearTimeout(fakeKeyRepeatTimer);
     fakeKeyRepeatTimer = setTimeout(function() {
+      // If the next key is the same and occurs quickly after the last keyup, it will be considered a key repeat,
+      // because some configurations on Windows seem to fire multiple keyups (and probably keydowns) for key repeats
+      // Once this timer fires, we clear a flag that allows even the same key to be fired as a new metric
       didFireLastKeyInfoMetric = false;
       lastKeyInfo = {}; // Force key info to be updated on next keydown
     }, CORE_CONST.MIN_TIME_BETWEEN_KEYS);
