@@ -61,7 +61,7 @@ define(
     sitecues.shrinkPanel = shrinkPanel;
 
     // Sitecues reset
-    sitecues.reset = function() {};  // noop unless Sitecues is running
+    sitecues.reset = function() {};  // noop unless page module is loaded (if not loaded, there is nothing to reset)
 
     //Loading state enumerations
     sitecues.readyStates = state;
