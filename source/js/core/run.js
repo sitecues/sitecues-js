@@ -283,6 +283,9 @@ define(
       initialPageVisitDetails.isStorageUnsupported = true;
     }
 
+    // TODO remove this once we know enough about window.name usage to make a decision about using it for sessions
+    initialPageVisitDetails.windowName = window.name || undefined;
+
     metric.init();
   }
 
