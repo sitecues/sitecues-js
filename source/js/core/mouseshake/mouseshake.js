@@ -106,20 +106,25 @@ define([
     }
 
     shakeIncrease = getShakeIncrease(lastDistance);
+    if (!shakeIncrease) {
+      lastMoves.shift();
+      return;
+    }
+
     if (shakeIncrease > 0) {
       shakeVigor = Math.min(MAX_SHAKE_VIGOR, lastShakeVigor + shakeIncrease);
     }
     else {  // Shake factor shrinks back down as mouse moves (faster as speed increases)
       var shakeDecrease = Math.max(lastDistance, 15) - 15;
-      shakeDecrease = Math.min(shakeDecrease, 100) / 2500;
+      shakeDecrease = Math.min(shakeDecrease, 100) / 50;
       shakeVigor = Math.max(lastShakeVigor - shakeDecrease, 0);
     }
 
+    shakeVigor = parseInt(shakeVigor.toPrecision(2));
     var shakeVigorDelta = shakeVigor - lastShakeVigor;
     lastShakeVigor = shakeVigor;
 
     if (Math.abs(shakeVigorDelta) >= SIGNIFICANT_SHAKE_VIGOR_DELTA || (shakeVigor === 0 && shakeVigorDelta < 0)) {
-      shakeVigor += shakeVigorDelta;
       fireShakeVigorChange(shakeVigor, shakeVigorDelta);
     }
 
