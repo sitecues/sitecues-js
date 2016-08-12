@@ -1,13 +1,11 @@
 define([
   'page/zoom/zoom',
   'page/highlight/move-keys',
-  'core/conf/user/manager',
   'page/highlight/highlight',
   'page/reset/reset'
   ],
   function(zoomMod,
            moveKeys,
-           conf,
            mh,
            reset) {
   return {
