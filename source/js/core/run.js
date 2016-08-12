@@ -70,31 +70,35 @@ define(
   }
 
   function initSpeech() {
-    require([ 'audio/audio' ], function (audio) {
+    require([ 'audio/audio', 'page/reset/reset'  ], function (audio, reset) {
       audio.init();
+      reset.init();
     });
   }
 
   function initSitecuesOn() {
-    require([ 'page/highlight/highlight', 'page/keys/keys', 'page/highlight/move-keys' ], function (highlight, keys, moveKeys) {
+    require([ 'page/highlight/highlight', 'page/keys/keys', 'page/highlight/move-keys', 'page/reset/reset' ], function (highlight, keys, moveKeys, reset) {
       highlight.init();
       keys.init();
       moveKeys.init();
+      reset.init();
     });
   }
 
   function initThemes() {
-    require([ 'theme/theme', 'page/focus/focus', 'page/keys/keys' ], function (theme, focus, keys) {
+    require([ 'theme/theme', 'page/focus/focus', 'page/keys/keys', 'page/reset/reset' ], function (theme, focus, keys, reset) {
       theme.init();
       focus.init();
       keys.init();
+      reset.init();
     });
   }
 
   function initMouse() {
-    require([ 'page/cursor/cursor', 'page/keys/keys' ], function (cursor, keys) {
+    require([ 'page/cursor/cursor', 'page/keys/keys', 'page/reset/reset' ], function (cursor, keys, reset) {
       cursor.init();
       keys.init();
+      reset.init();
     });
   }
 

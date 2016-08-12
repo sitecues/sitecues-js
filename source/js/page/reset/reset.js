@@ -25,13 +25,16 @@ define(['page/zoom/zoom', 'core/conf/user/manager'],
       resetMinorSettings();
     }
 
-    // Redefine (previously exported as noop function when Sitecues was off)
-    sitecues.reset = resetAll;
+    function init() {
+      // Redefine (previously exported as noop function when Sitecues was off)
+      sitecues.reset = resetAll;
+    }
 
     return {
       resetZoom: resetZoom,
       resetAudio: resetAudio,
       resetMinorSettings: resetMinorSettings,
-      resetAll: resetAll
+      resetAll: resetAll,
+      init: init
     };
   });
