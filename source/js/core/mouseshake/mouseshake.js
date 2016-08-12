@@ -126,7 +126,7 @@ define([
         console.log(shakeVigorDelta + ' => ' + shakeVigor);
       }
       if (shakeVigor >= METRIC_THRESHOLD && lastShakeVigor < METRIC_THRESHOLD) {
-        setTimeout(function() {
+        nativeFn.setTimeout(function() {
           new metric.MouseShake({
             shakeVigor: shakeVigor,
             shakeVigorDelta: shakeVigorDelta
