@@ -262,6 +262,7 @@ define(
       Feedback: wrap(name.FEEDBACK),
       KeyCommand: wrap(name.KEY_COMMAND),
       LensOpen: wrap(name.LENS_OPEN),
+      MouseShake: wrap(name.MOUSE_SHAKE),
       PageVisit: wrap(name.PAGE_VISIT),
       PanelClick: wrap(name.PANEL_CLICK),
       PanelClose: wrap(name.PANEL_CLOSE),

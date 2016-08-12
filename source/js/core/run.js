@@ -19,7 +19,8 @@ define(
     'core/dom-events',
     'Promise',
     'core/modifier-key-state',
-    'core/native-functions'
+    'core/native-functions',
+    'core/mouseshake/mouseshake'
   ],
   function (
     conf,
@@ -33,7 +34,8 @@ define(
     domEvents,
     Promise,
     modifierKeyState,
-    nativeFn
+    nativeFn,
+    mouseShake
   ) {
   'use strict';
 
@@ -193,6 +195,8 @@ define(
     }
 
     modifierKeyState.init();
+
+    mouseShake.init();
 
     onSitecuesReady();
   }
