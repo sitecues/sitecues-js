@@ -70,35 +70,35 @@ define(
   }
 
   function initSpeech() {
-    require([ 'audio/audio', 'page/reset/reset'  ], function (audio, reset) {
+    require([ 'audio/audio', 'page/page'  ], function (page, audio) {
+      page.init();
       audio.init();
-      reset.init();
     });
   }
 
   function initSitecuesOn() {
-    require([ 'page/highlight/highlight', 'page/keys/keys', 'page/highlight/move-keys', 'page/reset/reset' ], function (highlight, keys, moveKeys, reset) {
+    require([ 'page/page', 'page/highlight/highlight', 'page/keys/keys', 'page/highlight/move-keys'], function (page, highlight, keys, moveKeys) {
+      page.init();
       highlight.init();
       keys.init();
       moveKeys.init();
-      reset.init();
     });
   }
 
   function initThemes() {
-    require([ 'theme/theme', 'page/focus/focus', 'page/keys/keys', 'page/reset/reset' ], function (theme, focus, keys, reset) {
+    require([ 'page/page', 'theme/theme', 'page/focus/focus', 'page/keys/keys' ], function (page, theme, focus, keys) {
+      page.init();
       theme.init();
       focus.init();
       keys.init();
-      reset.init();
     });
   }
 
   function initMouse() {
-    require([ 'page/cursor/cursor', 'page/keys/keys', 'page/reset/reset' ], function (cursor, keys, reset) {
+    require([ 'page/page', 'page/cursor/cursor', 'page/keys/keys' ], function (page, cursor, keys) {
+      page.init();
       cursor.init();
       keys.init();
-      reset.init();
     });
   }
 

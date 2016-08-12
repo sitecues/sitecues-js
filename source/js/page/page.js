@@ -20,6 +20,13 @@ define([
   'page/zoom/constants',
   'page/zoom/state',
   'page/zoom/style'
-  ], function () {
+  ], function (reset) {
+
+    function init() {
+      reset.init();
+    }
+    return {
+      init: init
+    };
   }
 );
