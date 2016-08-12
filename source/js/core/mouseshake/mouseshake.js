@@ -6,7 +6,7 @@
 define([
   'core/metric',
   'core/dom-events',
-  'core/mousemove/constants',
+  'core/mouseshake/constants',
   'core/native-functions'
 ], function(metric,
             domEvents,
@@ -14,19 +14,18 @@ define([
             nativeFn) {
 
   var lastMoves = [],
-    extraZoomEffect = 0,
-    extraZoomEffectStep = 0,
+    shakeVigor = 0,
     lastShakeTimeout = 0,
-    lastShakeSize = 0,
+    lastShakeVigor = 0,
     MIN_DIR_SWITCHES_FOR_SHAKE = constants.MIN_DIR_SWITCHES_FOR_SHAKE,
     POSITIONS_ARRAY_SIZE = constants.POSITIONS_ARRAY_SIZE,
-    SMART_CURSOR_STEP = constants.SMART_CURSOR_STEP,
     MIN_SHAKE_DIST = constants.MIN_SHAKE_DIST,
     MAX_SHAKE_DIST = constants.MAX_SHAKE_DIST,
-    MAX_EXTRA_ZOOM_EFFECT = constants.MAX_EXTRA_ZOOM_EFFECT,
+    MAX_SHAKE_VIGOR = constants.MAX_SHAKE_VIGOR,
+    SIGNIFICANT_SHAKE_VIGOR_DELTA = constants.SIGNIFICANT_SHAKE_VIGOR_DELTA,
     MICRO_MOVE_SIZE = constants.MICRO_MOVE_SIZE;
 
-  function getShakeSize(lastDistance) {
+  function getShakeIncrease(lastDistance) {
     var
       prevMove = lastMoves[0],
       xDir = lastMoves[1].x > prevMove.x ? 1 : -1,
@@ -73,7 +72,7 @@ define([
       (isShakeY && totalXDist < MAX_SHAKE_DIST);
 
     if (isShake) {
-      var lastDistanceFactor = Math.min(Math.pow(lastDistance, 1.5), 3), // Shake size grows exponentially with last move
+      var lastDistanceFactor = Math.min(Math.pow(lastDistance, 1.5), 3), // Shake vigor grows exponentially with last move distance
         isExtraDirectionSwitch = (xDirectionSwitches > MIN_DIR_SWITCHES_FOR_SHAKE || yDirectionSwitches > MIN_DIR_SWITCHES_FOR_SHAKE);  // Boost for extra direction switches
 
       return Math.floor(lastDistanceFactor + isExtraDirectionSwitch);
@@ -85,8 +84,7 @@ define([
   function onMouseMove(evt) {
     var lastDistance,
       prevMove,
-      extraZoomEffectGoal = 0,
-      shakeSize;
+      shakeIncrease;
 
     clearTimeout(lastShakeTimeout);
 
@@ -107,40 +105,34 @@ define([
       return;
     }
 
-    shakeSize = getShakeSize(lastDistance);
-    if (shakeSize > 0) {
-      extraZoomEffectGoal = MAX_EXTRA_ZOOM_EFFECT;
-      if (extraZoomEffectGoal > 3 - lastShakeSize) {  // Can't be past 3
-        extraZoomEffectGoal = 3 - lastShakeSize;
-      }
-      extraZoomEffectStep += shakeSize * SMART_CURSOR_STEP;
-      if (extraZoomEffect + extraZoomEffectStep > extraZoomEffectGoal) {
-        extraZoomEffectStep = extraZoomEffectGoal - extraZoomEffect;
-      }
+    shakeIncrease = getShakeIncrease(lastDistance);
+    if (shakeIncrease > 0) {
+      shakeVigor = Math.min(MAX_SHAKE_VIGOR, lastShakeVigor + shakeIncrease);
     }
     else {  // Shake factor shrinks back down as mouse moves (faster as speed increases)
-      var shakeReduction = Math.max(lastDistance, 15) - 15;
-      extraZoomEffectStep -= Math.min(shakeReduction, 100) / 2500;
-      if (extraZoomEffect < -extraZoomEffectStep) {
-        extraZoomEffectStep = -extraZoomEffect;
-      }
+      var shakeDecrease = Math.max(lastDistance, 15) - 15;
+      shakeDecrease = Math.min(shakeDecrease, 100) / 2500;
+      shakeVigor = Math.max(lastShakeVigor - shakeDecrease, 0);
     }
 
-    if (Math.abs(extraZoomEffectStep) >= 0.05) {
-      extraZoomEffect += extraZoomEffectStep;
-      extraZoomEffectStep = 0; // Use it up
-      lastShakeTimeout = nativeFn.setTimeout(fireMouseShake, 0);
+    var shakeVigorDelta = shakeVigor - lastShakeVigor;
+    lastShakeVigor = shakeVigor;
+
+    if (Math.abs(shakeVigorDelta) >= SIGNIFICANT_SHAKE_VIGOR_DELTA || (shakeVigor === 0 && shakeVigorDelta < 0)) {
+      shakeVigor += shakeVigorDelta;
+      fireShakeVigorChange(shakeVigor, shakeVigorDelta);
     }
 
     lastMoves.shift();
   }
 
-  // function getEffectiveZoomForMouse() {
-  //   return Math.min(lastZoom + extraZoomEffect, 3);
-  // }
-
-  function fireMouseShake(details) {
-    new metric.MouseShake(details).send();
+  function fireShakeVigorChange(shakeVigor, shakeVigorDelta) {
+    lastShakeTimeout = nativeFn.setTimeout(function() {
+      new metric.MouseShake({
+        shakeVigor: shakeVigor,
+        shakeVigorDelta: shakeVigorDelta
+      }).send();
+    }, 0);
   }
 
   function init() {
