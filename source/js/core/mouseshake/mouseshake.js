@@ -1,5 +1,6 @@
 /**
  * Mouseshake feature
+ * - Value of shake vigor at any one time is 0-MAX_SHAKE_VIGOR
  * - For now, only fires a metric so that we can measure the potential usefulness
  * - Ideas for use -- make mouse larger, make badge glow temporarily
  */
@@ -22,10 +23,16 @@ define([
     MIN_SHAKE_DIST = constants.MIN_SHAKE_DIST,
     MAX_SHAKE_DIST = constants.MAX_SHAKE_DIST,
     MAX_SHAKE_VIGOR = constants.MAX_SHAKE_VIGOR,
-    SIGNIFICANT_SHAKE_VIGOR_DELTA = constants.SIGNIFICANT_SHAKE_VIGOR_DELTA,
-    MICRO_MOVE_SIZE = constants.MICRO_MOVE_SIZE;
+    MAX_SHAKE_VIGOR_DECREASE = constants.MAX_SHAKE_VIGOR_DECREASE,
+    MAX_SHAKE_VIGOR_INCREASE = constants.MAX_SHAKE_VIGOR_INCREASE,
+    MICRO_MOVE_SIZE = constants.MICRO_MOVE_SIZE,
+    METRIC_THRESHOLD = constants.METRIC_THRESHOLD;
 
-  function getShakeIncrease(lastDistance) {
+  function reset() {
+    lastMoves = [];
+  }
+
+  function getShakeVigorDelta(lastDistance) {
     var
       prevMove = lastMoves[0],
       xDir = lastMoves[1].x > prevMove.x ? 1 : -1,
@@ -72,19 +79,17 @@ define([
       (isShakeY && totalXDist < MAX_SHAKE_DIST);
 
     if (isShake) {
-      var lastDistanceFactor = Math.min(Math.pow(lastDistance, 1.5), 3), // Shake vigor grows exponentially with last move distance
-        isExtraDirectionSwitch = (xDirectionSwitches > MIN_DIR_SWITCHES_FOR_SHAKE || yDirectionSwitches > MIN_DIR_SWITCHES_FOR_SHAKE);  // Boost for extra direction switches
-
-      return Math.floor(lastDistanceFactor + isExtraDirectionSwitch);
+      return Math.min(Math.pow(lastDistance, 1.2), MAX_SHAKE_VIGOR_INCREASE); // Shake vigor grows exponentially with last move distance
     }
 
-    return 0;
+    // Shake factor shrinks back down as mouse moves (faster as speed increases)
+    return Math.min(lastDistance, MAX_SHAKE_VIGOR_DECREASE) - MAX_SHAKE_VIGOR_DECREASE;
   }
 
   function onMouseMove(evt) {
     var lastDistance,
       prevMove,
-      shakeIncrease;
+      shakeVigorDelta;
 
     clearTimeout(lastShakeTimeout);
 
@@ -105,43 +110,44 @@ define([
       return;
     }
 
-    shakeIncrease = getShakeIncrease(lastDistance);
-    if (!shakeIncrease) {
-      lastMoves.shift();
-      return;
+    shakeVigorDelta = Math.round(getShakeVigorDelta(lastDistance));
+
+    shakeVigor = lastShakeVigor + shakeVigorDelta;
+    if (shakeVigor < 0) {
+      shakeVigor = 0;
+    }
+    else if (shakeVigor > MAX_SHAKE_VIGOR) {
+      shakeVigor = MAX_SHAKE_VIGOR;
     }
 
-    if (shakeIncrease > 0) {
-      shakeVigor = Math.min(MAX_SHAKE_VIGOR, lastShakeVigor + shakeIncrease);
-    }
-    else {  // Shake factor shrinks back down as mouse moves (faster as speed increases)
-      var shakeDecrease = Math.max(lastDistance, 15) - 15;
-      shakeDecrease = Math.min(shakeDecrease, 100) / 50;
-      shakeVigor = Math.max(lastShakeVigor - shakeDecrease, 0);
+    if (shakeVigor !== lastShakeVigor) {
+      // fireShakeVigorChange(shakeVigor);
+      if (SC_DEV) {
+        console.log(shakeVigorDelta + ' => ' + shakeVigor);
+      }
+      if (shakeVigor >= METRIC_THRESHOLD && lastShakeVigor < METRIC_THRESHOLD) {
+        setTimeout(function() {
+          new metric.MouseShake({
+            shakeVigor: shakeVigor,
+            shakeVigorDelta: shakeVigorDelta
+          }).send();
+        }, 0);
+      }
     }
 
-    shakeVigor = parseInt(shakeVigor.toPrecision(2));
-    var shakeVigorDelta = shakeVigor - lastShakeVigor;
     lastShakeVigor = shakeVigor;
-
-    if (Math.abs(shakeVigorDelta) >= SIGNIFICANT_SHAKE_VIGOR_DELTA || (shakeVigor === 0 && shakeVigorDelta < 0)) {
-      fireShakeVigorChange(shakeVigor, shakeVigorDelta);
-    }
 
     lastMoves.shift();
   }
 
-  function fireShakeVigorChange(shakeVigor, shakeVigorDelta) {
-    lastShakeTimeout = nativeFn.setTimeout(function() {
-      new metric.MouseShake({
-        shakeVigor: shakeVigor,
-        shakeVigorDelta: shakeVigorDelta
-      }).send();
-    }, 0);
-  }
-
+  // function fireShakeVigorChange(shakeVigor) {
+  //   lastShakeTimeout = nativeFn.setTimeout(function() {
+  //   }, 0);
+  // }
+  //
   function init() {
     domEvents.on(document, 'mousemove', onMouseMove);
+    domEvents.on(document, 'mouseout', reset);
   }
 
   return {
