@@ -1,4 +1,5 @@
 define([
+  'page/reset/reset',
   'page/keys/keys',
   'page/keys/commands',
   'page/util/element-classifier',
@@ -19,5 +20,6 @@ define([
   'page/zoom/constants',
   'page/zoom/state',
   'page/zoom/style'
-  ], function () {}
+  ], function () {
+  }
 );

@@ -60,6 +60,9 @@ define(
     sitecues.expandPanel = expandPanel;
     sitecues.shrinkPanel = shrinkPanel;
 
+    // Sitecues reset
+    sitecues.reset = function() {};  // noop unless Sitecues is running
+
     //Loading state enumerations
     sitecues.readyStates = state;
 
