@@ -1,13 +1,11 @@
 define(
   [
-    '$',
     'page/positioner/util/element-map',
     'page/zoom/state',
     'core/platform',
     'core/bp/bp'
   ],
   function (
-    $,
     elementMap,
     state,
     platform,
