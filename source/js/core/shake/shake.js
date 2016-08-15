@@ -198,9 +198,10 @@ define([
     // }, 0);
 
     // Debugging
-    if (SC_DEV) {
-      console.log(shakeVigorPercent);
-    }
+    // Too noisy for main build
+    // if (SC_DEV) {
+    //   console.log('Shake value: ' + shakeVigorPercent);
+    // }
 
     // Metric
     // Fires only when it goes over the threshold, to limit network requests
