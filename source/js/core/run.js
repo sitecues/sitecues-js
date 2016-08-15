@@ -72,13 +72,15 @@ define(
   }
 
   function initSpeech() {
-    require([ 'audio/audio' ], function (audio) {
+    require([ 'audio/audio', 'page/page'  ], function (page, audio) {
+      page.init();
       audio.init();
     });
   }
 
   function initSitecuesOn() {
-    require([ 'page/highlight/highlight', 'page/keys/keys', 'page/highlight/move-keys' ], function (highlight, keys, moveKeys) {
+    require([ 'page/page', 'page/highlight/highlight', 'page/keys/keys', 'page/highlight/move-keys'], function (page, highlight, keys, moveKeys) {
+      page.init();
       highlight.init();
       keys.init();
       moveKeys.init();
@@ -86,7 +88,8 @@ define(
   }
 
   function initThemes() {
-    require([ 'theme/theme', 'page/focus/focus', 'page/keys/keys' ], function (theme, focus, keys) {
+    require([ 'page/page', 'theme/theme', 'page/focus/focus', 'page/keys/keys' ], function (page, theme, focus, keys) {
+      page.init();
       theme.init();
       focus.init();
       keys.init();
@@ -94,7 +97,8 @@ define(
   }
 
   function initMouse() {
-    require([ 'page/cursor/cursor', 'page/keys/keys' ], function (cursor, keys) {
+    require([ 'page/page', 'page/cursor/cursor', 'page/keys/keys' ], function (page, cursor, keys) {
+      page.init();
       cursor.init();
       keys.init();
     });
@@ -282,6 +286,9 @@ define(
       // Leave field undefined in the edge case
       initialPageVisitDetails.isStorageUnsupported = true;
     }
+
+    // TODO remove this once we know enough about window.name usage to make a decision about using it for sessions
+    initialPageVisitDetails.windowName = window.name || undefined;
 
     metric.init();
   }
