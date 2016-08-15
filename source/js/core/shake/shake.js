@@ -145,7 +145,7 @@ define([
   }
 
   function onMouseMove(evt) {
-    setTimeout(function () {
+    nativeFn.setTimeout(function () {
       processMouseMove(evt);
     }, 0);
   }
