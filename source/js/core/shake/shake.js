@@ -9,20 +9,19 @@ define([
   'core/events',
   'core/dom-events',
   'core/shake/constants',
-  'core/shake/badge-glow',
   'core/platform',
   'core/native-functions'
 ], function(metric,
             events,
             domEvents,
             constants,
-            badgeGlow,
             platform,
             nativeFn) {
 
   var lastMoves = [],
     lastShakeTimeout = 0,
     lastShakeVigor = 0,
+    lastShakeVigorPercent = 0,
     MIN_DIR_SWITCHES_FOR_SHAKE = constants.MIN_DIR_SWITCHES_FOR_SHAKE,
     POSITIONS_ARRAY_SIZE = constants.POSITIONS_ARRAY_SIZE,
     MIN_SHAKE_DIST = constants.MIN_SHAKE_DIST,
@@ -42,7 +41,7 @@ define([
     lastMoves = [];
     clearTimeout(lastShakeTimeout);
     if (lastShakeVigor > 0) {
-      lastShakeVigor = 0;
+      lastShakeVigor = lastShakeVigorPercent = 0;
       fireNotifications(0);
     }
   }
@@ -150,13 +149,15 @@ define([
       return;
     }
 
-    var shakeVigor = getShakeVigor(evt);
+    var shakeVigor = getShakeVigor(evt),
+      shakeVigorPercent;
 
     if (shakeVigor !== lastShakeVigor) {
-      fireNotifications(Math.round(100 * shakeVigor / MAX_SHAKE_VIGOR));
+      shakeVigorPercent = Math.round(100 * shakeVigor / MAX_SHAKE_VIGOR);
+      fireNotifications(shakeVigorPercent);
+      lastShakeVigor = shakeVigor;
+      lastShakeVigorPercent = shakeVigorPercent;
     }
-
-    lastShakeVigor = shakeVigor;
 
     lastMoves.shift();
   }
@@ -174,7 +175,7 @@ define([
 
     // Metric
     // Fires only when it goes over the threshold, to limit network requests
-    if (shakeVigorPercent >= METRIC_THRESHOLD_SHAKE_PERCENT && lastShakeVigor < METRIC_THRESHOLD_SHAKE_PERCENT) {
+    if (shakeVigorPercent >= METRIC_THRESHOLD_SHAKE_PERCENT && lastShakeVigorPercent < METRIC_THRESHOLD_SHAKE_PERCENT) {
       nativeFn.setTimeout(function() {
         fireShakeVigorMetric(shakeVigorPercent);
       }, 0);
@@ -211,21 +212,26 @@ define([
   }
 
   function fireShakeVigorMetric(shakeVigorPercent) {
-    new metric.MouseShake({
+    var details = {
       vigor: shakeVigorPercent,
       sessionCount: incrementSessionShakes()
-    }).send();
+    };
+
+    if (SC_DEV) {
+      console.log('Mouse shake metric fired: ', JSON.stringify(details));
+    }
+
+    new metric.MouseShake(details).send();
   }
 
   function fireShakeVigorChange(shakeVigorPercent) {
+    // TODO use this or remove it based on metrics
     events.emit('core/mouseshake', shakeVigorPercent);
   }
 
   function init() {
     domEvents.on(document, 'mousemove', onMouseMove);
     domEvents.on(document, 'mouseleave', onMouseLeave);
-
-    badgeGlow.init();
   }
 
   return {
