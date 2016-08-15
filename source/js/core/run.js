@@ -20,7 +20,7 @@ define(
     'Promise',
     'core/modifier-key-state',
     'core/native-functions',
-    'core/mouseshake/mouseshake'
+    'core/shake/shake'
   ],
   function (
     conf,
@@ -35,7 +35,7 @@ define(
     Promise,
     modifierKeyState,
     nativeFn,
-    mouseShake
+    shake
   ) {
   'use strict';
 
@@ -196,7 +196,7 @@ define(
 
     modifierKeyState.init();
 
-    mouseShake.init();
+    shake.init();
 
     onSitecuesReady();
   }
