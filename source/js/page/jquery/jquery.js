@@ -20,6 +20,16 @@
  *
  * Date: 2016-06-10T12:56Z
  */
+
+/*
+* !!! NOTE: !!!
+*
+* When updating jQuery, we need to ensure that our custom code blocks overwriting global references (setTimeout/JSON)
+* are copied to the new version
+*
+* */
+
+
 ( function( global, factory ) {
 
   "use strict";
@@ -54,17 +64,32 @@
 // enough that all such attempts are guarded in a try block.
   "use strict";
 
+  function insertNativeFrame() {
+    var frame = document.createElement('iframe');
+    frame.id = frameId;
+    frame.style.cssText = 'position:absolute;width:1px;height:1px;left:-9999px;visibility:hidden;';
+    document.documentElement.appendChild(frame);
+    return frame;
+  }
+
   function cacheSetTimeoutReference() {
     var
       frameId = 'sitecues-native-context',
       frame   = document.querySelector('#' + frameId);
     if (!frame) {
-      frame = document.createElement('iframe');
-      frame.id = frameId;
-      frame.style.cssText = 'position:absolute;width:1px;height:1px;left:-9999px;visibility:hidden;';
-      document.documentElement.appendChild(frame);
+      frame = insertNativeFrame();
     }
-    return setTimeout = frame.contentWindow.setTimeout.bind(window);
+    return frame.contentWindow.setTimeout.bind(window);
+  }
+
+  function cacheJSONReference() {
+    var
+      frameId = 'sitecues-native-context',
+      frame   = document.querySelector('#' + frameId);
+    if (!frame) {
+      frame = insertNativeFrame();
+    }
+    return frame.contentWindow.JSON;
   }
 
   var arr = [];
@@ -72,6 +97,8 @@
   var document = window.document;
 
   var setTimeout = cacheSetTimeoutReference();
+
+  var JSON = cacheJSONReference();
 
   var getProto = Object.getPrototypeOf;
 

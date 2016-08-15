@@ -11,16 +11,22 @@ define(
     'core/conf/urls',
     'core/constants',
     'core/bp/model/classic-mode',
-    'core/platform' ],
-  function (conf,
-            session,
-            site,
-            locale,
-            xhr,
-            urls,
-            constants,
-            classicMode,
-            platform) {
+    'core/platform',
+    'core/native-functions'
+  ],
+  function (
+    conf,
+    session,
+    site,
+    locale,
+    xhr,
+    urls,
+    constants,
+    classicMode,
+    platform,
+    nativeFn
+  ) {
+  'use strict';
 
     // IMPORTANT! Increment METRICS_VERSION this every time metrics change in any way
     // IMPORTANT! Have the backend team review all metrics changes!!!
@@ -58,7 +64,7 @@ define(
         var value = data[propName],
           type = typeof value;
         if (value !== null && type !== 'boolean' && type !== 'number' && type !== 'string' && type !== 'undefined') {
-          data[propName] = JSON.stringify(data[propName]);
+          data[propName] = nativeFn.JSON.stringify(data[propName]);
         }
       }
 
@@ -77,7 +83,7 @@ define(
 
     Metric.prototype.createDataJSON = function createDataJSON(name, details) {
       if (doLogMetrics) {
-        console.log('Metric / %s', name + (details ? ' / ' + JSON.stringify(details) : ''));
+        console.log('Metric / %s', name + (details ? ' / ' + nativeFn.JSON.stringify(details) : ''));
       }
 
       var data = this.data = {},
@@ -111,6 +117,7 @@ define(
     };
 
     Metric.prototype.send = function send() {
+      /*jshint validthis: true */
       if (SC_LOCAL || doSuppressMetrics) {   // No metric events in local mode
         return;
       }
@@ -121,7 +128,7 @@ define(
       });
 
       metricHistory.push(this);
-
+      /*jshint validthis: false */
     };
 
     function getMetricHistory(){
@@ -130,7 +137,9 @@ define(
 
     function wrap(metricName) {
       function metricFn(details) {
+        /*jshint validthis: true */
         Metric.call(this, metricName, details);
+        /*jshint validthis: false */
       }
       metricFn.prototype = Object.create(Metric.prototype);
       metricFn.prototype.constructor = metricFn;

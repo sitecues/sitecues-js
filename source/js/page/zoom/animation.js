@@ -430,7 +430,7 @@ define(
           audioCues.playZoomCue(state.completedZoom);
         });
       }
-      if (JSON.stringify(state.zoomInput) === '{}') {
+      if (nativeFn.JSON.stringify(state.zoomInput) === '{}') {
         errors.report(new Error('zoom metric empty details'));
       }
       new metric.ZoomChange(state.zoomInput).send();

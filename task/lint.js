@@ -30,6 +30,7 @@ function lintES6() {
  //Don't allow calls to setTimeout, Map, bind from the global scope, they may have been overridden
  function checkForNativeFns() {
    return gulp.src(ES5_LINT_GLOB)
+     .pipe(check(/[^\.\w]JSON *\(/))
      .pipe(check(/[^\.\w]setTimeout *\(/))
      .pipe(check(/[^\.\w]Map *\(/))
      .pipe(check(/[^\.\w]bind *\(/))

@@ -15,7 +15,16 @@
  *    }
  * }
  */
-define(['core/util/uuid'], function(uuid) {
+define(
+  [
+    'core/util/uuid',
+    'core/native-functions'
+  ],
+  function (
+    uuid,
+    nativeFn
+  ) {
+  'use strict';
 
   var
     NAMESPACE = 'sitecues',
@@ -46,7 +55,7 @@ define(['core/util/uuid'], function(uuid) {
      * Get the final representation that we will put into storage.
      */
     function serialize(data) {
-      return JSON.stringify(data || {});
+      return nativeFn.JSON.stringify(data || {});
     }
 
     // Saves data for this page view
@@ -74,7 +83,7 @@ define(['core/util/uuid'], function(uuid) {
      * Get the normalized representation of what was in storage.
      */
     function deserialize(dataString) {
-      return dataString ? JSON.parse(dataString) : {};
+      return dataString ? nativeFn.JSON.parse(dataString) : {};
     }
 
     if (cachedAppData) {
