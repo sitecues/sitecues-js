@@ -3,7 +3,17 @@
  * This file exposes an API for creating javascript animations.
  */
 
-define(['bp-expanded/view/transform-util', 'core/platform'], function (transformUtil, platform) {
+define(
+  [
+    'bp-expanded/view/transform-util',
+    'core/platform',
+    'core/native-functions'
+  ],
+  function (
+    transformUtil,
+    platform,
+    nativeFn
+  ) {
 
   var requestFrameFn = window.requestAnimationFrame,
       cancelFrameFn  = window.cancelAnimationFrame,
@@ -136,7 +146,7 @@ define(['bp-expanded/view/transform-util', 'core/platform'], function (transform
         if (elements[index]) {
           toTransform = toTransforms[index];
           if (doTweak) {
-            toTransform = JSON.parse(JSON.stringify(toTransform));
+            toTransform = nativeFn.JSON.parse(nativeFn.JSON.stringify(toTransform));
             toTransform.translateY = (toTransform.translateY || 0) + 0.001;
           }
           transformUtil.setElemTransform(elements[index], toTransform);

@@ -272,7 +272,7 @@ define(
     });
 
     // Copy sitecuesInitSummary so we can add to it
-    initialPageVisitDetails = JSON.parse(JSON.stringify(sitecuesInitSummary));
+    initialPageVisitDetails = nativeFn.JSON.parse(nativeFn.JSON.stringify(sitecuesInitSummary));
 
     // Add platform details
     initialPageVisitDetails.nativeZoom = platform.nativeZoom;
