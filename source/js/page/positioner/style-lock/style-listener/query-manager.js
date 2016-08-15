@@ -8,7 +8,7 @@
 define(
   [
     'page/positioner/style-lock/style-listener/selector-map',
-    'page/positioner/util/array-utility',
+    'core/util/array-utility',
     'core/native-functions'
   ],
   function (

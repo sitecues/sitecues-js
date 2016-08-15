@@ -24,7 +24,9 @@ define(
     'core/bp/model/classic-mode',
     'core/bp/view/badge/page-badge',
     'Promise',
-    'core/native-functions'
+    'core/native-functions',
+    'core/events',
+    'core/util/array-utility'
   ],
   function (
     bpController,
@@ -35,7 +37,9 @@ define(
     classicMode,
     pageBadgeView,
     Promise,
-    nativeFn
+    nativeFn,
+    events,
+    arrayUtil
   ) {
 
   /*
@@ -44,7 +48,10 @@ define(
 
   // The htmlContainer has all of the SVG inside of it, and can take keyboard focus
   var byId = helper.byId,
-      badgeView;
+      docElem,
+      badgeView,
+      bpElementMap,
+      didCacheBPElements;
 
   /**
    *** Start point ***
@@ -176,7 +183,7 @@ define(
   function fixDimensionsOfBody() {
     var body = document.body,
       bodyStyle   = getComputedStyle(body),
-      docStyle    = getComputedStyle(document.documentElement),
+      docStyle    = getComputedStyle(docElem),
       botMargin   = parseFloat(bodyStyle.marginBottom),
       topMargin   = bodyStyle.marginTop,
       leftMargin  = bodyStyle.marginLeft,
@@ -220,6 +227,20 @@ define(
     return viewInfo;
   }
 
+  function isBPElement(element) {
+    if (!didCacheBPElements) {
+      var
+        badge         = document.getElementById('sitecues-badge'),
+        badgeElements = arrayUtil.toArray(badge.querySelectorAll('*'));
+      badgeElements.push(badge);
+      badgeElements.forEach(function (el) {
+        bpElementMap.set(el, true);
+      });
+      didCacheBPElements = true;
+    }
+    return Boolean(bpElementMap.get(element));
+  }
+
   /**
    * init()
    *
@@ -245,6 +266,12 @@ define(
    *   5. Missing badge and document complete (causes toolbar)
    */
   function init() {
+    bpElementMap = new WeakMap();
+    docElem      = document.documentElement;
+
+    events.on('bp/did-init-secondary bp/content-loaded', function () {
+      didCacheBPElements = false;
+    });
 
     // Get whether the BP will run in classic mode (still needed for MS Edge)
     initClassicMode();
@@ -265,6 +292,7 @@ define(
   }
 
   return {
-    init: init
+    init: init,
+    isBPElement: isBPElement
   };
 });

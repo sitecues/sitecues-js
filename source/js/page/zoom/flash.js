@@ -3,7 +3,7 @@ define(
     'core/events',
     'page/zoom/state',
     'core/conf/urls',
-    'page/positioner/util/array-utility'
+    'core/util/array-utility'
   ],
   function (
     events,

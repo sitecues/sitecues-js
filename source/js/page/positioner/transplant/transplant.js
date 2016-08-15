@@ -6,7 +6,7 @@ define(
     'page/positioner/util/element-map',
     'page/positioner/transplant/clone',
     'page/positioner/constants',
-    'page/positioner/util/array-utility',
+    'core/util/array-utility',
     'page/positioner/util/element-info',
     'page/positioner/transplant/graft',
     'page/positioner/transplant/anchors'

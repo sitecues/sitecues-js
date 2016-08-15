@@ -23,7 +23,7 @@ define(
     'core/platform',
     'page/positioner/transform/rect-cache',
     'core/dom-events',
-    'page/positioner/util/array-utility',
+    'core/util/array-utility',
     'page/zoom/style',
     'page/viewport/scrollbars',
     'page/zoom/config/config',

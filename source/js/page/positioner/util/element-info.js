@@ -3,15 +3,16 @@ define(
     '$',
     'page/positioner/util/element-map',
     'page/zoom/state',
-    'core/platform'
+    'core/platform',
+    'core/bp/bp'
   ],
   function (
     $,
     elementMap,
     state,
-    platform
+    platform,
+    bp
   ) {
-
   'use strict';
 
   var originalBody, auxiliaryBody, docElem;
@@ -135,8 +136,8 @@ define(
     return !isClone(element) && !isPlaceholder(element);
   }
 
-  function isSitecuesElement(element, value) {
-    return getOrSet(element, 'sitecuesElement', value) || element.localName === 'sc';
+  function isSitecuesElement(element) {
+    return bp.isBPElement(element) || element.localName === 'sc';
   }
 
   function isTransplantRoot(element, value) {
@@ -173,14 +174,6 @@ define(
   function init() {
     originalBody = document.body;
     docElem      = document.documentElement;
-
-    var
-      sitecuesSet = $(docElem).find('#sitecues-badge').find('*').addBack().get(),
-      length = sitecuesSet.length;
-
-    for (var i = 0; i < length; i++) {
-      isSitecuesElement(sitecuesSet[i], true);
-    }
   }
 
   return {
