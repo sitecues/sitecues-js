@@ -3,8 +3,10 @@
  * - Badge glows based on mouse shake
  */
 define([
-  'core/events'
-], function(events) {
+  'core/events',
+  'core/native-functions'
+], function(events,
+            nativeFn) {
 
   var isPanelOpen,
     badgeSvgStyle,
@@ -36,7 +38,7 @@ define([
 
     clearTimeout(fadeTimeout);
     if (glowPercent) {
-      fadeTimeout = setTimeout(fadeBadgeGlow, FADE_TIME_MS);
+      fadeTimeout = nativeFn.setTimeout(fadeBadgeGlow, FADE_TIME_MS);
     }
   }
 
