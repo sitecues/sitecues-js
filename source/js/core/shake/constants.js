@@ -13,6 +13,7 @@ define([], function () {
     MAX_SHAKE_VIGOR_INCREASE: 100,  // Max shake increase (out of total possible MAX_SHAKE_VIGOR)
     MAX_SHAKE_VIGOR: 400,           // Max total shake vigor
     MIN_MOVE_SIZE_FOR_SHAKE: 3,     // Pixel-size for irrelevant mousemove
+    MS_BETWEEN_SHAKE_EVENTS: 50,    // ms between internal shake events
     METRIC_THRESHOLD_SHAKE_PERCENT: 50   // Only fire metric when shake vigor suddenly jumps over this % of MAX_SHAKE_VIGOR
   };
 });

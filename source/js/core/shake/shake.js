@@ -20,7 +20,7 @@ define([
             nativeFn) {
 
   var recentMousePositions = [],
-    lastShakeTimeout = 0,
+    lastShakeTimeout,
     lastShakeVigor = 0,
     lastShakeVigorPercent = 0,
     MIN_DIR_SWITCHES_FOR_SHAKE = constants.MIN_DIR_SWITCHES_FOR_SHAKE,
@@ -124,7 +124,7 @@ define([
         return totalYDist < MAX_SHAKE_DIST;
       }
 
-      if (isShakeX) {
+      if (isShakeY) {
         // Vertical only -- require small total horizontal movement
         totalXDist = Math.abs(currMove.x - recentMousePositions[0].x);
         return totalXDist < MAX_SHAKE_DIST;
@@ -145,8 +145,12 @@ define([
   }
 
   function onMouseMove(evt) {
-    clearTimeout(lastShakeTimeout);
+    setTimeout(function () {
+      processMouseMove(evt);
+    }, 0);
+  }
 
+  function processMouseMove(evt) {
     // Add move to FIFO array
     recentMousePositions.push({x: evt.clientX, y: evt.clientY});
 
@@ -193,9 +197,11 @@ define([
   function fireNotifications(shakeVigorPercent) {
     // Internal change event
     // TODO add back once we use it
-    // lastShakeTimeout = nativeFn.setTimeout(function() {
-    //   fireShakeVigorChange(shakeVigorPercent);
-    // }, 0);
+    // if (!lastShakeTimeout) {
+      // lastShakeTimeout = nativeFn.setTimeout(function() {
+      //   fireShakeVigorChange(shakeVigorPercent);
+      // }, constants.MS_BETWEEN_SHAKE_EVENTS);
+    // }
 
     // Debugging
     // Too noisy for main build
@@ -236,6 +242,7 @@ define([
 
   // Add back once we use it
   // function fireShakeVigorChange(shakeVigorPercent) {
+  //   lastShakeTimeout = 0;
   //   events.emit('core/mouseshake', shakeVigorPercent);
   // }
 
