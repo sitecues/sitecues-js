@@ -14,6 +14,7 @@ define([], function () {
     FEEDBACK: 'feedback-sent',
     KEY_COMMAND: 'key-command',
     LENS_OPEN: 'hlb-opened',
+    MOUSE_SHAKE: 'mouse-shake',
     PAGE_VISIT: 'page-visited',
     PANEL_CLICK: 'panel-clicked',
     PANEL_CLOSE: 'panel-closed',
