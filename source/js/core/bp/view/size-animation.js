@@ -1,10 +1,24 @@
 /**
  * Expand or contract the BP
  */
-define([ 'core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/platform', 'core/events'],
-  function(state, BP_CONST, helper, platform, events) {
-
-    'use strict';
+define(
+  [
+    'core/bp/model/state',
+    'core/bp/constants',
+    'core/bp/helper',
+    'core/platform',
+    'core/events',
+    'core/native-functions'
+  ],
+  function (
+    state,
+    BP_CONST,
+    helper,
+    platform,
+    events,
+    nativeFn
+  ) {
+  'use strict';
 
   var requestFrameFn = window.requestAnimationFrame,
       cancelFrameFn  = window.cancelAnimationFrame,
@@ -363,7 +377,7 @@ define([ 'core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/pla
   function getTargetSVGElementTransforms () {
 
     function copyObj (obj) {
-      return JSON.parse(JSON.stringify(obj));
+      return nativeFn.JSON.parse(nativeFn.JSON.stringify(obj));
     }
 
     var isPanelRequested = state.isPanelRequested(),

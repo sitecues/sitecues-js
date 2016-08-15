@@ -25,16 +25,14 @@ define(
 
       // Promise handler for when loading voices is asynchronous.
       function waitForVoices(resolve, reject) {
-        speechSynthesis.addEventListener('voiceschanged', onVoicesChanged, true);
-
-        // Don't wait forever for a voice.
-        var voicesTimeout = nativeFn.setTimeout(onTimeout, 3000);
-
         // Handle timeouts so we don't wait forever in any case where
         // the voiceschanged event never fires.
         function onTimeout() {
           reject(new Error(errMessage.TIMEOUT));
         }
+
+        // Don't wait forever for a voice.
+        var voicesTimeout = nativeFn.setTimeout(onTimeout, 3000);
 
         // At least one voice has loaded asynchronously. We don't know if/when
         // any more will come in, so it is best to consider the job done here.
@@ -45,6 +43,8 @@ define(
           // Remove thyself.
           event.currentTarget.removeEventListener(event.type, onVoicesChanged, true);
         }
+
+        speechSynthesis.addEventListener('voiceschanged', onVoicesChanged, true);
       }
 
       // Tickle the browser with a feather to get it to actually load voices.
@@ -74,7 +74,9 @@ define(
       // In theory, a platform could support the synthesis API but not have any
       // voices available. Or all the voices could suddenly be uninstalled.
       // We have not encountered that, but we try to take care of it here.
-      throw new Error(errMessage.NO_VOICES);
+      return Promise.reject(
+          new Error(errMessage.NO_VOICES)
+      );
     }
 
     // Based on a given set of voices and locale restrictions, get sitecues'

@@ -1,5 +1,24 @@
-define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/metric', 'core/bp/view/view', 'core/events'],
-  function (BP_CONST, helper, state, metric, view, events) {
+define(
+  [
+    'core/bp/constants',
+    'core/bp/helper',
+    'core/bp/model/state',
+    'core/metric',
+    'core/bp/view/view',
+    'core/events',
+    'core/native-functions'
+  ],
+  function (
+    BP_CONST,
+    helper,
+    state,
+    metric,
+    view,
+    events,
+    nativeFn
+  ) {
+  'use strict';
+
   var byId = helper.byId,
     isActive = false,
     isInitialized,
@@ -114,7 +133,7 @@ define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/metr
     // Prepend blank lines so that status is on next screen of mail message in order not to confuse the user.
     var NUM_NEWLINES = 99,
       STATUS_PREFIX = Array(NUM_NEWLINES).join('\n') + '---- User configuration: ----\n\n',
-      currentStatusText = JSON.stringify(currentStatus, null, '    ');
+      currentStatusText = nativeFn.JSON.stringify(currentStatus, null, '    ');
     return getFeedbackText() + STATUS_PREFIX + currentStatusText;
   }
 
@@ -156,7 +175,7 @@ define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/metr
       var details = {
         feedbackText: getFeedbackTextToSend(),
         rating: currentRating,  // 0 = no rating, otherwise 1-5 stars
-        statusText: JSON.stringify(currentStatus)
+        statusText: nativeFn.JSON.stringify(currentStatus)
       };
 
       if (SC_DEV) {

@@ -19,7 +19,8 @@ define(
     'core/dom-events',
     'Promise',
     'core/modifier-key-state',
-    'core/native-functions'
+    'core/native-functions',
+    'core/shake/shake'
   ],
   function (
     conf,
@@ -33,7 +34,8 @@ define(
     domEvents,
     Promise,
     modifierKeyState,
-    nativeFn
+    nativeFn,
+    shake
   ) {
   'use strict';
 
@@ -198,6 +200,8 @@ define(
 
     modifierKeyState.init();
 
+    shake.init();
+
     onSitecuesReady();
   }
 
@@ -272,7 +276,7 @@ define(
     });
 
     // Copy sitecuesInitSummary so we can add to it
-    initialPageVisitDetails = JSON.parse(JSON.stringify(sitecuesInitSummary));
+    initialPageVisitDetails = nativeFn.JSON.parse(nativeFn.JSON.stringify(sitecuesInitSummary));
 
     // Add platform details
     initialPageVisitDetails.nativeZoom = platform.nativeZoom;

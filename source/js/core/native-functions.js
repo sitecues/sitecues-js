@@ -8,12 +8,16 @@ define([], function () {
 
     exports.bindFn = frame.contentWindow.Function.prototype.bind;
 
-    function addWindowMethod(name) {
-      exports[name] = frame.contentWindow[name].bind(window);
+    function addWindowProperty(name) {
+      var value = frame.contentWindow[name];
+      // if `value` is a function, bind it to the top window
+      exports[name] = value.bind ? value.bind(window) : value;
     }
 
-    addWindowMethod('Map');
-    addWindowMethod('setTimeout');
+    addWindowProperty('Map');
+    addWindowProperty('setTimeout');
+    // Necessary on http://www.mgmresorts.com/
+    addWindowProperty('JSON');
   }
 
   exports.init = init;

@@ -400,8 +400,8 @@ define(
 
       // Image has full color information
       if (SC_DEV && isDebuggingOn && img) {
-        $(img).attr('data-sc-pixel-info', JSON.stringify(pixelInfo));
-        $(img).attr('data-sc-pixel-score-breakdown', JSON.stringify(analysis));
+        $(img).attr('data-sc-pixel-info', nativeFn.JSON.stringify(pixelInfo));
+        $(img).attr('data-sc-pixel-score-breakdown', nativeFn.JSON.stringify(analysis));
         $(img).attr('data-sc-pixel-score', score);
       }
 
