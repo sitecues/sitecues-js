@@ -7,13 +7,13 @@
  */
 define([
   'core/metric',
-  'core/events',
+  // 'core/events',
   'core/dom-events',
   'core/shake/constants',
   'core/platform',
   'core/native-functions'
 ], function(metric,
-            events,
+            // events,
             domEvents,
             constants,
             platform,
