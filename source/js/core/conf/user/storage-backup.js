@@ -10,15 +10,18 @@ define(
     'core/conf/site',
     'Promise',
     'core/platform',
-    'core/native-functions'
+    'core/native-functions',
+    'core/inline-style/inline-style'
   ],
   function (
     urls,
     site,
     Promise,
     platform,
-    nativeFn
+    nativeFn,
+    inlineStyle
   ) {
+  'use strict';
 
   var PATH = 'html/prefs.html',
     ID = 'sitecues-prefs',
@@ -179,7 +182,7 @@ define(
       iframe.setAttribute('role', 'presentation');
       iframe.id = ID;
       // Needs to have some size (1x1) and not be display:none -- otherwise it won't load in some browsers
-      iframe.style.cssText = 'position:absolute;width:1px;height:1px;left:-9999px;visibility:hidden;';
+      inlineStyle.set(iframe, 'position:absolute;width:1px;height:1px;left:-9999px;visibility:hidden;', true);
       iframe.src = urls.resolveResourceUrl(PATH);
       // Set title and text description for iframe. Without this, accessibility tools fail,
       // even though they shouldn't given that it has aria-hidden="true" and says role="presentation".

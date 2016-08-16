@@ -18,7 +18,8 @@ define(
     'page/positioner/util/element-map',
     'page/positioner/constants',
     'core/constants',
-    'core/native-functions'
+    'core/native-functions',
+    'core/inline-style/inline-style'
   ],
   function (
     queryManager,
@@ -30,7 +31,8 @@ define(
     elementMap,
     constants,
     coreConstants,
-    nativeFn
+    nativeFn,
+    inlineStyle
   ) {
   'use strict';
 
@@ -134,7 +136,7 @@ define(
               var
                 property       = observedProperties[j],
                 inlineKey      = property + '_inline_value',
-                inlineValue    = target.style[property],
+                inlineValue    = inlineStyle.get(target, property),
                 oldInlineValue = elementMap.getField(target, inlineKey),
                 didChange      = oldInlineValue !== inlineValue;
 

@@ -19,7 +19,8 @@ define(
     'core/dom-events',
     'page/zoom/zoom',
     'page/zoom/util/body-geometry',
-    'core/native-functions'
+    'core/native-functions',
+    'core/inline-style/inline-style'
   ],
   function (
     $,
@@ -37,7 +38,8 @@ define(
     domEvents,
     zoomMod,
     bodyGeo,
-    nativeFn
+    nativeFn,
+    inlineStyle
   ) {
 /*jshint +W072 */
   'use strict';
@@ -457,10 +459,11 @@ define(
     }
   }
 
-  function setMultipleBackgrounds(style, newBg, origBg, doPlaceOrigOnTop) {
-    var hasOrigBgImage = origBg.backgroundImage !== 'none',
-      value;
-    BG_PROPS.forEach(function(prop) {
+  function setMultipleBackgrounds(element, newBg, origBg, doPlaceOrigOnTop) {
+    var value,
+      hasOrigBgImage = origBg.backgroundImage !== 'none',
+      styles = {};
+    BG_PROPS.forEach(function (prop) {
       var fullName = 'background' + prop;
       if (!hasOrigBgImage) {
         value = newBg[fullName];
@@ -471,15 +474,16 @@ define(
       else {
         value = newBg[fullName] + ',' + newBg[fullName];
       }
-      style[fullName] = value;
+      styles[fullName] = value;
     });
+    inlineStyle.set(element, styles);
   }
 
-  function copyBackgroundCss(orig) {
+  function copyBackgroundCss(origElem) {
     var copy = {};
     BG_PROPS.forEach(function (prop) {
       var fullName = 'background' + prop;
-      copy[fullName] = orig[fullName].slice();
+      copy[fullName] = inlineStyle.get(origElem, fullName).slice();
     });
     return copy;
   }
@@ -496,7 +500,6 @@ define(
   function updateElementBgImage() {
 
     var element = state.picked[0],
-        inlineStyle = element.style,
         offsetLeft,
         offsetTop;
 
@@ -548,10 +551,10 @@ define(
       doPlaceOrigOnTop = common.isSprite(origBgStyle);  // Place sprites on top of our background, and textures underneath it
 
     // Save the current inline style for later restoration when the highlight is hidden
-    state.savedCss = copyBackgroundCss(inlineStyle);
+    state.savedCss = copyBackgroundCss(element);
 
     // Set the new background
-    setMultipleBackgrounds(inlineStyle, newBgStyle, origBgStyle, doPlaceOrigOnTop);
+    setMultipleBackgrounds(element, newBgStyle, origBgStyle, doPlaceOrigOnTop);
   }
 
   function isCloseToHighlightColor(colorIntensity) {

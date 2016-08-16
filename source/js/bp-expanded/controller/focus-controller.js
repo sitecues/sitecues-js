@@ -8,7 +8,8 @@ define(
     'core/bp/view/view',
     'core/events',
     'core/constants',
-    'core/native-functions'
+    'core/native-functions',
+    'core/inline-style/inline-style'
   ],
   function (
     BP_CONST,
@@ -18,7 +19,8 @@ define(
     view,
     events,
     CORE_CONST,
-    nativeFn
+    nativeFn,
+    inlineStyle
   ) {
   'use strict';
 
@@ -301,15 +303,15 @@ define(
       var EXTRA_FOCUS_PADDING = 1,
         clientPanelRect = helper.getRect(getPanelContainer()),  // Focus rect is positioned relative to this
         clientFocusRect = helper.getRect(showFocusOn),
-        focusOutline = byId(BP_CONST.OUTLINE_ID),
-        focusOutlineStyle = focusOutline.style;
+        focusOutline = byId(BP_CONST.OUTLINE_ID);
 
       focusOutline.setAttribute('data-show', true);
-      focusOutlineStyle.width = getFinalCoordinate(clientFocusRect.width + 2 * EXTRA_FOCUS_PADDING);
-      focusOutlineStyle.height = getFinalCoordinate(clientFocusRect.height + 2 * EXTRA_FOCUS_PADDING);
-
-      focusOutlineStyle.top = getFinalCoordinate(clientFocusRect.top - EXTRA_FOCUS_PADDING - clientPanelRect.top);
-      focusOutlineStyle.left = getFinalCoordinate(clientFocusRect.left - EXTRA_FOCUS_PADDING - clientPanelRect.left);
+      inlineStyle.set(focusOutline, {
+        width  : getFinalCoordinate(clientFocusRect.width + 2 * EXTRA_FOCUS_PADDING),
+        height : getFinalCoordinate(clientFocusRect.height + 2 * EXTRA_FOCUS_PADDING),
+        top    : getFinalCoordinate(clientFocusRect.top - EXTRA_FOCUS_PADDING - clientPanelRect.top),
+        left   : getFinalCoordinate(clientFocusRect.left - EXTRA_FOCUS_PADDING - clientPanelRect.left)
+      }, true);
     }
   }
 

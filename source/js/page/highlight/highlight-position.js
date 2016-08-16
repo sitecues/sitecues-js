@@ -9,7 +9,8 @@ define(
     'page/util/element-classifier',
     'page/zoom/zoom',
     'page/highlight/traitcache',
-    'core/native-functions'
+    'core/native-functions',
+    'core/inline-style/inline-style'
   ],
   function (
     $,
@@ -17,7 +18,8 @@ define(
     elemClassifier,
     zoomMod,
     traitcache,
-    nativeFn
+    nativeFn,
+    inlineStyle
   ) {
   'use strict';
 
@@ -446,14 +448,18 @@ define(
       // Turn off zoom CSS hacks for comboboxes
       comboElem.setAttribute('data-sc-dropdown-fix-off', '');
       // Turn off transition temporarily if it's there, otherwise it prevents us from getting the correct rect
-      oldTransitionProp = comboElem.style.transitionProperty;
-      comboElem.style.transitionProperty = 'none';
+      oldTransitionProp = inlineStyle.get(comboElem, 'transitionProperty');
+      inlineStyle.set(comboElem, {
+        transitionProperty : 'none'
+      });
       // Get what the rect would have been
       comboRect = comboElem.getBoundingClientRect();
       // Restore CSS
       nativeFn.setTimeout(function() {
         // Do this on a timeout otherwise it may animate our return changes
-        comboElem.style.transitionProperty = oldTransitionProp;
+        inlineStyle.set(comboElem, {
+          transitionProperty : oldTransitionProp
+        });
       }, 0);
       comboElem.removeAttribute('data-sc-dropdown-fix');
     }

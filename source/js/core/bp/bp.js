@@ -18,6 +18,7 @@ define(
   [
     'core/bp/controller/bp-controller',
     'core/bp/model/state',
+    'core/bp/model/element-info',
     'core/bp/helper',
     'core/bp/constants',
     'core/conf/site',
@@ -25,12 +26,12 @@ define(
     'core/bp/view/badge/page-badge',
     'Promise',
     'core/native-functions',
-    'core/events',
-    'core/util/array-utility'
+    'core/inline-style/inline-style'
   ],
   function (
     bpController,
     state,
+    bpElemInfo,
     helper,
     BP_CONST,
     site,
@@ -38,9 +39,9 @@ define(
     pageBadgeView,
     Promise,
     nativeFn,
-    events,
-    arrayUtil
+    inlineStyle
   ) {
+  'use strict';
 
   /*
    *** Public methods ***
@@ -49,9 +50,7 @@ define(
   // The htmlContainer has all of the SVG inside of it, and can take keyboard focus
   var byId = helper.byId,
       docElem,
-      badgeView,
-      bpElementMap,
-      didCacheBPElements;
+      badgeView;
 
   /**
    *** Start point ***
@@ -190,12 +189,16 @@ define(
       rightMargin = bodyStyle.marginRight;
 
     if (parseFloat(bodyStyle.height) < parseFloat(docStyle.height)) {
-      body.style.height = docStyle.height;
+      inlineStyle.set(body, {
+        height : docStyle.height
+      });
     }
     if (botMargin !== 0) {
       //marginBottom doesn't override bottom margins that are set with the shorthand 'margin' style,
       //so we get all the margins and set our own inline shorthand margin
-      body.style.margin = topMargin + ' ' + rightMargin + ' 0px ' + leftMargin;
+      inlineStyle.set(body, {
+        margin : topMargin + ' ' + rightMargin + ' 0px ' + leftMargin
+      });
     }
   }
 
@@ -227,20 +230,6 @@ define(
     return viewInfo;
   }
 
-  function isBPElement(element) {
-    if (!didCacheBPElements) {
-      var
-        badge         = document.getElementById('sitecues-badge'),
-        badgeElements = arrayUtil.toArray(badge.querySelectorAll('*'));
-      badgeElements.push(badge);
-      badgeElements.forEach(function (el) {
-        bpElementMap.set(el, true);
-      });
-      didCacheBPElements = true;
-    }
-    return Boolean(bpElementMap.get(element));
-  }
-
   /**
    * init()
    *
@@ -266,12 +255,8 @@ define(
    *   5. Missing badge and document complete (causes toolbar)
    */
   function init() {
-    bpElementMap = new WeakMap();
     docElem      = document.documentElement;
-
-    events.on('bp/did-init-secondary bp/content-loaded', function () {
-      didCacheBPElements = false;
-    });
+    bpElemInfo.init();
 
     // Get whether the BP will run in classic mode (still needed for MS Edge)
     initClassicMode();
@@ -292,7 +277,6 @@ define(
   }
 
   return {
-    init: init,
-    isBPElement: isBPElement
+    init: init
   };
 });

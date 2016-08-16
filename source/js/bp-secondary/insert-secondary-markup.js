@@ -1,6 +1,20 @@
 // Markup for the secondary panel
-define(['core/bp/view/markup-finalizer', 'core/bp/helper', 'core/platform', 'bp-secondary/font-charset', 'core/conf/urls'],
-  function(finalizer, helper, platform, fontCharset, urls) {
+define(
+  [
+    'core/bp/view/markup-finalizer',
+    'core/bp/helper',
+    'core/platform',
+    'bp-secondary/font-charset',
+    'core/conf/urls'
+  ],
+  function (
+    finalizer,
+    helper,
+    platform,
+    fontCharset,
+    urls
+  ) {
+  'use strict';
   /*jshint multistr: true */
 
 var isInitialized,

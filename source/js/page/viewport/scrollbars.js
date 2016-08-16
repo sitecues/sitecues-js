@@ -11,17 +11,19 @@ define(
     'core/platform',
     'page/viewport/viewport',
     'core/native-functions',
-    'page/zoom/util/body-geometry'
+    'page/zoom/util/body-geometry',
+    'core/inline-style/inline-style'
   ],
   function (
     platform,
     viewport,
     nativeFn,
-    bodyGeo
+    bodyGeo,
+    inlineStyle
   ) {
   'use strict';
 
-  var mainBodyRect,
+  var mainBodyRect, docElem,
     shouldComputeMainBodyScrollbars,
     doForceHorizScrollbar,
     doForceVertScrollbar,
@@ -61,12 +63,15 @@ define(
   }
 
   function setOverflow(overflowX, overflowY) {
-    var docElemStyle = document.documentElement.style;
-    if (docElemStyle.overflowX !== overflowX) {
-      docElemStyle.overflowX = overflowX;
+    if (inlineStyle.get(docElem, 'overflowX') !== overflowX) {
+      inlineStyle.set(docElem, {
+        overflowX : overflowX
+      });
     }
-    if (docElemStyle.overflowY !== overflowY) {
-      docElemStyle.overflowY = overflowY;
+    if (inlineStyle.get(docElem, 'overflowY') !== overflowY) {
+      inlineStyle.set(docElem, {
+        overflowY : overflowY
+      });
     }
   }
 
@@ -81,16 +86,14 @@ define(
 
     mainBodyRect = bodyGeo.getCurrentBodyInfo();
 
-    var docElemStyle = document.documentElement.style;
-
     // -- Clear the scrollbars --
     if (!isInitialized) {
       if (shouldComputeMainBodyScrollbars) {
         defaultOverflowX = defaultOverflowY = 'hidden';
       }
       else {
-        defaultOverflowX = docElemStyle.overflowX;
-        defaultOverflowY = docElemStyle.overflowY;
+        defaultOverflowX = inlineStyle.get(docElem, 'overflowX');
+        defaultOverflowY = inlineStyle.get(docElem, 'overflowY');
       }
       isInitialized = true;
     }
@@ -108,7 +111,7 @@ define(
       newOverflowX = doUseHorizScrollbar ? 'scroll' : defaultOverflowX,
       newOverflowY = doUseVertScrollbar ? 'scroll' : defaultOverflowY;
 
-    if (newOverflowX !== docElemStyle.overflowX || newOverflowY !== docElemStyle.overflowY) {
+    if (newOverflowX !== inlineStyle.get(docElem, 'overflowX') || newOverflowY !== inlineStyle.get(docElem, 'overflowY')) {
       if (shouldComputeMainBodyScrollbars) {
         // MS browsers need to reset first, otherwise causes SC-3722
         setOverflow('hidden', 'hidden');
@@ -123,6 +126,9 @@ define(
     // IE/Edge don't know when to put in scrollbars after CSS transform
     // Edge does, but we need to do this because of SC-3722 -- jiggling of Sitecues toolbar during vertical scrolls
     shouldComputeMainBodyScrollbars = platform.browser.isMS;
+    docElem = document.documentElement;
+    console.log('init:', docElem);
+    console.log('doc:', document.documentElement);
   }
 
   return {

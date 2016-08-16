@@ -13,7 +13,8 @@ define(
     'bp-expanded/view/transform-hovers',
     'core/bp/model/state',
     'core/events',
-    'core/native-functions'
+    'core/native-functions',
+    'core/inline-style/inline-style'
   ],
   function (
     BP_CONST,
@@ -23,7 +24,8 @@ define(
     hovers,
     state,
     events,
-    nativeFn
+    nativeFn,
+    inlineStyle
   ) {
   'use strict';
 
@@ -80,7 +82,9 @@ define(
     moreOpacityElem.setAttribute('class', 'scp-transition-opacity' + opacityType);
 
     // The class we set above takes care of the opacity animation...
-    moreOpacityElem.style.opacity = 1;
+    inlineStyle.set(moreOpacityElem, {
+      opacity : 1
+    }, true);
   }
 
   function showMoreButton (useInstantTransition) {
@@ -92,7 +96,7 @@ define(
     // The first time the button is presented to the user, scale the button to 0.5 and then animate it to a scale of 1
     if (!doAlwaysShowButton && !useInstantTransition) {
 
-      transformUtil.setElemTransform(moreButtonContainer, { scale: 0.5 }); // Starting point
+      transformUtil.setElemTransform(moreButtonContainer, { scale: 0.5 }, true); // Starting point
       requestAnimationFrame(function() {
         getComputedStyle(moreButtonContainer); // Force layout update
         animate.animateTransformLinear(moreButtonContainer, { scale: 1 }, BUTTON_ENTER_ANIMATION_DURATION);
@@ -119,7 +123,9 @@ define(
   function hideHelpButton () {
 
     moreOpacityElem.setAttribute('class', '');
-    moreOpacityElem.style.opacity = 0;
+    inlineStyle.set(moreOpacityElem, {
+      opacity : 0
+    }, true);
 
     byId(BP_CONST.BOTTOM_MOUSETARGET_ID).removeEventListener('mousemove', showMoreButtonSlowly);
 

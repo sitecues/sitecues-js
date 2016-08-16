@@ -1,7 +1,18 @@
 /**
  * BackgroundDimmer can dim all content in the page behind a given z-index.
  */
-define([ '$', 'hlb/constants' ], function($, constants) {
+define(
+  [
+    '$',
+    'hlb/constants',
+    'core/inline-style/inline-style'
+  ],
+  function (
+    $,
+    constants,
+    inlineStyle
+  ) {
+  'use strict';
 
   //////////////////////////////
   // PRIVATE VARIABLES
@@ -42,9 +53,9 @@ define([ '$', 'hlb/constants' ], function($, constants) {
           pointerEvents: 'none',
           willChange: 'opacity'
         },
-        newDimmer = $('<sc>')
-          .css(useCss)
-          .attr('id', DIMMER_ID)[0];
+        newDimmer = $('<sc>');
+      inlineStyle.set(newDimmer.get(), useCss);
+      newDimmer = newDimmer.attr('id', DIMMER_ID)[0];
 
       animateOpacity(newDimmer, DIMMER_MIN_OPACITY, DIMMER_MAX_OPACITY, inflationSpeed);
 
@@ -66,7 +77,10 @@ define([ '$', 'hlb/constants' ], function($, constants) {
         percentComplete = timeElapsed > speed ? 1 : timeElapsed / speed,
         currentOpacity = startOpacity + (endOpacity - startOpacity) * percentComplete;
 
-      dimmerElement.style.opacity = currentOpacity;
+      inlineStyle.set(dimmerElement, {
+        opacity : currentOpacity
+      });
+
       if (percentComplete < 1) {
         requestFrameFn(nextFrame);
       }

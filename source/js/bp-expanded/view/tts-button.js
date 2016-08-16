@@ -7,7 +7,8 @@ define(
     'core/conf/user/manager',
     'core/events',
     'core/platform',
-    'core/native-functions'
+    'core/native-functions',
+    'core/inline-style/inline-style'
   ],
   function (
     BP_CONST,
@@ -17,7 +18,8 @@ define(
     conf,
     events,
     platform,
-    nativeFn
+    nativeFn,
+    inlineStyle
   ) {
   'use strict';
 
@@ -119,7 +121,9 @@ define(
         opacityData = BP_CONST.ANIMATE_WAVES_OPACITY;
 
     for (var waveNum = 0; waveNum < waves.length; waveNum ++) {
-      waves[waveNum].style.opacity = opacityData[waveNum][waveAnimationStepNum];
+      inlineStyle.set(waves[waveNum], {
+        opacity : opacityData[waveNum][waveAnimationStepNum]
+      }, true);
     }
 
     if (++ waveAnimationStepNum < opacityData[0].length) {
@@ -140,7 +144,9 @@ define(
     waveAnimationStepNum = 0;
 
     for (var waveNum = 0; waveNum < waves.length; waveNum ++) {
-      waves[waveNum].style.opacity = '';
+      inlineStyle.set(waves[waveNum], {
+        opacity : ''
+      }, true);
     }
 
   }

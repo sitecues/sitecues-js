@@ -8,7 +8,8 @@ define(
     'page/zoom/util/restrict-zoom',
     'page/viewport/viewport',
     'core/dom-events',
-    'core/events'
+    'core/events',
+    'core/inline-style/inline-style'
   ],
   function (
     $,
@@ -19,7 +20,8 @@ define(
     restrictZoom,
     viewport,
     domEvents,
-    events
+    events,
+    inlineStyle
   ) {
 
   'use strict';
@@ -75,14 +77,18 @@ define(
     // We consider it fluid if the main node we discovered inside the body changes width
     // if we change the body's width.
     var
-      originalBodyWidth = body.style.width,
+      originalBodyWidth = inlineStyle.get(body, 'width'),
       origWidth = originalBodyInfo.mainNode.clientWidth,
       newWidth,
       isFluid;
-    body.style.width = (viewport.getInnerWidth() / 5) + 'px';
+    inlineStyle.set(body, {
+      width : (viewport.getInnerWidth() / 5) + 'px'
+    });
     newWidth = originalBodyInfo.mainNode.clientWidth;
     isFluid = origWidth !== newWidth;
-    body.style.width = originalBodyWidth;
+    inlineStyle.set(body, {
+      width : originalBodyWidth
+    });
     return isFluid;
   }
 
@@ -180,8 +186,10 @@ define(
       style = getComputedStyle(node);
     if (willAddRect(newRect, node, style, parentStyle, isStrict)) {
       if (doDebugVisibleRects && node.nodeType === Node.ELEMENT_NODE) {
-        node.style.outline = '9px solid rgba(0,255,0,.5)';
-        node.style.outlineOffset = '-5px';
+        inlineStyle.set(node, {
+          outline       : '9px solid rgba(0,255,0,.5)',
+          outlineOffset : '-5px'
+        });
       }
       addRect(sumRect, newRect);
       visibleNodes.push({ domNode: node, rect: newRect });
@@ -373,7 +381,7 @@ define(
     // surface area multiplied by 3 (450720 pixels). All occurrences of will-change in the document are
     // ignored when over budget.
     // shouldUseWillChangeOptimization =
-    // typeof body.style.willChange === 'string' && !shouldUseElementDotAnimate;
+    // typeof body. style.willChange === 'string' && !shouldUseElementDotAnimate;
   }
 
   sitecues.debugVisibleRects = function() {

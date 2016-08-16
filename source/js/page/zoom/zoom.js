@@ -17,7 +17,8 @@ define(
     'page/zoom/style',
     'page/viewport/scrollbars',
     'core/native-functions',
-    'page/zoom/flash'
+    'page/zoom/flash',
+    'core/inline-style/inline-style'
   ],
   /*jshint -W072 */ //Currently there are too many dependencies, so we need to tell JSHint to ignore it for now
   function (
@@ -34,7 +35,8 @@ define(
     style,
     scrollbars,
     nativeFn,
-    flash
+    flash,
+    inlineStyle
   ) {
   /*jshint +W072 */
   'use strict';
@@ -165,14 +167,18 @@ define(
     if (!$origBody) {
       return;
     }
-
-    $origBody.css({width: '', transform: ''});
+    inlineStyle.set(body, {
+      width     : '',
+      transform : ''
+    });
     bodyGeo.refreshOriginalBodyInfo();
-    $origBody.css(style.getZoomCss(state.completedZoom));
+    inlineStyle.set(body, style.getZoomCss(state.completedZoom));
     if (config.shouldRestrictWidth) {
       // Restrict the width of the body so that it works similar to browser zoom
       // Documents designed to fit the width of the page still will
-      $origBody.css('width', bodyGeo.getRestrictedBodyWidth(state.completedZoom));
+      inlineStyle.set(body, {
+        width : bodyGeo.getRestrictedBodyWidth(state.completedZoom)
+      });
     }
     bodyGeo.invalidateBodyInfo();
     // TODO computeBodyInfo() is doing a lot of work that refreshBodyInfo() did -- at least it should share which nodes to iterate over
@@ -219,6 +225,7 @@ define(
     isInitialized = true;
 
     config.init();
+    console.log('init zoom');
     bodyGeo.init(function() {
       bodyGeometryInitialized(wheelEvent);
     });

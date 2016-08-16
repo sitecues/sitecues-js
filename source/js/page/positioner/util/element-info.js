@@ -3,13 +3,13 @@ define(
     'page/positioner/util/element-map',
     'page/zoom/state',
     'core/platform',
-    'core/bp/bp'
+    'core/bp/model/element-info'
   ],
   function (
     elementMap,
     state,
     platform,
-    bp
+    bpElemInfo
   ) {
   'use strict';
 
@@ -135,7 +135,7 @@ define(
   }
 
   function isSitecuesElement(element) {
-    return bp.isBPElement(element) || element.localName === 'sc';
+    return bpElemInfo.isBPElement(element);
   }
 
   function isTransplantRoot(element, value) {

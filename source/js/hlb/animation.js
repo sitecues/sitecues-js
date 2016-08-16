@@ -10,7 +10,8 @@ define(
     'core/platform',
     '$',
     'hlb/constants',
-    'core/native-functions'
+    'core/native-functions',
+    'core/inline-style/inline-style'
   ],
   function (
     dimmer,
@@ -19,7 +20,8 @@ define(
     platform,
     $,
     constants,
-    nativeFn
+    nativeFn,
+    inlineStyle
   ) {
   'use strict';
 
@@ -41,7 +43,7 @@ define(
     var $hlb = data.$hlb,
       speed = doShowQuickly ? INFLATION_SPEED_FAST : INFLATION_SPEED,
       startingScale = getStartingScale($hlb),
-      hlbStyle = $hlb[0].style;
+      hlbStyle = inlineStyle.get($hlb[0]);
 
     hlbStyle[platform.transformOriginProperty] = data.originCSS;
 
@@ -77,24 +79,25 @@ define(
   }
 
   function animateCss(hlbElement, startScale, endScale, speed, translateCSS, onCompleteFn) {
-    var $hlbElement = $(hlbElement),
-      fromCss,
-      toCss = { transform : 'scale(' + endScale + ') ' + translateCSS };
+    var
+      fromCss = {},
+      toCss   = {};
+    toCss[platform.transformProperty] = 'scale(' + endScale + ') ' + translateCSS;
 
-    $hlbElement.css('transitionProperty', 'none'); // Clear any existing transition
+    inlineStyle.set(hlbElement, {
+      transitionProperty : 'none' // Clear any existing transition
+    });
 
     if (!speed) {
       // No animation -- do it immediately and return
-      $hlbElement.css(toCss);
+      inlineStyle.set(hlbElement, toCss);
       onCompleteFn();
       return;
     }
 
     // Animate fromCss -> toCss
-    fromCss = {
-      transform: 'scale(' + startScale + ') ' + translateCSS
-    };
-    $hlbElement.css(fromCss);
+    fromCss[platform.transformProperty] = 'scale(' + startScale + ') ' + translateCSS;
+    inlineStyle.set(hlbElement, fromCss);
 
     function onTransitionEnd() {
       hlbElement.removeEventListener(platform.transitionEndEvent, onTransitionEnd);
@@ -103,9 +106,9 @@ define(
 
     // Allow the from CSS to register so that setting the toCss actually animates there
     // rather than just setting the toCss and ignoring the fromCss
-    nativeFn.setTimeout(function() {
+    nativeFn.setTimeout(function () {
       toCss.transition = platform.transformProperty + ' ' + speed + 'ms ease-in-out';
-      $hlbElement.css(toCss);
+      inlineStyle.set(hlbElement, toCss);
       hlbElement.addEventListener(platform.transitionEndEvent, onTransitionEnd);
     }, 0);
   }

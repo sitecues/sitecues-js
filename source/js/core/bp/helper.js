@@ -1,10 +1,19 @@
 // It is too similar to utils.js which is confusing
-define(['core/bp/constants'], function(BP_CONST) {
+define(
+  [
+    'core/bp/constants',
+    'core/inline-style/inline-style'
+  ],
+  function(
+    BP_CONST,
+    inlineStyle
+  ) {
+  'use strict';
   /**
    *** Getters ***
    */
 
-  var elementByIdCache = {};
+  var elementByIdCache   = {};
 
   function byId(id) {
     var result = elementByIdCache[id];
@@ -56,7 +65,12 @@ define(['core/bp/constants'], function(BP_CONST) {
   function setAttributes(element, attrs) {
     for (var attrName in attrs) {
       if (attrs.hasOwnProperty(attrName)) {
-        element.setAttribute(attrName, attrs[attrName]);
+        if (attrName === 'style') {
+          inlineStyle.set(element, attrs[attrName]);
+        }
+        else {
+          element.setAttribute(attrName, attrs[attrName]);
+        }
       }
     }
   }

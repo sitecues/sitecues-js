@@ -1,34 +1,42 @@
 /**
  * Badge, toolbar and panel base view
  */
-define([
-  'core/bp/constants',
-  'core/bp/helper',
-  'core/bp/view/svg',
-  'core/bp/view/badge/placement',
-  'core/bp/model/state',
-  'core/conf/user/manager',
-  'core/bp/view/size-animation',
-  'core/locale',
-  'core/conf/site',
-  'core/bp/view/panel/panel-classes',
-  'core/bp/view/badge/badge-classes',
-  'core/events',
-  'core/history-change-events'
-],
-  function(BP_CONST,
-            helper,
-            bpSVG,
-            placement,
-            state,
-            conf,
-            sizeAnimation,
-            locale,
-            site,
-            panelClasses,
-            badgeClasses,
-            events,
-            historyChange) {
+define(
+  [
+    'core/bp/constants',
+    'core/bp/helper',
+    'core/bp/view/svg',
+    'core/bp/view/badge/placement',
+    'core/bp/model/state',
+    'core/conf/user/manager',
+    'core/bp/view/size-animation',
+    'core/locale',
+    'core/conf/site',
+    'core/bp/view/panel/panel-classes',
+    'core/bp/view/badge/badge-classes',
+    'core/events',
+    'core/history-change-events',
+    'core/inline-style/inline-style'
+  ],
+  /*jshint -W072 */ //Currently there are too many dependencies, so we need to tell JSHint to ignore it for now
+  function (
+    BP_CONST,
+    helper,
+    bpSVG,
+    placement,
+    state,
+    conf,
+    sizeAnimation,
+    locale,
+    site,
+    panelClasses,
+    badgeClasses,
+    events,
+    historyChange,
+    inlineStyle
+  ) {
+  /*jshint +W072 */
+  'use strict';
 
   var byId = helper.byId,
     bpContainer,
@@ -82,8 +90,11 @@ define([
   function addLabel(badgeOrToolbarElement) {
     var badgeLabelElement = document.createElement('sc');
     badgeLabelElement.innerHTML = locale.translate(BP_CONST.STRINGS.BADGE_LABEL);
-    badgeLabelElement.style.position = 'absolute';
-    badgeLabelElement.style.left = '-9999px';
+
+    inlineStyle.set(badgeLabelElement, {
+      position : 'absolute',
+      left     : '-9999px'
+    });
 
     badgeOrToolbarElement.appendChild(badgeLabelElement);
   }

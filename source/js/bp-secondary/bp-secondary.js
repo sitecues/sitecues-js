@@ -14,7 +14,8 @@ define(
     'bp-secondary/insert-secondary-markup',
     'bp-secondary/bp-secondary-features',
     'core/events',
-    'core/native-functions'
+    'core/native-functions',
+    'core/inline-style/inline-style'
   ],
   function (
     BP_CONST,
@@ -28,7 +29,8 @@ define(
     markup,
     secondaryFeatures,
     events,
-    nativeFn
+    nativeFn,
+    inlineStyle
   ) {
   'use strict';
 
@@ -432,7 +434,9 @@ define(
       transformUtil.setElemTransform(elem, {});
       if (!platform.browser.isFirefox) {
         // Do not use will-change in Firefox as it caused SC-3421 on some sites
-        elem.style.willChange = 'transform';
+        inlineStyle.set(elem, {
+          willChange : 'transform'
+        });
       }
     });
 
@@ -444,10 +448,14 @@ define(
   function resetWebKitLayout(elem) {
     // Hack to fix Chrome/Safari bug where the more button was in the wrong place after resetting styles
     // This forces WebKit to reflow the element's layout.
-    elem.style.display = 'none';
+    inlineStyle.set(elem, {
+      display : 'none'
+    });
     // jshint unused:false
     var unused = getBPContainer().offsetHeight; // Force layout refresh
-    elem.style.display = 'block';
+    inlineStyle.set(elem, {
+      display : 'block'
+    });
   }
 
   function resetButtonStyles() {
@@ -494,6 +502,7 @@ define(
 
       // Insert the markup for the secondary panel
       markup.init();
+      events.emit('bp/inserted-secondary-markup');
       resetButtonStyles();
 
       origOutlineHeight = getCurrentOutlineHeight();

@@ -11,7 +11,8 @@ define(
     'inverter/invert-url',
     'inverter/bg-image-classifier',
     'inverter/img-classifier',
-    'inverter/orig-bg-info'
+    'inverter/orig-bg-info',
+    'core/inline-style/inline-style'
   ],
   function (
     $,
@@ -21,7 +22,8 @@ define(
     invertUrl,
     bgImgClassifier,
     imgClassifier,
-    origBgInfo
+    origBgInfo,
+    inlineStyle
   ) {
   'use strict';
 
@@ -96,18 +98,20 @@ define(
 
   // Invert image or element via CSS filter: invert(1)
   function reverseElemCss($img, doReverse) {
-    var savedFilter = $img.attr('data-sc-filter');
+    var savedFilter = $img.attr('data-sc-filter'),
+        styles      = {};
     if (doReverse) {
       // Add filter
       if (savedFilter === null) {
         $img.attr('data-sc-filter', $img.css(filterProperty));
       }
-      $img.css(filterProperty, 'invert(1)');
+      styles[filterProperty] = 'invert(1)';
     }
     else {
       // Clear filter
-      $img.css(filterProperty, savedFilter || '');
+      styles[filterProperty] = savedFilter || '';
     }
+    inlineStyle.set($img.get(), styles);
   }
 
   // Invert image via our reversal proxy web service
@@ -186,8 +190,10 @@ define(
 
   function getFilterProperty() {
     var div = document.createElement('div');
-    div.style.filter = 'invert(1)';
-    return div.style.filter ? 'filter': platform.cssPrefix + 'filter';
+    inlineStyle.set(div, {
+      filter : 'invert(1)'
+    });
+    return inlineStyle.get(div, 'filter') ? 'filter' : platform.cssPrefix + 'filter';
   }
 
   function toggleSheet(sheet, isDisabled) {

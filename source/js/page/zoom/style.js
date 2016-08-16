@@ -9,7 +9,8 @@ define(
     'page/zoom/constants',
     'page/zoom/util/body-geometry',
     'page/zoom/config/config',
-    'core/native-functions'
+    'core/native-functions',
+    'core/inline-style/inline-style'
   ],
   function (
     $,
@@ -18,7 +19,8 @@ define(
     constants,
     bodyGeo,
     config,
-    nativeFn
+    nativeFn,
+    inlineStyle
   ) {
   'use strict';
 
@@ -211,9 +213,13 @@ define(
   function fixZoomBodyCss() {
     // Allow the content to be horizontally centered, unless it would go
     // offscreen to the left, in which case start zooming the content from the left-side of the window
-    body.style[platform.transformOriginProperty] = config.shouldRestrictWidth ? '0 0' : '50% 0';
+    var styles = {};
+    styles[platform.transformOriginProperty] = config.shouldRestrictWidth ? '0 0' : '50% 0';
+    inlineStyle.set(body, styles);
     if (shouldOptimizeLegibility) {
-      body.style.textRendering = 'optimizeLegibility';
+      inlineStyle.set(body, {
+        textRendering : 'optimizeLegibility'
+      });
     }
   }
 
@@ -237,19 +243,22 @@ define(
     }, REPAINT_FOR_CRISP_TEXT_DELAY);
 
     var MAX_ZINDEX = 2147483647,
-      appendedDiv = $('<sc>')
-        .css({
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          opacity: 1,
-          backgroundColor: 'transparent',
-          zIndex: MAX_ZINDEX,
-          pointerEvents: 'none'
-        })
-        .appendTo('html');
+      appendedDiv = $('<sc>');
+
+    inlineStyle.set(appendedDiv[0], {
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      opacity: 1,
+      backgroundColor: 'transparent',
+      zIndex: MAX_ZINDEX,
+      pointerEvents: 'none'
+    });
+
+    appendedDiv.appendTo('html');
+
     nativeFn.setTimeout(function () {
       appendedDiv.remove();
     }, 0);
@@ -258,7 +267,9 @@ define(
   //Restore the intended inline style when we're done transforming the body
   function restoreBodyTransitions() {
     if (typeof cachedTransitionValue === 'string') {
-      body.style.transition = cachedTransitionValue;
+      inlineStyle.set(body, {
+        transition : cachedTransitionValue
+      });
     }
     cachedTransitionValue = null;
   }
@@ -284,11 +295,15 @@ define(
     }
 
     if (property.indexOf('all') >= 0 || property.indexOf('transform') >= 0) {
-      cachedTransitionValue = body.style.transition;
-      if (body.style.transition) {
-        body.style.transition += ', ';
+      cachedTransitionValue = inlineStyle.get(body, 'transition');
+      var transitionValue = cachedTransitionValue;
+      if (transitionValue) {
+        transitionValue += ', ';
       }
-      body.style.transition += 'transform 0s';
+      transitionValue += 'transform 0s';
+      inlineStyle.set(body, {
+        transition : transitionValue
+      });
     }
 
   }

@@ -20,8 +20,10 @@ define(
     'Promise',
     'core/modifier-key-state',
     'core/native-functions',
-    'core/shake/shake'
+    'core/shake/shake',
+    'core/inline-style/inline-style'
   ],
+  /*jshint -W072 */ //Currently there are too many dependencies, so we need to tell JSHint to ignore it for now
   function (
     conf,
     session,
@@ -35,8 +37,10 @@ define(
     Promise,
     modifierKeyState,
     nativeFn,
-    shake
+    shake,
+    inlineStyle
   ) {
+  /*jshint +W072 */
   'use strict';
 
   var
@@ -305,6 +309,7 @@ define(
     events.on('zoom/ready', onZoomInitialized);
 
     // Start initialization
+    inlineStyle.init();
     platform.init();
     nativeFn.init();
 

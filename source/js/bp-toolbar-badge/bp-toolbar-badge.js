@@ -4,20 +4,25 @@
  */
 // TODO add a close button
 
-define([
-  'Promise',
-  'core/bp/constants',
-  'core/bp/model/state',
-  'core/bp/helper',
-  'core/bp/view/palette',
-  'core/bp/view/view'
-],
-  function(Promise,
-           BP_CONST,
-           state,
-           helper,
-           palette,
-           baseView) {
+define(
+  [
+    'Promise',
+    'core/bp/constants',
+    'core/bp/model/state',
+    'core/bp/helper',
+    'core/bp/view/palette',
+    'core/bp/view/view'
+  ],
+  function (
+    Promise,
+    BP_CONST,
+    state,
+    helper,
+    palette,
+    baseView
+  ) {
+  'use strict';
+
   var TOOLBAR_HEIGHT = 38;
 
   function adjustFixedElementsBelowToolbar() {

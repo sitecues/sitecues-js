@@ -28,7 +28,8 @@ define(
     'page/viewport/scrollbars',
     'page/zoom/config/config',
     'core/events',
-    'core/native-functions'
+    'core/native-functions',
+    'core/inline-style/inline-style'
   ],
   function (
     elementMap,
@@ -45,7 +46,8 @@ define(
     scrollbars,
     config,
     events,
-    nativeFn
+    nativeFn,
+    inlineStyle
   ) {
     /*jshint +W072 */
     'use strict';
@@ -164,7 +166,7 @@ define(
 
     function getTranslationValues(element) {
       var
-        split  = element.style[transformProperty].split(/(?:\()|(?:px,*)/),
+        split  = inlineStyle.get(element, transformProperty).split(/(?:\()|(?:px,*)/),
         index  = split.indexOf('translate3d'),
         values = { x: 0, y: 0 };
       if (index >= 0) {
@@ -180,7 +182,9 @@ define(
     }
 
     function setNewTransform(element, translateX, translateY, scale) {
-      element.style[transformProperty] = 'translate3d(' + translateX + 'px, ' + translateY + 'px, 0) scale(' + scale + ')';
+      var styles = {};
+      styles[transformProperty] = 'translate3d(' + translateX + 'px, ' + translateY + 'px, 0) scale(' + scale + ')';
+      inlineStyle.set(element, styles);
     }
 
     function calculateXTranslation(args) {
@@ -386,15 +390,17 @@ define(
       if (platform.browser.isIE) {
         var zIndex = getComputedStyle(element).zIndex;
         if (zIndex === 'auto') {
-          element.style.zIndex = '999999';
+          inlineStyle.set(element, {
+            zIndex : '999999'
+          });
         }
       }
     }
 
     function scaleTop(element) {
       var
-        currentInlinePosition = element.style.position,
-        currentInlineTop      = element.style.top,
+        currentInlinePosition = inlineStyle.get(element, 'position'),
+        currentInlineTop      = inlineStyle.get(element, 'top'),
         cachedInitialTop      = elementMap.getField(element, 'initialTop'),
         cachedAppliedTop      = elementMap.getField(element, 'appliedTop');
 
@@ -402,12 +408,17 @@ define(
         cachedInitialTop = currentInlineTop;
       }
 
-      element.style.top      = cachedInitialTop;
+      inlineStyle.set(element, {
+        top : cachedAppliedTop
+      });
+
       // Absolute elements return the used top value if there isn't one specified. Setting the position to static ensures
       // that only specified top values are returned with the computed style
       // EXCEPTION: IE returns the used value for both
       if (!platform.browser.isIE) {
-        element.style.position = 'static';
+        inlineStyle.set(element, {
+          position : 'static'
+        });
       }
 
       var
@@ -416,18 +427,22 @@ define(
 
 
       if (!isNaN(specifiedValue) && specifiedTop.indexOf('px') >= 0) {
-        element.style.top = (specifiedValue * state.fixedZoom) + 'px';
+        inlineStyle.set(element, {
+          top : (specifiedValue * state.fixedZoom) + 'px'
+        });
       }
 
-      element.style.position = currentInlinePosition;
-      cachedAppliedTop       = element.style.top;
+      inlineStyle.set(element, {
+        position : currentInlinePosition
+      });
+      cachedAppliedTop = inlineStyle.get(element, 'top');
       elementMap.setField(element, 'initialTop', cachedInitialTop);
       elementMap.setField(element, 'appliedTop', cachedAppliedTop);
     }
 
     function restoreTop(element) {
       var
-        currentInlineTop = element.style.top,
+        currentInlineTop = inlineStyle.get(element, 'top'),
         cachedInitialTop = elementMap.getField(element, 'initialTop'),
         cachedAppliedTop = elementMap.getField(element, 'appliedTop');
 
@@ -436,11 +451,15 @@ define(
         return;
       }
 
-      element.style.top = cachedInitialTop;
+      inlineStyle.set(element, {
+        top : cachedInitialTop
+      });
     }
 
     function onTargetAdded(element) {
-      element.style[transformOriginProperty] = isTransformXOriginCentered ? '50% 0' : '0 0';
+      var styles = {};
+      styles[transformOriginProperty] = isTransformXOriginCentered ? '50% 0' : '0 0';
+      inlineStyle.set(element, styles);
       // This handler runs when a style relevant to @element's bounding rectangle has mutated
       rectCache.listenForMutatedRect(element, function () {
         /*jshint validthis: true */
@@ -456,8 +475,10 @@ define(
     }
 
     function onTargetRemoved(element) {
-      element.style[transformProperty]       = '';
-      element.style[transformOriginProperty] = '';
+      var styles = {};
+      styles[transformProperty]       = '';
+      styles[transformOriginProperty] = '';
+      inlineStyle.set(element, styles);
       restoreTop(element);
       rectCache.delete(element);
       // This is the cached metadata we used for transforming the element. We need to clear it now that
@@ -560,7 +581,9 @@ define(
     function clearInvalidTransforms() {
       targets.forEach(function (element) {
         if (!platform.browser.isIE && state.completedZoom === 1 && elementInfo.isInOriginalBody(element)) {
-          element.style[transformProperty] = '';
+          var styles = {};
+          styles[transformProperty] = '';
+          inlineStyle.set(element, styles);
         }
       });
     }
