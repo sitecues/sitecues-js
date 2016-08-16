@@ -71,13 +71,12 @@ define(
       Object.keys(data).forEach(flattenDataField);
     }
 
-    function shallowCopyInto(source, dest) {
+    // TODO: Delete this and use Object.assign() when we drop IE support.
+    function assign(target, source) {
       if (source) {
-        for (var keyName in source) {
-          if (source.hasOwnProperty(keyName)) {
-            dest[keyName] = source[keyName];
-          }
-        }
+        Object.keys(source).forEach(function (key) {
+          target[key] = source[key];
+        });
       }
     }
 
@@ -90,7 +89,7 @@ define(
         settings = getSettings(); // Gets all prefs
 
       // Session data
-      shallowCopyInto(sessionData, data);
+      assign(data, sessionData);
 
       // Common fields
       data.name = name;
@@ -100,7 +99,7 @@ define(
 
       // Platform data -- goes into details field for historical reason
       details = details || {};
-      shallowCopyInto(platformData, details);
+      assign(details, platformData);
 
       // Ensure data we send has simple types
       flattenData(data);
@@ -215,9 +214,7 @@ define(
 
     // This info is not available right away -- we add to session data as soon as available
     function initViewInfo(viewInfo) {
-      if (viewInfo) {
-        shallowCopyInto(viewInfo, sessionData);
-      }
+      assign(sessionData, viewInfo);
     }
 
     function init() {
