@@ -91,6 +91,9 @@ define(
     function logNameCollisions(metricName, data, details) {
       function logFieldNameCollision(propName) {
         if (data.hasOwnProperty(propName)) {
+          // TODO: Sadly, we do not currently throw an error here, because our errors.js module sends an error metric
+          // for exceptions, which could then lead to an infinite loop. This could be solved by having errors.js
+          // skip sending a metric when it is the metrics code that is borked anyway.
           console.error('Sitecues error: name collision for metric ' + metricName + ' field name ' + propName);
         }
       }
