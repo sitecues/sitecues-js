@@ -12,6 +12,7 @@ define(
     'core/constants',
     'core/bp/model/classic-mode',
     'core/platform',
+    'core/has',
     'core/native-functions'
   ],
   function (
@@ -24,6 +25,7 @@ define(
     constants,
     classicMode,
     platform,
+    has,
     nativeFn
   ) {
   'use strict';
@@ -74,6 +76,15 @@ define(
 
       data.details = details;
       data.settings = settings;
+      data.has = (function () {
+        var target = {};
+        Object.keys(target).forEach(function (key) {
+          if (typeof has[key] === 'boolean') {
+            target[key] = has[key];
+          }
+        });
+        return target;
+      }());
     }
 
     // In dev, log field name collisions because the backend is going to flatten the metrics object
