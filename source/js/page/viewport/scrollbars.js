@@ -23,7 +23,8 @@ define(
   ) {
   'use strict';
 
-  var mainBodyRect, docElem,
+  var
+    mainBodyRect, docElem,
     shouldComputeMainBodyScrollbars,
     doForceHorizScrollbar,
     doForceVertScrollbar,
@@ -87,15 +88,12 @@ define(
     mainBodyRect = bodyGeo.getCurrentBodyInfo();
 
     // -- Clear the scrollbars --
-    if (!isInitialized) {
-      if (shouldComputeMainBodyScrollbars) {
-        defaultOverflowX = defaultOverflowY = 'hidden';
-      }
-      else {
-        defaultOverflowX = inlineStyle.get(docElem, 'overflowX');
-        defaultOverflowY = inlineStyle.get(docElem, 'overflowY');
-      }
-      isInitialized = true;
+    if (shouldComputeMainBodyScrollbars) {
+      defaultOverflowX = defaultOverflowY = 'hidden';
+    }
+    else {
+      defaultOverflowX = inlineStyle.get(docElem, 'overflowX');
+      defaultOverflowY = inlineStyle.get(docElem, 'overflowY');
     }
 
     // -- Set the scrollbars after a delay --
@@ -123,12 +121,14 @@ define(
   }
 
   function init() {
+    if (isInitialized) {
+      return;
+    }
+    isInitialized = true;
     // IE/Edge don't know when to put in scrollbars after CSS transform
     // Edge does, but we need to do this because of SC-3722 -- jiggling of Sitecues toolbar during vertical scrolls
     shouldComputeMainBodyScrollbars = platform.browser.isMS;
     docElem = document.documentElement;
-    console.log('init:', docElem);
-    console.log('doc:', document.documentElement);
   }
 
   return {

@@ -434,6 +434,7 @@ define(
 
     // The cloned element (HLB)
     $hlb = $($foundation[0].cloneNode(true));
+    var hlb = $hlb[0];
 
     // Copies form values from the foundation to the HLB
     // Need to do this on a timeout in order to enable Safari input fix hack
@@ -442,6 +443,7 @@ define(
     mapForm($foundation, $hlb);
     // }, 0);
 
+    // TODO: This doesn't seem like it's doing anything? Check it out
     hlbStyling.filter.bind(mapForm);
 
     // Clone styles of HLB and children of HLB, so layout is preserved
@@ -459,14 +461,14 @@ define(
     hlbStyles = hlbStyling.getHLBStyles($picked, $foundation, highlight);
 
     // Set the styles for the HLB and append to the wrapping element
-    inlineStyle.set($hlb.get(), hlbStyles);
+    inlineStyle.set(hlb, hlbStyles, true);
     $hlb.appendTo($hlbWrapper);
 
     // Fixes problem with TexasAT home page when opening the top nav (Home, Sitemap, Contact Us) in HLB
     hlbStyling.setHLBChildTextColor($hlb);
 
     // Set the ID of the hlb.
-    $hlb[0].id = constants.HLB_ID;
+    hlb.id = constants.HLB_ID;
   }
 
   /**
@@ -501,10 +503,10 @@ define(
 
     // It is important to clone the styles of the parent <ul> of the original element, because it may
     // have important styles such as background images, etc.
-    inlineStyle.set($foundation[0], hlbStyling.getComputedStyleCssText($picked.parents('ul, ol')[0]));
+    inlineStyle.get($foundation[0]).cssText = hlbStyling.getComputedStyleCssText($picked.parents('ul, ol')[0]);
 
     // Create, position, and style this element so that it overlaps the element chosen by the picker.
-    inlineStyle.set($foundation.get(), {
+    inlineStyle.set($foundation[0], {
       'position'       : 'absolute',
       'left'           : (pickedElementBoundingBox.left + window.pageXOffset) / inheritedZoom,
       'top'            : (pickedElementBoundingBox.top  + window.pageYOffset) / inheritedZoom,
@@ -512,13 +514,13 @@ define(
       'padding'        : 0,
       'margin'         : 0,
       'width'          : pickedElementBoundingBox.width / inheritedZoom,
-      'list-style-type': pickedElementComputedStyle.listStyleType || 'none'
-    });
+      'listStyleType': pickedElementComputedStyle.listStyleType || 'none'
+    }, true);
     $foundation.insertAfter('body');
 
     // Map all picked elements children CSS to cloned children CSS
     for (i = 0; i < $pickedAndDescendants.length; i += 1) {
-      inlineStyle.set($pickedCloneAndDescendants[i], hlbStyling.getComputedStyleCssText($pickedAndDescendants[i]));
+      inlineStyle.get($pickedCloneAndDescendants[i]).cssText = hlbStyling.getComputedStyleCssText($pickedAndDescendants[i]);
     }
 
     return $foundation;
@@ -542,7 +544,7 @@ define(
     removeTemporaryFoundation = true;
 
     // Create, position, and style this element so that it overlaps the element chosen by the picker.
-    inlineStyle.set($foundation.get(), {
+    inlineStyle.set($foundation[0], {
       'position'       : 'absolute',
       'left'           : (pickedElementsBoundingBox.left + window.pageXOffset) / inheritedZoom,
       'top'            : (pickedElementsBoundingBox.top  + window.pageYOffset) / inheritedZoom,
@@ -550,12 +552,12 @@ define(
       'padding'        : 0,
       'margin'         : 0,
       'width'          : pickedElementsBoundingBox.width / inheritedZoom
-    });
+    }, true);
     $foundation.insertAfter('body');
 
     // Map all picked elements children CSS to cloned children CSS
     for (i = 0; i < $pickedAndDescendants.length; i += 1) {
-      inlineStyle.set($pickedCloneAndDescendants[i], hlbStyling.getComputedStyleCssText($pickedAndDescendants[i]));
+      inlineStyle.get($pickedCloneAndDescendants[i]).cssText = hlbStyling.getComputedStyleCssText($pickedAndDescendants[i]);
     }
 
     return $foundation;
@@ -596,7 +598,7 @@ define(
     removeTemporaryFoundation = true;
 
     // Create, position, and style this element so that it overlaps the element chosen by the picker.
-    inlineStyle.set($foundation.get(), {
+    inlineStyle.set($foundation[0], {
       'position'       : 'absolute',
       'left'           : (pickedElementsBoundingBox.left + window.pageXOffset) / inheritedZoom,
       'top'            : (pickedElementsBoundingBox.top  + window.pageYOffset) / inheritedZoom,
@@ -604,12 +606,12 @@ define(
       'padding'        : 0,
       'margin'         : 0,
       'width'          : pickedElementsBoundingBox.width / inheritedZoom
-    });
+    }, true);
     $foundation.insertAfter('body');
 
     // Map all picked elements children CSS to cloned children CSS
     for (i = 0; i < $pickedAndDescendants.length; i += 1) {
-      inlineStyle.set($pickedCloneAndDescendants[i], hlbStyling.getComputedStyleCssText($pickedAndDescendants[i]));
+      inlineStyle.get($pickedCloneAndDescendants[i]).cssText = hlbStyling.getComputedStyleCssText($pickedAndDescendants[i]);
     }
 
     return $foundation;
@@ -712,14 +714,14 @@ define(
             $('<sc>', {
               'id': constants.HLB_WRAPPER_ID
             });
-    inlineStyle.set(wrapper.get(), {
+    inlineStyle.set(wrapper[0], {
       'padding'  : 0,
       'margin'   : 0,
       'top'      : 0,
       'left'     : 0,
       'position' : 'absolute',
       'overflow' : 'visible'
-    });
+    }, true);
     return wrapper;
   }
 

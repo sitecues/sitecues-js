@@ -16,36 +16,58 @@ define(
   'use strict';
 
   var inlinePattern, styleMap, proxyMap,
-      assignmentRecords, updateTimer;
+      assignmentRecords, updateTimer,
+      cssNumbers = {
+        "animationIterationCount" : true,
+        "columnCount"             : true,
+        "fillOpacity"             : true,
+        "flexGrow"                : true,
+        "flexShrink"              : true,
+        "fontWeight"              : true,
+        "lineHeight"              : true,
+        "opacity"                 : true,
+        "order"                   : true,
+        "orphans"                 : true,
+        "widows"                  : true,
+        "zIndex"                  : true,
+        "zoom"                    : true
+      };
 
-  function setStyle(elements, styleInfo, doNotProxy) {
-    var styleType = Array.isArray(styleInfo) ? 'array' : typeof styleInfo;
+  function fixUnits(property, value) {
+    return typeof value === 'number' && value !== 0 && !cssNumbers[property] ? value + 'px' : value;
+  }
 
-    if (!Array.isArray(elements)) {
-      elements = [elements];
-    }
+  function setStyle(elmts, styleInfo, doNotProxy) {
+    var
+      styleType = Array.isArray(styleInfo) ? 'array' : typeof styleInfo,
+      elements  = Array.isArray(elmts)     ? elmts   : [elmts];
 
     elements.forEach(function (element) {
-      var
-        isBPElement      = bpElemInfo.isBPElement(element),
-        // We don't care about proxying elements inserted by Sitecues, they don't have an `intended style`
-        shouldProxyStyle = !isBPElement && !doNotProxy,
-        styleProperty    = shouldProxyStyle ? '_scStyle' : 'style';
+      var styleProperty;
 
-      if (shouldProxyStyle && !isStyleProxied(element)) {
-        var intendedStyles = parseCss(getCssText(element));
-        styleMap.set(element, intendedStyles);
-        insertStyleProxy(element);
+      if (!isStyleProxied(element)) {
+        var shouldProxyStyle = !doNotProxy && !bpElemInfo.isBPElement(element);
+        styleProperty = shouldProxyStyle ? '_scStyle' : 'style';
+
+        if (shouldProxyStyle) {
+          var intendedStyles = parseCss(getCssText(element));
+          styleMap.set(element, intendedStyles);
+          insertStyleProxy(element);
+        }
+      }
+      else {
+        styleProperty = '_scStyle';
       }
 
       switch (styleType) {
         case 'array':
-          element[styleProperty].setProperty(styleInfo[0], styleInfo[1], styleInfo[2]);
+          var property = styleInfo[0];
+          element[styleProperty].setProperty(property, fixUnits(property, styleInfo[1]), styleInfo[2] || '');
           break;
 
         case 'object':
           Object.keys(styleInfo).forEach(function (property) {
-            element[styleProperty][property] = styleInfo[property];
+            element[styleProperty][property] = fixUnits(property, styleInfo[property]);
           });
           break;
 
@@ -56,33 +78,37 @@ define(
     });
   }
 
-  // This function exists only because we need a linting rule to ensure that other modules do not interact directly with element's
-  // style object directly.
-  // NOTE: It is important to use `setStyle` to set style values for `original elements`, defined as elements in the DOM that were not
-  // inserted by Sitecues. Though this method can return the style object of an element for conveniently reading and writing from
-  // Sitecues elements, it must NOT be used to get the style object of original elements for the intention of setting style values
+  function removeProperty(element, property) {
+    getStyle(element).removeProperty(property);
+  }
+
+  // Remove the style attribute from @element
+  function removeAttribute(element) {
+    element.removeAttribute('style');
+  }
+
+    // This function exists mainly because we need a linting rule against /.style[^\w]/ to ensure that other modules do not interact directly
+    // with elements' style object directly.
+   /* NOTE: It is important to use `setStyle` to set style values for `original elements`, defined as elements in the DOM that were not
+    * inserted by Sitecues. Though this method can return the style object of an element for conveniently reading and writing from
+    * Sitecues elements, it must NOT be used to get the style object of original elements for the intention of setting style values */
   function getStyle(element, property) {
     var styleProperty = getDirectStyleProperty(element);
     return property ? element[styleProperty][property] : element[styleProperty];
   }
 
-  // The intended style of an element is the inline style it would have if Sitecues wasn't interfering on the page
-  //function getIntendedStyle(element, property) {
-  //
-  //}
-
   function queueAssignmentRecord(element, styleInfo) {
     console.log('queueAssignmentRecord:', arguments);
     assignmentRecords.push({
-      element: element,
-      styleInfo: styleInfo
+      element   : element,
+      styleInfo : styleInfo
     });
 
     if (!updateTimer) {
       updateTimer = nativeFn.setTimeout(function () {
         updateIntendedStyles();
         updateTimer = null;
-      }, 100);
+      }, 300);
     }
   }
 
@@ -105,19 +131,63 @@ define(
   /*
   * If this function is called with an undefined `property` parameter, de-proxy the element's style property
   * */
-  //function restore(element, property) {
-  //
-  //}
+  function restore(element, props) {
+    var properties,
+      intendedStyles = getIntendedStyles(element);
+
+    if (!intendedStyles) {
+      // If we haven't cached any intended styles, the element has not been modified by Sitecues
+      return;
+    }
+
+    if (props) {
+      properties = Array.isArray(props) ? props : [props];
+      properties.forEach(function (property) {
+        var value = intendedStyles[property];
+
+        if (value) {
+          getStyle(element)[property] = value;
+        }
+        else {
+          removeProperty(element, property);
+        }
+      });
+      return;
+    }
+
+    var cssText = stringifyCss(intendedStyles);
+
+    if (cssText) {
+      getStyle(element).cssText = cssText;
+    }
+    else {
+      element.removeAttribute('style');
+    }
+
+    delete element.style;
+    delete element._scStyle;
+    delete element._scStyleProxy;
+  }
+
+  function getIntendedStyles(element) {
+    updateIntendedStyles();
+    updateTimer = null;
+    return styleMap.get(element);
+  }
 
   // Proxying the style object doesn't allow us to intercept style changes via setAttribute and setAttributeNode
   // value, nodeValue, textContent would have to be intercepted on the attributeNode
+  // TODO: proxy element.removeAttribute, element.setAttribute, style.setProperty, style.removeProperty
   //function proxySetAttribute(element) {
   //
   //}
 
   function styleProxyGetter(property) {
     /*jshint validthis: true */
-    // TODO: We should return a proxied version of setProperty
+    // TODO: We should return a proxied version of setProperty / removeProperty
+    if (typeof this._scStyle[property] === 'function') {
+      return this._scStyle[property].bind(this._scStyle);
+    }
     return this._scStyle[property];
     /*jshint validthis: false */
   }
@@ -176,6 +246,14 @@ define(
     return element.style.cssText;
   }
 
+  function stringifyCss(cssObject) {
+    var cssText = '';
+    Object.keys(cssObject).forEach(function (property) {
+      cssText += property + ': ' + cssObject(property) + '; ';
+    });
+    return cssText;
+  }
+
   function parseCss(cssText) {
     var
       cssObj = {},
@@ -207,11 +285,13 @@ define(
     Object.defineProperty(element, 'style', {
       configurable: true,
       /*
-      * Interesting:
-      * this syntax
-      * { get() { ... } }
-      * prevented the core from running, should investigate further
-      * */
+       * Interesting:
+       * this syntax
+       * { get() { ... } }
+       * prevented the core from running, should investigate further
+       * */
+      // note : get & set function declarations / expressions de-optimize their containing
+      // function. Don't put more in this function than needs to happen
       get : function () { return element._scStyleProxy; },
       set : function (cssText) {
         queueAssignmentRecord(element, cssText);
@@ -231,9 +311,11 @@ define(
   }
 
   return {
-    set : setStyle,
-    get : getStyle,
-    //getIntended: getIntendedStyle,
-    init: init
+    set             : setStyle,
+    get             : getStyle,
+    restore         : restore,
+    removeProperty  : removeProperty,
+    removeAttribute : removeAttribute,
+    init            : init
   };
 });

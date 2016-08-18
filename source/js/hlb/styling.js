@@ -171,7 +171,7 @@ define(
    */
   function filterStyles ($hlb) {
     for (var i = 0; i < HLBCSSBlacklist.length; i += 1) {
-      $hlb[0].style.removeProperty([HLBCSSBlacklist[i]]);
+      inlineStyle.removeProperty($hlb[0], [HLBCSSBlacklist[i]]);
     }
   }
 
@@ -515,7 +515,7 @@ define(
    * @param  {[jQuery element]} $hlb      [The HLB element]
    */
   function initializeHLBElementStyles ($foundation, $hlb) {
-    inlineStyle.set($hlb[0], getComputedStyleCssText($foundation[0]));
+    inlineStyle.get($hlb[0]).cssText =  getComputedStyleCssText($foundation[0]);
   }
 
    /**
@@ -556,10 +556,10 @@ define(
       foundationDescendantStyle = getComputedStyle(foundationDescendant);
 
       // Copy the original elements child styles to the HLB elements child.
-      inlineStyle.set(hlbDescendant, getComputedStyleCssText(foundationDescendant));
+      inlineStyle.get(hlbDescendant).cssText = getComputedStyleCssText(foundationDescendant);
 
       if (shouldRemovePadding($foundationDescendant, initialHLBRect)) {
-        inlineStyle.set($hlbDescendant.get(), getChildPadding($foundationDescendant, initialHLBRect));
+        inlineStyle.set(hlbDescendant, getChildPadding($foundationDescendant, initialHLBRect), true);
       }
 
       // Compute styles that are more complicated than copying cssText.
@@ -577,7 +577,7 @@ define(
       }
 
       // Set the childs css.
-      inlineStyle.set($hlbDescendant.get(), computedChildStyles);
+      inlineStyle.set(hlbDescendant, computedChildStyles, true);
 
       // Ran into issues with children inheriting styles because of class and id CSS selectors.
       // Filtering children of these attributes solves the problem.
@@ -691,9 +691,7 @@ define(
         });
 
         if (forceTextColor) {
-          inlineStyle.set(this, {
-            color : HLB_DEFAULT_TEXT_COLOR
-          });
+          inlineStyle.get(this).color = HLB_DEFAULT_TEXT_COLOR;
         }
 
       }
@@ -715,7 +713,7 @@ define(
         backgroundStyles      = getHLBBackgroundImage($picked, elementComputedStyle),
         backgroundColor       = getHLBBackgroundColor($picked, elementComputedStyle),
         calculatedHLBStyles   = {
-          'paddingLeft' : getHLBLeftPadding($foundation, elementComputedStyle),
+          'paddingLeft'  : getHLBLeftPadding($foundation, elementComputedStyle),
           'display'      : getHLBDisplay(elementComputedStyle),
           'left'         : originalElementRect.left + window.scrollLeft,
           'top'          : originalElementRect.top + window.scrollTop

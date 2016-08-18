@@ -126,9 +126,7 @@ define(
       fixit = true;
 
       allHLBChildren.each(function () {
-        inlineStyle.set(this, {
-          maxWidth : getChildWidth(this, $hlb)
-        });
+        inlineStyle.get(this).maxWidth = getChildWidth(this, $hlb) + 'px';
       });
 
     }
@@ -157,9 +155,7 @@ define(
         // Performing this check because http://www.nvblindchildren.org/give.html top navigation..
         childRect = this.getBoundingClientRect();
         if (childRect.left < hlbRect.left || childRect.right + scrollDiff > hlbRect.right) {
-          inlineStyle.set(this, {
-            maxWidth : parseFloat(getComputedStyle(this).maxWidth) - scrollDiff
-          });
+          inlineStyle.get(this).maxWidth = (parseFloat(getComputedStyle(this).maxWidth) - scrollDiff) + 'px';
         }
       });
 
@@ -286,9 +282,7 @@ define(
       }
 
       // 'ch' units are equal to the width of the "0" character
-      inlineStyle.set($hlb.get(), {
-        maxWidth : characterWidthLimit + 'ch'
-      });
+      inlineStyle.get($hlb[0]).maxWidth = characterWidthLimit + 'ch';
     }
 
   }
@@ -305,9 +299,7 @@ define(
 
       // Set to the scroll height minus 4 (half of the padding)
       // It is necessary to subtract the padding because scrollHeight includes padding.
-      inlineStyle.set($hlb.get(), {
-        'height': ($hlb[0].scrollHeight - parseInt(getComputedStyle($hlb[0]).paddingBottom)) + 'px'
-      });
+      inlineStyle.get($hlb[0]).height = ($hlb[0].scrollHeight - parseInt(getComputedStyle($hlb[0]).paddingBottom)) + 'px';
       // Now that we have set the height of the cloned element to the height of the scroll height...
       // we need to test that the element's height does not exceed the height of the safe area.
       constrainHeightToSafeArea($hlb);
@@ -353,31 +345,28 @@ define(
    */
   function constrainHeightToSafeArea($hlb) {
 
-    var originalHeight = scaleRectFromCenter($hlb).height,
+    var hlb            = $hlb[0],
+        originalHeight = scaleRectFromCenter($hlb).height,
         safeZoneHeight = hlbSafeArea.getSafeZoneBoundingBox().height;
 
     // Would the scaled element's height be greater than the safe area height?
     if (originalHeight > safeZoneHeight) {
 
       // height is now the "safe zone" height, minus the padding/border
-      inlineStyle.set($hlb.get(), {
-        'height': ((safeZoneHeight / getFinalScale($hlb) / getInheritedZoom($hlb)) -
+      inlineStyle.get(hlb).height = ((safeZoneHeight / getFinalScale($hlb) / getInheritedZoom($hlb)) -
           (hlbStyling.defaultBorder +
             hlbStyling.defaultBorder +
             parseInt($hlb.css('paddingTop')) +
             parseInt($hlb.css('paddingBottom'))
           )
-        ) + 'px'
-      });
+        ) + 'px';
 
       // Keep aspect ratio if HLB is an image
-      if (isVisualMedia($hlb[0])) {
+      if (isVisualMedia(hlb)) {
 
         // We need to recalculate the bounding client rect of the HLB element, because we just changed it.
-        inlineStyle.set($hlb.get(), {
-          width : ($hlb[0].getBoundingClientRect().width / getInheritedZoom($hlb) *
-          (safeZoneHeight / originalHeight)) + 'px'
-        });
+        inlineStyle.get(hlb).width = (hlb.getBoundingClientRect().width / getInheritedZoom($hlb) *
+          (safeZoneHeight / originalHeight)) + 'px';
       }
     }
   }
@@ -389,26 +378,23 @@ define(
    */
   function constrainWidthToSafeArea($hlb) {
 
-    var originalWidth = scaleRectFromCenter($hlb).width,
+    var hlb           = $hlb[0],
+        originalWidth = scaleRectFromCenter($hlb).width,
         safeZoneWidth = hlbSafeArea.getSafeZoneBoundingBox().width;
 
     // Would the scaled element's width be greater than the safe area width?
     if (originalWidth > safeZoneWidth) {
 
       // width is now the "safe zone" width, minus the padding/border
-      inlineStyle.set($hlb.get(), {
-        width : ((safeZoneWidth /getFinalScale($hlb) / getInheritedZoom($hlb)) -
-        (hlbStyling.defaultBorder + hlbStyling.defaultPadding + getExtraLeftPadding($hlb) / 2) * 2) + 'px'
-      });
+      inlineStyle.get(hlb).width = ((safeZoneWidth / getFinalScale($hlb) / getInheritedZoom($hlb)) -
+        (hlbStyling.defaultBorder + hlbStyling.defaultPadding + getExtraLeftPadding($hlb) / 2) * 2) + 'px';
 
       // Keep aspect ratio if HLB is an image
-      if (isVisualMedia($hlb[0])) {
+      if (isVisualMedia(hlb)) {
 
         // We need to recalculate the bounding client rect of the HLB element, because we just changed it.
-        inlineStyle.set($hlb.get(), {
-          height : ($hlb[0].getBoundingClientRect().height / getInheritedZoom($hlb) *
-          (safeZoneWidth / originalWidth)) + 'px'
-        });
+        inlineStyle.get(hlb).height = (hlb.getBoundingClientRect().height / getInheritedZoom($hlb) *
+          (safeZoneWidth / originalWidth)) + 'px';
       }
     }
   }
@@ -424,19 +410,19 @@ define(
     var zoom   = getPageZoom(),
         width  = (initialHLBRect.width  / zoom) + 'px',
         height = (initialHLBRect.height / zoom) + 'px';
-    inlineStyle.set($hlb.get(), {
+    inlineStyle.set($hlb[0], {
       width  : width, //Preserve dimensional ratio
       height : height //Preserve dimensional ratio
-    });
+    }, true);
 
     // This fixes the HLB being too wide or tall (lots of whitespace) for www.faast.org/news
     // when HLBing "News" header.  Because we copy computedStyles, we sometimes get an HLB
     // that has a child that is much wider or taller than the highlight, causing the HLB
     // to increase in width and height for the purpose of avoiding scrollbars.
-    // TODO: cache decendants because we use it alot
+    // TODO: cache descendants because we use it alot
     inlineStyle.set($hlb.find('*').get(), {
       maxWidth : width
-    });
+    }, true);
   }
 
   /**
@@ -464,18 +450,13 @@ define(
    * @param {[jQuery element]} $hlb [HLB element]
    */
   function addVerticalScroll($hlb) {
+    var hlb = $hlb[0];
 
-    if (common.hasVertScroll($hlb[0])) {
-
-      inlineStyle.set($hlb.get(), {
-        'overflow-y' : 'scroll'
-      });
-
+    if (common.hasVertScroll(hlb)) {
+      inlineStyle.get(hlb).overflowY = 'scroll';
       // Adding a vertical scroll may sometimes make content overflow the width
       fixOverflowWidth($hlb);
-
     }
-
   }
 
   /**
@@ -493,10 +474,10 @@ define(
         console.log('%cSPECIAL CASE: Fix overflow width.',  'background:orange;');
       }
 
-      inlineStyle.set($hlb.get(), {
-        'width'     : hlbElement.scrollWidth + hlbStyling.defaultPadding + 'px',
-        'max-width' : 'none'
-      });
+      inlineStyle.set(hlbElement, {
+        'width'    : hlbElement.scrollWidth + hlbStyling.defaultPadding + 'px',
+        'maxWidth' : 'none'
+      }, true);
 
       // Again, we can't be positive that the increase in width does not overflow the safe area.
       constrainWidthToSafeArea($hlb);
@@ -567,20 +548,16 @@ define(
           console.log('%cSPECIAL CASE: Reset HLB width to use padding for width...',  'background:orange;');
         }
 
-        inlineStyle.set($hlb.get(), {
-          'width' : initialHLBRect.width / getPageZoom()  - extraLeft
-        });
+        inlineStyle.get($hlb[0]).width = (initialHLBRect.width / getPageZoom()  - extraLeft) + 'px';
 
         fixOverflowWidth($hlb);
       }
-
     });
 
-
-    inlineStyle.set($hlb.get(), {
+    inlineStyle.set($hlb[0], {
       'paddingTop' : extraTop  ? originalHLBTopPadding  + extraTop  + hlbStyling.defaultPadding + hlbStyling.defaultBorder : originalHLBTopPadding,
       'paddingLeft': extraLeft ? originalHLBLeftPadding + extraLeft + hlbStyling.defaultPadding + hlbStyling.defaultBorder : originalHLBLeftPadding
-    });
+    }, true);
   }
 
   //////////////////////////
@@ -667,9 +644,9 @@ define(
 
     // The minimum distance we must move the HLB for it to fall within the safe zone
     var constrainedOffset,
-
+        hlb = $hlb[0],
         HLBBoundingBoxAfterZoom = scaleRectFromCenter($hlb),
-        HLBBoundingBox = $hlb[0].getBoundingClientRect(),
+        HLBBoundingBox = hlb.getBoundingClientRect(),
 
         // These are used in the positioning calculation.
         // They are the differences in height and width before and after the HLB is scaled.
@@ -677,7 +654,7 @@ define(
         expandedHeightOffset = (HLBBoundingBoxAfterZoom.height - HLBBoundingBox.height) / 2,
 
         // The difference between the mid points of the hlb element and the original
-        offset = midPointDiff($hlb[0].getBoundingClientRect(), initialHLBRect);
+        offset = midPointDiff(hlb.getBoundingClientRect(), initialHLBRect);
 
     // Update the dimensions for the HLB which is used for constraint calculations.
     // The offset of the original element and cloned element midpoints are used for positioning.
@@ -712,7 +689,7 @@ define(
     hlbStyles[platform.transformProperty] = 'scale(' + startAnimationZoom + ') ' + translateCSS;
     hlbStyles[platform.transformOriginProperty] = originCSS;
 
-    inlineStyle.set($hlb.get(), hlbStyles);
+    inlineStyle.set(hlb, hlbStyles, true);
   }
 
   return {

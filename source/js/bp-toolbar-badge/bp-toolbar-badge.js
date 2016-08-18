@@ -27,9 +27,10 @@ define(
 
   function adjustFixedElementsBelowToolbar() {
     return new Promise(function (resolve) {
-      require(['page/positioner/positioner'], function (positioner) {
+      require(['page/positioner/positioner', 'page/viewport/scrollbars'], function (positioner, scrollbars) {
         // In the case of the toolbar, we must always move fixed position elements
         // down, so that they are not obscured by our toolbar.
+        scrollbars.init();
         positioner.initFromToolbar(resolve, TOOLBAR_HEIGHT);
       });
     });

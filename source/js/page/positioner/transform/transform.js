@@ -398,19 +398,7 @@ define(
     }
 
     function scaleTop(element) {
-      var
-        currentInlinePosition = inlineStyle.get(element, 'position'),
-        currentInlineTop      = inlineStyle.get(element, 'top'),
-        cachedInitialTop      = elementMap.getField(element, 'initialTop'),
-        cachedAppliedTop      = elementMap.getField(element, 'appliedTop');
-
-      if (currentInlineTop !== cachedAppliedTop) {
-        cachedInitialTop = currentInlineTop;
-      }
-
-      inlineStyle.set(element, {
-        top : cachedAppliedTop
-      });
+      restoreTop(element);
 
       // Absolute elements return the used top value if there isn't one specified. Setting the position to static ensures
       // that only specified top values are returned with the computed style
@@ -432,28 +420,11 @@ define(
         });
       }
 
-      inlineStyle.set(element, {
-        position : currentInlinePosition
-      });
-      cachedAppliedTop = inlineStyle.get(element, 'top');
-      elementMap.setField(element, 'initialTop', cachedInitialTop);
-      elementMap.setField(element, 'appliedTop', cachedAppliedTop);
+      inlineStyle.restore(element, 'position');
     }
 
     function restoreTop(element) {
-      var
-        currentInlineTop = inlineStyle.get(element, 'top'),
-        cachedInitialTop = elementMap.getField(element, 'initialTop'),
-        cachedAppliedTop = elementMap.getField(element, 'appliedTop');
-
-      // The inline top value has mutated from what we've set, so keep the current value
-      if (currentInlineTop !== cachedAppliedTop) {
-        return;
-      }
-
-      inlineStyle.set(element, {
-        top : cachedInitialTop
-      });
+      inlineStyle.restore(element, 'top');
     }
 
     function onTargetAdded(element) {
@@ -475,11 +446,7 @@ define(
     }
 
     function onTargetRemoved(element) {
-      var styles = {};
-      styles[transformProperty]       = '';
-      styles[transformOriginProperty] = '';
-      inlineStyle.set(element, styles);
-      restoreTop(element);
+      inlineStyle.restore(element, [transformProperty, transformOriginProperty, 'top']);
       rectCache.delete(element);
       // This is the cached metadata we used for transforming the element. We need to clear it now that
       // the information is stale

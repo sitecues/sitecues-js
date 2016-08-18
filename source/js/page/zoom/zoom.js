@@ -225,7 +225,6 @@ define(
     isInitialized = true;
 
     config.init();
-    console.log('init zoom');
     bodyGeo.init(function() {
       bodyGeometryInitialized(wheelEvent);
     });

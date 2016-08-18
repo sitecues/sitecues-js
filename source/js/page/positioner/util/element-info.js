@@ -13,7 +13,7 @@ define(
   ) {
   'use strict';
 
-  var originalBody, auxiliaryBody, docElem;
+  var originalBody, docElem;
 
   function getScale(element, position) {
     // If we've never scaled this element before, it's possible that this element is inheriting a transformation from the original body
@@ -113,11 +113,8 @@ define(
 
       do {
         ancestor = ancestor.parentElement;
-        if (elementMap.getField(ancestor, 'isClone') === true) {
-          return auxiliaryBody;
-        }
-      } while (ancestor !== originalBody && ancestor !== docElem);
-      body = ancestor === originalBody ? originalBody : null;
+      } while (ancestor.localName.toLowerCase() !== 'body' && ancestor !== docElem);
+      body = ancestor === docElem ? null : ancestor;
     }
     return body;
   }
@@ -165,10 +162,6 @@ define(
     return elementMap.getField(element, field);
   }
 
-  function setAuxiliaryBody(body) {
-    auxiliaryBody = body;
-  }
-
   function init() {
     originalBody = document.body;
     docElem      = document.documentElement;
@@ -201,7 +194,6 @@ define(
     isTransplantRoot    : isTransplantRoot,
     isTransplantAnchor  : isTransplantAnchor,
     isInOriginalBody    : isInOriginalBody,
-    setAuxiliaryBody    : setAuxiliaryBody,
     init                : init
   };
 });

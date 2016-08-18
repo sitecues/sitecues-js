@@ -60,9 +60,9 @@ define(
       if (platform.browser.isWebKit) {
         // Hack .. wake up Chrome and Safari! They weren't refreshing the rule on hue-only changes
         // E.g. when you drag the mouse hue slider you should see instant changes
-        inlineStyle.set(rule, ['cursor', '', 'important']);
+        inlineStyle.get(rule).setProperty('cursor', '', 'important');
       }
-      inlineStyle.set(rule, ['cursor', cursorValueURL, 'important']);
+      inlineStyle.get(rule).setProperty('cursor', cursorValueURL, 'important');
     } catch (e) {
       if (SC_DEV) { console.log('Catch setting cursor property: %o', e); }
     }

@@ -591,10 +591,9 @@ define(
         colorIntensity = colorUtil.getPerceivedLuminance(bgColor);
         if (bgRgba.a === 1 && isCloseToHighlightColor(colorIntensity) &&
           !common.hasOwnBackgroundColor(this, style, state.styles[0])) { // If it's a unique color, we want to preserve it
-          state.savedBgColors.push({ elem: this, color: this.style.backgroundColor });
-          var prevStyle = this.getAttribute('style') || '';
+          state.savedBgColors.push({ elem: this, color: inlineStyle.get(this, 'backgroundColor') });
           // Needed to do this as !important because of Perkins.org theme which also used !important
-          this.setAttribute('style', 'background-color: transparent !important; ' + prevStyle);
+          inlineStyle.set(this, ['backgroundColor', 'transparent', 'important']);
         }
       }
     });
@@ -916,7 +915,7 @@ define(
     var isFixed = traitcache.getStyleProp(overlayContainerElem, 'position') === 'fixed';
 
     if (isFixed) {
-      var elemTransform = overlayContainerElem.style[platform.transformProperty],
+      var elemTransform = inlineStyle.get(overlayContainerElem, platform.transformProperty),
         scaleSplit = elemTransform.split('scale(');
       return parseFloat(scaleSplit[1]) || 1;
     }
@@ -1639,15 +1638,17 @@ define(
 
     if (state.picked && state.savedCss) {
       // Restore the previous CSS on the picked elements (remove highlight bg etc.)
-      $(state.picked).css(state.savedCss);
+      inlineStyle.set(state.picked[0], state.savedCss);
       state.savedCss = null;
       state.savedBgColors.forEach(function(savedBg) {
-        savedBg.elem.style.backgroundColor = savedBg.color;
+        inlineStyle.set(savedBg.elem, {
+          backgroundColor : savedBg.color
+        });
       });
       state.savedBgColors = [];
 
       if ($(state.picked).attr('style') === '') {
-        $(state.picked).removeAttr('style'); // Full cleanup of attribute
+        inlineStyle.removeAttribute(state.picked[0]); // Full cleanup of attribute
       }
       removeMouseWheelListener();
     }

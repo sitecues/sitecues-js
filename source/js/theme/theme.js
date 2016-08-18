@@ -397,8 +397,7 @@ define(
       styles[platform.transformProperty] = 'translateY(0.01px)';
       inlineStyle.set(document.documentElement, styles);
       nativeFn.setTimeout(function () {
-        styles[platform.transformProperty] = '';
-        inlineStyle.set(document.documentElement, styles);
+        inlineStyle.restore(document.documentElement, platform.transformProperty);
       }, REPAINT_MS);
     }
   }

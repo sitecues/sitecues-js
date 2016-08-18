@@ -232,17 +232,16 @@ define(
       // Removes position lock from clone
       styleLock.unlockStyle(auxiliaryBody);
 
-      var styles = {};
+      var bodyStyle = inlineStyle.get(auxiliaryBody);
       // Strange bug, don't really understand it, but visible elements nested in hidden elements don't show up as
       // expected when the original body has overflowY set to scroll (reproduces on Desire To Learn)
-      styles.visibility               = getComputedStyle(originalBody).overflowY === 'scroll' ? '' : 'hidden';
-      styles[platform.transformProperty] = 'none';
-      styles.pointerEvents            = '';
-      styles.position                 = 'absolute';
-      styles.top                      = 0;
-      styles.height                   = viewport.getInnerHeight();
-      styles.width                    = viewport.getInnerWidth();
-      inlineStyle.set(auxiliaryBody, styles);
+      bodyStyle.visibility               = getComputedStyle(originalBody).overflowY === 'scroll' ? '' : 'hidden';
+      bodyStyle[platform.transformProperty] = 'none';
+      bodyStyle.pointerEvents            = '';
+      bodyStyle.position                 = 'absolute';
+      bodyStyle.top                      = 0;
+      bodyStyle.height                   = viewport.getInnerHeight();
+      bodyStyle.width                    = viewport.getInnerWidth();
       docElem.appendChild(auxiliaryBody);
     }
     return auxiliaryBody;
@@ -251,7 +250,6 @@ define(
   function init() {
     docElem      = document.documentElement;
     originalBody = document.body;
-    elementInfo.setAuxiliaryBody(getAuxiliaryBody());
   }
 
   clone.init             = init;
