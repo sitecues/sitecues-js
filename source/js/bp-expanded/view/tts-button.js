@@ -121,9 +121,7 @@ define(
         opacityData = BP_CONST.ANIMATE_WAVES_OPACITY;
 
     for (var waveNum = 0; waveNum < waves.length; waveNum ++) {
-      inlineStyle.set(waves[waveNum], {
-        opacity : opacityData[waveNum][waveAnimationStepNum]
-      }, true);
+      inlineStyle.get(waves[waveNum]).opacity = opacityData[waveNum][waveAnimationStepNum];
     }
 
     if (++ waveAnimationStepNum < opacityData[0].length) {
@@ -144,9 +142,7 @@ define(
     waveAnimationStepNum = 0;
 
     for (var waveNum = 0; waveNum < waves.length; waveNum ++) {
-      inlineStyle.set(waves[waveNum], {
-        opacity : ''
-      }, true);
+      inlineStyle.get(waves[waveNum]).opacity = '';
     }
 
   }

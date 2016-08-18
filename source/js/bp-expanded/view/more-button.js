@@ -82,9 +82,7 @@ define(
     moreOpacityElem.setAttribute('class', 'scp-transition-opacity' + opacityType);
 
     // The class we set above takes care of the opacity animation...
-    inlineStyle.set(moreOpacityElem, {
-      opacity : 1
-    }, true);
+    inlineStyle.get(moreOpacityElem).opacity = 1
   }
 
   function showMoreButton (useInstantTransition) {
@@ -121,11 +119,8 @@ define(
   }
 
   function hideHelpButton () {
-
     moreOpacityElem.setAttribute('class', '');
-    inlineStyle.set(moreOpacityElem, {
-      opacity : 0
-    }, true);
+    inlineStyle.get(moreOpacityElem).opacity = 0;
 
     byId(BP_CONST.BOTTOM_MOUSETARGET_ID).removeEventListener('mousemove', showMoreButtonSlowly);
 

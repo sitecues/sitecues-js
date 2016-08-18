@@ -69,9 +69,7 @@ define(
     transferStylesFromExistingBadge(stylesToTransfer);
 
     // Set other styles that cannot be abstracted into a helper function.
-    inlineStyle.set(newBadge, {
-      display : 'inline-block'
-    }, true);
+    inlineStyle.get(newBadge).display = 'inline-block';
 
     var
       newHeight = badgeImgBoundingBox.height,
