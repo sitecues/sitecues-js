@@ -40,14 +40,12 @@ define(
   //   rotate: number
   // }
   // scaleType can be 'scaleX' or 'scaleY'
-  function setElemTransform(elem, transformMap, isSitecuesElement) {
+  function setElemTransform(elem, transformMap) {
     var useCss = shouldUseCss(elem),
       transformString = getTransformString(transformMap, useCss);
 
     if (useCss) {  // Always use CSS, even in SVG
-      var style = {};
-      style[platform.transformProperty] = transformString;
-      inlineStyle.set(elem, style, isSitecuesElement);
+      inlineStyle.get(elem)[platform.transformProperty] = transformString;
     }
     else if (transformString) {
       elem.setAttribute('transform', transformString);

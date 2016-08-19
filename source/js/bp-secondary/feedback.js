@@ -61,12 +61,12 @@ define(
       width = (feedbackInputRect.width - ROOM_FOR_ROUNDED_OUTLINE) / scale,
       height = (feedbackInputRect.height - ROOM_FOR_ROUNDED_OUTLINE) / scale;
 
-    inlineStyle(feedbackTextarea, {
+    inlineStyle.set(feedbackTextarea, {
       width  : width + 'px',
       height : height + 'px',
-    // Hide scrollbar by clipping horizontally - don't clip vertically (just large height of 999px for that)
+      // Hide scrollbar by clipping horizontally - don't clip vertically (just large height of 999px for that)
       clip   : 'rect(0,' + (width - ROOM_FOR_SCROLLBAR) + 'px,999px,0)'
-    });
+    }, { doProxy : false });
   }
 
   function onPanelUpdate() {

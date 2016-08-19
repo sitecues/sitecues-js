@@ -413,7 +413,7 @@ define(
     inlineStyle.set($hlb[0], {
       width  : width, //Preserve dimensional ratio
       height : height //Preserve dimensional ratio
-    }, true);
+    }, { doProxy : false });
 
     // This fixes the HLB being too wide or tall (lots of whitespace) for www.faast.org/news
     // when HLBing "News" header.  Because we copy computedStyles, we sometimes get an HLB
@@ -422,7 +422,7 @@ define(
     // TODO: cache descendants because we use it alot
     inlineStyle.set($hlb.find('*').get(), {
       maxWidth : width
-    }, true);
+    }, { doProxy : false });
   }
 
   /**
@@ -477,7 +477,7 @@ define(
       inlineStyle.set(hlbElement, {
         'width'    : hlbElement.scrollWidth + hlbStyling.defaultPadding + 'px',
         'maxWidth' : 'none'
-      }, true);
+      }, { doProxy : false });
 
       // Again, we can't be positive that the increase in width does not overflow the safe area.
       constrainWidthToSafeArea($hlb);
@@ -557,7 +557,7 @@ define(
     inlineStyle.set($hlb[0], {
       'paddingTop' : extraTop  ? originalHLBTopPadding  + extraTop  + hlbStyling.defaultPadding + hlbStyling.defaultBorder : originalHLBTopPadding,
       'paddingLeft': extraLeft ? originalHLBLeftPadding + extraLeft + hlbStyling.defaultPadding + hlbStyling.defaultBorder : originalHLBLeftPadding
-    }, true);
+    }, { doProxy : false });
   }
 
   //////////////////////////
@@ -689,7 +689,7 @@ define(
     hlbStyles[platform.transformProperty] = 'scale(' + startAnimationZoom + ') ' + translateCSS;
     hlbStyles[platform.transformOriginProperty] = originCSS;
 
-    inlineStyle.set(hlb, hlbStyles, true);
+    inlineStyle.set(hlb, hlbStyles, { doProxy : false });
   }
 
   return {

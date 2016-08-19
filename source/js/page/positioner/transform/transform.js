@@ -548,9 +548,7 @@ define(
     function clearInvalidTransforms() {
       targets.forEach(function (element) {
         if (!platform.browser.isIE && state.completedZoom === 1 && elementInfo.isInOriginalBody(element)) {
-          var styles = {};
-          styles[transformProperty] = '';
-          inlineStyle.set(element, styles);
+          inlineStyle.restore(element, transformProperty);
         }
       });
     }

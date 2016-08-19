@@ -304,9 +304,7 @@ define(
   function prepareMovement() {
     // Hide current HLB so it doesn't interfere with getElementFromPoint
     if (hlbElement) {
-      inlineStyle.set(hlbElement, {
-        display : 'none'
-      });
+      inlineStyle.get(hlbElement).display = 'none';
     }
 
     fixedElements.disableMouseEvents();
@@ -327,9 +325,7 @@ define(
 
     // Make lens visible again
     if (hlbElement) {
-      inlineStyle.set(hlbElement, {
-        display : 'block'
-      });
+      inlineStyle.get(hlbElement).display = 'block';
       // Scroll back to original position if the lens is now offscreen
       if (typeof origPanX === 'number') {
         var lensRect = hlbElement.getBoundingClientRect();
@@ -670,7 +666,7 @@ define(
         height: '0px',
         outline: '3px solid ' + color,
         zIndex: 999999
-      });
+      }, { doProxy : false });
     }
 
     // Need to use something that's not a container of the last picked item
@@ -832,7 +828,7 @@ define(
       isKeyRepeating = false;
     });
 
-    events.on('hlb/did-create', function($hlb) {
+    events.on('hlb/did-create', function ($hlb) {
       hlbElement = $hlb[0];
     });
 

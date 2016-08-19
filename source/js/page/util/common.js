@@ -205,7 +205,7 @@ define(
       fontSize   : fontSize,
       width      : ems + 'em',
       visibility : 'hidden'
-    }, true);
+    }, { doProxy : false });
     // Multiply by zoom because our <div> is not affected by the document's current zoom level
     px = measureDiv.clientWidth;
     document.body.removeChild(measureDiv);

@@ -229,8 +229,8 @@ define(
     var restrictingWidthInSafari = platform.browser.isSafari && config.shouldRestrictWidth;
 
     return !platform.browser.isMS &&  // IE/Edge are working better with JS animation (keyframes even taking too long to start/stop, not really smoother)
-      !restrictingWidthInSafari &&  // Safari is herky jerky if animating the width and using key frames
-      !shouldUseElementDotAnimate;  // Chrome will use element.animate();
+      !restrictingWidthInSafari   &&  // Safari is herky jerky if animating the width and using key frames
+      !shouldUseElementDotAnimate;    // Chrome will use element.animate();
   }
 
   // Animate until the currentTargetZoom, used for gliding zoom changes
@@ -239,7 +239,7 @@ define(
   function performJsAnimateZoomOperation() {
     function jsZoomStep() {  // Firefox passes in a weird startZoomTime that can't be compared with Date.now()
       var midAnimationZoom = getMidAnimationZoom();
-      inlineStyle.set($origBody.get(), style.getZoomCss(midAnimationZoom));
+      inlineStyle.set($origBody[0], style.getZoomCss(midAnimationZoom));
       if (midAnimationZoom === state.currentTargetZoom && !isSliderActive()) {
         zoomAnimator = requestFrame(finishZoomOperation);
       }
@@ -268,7 +268,7 @@ define(
       };
 
     // Apply the new CSS
-    inlineStyle.set($origBody.get(), animationCss);
+    inlineStyle.set($origBody[0], animationCss);
 
     // No zoomStopRequested() received for initial zoom
     $origBody.one(ANIMATION_END_EVENTS, onGlideStopped);
@@ -319,7 +319,7 @@ define(
         });
     }
     else {
-      inlineStyle.set($origBody.get(), zoomCss);
+      inlineStyle.set($origBody[0], zoomCss);
     }
     if (thumbChangeListener) {
       thumbChangeListener(state.currentTargetZoom);
@@ -383,7 +383,7 @@ define(
     }
     var styles = style.getZoomCss(state.currentTargetZoom);
     styles.animation = '';
-    inlineStyle.set($origBody.get(), styles);
+    inlineStyle.set($origBody[0], styles);
     finishZoomOperation();
   }
 
@@ -399,7 +399,7 @@ define(
 
     if (elementDotAnimatePlayer) {
       // Can't leave animation player around, as it will prevent future animations
-      inlineStyle.set($origBody.get(), style.getZoomCss(state.currentTargetZoom));
+      inlineStyle.set($origBody[0], style.getZoomCss(state.currentTargetZoom));
       elementDotAnimatePlayer.onfinish = null;
       elementDotAnimatePlayer.cancel();
     }
@@ -464,9 +464,7 @@ define(
     if (state.completedZoom === 1) {
       // Fixed elements are broken when we apply a transformation, and it takes work for us to correct that, so we remove the transformation
       // from the body when possible
-      inlineStyle.set(body, {
-        transform : ''
-      });
+      inlineStyle.restore(body, platform.transformProperty);
     }
 
     // Un-Blur text in Chrome
@@ -515,7 +513,7 @@ define(
 
   function freezeZoom() {
     state.currentTargetZoom = getActualZoom();
-    inlineStyle.set($origBody.get(), style.getZoomCss(state.currentTargetZoom));
+    inlineStyle.set($origBody[0], style.getZoomCss(state.currentTargetZoom));
     if (elementDotAnimatePlayer) {
       elementDotAnimatePlayer.onfinish = null;
       elementDotAnimatePlayer.cancel();
@@ -556,7 +554,7 @@ define(
     zoomAnimator = requestFrame(function () {
       // Stop the key-frame animation at the current zoom level
       // Yes, it's crazy, but this sequence helps the zoom stop where it is supposed to, and not jump back a little
-      inlineStyle.set($origBody.get(), {
+      inlineStyle.set($origBody[0], {
         animationPlayState: 'paused'
       });
       zoomAnimator = requestFrame(function() {

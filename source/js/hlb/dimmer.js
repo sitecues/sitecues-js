@@ -55,7 +55,7 @@ define(
         },
         newDimmer = $('<sc>');
 
-      inlineStyle.set(newDimmer[0], useCss, true);
+      inlineStyle.set(newDimmer[0], useCss, { doProxy : false });
       newDimmer = newDimmer.attr('id', DIMMER_ID)[0];
 
       animateOpacity(newDimmer, DIMMER_MIN_OPACITY, DIMMER_MAX_OPACITY, inflationSpeed);

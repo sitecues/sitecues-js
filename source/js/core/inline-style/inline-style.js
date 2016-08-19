@@ -37,7 +37,11 @@ define(
     return typeof value === 'number' && value !== 0 && !cssNumbers[property] ? value + 'px' : value;
   }
 
-  function setStyle(elmts, styleInfo, doNotProxy) {
+
+
+  function setStyle(elmts, styleInfo, opts) {
+    opts = opts || {};
+
     var
       styleType = Array.isArray(styleInfo) ? 'array' : typeof styleInfo,
       elements  = Array.isArray(elmts)     ? elmts   : [elmts];
@@ -46,7 +50,7 @@ define(
       var styleProperty;
 
       if (!isStyleProxied(element)) {
-        var shouldProxyStyle = !doNotProxy && !bpElemInfo.isBPElement(element);
+        var shouldProxyStyle = opts.doProxy !== false && !bpElemInfo.isBPElement(element);
         styleProperty = shouldProxyStyle ? '_scStyle' : 'style';
 
         if (shouldProxyStyle) {
@@ -269,6 +273,7 @@ define(
 
   function insertStyleProxy(element) {
     console.log('proxied element:', element);
+    //debugger;
     var proxy = proxyMap.get(element);
 
     if (element.style === proxy) {
@@ -283,7 +288,7 @@ define(
     element._scStyleProxy = proxy;
 
     Object.defineProperty(element, 'style', {
-      configurable: true,
+      configurable : true,
       /*
        * Interesting:
        * this syntax

@@ -491,9 +491,7 @@ define(
   }
 
   function setTransform (left, top, transformScale) {
-    var styles = {};
-    styles[platform.transformProperty] = 'translate(' + left + 'px' + ' , ' + top + 'px' + ') ' + 'scale(' + transformScale + ')';
-    inlineStyle.set(byId(transformElementId), styles);
+    inlineStyle.get(byId(transformElementId))[platform.transformProperty] = 'translate(' + left + 'px' + ' , ' + top + 'px' + ') ' + 'scale(' + transformScale + ')';
   }
 
   /**

@@ -104,10 +104,12 @@ define(
     // deal with zoom first, and then scrollbars separately
     // The delay also allows us to collect several concurrent requests and handle them once.
     clearTimeout(finalizeScrollbarsTimer);
-    var doUseHorizScrollbar = doForceHorizScrollbar || isBodyTooWide(),
-      doUseVertScrollbar = doForceVertScrollbar || isBodyTooTall(),
-      newOverflowX = doUseHorizScrollbar ? 'scroll' : defaultOverflowX,
-      newOverflowY = doUseVertScrollbar ? 'scroll' : defaultOverflowY;
+
+    var
+      doUseHorizScrollbar = doForceHorizScrollbar || isBodyTooWide(),
+      doUseVertScrollbar  = doForceVertScrollbar  || isBodyTooTall(),
+      newOverflowX        = doUseHorizScrollbar ? 'scroll' : defaultOverflowX,
+      newOverflowY        = doUseVertScrollbar  ? 'scroll' : defaultOverflowY;
 
     if (newOverflowX !== inlineStyle.get(docElem, 'overflowX') || newOverflowY !== inlineStyle.get(docElem, 'overflowY')) {
       if (shouldComputeMainBodyScrollbars) {

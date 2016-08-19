@@ -461,7 +461,7 @@ define(
     hlbStyles = hlbStyling.getHLBStyles($picked, $foundation, highlight);
 
     // Set the styles for the HLB and append to the wrapping element
-    inlineStyle.set(hlb, hlbStyles, true);
+    inlineStyle.set(hlb, hlbStyles, { doProxy : false });
     $hlb.appendTo($hlbWrapper);
 
     // Fixes problem with TexasAT home page when opening the top nav (Home, Sitemap, Contact Us) in HLB
@@ -515,7 +515,7 @@ define(
       'margin'         : 0,
       'width'          : pickedElementBoundingBox.width / inheritedZoom,
       'listStyleType': pickedElementComputedStyle.listStyleType || 'none'
-    }, true);
+    }, { doProxy : false });
     $foundation.insertAfter('body');
 
     // Map all picked elements children CSS to cloned children CSS
@@ -552,7 +552,7 @@ define(
       'padding'        : 0,
       'margin'         : 0,
       'width'          : pickedElementsBoundingBox.width / inheritedZoom
-    }, true);
+    }, { doProxy : false });
     $foundation.insertAfter('body');
 
     // Map all picked elements children CSS to cloned children CSS
@@ -606,7 +606,7 @@ define(
       'padding'        : 0,
       'margin'         : 0,
       'width'          : pickedElementsBoundingBox.width / inheritedZoom
-    }, true);
+    }, { doProxy : false });
     $foundation.insertAfter('body');
 
     // Map all picked elements children CSS to cloned children CSS
@@ -721,7 +721,7 @@ define(
       'left'     : 0,
       'position' : 'absolute',
       'overflow' : 'visible'
-    }, true);
+    }, { doProxy : false });
     return wrapper;
   }
 

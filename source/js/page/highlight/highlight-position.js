@@ -442,24 +442,20 @@ define(
 
   // Our hacky zoom combobox fixes can mess up highlight rects -- this corrects for that case
   function getComboboxRect(comboElem, comboRect) {
-    var isHackedCombobox = traitcache.getStyleProp(comboElem, 'zoom') > 1,
-      oldTransitionProp;
+    var isHackedCombobox = traitcache.getStyleProp(comboElem, 'zoom') > 1;
     if (isHackedCombobox) {
       // Turn off zoom CSS hacks for comboboxes
       comboElem.setAttribute('data-sc-dropdown-fix-off', '');
       // Turn off transition temporarily if it's there, otherwise it prevents us from getting the correct rect
-      oldTransitionProp = inlineStyle.get(comboElem, 'transitionProperty');
       inlineStyle.set(comboElem, {
         transitionProperty : 'none'
       });
       // Get what the rect would have been
       comboRect = comboElem.getBoundingClientRect();
       // Restore CSS
-      nativeFn.setTimeout(function() {
+      nativeFn.setTimeout(function () {
         // Do this on a timeout otherwise it may animate our return changes
-        inlineStyle.set(comboElem, {
-          transitionProperty : oldTransitionProp
-        });
+        inlineStyle.restore(comboElem, 'transitionProperty');
       }, 0);
       comboElem.removeAttribute('data-sc-dropdown-fix');
     }

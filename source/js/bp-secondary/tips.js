@@ -85,13 +85,9 @@ define(
     if (elem) {
       // Reset element back to normal position instantly (temporarily turn of animations)
       elem.setAttribute('data-demo', false);
-      inlineStyle.set(elem, {
-        transitionDuration : '0s'
-      });
+      inlineStyle.get(elem).transitionDuration = '0s';
       nativeFn.setTimeout(function () {
-        inlineStyle.set(elem, {
-          transitionDuration : ''
-        });
+        inlineStyle.get(elem).transitionDuration = '';
       }, 20); // Wait at least one frame tick to turn animations back on
     }
   }

@@ -1638,9 +1638,10 @@ define(
 
     if (state.picked && state.savedCss) {
       // Restore the previous CSS on the picked elements (remove highlight bg etc.)
+
       inlineStyle.set(state.picked[0], state.savedCss);
       state.savedCss = null;
-      state.savedBgColors.forEach(function(savedBg) {
+      state.savedBgColors.forEach(function (savedBg) {
         inlineStyle.set(savedBg.elem, {
           backgroundColor : savedBg.color
         });

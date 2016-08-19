@@ -31,6 +31,9 @@ define(
   function convertExistingBadge(badgeImg) {
 
     var
+      styleOpts = {
+        doProxy : false
+      },
       newBadge            = document.createElement('sc'),
       badgeImgBoundingBox = helper.getRect(badgeImg),
       badgeComputedStyles = window.getComputedStyle(badgeImg),
@@ -56,8 +59,8 @@ define(
         newBadgeStyles[styles[i]]   = helper.getNumberFromString(badgeComputedStyles[styles[i]]) + 'px';
         badgeImageStyles[styles[i]] = 0;
       }
-      inlineStyle.set(newBadge, newBadgeStyles, true);
-      inlineStyle.set(badgeImg, badgeImageStyles, true);
+      inlineStyle.set(newBadge, newBadgeStyles, styleOpts);
+      inlineStyle.set(badgeImg, badgeImageStyles, styleOpts);
     }
 
     // Added to fix issue on ruhglobal.com
@@ -79,7 +82,7 @@ define(
     newBadgeStyle.width  = newHeight * WIDTH_TO_HEIGHT_RATIO + 'px';
     newBadgeStyle.float  = badgeComputedStyles.float;
 
-    inlineStyle.set(newBadge, newBadgeStyle, true);
+    inlineStyle.set(newBadge, newBadgeStyle, styleOpts);
 
     // Existing badge is hidden from screen readers, because the new <sc> parent will be the real badge
     badgeImg.setAttribute('aria-hidden', true);

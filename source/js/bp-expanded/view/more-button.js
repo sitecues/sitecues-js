@@ -82,7 +82,7 @@ define(
     moreOpacityElem.setAttribute('class', 'scp-transition-opacity' + opacityType);
 
     // The class we set above takes care of the opacity animation...
-    inlineStyle.get(moreOpacityElem).opacity = 1
+    inlineStyle.get(moreOpacityElem).opacity = '1';
   }
 
   function showMoreButton (useInstantTransition) {
@@ -94,7 +94,7 @@ define(
     // The first time the button is presented to the user, scale the button to 0.5 and then animate it to a scale of 1
     if (!doAlwaysShowButton && !useInstantTransition) {
 
-      transformUtil.setElemTransform(moreButtonContainer, { scale: 0.5 }, true); // Starting point
+      transformUtil.setElemTransform(moreButtonContainer, { scale: 0.5 }); // Starting point
       requestAnimationFrame(function() {
         getComputedStyle(moreButtonContainer); // Force layout update
         animate.animateTransformLinear(moreButtonContainer, { scale: 1 }, BUTTON_ENTER_ANIMATION_DURATION);

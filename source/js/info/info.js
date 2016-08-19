@@ -78,7 +78,7 @@ define(
   }
 
   function close() {
-    inlineStyle.set($iframe.get(), INITIAL_CSS);
+    inlineStyle.set($iframe[0], INITIAL_CSS, { doProxy : false });
     nativeFn.setTimeout(function() {
       $iframe.remove();
       $iframe = $();
@@ -140,10 +140,8 @@ define(
     $iframe = $('<iframe>')
       .attr('src', pageUrl + anchor);
 
-    inlineStyle.set($iframe.get(), INITIAL_CSS);
-    inlineStyle.set($iframe.get(), {
-      border : getBorderCss()
-    });
+    inlineStyle.set($iframe[0], INITIAL_CSS, { doProxy : false });
+    inlineStyle.get($iframe[0]).border = getBorderCss();
 
     $iframe
       .one('load', onload)
@@ -180,25 +178,25 @@ define(
   }
 
   function addCloseButton() {
-    var helpRect = $iframe[0].getBoundingClientRect(),
+    var
+      styleOpts = { doProxy : false },
+      helpRect = $iframe[0].getBoundingClientRect(),
       offsetLeft = platform.browser.isMS ? -30 : -17, // Deal with big scrollbars on Windows
       offsetTop = platform.browser.isMS ? -6 : -1;
 
     $closeButton =
       $('<scx style="display:block" class="scp-hand-cursor"><scx style="position:relative;left:14px;top:23px;color:#ccc">x</scx></scx>');
-    inlineStyle.set($closeButton.get(), CLOSE_BUTTON_CSS);
-    inlineStyle.set($closeButton.get(), {
+    inlineStyle.set($closeButton[0], CLOSE_BUTTON_CSS, styleOpts);
+    inlineStyle.set($closeButton[0], {
         left: (helpRect.right - BUTTON_SIZE / 2 + offsetLeft) + 'px',  // Subtracts border width as well
         top: (helpRect.top - BUTTON_SIZE / 2 + offsetTop) + 'px'
-    });
+    }, styleOpts);
     $closeButton
         .appendTo('html')
         .one('click', close);
 
     addCloseButtonTimer = nativeFn.setTimeout(function () {
-      inlineStyle.set($closeButton.get(), {
-        opacity : 1
-      });
+      inlineStyle.get($closeButton[0]).opacity = '1';
     }, 100);
   }
 

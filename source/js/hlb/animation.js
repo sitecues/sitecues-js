@@ -80,22 +80,23 @@ define(
 
   function animateCss(hlbElement, startScale, endScale, speed, translateCSS, onCompleteFn) {
     var
-      fromCss = {},
-      toCss   = {};
+      styleOpts = { doProxy : false },
+      fromCss   = {},
+      toCss     = {};
     toCss[platform.transformProperty] = 'scale(' + endScale + ') ' + translateCSS;
 
     inlineStyle.get(hlbElement).transitionProperty = 'none';// Clear any existing transition
 
     if (!speed) {
       // No animation -- do it immediately and return
-      inlineStyle.set(hlbElement, toCss, true);
+      inlineStyle.set(hlbElement, toCss, styleOpts);
       onCompleteFn();
       return;
     }
 
     // Animate fromCss -> toCss
     fromCss[platform.transformProperty] = 'scale(' + startScale + ') ' + translateCSS;
-    inlineStyle.set(hlbElement, fromCss, true);
+    inlineStyle.set(hlbElement, fromCss, styleOpts);
 
     function onTransitionEnd() {
       hlbElement.removeEventListener(platform.transitionEndEvent, onTransitionEnd);
@@ -106,7 +107,7 @@ define(
     // rather than just setting the toCss and ignoring the fromCss
     nativeFn.setTimeout(function () {
       toCss.transition = platform.transformProperty + ' ' + speed + 'ms ease-in-out';
-      inlineStyle.set(hlbElement, toCss, true);
+      inlineStyle.set(hlbElement, toCss, styleOpts);
       hlbElement.addEventListener(platform.transitionEndEvent, onTransitionEnd);
     }, 0);
   }

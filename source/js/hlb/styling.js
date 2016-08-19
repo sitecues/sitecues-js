@@ -559,7 +559,7 @@ define(
       inlineStyle.get(hlbDescendant).cssText = getComputedStyleCssText(foundationDescendant);
 
       if (shouldRemovePadding($foundationDescendant, initialHLBRect)) {
-        inlineStyle.set(hlbDescendant, getChildPadding($foundationDescendant, initialHLBRect), true);
+        inlineStyle.set(hlbDescendant, getChildPadding($foundationDescendant, initialHLBRect), { doProxy : false });
       }
 
       // Compute styles that are more complicated than copying cssText.
@@ -577,7 +577,7 @@ define(
       }
 
       // Set the childs css.
-      inlineStyle.set(hlbDescendant, computedChildStyles, true);
+      inlineStyle.set(hlbDescendant, computedChildStyles, { doProxy : false });
 
       // Ran into issues with children inheriting styles because of class and id CSS selectors.
       // Filtering children of these attributes solves the problem.

@@ -16,10 +16,14 @@ define(
     if (!didCacheBPElements) {
       var
         badge         = document.getElementById('sitecues-badge'),
-        badgeElements = badge ? arrayUtil.toArray(badge.querySelectorAll('*')).concat(badge) : [];
-      badgeElements.forEach(function (el) {
+        bp            = document.getElementById('scp-bp-container'),
+        badgeElems    = badge ? arrayUtil.toArray(badge.querySelectorAll('*')).concat(badge) : [],
+        bpElems       = bp    ? arrayUtil.toArray(bp.querySelectorAll('*')).concat(bp) : [];
+
+      badgeElems.concat(bpElems).forEach(function (el) {
         bpElementMap.set(el, true);
       });
+
       didCacheBPElements = Boolean(badge);
     }
     return Boolean(bpElementMap.get(element)) || element.localName === 'sc';

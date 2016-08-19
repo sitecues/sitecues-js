@@ -29,8 +29,6 @@ define(
     $zoomStyleSheet,            // <style> element we insert to correct form issues in WebKit
     $zoomFormsStyleSheet,       // <style> element we insert to correct form issues in WebKit
     TRANSFORM_PROP_CSS,
-    // We store their current applied transition shorthand property, to revert to when we finish the zoom operation
-    cachedTransitionValue,
     // Optimize fonts for legibility? Helps a little bit with Chrome on Windows
     shouldOptimizeLegibility,
     // Should we repaint when zoom is finished (after any animations)?
@@ -243,35 +241,30 @@ define(
     }, REPAINT_FOR_CRISP_TEXT_DELAY);
 
     var MAX_ZINDEX = 2147483647,
-      appendedDiv = $('<sc>');
+      $appendedDiv = $('<sc>');
 
-    inlineStyle.set(appendedDiv[0], {
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      width: '100%',
-      height: '100%',
-      opacity: 1,
-      backgroundColor: 'transparent',
-      zIndex: MAX_ZINDEX,
-      pointerEvents: 'none'
-    });
+    inlineStyle.set($appendedDiv[0], {
+      position        : 'fixed',
+      top             : 0,
+      left            : 0,
+      width           : '100%',
+      height          : '100%',
+      opacity         : 1,
+      backgroundColor : 'transparent',
+      zIndex          : MAX_ZINDEX,
+      pointerEvents   : 'none'
+    }, { doProxy : false });
 
-    appendedDiv.appendTo('html');
+    $appendedDiv.appendTo('html');
 
     nativeFn.setTimeout(function () {
-      appendedDiv.remove();
+      $appendedDiv.remove();
     }, 0);
   }
 
   //Restore the intended inline style when we're done transforming the body
   function restoreBodyTransitions() {
-    if (typeof cachedTransitionValue === 'string') {
-      inlineStyle.set(body, {
-        transition : cachedTransitionValue
-      });
-    }
-    cachedTransitionValue = null;
+    inlineStyle.restore(body, 'transition');
   }
 
   //If there is a transition style applied to the body, we need to be sure that it doesn't apply to transformations
@@ -295,8 +288,7 @@ define(
     }
 
     if (property.indexOf('all') >= 0 || property.indexOf('transform') >= 0) {
-      cachedTransitionValue = inlineStyle.get(body, 'transition');
-      var transitionValue = cachedTransitionValue;
+      var transitionValue = inlineStyle.get(body, 'transition');
       if (transitionValue) {
         transitionValue += ', ';
       }

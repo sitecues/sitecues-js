@@ -189,11 +189,11 @@ define(
   }
 
   function getFilterProperty() {
-    var div = document.createElement('div');
-    inlineStyle.set(div, {
-      filter : 'invert(1)'
-    });
-    return inlineStyle.get(div, 'filter') ? 'filter' : platform.cssPrefix + 'filter';
+    var
+      div = document.createElement('div'),
+      divStyle = inlineStyle.get(div);
+    divStyle.filter = 'invert(1)';
+    return divStyle.filter ? 'filter' : platform.cssPrefix + 'filter';
   }
 
   function toggleSheet(sheet, isDisabled) {

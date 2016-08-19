@@ -288,9 +288,7 @@ define(
     if (rectHasNoArea(badgeRect)) {
       badgeRect = badgeGeometry.cachedRect;
     }
-    inlineStyle.set(bpElement, {
-      clip :  'rect(0,' + (badgeRect.width  + EXTRA_PIXELS_WIDTH) + 'px,' + (badgeRect.height + EXTRA_PIXELS_HEIGHT) + 'px,0)'
-    });
+    inlineStyle.get(bpElement).clip = 'rect(0,' + (badgeRect.width  + EXTRA_PIXELS_WIDTH) + 'px,' + (badgeRect.height + EXTRA_PIXELS_HEIGHT) + 'px,0)';
   }
 
   function onZoomChange(zoomLevel) {
@@ -304,7 +302,6 @@ define(
 
   function executeWhileElementIsRendered(element, fn) {
     var isReparented,
-        styles          = {},
         inlineTransform = inlineStyle.get(element, platform.transformProperty),
         nextSibling     = element.nextSibling,
         parent          = element.parentElement,
@@ -314,8 +311,7 @@ define(
     // This way we can be confident that an ancestor of the element isn't hiding it
     // This doesn't guarantee that a stylesheet isn't hiding the element, but it is sufficient for our current purposes
     if (rectHasNoArea(rect)) {
-      styles[platform.transformPropery] = 'translate(-99999px,-99999px)';
-      inlineStyle.set(element, styles);
+      inlineStyle.get(element)[platform.transformPropery] = 'translate(-99999px,-99999px)';
       documentElement.appendChild(element);
       isReparented = true;
     }
@@ -323,8 +319,7 @@ define(
     fn();
 
     if (isReparented) {
-      styles[platform.transformProperty] = inlineTransform;
-      inlineStyle.set(element, styles);
+      inlineStyle.get(element)[platform.transformProperty] = inlineTransform;
       if (nextSibling) {
         parent.insertBefore(element, nextSibling);
       }

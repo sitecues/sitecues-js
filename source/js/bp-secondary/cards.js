@@ -226,9 +226,7 @@ define(
     }
 
     // Set indicator
-    inlineStyle.set(indicator, {
-      backgroundPosition : indicatorLeft + 'px 0'
-    });
+    inlineStyle.get(indicator).backgroundPosition = indicatorLeft + 'px 0';
     chosenItem.setAttribute('aria-selected', 'true');
   }
 
