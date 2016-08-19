@@ -5,6 +5,10 @@ define(
             return ('on' + name) in window;
         }
 
+        // TODO: Remove this when issue is resolved:
+        // https://github.com/jshint/jshint/issues/3014
+        var speechSynthesis = window.speechSynthesis;
+
         return {
             pointerEvents     : hasEvent('pointerdown'),
             touchEvents       : hasEvent('touchstart'),
