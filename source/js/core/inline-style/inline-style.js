@@ -37,19 +37,49 @@ define(
     return typeof value === 'number' && value !== 0 && !cssNumbers[property] ? value + 'px' : value;
   }
 
+  function arrayAssignment(element, styleInfo, styleProperty) {
+    var property = styleInfo[0];
+    element[styleProperty].setProperty(property, fixUnits(property, styleInfo[1]), styleInfo[2] || '');
+  }
 
+  function objectAssignment(element, styleInfo, styleProperty) {
+    Object.keys(styleInfo).forEach(function (property) {
+      element[styleProperty][property] = fixUnits(property, styleInfo[property]);
+    });
+  }
+
+  function stringAssignment(element, styleInfo, styleProperty) {
+    element[styleProperty].cssText = styleInfo;
+  }
 
   function setStyle(elmts, styleInfo, opts) {
     opts = opts || {};
 
-    var
+    var assignmentFn,
       styleType = Array.isArray(styleInfo) ? 'array' : typeof styleInfo,
       elements  = Array.isArray(elmts)     ? elmts   : [elmts];
+
+    switch (styleType) {
+      case 'array':
+        assignmentFn = arrayAssignment;
+        break;
+
+      case 'object':
+        assignmentFn = objectAssignment;
+        break;
+
+      case 'string':
+        assignmentFn = stringAssignment;
+        break;
+    }
 
     elements.forEach(function (element) {
       var styleProperty;
 
-      if (!isStyleProxied(element)) {
+      if (isStyleProxied(element)) {
+        styleProperty = '_scStyle';
+      }
+      else {
         var shouldProxyStyle = opts.doProxy !== false && !bpElemInfo.isBPElement(element);
         styleProperty = shouldProxyStyle ? '_scStyle' : 'style';
 
@@ -59,26 +89,8 @@ define(
           insertStyleProxy(element);
         }
       }
-      else {
-        styleProperty = '_scStyle';
-      }
 
-      switch (styleType) {
-        case 'array':
-          var property = styleInfo[0];
-          element[styleProperty].setProperty(property, fixUnits(property, styleInfo[1]), styleInfo[2] || '');
-          break;
-
-        case 'object':
-          Object.keys(styleInfo).forEach(function (property) {
-            element[styleProperty][property] = fixUnits(property, styleInfo[property]);
-          });
-          break;
-
-        case 'string':
-          element[styleProperty].cssText = styleInfo;
-          break;
-      }
+      assignmentFn(element, styleInfo, styleProperty);
     });
   }
 
@@ -117,24 +129,42 @@ define(
   }
 
   function updateIntendedStyles() {
+    var normalizer = document.createElement('div').style;
+
     assignmentRecords.forEach(function (record) {
-      var
+      var cssObject,
         element          = record.element,
         styleInfo        = record.styleInfo,
         isCssOverwritten = typeof styleInfo === 'string',
-        cssObject        = isCssOverwritten ? parseCss(styleInfo) : styleInfo,
         intendedStyles   = isCssOverwritten ? {} : styleMap.get(element) || {};
+
+      if (isCssOverwritten) {
+        normalizer.cssText = styleInfo;
+      }
+      else {
+        Object.keys(styleInfo).forEach(function (property) {
+          normalizer[property] = styleInfo[property];
+        });
+      }
+
+      // This gives us the kebab-case property names, so that we're not writing both camelCase and kebab-case intended styles
+      cssObject          = parseCss(normalizer.cssText);
+      normalizer.cssText = '';
+
       Object.keys(cssObject).forEach(function (property) {
         intendedStyles[property] = cssObject[property];
       });
+
       styleMap.set(element, intendedStyles);
     });
+
     assignmentRecords = [];
   }
 
   /*
   * If this function is called with an undefined `property` parameter, de-proxy the element's style property
   * */
+  // NOTE: currently this function only takes kebab case properties!
   function restore(element, props) {
     var properties,
       intendedStyles = getIntendedStyles(element);
@@ -175,6 +205,7 @@ define(
 
   function getIntendedStyles(element) {
     updateIntendedStyles();
+    clearTimeout(updateTimer);
     updateTimer = null;
     return styleMap.get(element);
   }
@@ -273,7 +304,6 @@ define(
 
   function insertStyleProxy(element) {
     console.log('proxied element:', element);
-    //debugger;
     var proxy = proxyMap.get(element);
 
     if (element.style === proxy) {
@@ -289,12 +319,6 @@ define(
 
     Object.defineProperty(element, 'style', {
       configurable : true,
-      /*
-       * Interesting:
-       * this syntax
-       * { get() { ... } }
-       * prevented the core from running, should investigate further
-       * */
       // note : get & set function declarations / expressions de-optimize their containing
       // function. Don't put more in this function than needs to happen
       get : function () { return element._scStyleProxy; },
@@ -306,13 +330,12 @@ define(
   }
 
   function init() {
-    inlinePattern = /([^:]*):\s?([^;]*);\s?/g;
+    inlinePattern = /([^:]*):\s?([\W\w]*?)(?:;\s|;$)/g;
     // element -> intended css object
     styleMap          = new WeakMap();
     // element -> style proxy object
     proxyMap          = new WeakMap();
     assignmentRecords = [];
-    updateTimer       = null;
   }
 
   return {

@@ -73,7 +73,7 @@ define(
       isLegalColor = inlineStyle.get(docElt, 'outlineColor'),  // Browser didn't set the border color -> not a legal color
       rgb          = isLegalColor && getComputedStyle(docElt).outlineColor;
 
-    inlineStyle.restore(docElt, 'outlineColor');
+    inlineStyle.restore(docElt, 'outline-color');
     return rgb;
   }
 

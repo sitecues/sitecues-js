@@ -455,7 +455,7 @@ define(
       // Restore CSS
       nativeFn.setTimeout(function () {
         // Do this on a timeout otherwise it may animate our return changes
-        inlineStyle.restore(comboElem, 'transitionProperty');
+        inlineStyle.restore(comboElem, 'transition-property');
       }, 0);
       comboElem.removeAttribute('data-sc-dropdown-fix');
     }
