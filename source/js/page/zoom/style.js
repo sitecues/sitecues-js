@@ -10,7 +10,8 @@ define(
     'page/zoom/util/body-geometry',
     'page/zoom/config/config',
     'core/native-functions',
-    'core/inline-style/inline-style'
+    'core/inline-style/inline-style',
+    'core/util/array-utility'
   ],
   function (
     $,
@@ -20,7 +21,8 @@ define(
     bodyGeo,
     config,
     nativeFn,
-    inlineStyle
+    inlineStyle,
+    arrayUtil
   ) {
   'use strict';
 
@@ -29,6 +31,7 @@ define(
     $zoomStyleSheet,            // <style> element we insert to correct form issues in WebKit
     $zoomFormsStyleSheet,       // <style> element we insert to correct form issues in WebKit
     TRANSFORM_PROP_CSS,
+    lastZoom,
     // Optimize fonts for legibility? Helps a little bit with Chrome on Windows
     shouldOptimizeLegibility,
     // Should we repaint when zoom is finished (after any animations)?
@@ -103,34 +106,58 @@ define(
     }
 
     function applyZoomFormFixes(zoom) {
+      var css, selector;
       if (platform.browser.isWebKit) {
         // Add useful zoom fixes for forms that render incorrectly with CSS transform
         // We turn them off when data-sc-dropdown-fix off is set (need to temporarily turn off for highlight position calculation elsewhere)
-        var css =
-          'select[size="1"]:not([data-sc-dropdown-fix-off]),select:not([size]):not([data-sc-dropdown-fix-off]){' +
+        css ='select[size="1"]:not([data-sc-dropdown-fix-off]),select:not([size]):not([data-sc-dropdown-fix-off]) {' +
           platform.transformPropertyCss + ':scale(' + 1 / zoom + ') !important;' +
           'transform-origin:0% 62% !important;' +
           'margin-right:' + (13 * (1 - zoom)) + '% !important;' +
           'margin-top:' + (8 * (1-zoom)) + 'px !important;' +
           'margin-bottom:' + (8 * (1-zoom)) + 'px !important;' +
-          'zoom:' + zoom + ' !important;}';
-
-        // Turn off any page transitions for select during zoom, otherwise it will potentially animate the above changes
-        css +=
-          '\nbody[data-sc-zooming] select { transition-property: none !important; }';
-
-        // Don't use any of these rules in print
-        css = '@media screen {\n' + css + '\n}';
-        if (!$zoomFormsStyleSheet) {
-          $zoomFormsStyleSheet = $('<style>')
-            .text(css)
-            .attr('id', SITECUES_ZOOM_FORMS_ID)
-            .appendTo('head');
-        }
-        else {
-          $zoomFormsStyleSheet.text(css);
-        }
+          'zoom:' + zoom + ' !important;}' +
+          '\nbody[data-sc-zooming] select { transition-property: none !important; }'; // Turn off any page transitions for select during zoom, otherwise it will potentially animate the above changes
       }
+      else {
+        selector = 'select[size="1"],select:not([size])';
+        css = selector + ' {' +
+          platform.transformPropertyCss + ': translateX(' + state.translation / 6 + 'px) scale(' + 1 / zoom + ') !important;' +
+          'transform-origin: 0 0 !important; }';
+        var comboBoxes = arrayUtil.toArray(document.querySelectorAll(selector));
+        comboBoxes.forEach(function (box) {
+          inlineStyle.restore(box, ['font-size', 'width', 'height']);
+          if (zoom > 1) {
+            var style     = getComputedStyle(box),
+                // Firefox doesn't scale down the element's width despite us applying the inverse of our scale transformation,
+                // for some reason the last scale transformation is still factored into each dimension.
+                height    = parseFloat(style.height) / (lastZoom ? lastZoom : 1),
+                width     = parseFloat(style.width) / (lastZoom ? lastZoom : 1),
+                newWidth  = width * zoom,
+                newHeight = height * zoom;
+
+            inlineStyle.set(box, {
+              fontSize : zoom + 'em',
+              height   : newHeight + 'px',
+              width    : newWidth + 'px'
+            });
+          }
+        });
+        lastZoom = zoom;
+      }
+
+      // Don't use any of these rules in print
+      css = '@media screen {\n' + css + '\n}';
+      if (!$zoomFormsStyleSheet) {
+        $zoomFormsStyleSheet = $('<style>')
+          .text(css)
+          .attr('id', SITECUES_ZOOM_FORMS_ID)
+          .appendTo('head');
+      }
+      else {
+        $zoomFormsStyleSheet.text(css);
+      }
+
     }
 
   // This is used to repaint the DOM after a zoom in WebKit to ensure crisp text

@@ -218,6 +218,12 @@ define(
     return parseFloat(transform.substring(7)) || 1;
   }
 
+  function getComputedTranslation(elem) {
+    var style = getComputedStyle(elem),
+        transform = style[platform.transformProperty];
+    return parseFloat(transform.split(', ')[4]) || 0;
+  }
+
   return {
     isWhitespaceOrPunct: isWhitespaceOrPunct,
     isVisualRegion: isVisualRegion,
@@ -232,6 +238,7 @@ define(
     hasVertScroll: hasVertScroll,
     getBulletWidth: getBulletWidth,
     getEmsToPx: getEmsToPx,
-    getComputedScale: getComputedScale
+    getComputedScale: getComputedScale,
+    getComputedTranslation: getComputedTranslation
   };
 });
