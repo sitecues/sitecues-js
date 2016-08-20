@@ -122,8 +122,8 @@ define(
       else {
         selector = 'select[size="1"],select:not([size])';
         css = selector + ' {' +
-          platform.transformPropertyCss + ': translateX(' + state.translation / 6 + 'px) scale(' + 1 / zoom + ') !important;' +
-          'transform-origin: 0 0 !important; }';
+          platform.transformPropertyCss + ': scale(' + 1 / zoom + ') !important;' +
+          'transform-origin: 50% 0 !important; }';
         var comboBoxes = arrayUtil.toArray(document.querySelectorAll(selector));
         comboBoxes.forEach(function (box) {
           inlineStyle.restore(box, ['font-size', 'width', 'height']);
@@ -147,7 +147,7 @@ define(
       }
 
       // Don't use any of these rules in print
-      css = '@media screen {\n' + css + '\n}';
+      css = '@media screen {\n' + css + '\n }';
       if (!$zoomFormsStyleSheet) {
         $zoomFormsStyleSheet = $('<style>')
           .text(css)

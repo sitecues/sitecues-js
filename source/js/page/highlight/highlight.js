@@ -1418,12 +1418,21 @@ define(
     addOrRemoveFn(window, 'focus', onFocusWindow);
     addOrRemoveFn(window, 'blur', onBlur);
     addOrRemoveFn(window, 'resize', hide);
+    addOrRemoveFn(window, 'mousedown', setFocus);
 
     if (!isTrackingMouse) {
       removeMouseWheelListener();
     }
 
     return isTrackingMouse;
+  }
+
+  // This addresses the stickiness of the focus on the dropdown select element on fairfieldcountybank.com
+  function setFocus(evt) {
+    if (evt.target !== document.activeElement) {
+      evt.target.focus();
+    }
+    testFocus();
   }
 
   function getCursorPos(event, scrollX, scrollY) {
@@ -1801,5 +1810,4 @@ define(
     hide: hide,
     init: init
   };
-
 });
