@@ -106,7 +106,7 @@ define(
     }
 
     function applyZoomFormFixes(zoom) {
-      var css, selector;
+      var css;
       if (platform.browser.isWebKit) {
         // Add useful zoom fixes for forms that render incorrectly with CSS transform
         // We turn them off when data-sc-dropdown-fix off is set (need to temporarily turn off for highlight position calculation elsewhere)
@@ -120,17 +120,15 @@ define(
           '\nbody[data-sc-zooming] select { transition-property: none !important; }'; // Turn off any page transitions for select during zoom, otherwise it will potentially animate the above changes
       }
       else {
-        selector = 'select[size="1"],select:not([size])';
+        var selector = 'select[size="1"],select:not([size])';
         css = selector + ' {' +
           platform.transformPropertyCss + ': scale(' + 1 / zoom + ') !important;' +
-          'transform-origin: 50% 0 !important; }';
+          'transform-origin: 100% 0 !important; }' ;
         var comboBoxes = arrayUtil.toArray(document.querySelectorAll(selector));
         comboBoxes.forEach(function (box) {
           inlineStyle.restore(box, ['font-size', 'width', 'height']);
           if (zoom > 1) {
             var style     = getComputedStyle(box),
-                // Firefox doesn't scale down the element's width despite us applying the inverse of our scale transformation,
-                // for some reason the last scale transformation is still factored into each dimension.
                 height    = parseFloat(style.height) / (lastZoom ? lastZoom : 1),
                 width     = parseFloat(style.width) / (lastZoom ? lastZoom : 1),
                 newWidth  = width * zoom,
