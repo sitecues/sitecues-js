@@ -272,7 +272,9 @@ var requirejs, require, define;
     bootstrapConfig = requirejs || require,
     contexts = {},
     queue = [],
-    currDirRegExp = /^\.\//,
+    // ----- BEGIN SITECUES CUSTOM BLOCK -----
+    //currDirRegExp = /^\.\//,
+    // ----- END SITECUES CUSTOM BLOCK -----
     commentRegExp = /(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg,
     cjsRequireRegExp = /[^.]\s*require\s*\(\s*["']([^'"\s]+)["']\s*\)/g,
     jsSuffixRegExp = /\.js$/;
@@ -365,18 +367,20 @@ var requirejs, require, define;
     return target;
   }
 
+  // ----- BEGIN SITECUES CUSTOM BLOCK -----
   // Allow getting a global that expressed in
   // dot notation, like 'a.b.c'.
-  function getGlobal(value) {
-    if (!value) {
-      return value;
-    }
-    var g = global;
-    value.split('.').forEach(function (part) {
-      g = g[part];
-    });
-    return g;
-  }
+  // function getGlobal(value) {
+  //   if (!value) {
+  //     return value;
+  //   }
+  //   var g = global;
+  //   value.split('.').forEach(function (part) {
+  //     g = g[part];
+  //   });
+  //   return g;
+  // }
+  // ----- END SITECUES CUSTOM BLOCK -----
 
   function newContext(contextName) {
     var req, main, makeMap, callDep, handlers, checkingLater, load, context,
