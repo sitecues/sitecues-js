@@ -37,9 +37,6 @@ define([
     METRIC_THRESHOLD_SHAKE_PERCENT = constants.METRIC_THRESHOLD_SHAKE_PERCENT;
 
   function reset() {
-    if (SC_DEV) {
-      console.log('reset mouseshake');
-    }
     recentMousePositions = [];
     clearTimeout(lastShakeTimeout);
     if (lastShakeVigor > 0) {

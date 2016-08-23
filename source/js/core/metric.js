@@ -12,6 +12,7 @@ define(
     'core/constants',
     'core/bp/model/classic-mode',
     'core/platform',
+    'core/has',
     'core/native-functions'
   ],
   function (
@@ -24,6 +25,7 @@ define(
     constants,
     classicMode,
     platform,
+    has,
     nativeFn
   ) {
   'use strict';
@@ -39,58 +41,18 @@ define(
         platformData,
         sessionData;
 
-
     function Metric(name, details) {
-      this.createDataJSON(name, details);
-      this.sent = false;
-    }
-
-    function logNameCollisions(metricName, data, details) {
-      // In dev, log field name collisions because the backend is going to flatten the metrics object
-      function logFieldNameCollision(propName) {
-        if (data.hasOwnProperty(propName)) {
-          console.error('Sitecues error: name collision for metric ' + metricName + ' field name ' + propName);
-        }
-      }
-
-      if (details) {
-        Object.keys(details).forEach(logFieldNameCollision);
-      }
-    }
-
-    // Data must be of simple types
-    function flattenData(data) {
-      function flattenDataField(propName) {
-        var value = data[propName],
-          type = typeof value;
-        if (value !== null && type !== 'boolean' && type !== 'number' && type !== 'string' && type !== 'undefined') {
-          data[propName] = nativeFn.JSON.stringify(data[propName]);
-        }
-      }
-
-      Object.keys(data).forEach(flattenDataField);
-    }
-
-    function shallowCopyInto(source, dest) {
-      if (source) {
-        for (var keyName in source) {
-          if (source.hasOwnProperty(keyName)) {
-            dest[keyName] = source[keyName];
-          }
-        }
-      }
-    }
-
-    Metric.prototype.createDataJSON = function createDataJSON(name, details) {
       if (doLogMetrics) {
         console.log('Metric / %s', name + (details ? ' / ' + nativeFn.JSON.stringify(details) : ''));
       }
 
-      var data = this.data = {},
-        settings = getSettings(); // Gets all prefs
+      this.sent = false;
+
+      var data = this.data = {};
+      var settings = getSettings(); // Gets all prefs
 
       // Session data
-      shallowCopyInto(sessionData, data);
+      assign(data, sessionData);
 
       // Common fields
       data.name = name;
@@ -100,7 +62,7 @@ define(
 
       // Platform data -- goes into details field for historical reason
       details = details || {};
-      shallowCopyInto(platformData, details);
+      assign(details, platformData);
 
       // Ensure data we send has simple types
       flattenData(data);
@@ -114,7 +76,53 @@ define(
 
       data.details = details;
       data.settings = settings;
-    };
+      data.has = (function () {
+        var target = {};
+        Object.keys(target).forEach(function (key) {
+          if (typeof has[key] === 'boolean') {
+            target[key] = has[key];
+          }
+        });
+        return target;
+      }());
+    }
+
+    // In dev, log field name collisions because the backend is going to flatten the metrics object
+    function logNameCollisions(metricName, data, details) {
+      function logFieldNameCollision(propName) {
+        if (data.hasOwnProperty(propName)) {
+          // TODO: Sadly, we do not currently throw an error here, because our errors.js module sends an error metric
+          // for exceptions, which could then lead to an infinite loop. This could be solved by having errors.js
+          // skip sending a metric when it is the metrics code that is borked anyway.
+          console.error('Sitecues error: name collision for metric ' + metricName + ' field name ' + propName);
+        }
+      }
+
+      if (details) {
+        Object.keys(details).forEach(logFieldNameCollision);
+      }
+    }
+
+    // Data must be of simple types.
+    function flattenData(data) {
+      Object.keys(data).forEach(function (propName) {
+        var value = data[propName];
+        var type = typeof value;
+
+        if (value !== null && type !== 'boolean' && type !== 'number' && type !== 'string' && type !== 'undefined') {
+          data[propName] = nativeFn.JSON.stringify(data[propName]);
+        }
+      });
+    }
+
+    // TODO: Delete this and use Object.assign() when we drop IE support.
+    function assign(target, source) {
+      if (source) {
+        Object.keys(source).forEach(function (key) {
+          target[key] = source[key];
+        });
+      }
+    }
 
     Metric.prototype.send = function send() {
       /*jshint validthis: true */
@@ -123,8 +131,8 @@ define(
       }
 
       xhr.post({
-        url: urls.getApiUrl('metrics/site/' + this.data.siteId + '/notify.json?name=' + this.data.name),
-        data: this.data
+        url  : urls.getApiUrl('metrics/site/' + this.data.siteId + '/notify.json?name=' + this.data.name),
+        data : this.data
       });
 
       metricHistory.push(this);
@@ -147,7 +155,6 @@ define(
     }
 
     function isTester() {
-
       if (conf.get('isTester')) {
         // Once a tester, always a tester
         return true;
@@ -163,7 +170,7 @@ define(
 
     // TODO Should go away once we go to the new extension which is entirely in a content script
     function isOldExtension() {
-      return sitecues.everywhereConfig;
+      return Boolean(sitecues.everywhereConfig);
     }
 
     // Return settings we care about
@@ -215,13 +222,10 @@ define(
 
     // This info is not available right away -- we add to session data as soon as available
     function initViewInfo(viewInfo) {
-      if (viewInfo) {
-        shallowCopyInto(viewInfo, sessionData);
-      }
+      assign(sessionData, viewInfo);
     }
 
     function init() {
-
       if (isInitialized) {
         return;
       }
