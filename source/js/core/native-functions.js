@@ -4,12 +4,15 @@ define([], function () {
   var exports = {};
 
   function init() {
-    var frame = document.querySelector('#sitecues-native-context');
+    // Extension always uses window
+    // In-page library uses native iframe context if available
+    var nativeWindow = SC_EXTENSION ? window :
+      (document.getElementById('sitecues-native-context').contentWindow || window);
 
-    exports.bindFn = frame.contentWindow.Function.prototype.bind;
+    exports.bindFn = nativeWindow.Function.prototype.bind;
 
     function addWindowProperty(name) {
-      var value = frame.contentWindow[name];
+      var value = nativeWindow[name];
       // if `value` is a function, bind it to the top window
       exports[name] = value.bind ? value.bind(window) : value;
     }

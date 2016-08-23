@@ -283,19 +283,31 @@ var requirejs, require, define;
 
   // ----- BEGIN SITECUES CUSTOM BLOCK -----
   // Recover potentially overridden window methods from a nested browsing context
-  function cacheNativeFnReferences() {
-    var
-      frameId = 'sitecues-native-context',
-      frame   = document.querySelector('#' + frameId);
-    if (!frame) {
-      frame = document.createElement('iframe');
-      frame.style.cssText = 'position:absolute;width:1px;height:1px;left:-9999px;visibility:hidden;';
-      frame.id = frameId;
-      document.documentElement.appendChild(frame);
+  function getNativeWindow() {
+    if (SC_EXTENSION) {
+      return window;
     }
-    hasOwn     = frame.contentWindow.Object.prototype.hasOwnProperty;
-    setTimeout = frame.contentWindow.setTimeout.bind(window);
-    slice      = frame.contentWindow.Array.prototype.slice;
+    var NATIVE_FRAME_ID = 'sitecues-native-context',
+      frame = document.getElementById(NATIVE_FRAME_ID);
+    if (frame) {
+      // Protect against someone trying to mess up Sitecues by creating this iframe
+      console.log('Error: sitecues-native-context iframe already created!');
+      return window;
+    }
+
+    frame = document.createElement('iframe');
+    frame.id = NATIVE_FRAME_ID;
+    frame.style.cssText = 'position:absolute;width:1px;height:1px;left:-9999px;visibility:hidden;';
+    document.documentElement.appendChild(frame);
+
+    return frame.contentWindow;
+  }
+
+  function cacheNativeFnReferences() {
+    var nativeWindow = getNativeWindow();
+    hasOwn     = nativeWindow.Object.prototype.hasOwnProperty;
+    setTimeout = nativeWindow.setTimeout.bind(window);
+    slice      = nativeWindow.Array.prototype.slice;
   }
   // ----- END SITECUES CUSTOM BLOCK -----
 
