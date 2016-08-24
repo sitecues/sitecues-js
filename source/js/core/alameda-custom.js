@@ -12,10 +12,10 @@
 
 // ----- BEGIN SITECUES CUSTOM BLOCK -----
 // All custom sitecues code is marked this way
-/* globals -define, -require, importScripts, sc_require */
+/* globals -define, -require, importScripts, _sc_require, _sc_getHelperFrame */
 /* jshint proto: true */
 // TODO Once we kill off IE11 we can use alameda.js instead of alameda-prim.js (native promise only)
-var require = sc_require;
+var require = _sc_require;
 // ----- END SITECUES CUSTOM BLOCK -----
 
 var requirejs, require, define;
@@ -286,9 +286,7 @@ var requirejs, require, define;
   // ----- BEGIN SITECUES CUSTOM BLOCK -----
   // Recover potentially overridden window methods from a nested browsing context
   function getNativeWindow() {
-    // jshint -W117
-    return SC_EXTENSION ? window : sc_getHelperFrame('sitecues-context').contentWindow;
-    // jshint +W117
+    return SC_EXTENSION ? window : _sc_getHelperFrame('sitecues-context').contentWindow;
   }
 
   function cacheNativeFnReferences() {

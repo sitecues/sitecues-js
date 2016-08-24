@@ -3,7 +3,7 @@
 // Must be inserted before alameda by the build process
 
 // jshint -W098
-var sc_getHelperFrame = function(id, optionalSrc) {
+var _sc_getHelperFrame = function(id, optionalSrc) {
 // jshint +W098
   var frame = document.getElementById(id);
 

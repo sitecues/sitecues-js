@@ -67,7 +67,7 @@
   // Recover potentially overridden window methods from a nested browsing context
   function getNativeWindow() {
     // jshint -W117
-    return SC_EXTENSION ? window : sc_getHelperFrame('sitecues-context').contentWindow;
+    return SC_EXTENSION ? window : _sc_getHelperFrame('sitecues-context').contentWindow;
     // jshint +W117
   }
 
