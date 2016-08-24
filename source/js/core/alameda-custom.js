@@ -299,6 +299,7 @@ var requirejs, require, define;
 
     frame = document.createElement('iframe');
     frame.id = NATIVE_FRAME_ID;
+    frame.setAttribute('role', 'presentation');
     frame.style.cssText = 'position:absolute;width:1px;height:1px;left:-9999px;visibility:hidden;';
     document.documentElement.appendChild(frame);
 
