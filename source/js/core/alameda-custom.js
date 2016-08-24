@@ -12,10 +12,10 @@
 
 // ----- BEGIN SITECUES CUSTOM BLOCK -----
 // All custom sitecues code is marked this way
-/* globals -define, -require, importScripts, sc_require */
+/* globals -define, -require, importScripts */
 /* jshint proto: true */
 // TODO Once we kill off IE11 we can use alameda.js instead of alameda-prim.js (native promise only)
-var require = sc_require;
+var require = sitecues._require;
 // ----- END SITECUES CUSTOM BLOCK -----
 
 var requirejs, require, define;
@@ -272,7 +272,9 @@ var requirejs, require, define;
     bootstrapConfig = requirejs || require,
     contexts = {},
     queue = [],
-    currDirRegExp = /^\.\//,
+    // ----- BEGIN SITECUES CUSTOM BLOCK -----
+    //currDirRegExp = /^\.\//,
+    // ----- END SITECUES CUSTOM BLOCK -----
     commentRegExp = /(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg,
     cjsRequireRegExp = /[^.]\s*require\s*\(\s*["']([^'"\s]+)["']\s*\)/g,
     jsSuffixRegExp = /\.js$/;
@@ -283,19 +285,15 @@ var requirejs, require, define;
 
   // ----- BEGIN SITECUES CUSTOM BLOCK -----
   // Recover potentially overridden window methods from a nested browsing context
+  function getNativeWindow() {
+    return SC_EXTENSION ? window : sitecues._getHelperFrame('sitecues-context').contentWindow;
+  }
+
   function cacheNativeFnReferences() {
-    var
-      frameId = 'sitecues-native-context',
-      frame   = document.querySelector('#' + frameId);
-    if (!frame) {
-      frame = document.createElement('iframe');
-      frame.style.cssText = 'position:absolute;width:1px;height:1px;left:-9999px;visibility:hidden;';
-      frame.id = frameId;
-      document.documentElement.appendChild(frame);
-    }
-    hasOwn     = frame.contentWindow.Object.prototype.hasOwnProperty;
-    setTimeout = frame.contentWindow.setTimeout.bind(window);
-    slice      = frame.contentWindow.Array.prototype.slice;
+    var nativeWindow = getNativeWindow();
+    hasOwn     = nativeWindow.Object.prototype.hasOwnProperty;
+    setTimeout = nativeWindow.setTimeout.bind(window);
+    slice      = nativeWindow.Array.prototype.slice;
   }
   // ----- END SITECUES CUSTOM BLOCK -----
 
@@ -353,18 +351,20 @@ var requirejs, require, define;
     return target;
   }
 
+  // ----- BEGIN SITECUES CUSTOM BLOCK -----
   // Allow getting a global that expressed in
   // dot notation, like 'a.b.c'.
-  function getGlobal(value) {
-    if (!value) {
-      return value;
-    }
-    var g = global;
-    value.split('.').forEach(function (part) {
-      g = g[part];
-    });
-    return g;
-  }
+  // function getGlobal(value) {
+  //   if (!value) {
+  //     return value;
+  //   }
+  //   var g = global;
+  //   value.split('.').forEach(function (part) {
+  //     g = g[part];
+  //   });
+  //   return g;
+  // }
+  // ----- END SITECUES CUSTOM BLOCK -----
 
   function newContext(contextName) {
     var req, main, makeMap, callDep, handlers, checkingLater, load, context,
