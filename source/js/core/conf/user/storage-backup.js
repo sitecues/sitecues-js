@@ -175,7 +175,7 @@ define(
 
       // Create iframe
       // jshint -W117
-      iframe = _sc_getHelperFrame(SITECUES_PREFS_IFRAME_ID, urls.resolveResourceUrl(PATH));
+      iframe = sitecues._getHelperFrame(SITECUES_PREFS_IFRAME_ID, urls.resolveResourceUrl(PATH));
       // jshint +W117
 
       addListeners();

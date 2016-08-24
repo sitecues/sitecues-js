@@ -5,9 +5,7 @@ define([], function () {
 
   // Recover potentially overridden window methods from a nested browsing context
   function getNativeWindow() {
-    // jshint -W117
-    return SC_EXTENSION ? window : _sc_getHelperFrame('sitecues-context').contentWindow;
-    // jshint +W117
+    return SC_EXTENSION ? window : sitecues._getHelperFrame('sitecues-context').contentWindow;
   }
 
   function init() {

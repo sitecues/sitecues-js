@@ -2,9 +2,7 @@
 // Apologies for putting this on the native window
 // Must be inserted before alameda by the build process
 
-// jshint -W098
-var _sc_getHelperFrame = function(id, optionalSrc) {
-// jshint +W098
+sitecues._getHelperFrame = function(id, optionalSrc) {
   var frame = document.getElementById(id);
 
   if (!frame) {
