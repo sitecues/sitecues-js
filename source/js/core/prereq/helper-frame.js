@@ -28,4 +28,4 @@ var _sc_getHelperFrame = function(id, optionalSrc) {
   }
 
   return frame;
-}
+};
