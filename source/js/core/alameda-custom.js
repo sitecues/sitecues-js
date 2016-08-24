@@ -286,24 +286,9 @@ var requirejs, require, define;
   // ----- BEGIN SITECUES CUSTOM BLOCK -----
   // Recover potentially overridden window methods from a nested browsing context
   function getNativeWindow() {
-    if (SC_EXTENSION) {
-      return window;
-    }
-    var NATIVE_FRAME_ID = 'sitecues-native-context',
-      frame = document.getElementById(NATIVE_FRAME_ID);
-    if (frame) {
-      // Protect against someone trying to mess up Sitecues by creating this iframe
-      console.log('Error: sitecues-native-context iframe already created!');
-      return window;
-    }
-
-    frame = document.createElement('iframe');
-    frame.id = NATIVE_FRAME_ID;
-    frame.setAttribute('role', 'presentation');
-    frame.style.cssText = 'position:absolute;width:1px;height:1px;left:-9999px;visibility:hidden;';
-    document.documentElement.appendChild(frame);
-
-    return frame.contentWindow;
+    // jshint -W117
+    return SC_EXTENSION ? window : sc_getHelperFrame('sitecues-context').contentWindow;
+    // jshint +W117
   }
 
   function cacheNativeFnReferences() {

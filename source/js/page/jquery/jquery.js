@@ -64,13 +64,11 @@
 // enough that all such attempts are guarded in a try block.
   "use strict";
 
+  // Recover potentially overridden window methods from a nested browsing context
   function getNativeWindow() {
-    if (SC_EXTENSION) {
-      return window;
-    }
-    var NATIVE_FRAME_ID = 'sitecues-native-context',
-      frame = document.getElementById(NATIVE_FRAME_ID);
-    return frame ? frame.contentWindow : window;
+    // jshint -W117
+    return SC_EXTENSION ? window : sc_getHelperFrame('sitecues-context').contentWindow;
+    // jshint +W117
   }
 
   function cacheSetTimeoutReference() {

@@ -3,11 +3,17 @@ define([], function () {
 
   var exports = {};
 
+  // Recover potentially overridden window methods from a nested browsing context
+  function getNativeWindow() {
+    // jshint -W117
+    return SC_EXTENSION ? window : sc_getHelperFrame('sitecues-context').contentWindow;
+    // jshint +W117
+  }
+
   function init() {
     // Extension always uses window
     // In-page library uses native iframe context if available
-    var nativeWindow = SC_EXTENSION ? window :
-      (document.getElementById('sitecues-native-context').contentWindow || window);
+    var nativeWindow = getNativeWindow();
 
     exports.bindFn = nativeWindow.Function.prototype.bind;
 

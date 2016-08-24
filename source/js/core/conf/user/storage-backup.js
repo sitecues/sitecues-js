@@ -21,7 +21,7 @@ define(
   ) {
 
   var PATH = 'html/prefs.html',
-    ID = 'sitecues-prefs',
+    SITECUES_PREFS_IFRAME_ID = 'sitecues-prefs',
     iframe,
     doLogStorageBackup,
     isIframeLoaded,
@@ -162,7 +162,7 @@ define(
         iframe.addEventListener('error', onError);
       }
 
-      // Has existing iframe
+      // Has existing iframe with prefs.html already loaded into it
       if (iframe) {
         if (isIframeLoaded) {
           resolve();
@@ -174,27 +174,13 @@ define(
       }
 
       // Create iframe
-      iframe = document.createElement('iframe');
-      iframe.setAttribute('aria-hidden', true);
-      iframe.setAttribute('role', 'presentation');
-      iframe.id = ID;
-      // Needs to have some size (1x1) and not be display:none -- otherwise it won't load in some browsers
-      iframe.style.cssText = 'position:absolute;width:1px;height:1px;left:-9999px;visibility:hidden;';
-      iframe.src = urls.resolveResourceUrl(PATH);
-      // Set title and text description for iframe. Without this, accessibility tools fail,
-      // even though they shouldn't given that it has aria-hidden="true" and says role="presentation".
-      // But, customers rightly insist that we pass their tools.
-      // The real point is that screen reader users either won't see the iframe, or if they do, it won't be a complete mystery.
-      // We used a text phrase that does not need to be localized, just to save effort ... the word 'data' is pretty international.
-      var SITECUES_IFRAME_TEXT = 'Sitecues data';
-      iframe.setAttribute('title', SITECUES_IFRAME_TEXT);
-      iframe.innerText = SITECUES_IFRAME_TEXT;
-      document.documentElement.appendChild(iframe);
+      // jshint -W117
+      iframe = sc_getHelperFrame(SITECUES_PREFS_IFRAME_ID, urls.resolveResourceUrl(PATH));
+      // jshint +W117
 
       addListeners();
     });
   }
-
 
   function init() {
     IS_BACKUP_DISABLED =

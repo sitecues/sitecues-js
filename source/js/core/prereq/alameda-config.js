@@ -1,4 +1,5 @@
 // Alameda configuration
+// Must be inserted before alameda by the build process
 
 /* globals SC_RESOURCE_FOLDER_NAME, -sc_require */
 /* jshint -W098 */
