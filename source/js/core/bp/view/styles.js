@@ -260,6 +260,15 @@ define(['core/bp/helper', 'core/platform', 'core/conf/site'],
         'display': 'none'  // Don't let badge mouseover target interfere with actual use of panel
       },
 
+      // Absolutely positioned overlay extending the size of the badge for easier hovers
+      '#scp-mouseover-target': {
+        'position': 'absolute',
+        'top': '-16px',
+        'left': '-16px',
+        'width': 'calc(100% + 32px)',
+        'height': 'calc(100% + 32px)'
+      },
+
       /**************** Waves ************************/
 
       '.scp-wave,.scp-head': {

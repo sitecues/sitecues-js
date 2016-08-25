@@ -55,13 +55,13 @@ define(
     return state.isInitialLoadZoom;
   }
 
-  function beginZoomIncrease(event) {
+  function beginZoomIncrease(event, inputInfo) {
     // Increase up to max or until zoomStopRequested()
-    animation.beginGlide(MAX, event);
+    animation.beginGlide(MAX, event, inputInfo);
   }
 
-  function beginZoomDecrease(event) {
-    animation.beginGlide(MIN, event);
+  function beginZoomDecrease(event, inputInfo) {
+    animation.beginGlide(MIN, event, inputInfo);
   }
 
   function getCompletedZoom() {
@@ -70,10 +70,10 @@ define(
 
   // Use to jump the current zoom immediately to the targetZoom requested
   // The use case for this is currently the zoom slider
-  function jumpTo(targetZoom) {
+  function jumpTo(targetZoom, inputInfo) {
     if (!animation.isZoomOperationRunning()) {
       // 1st call -- we will glide to it, it may be far away from previous zoom value
-      animation.beginZoomOperation(targetZoom, {isSlider: true}); // Get ready for more slider updates
+      animation.beginZoomOperation(targetZoom, $.extend(inputInfo, {isSlider: true })); // Get ready for more slider updates
       if (targetZoom !== state.completedZoom) {
         animation.performJsAnimateZoomOperation();
         animation.updateSlider();
