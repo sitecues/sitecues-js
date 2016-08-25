@@ -11,22 +11,22 @@ define([], function () {
   // Maximum layer depth is 5 (because of 5 sections of user id)
   // TODO this is just an example of what's possible, let's actually use it
 
-  var globalAbOptions = {
+  var globalAbConfig = {
     NONE: {  // Special value meaning no A/B test is occurring
       weight: 3
     },
     // Commented but kept in source as an example of what's possible
     // 'iconTest': {
     //   weight: 10,
-    //   layerOptions: {
+    //   values: {
     //     'settingsIconTest': {
-    //       layerOptions: [
+    //       values: [
     //         'gear',
     //         'sliders'
     //       ]
     //     },
     //     'tipsIconTest': {
-    //       layerOptions: [
+    //       values: [
     //         'question',
     //         'lightbulb'
     //       ]
@@ -35,14 +35,11 @@ define([], function () {
     // },
     'extraSensitiveBadgeNewUser': {
       // Test Marc's idea to have an extra sensitive badge for first time users
-      weight: 1,
-      layerOptions: [
-        true
-      ]
+      weight: 100
     },
     'moreButtonTimer': {
       weight: 1,
-      layerOptions: [
+      values: [
         0,
         1000,
         2000,
@@ -55,6 +52,6 @@ define([], function () {
     }
   };
 
-  return globalAbOptions;
+  return globalAbConfig;
 });
 

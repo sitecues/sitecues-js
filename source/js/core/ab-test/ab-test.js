@@ -24,13 +24,11 @@ define(
     var userAbConfig = [];
 
     function getLayerWeight(layer, keys) {
-      function getKeyWeight(key) {
-        return layer[key].weight || 1; // If weight is not specified, defaults to 1
-      }
-
-      return keys.reduce(function(key1, key2) {
-        return getKeyWeight(key1) + getKeyWeight(key2);
+      var total = 0;
+      keys.forEach(function(key) {
+        total += layer[key].weight || 1; // If weight is not specified, defaults to 1
       });
+      return total;
     }
 
     function selectKeyInLayer(seed, layer, keys) {
@@ -53,16 +51,16 @@ define(
       return keys[numKeys - 1];
     }
 
-    function selectTests(layerOptions, userIdParts, layerIndex) {
+    function selectTests(layerValues, userIdParts, layerIndex) {
       var
-        layerKeys = Object.keys(layerOptions),
+        layerKeys = Object.keys(layerValues),
         seed = parseInt(userIdParts[layerIndex], 16),   // Choose an option in the layer based on this part of the user id
-        selectedKey = selectKeyInLayer(seed, layerOptions, layerKeys),
-        nextLayerOptions = layerOptions[selectedKey].layerOptions;
+        selectedKey = selectKeyInLayer(seed, layerValues, layerKeys),
+        nextLayerValues = layerValues[selectedKey].values;
 
       // If array is provided, use the simple value provided, otherwise the key
-      userAbConfig[layerIndex] = Array.isArray(layerOptions) ? layerOptions[selectedKey] : selectedKey;
-      if (nextLayerOptions) {
+      userAbConfig[layerIndex] = Array.isArray(layerValues) ? layerValues[selectedKey] : selectedKey;
+      if (nextLayerValues) {
         ++ layerIndex;
         if (layerIndex > userIdParts.length) {  // Realistically this is always 5
           if (SC_DEV) {
@@ -70,7 +68,7 @@ define(
           }
           return;
         }
-        selectTests(nextLayerOptions, userIdParts, layerIndex);
+        selectTests(nextLayerValues, userIdParts, layerIndex);
       }
     }
 
