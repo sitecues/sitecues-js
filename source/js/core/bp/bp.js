@@ -16,7 +16,7 @@
 
 define(
   [
-    'core/bp/controller/bp-controller',
+    'core/bp/controller/expand-controller',
     'core/bp/model/state',
     'core/bp/helper',
     'core/bp/constants',
@@ -27,7 +27,7 @@ define(
     'core/native-functions'
   ],
   function (
-    bpController,
+    expandController,
     state,
     helper,
     BP_CONST,
@@ -87,7 +87,7 @@ define(
   function initBPFeature() {
     return initBPView()
       .then(function() {
-        bpController.init();
+        expandController.init();
         fixDimensionsOfBody();
         return getViewInfo();
       });
