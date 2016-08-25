@@ -7,6 +7,7 @@ define(
     'core/bp/model/state',
     'core/bp/helper',
     'core/metric',
+    'core/ab-test/ab-test',
     'core/conf/user/manager',
     'core/bp/view/view',
     'core/events',
@@ -18,6 +19,7 @@ define(
     state,
     helper,
     metric,
+    abTest,
     conf,
     view,
     events,
@@ -111,7 +113,7 @@ define(
 
   function getHoverDelayStayInside(isInBadge) {
     // First interaction is most sensitive
-    if (isFirstInteraction()) {
+    if (abTest.get('extraSensitiveBadgeNewUser') && isFirstInteraction()) {
       return BP_CONST.HOVER_DELAY_STAY_INSIDE_FIRST_TIME;
     }
     // Badge is more sensitive than toolbar, because it's smaller
