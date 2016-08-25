@@ -42,6 +42,7 @@ define(
         "zoom"                    : true
       };
 
+  // This function replicates jQuery's coercion of numeric style values to unit strings when appropriate
   function fixUnits(property, value) {
     return typeof value === 'number' && value !== 0 && !cssNumbers[property] ? value + 'px' : value;
   }
@@ -96,6 +97,7 @@ define(
         styleProperty = '_scStyle';
       }
       else {
+        // If we haven't specified that an element shouldn't be proxied, and it isn't nested in the badge or bp, proxy the element
         var shouldProxyStyle = opts.doProxy !== false && !bpElemInfo.isBPElement(element);
         styleProperty = shouldProxyStyle ? '_scStyle' : 'style';
 
@@ -337,6 +339,7 @@ define(
       // note : get & set function declarations / expressions de-optimize their containing
       // function. Don't put more in this function than needs to happen
       get : function () { return element._scStyleProxy; },
+      // element.style = cssText is equivalent to element.style.cssText = cssText
       set : function (cssText) {
         queueAssignmentRecord(element, cssText);
         element._scStyle.cssText = cssText;

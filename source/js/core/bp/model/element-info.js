@@ -1,3 +1,5 @@
+// Utility module for miscellaneous information about elements. Separated from the element-info module in the page bundle so that we're not
+// including more code in the core than is absolute necessary.
 define(
   [
     'core/events',
