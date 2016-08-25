@@ -107,8 +107,8 @@ define([], function() {
   constants.MOUSE_SIZE_ID            = 'scp-mouse-size';
 
   constants.HOVER_DELAY_NOMOVE_BADGE = 30;        // If mouse stays still inside badge for this long, open
-  constants.HOVER_DELAY_NOMOVE_TOOLBAR = 150;     // If mouse stays still inside toolbar for this long, open
-  constants.HOVER_DELAY_STAY_INSIDE_TOOLBAR = 300;  // If mouse stays inside badge or toolbar for this long, open
+  constants.HOVER_DELAY_NOMOVE_TOOLBAR = 250;     // If mouse stays still inside toolbar for this long, open
+  constants.HOVER_DELAY_STAY_INSIDE_TOOLBAR = 400;  // If mouse stays inside badge or toolbar for this long, open
   constants.HOVER_DELAY_STAY_INSIDE_BADGE = 150;  // If mouse stays inside badge or toolbar for this long, open
   constants.HOVER_DELAY_STAY_INSIDE_FIRST_TIME = 40;  // First time users get more sensitive badge
   constants.MOUSELEAVE_DELAY_SHRINK_BP = 2000;
