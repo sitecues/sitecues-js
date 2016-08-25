@@ -308,16 +308,9 @@ define(['core/bp/helper', 'core/platform', 'core/conf/site'],
         'pointer-events': 'all'
       },
 
-      '.scp-transition-opacity' : {
-        'transition': 'opacity .8s'
-      },
-
       '.scp-transition-opacity-fast' : {
-        'transition': 'opacity 0.4s'
-      },
-
-      '.scp-transition-opacity-instant' : {
-        'transition': 'opacity 0s'
+        'transition': 'opacity 0.4s',
+        'opacity': 1
       },
 
       '#scp-secondary, .scp-secondary-feature': {

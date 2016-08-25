@@ -125,7 +125,27 @@ define(
                 );
             });
 
-            test('.get() callback is called the first time value is set', function () {
+            test('.has() returns false when value is undefined', function () {
+
+              assert.isFalse(
+                manager.has('shoes'),
+                'has() should return false when the value is not set'
+              );
+            });
+
+          test('.has() returns true when value is defined', function () {
+
+            manager.set('shoes', 2);
+
+            var has = manager.has('shoes');
+
+            assert.isTrue(
+              has,
+              'has() should return true when the value is defined'
+            );
+          });
+
+          test('.get() callback is called the first time value is set', function () {
 
                 var VALUE = 2,
                     numCalls = 0;

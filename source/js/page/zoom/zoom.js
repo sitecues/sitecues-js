@@ -73,7 +73,7 @@ define(
   function jumpTo(targetZoom, inputInfo) {
     if (!animation.isZoomOperationRunning()) {
       // 1st call -- we will glide to it, it may be far away from previous zoom value
-      animation.beginZoomOperation(targetZoom, $.extend(inputInfo, {isSlider: true })); // Get ready for more slider updates
+      animation.beginZoomOperation(targetZoom, $.extend({}, inputInfo, {isSlider: true })); // Get ready for more slider updates
       if (targetZoom !== state.completedZoom) {
         animation.performJsAnimateZoomOperation();
         animation.updateSlider();

@@ -7,11 +7,14 @@ define(['page/zoom/zoom', 'core/conf/user/manager'],
       zoomMod.resetZoom();
     }
 
-    function resetAudio() {
+    function resetAudio(callback) {
       require(['audio/audio'], function (audio) {
         audio.init();
         audio.setSpeechState(false, true);
         audio.stopAudio();
+        if (callback) {
+          callback();
+        }
       });
     }
 
@@ -21,8 +24,7 @@ define(['page/zoom/zoom', 'core/conf/user/manager'],
 
     function resetAll() {
       resetZoom();
-      resetAudio();
-      resetMinorSettings();
+      resetAudio(resetMinorSettings);
     }
 
     function init() {

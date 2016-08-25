@@ -109,6 +109,10 @@ define([], function() {
     return isPanel() && data.secondaryPanelName === 'button-menu';
   }
 
+  function turnOnRealSettings() {
+    set('isRealSettings', true);    // Always use real settings once expanded
+  }
+
   return {
     get: get,
     set: set,
@@ -121,6 +125,7 @@ define([], function() {
     isShrinking: isShrinking,
     getSecondaryPanelName: getSecondaryPanelName,
     isButtonMenu: isButtonMenu,
+    turnOnRealSettings: turnOnRealSettings,
     getPanelName: getPanelName
   };
 

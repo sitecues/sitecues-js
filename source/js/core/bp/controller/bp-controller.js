@@ -151,9 +151,11 @@ define(
 
     view.update();
   }
-
-  function turnOnRealSettings() {
-    state.set('isRealSettings', true);    // Always use real settings once expanded
+  function ensureFutureRealSettings() {   // Use real settings on next page load
+    // Save zoom level so that Sitecues does not see this as a first time user
+    if (!conf.has('zoom')) {
+      conf.set('zoom', 1);
+    }
   }
 
   function setPanelExpandedState(isOpenedWithHover) {
@@ -161,7 +163,8 @@ define(
     state.set('wasMouseInPanel', isOpenedWithHover);
     state.set('isOpenedWithHover', isOpenedWithHover);
     state.set('transitionTo', BP_CONST.PANEL_MODE);
-    turnOnRealSettings();
+    state.turnOnRealSettings();
+    ensureFutureRealSettings();
   }
 
   function changeModeToPanel(isOpenedWithKeyboard) {
@@ -245,7 +248,7 @@ define(
 
   function didZoom() {
     require(['bp-expanded/controller/slider-controller'], function (sliderController) {
-      turnOnRealSettings();
+      state.turnOnRealSettings();
       sliderController.init();
       view.update();
     });
@@ -254,7 +257,7 @@ define(
   function didChangeSpeech(isOn) {
     require(['bp-expanded/view/tts-button'], function(ttsButton) {
       // Update the TTS button view on any speech state change
-      turnOnRealSettings();
+      state.turnOnRealSettings();
       ttsButton.init();
       ttsButton.updateTTSStateView(isOn);
       view.update();
@@ -271,7 +274,7 @@ define(
 
       var badgeElement = getBadgeElement();
       domEvents.on(badgeElement, 'keydown', processBadgeActivationKeys, { passive: false });
-      domEvents.on(badgeElement, 'mousedown', clickToOpenPanel);
+      domEvents.on(badgeElement, 'mousedown', clickToOpenPanel, { passive: false });
       domEvents.on(badgeElement, 'mousemove', onMouseMove);
       domEvents.on(badgeElement, 'mouseleave', cancelHoverTimers);
 
