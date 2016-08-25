@@ -337,7 +337,7 @@ define(
   function initBadgeGeometry() {
     badgeElement.appendChild(bpElement);
 
-    events.emit('bp/bp-element-inserted');
+    events.emit('bp/did-insert-bp-element');
 
     executeWhileElementIsRendered(badgeElement, function () {
       var cachedRect = helper.getRect(badgeElement),

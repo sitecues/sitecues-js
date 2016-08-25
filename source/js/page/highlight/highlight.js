@@ -1648,7 +1648,7 @@ define(
       });
       state.savedBgColors = [];
 
-      if ($(state.picked).attr('style') === '') {
+      if (state.picked.attr('style') === '') {
         inlineStyle.removeAttribute(state.picked[0]); // Full cleanup of attribute
       }
       removeMouseWheelListener();

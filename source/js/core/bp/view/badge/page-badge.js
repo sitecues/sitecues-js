@@ -46,7 +46,7 @@ define(
         var newBadge = imagePlaceHolder.init(origBadgeElem);
         resolve({
           badgeElem: newBadge,
-          origSrc: origBadgeElem.srcv
+          origSrc: origBadgeElem.src
         });
       });
     }).then(function(badgeInfo) {
