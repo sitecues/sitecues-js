@@ -35,7 +35,7 @@ define([], function () {
     // },
     'extraSensitiveBadgeNewUser': {
       // Test Marc's idea to have an extra sensitive badge for first time users
-      weight: 100
+      weight: 1
     },
     'moreButtonTimer': {
       weight: 1,
