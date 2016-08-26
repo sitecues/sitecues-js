@@ -101,6 +101,7 @@ define(
     var userId = uuid(),
       appData = { userId : userId };
     appData[userId] = {};
+    console.log('New user ', userId);
     setAppData(appData);
   }
 

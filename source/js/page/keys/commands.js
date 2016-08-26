@@ -31,13 +31,14 @@ define([
       // Turn off zoom
       reset.resetZoom();
       if (event.altKey) {
-        reset.resetAudio();
-        if (event.shiftKey) {
-          reset.resetMinorSettings();
-          require(['audio/audio'], function (audio) {
-            audio.playEarcon('quit-organ');
-          });
-        }
+        reset.resetAudio(function() {
+          if (event.shiftKey) {
+            reset.resetMinorSettings();
+            require(['audio/audio'], function (audio) {
+              audio.playEarcon('quit-organ');
+            });
+          }
+        });
       }
     },
     speakHighlight: function () {

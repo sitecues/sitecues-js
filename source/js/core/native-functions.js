@@ -3,13 +3,20 @@ define([], function () {
 
   var exports = {};
 
-  function init() {
-    var frame = document.querySelector('#sitecues-native-context');
+  // Recover potentially overridden window methods from a nested browsing context
+  function getNativeWindow() {
+    return SC_EXTENSION ? window : sitecues._getHelperFrame('sitecues-context').contentWindow;
+  }
 
-    exports.bindFn = frame.contentWindow.Function.prototype.bind;
+  function init() {
+    // Extension always uses window
+    // In-page library uses native iframe context if available
+    var nativeWindow = getNativeWindow();
+
+    exports.bindFn = nativeWindow.Function.prototype.bind;
 
     function addWindowProperty(name) {
-      var value = frame.contentWindow[name];
+      var value = nativeWindow[name];
       // if `value` is a function, bind it to the top window
       exports[name] = value.bind ? value.bind(window) : value;
     }

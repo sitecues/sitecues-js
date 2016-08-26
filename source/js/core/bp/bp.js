@@ -16,7 +16,7 @@
 
 define(
   [
-    'core/bp/controller/bp-controller',
+    'core/bp/controller/expand-controller',
     'core/bp/model/state',
     'core/bp/model/element-info',
     'core/bp/helper',
@@ -29,7 +29,7 @@ define(
     'core/inline-style/inline-style'
   ],
   function (
-    bpController,
+    expandController,
     state,
     bpElemInfo,
     helper,
@@ -93,7 +93,7 @@ define(
   function initBPFeature() {
     return initBPView()
       .then(function() {
-        bpController.init();
+        expandController.init();
         fixDimensionsOfBody();
         return getViewInfo();
       });

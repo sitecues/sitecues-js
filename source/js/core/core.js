@@ -71,8 +71,8 @@ define(
   }
 
   function expandPanel() {
-    require(['core/bp/controller/bp-controller'], function(bpController) {
-      bpController.expandPanel();
+    require(['core/bp/controller/expand-controller'], function(expandController) {
+      expandController.expandPanel();
     });
   }
 

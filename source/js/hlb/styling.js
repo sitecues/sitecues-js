@@ -42,7 +42,7 @@ define(
   var
       // How many ancestors do we move up the chain until we find a background image
       // to use for the $hlb background image.
-      BACKGROUND_IMAGE_ANCESTOR_TRAVERSAL_COUNT = 0,
+      BACKGROUND_IMAGE_ANCESTOR_TRAVERSAL_COUNT = 3,
 
       // Default background color for HLB, if HLB is NOT an image.
       HLB_DEFAULT_BACKGROUND_COLOR = '#fff',

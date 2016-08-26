@@ -5,7 +5,6 @@
  *   3. Listen to anything that should wake up sitecues features
  *   4. Fire sitecues ready callback and page-visited metric
  */
-
 define(
   [
     'core/conf/user/manager',
@@ -20,6 +19,7 @@ define(
     'Promise',
     'core/modifier-key-state',
     'core/native-functions',
+    'core/ab-test/ab-test',
     'core/shake/shake',
     'core/inline-style/inline-style'
   ],
@@ -37,6 +37,7 @@ define(
     Promise,
     modifierKeyState,
     nativeFn,
+    abTest,
     shake,
     inlineStyle
   ) {
@@ -300,6 +301,7 @@ define(
   function initConfAndMetrics() {
     return conf.init()
       .catch(function handlePrefsError(error) { return { error: error.message }; })
+      .then(abTest.init)
       .then(initMetrics);
   }
 

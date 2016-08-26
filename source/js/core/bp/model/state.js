@@ -11,6 +11,7 @@ define(
     secondaryPanelTransitionTo: 0,
     scale                   : 1, // How much transform scale used on expanded BP
     isRealSettings          : true, // Are we currently showing the actual settings or fake settings?
+    isFirstBadgeUse         : true, // Is this a first time user?
     secondaryPanelName      : 'button-menu', // 'button-menu', 'tips', 'settings', 'feedback', 'about'
     isSecondaryExpanding    : false, // Is secondary panel currently expanding to accommodate new contents?
     isSecondaryExpanded     : false, // Is secondary panel fully expanded?
@@ -112,6 +113,10 @@ define(
     return isPanel() && data.secondaryPanelName === 'button-menu';
   }
 
+  function turnOnRealSettings() {
+    set('isRealSettings', true);    // Always use real settings once expanded
+  }
+
   return {
     get: get,
     set: set,
@@ -124,6 +129,7 @@ define(
     isShrinking: isShrinking,
     getSecondaryPanelName: getSecondaryPanelName,
     isButtonMenu: isButtonMenu,
+    turnOnRealSettings: turnOnRealSettings,
     getPanelName: getPanelName
   };
 });

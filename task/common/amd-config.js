@@ -37,8 +37,9 @@ var config = require('../build-config'),
         'if (sitecues && sitecues.exists) throw new Error("The sitecues library already exists on this page.");\n' +
         'Object.defineProperty(sitecues, "version", { value: "' + config.version + '", writable: false });\n' +
         '"use strict";\n' +
-        fs.readFileSync(JS_SOURCE_DIR + '/core/util/custom-event-polyfill.js') +
-        fs.readFileSync(JS_SOURCE_DIR + '/core/alameda-config.js')
+        fs.readFileSync(JS_SOURCE_DIR + '/core/prereq/custom-event-polyfill.js') +
+        fs.readFileSync(JS_SOURCE_DIR + '/core/prereq/helper-frame.js') +
+        fs.readFileSync(JS_SOURCE_DIR + '/core/prereq/alameda-config.js')
       },
       // Include alameda in core
       include: [ 'core/alameda-custom', 'core/errors' ],
