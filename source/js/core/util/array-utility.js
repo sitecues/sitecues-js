@@ -48,7 +48,7 @@ define([], function () {
     return fromSet(set);
   }
 
-  // Returns the an array with elements that are in all of the passed arrays
+  // Returns an array with elements that are in all of the passed arrays
   function intersection() {
     var
       arrays = arguments,

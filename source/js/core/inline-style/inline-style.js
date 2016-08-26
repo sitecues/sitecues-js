@@ -3,6 +3,15 @@
 *
 * This module is responsible for watching inline style mutations of elements modified by Sitecues in order to accurately
 * calculate the `intended style` of an element, i.e. the style an element would have if Sitecues had not manipulated its inline value.
+*
+* This is important for a couple reasons:
+ A complete reset of Sitecues should restore all the original styles. The problem with our past solution, caching an element's style value before setting
+ our own style, is that it doesn't allow for dynamic re-setting of the style during the lifetime of the document, because we will overwrite the updated style
+ with our cached value.
+
+ Even without a complete reset, we frequently want to restore individual elements to their intended state for certain operations.
+ For example zoom resets the transform and width of the body element to an empty string when it recomputes the original body dimensions,
+ instead of restoring values that were potentially already defined. This makes that process very easy now: inlineStyle.restore(body, ['width', 'transform'])
 * */
 define(
   [
@@ -33,6 +42,7 @@ define(
         "zoom"                    : true
       };
 
+  // This function replicates jQuery's coercion of numeric style values to unit strings when appropriate
   function fixUnits(property, value) {
     return typeof value === 'number' && value !== 0 && !cssNumbers[property] ? value + 'px' : value;
   }
@@ -52,6 +62,13 @@ define(
     element[styleProperty].cssText = styleInfo;
   }
 
+  // @styleInfo accepts a string, array or object in the following formats:
+  /*
+  * { property : value, ... }
+  * 'property: value; ...'
+  * ['property', 'value', 'importance']
+  * */
+  // @opts may take a single boolean, doProxy, which short circuits the logic for deciding whether to create style proxy for the element
   function setStyle(elmts, styleInfo, opts) {
     opts = opts || {};
 
@@ -80,6 +97,7 @@ define(
         styleProperty = '_scStyle';
       }
       else {
+        // If we haven't specified that an element shouldn't be proxied, and it isn't nested in the badge or bp, proxy the element
         var shouldProxyStyle = opts.doProxy !== false && !bpElemInfo.isBPElement(element);
         styleProperty = shouldProxyStyle ? '_scStyle' : 'style';
 
@@ -114,7 +132,6 @@ define(
   }
 
   function queueAssignmentRecord(element, styleInfo) {
-    console.log('queueAssignmentRecord:', arguments);
     assignmentRecords.push({
       element   : element,
       styleInfo : styleInfo
@@ -289,6 +306,7 @@ define(
     return cssText;
   }
 
+  // Note: Only use this function against 'normalized' cssText strings, that have been retrieved from an element's style object.
   function parseCss(cssText) {
     var
       cssObj = {},
@@ -303,7 +321,6 @@ define(
   }
 
   function insertStyleProxy(element) {
-    console.log('proxied element:', element);
     var proxy = proxyMap.get(element);
 
     if (element.style === proxy) {
@@ -322,6 +339,7 @@ define(
       // note : get & set function declarations / expressions de-optimize their containing
       // function. Don't put more in this function than needs to happen
       get : function () { return element._scStyleProxy; },
+      // element.style = cssText is equivalent to element.style.cssText = cssText
       set : function (cssText) {
         queueAssignmentRecord(element, cssText);
         element._scStyle.cssText = cssText;

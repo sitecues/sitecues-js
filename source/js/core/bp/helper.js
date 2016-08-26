@@ -13,7 +13,7 @@ define(
    *** Getters ***
    */
 
-  var elementByIdCache   = {};
+  var elementByIdCache = {};
 
   function byId(id) {
     var result = elementByIdCache[id];

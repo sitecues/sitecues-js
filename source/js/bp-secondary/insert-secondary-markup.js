@@ -187,7 +187,7 @@ htmlSecondary =
       insertHtml('scp-html-secondary-anchor', htmlSecondary);
       insertSvg('scp-secondary-anchor', svgSecondary);
       insertSheets();
-      events.emit('bp/inserted-secondary-markup');
+      events.emit('bp/did-insert-secondary-markup');
     }
   }
 

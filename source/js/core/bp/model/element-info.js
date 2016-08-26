@@ -1,3 +1,5 @@
+// Utility module for miscellaneous information about elements. Separated from the element-info module in the page bundle so that we're not
+// including more code in the core than is absolute necessary.
 define(
   [
     'core/events',
@@ -12,6 +14,8 @@ define(
   var didCacheBPElements = false,
       bpElementMap       = new WeakMap();
 
+  // This function caches a map of all elements nested within the sitecues badge and bp container.
+  // This cache is invalidated when new elements are inserted into either element
   function isBPElement(element) {
     if (!didCacheBPElements) {
       var
@@ -24,13 +28,14 @@ define(
         bpElementMap.set(el, true);
       });
 
+      // If the badge hasn't been inserted yet, don't bother saving the cached list (it's empty)
       didCacheBPElements = Boolean(badge);
     }
     return Boolean(bpElementMap.get(element)) || element.localName === 'sc';
   }
 
   function init() {
-    events.on('bp/inserted-secondary-markup bp/content-loaded bp/bp-element-inserted', function () {
+    events.on('bp/did-insert-secondary-markup bp/content-loaded bp/did-inserted-bp-element', function () {
       didCacheBPElements = false;
     });
   }

@@ -65,9 +65,7 @@ define(
       return TRANSPARENT;
     }
 
-    inlineStyle.set(docElt, {
-      outlineColor : colorName
-    });
+    inlineStyle.set(docElt, ['outlineColor', colorName]);
 
     var
       isLegalColor = inlineStyle.get(docElt, 'outlineColor'),  // Browser didn't set the border color -> not a legal color
