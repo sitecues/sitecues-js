@@ -56,7 +56,7 @@ define(
     return evt.clientY >= badgeRect.top && evt.clientY<= badgeRect.bottom;
   }
 
-  function getVisibleBadgeRect() {
+  function  getVisibleBadgeRect() {
     return helper.getRect(helper.byId(BP_CONST.MOUSEOVER_TARGET));
   }
 
@@ -104,25 +104,22 @@ define(
       // Hover if no move -- start a new timer every time mouse moves
       hoverIfNoMoveTimer = nativeFn.setTimeout(changeModeToPanel,
         isInBadge ? BP_CONST.HOVER_DELAY_NOMOVE_BADGE : BP_CONST.HOVER_DELAY_NOMOVE_TOOLBAR);
-      // Hover if stay inside -- start a new timer first time inside badge
-      if (!hoverIfStayInsideTimer) {
-        hoverIfStayInsideTimer = nativeFn.setTimeout(changeModeToPanel, getHoverDelayStayInside(isInBadge));
-      }
+    }
+
+    // Hover if stay inside -- start a new timer first time inside badge
+    if (isInBadge && !hoverIfStayInsideTimer) {
+      hoverIfStayInsideTimer = nativeFn.setTimeout(changeModeToPanel, getHoverDelayStayInside());
     }
   }
 
-  function getHoverDelayStayInside(isInBadge) {
+  function getHoverDelayStayInside() {
     // First interaction is most sensitive
     if (abTest.get('extraSensitiveBadgeNewUser') && isFirstInteraction()) {
       return BP_CONST.HOVER_DELAY_STAY_INSIDE_FIRST_TIME;
     }
-    // Badge is more sensitive than toolbar, because it's smaller
-    if (isInBadge) {
-      return BP_CONST.HOVER_DELAY_STAY_INSIDE_BADGE;
-    }
 
-    // Toolbar is least sensitive, because it's such a large target
-    return BP_CONST.HOVER_DELAY_STAY_INSIDE_TOOLBAR;
+    // Second or later interaction
+    return BP_CONST.HOVER_DELAY_STAY_INSIDE_BADGE;
   }
 
   function isFirstInteraction() {

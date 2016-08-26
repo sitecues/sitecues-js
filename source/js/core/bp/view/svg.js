@@ -87,6 +87,7 @@ define(['core/bp/view/markup-finalizer', 'core/bp/view/styles'], function(finali
     </g>\
   </g>\
 </g>\
+<rect id="scp-mouseover-target" role="presentation" x="-100" y="-40" width="820" height="200" opacity="0"/>\
 </svg>\
 \
 <sc id="scp-html-secondary-anchor" role="presentation" style="display:none"></sc>'; // Hack to make sure innerHTML doesn't remove any important last element

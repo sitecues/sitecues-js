@@ -149,14 +149,7 @@ define([
     updateElements('[filter]', 'filter');
   }
 
-  // Insert an element that will be absolutely positioned and extends the bounds of the hoverable badge area
-  function insertMouseoverTarget(origBadgeElem) {
-    var bpHoverElement = document.createElement('sc');
-    bpHoverElement.id = BP_CONST.MOUSEOVER_TARGET;
-    origBadgeElem.appendChild(bpHoverElement);
-  }
-
-    // This function augments the badge placement element, which is passed in.
+  // This function augments the badge placement element, which is passed in.
   // This is an element that will have <svg> and other markup inserted inside of it.
   //
   // It binds the permanent event handlers. It positions the elements so they appear directly over
@@ -184,9 +177,6 @@ define([
 
     // Label it
     addLabel(badgeElement);
-
-    // Hoverable area
-    insertMouseoverTarget(badgeElement);
 
     // Append the container to the badgeElement and fit to the space available
     placement.init(badgeElement, bpContainer, svgElement);
