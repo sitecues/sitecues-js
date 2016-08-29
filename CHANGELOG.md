@@ -8,6 +8,10 @@ All notable changes to this project will be documented here.
  - **Deprecated** : Planned for removal in the near future.
  - **Removed**    : Disabled or deleted within the source code.
 
+## [4.2.6] - 2016-08-29
+### Fixed
+ - No longer attempt to read text from cross-origin sources
+
 ## [4.2.5] - 2016-08-26
 ### Fixed
  - Improve fixed positioning for flash elements. Ignore invalid documents.
