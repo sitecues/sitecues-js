@@ -25,6 +25,7 @@ define([
     lastShakeTimeout,
     lastShakeVigor = 0,
     lastShakeVigorPercent = 0,
+    canFireMetricAgain = true,
     MIN_DIR_SWITCHES_FOR_SHAKE = constants.MIN_DIR_SWITCHES_FOR_SHAKE,
     MOUSE_POSITIONS_ARRAY_SIZE = constants.MOUSE_POSITIONS_ARRAY_SIZE,
     MIN_SHAKE_DIST = constants.MIN_SHAKE_DIST,
@@ -36,7 +37,8 @@ define([
     SHAKE_INCREASE_POWER = constants.SHAKE_INCREASE_POWER,
     MAX_SHAKE_VIGOR_INCREASE = constants.MAX_SHAKE_VIGOR_INCREASE,
     MIN_MOVE_SIZE_FOR_SHAKE = constants.MIN_MOVE_SIZE_FOR_SHAKE,
-    METRIC_THRESHOLD_SHAKE_PERCENT = constants.METRIC_THRESHOLD_SHAKE_PERCENT;
+    METRIC_THRESHOLD_SHAKE_PERCENT_FIRE = constants.METRIC_THRESHOLD_SHAKE_PERCENT_FIRE,
+    METRIC_THRESHOLD_SHAKE_PERCENT_RESET = constants.METRIC_THRESHOLD_SHAKE_PERCENT_RESET;
 
   function reset() {
     recentMousePositions = [];
@@ -210,10 +212,14 @@ define([
 
     // Metric
     // Fires only when it goes over the threshold, to limit network requests
-    if (shakeVigorPercent >= METRIC_THRESHOLD_SHAKE_PERCENT && lastShakeVigorPercent < METRIC_THRESHOLD_SHAKE_PERCENT) {
+    if (shakeVigorPercent >= METRIC_THRESHOLD_SHAKE_PERCENT_FIRE && canFireMetricAgain) {
+      canFireMetricAgain = false;
       nativeFn.setTimeout(function() {
         fireShakeVigorMetric(shakeVigorPercent);
       }, 0);
+    }
+    else if (shakeVigorPercent < METRIC_THRESHOLD_SHAKE_PERCENT_RESET) {
+      canFireMetricAgain = true;
     }
   }
 

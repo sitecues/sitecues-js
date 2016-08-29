@@ -14,6 +14,7 @@ define([], function () {
     MAX_SHAKE_VIGOR: 400,           // Max total shake vigor
     MIN_MOVE_SIZE_FOR_SHAKE: 3,     // Pixel-size for irrelevant mousemove
     MS_BETWEEN_SHAKE_EVENTS: 50,    // ms between internal shake events
-    METRIC_THRESHOLD_SHAKE_PERCENT: 50   // Only fire metric when shake vigor suddenly jumps over this % of MAX_SHAKE_VIGOR
+    METRIC_THRESHOLD_SHAKE_PERCENT_RESET: 10, // Shake percent must dip below this amount before firing again
+    METRIC_THRESHOLD_SHAKE_PERCENT_FIRE: 50   // Only fire metric when shake vigor suddenly jumps over this % of MAX_SHAKE_VIGOR
   };
 });
