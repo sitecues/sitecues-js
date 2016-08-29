@@ -19,6 +19,8 @@ define([
             platform,
             nativeFn) {
 
+  'use strict';
+
   var recentMousePositions = [],
     lastShakeTimeout,
     lastShakeVigor = 0,
