@@ -72,18 +72,18 @@ define([
     menuButtonElement.className = 'scp-hand-cursor';
 
     // Interactions
-    domEvents.on(toolbarElement, 'click', toggle);
-    domEvents.on(toolbarElement, 'mouseenter', function() {
+    domEvents.on(menuButtonElement, 'click', toggle);
+    domEvents.on(menuButtonElement, 'mouseenter', function() {
       clearTimeout(hideTimeout);
       toggle({ doOpen: true });
     });
-    domEvents.on(toolbarElement, 'mouseleave', function() {
+    domEvents.on(menuButtonElement, 'mouseleave', function() {
       clearTimeout(hideTimeout);
       hideTimeout = nativeFn.setTimeout(function() {
         toggle({doOpen: false});
       }, 100);
     });
-    domEvents.on(toolbarElement, 'keydown', function(event) {
+    domEvents.on(menuButtonElement, 'keydown', function(event) {
       if (event.keyCode === ENTER_KEY) {
         toggle();
       }
