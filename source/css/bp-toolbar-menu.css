@@ -1,0 +1,56 @@
+/* Font */
+
+/** Open Sans **/
+/* latin normal woff2 */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Open Sans'), local('OpenSans'), url(https://fonts.gstatic.com/s/opensans/v13/cJZKeOuBrn4kERxqtaUH3ZBw1xU1rKptJj_0jans920.woff2) format('woff2');
+  src: url(https://fonts.gstatic.com/s/opensans/v13/cJZKeOuBrn4kERxqtaUH3T8E0i7KZn-EPnyo3HZu7kw.woff) format('woff');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
+}
+
+/* Toolbar menu */
+
+#scp-toolbar-menu {
+  transition: opacity 170ms linear;
+  opacity: 0;
+  position: absolute;
+  top: 28px;
+  right: -1px;
+  border: 2.5px solid #aaa;
+  border-radius: 2px;
+  background-color: #fff;
+  box-shadow: 1px 1px 5px rgba(0,0,0,0.5);
+  z-index: 2147483647;
+}
+#scp-toolbar-menu[aria-hidden="false"] {
+  opacity: 1 !important;
+}
+
+#scp-toolbar-menu[aria-hidden="true"] {
+  pointer-events: none;
+}
+
+/* Menu items */
+
+sc-toolbar-menu, sc-toolbar-menuitem {
+  display: block;
+  font-family: 'Open Sans',Arial,serif;
+  font-size: 20px;
+  margin: 0;
+  color: #000;
+  line-height: normal;
+  color: #447AC4;
+}
+
+sc-toolbar-menuitem:hover {
+  background-color: #eee;
+}
+
+sc-toolbar-menuitem {
+  white-space: nowrap;
+  padding: 10px 20px;
+  transition: background-color 85ms linear;
+}

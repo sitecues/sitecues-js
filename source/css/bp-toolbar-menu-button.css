@@ -1,0 +1,24 @@
+/* Toolbar menu button*/
+
+#scp-toolbar-menu-button {
+  display: block !important;
+  /* Load both backgrounds right away to avoid flicker on hover -- only top (first) background shows, other background gets pre-loaded */
+  background: url('../images/bp-toolbar-menu/hamburger.svg'), url('../images/bp-toolbar-menu/hamburger-active.svg');
+  position: absolute;
+  cursor: pointer;
+  top: 10px;
+  right: 13px;
+  width: 24px;
+  height: 19px;
+  transition: background 99ms linear;
+  z-index: 2147483647;
+  outline-offset: 1px; /* So that focus outline isn't jammed against button graphic */
+}
+
+#scp-toolbar-menu-button:hover, #scp-toolbar-menu-button:focus, #scp-toolbar-menu-button[aria-expanded="true"] {
+  background-image: url('../images/bp-toolbar-menu/hamburger-active.svg');
+}
+
+#scp-toolbar-menu {
+  opacity: 0;
+}

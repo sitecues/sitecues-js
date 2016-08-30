@@ -6,6 +6,7 @@
 
 define([
   'Promise',
+    'core/conf/site',
   'core/bp/constants',
   'core/bp/model/state',
   'core/bp/helper',
@@ -13,6 +14,7 @@ define([
   'core/bp/view/view'
 ],
   function(Promise,
+           site,
            BP_CONST,
            state,
            helper,
@@ -41,6 +43,13 @@ define([
 
     state.set('isPageBadge', false);
     state.set('isToolbarBadge', true);
+
+    if (site.get('hasOptionsMenu')) {
+      // Can do this async -- no need to hold up the rest of our initialization
+      require(['bp-toolbar-menu-button/bp-toolbar-menu-button'], function(bpToolbarMenuButton) {
+        bpToolbarMenuButton.init(toolbarElement);
+      });
+    }
 
     return palette.init(null)
       .then(function() {

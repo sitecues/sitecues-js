@@ -16,7 +16,7 @@ var config = require('./build-config'),
   fs         = require('fs'),
   path       = require('path'),
   htmlClean  = require('htmlclean'), // Non-gulp version, since this module has not been converted to using streams
-  sources    = ['settings', 'tips', 'help' ];
+  sources    = ['settings', 'tips', 'help', 'toolbar-menu' ];
 
 function readTemplate(templateName) {
 
