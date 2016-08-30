@@ -21,7 +21,7 @@ define([
 
   'use strict';
 
-  var recentMousePositions = [],
+  var mousePositionsQueue = [],
     lastShakeTimeout,
     lastShakeVigor = 0,
     lastShakeVigorPercent = 0,
@@ -29,7 +29,7 @@ define([
     MIN_DIR_SWITCHES_FOR_SHAKE = constants.MIN_DIR_SWITCHES_FOR_SHAKE,
     MOUSE_POSITIONS_ARRAY_SIZE = constants.MOUSE_POSITIONS_ARRAY_SIZE,
     MIN_SHAKE_DIST = constants.MIN_SHAKE_DIST,
-    MAX_SHAKE_DIST = constants.MAX_DIST_NON_SHAKE_AXIS,
+    MAX_DIST_NON_SHAKE_AXIS = constants.MAX_DIST_NON_SHAKE_AXIS,
     MAX_SHAKE_VIGOR = constants.MAX_SHAKE_VIGOR,
     MIN_SHAKE_VIGOR_DECREASE = constants.MIN_SHAKE_VIGOR_DECREASE,
     MAX_SHAKE_VIGOR_DECREASE = constants.MAX_SHAKE_VIGOR_DECREASE,
@@ -37,11 +37,12 @@ define([
     SHAKE_INCREASE_POWER = constants.SHAKE_INCREASE_POWER,
     MAX_SHAKE_VIGOR_INCREASE = constants.MAX_SHAKE_VIGOR_INCREASE,
     MIN_MOVE_SIZE_FOR_SHAKE = constants.MIN_MOVE_SIZE_FOR_SHAKE,
+    MAX_TIME_BETWEEN_MOVES = constants.MAX_TIME_BETWEEN_MOVES,
     METRIC_THRESHOLD_SHAKE_PERCENT_FIRE = constants.METRIC_THRESHOLD_SHAKE_PERCENT_FIRE,
     METRIC_THRESHOLD_SHAKE_PERCENT_RESET = constants.METRIC_THRESHOLD_SHAKE_PERCENT_RESET;
 
   function reset() {
-    recentMousePositions = [];
+    mousePositionsQueue = [];
     clearTimeout(lastShakeTimeout);
     if (lastShakeVigor > 0) {
       lastShakeVigor = lastShakeVigorPercent = 0;
@@ -57,18 +58,25 @@ define([
 
   function getMovementSummary() {
     var
-      prevMove = recentMousePositions[0],
-      xDir = recentMousePositions[1].x > prevMove.x ? 1 : -1,
-      yDir = recentMousePositions[1].y > prevMove.y ? 1 : -1,
+      prevMove = mousePositionsQueue[0],
+      xDir = mousePositionsQueue[1].x > prevMove.x ? 1 : -1,
+      yDir = mousePositionsQueue[1].y > prevMove.y ? 1 : -1,
       totalDist = 0,
       xDirectionSwitches = 0,
       yDirectionSwitches = 0,
-      distanceRequirement = lastShakeVigor ? 0 : MIN_SHAKE_DIST;
+      distanceRequirement = lastShakeVigor ? 0 : MIN_SHAKE_DIST,
+      minX = prevMove.x,
+      minY = prevMove.y,
+      maxX = minX,
+      maxY = minY;
 
-    recentMousePositions.slice(1).forEach(function(currMove) {
-      var xDelta = currMove.x - prevMove.x,
+    mousePositionsQueue.slice(1).forEach(function(currMove) {
+      var
+        x = currMove.x,
+        y = currMove.y,
+        xDelta = x - prevMove.x,
         xDist = Math.abs(xDelta),
-        yDelta = currMove.y - prevMove.y,
+        yDelta = y - prevMove.y,
         yDist = Math.abs(yDelta),
         xDirection = xDist < distanceRequirement ? 0 : xDist / xDelta,
         yDirection = yDist < distanceRequirement ? 0 : yDist / yDelta;
@@ -87,28 +95,42 @@ define([
         yDir = yDirection;
       }
 
+      if (x < minX) {
+        minX = x;
+      }
+      else if (x > maxX) {
+        maxX = x;
+      }
+
+      if (y < minY) {
+        minY = y;
+      }
+      else if (y > maxY) {
+        maxY = y;
+      }
+
       prevMove = currMove;
     });
 
     return {
       xSwitches: xDirectionSwitches,
       ySwitches: yDirectionSwitches,
-      averageDist: totalDist / MOUSE_POSITIONS_ARRAY_SIZE
+      totalXDist: maxX - minX,
+      totalYDist: maxY - minY
     };
   }
 
-  function getShakeVigorIncrease(currMove) {
+  function getShakeVigorIncrease() {
     var
       isShakeX,
       isShakeY,
-      totalXDist,
-      totalYDist,
-      movementSummary = getMovementSummary(recentMousePositions);
+      movementSummary = getMovementSummary(mousePositionsQueue);
 
     function isMouseShake() {
       if (lastShakeVigor) {
         // Was already shaking -- make it easy to keep it going
-        return movementSummary.xSwitches || movementSummary.ySwitches;
+        return movementSummary.xSwitches >= MIN_DIR_SWITCHES_FOR_SHAKE ||
+          movementSummary.ySwitches >= MIN_DIR_SWITCHES_FOR_SHAKE;
       }
 
       // Possible new shake -- be more stringent
@@ -121,19 +143,18 @@ define([
 
       if (isShakeX) {
         // Horizontal only -- require small total vertical movement
-        totalYDist = Math.abs(currMove.y - recentMousePositions[0].y);
-        return totalYDist < MAX_SHAKE_DIST;
+        return movementSummary.totalYDist < MAX_DIST_NON_SHAKE_AXIS;
       }
 
       if (isShakeY) {
         // Vertical only -- require small total horizontal movement
-        totalXDist = Math.abs(currMove.x - recentMousePositions[0].x);
-        return totalXDist < MAX_SHAKE_DIST;
+        return movementSummary.totalXDist < MAX_DIST_NON_SHAKE_AXIS;
       }
     }
 
     if (isMouseShake()) {
-      return Math.min(Math.pow(movementSummary.averageDist, SHAKE_INCREASE_POWER), MAX_SHAKE_VIGOR_INCREASE); // Shake vigor grows exponentially with last move distance
+      var distanceFactor = Math.max(movementSummary.totalXDist, movementSummary.totalYDist);
+      return Math.min(Math.pow(distanceFactor, SHAKE_INCREASE_POWER), MAX_SHAKE_VIGOR_INCREASE); // Shake vigor grows exponentially with last move distance
     }
   }
 
@@ -146,41 +167,55 @@ define([
   }
 
   function onMouseMove(evt) {
-    nativeFn.setTimeout(function () {
-      processMouseMove(evt);
-    }, 0);
-  }
+    var x = evt.screenX,
+      y = evt.screenY,
+      t = evt.timeStamp,
+      numMoves = mousePositionsQueue.length,
+      lastMove = numMoves > 0 && mousePositionsQueue[numMoves - 1];
 
-  function processMouseMove(evt) {
-    // Add move to FIFO array
-    recentMousePositions.push({x: evt.clientX, y: evt.clientY});
-
-    // Too few mouse moves to analyze: return early
-    if (recentMousePositions.length < MOUSE_POSITIONS_ARRAY_SIZE) {
-      return;
+    if (lastMove) {
+      if (t - lastMove.t > MAX_TIME_BETWEEN_MOVES) {
+        mousePositionsQueue = []; // Start from scratch
+        numMoves = 0;
+        lastMove = null;
+      }
     }
 
-    var
-      currPosIndex = MOUSE_POSITIONS_ARRAY_SIZE - 1,
-      shakeVigor = getShakeVigor(recentMousePositions[currPosIndex], recentMousePositions[currPosIndex - 1]),
-      shakeVigorPercent;
+    function processMouseMove() {
+      // Add move to queue
+      var currMove = { x: x, y: y, t: t };
+      mousePositionsQueue.push(currMove);
 
-    if (shakeVigor !== lastShakeVigor) {
-      shakeVigorPercent = Math.round(100 * shakeVigor / MAX_SHAKE_VIGOR);
-      fireNotifications(shakeVigorPercent);
-      lastShakeVigor = shakeVigor;
-      lastShakeVigorPercent = shakeVigorPercent;
+      var
+        lastDistance = lastMove ? getDistanceBetweenMoves(currMove, lastMove) : 0,
+        shakeVigor = getShakeVigor(numMoves, lastDistance),
+        shakeVigorPercent;
+
+      if (shakeVigor !== lastShakeVigor) {
+        shakeVigorPercent = Math.round(100 * shakeVigor / MAX_SHAKE_VIGOR);
+        fireNotifications(shakeVigorPercent);
+        lastShakeVigor = shakeVigor;
+        lastShakeVigorPercent = shakeVigorPercent;
+      }
+
+      // Shift oldest item out of moves queue
+      if (lastMove && numMoves > MOUSE_POSITIONS_ARRAY_SIZE) {
+        mousePositionsQueue.shift();
+      }
     }
 
-    // Shift oldest item out of FIFO array
-    recentMousePositions.shift();
+    nativeFn.setTimeout(processMouseMove, 0);
   }
 
-  function getShakeVigor(currMove, prevMove) {
-    var lastDistance = Math.abs(currMove.x - prevMove.x) + Math.abs(currMove.y - prevMove.y),
-      shakeVigor,
-      isShakeIncreaseAllowed = lastShakeVigor || lastDistance >= MIN_MOVE_SIZE_FOR_SHAKE,
-      shakeVigorIncrease = isShakeIncreaseAllowed && getShakeVigorIncrease(currMove),
+  // Rough approximation for faster math
+  function getDistanceBetweenMoves(move1, move2) {
+    return Math.abs(move2.x - move1.x) + Math.abs(move2.y - move1.y);
+  }
+
+  function getShakeVigor(numMoves, lastDistance) {
+    var shakeVigor,
+      isShakeIncreaseAllowed = numMoves >= MOUSE_POSITIONS_ARRAY_SIZE && (lastShakeVigor || lastDistance >= MIN_MOVE_SIZE_FOR_SHAKE),
+      shakeVigorIncrease = isShakeIncreaseAllowed && getShakeVigorIncrease(),
       shakeVigorDelta = shakeVigorIncrease || - getShakeVigorDecrease(lastDistance);
 
     shakeVigor = lastShakeVigor + shakeVigorDelta;
