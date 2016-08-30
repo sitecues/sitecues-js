@@ -5,11 +5,13 @@
 define([
   'core/conf/urls',
   'core/dom-events',
-  'core/locale'
+  'core/locale',
+  'core/native-functions'
   ],
   function(urls,
            domEvents,
-           locale) {
+           locale,
+           nativeFn) {
 
   var menuButtonElement,
     wasEverOpen,
@@ -77,7 +79,7 @@ define([
     });
     domEvents.on(toolbarElement, 'mouseleave', function() {
       clearTimeout(hideTimeout);
-      hideTimeout = setTimeout(function() {
+      hideTimeout = nativeFn.setTimeout(function() {
         toggle({doOpen: false});
       }, 100);
     });
