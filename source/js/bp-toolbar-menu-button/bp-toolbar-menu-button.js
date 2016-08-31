@@ -16,7 +16,8 @@ define([
   var menuButtonElement,
     wasEverOpen,
     hideTimeout,
-    ENTER_KEY = 13;
+    ENTER_KEY = 13,
+    WAIT_BEFORE_CLOSE_MS = 300;
 
   function insertSheet(name) {
     var cssLink = document.createElement('link'),
@@ -35,8 +36,15 @@ define([
     return menuButtonElement.getAttribute('aria-expanded') === 'true';
   }
 
-  function toggle(options) {
-    var willOpen = typeof options === 'undefined' ? !isExpanded() : options.doOpen;
+  function requestOpen(willOpen) {
+    var isOpen = isExpanded();
+    if (willOpen !== isOpen) {
+      toggle();
+    }
+  }
+
+  function toggle() {
+    var willOpen = !isExpanded();
     if (willOpen && !wasEverOpen) {
       // Styles for both button and menu
       insertSheet('bp-toolbar-menu');
@@ -75,13 +83,17 @@ define([
     domEvents.on(menuButtonElement, 'click', toggle);
     domEvents.on(menuButtonElement, 'mouseenter', function() {
       clearTimeout(hideTimeout);
-      toggle({ doOpen: true });
+      requestOpen(true);
     });
-    domEvents.on(menuButtonElement, 'mouseleave', function() {
-      clearTimeout(hideTimeout);
-      hideTimeout = nativeFn.setTimeout(function() {
-        toggle({doOpen: false});
-      }, 100);
+    domEvents.on(toolbarElement, 'mouseleave', function(event) {
+      if (event.target === toolbarElement) {
+        // You have to leave the toolbar itself in order to close the menu
+        // (We tried just putting mouseleave on the button, but the menu would close too easily while moving from the button to the menu)
+        clearTimeout(hideTimeout);
+        hideTimeout = nativeFn.setTimeout(function () {
+          requestOpen(false);
+        }, WAIT_BEFORE_CLOSE_MS);
+      }
     });
     domEvents.on(menuButtonElement, 'keydown', function(event) {
       if (event.keyCode === ENTER_KEY) {
