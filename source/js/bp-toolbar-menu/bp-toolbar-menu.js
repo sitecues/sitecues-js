@@ -5,17 +5,20 @@
 define([
   'core/locale',
   'core/conf/urls',
-  'core/util/xhr'
+  'core/util/xhr',
+  'core/events'
   ],
   function(locale,
            urls,
-           xhr) {
+           xhr,
+           events) {
 
   var menuButtonElement,
     menuElement;
 
   function setOpen(doOpen) {
     menuElement.setAttribute('aria-hidden', !doOpen);
+    events.emit('bp/did-toggle-menu', doOpen);
   }
 
   function addSemanticSugar(html) {
