@@ -1715,11 +1715,7 @@ define(
     // Mouse highlighting not available while BP is open
     events.on('bp/will-expand', willExpand);
     events.on('bp/did-shrink', didShrink);
-    events.on('bp/did-toggle-menu', function(isOpen) {
-      isSitecuesUIOpen = isOpen;
-    });
-
-
+    events.on('bp/did-toggle-menu', didToggleBpMenu);
 
     events.on('speech/did-change', function(isOn) {
       isSpeechEnabled = isOn;
