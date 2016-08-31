@@ -24,6 +24,7 @@
   background-color: #fff;
   box-shadow: 2px 2px 2px rgba(99,99,99,0.5);
   z-index: 2147483647;
+  outline: 0px solid transparent !important; /* Prevent focus outline, as we will be showing focus on individual menu items */
 }
 #scp-toolbar-menu[aria-hidden="false"] {
   opacity: 1 !important;

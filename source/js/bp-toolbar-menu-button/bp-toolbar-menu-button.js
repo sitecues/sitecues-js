@@ -17,6 +17,7 @@ define([
     wasEverOpen,
     hideTimeout,
     ENTER_KEY = 13,
+    SPACE_KEY = 32,
     WAIT_BEFORE_CLOSE_MS = 300;
 
   function insertSheet(name) {
@@ -95,12 +96,15 @@ define([
         }, WAIT_BEFORE_CLOSE_MS);
       }
     });
+    domEvents.on(menuButtonElement, 'blur', function() {
+      clearTimeout(hideTimeout);
+      requestOpen(false);
+    });
     domEvents.on(menuButtonElement, 'keydown', function(event) {
-      if (event.keyCode === ENTER_KEY) {
+      if (event.keyCode === ENTER_KEY || event.keyCode === SPACE_KEY) {
         toggle();
       }
     });
-
     // Append to document
     toolbarElement.appendChild(menuButtonElement);
   }
