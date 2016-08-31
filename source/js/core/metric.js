@@ -279,6 +279,8 @@ define(
       KeyCommand: wrap(name.KEY_COMMAND),
       LensOpen: wrap(name.LENS_OPEN),
       MouseShake: wrap(name.MOUSE_SHAKE),
+      OptionMenuOpen: wrap(name.OPTION_MENU_OPEN),
+      OptionMenuItemSelection: wrap(name.OPTION_MENUITEM_SELECTION),
       PageVisit: wrap(name.PAGE_VISIT),
       PanelClick: wrap(name.PANEL_CLICK),
       PanelClose: wrap(name.PANEL_CLOSE),

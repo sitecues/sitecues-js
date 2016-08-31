@@ -109,7 +109,7 @@ define([
       }, 0);
     });
     domEvents.on(menuButtonElement, 'keydown', function(event) {
-      if (event.keyCode === KEY_CODES.ENTER || event.keyCode === KEY_CODES.SPACE) {
+      if (event.keyCode === KEY_CODES.ENTER || event.keyCode === KEY_CODES.SPACE_KEY) {
         toggle();
       }
     });

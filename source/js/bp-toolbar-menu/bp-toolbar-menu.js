@@ -7,6 +7,7 @@ define([
     'core/conf/urls',
     'core/util/xhr',
     'core/constants',
+    'core/metric',
     'core/events',
     'core/dom-events',
     'core/native-functions'
@@ -15,6 +16,7 @@ define([
            urls,
            xhr,
            CORE_CONST,
+           metric,
            events,
            domEvents,
            nativeFn) {
@@ -32,6 +34,9 @@ define([
         toggleClass('scp-no-focus', !doFocusMenuItem);
         if (doFocusMenuItem) {
           nativeFn.setTimeout(focusMenuItem, 0);
+        }
+        if (doOpen) {
+          new metric.OptionMenuOpen().send();
         }
       }
     }
@@ -86,7 +91,8 @@ define([
 
     function activateMenuItem(event) {
       var menuItem = event.target;
-      console.log(menuItem.innerText + ' activated');
+      new metric.OptionMenuItemSelection({ target: menuItem.id }).send();
+      console.log(menuItem.id + ' activated');
     }
 
     function onKeyDown(event) {
