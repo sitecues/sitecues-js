@@ -46,12 +46,18 @@ sc-toolbar-menu, sc-toolbar-menuitem {
   color: #447AC4;
 }
 
-sc-toolbar-menuitem:hover {
-  background-color: #eee;
-}
-
 sc-toolbar-menuitem {
   white-space: nowrap;
   padding: 10px 20px;
   transition: background-color 85ms linear;
+
+}
+
+sc-toolbar-menuitem:focus {
+  outline: 10px solid green;
+  box-shadow: 2px 2px 2px red; /* rgba(99,99,99,0.5); */
+}
+
+.scp-no-focus > sc-toolbar-menuitem:hover {
+  background-color: #eee;
 }

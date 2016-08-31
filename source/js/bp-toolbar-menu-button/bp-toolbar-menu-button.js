@@ -6,18 +6,20 @@ define([
   'core/conf/urls',
   'core/dom-events',
   'core/locale',
+  'core/constants',
   'core/native-functions'
   ],
   function(urls,
            domEvents,
            locale,
+           CORE_CONST,
            nativeFn) {
 
   var menuButtonElement,
     wasEverOpen,
     hideTimeout,
-    ENTER_KEY = 13,
-    SPACE_KEY = 32,
+    bpToolbarMenu,
+    KEY_CODES = CORE_CONST.KEY_CODE,
     WAIT_BEFORE_CLOSE_MS = 300;
 
   function insertSheet(name) {
@@ -40,7 +42,10 @@ define([
   function requestOpen(willOpen) {
     var isOpen = isExpanded();
     if (willOpen !== isOpen) {
-      toggle();
+      if (!bpToolbarMenu || !bpToolbarMenu.hasFocus()) {
+        // Don't close while interacting with keyboard
+        toggle();
+      }
     }
   }
 
@@ -51,10 +56,11 @@ define([
       insertSheet('bp-toolbar-menu');
       wasEverOpen = true;
     }
-    require(['bp-toolbar-menu/bp-toolbar-menu'], function(bpToolbarMenu) {
+    require(['bp-toolbar-menu/bp-toolbar-menu'], function(_bpToolbarMenu) {
+      bpToolbarMenu = _bpToolbarMenu;
       bpToolbarMenu.init(menuButtonElement, function() {
         setOpen(willOpen);
-        bpToolbarMenu.setOpen(willOpen);
+        bpToolbarMenu.requestOpen(willOpen);
       });
     });
   }
@@ -98,10 +104,12 @@ define([
     });
     domEvents.on(menuButtonElement, 'blur', function() {
       clearTimeout(hideTimeout);
-      requestOpen(false);
+      hideTimeout = nativeFn.setTimeout(function () {
+        requestOpen(false);
+      }, 0);
     });
     domEvents.on(menuButtonElement, 'keydown', function(event) {
-      if (event.keyCode === ENTER_KEY || event.keyCode === SPACE_KEY) {
+      if (event.keyCode === KEY_CODES.ENTER || event.keyCode === KEY_CODES.SPACE) {
         toggle();
       }
     });
