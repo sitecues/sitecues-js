@@ -65,6 +65,11 @@ define(
     return typeof get(key) !== 'undefined';
   }
 
+  // Has Sitecues ever been touched by this user?
+  function isSitecuesUser() {
+    return has('zoom') || has('ttsOn');
+  }
+
   // set preferences value (or pass undefined to unset)
   function set(key, value) {
     // private variables
@@ -195,6 +200,7 @@ define(
     has: has,
     set: set,
     def: def,
-    reset: reset
+    reset: reset,
+    isSitecuesUser: isSitecuesUser
   };
 });

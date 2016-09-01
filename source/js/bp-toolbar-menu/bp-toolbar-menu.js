@@ -10,6 +10,7 @@ define([
     'core/metric',
     'core/events',
     'core/dom-events',
+    'core/conf/user/manager',
     'core/native-functions'
   ],
   function(locale,
@@ -19,6 +20,7 @@ define([
            metric,
            events,
            domEvents,
+           conf,
            nativeFn) {
 
     var menuButtonElement,
@@ -36,6 +38,7 @@ define([
           nativeFn.setTimeout(focusMenuItem, 0);
         }
         if (doOpen) {
+          refreshShowHide(!conf.isSitecuesUser());
           new metric.OptionMenuOpen().send();
         }
       }
@@ -49,6 +52,10 @@ define([
       else {
         classList.remove(name);
       }
+    }
+
+    function refreshShowHide(showHide) {
+      toggleClass('scp-show-hide', showHide);
     }
 
     // Specify menu item element to focus.
@@ -90,9 +97,14 @@ define([
     }
 
     function activateMenuItem(event) {
-      var menuItem = event.target;
-      new metric.OptionMenuItemSelection({ target: menuItem.id }).send();
-      console.log(menuItem.id + ' activated');
+      var menuItem = event.target,
+        featureId = menuItem.id;
+      require(['bp-toolbar-features/bp-toolbar-features'], function(bpToolbarFeatures) {
+        bpToolbarFeatures.activateFeatureById(featureId);
+        if (featureId === 'scp-toolbar-turn-off') {
+          refreshShowHide(true);
+        }
+      });
     }
 
     function onKeyDown(event) {
@@ -120,6 +132,27 @@ define([
       domEvents.on(menuElement, 'click', activateMenuItem);
     }
 
+    // Remove elements unless required by the site config
+    function removeAllElements(panelElement, elementsToRemoveSelector) {
+      function hide(elements) {
+        var index = elements.length,
+          element;
+        while (index--) {
+          element = elements[index];
+          element.parentNode.removeChild(element);
+        }
+      }
+
+      var elementsToRemove = panelElement.querySelectorAll(elementsToRemoveSelector);
+
+      hide(elementsToRemove);
+    }
+
+    function removeUnsupportedContent(menuElement) {
+      var whatToRemove = SC_EXTENSION ? 'page' : 'extension';
+      removeAllElements(menuElement, '[data-sitecues-type="' + whatToRemove + '"]');
+    }
+
     function init(_menuButtonElement, callback) {
       if (menuButtonElement) {
         callback();
@@ -136,6 +169,7 @@ define([
           var finalHTML = addSemanticSugar(html);
           menuButtonElement.innerHTML = finalHTML;
           menuElement = menuButtonElement.firstElementChild;
+          removeUnsupportedContent(menuElement);
           initInteractions();
           callback();
         }

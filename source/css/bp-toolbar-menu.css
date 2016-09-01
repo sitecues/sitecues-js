@@ -11,6 +11,11 @@
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
 }
 
+/* Extension logic */
+[data-sitecues-everywhere] .scp-extension-only {
+
+}
+
 /* Toolbar menu */
 
 #scp-toolbar-menu {
@@ -25,6 +30,7 @@
   box-shadow: 2px 2px 2px rgba(99,99,99,0.5);
   z-index: 2147483647;
   outline: 0px solid transparent !important; /* Prevent focus outline, as we will be showing focus on individual menu items */
+  overflow: hidden; /* So that "Hide" menu item doesn't show outside of menu before it slides in */
 }
 #scp-toolbar-menu[aria-hidden="false"] {
   opacity: 1 !important;
@@ -50,14 +56,26 @@ sc-toolbar-menuitem {
   white-space: nowrap;
   padding: 10px 20px;
   transition: background-color 85ms linear;
-
 }
 
 sc-toolbar-menuitem:focus {
-  outline: none;
-  box-shadow: 1px 0 4px 5px rgba(82,168,236,0.8);
+  outline: 4px solid rgba(82,168,236,0.8);
+  outline-offset: -5px;
 }
 
-.scp-no-focus > sc-toolbar-menuitem:hover {
+.scp-no-focus sc-toolbar-menuitem:hover, .scp-no-focus sc-toolbar-menuitem:hover > * {
   background-color: #eee;
+}
+
+#scp-toolbar-hide {
+  display: block;
+  position: absolute;
+  left: 100%;
+  width: 100%;
+  top: 0;
+}
+
+.scp-show-hide #scp-toolbar-turn-off {
+  transition: transform 500ms ease-out;
+  transform: translateX(-100%);
 }

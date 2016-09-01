@@ -87,7 +87,11 @@ define([
     menuButtonElement.className = 'scp-hand-cursor';
 
     // Interactions
-    domEvents.on(menuButtonElement, 'click', toggle);
+    domEvents.on(menuButtonElement, 'click', function(event) {
+      if (!event.target.hasAttribute('data-keep-open')) {
+        toggle(); // Don't necessarily
+      }
+    });
     domEvents.on(menuButtonElement, 'mouseenter', function() {
       clearTimeout(hideTimeout);
       requestOpen(true);
