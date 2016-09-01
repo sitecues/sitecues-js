@@ -3,6 +3,8 @@
  */
 
 define([
+    'bp-toolbar-menu/bp-toolbar-features',
+    'bp-toolbar-menu/bp-toolbar-view',
     'core/locale',
     'core/conf/urls',
     'core/util/xhr',
@@ -13,7 +15,9 @@ define([
     'core/conf/user/manager',
     'core/native-functions'
   ],
-  function(locale,
+  function(bpToolbarFeatures,
+           bpToolbarView,
+           locale,
            urls,
            xhr,
            CORE_CONST,
@@ -25,37 +29,24 @@ define([
 
     var menuButtonElement,
       menuElement,
-      KEY_CODES = CORE_CONST.KEY_CODE;
+      KEY_CODES = CORE_CONST.KEY_CODE,
+      origViewClasses;
 
     function requestOpen(doOpen) {
       if (isOpen() !== doOpen) {
         menuElement.setAttribute('aria-hidden', !doOpen);
         events.emit('bp/did-toggle-menu', doOpen);
+        if (doOpen) {
+          bpToolbarView.reset();
+          bpToolbarView.refreshShowHide(!conf.isSitecuesUser());
+          new metric.OptionMenuOpen().send();
+        }
         var doFocusMenuItem = doOpen && isMenuButtonFocused();
-        toggleClass('scp-has-focus', doFocusMenuItem);
-        toggleClass('scp-no-focus', !doFocusMenuItem);
         if (doFocusMenuItem) {
           nativeFn.setTimeout(focusMenuItem, 0);
         }
-        if (doOpen) {
-          refreshShowHide(!conf.isSitecuesUser());
-          new metric.OptionMenuOpen().send();
-        }
+        bpToolbarView.enableFocus(doFocusMenuItem);
       }
-    }
-
-    function toggleClass(name, doForce) {
-      var classList = menuElement.classList;
-      if (doForce) {
-        classList.add(name);
-      }
-      else {
-        classList.remove(name);
-      }
-    }
-
-    function refreshShowHide(showHide) {
-      toggleClass('scp-show-hide', showHide);
     }
 
     // Specify menu item element to focus.
@@ -99,12 +90,7 @@ define([
     function activateMenuItem(event) {
       var menuItem = event.target,
         featureId = menuItem.id;
-      require(['bp-toolbar-features/bp-toolbar-features'], function(bpToolbarFeatures) {
-        bpToolbarFeatures.activateFeatureById(featureId);
-        if (featureId === 'scp-toolbar-turn-off') {
-          refreshShowHide(true);
-        }
-      });
+      bpToolbarFeatures.activateFeatureById(featureId);
     }
 
     function onKeyDown(event) {
@@ -169,8 +155,10 @@ define([
           var finalHTML = addSemanticSugar(html);
           menuButtonElement.innerHTML = finalHTML;
           menuElement = menuButtonElement.firstElementChild;
+          bpToolbarView.init(menuElement);
           removeUnsupportedContent(menuElement);
           initInteractions();
+          origViewClasses = menuElement.className;
           callback();
         }
       });

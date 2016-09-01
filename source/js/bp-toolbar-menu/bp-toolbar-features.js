@@ -1,28 +1,37 @@
 /**
- * Toolbar menu
+ * Toolbar menu feature implementations
  */
 
 define([
     'core/metric',
     'core/native-functions',
-    'core/constants'
+    'core/constants',
+    'bp-toolbar-menu/bp-toolbar-view'
   ],
   function(metric,
            nativeFn,
-           constants) {
+           constants,
+           bpToolbarView) {
+
+    function hideMenu() {
+      require(['bp-toolbar-menu-button/bp-toolbar-menu-button'], function(bpToolbarMenuButton) {
+        bpToolbarMenuButton.toggle();
+      });
+    }
 
     function whatIsThis() {
-
+      hideMenu();
     }
 
     function share() {
-
+      hideMenu();
     }
 
     function turnOff() {
       require(['page/reset/reset'], function(reset) {
         reset.init();
         reset.resetAll();
+        bpToolbarView.refreshShowHide(true);
       });
     }
 
@@ -46,6 +55,7 @@ define([
       }
 
       document.addEventListener('keydown', checkF8);
+      bpToolbarView.enableBlurb('unhide');
     }
 
     function activateFeatureById(id) {

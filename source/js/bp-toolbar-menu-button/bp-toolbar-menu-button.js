@@ -88,7 +88,7 @@ define([
 
     // Interactions
     domEvents.on(menuButtonElement, 'click', function(event) {
-      if (!event.target.hasAttribute('data-keep-open')) {
+      if (event.target === menuButtonElement) {
         toggle(); // Don't necessarily
       }
     });
@@ -122,6 +122,7 @@ define([
   }
 
   return {
+    toggle: toggle,
     init: init
   };
 
