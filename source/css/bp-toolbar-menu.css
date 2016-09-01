@@ -54,8 +54,8 @@ sc-toolbar-menuitem {
 }
 
 sc-toolbar-menuitem:focus {
-  outline: 10px solid green;
-  box-shadow: 2px 2px 2px red; /* rgba(99,99,99,0.5); */
+  outline: none;
+  box-shadow: 1px 0 4px 5px rgba(82,168,236,0.8);
 }
 
 .scp-no-focus > sc-toolbar-menuitem:hover {
