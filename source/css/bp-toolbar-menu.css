@@ -114,6 +114,11 @@ sc-blurb {
   padding: 30px;
 }
 
+.scp-blurb-what-is > #scp-blurb-what-is {
+  display: block;
+  width: 30ex;
+}
+
 .scp-blurb-unhide > #scp-blurb-unhide {
   display: block;
 }

@@ -20,7 +20,7 @@ define([
     }
 
     function whatIsThis() {
-      hideMenu();
+      bpToolbarView.enableBlurb('what-is');
     }
 
     function share() {
@@ -60,7 +60,7 @@ define([
 
     function activateFeatureById(id) {
       var ALL_FEATURES = {
-        'scp-toolbar-what-is-this': whatIsThis,
+        'scp-toolbar-what-is': whatIsThis,
         'scp-toolbar-share': share,
         'scp-toolbar-turn-off' : turnOff,
         'scp-toolbar-hide': hide
