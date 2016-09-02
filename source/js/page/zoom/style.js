@@ -198,25 +198,25 @@ define(
     return KEYFRAMES_ID + '-' + Math.round(state.completedZoom * 1000) + '-' + Math.round(targetZoom * 1000);
   }
 
-    // Get keyframes css for animating from completed zoom to target zoom
-    function getAnimationCSS(targetZoom) {
-      var animationName = getCssAnimationName(targetZoom),
-        keyFramesCssProperty = platform.browser.isWebKit ? '@-webkit-keyframes ' : '@keyframes ',
-        keyFramesCss = animationName + ' {\n',
-        keyFrames = getCssKeyFrames(targetZoom, state.isInitialLoadZoom, true),
-        numSteps = keyFrames.length - 1,
-        step = 0;
+  // Get keyframes css for animating from completed zoom to target zoom
+  function getAnimationCSS(targetZoom) {
+    var animationName = getCssAnimationName(targetZoom),
+      keyFramesCssProperty = platform.browser.isWebKit ? '@-webkit-keyframes ' : '@keyframes ',
+      keyFramesCss = animationName + ' {\n',
+      keyFrames = getCssKeyFrames(targetZoom, state.isInitialLoadZoom, true),
+      numSteps = keyFrames.length - 1,
+      step = 0;
 
-      for (; step <= numSteps; ++step) {
-        var keyFrame = keyFrames[step],
-          zoomCssString = TRANSFORM_PROP_CSS + ': ' + keyFrame[TRANSFORM_PROP_CSS] + (keyFrame.width ? '; width: ' + keyFrame.width : '');
+    for (; step <= numSteps; ++step) {
+      var keyFrame = keyFrames[step],
+        zoomCssString = TRANSFORM_PROP_CSS + ': ' + keyFrame[TRANSFORM_PROP_CSS] + (keyFrame.width ? '; width: ' + keyFrame.width : '');
 
-        keyFramesCss += Math.round(10000 * keyFrame.timePercent) / 100 + '% { ' + zoomCssString + ' }\n';
-      }
-      keyFramesCss += '}\n\n';
-
-      return keyFramesCssProperty + keyFramesCss;
+      keyFramesCss += Math.round(10000 * keyFrame.timePercent) / 100 + '% { ' + zoomCssString + ' }\n';
     }
+    keyFramesCss += '}\n\n';
+
+    return keyFramesCssProperty + keyFramesCss;
+  }
 
   // Get a CSS object for the targetZoom level
   //This needs to return the formatted translate x / width only when we're zooming the primary body

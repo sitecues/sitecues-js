@@ -29,7 +29,7 @@ define(
   ) {
   'use strict';
 
-  var inlinePattern, proxyMap,
+  var proxyMap,
       assignmentDictionary, assignmentRecords,
       lastStyleMap, intendedStyleMap,
       updateTimer, styleParser,
@@ -333,35 +333,62 @@ define(
     /*jshint validthis: false */
   }
 
-  function createProxy(element) {
-    var styleChain        = element.style,
-        styleProxy        = {},
-        proxiedProperties = {};
+  function insertStyleProxy(element) {
+    var proxy = proxyMap.get(element);
 
-    function interceptProperty(property) {
-      if (proxiedProperties[property]) {
-        return;
+    if (element.style === proxy) {
+      return;
+    }
+
+    if (!proxy) {
+      proxy = createProxy(element);
+    }
+
+    element._scStyle      = element.style;
+    element._scStyleProxy = proxy;
+
+    Object.defineProperty(element, 'style', {
+      configurable : true,
+      // note : get & set function declarations / expressions de-optimize their containing
+      // function. Don't put more in this function than needs to happen
+      get : function () { return element._scStyleProxy; },
+      // element.style = cssText is equivalent to element.style.cssText = cssText
+      set : function (cssText) {
+        queueAssignmentRecord(element, cssText);
+        element._scStyle.cssText = cssText;
       }
-
-      var boundGetter = nativeFn.bindFn.call(styleProxyGetter, element, property),
-          boundSetter = nativeFn.bindFn.call(styleProxySetter, element, property);
-
-      proxiedProperties[property] = true;
-
-      Object.defineProperty(styleProxy, property, {
-        get : boundGetter,
-        set : boundSetter
-      });
-    }
-
-    while (styleChain) {
-      Object.getOwnPropertyNames(styleChain).forEach(interceptProperty);
-      styleChain = Object.getPrototypeOf(styleChain);
-    }
-
-    proxyMap.set(element, styleProxy);
-    return styleProxy;
+    });
   }
+
+  function createProxy(element) {
+  var styleChain        = element.style,
+      styleProxy        = {},
+      proxiedProperties = {};
+
+  function interceptProperty(property) {
+    if (proxiedProperties[property]) {
+      return;
+    }
+
+    var boundGetter = nativeFn.bindFn.call(styleProxyGetter, element, property),
+        boundSetter = nativeFn.bindFn.call(styleProxySetter, element, property);
+
+    proxiedProperties[property] = true;
+
+    Object.defineProperty(styleProxy, property, {
+      get : boundGetter,
+      set : boundSetter
+    });
+  }
+
+  while (styleChain) {
+    Object.getOwnPropertyNames(styleChain).forEach(interceptProperty);
+    styleChain = Object.getPrototypeOf(styleChain);
+  }
+
+  proxyMap.set(element, styleProxy);
+  return styleProxy;
+}
 
   function isStyleProxied(element) {
     return element.style === element._scStyleProxy;
@@ -396,35 +423,7 @@ define(
     return cssObj;
   }
 
-  function insertStyleProxy(element) {
-    var proxy = proxyMap.get(element);
-
-    if (element.style === proxy) {
-      return;
-    }
-
-    if (!proxy) {
-      proxy = createProxy(element);
-    }
-
-    element._scStyle      = element.style;
-    element._scStyleProxy = proxy;
-
-    Object.defineProperty(element, 'style', {
-      configurable : true,
-      // note : get & set function declarations / expressions de-optimize their containing
-      // function. Don't put more in this function than needs to happen
-      get : function () { return element._scStyleProxy; },
-      // element.style = cssText is equivalent to element.style.cssText = cssText
-      set : function (cssText) {
-        queueAssignmentRecord(element, cssText);
-        element._scStyle.cssText = cssText;
-      }
-    });
-  }
-
   function init() {
-    inlinePattern = /([^:]*):\s?([\W\w]*?)(?:;\s|;$)/g;
     // element -> intended css object
     intendedStyleMap     = new WeakMap();
     // element -> last css object
@@ -447,5 +446,6 @@ define(
   getStyle.removeProperty  = removeProperty;
   getStyle.removeAttribute = removeAttribute;
   getStyle.init            = init;
+
   return getStyle;
 });
