@@ -443,9 +443,6 @@ define(
     mapForm($foundation, $hlb);
     // }, 0);
 
-    // TODO: This doesn't seem like it's doing anything? Check it out
-    hlbStyling.filter.bind(mapForm);
-
     // Clone styles of HLB and children of HLB, so layout is preserved
     hlbStyling.initializeStyles($foundation, $hlb, initialHLBRect);
 
