@@ -18,7 +18,6 @@ define(
   [
     'core/bp/controller/expand-controller',
     'core/bp/model/state',
-    'core/bp/model/element-info',
     'core/bp/helper',
     'core/bp/constants',
     'core/conf/site',
@@ -31,7 +30,6 @@ define(
   function (
     expandController,
     state,
-    bpElemInfo,
     helper,
     BP_CONST,
     site,
@@ -256,7 +254,6 @@ define(
    */
   function init() {
     docElem = document.documentElement;
-    bpElemInfo.init();
 
     // Get whether the BP will run in classic mode (still needed for MS Edge)
     initClassicMode();
