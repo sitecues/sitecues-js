@@ -58,9 +58,11 @@ sc-toolbar-menuitem {
   transition: background-color 85ms linear;
 }
 
-sc-toolbar-menuitem:focus {
-  outline: 4px solid rgba(82,168,236,0.8);
-  outline-offset: -5px;
+/* Focus outline (including on the one that slides over) */
+sc-toolbar-menuitem:focus,.scp-show-hide sc-toolbar-menuitem:focus > #scp-toolbar-hide {
+  background-color: rgba(82,168,236,0.8);
+  color: white;
+  outline: 0;
 }
 
 .scp-no-focus sc-toolbar-menuitem:hover, .scp-no-focus sc-toolbar-menuitem:hover > * {

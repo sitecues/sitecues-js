@@ -5,11 +5,13 @@
 define([
     'core/metric',
     'core/constants',
-    'bp-toolbar-menu/bp-toolbar-view'
+    'bp-toolbar-menu/bp-toolbar-view',
+    'core/native-functions'
   ],
   function(metric,
            constants,
-           bpToolbarView) {
+           bpToolbarView,
+           nativeFn) {
 
     function hideMenu() {
       require(['bp-toolbar-menu-button/bp-toolbar-menu-button'], function(bpToolbarMenuButton) {
@@ -25,11 +27,19 @@ define([
       hideMenu();
     }
 
-    function turnOff() {
+    function turnOff(hasFocus) {
       require(['page/reset/reset'], function(reset) {
         reset.init();
         reset.resetAll();
+
         bpToolbarView.showHideOption(true);
+        // Slide the hide menu option over, focusing it if we're in focus mode
+        if (hasFocus) {
+          nativeFn.setTimeout(function() {
+            var hideMenuItem = document.getElementById('scp-toolbar-hide');
+            hideMenuItem.focus(); // Focus menu item that slides over
+          }, 0);
+        }
       });
     }
 
@@ -61,7 +71,7 @@ define([
       bpToolbarView.enableBlurb('unhide');
     }
 
-    function activateFeatureById(id) {
+    function activateFeatureById(id, hasFocus) {
       var ALL_FEATURES = {
         'scp-toolbar-what-is': whatIsThis,
         'scp-toolbar-share': share,
@@ -73,7 +83,7 @@ define([
 
       if (feature) {
         new metric.OptionMenuItemSelection({ target: id }).send();
-        feature();
+        feature(hasFocus);
       }
     }
 

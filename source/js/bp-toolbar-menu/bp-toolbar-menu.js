@@ -44,7 +44,9 @@ define([
         }
         var doFocusMenuItem = doOpen && isMenuButtonFocused();
         if (doFocusMenuItem) {
-          nativeFn.setTimeout(focusMenuItem, 0);
+          nativeFn.setTimeout(function() {
+            menuElement.firstElementChild.focus();
+          }, 0);
         }
         bpToolbarView.enableFocus(doFocusMenuItem);
         // jshint -W030
@@ -56,9 +58,25 @@ define([
 
     // Specify menu item element to focus.
     // If none specified, first menu item will receive focus
-    function focusMenuItem(element) {
-      element = element || menuElement.firstElementChild;
-      element.focus();
+    // TODO does not yet handle secondary menu option that slides over (Hide)
+    function focusAdjacentVisibleItem(startElement, direction) {
+      var nextProp = direction === 1 ? 'nextElementSibling' : 'previousElementSibling',
+        wrapAroundProp = direction === 1 ? 'firstElementChild' : 'lastElementChild',
+        element = startElement;
+
+      function getVisibleItemInDirection() {
+        while (true) {
+          element = element[nextProp] || element.parentElement[wrapAroundProp];
+          if (getComputedStyle(element).display !== 'none') {
+            return element;
+          }
+          if (element === startElement) {
+            return element;
+          }
+        }
+      }
+
+      getVisibleItemInDirection().focus();
     }
 
     function hasFocus() {
@@ -95,7 +113,7 @@ define([
     function activateMenuItem(event) {
       var menuItem = event.target,
         featureId = menuItem.id;
-      bpToolbarFeatures.activateFeatureById(featureId);
+      bpToolbarFeatures.activateFeatureById(featureId, hasFocus());
     }
 
     function onKeyDown(event) {
@@ -109,10 +127,10 @@ define([
           document.activeElement.blur();
           break;
         case KEY_CODES.DOWN:
-          focusMenuItem(event.target.nextElementSibling);
+          focusAdjacentVisibleItem(event.target, 1);
           break;
         case KEY_CODES.UP:
-          focusMenuItem(event.target.previousElementSibling || menuElement.lastElementChild);
+          focusAdjacentVisibleItem(event.target, -1);
           break;
       }
     }

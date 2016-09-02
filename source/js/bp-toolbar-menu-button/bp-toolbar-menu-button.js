@@ -65,6 +65,14 @@ define([
     });
   }
 
+  function onBlur() {
+    var focusedElement = document.activeElement;
+    if (!menuButtonElement.contains(focusedElement)) {
+      clearTimeout(hideTimeout);
+      requestOpen(false);
+    }
+  }
+
   function init(toolbarElement) {
     // Styles for menu button
     insertSheet('bp-toolbar-menu-button');
@@ -107,14 +115,14 @@ define([
       }
     });
     domEvents.on(menuButtonElement, 'blur', function() {
-      clearTimeout(hideTimeout);
-      hideTimeout = nativeFn.setTimeout(function () {
-        requestOpen(false);
-      }, 0);
+      nativeFn.setTimeout(onBlur, 0);  // Wait so that document.activeElement is properly updated
     });
     domEvents.on(menuButtonElement, 'keydown', function(event) {
-      if (event.keyCode === KEY_CODES.ENTER || event.keyCode === KEY_CODES.SPACE_KEY) {
-        toggle();
+      if (!isExpanded()) {
+        var keyCode = event.keyCode;
+        if (keyCode === KEY_CODES.ENTER || keyCode === KEY_CODES.SPACE_KEY || keyCode === KEY_CODES.DOWN) {
+          toggle();
+        }
       }
     });
     // Append to document
