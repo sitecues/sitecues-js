@@ -87,9 +87,6 @@ define(
         hasCallback  = typeof callback === 'function';
 
     elements.forEach(function (element) {
-      if (element === document.body) {
-        debugger;
-      }
       var styleProperty, currentStyles,
           shouldProxyStyle = !hasCallback,
           isProxied        = isStyleProxied(element);
