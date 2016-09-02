@@ -134,7 +134,7 @@ define(
                 newWidth  = width * zoom,
                 newHeight = height * zoom;
 
-            inlineStyle.set(box, {
+            inlineStyle.override(box, {
               fontSize : zoom + 'em',
               height   : newHeight + 'px',
               width    : newWidth + 'px'
