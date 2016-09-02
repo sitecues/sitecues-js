@@ -89,7 +89,7 @@ define([
     }
 
     function addSemanticSugar(html) {
-      return html.replace(/<sc-toolbar-menuitem/g, '<sc-toolbar-menuitem role="menuitem" class="scp-hand-cursor scp-tabbable" tabindex="-1"');
+      return html.replace(/<sc-toolbar-menuitem/g, '<sc-toolbar-menuitem role="menuitem" class="scp-hand-cursor scp-tabbable"');
     }
 
     function isMenuButtonFocused() {
@@ -111,9 +111,11 @@ define([
     }
 
     function activateMenuItem(event) {
-      var menuItem = event.target,
-        featureId = menuItem.id;
-      bpToolbarFeatures.activateFeatureById(featureId, hasFocus());
+      var menuItem = event.target;
+      if (!isFocusable(menuItem)) {
+        menuItem = menuItem.parentElement; // Use the selectable menu item parent (in the case of the hide menu item)
+      }
+      bpToolbarFeatures.activateFeatureById(menuItem.id, hasFocus());
     }
 
     function onKeyDown(event) {

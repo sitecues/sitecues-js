@@ -6,12 +6,12 @@ define([
     'core/metric',
     'core/constants',
     'bp-toolbar-menu/bp-toolbar-view',
-    'core/native-functions'
+    'core/conf/user/manager'
   ],
   function(metric,
            constants,
            bpToolbarView,
-           nativeFn) {
+           conf) {
 
     function hideMenu() {
       require(['bp-toolbar-menu-button/bp-toolbar-menu-button'], function(bpToolbarMenuButton) {
@@ -27,20 +27,18 @@ define([
       hideMenu();
     }
 
-    function turnOff(hasFocus) {
-      require(['page/reset/reset'], function(reset) {
-        reset.init();
-        reset.resetAll();
+    function turnOff() {
+      if (conf.isSitecuesUser()) {
+        require(['page/reset/reset'], function(reset) {
+          reset.init();
+          reset.resetAll();
 
-        bpToolbarView.showHideOption(true);
-        // Slide the hide menu option over, focusing it if we're in focus mode
-        if (hasFocus) {
-          nativeFn.setTimeout(function() {
-            var hideMenuItem = document.getElementById('scp-toolbar-hide');
-            hideMenuItem.focus(); // Focus menu item that slides over
-          }, 0);
-        }
-      });
+          bpToolbarView.showHideOption(true);
+        });
+      }
+      else {
+        hide();
+      }
     }
 
     function hide() {
@@ -75,8 +73,7 @@ define([
       var ALL_FEATURES = {
         'scp-toolbar-what-is': whatIsThis,
         'scp-toolbar-share': share,
-        'scp-toolbar-turn-off' : turnOff,
-        'scp-toolbar-hide': hide
+        'scp-toolbar-turn-off' : turnOff
       };
 
       var feature = ALL_FEATURES[id];
