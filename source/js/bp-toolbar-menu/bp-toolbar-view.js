@@ -7,7 +7,8 @@ define([
   function() {
 
     var menuElement,
-      origClasses;
+      origClasses,
+      closeDelay;
 
     function showHideOption(doAnimate) {
       if (doAnimate) {
@@ -35,7 +36,8 @@ define([
 
     function enableBlurb(blurbName) {
       var origRect = menuElement.getBoundingClientRect(),
-        targetRect;
+        targetRect,
+        blurbElement = document.getElementById('scp-blurb-' + blurbName);
       toggleClass('scp-blurb-' + blurbName, true);
       toggleClass('scp-blurb', true);
 
@@ -57,7 +59,15 @@ define([
       setSize(targetRect);
       toggleClass('scp-blurb-fade-in-text', true);
       menuElement.offsetHeight; // Ask layout engine to update
-      menuElement.style.transitionDelay = '2s';  // Mousing out of blurb should keep it onscreen for just a bit
+      // jshint +W030
+
+      // Focus the blurb so that it is spoken
+      // Pressing escape or clicking outside will close it
+      // (Mousing out won't close while focus is there)
+      // Overall, the experience of the blurb is that it stays on screen unless intentionally dismissed with click/Escape,
+      // to ensure that it is read before accidentally disappearing.
+      blurbElement.setAttribute('tabindex', '-1');
+      blurbElement.focus();
     }
 
     function enableFocus(isFocusEnabled) {
@@ -68,6 +78,7 @@ define([
     function reset() {
       menuElement.className = origClasses;
       menuElement.style.cssText = '';
+      closeDelay = 0;
     }
 
     function init(_menuElement) {

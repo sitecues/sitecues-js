@@ -46,9 +46,14 @@ define([
 
       function checkF8(event) {
         if (event.keyCode === constants.KEY_CODE.F8) {
+          // Reenable Sitecues
           document.removeEventListener('keydown', checkF8);
           localStorage.removeItem('sitecues-disabled');
           sitecuesToolbar.style.top = '';
+          var currentFocus = document.activeElement;
+          if (currentFocus.localName === 'sc-blurb') {
+            currentFocus.blur();
+          }
         }
       }
 

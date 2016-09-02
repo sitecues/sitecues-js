@@ -14,7 +14,7 @@
 /* Toolbar menu */
 
 #scp-toolbar-menu {
-  transition: opacity 470ms, max-width 3s, max-height 3s;
+  transition: opacity 500ms, max-width 3s, max-height 3s;
   opacity: 0;
   position: absolute;
   top: 28px;

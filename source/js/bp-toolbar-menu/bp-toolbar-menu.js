@@ -47,9 +47,10 @@ define([
           nativeFn.setTimeout(focusMenuItem, 0);
         }
         bpToolbarView.enableFocus(doFocusMenuItem);
-        requestAnimationFrame(function() {
-          menuElement.setAttribute('aria-hidden', !doOpen);
-        });
+        // jshint -W030
+        menuElement.offsetHeight;
+        // jshint +W030
+        menuElement.setAttribute('aria-hidden', !doOpen);
       }
     }
 
