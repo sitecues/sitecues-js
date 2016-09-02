@@ -31,7 +31,7 @@ define([
       require(['page/reset/reset'], function(reset) {
         reset.init();
         reset.resetAll();
-        bpToolbarView.refreshShowHide(true);
+        bpToolbarView.showHideOption(true);
       });
     }
 

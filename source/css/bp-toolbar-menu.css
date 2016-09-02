@@ -14,7 +14,7 @@
 /* Toolbar menu */
 
 #scp-toolbar-menu {
-  transition: opacity 170ms linear;
+  transition: opacity 170ms, max-width 2s;
   opacity: 0;
   position: absolute;
   top: 28px;
@@ -26,9 +26,13 @@
   z-index: 2147483647;
   outline: 0px solid transparent !important; /* Prevent focus outline, as we will be showing focus on individual menu items */
   overflow: hidden; /* So that "Hide" menu item doesn't show outside of menu before it slides in */
+  max-width: 1px;   /* Allows animation to auto size */
+  max-height: 999px;
 }
+
 #scp-toolbar-menu[aria-hidden="false"] {
   opacity: 1 !important;
+  max-width: 999px;   /* Allows animation to auto size */
 }
 
 #scp-toolbar-menu[aria-hidden="true"] {
@@ -70,8 +74,11 @@ sc-toolbar-menuitem:focus {
 }
 
 .scp-show-hide #scp-toolbar-turn-off {
-  transition: transform 500ms ease-out;
   transform: translateX(-100%);
+}
+
+.scp-animate-hide  #scp-toolbar-turn-off {
+  transition: transform 500ms ease-out;
 }
 
 /* Repeated */
@@ -101,6 +108,7 @@ sc-kbd {
 
 .scp-blurb {
   min-width: 15ex;
+  transition-delay: 2s !important;
 }
 
 sc-blurb {

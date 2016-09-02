@@ -38,7 +38,9 @@ define([
         events.emit('bp/did-toggle-menu', doOpen);
         if (doOpen) {
           bpToolbarView.reset();
-          bpToolbarView.refreshShowHide(!conf.isSitecuesUser());
+          if (!conf.isSitecuesUser()) {
+            bpToolbarView.showHideOption();
+          }
           new metric.OptionMenuOpen().send();
         }
         var doFocusMenuItem = doOpen && isMenuButtonFocused();
@@ -159,7 +161,7 @@ define([
           removeUnsupportedContent(menuElement);
           initInteractions();
           origViewClasses = menuElement.className;
-          callback();
+          requestAnimationFrame(callback); // Animations can't be synchronous after insertion
         }
       });
     }

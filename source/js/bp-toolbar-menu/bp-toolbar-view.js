@@ -9,8 +9,13 @@ define([
     var menuElement,
       origClasses;
 
-    function refreshShowHide(showHide) {
-      toggleClass('scp-show-hide', showHide);
+    function showHideOption(doAnimate) {
+      if (doAnimate) {
+        toggleClass('scp-animate-hide', true);
+      }
+      requestAnimationFrame(function() {
+        toggleClass('scp-show-hide', true);
+      });
     }
 
     function toggleClass(name, doForce) {
@@ -44,7 +49,7 @@ define([
 
     return {
       reset: reset,
-      refreshShowHide: refreshShowHide,
+      showHideOption: showHideOption,
       enableBlurb: enableBlurb,
       enableFocus: enableFocus,
       init: init
