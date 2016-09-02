@@ -31,9 +31,6 @@ define(
   function convertExistingBadge(badgeImg) {
 
     var
-      styleOpts = {
-        doProxy : false
-      },
       newBadge            = document.createElement('sc'),
       badgeImgBoundingBox = helper.getRect(badgeImg),
       badgeComputedStyles = window.getComputedStyle(badgeImg),
@@ -59,12 +56,12 @@ define(
         newBadgeStyles[styles[i]]   = helper.getNumberFromString(badgeComputedStyles[styles[i]]) + 'px';
         badgeImageStyles[styles[i]] = 0;
       }
-      inlineStyle.set(newBadge, newBadgeStyles, styleOpts);
-      inlineStyle.set(badgeImg, badgeImageStyles, styleOpts);
+      inlineStyle.set(newBadge, newBadgeStyles);
+      inlineStyle.set(badgeImg, badgeImageStyles);
     }
 
     // Added to fix issue on ruhglobal.com
-    if (inlineStyle.get(badgeImg, 'position') === 'relative') {
+    if (inlineStyle(badgeImg).position === 'relative') {
       stylesToTransfer.push('top');
       stylesToTransfer.push('left');
     }
@@ -72,7 +69,7 @@ define(
     transferStylesFromExistingBadge(stylesToTransfer);
 
     // Set other styles that cannot be abstracted into a helper function.
-    inlineStyle.get(newBadge).display = 'inline-block';
+    inlineStyle(newBadge).display = 'inline-block';
 
     var
       newHeight = badgeImgBoundingBox.height,
@@ -82,7 +79,7 @@ define(
     newBadgeStyle.width  = newHeight * WIDTH_TO_HEIGHT_RATIO + 'px';
     newBadgeStyle.float  = badgeComputedStyles.float;
 
-    inlineStyle.set(newBadge, newBadgeStyle, styleOpts);
+    inlineStyle.set(newBadge, newBadgeStyle);
 
     // Existing badge is hidden from screen readers, because the new <sc> parent will be the real badge
     badgeImg.setAttribute('aria-hidden', true);

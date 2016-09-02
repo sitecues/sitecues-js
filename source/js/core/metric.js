@@ -13,6 +13,7 @@ define(
     'core/bp/model/classic-mode',
     'core/platform',
     'core/has',
+    'core/ab-test/ab-test',
     'core/native-functions'
   ],
   function (
@@ -26,6 +27,7 @@ define(
     classicMode,
     platform,
     has,
+    abTest,
     nativeFn
   ) {
   'use strict';
@@ -242,6 +244,7 @@ define(
         pageViewId: session.pageViewId,
         siteId: site.getSiteId(),
         userId: conf.getUserId(),
+        abTest: abTest.get(),
         pageUrl: getPageUrl(source),
         browserUserAgent: navigator.userAgent,
         isClassicMode: classicMode(),

@@ -23,7 +23,7 @@ define(
     var existingPositionCss = getComputedStyle(badge).position;
 
     if (existingPositionCss === 'static') {
-      inlineStyle.get(badge).position = 'relative';
+      inlineStyle(badge).position = 'relative';
     }
   }
 

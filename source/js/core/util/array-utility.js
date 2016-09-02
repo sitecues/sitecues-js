@@ -109,14 +109,19 @@ define([], function () {
     return Array.prototype.slice.call(arrayLike, 0);
   }
 
+  function wrap(data) {
+    return Array.isArray(data) ? data : [data];
+  }
+
   return {
-    remove: remove,
-    addUnique: addUnique,
-    unique: unique,
-    symmetricDifference: symmetricDifference,
-    union: union,
-    intersection: intersection,
-    fromSet: fromSet,
-    toArray: toArray
+    remove    : remove,
+    addUnique : addUnique,
+    unique    : unique,
+    symmetricDifference : symmetricDifference,
+    union : union,
+    intersection : intersection,
+    fromSet : fromSet,
+    toArray : toArray,
+    wrap    : wrap
   };
 });

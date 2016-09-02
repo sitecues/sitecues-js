@@ -55,7 +55,7 @@ define(
         },
         newDimmer = $('<sc>');
 
-      inlineStyle.set(newDimmer[0], useCss, { doProxy : false });
+      inlineStyle.set(newDimmer[0], useCss);
       newDimmer = newDimmer.attr('id', DIMMER_ID)[0];
 
       animateOpacity(newDimmer, DIMMER_MIN_OPACITY, DIMMER_MAX_OPACITY, inflationSpeed);
@@ -78,7 +78,7 @@ define(
         percentComplete = timeElapsed > speed ? 1 : timeElapsed / speed,
         currentOpacity = startOpacity + (endOpacity - startOpacity) * percentComplete;
 
-      inlineStyle.get(dimmerElement).opacity = currentOpacity;
+      inlineStyle(dimmerElement).opacity = currentOpacity;
 
       if (percentComplete < 1) {
         requestFrameFn(nextFrame);

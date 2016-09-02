@@ -1,12 +1,10 @@
 // It is too similar to utils.js which is confusing
 define(
   [
-    'core/bp/constants',
-    'core/inline-style/inline-style'
+    'core/bp/constants'
   ],
   function(
-    BP_CONST,
-    inlineStyle
+    BP_CONST
   ) {
   'use strict';
   /**
@@ -62,15 +60,11 @@ define(
 
   // Leave this method here rather than take it out to 'util / common' to avoid extra modules deps.
   // In the end, we only want to load badge on the page w/o any other modules.
+  // Important note: do not use this function to set inline styles on original (non-Sitecues) elements
   function setAttributes(element, attrs) {
     for (var attrName in attrs) {
       if (attrs.hasOwnProperty(attrName)) {
-        if (attrName === 'style') {
-          inlineStyle.set(element, attrs[attrName]);
-        }
-        else {
-          element.setAttribute(attrName, attrs[attrName]);
-        }
+        element.setAttribute(attrName, attrs[attrName]);
       }
     }
   }

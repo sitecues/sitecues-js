@@ -86,10 +86,14 @@ define([
       newPercent      = (evt.clientX - sliderLeft) / sliderWidth;
 
     var newValue        = (newPercent * ZOOM_CONST.ZOOM_RANGE) + ZOOM_CONST.MIN_ZOOM;
-    zoomMod.jumpTo(newValue);
+    zoomMod.jumpTo(newValue, { isFirstBadgeUse : isFirstBadgeUse() });
 
     evt.preventDefault();
 
+  }
+
+  function isFirstBadgeUse() {
+    return state.get('isFirstBadgeUse');
   }
 
   /**
@@ -102,13 +106,8 @@ define([
 
     addWindowMouseUpListener();
 
-    if (isDecrease) {
-      zoomMod.beginZoomDecrease(evt);
-    }
-    else {
-      zoomMod.beginZoomIncrease(evt);
-    }
-
+    var changeFn = isDecrease ? zoomMod.beginZoomDecrease : zoomMod.beginZoomIncrease;
+    changeFn(evt, { isFirstBadgeUse : isFirstBadgeUse() });
   }
 
   function finishZoomChanges() {

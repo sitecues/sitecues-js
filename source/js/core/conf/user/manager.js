@@ -61,6 +61,10 @@ define(
     }
   }
 
+  function has(key) {
+    return typeof get(key) !== 'undefined';
+  }
+
   // set preferences value (or pass undefined to unset)
   function set(key, value) {
     // private variables
@@ -188,6 +192,7 @@ define(
     init: init,
     getUserId: getUserId,
     get: get,
+    has: has,
     set: set,
     def: def,
     reset: reset

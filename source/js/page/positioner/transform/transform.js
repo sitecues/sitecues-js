@@ -166,7 +166,7 @@ define(
 
     function getTranslationValues(element) {
       var
-        split  = inlineStyle.get(element, transformProperty).split(/(?:\()|(?:px,*)/),
+        split  = inlineStyle(element)[transformProperty].split(/(?:\()|(?:px,*)/),
         index  = split.indexOf('translate3d'),
         values = { x: 0, y: 0 };
       if (index >= 0) {
@@ -184,7 +184,7 @@ define(
     function setNewTransform(element, translateX, translateY, scale) {
       var styles = {};
       styles[transformProperty] = 'translate3d(' + translateX + 'px, ' + translateY + 'px, 0) scale(' + scale + ')';
-      inlineStyle.set(element, styles);
+      inlineStyle.override(element, styles);
     }
 
     function calculateXTranslation(args) {
@@ -390,7 +390,7 @@ define(
       if (platform.browser.isIE) {
         var zIndex = getComputedStyle(element).zIndex;
         if (zIndex === 'auto') {
-          inlineStyle.set(element, {
+          inlineStyle.override(element, {
             zIndex : '999999'
           });
         }
@@ -404,7 +404,7 @@ define(
       // that only specified top values are returned with the computed style
       // EXCEPTION: IE returns the used value for both
       if (!platform.browser.isIE) {
-        inlineStyle.set(element, {
+        inlineStyle.override(element, {
           position : 'static'
         });
       }
@@ -415,7 +415,7 @@ define(
 
 
       if (!isNaN(specifiedValue) && specifiedTop.indexOf('px') >= 0) {
-        inlineStyle.set(element, {
+        inlineStyle.override(element, {
           top : (specifiedValue * state.fixedZoom) + 'px'
         });
       }
@@ -430,7 +430,7 @@ define(
     function onTargetAdded(element) {
       var styles = {};
       styles[transformOriginProperty] = isTransformXOriginCentered ? '50% 0' : '0 0';
-      inlineStyle.set(element, styles);
+      inlineStyle.override(element, styles);
       // This handler runs when a style relevant to @element's bounding rectangle has mutated
       rectCache.listenForMutatedRect(element, function () {
         /*jshint validthis: true */

@@ -98,9 +98,16 @@ define(
         ancestor = ancestor.parentNode;
       }
 
-      new metric.PanelClick({ target: id, role: role }).send();
+      new metric.PanelClick({
+        target: id,
+        role: role,
+        isFirstBadgeUse: isFirstBadgeUse()
+      }).send();
     }
 
+    function isFirstBadgeUse() {
+      return state.get('isFirstBadgeUse');
+    }
 
     function winMouseDown(evt) {
       if (SC_DEV && isSticky()) {
@@ -163,7 +170,9 @@ define(
       // Finally, begin the shrinking animation.
       view.update();
 
-      new metric.PanelClose().send();
+      new metric.PanelClose({
+        isFirstBadgeUse: isFirstBadgeUse()
+      }).send();
     }
 
     /*

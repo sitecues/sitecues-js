@@ -60,18 +60,18 @@ define(
 
 // APPROACH #2 is slower (~34ms on Chrome) but does not require COLOR_NAMES_MAP
 // Setting the border on the <body> and then immediately resetting will not cause a visible change
-    var docElt = document.documentElement;
+    var rgb,
+      docElt = document.documentElement;
+
     if (colorName === 'initial' || colorName === 'inherit' || colorName === 'transparent') {
       return TRANSPARENT;
     }
 
-    inlineStyle.set(docElt, ['outlineColor', colorName]);
+    inlineStyle.override(docElt, { outlineColor : colorName }, function () {
+      var isLegalColor = inlineStyle(docElt).outlineColor;  // Browser didn't set the border color -> not a legal color
+      rgb = isLegalColor && getComputedStyle(docElt).outlineColor;
+    });
 
-    var
-      isLegalColor = inlineStyle.get(docElt, 'outlineColor'),  // Browser didn't set the border color -> not a legal color
-      rgb          = isLegalColor && getComputedStyle(docElt).outlineColor;
-
-    inlineStyle.restore(docElt, 'outline-color');
     return rgb;
   }
 

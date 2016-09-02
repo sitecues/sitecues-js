@@ -242,7 +242,7 @@ define(
         LEFT_COLOR + ' ' + percent + ',' +
         RIGHT_COLOR + ' ' + percent + ',' +
         RIGHT_COLOR + ' 100%)';
-    inlineStyle.get(slider).backgroundImage = gradient;
+    inlineStyle(slider).backgroundImage = gradient;
   }
 
   // Native input change

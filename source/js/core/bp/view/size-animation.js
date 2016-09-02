@@ -429,7 +429,7 @@ define(
 
   function getCurrentTransformPosition () {
 
-    var transform = inlineStyle.get(byId(transformElementId), platform.transformProperty),
+    var transform = inlineStyle(byId(transformElementId))[platform.transformProperty],
         position  = {},
         transformValues,
         translateLeft,
@@ -468,7 +468,7 @@ define(
 
   function getCurrentScale () {
 
-    var transformStyle = inlineStyle.get(byId(transformElementId), platform.transformProperty),
+    var transformStyle = inlineStyle(byId(transformElementId))[platform.transformProperty],
         transformValues;
 
     if (transformStyle.indexOf('scale') !== -1) {
@@ -491,7 +491,7 @@ define(
   }
 
   function setTransform (left, top, transformScale) {
-    inlineStyle.get(byId(transformElementId))[platform.transformProperty] = 'translate(' + left + 'px' + ' , ' + top + 'px' + ') ' + 'scale(' + transformScale + ')';
+    inlineStyle(byId(transformElementId))[platform.transformProperty] = 'translate(' + left + 'px' + ' , ' + top + 'px' + ') ' + 'scale(' + transformScale + ')';
   }
 
   /**

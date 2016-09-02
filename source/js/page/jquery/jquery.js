@@ -64,32 +64,19 @@
 // enough that all such attempts are guarded in a try block.
   "use strict";
 
-  function insertNativeFrame() {
-    var frame = document.createElement('iframe');
-    frame.id = frameId;
-    frame.style.cssText = 'position:absolute;width:1px;height:1px;left:-9999px;visibility:hidden;';
-    document.documentElement.appendChild(frame);
-    return frame;
+  // Recover potentially overridden window methods from a nested browsing context
+  function getNativeWindow() {
+    // jshint -W117
+    return SC_EXTENSION ? window : sitecues._getHelperFrame('sitecues-context').contentWindow;
+    // jshint +W117
   }
 
   function cacheSetTimeoutReference() {
-    var
-      frameId = 'sitecues-native-context',
-      frame   = document.querySelector('#' + frameId);
-    if (!frame) {
-      frame = insertNativeFrame();
-    }
-    return frame.contentWindow.setTimeout.bind(window);
+    return getNativeWindow().setTimeout.bind(window);
   }
 
   function cacheJSONReference() {
-    var
-      frameId = 'sitecues-native-context',
-      frame   = document.querySelector('#' + frameId);
-    if (!frame) {
-      frame = insertNativeFrame();
-    }
-    return frame.contentWindow.JSON;
+    return getNativeWindow().JSON;
   }
 
   var arr = [];

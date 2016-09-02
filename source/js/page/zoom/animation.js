@@ -88,7 +88,7 @@ define(
 
     // Initialize zoom input info
     state.zoomInput = $.extend({
-      isSlider: false,                  // Slider in panel
+      isSlider: false,                 // Slider in panel
       isSliderDrag: false,             // True if the user drags the slider (as opposed to clicking in it)
       isSliderClick: false,            // True if the user dragged the slider and now stopped
       isLongGlide: false,              // Key or A button held down to glide extra
@@ -96,6 +96,7 @@ define(
       isButtonPress: false,            // Small or large A in panel
       isUnpinch: false,                // Trackpad unpinch
       isCtrlWheel: false,              // Ctrl+mousewheel
+      // isFirstBadgeUse: undefined,     // If first badge use? Not defined if this is not originating from the badge
       fromZoom: state.completedZoom    // Old zoom value
     }, input);
 
@@ -122,7 +123,7 @@ define(
     // Temporarily indicate that zooming is in progress -- this is used by the sitecues-zoom-form-fix stylesheet
     $body.attr('data-sc-zooming', '');
 
-    inlineStyle.set($body.get(), {
+    inlineStyle.override($body.get(), {
       // Temporarily disable mouse cursor events and CSS behavior, to help with zoom performance
       pointerEvents : 'none'
     });
@@ -137,13 +138,13 @@ define(
   // Begin an operation to the glide toward the current zoom, if smooth zoom is currently supported.
   // If no smooth zoom, apply an instant zoom change to increase or decrease zoom by a constant amount.
   // If we are zooming with +/- or clicking A/a
-  function beginGlide(targetZoom, event) {
+  function beginGlide(targetZoom, event, inputInfo) {
     if (targetZoom === state.completedZoom) {
       return;
     }
 
     if (!isZoomOperationRunning()) {
-      var input = {};
+      var input = inputInfo || {};
       if (event) {
         if (event.keyCode) {
           // TODO should we differentiate between Enter on A/a vs +/- ?
@@ -239,7 +240,7 @@ define(
   function performJsAnimateZoomOperation() {
     function jsZoomStep() {  // Firefox passes in a weird startZoomTime that can't be compared with Date.now()
       var midAnimationZoom = getMidAnimationZoom();
-      inlineStyle.set($origBody[0], style.getZoomCss(midAnimationZoom));
+      inlineStyle.override($origBody[0], style.getZoomCss(midAnimationZoom));
       if (midAnimationZoom === state.currentTargetZoom && !isSliderActive()) {
         zoomAnimator = requestFrame(finishZoomOperation);
       }
@@ -268,7 +269,7 @@ define(
       };
 
     // Apply the new CSS
-    inlineStyle.set($origBody[0], animationCss);
+    inlineStyle.override($origBody[0], animationCss);
 
     // No zoomStopRequested() received for initial zoom
     $origBody.one(ANIMATION_END_EVENTS, onGlideStopped);
@@ -319,7 +320,7 @@ define(
         });
     }
     else {
-      inlineStyle.set($origBody[0], zoomCss);
+      inlineStyle.override($origBody[0], zoomCss);
     }
     if (thumbChangeListener) {
       thumbChangeListener(state.currentTargetZoom);
@@ -383,7 +384,7 @@ define(
     }
     var styles = style.getZoomCss(state.currentTargetZoom);
     styles.animation = '';
-    inlineStyle.set($origBody[0], styles);
+    inlineStyle.override($origBody[0], styles);
     finishZoomOperation();
   }
 
@@ -399,7 +400,7 @@ define(
 
     if (elementDotAnimatePlayer) {
       // Can't leave animation player around, as it will prevent future animations
-      inlineStyle.set($origBody[0], style.getZoomCss(state.currentTargetZoom));
+      inlineStyle.override($origBody[0], style.getZoomCss(state.currentTargetZoom));
       elementDotAnimatePlayer.onfinish = null;
       elementDotAnimatePlayer.cancel();
     }
@@ -420,7 +421,7 @@ define(
     scrollbars.onBodyRectChange();
 
     // Restore mouse cursor events and CSS behavior
-    inlineStyle.set($body.get(), {
+    inlineStyle.override($body.get(), {
       pointerEvents : ''
     });
 
@@ -514,7 +515,7 @@ define(
 
   function freezeZoom() {
     state.currentTargetZoom = getActualZoom();
-    inlineStyle.set($origBody[0], style.getZoomCss(state.currentTargetZoom));
+    inlineStyle.override($origBody[0], style.getZoomCss(state.currentTargetZoom));
     if (elementDotAnimatePlayer) {
       elementDotAnimatePlayer.onfinish = null;
       elementDotAnimatePlayer.cancel();
@@ -555,7 +556,7 @@ define(
     zoomAnimator = requestFrame(function () {
       // Stop the key-frame animation at the current zoom level
       // Yes, it's crazy, but this sequence helps the zoom stop where it is supposed to, and not jump back a little
-      inlineStyle.set($origBody[0], {
+      inlineStyle.override($origBody[0], {
         animationPlayState: 'paused'
       });
       zoomAnimator = requestFrame(function() {

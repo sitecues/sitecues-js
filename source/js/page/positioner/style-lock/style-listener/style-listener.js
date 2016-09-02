@@ -136,7 +136,7 @@ define(
               var
                 property       = observedProperties[j],
                 inlineKey      = property + '_inline_value',
-                inlineValue    = inlineStyle.get(target, property),
+                inlineValue    = inlineStyle(target)[property],
                 oldInlineValue = elementMap.getField(target, inlineKey),
                 didChange      = oldInlineValue !== inlineValue;
 

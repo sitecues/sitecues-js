@@ -66,7 +66,7 @@ define(
       height : height + 'px',
       // Hide scrollbar by clipping horizontally - don't clip vertically (just large height of 999px for that)
       clip   : 'rect(0,' + (width - ROOM_FOR_SCROLLBAR) + 'px,999px,0)'
-    }, { doProxy : false });
+    });
   }
 
   function onPanelUpdate() {

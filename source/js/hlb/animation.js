@@ -40,12 +40,12 @@ define(
     // Dim the background!
     dimmer.dimBackgroundContent(INFLATION_SPEED, $('#' + constants.HLB_WRAPPER_ID));
 
-    var $hlb = data.$hlb,
+    var
+      $hlb  = data.$hlb,
       speed = doShowQuickly ? INFLATION_SPEED_FAST : INFLATION_SPEED,
-      startingScale = getStartingScale($hlb),
-      hlbStyle = inlineStyle.get($hlb[0]);
+      startingScale = getStartingScale($hlb);
 
-    hlbStyle[platform.transformOriginProperty] = data.originCSS;
+    inlineStyle($hlb[0])[platform.transformOriginProperty] = data.originCSS;
 
     animateCss($hlb[0], startingScale, hlbPositioning.getFinalScale($hlb), speed, data.translateCSS, data.onHLBReady);
   }
@@ -80,23 +80,22 @@ define(
 
   function animateCss(hlbElement, startScale, endScale, speed, translateCSS, onCompleteFn) {
     var
-      styleOpts = { doProxy : false },
-      fromCss   = {},
-      toCss     = {};
+      fromCss = {},
+      toCss   = {};
     toCss[platform.transformProperty] = 'scale(' + endScale + ') ' + translateCSS;
 
-    inlineStyle.get(hlbElement).transitionProperty = 'none';// Clear any existing transition
+    inlineStyle(hlbElement).transitionProperty = 'none';// Clear any existing transition
 
     if (!speed) {
       // No animation -- do it immediately and return
-      inlineStyle.set(hlbElement, toCss, styleOpts);
+      inlineStyle.set(hlbElement, toCss);
       onCompleteFn();
       return;
     }
 
     // Animate fromCss -> toCss
     fromCss[platform.transformProperty] = 'scale(' + startScale + ') ' + translateCSS;
-    inlineStyle.set(hlbElement, fromCss, styleOpts);
+    inlineStyle.set(hlbElement, fromCss);
 
     function onTransitionEnd() {
       hlbElement.removeEventListener(platform.transitionEndEvent, onTransitionEnd);
@@ -107,7 +106,7 @@ define(
     // rather than just setting the toCss and ignoring the fromCss
     nativeFn.setTimeout(function () {
       toCss.transition = platform.transformProperty + ' ' + speed + 'ms ease-in-out';
-      inlineStyle.set(hlbElement, toCss, styleOpts);
+      inlineStyle.set(hlbElement, toCss);
       hlbElement.addEventListener(platform.transitionEndEvent, onTransitionEnd);
     }, 0);
   }
@@ -124,7 +123,6 @@ define(
    * @example "matrix(1, 0, 0, 1, 1888.0610961914063, 2053.21875)"
    */
   function isHLBZoomed($hlb) {
-
     // If there isn't any transform, then it isn't scaled.
     var scale = getCurrentScale($hlb);
     return scale > hlbPositioning.getStartingScale($hlb);

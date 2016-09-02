@@ -64,13 +64,16 @@ define(
   }
 
   function setOverflow(overflowX, overflowY) {
-    if (inlineStyle.get(docElem, 'overflowX') !== overflowX) {
-      inlineStyle.set(docElem, {
+    var docStyle = inlineStyle(docElem);
+
+    if (docStyle.overflowX !== overflowX) {
+      inlineStyle.override(docElem, {
         overflowX : overflowX
       });
     }
-    if (inlineStyle.get(docElem, 'overflowY') !== overflowY) {
-      inlineStyle.set(docElem, {
+
+    if (docStyle.overflowY !== overflowY) {
+      inlineStyle.override(docElem, {
         overflowY : overflowY
       });
     }
@@ -84,7 +87,7 @@ define(
   // By controlling the visibility of the scrollbars ourselves, the bug magically goes away.
   // This is also good because we're better than IE at determining when content is big enough to need scrollbars.
   function determineScrollbars() {
-
+    var docStyle = inlineStyle(docElem);
     mainBodyRect = bodyGeo.getCurrentBodyInfo();
 
     // -- Clear the scrollbars --
@@ -92,8 +95,8 @@ define(
       defaultOverflowX = defaultOverflowY = 'hidden';
     }
     else {
-      defaultOverflowX = inlineStyle.get(docElem, 'overflowX');
-      defaultOverflowY = inlineStyle.get(docElem, 'overflowY');
+      defaultOverflowX = docStyle.overflowX;
+      defaultOverflowY = docStyle.overflowY;
     }
 
     // -- Set the scrollbars after a delay --
@@ -111,7 +114,7 @@ define(
       newOverflowX        = doUseHorizScrollbar ? 'scroll' : defaultOverflowX,
       newOverflowY        = doUseVertScrollbar  ? 'scroll' : defaultOverflowY;
 
-    if (newOverflowX !== inlineStyle.get(docElem, 'overflowX') || newOverflowY !== inlineStyle.get(docElem, 'overflowY')) {
+    if (newOverflowX !== docStyle.overflowX || newOverflowY !== docStyle.overflowY) {
       if (shouldComputeMainBodyScrollbars) {
         // MS browsers need to reset first, otherwise causes SC-3722
         setOverflow('hidden', 'hidden');

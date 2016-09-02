@@ -311,7 +311,7 @@ define(
         height : getFinalCoordinate(clientFocusRect.height + 2 * EXTRA_FOCUS_PADDING),
         top    : getFinalCoordinate(clientFocusRect.top - EXTRA_FOCUS_PADDING - clientPanelRect.top),
         left   : getFinalCoordinate(clientFocusRect.left - EXTRA_FOCUS_PADDING - clientPanelRect.left)
-      }, { doProxy : false });
+      });
     }
   }
 

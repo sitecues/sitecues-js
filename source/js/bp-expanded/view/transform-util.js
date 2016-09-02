@@ -45,7 +45,7 @@ define(
       transformString = getTransformString(transformMap, useCss);
 
     if (useCss) {  // Always use CSS, even in SVG
-      inlineStyle.get(elem)[platform.transformProperty] = transformString;
+      inlineStyle(elem)[platform.transformProperty] = transformString;
     }
     else if (transformString) {
       elem.setAttribute('transform', transformString);
@@ -57,7 +57,7 @@ define(
 
   // Always get style transform
   function getStyleTransformMap(elem) {
-    return getTransformMap(inlineStyle.get(elem, platform.transformProperty));
+    return getTransformMap(inlineStyle(elem)[platform.transformProperty]);
   }
 
   function getElemTransformMap(elem) {
