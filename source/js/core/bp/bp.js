@@ -24,8 +24,8 @@ define(
     'core/bp/model/classic-mode',
     'core/bp/view/badge/page-badge',
     'Promise',
-    'core/native-functions'/*,
-    'core/inline-style/inline-style'*/
+    'core/native-functions',
+    'core/inline-style/inline-style'
   ],
   function (
     expandController,
@@ -36,8 +36,8 @@ define(
     classicMode,
     pageBadgeView,
     Promise,
-    nativeFn/*,
-    inlineStyle*/
+    nativeFn,
+    inlineStyle
   ) {
   'use strict';
 
@@ -92,7 +92,7 @@ define(
     return initBPView()
       .then(function() {
         expandController.init();
-        //fixDimensionsOfBody();
+        fixDimensionsOfBody();
         return getViewInfo();
       });
   }
@@ -177,28 +177,28 @@ define(
   //contained by the initial containing block. This is a hacky solution to the problem, but it is much cheaper
   //than analyzing the page and manually repositioning absolute elements.
   //TODO: Check client site CNIB's absolutely positioned elements if this gets changed
-  //function fixDimensionsOfBody() {
-  //  var body = document.body,
-  //    bodyStyle   = getComputedStyle(body),
-  //    docStyle    = getComputedStyle(docElem),
-  //    botMargin   = parseFloat(bodyStyle.marginBottom),
-  //    topMargin   = bodyStyle.marginTop,
-  //    leftMargin  = bodyStyle.marginLeft,
-  //    rightMargin = bodyStyle.marginRight;
-  //
-  //  if (parseFloat(bodyStyle.height) < parseFloat(docStyle.height)) {
-  //    inlineStyle.override(body, {
-  //      height : docStyle.height
-  //    });
-  //  }
-  //  if (botMargin !== 0) {
-  //    //marginBottom doesn't override bottom margins that are set with the shorthand 'margin' style,
-  //    //so we get all the margins and set our own inline shorthand margin
-  //    inlineStyle.override(body, {
-  //      margin : topMargin + ' ' + rightMargin + ' 0px ' + leftMargin
-  //    });
-  //  }
-  //}
+  function fixDimensionsOfBody() {
+    var body = document.body,
+      bodyStyle   = getComputedStyle(body),
+      docStyle    = getComputedStyle(docElem),
+      botMargin   = parseFloat(bodyStyle.marginBottom),
+      topMargin   = bodyStyle.marginTop,
+      leftMargin  = bodyStyle.marginLeft,
+      rightMargin = bodyStyle.marginRight;
+
+    if (parseFloat(bodyStyle.height) < parseFloat(docStyle.height)) {
+      inlineStyle.override(body, {
+        height : docStyle.height
+      });
+    }
+    if (botMargin !== 0) {
+      //marginBottom doesn't override bottom margins that are set with the shorthand 'margin' style,
+      //so we get all the margins and set our own inline shorthand margin
+      inlineStyle.override(body, {
+        margin : topMargin + ' ' + rightMargin + ' 0px ' + leftMargin
+      });
+    }
+  }
 
   function getViewInfo() {
     var badgeElem = document.getElementById('sitecues-badge'),

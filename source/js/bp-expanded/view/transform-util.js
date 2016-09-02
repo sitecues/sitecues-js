@@ -1,6 +1,6 @@
 /**
  * This file contains helper methods for dealing with the string that is returned
- * when using Element. style.transform or Element.getAttribute('transform')
+ * when using Element#style.transform or Element.getAttribute('transform')
  * This module supports translateX, translateY, scale, scaleY and rotate.
  * In the case of scaleY it is get/set as a scale(1,y) value with a paired property scaleType = 'scaleY'
  */
