@@ -34,7 +34,6 @@ define([
 
     function requestOpen(doOpen) {
       if (isOpen() !== doOpen) {
-        menuElement.setAttribute('aria-hidden', !doOpen);
         events.emit('bp/did-toggle-menu', doOpen);
         if (doOpen) {
           bpToolbarView.reset();
@@ -48,6 +47,9 @@ define([
           nativeFn.setTimeout(focusMenuItem, 0);
         }
         bpToolbarView.enableFocus(doFocusMenuItem);
+        requestAnimationFrame(function() {
+          menuElement.setAttribute('aria-hidden', !doOpen);
+        });
       }
     }
 

@@ -4,12 +4,10 @@
 
 define([
     'core/metric',
-    'core/native-functions',
     'core/constants',
     'bp-toolbar-menu/bp-toolbar-view'
   ],
   function(metric,
-           nativeFn,
            constants,
            bpToolbarView) {
 
@@ -38,9 +36,9 @@ define([
     function hide() {
       var sitecuesToolbar = document.getElementById('sitecues-badge');
 
-      sitecuesToolbar.style.transition = 'transform 500ms linear';
-      nativeFn.setTimeout(function() {
-        sitecuesToolbar.style.transform = 'translateY(-40px)';
+      sitecuesToolbar.style.transition = 'top 500ms linear';
+      requestAnimationFrame(function() {
+        sitecuesToolbar.style.top = '-40px';
       });
 
       // Disable for next time, on this site
@@ -50,7 +48,7 @@ define([
         if (event.keyCode === constants.KEY_CODE.F8) {
           document.removeEventListener('keydown', checkF8);
           localStorage.removeItem('sitecues-disabled');
-          sitecuesToolbar.style.transform = '';
+          sitecuesToolbar.style.top = '';
         }
       }
 
