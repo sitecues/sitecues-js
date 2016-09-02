@@ -169,9 +169,9 @@ define(
    * [filterElements removes css styles in HLBCSSBlacklist from the HLB element, but not its children]
    * @param  {[DOM element]} $hlb [HLB element]
    */
-  function filterStyles ($hlb) {
+  function filterStyles($hlb) {
     for (var i = 0; i < HLBCSSBlacklist.length; i += 1) {
-      inlineStyle.removeProperty($hlb[0], [HLBCSSBlacklist[i]]);
+      inlineStyle.removeProperty($hlb[0], HLBCSSBlacklist[i]);
     }
   }
 
@@ -179,7 +179,7 @@ define(
    * [filterAttributes removes html attributes in HLBAttributeBlacklist]
    * @param  {[DOM element]} $hlb [HLB element]
   */
-  function filterAttributes ($hlb) {
+  function filterAttributes($hlb) {
     for (var i = 0; i < HLBAttributeBlacklist.length; i += 1) {
       $hlb.removeAttr(HLBAttributeBlacklist[i]);
     }
@@ -515,7 +515,7 @@ define(
    * @param  {[jQuery element]} $hlb      [The HLB element]
    */
   function initializeHLBElementStyles ($foundation, $hlb) {
-    inlineStyle.get($hlb[0]).cssText =  getComputedStyleCssText($foundation[0]);
+    inlineStyle($hlb[0]).cssText =  getComputedStyleCssText($foundation[0]);
   }
 
    /**
@@ -556,10 +556,10 @@ define(
       foundationDescendantStyle = getComputedStyle(foundationDescendant);
 
       // Copy the original elements child styles to the HLB elements child.
-      inlineStyle.get(hlbDescendant).cssText = getComputedStyleCssText(foundationDescendant);
+      inlineStyle(hlbDescendant).cssText = getComputedStyleCssText(foundationDescendant);
 
       if (shouldRemovePadding($foundationDescendant, initialHLBRect)) {
-        inlineStyle.set(hlbDescendant, getChildPadding($foundationDescendant, initialHLBRect), { doProxy : false });
+        inlineStyle.set(hlbDescendant, getChildPadding($foundationDescendant, initialHLBRect));
       }
 
       // Compute styles that are more complicated than copying cssText.
@@ -577,7 +577,7 @@ define(
       }
 
       // Set the childs css.
-      inlineStyle.set(hlbDescendant, computedChildStyles, { doProxy : false });
+      inlineStyle.set(hlbDescendant, computedChildStyles);
 
       // Ran into issues with children inheriting styles because of class and id CSS selectors.
       // Filtering children of these attributes solves the problem.
@@ -691,7 +691,7 @@ define(
         });
 
         if (forceTextColor) {
-          inlineStyle.get(this).color = HLB_DEFAULT_TEXT_COLOR;
+          inlineStyle(this).color = HLB_DEFAULT_TEXT_COLOR;
         }
 
       }

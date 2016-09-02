@@ -76,7 +76,7 @@ define(
       var styles = {};
       styles[platform.transformProperty]       = 'scale(' + zoomReciprocal + ')';
       styles[platform.transformOriginProperty] = '0 0';
-      inlineStyle.set(ancestor, styles);
+      inlineStyle.override(ancestor, styles);
 
       var
         originalDimensions = dimensionsMap.get(element) || {},

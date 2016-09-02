@@ -77,17 +77,12 @@ define(
     // We consider it fluid if the main node we discovered inside the body changes width
     // if we change the body's width.
     var
-      originalBodyWidth = inlineStyle.get(body, 'width'),
       origWidth = originalBodyInfo.mainNode.clientWidth,
       newWidth,
       isFluid;
-    inlineStyle.set(body, {
-      width : (viewport.getInnerWidth() / 5) + 'px'
-    });
-    newWidth = originalBodyInfo.mainNode.clientWidth;
-    isFluid = origWidth !== newWidth;
-    inlineStyle.set(body, {
-      width : originalBodyWidth
+    inlineStyle.override(body, { width : (viewport.getInnerWidth() / 5) + 'px' }, function () {
+      newWidth = originalBodyInfo.mainNode.clientWidth;
+      isFluid = origWidth !== newWidth;
     });
     return isFluid;
   }

@@ -211,11 +211,9 @@ define(
   function fixZoomBodyCss() {
     // Allow the content to be horizontally centered, unless it would go
     // offscreen to the left, in which case start zooming the content from the left-side of the window
-    var styles = {};
-    styles[platform.transformOriginProperty] = config.shouldRestrictWidth ? '0 0' : '50% 0';
-    inlineStyle.set(body, styles);
+    inlineStyle.override(body, [platform.transformOriginProperty, config.shouldRestrictWidth ? '0 0' : '50% 0']);
     if (shouldOptimizeLegibility) {
-      inlineStyle.set(body, {
+      inlineStyle.override(body, {
         textRendering : 'optimizeLegibility'
       });
     }
@@ -253,7 +251,7 @@ define(
       backgroundColor : 'transparent',
       zIndex          : MAX_ZINDEX,
       pointerEvents   : 'none'
-    }, { doProxy : false });
+    });
 
     $appendedDiv.appendTo('html');
 
@@ -288,12 +286,12 @@ define(
     }
 
     if (property.indexOf('all') >= 0 || property.indexOf('transform') >= 0) {
-      var transitionValue = inlineStyle.get(body, 'transition');
+      var transitionValue = inlineStyle(body).transition;
       if (transitionValue) {
         transitionValue += ', ';
       }
       transitionValue += 'transform 0s';
-      inlineStyle.set(body, {
+      inlineStyle.override(body, {
         transition : transitionValue
       });
     }

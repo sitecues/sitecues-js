@@ -81,7 +81,7 @@ define(
     clearTimeout(userInputTimeoutId);
 
     moreOpacityElem.setAttribute('class', useInstantTransition ? '' : 'scp-transition-opacity-fast');
-    inlineStyle.get(moreOpacityElem).opacity = 1;
+    inlineStyle(moreOpacityElem).opacity = 1;
 
     // Scale the button to 0.5 and then animate it to a scale of 1
     if (useInstantTransition) {

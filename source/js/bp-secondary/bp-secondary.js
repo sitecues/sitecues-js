@@ -434,7 +434,7 @@ define(
       transformUtil.setElemTransform(elem, {});
       if (!platform.browser.isFirefox) {
         // Do not use will-change in Firefox as it caused SC-3421 on some sites
-        inlineStyle.get(elem).willChange = 'transform';
+        inlineStyle(elem).willChange = 'transform';
       }
     });
 
@@ -446,10 +446,10 @@ define(
   function resetWebKitLayout(elem) {
     // Hack to fix Chrome/Safari bug where the more button was in the wrong place after resetting styles
     // This forces WebKit to reflow the element's layout.
-    inlineStyle.get(elem).display = 'none';
-    // jshint unused:false
-    var unused = getBPContainer().offsetHeight; // Force layout refresh
-    inlineStyle.get(elem).display = 'block';
+    inlineStyle.override(elem, { display : 'none' }, function () {
+      // jshint unused:false
+      var unused = getBPContainer().offsetHeight; // Force layout refresh
+    });
   }
 
   function resetButtonStyles() {

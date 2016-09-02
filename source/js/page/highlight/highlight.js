@@ -106,7 +106,15 @@ define(
 
   // All CSS background properties except color
   // Image must be listed last for multiple backgrounds code to work
-  BG_PROPS = ['Position', 'Origin', 'Repeat', 'Clip', 'Attachment', 'Size', 'Image'],
+  BG_PROPS = [
+    'backgroundPosition', 
+    'backgroundOrigin', 
+    'backgroundRepeat', 
+    'backgroundClip', 
+    'backgroundAttachment', 
+    'backgroundSize', 
+    'backgroundImage'
+  ],
 
   state,
 
@@ -463,27 +471,26 @@ define(
     var value,
       hasOrigBgImage = origBg.backgroundImage !== 'none',
       styles = {};
-    BG_PROPS.forEach(function (prop) {
-      var fullName = 'background' + prop;
+    BG_PROPS.forEach(function (property) {
       if (!hasOrigBgImage) {
-        value = newBg[fullName];
+        value = newBg[property];
       }
       else if (doPlaceOrigOnTop) {
-        value = origBg[fullName] + ',' + newBg[fullName];
+        value = origBg[property] + ',' + newBg[property];
       }
       else {
-        value = newBg[fullName] + ',' + newBg[fullName];
+        value = newBg[property] + ',' + newBg[property];
       }
-      styles[fullName] = value;
+      styles[property] = value;
     });
-    inlineStyle.set(element, styles);
+    inlineStyle.override(element, styles);
   }
 
   function copyBackgroundCss(origElem) {
-    var copy = {};
-    BG_PROPS.forEach(function (prop) {
-      var fullName = 'background' + prop;
-      copy[fullName] = inlineStyle.get(origElem, fullName).slice();
+    var copy = {},
+        style = inlineStyle(origElem);
+    BG_PROPS.forEach(function (property) {
+      copy[property] = style[property].slice();
     });
     return copy;
   }
@@ -591,9 +598,9 @@ define(
         colorIntensity = colorUtil.getPerceivedLuminance(bgColor);
         if (bgRgba.a === 1 && isCloseToHighlightColor(colorIntensity) &&
           !common.hasOwnBackgroundColor(this, style, state.styles[0])) { // If it's a unique color, we want to preserve it
-          state.savedBgColors.push({ elem: this, color: inlineStyle.get(this, 'backgroundColor') });
+          state.savedBgColors.push({ elem: this, color: inlineStyle(this).backgroundColor });
           // Needed to do this as !important because of Perkins.org theme which also used !important
-          inlineStyle.set(this, ['backgroundColor', 'transparent', 'important']);
+          inlineStyle.override(this, ['background-color', 'transparent', 'important']);
         }
       }
     });
@@ -915,7 +922,7 @@ define(
     var isFixed = traitcache.getStyleProp(overlayContainerElem, 'position') === 'fixed';
 
     if (isFixed) {
-      var elemTransform = inlineStyle.get(overlayContainerElem, platform.transformProperty),
+      var elemTransform = inlineStyle(overlayContainerElem)[platform.transformProperty],
         scaleSplit = elemTransform.split('scale(');
       return parseFloat(scaleSplit[1]) || 1;
     }
@@ -1638,13 +1645,10 @@ define(
 
     if (state.picked && state.savedCss) {
       // Restore the previous CSS on the picked elements (remove highlight bg etc.)
-
-      inlineStyle.set(state.picked[0], state.savedCss);
+      inlineStyle.restore(state.picked[0], BG_PROPS);
       state.savedCss = null;
       state.savedBgColors.forEach(function (savedBg) {
-        inlineStyle.set(savedBg.elem, {
-          backgroundColor : savedBg.color
-        });
+        inlineStyle.restore(savedBg.elem, 'background-color');
       });
       state.savedBgColors = [];
 

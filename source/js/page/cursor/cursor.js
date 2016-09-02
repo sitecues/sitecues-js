@@ -14,8 +14,7 @@ define(
     'page/cursor/cursor-css',
     'core/platform',
     'core/events',
-    'core/native-functions',
-    'core/inline-style/inline-style'
+    'core/native-functions'
   ],
   function (
     $,
@@ -24,8 +23,7 @@ define(
     cursorCss,
     platform,
     events,
-    nativeFn,
-    inlineStyle
+    nativeFn
   ) {
   'use strict';
 
@@ -60,9 +58,9 @@ define(
       if (platform.browser.isWebKit) {
         // Hack .. wake up Chrome and Safari! They weren't refreshing the rule on hue-only changes
         // E.g. when you drag the mouse hue slider you should see instant changes
-        inlineStyle.get(rule).setProperty('cursor', '', 'important');
+        rule.style.setProperty('cursor', '', 'important');
       }
-      inlineStyle.get(rule).setProperty('cursor', cursorValueURL, 'important');
+      rule.style.setProperty('cursor', cursorValueURL, 'important');
     } catch (e) {
       if (SC_DEV) { console.log('Catch setting cursor property: %o', e); }
     }
@@ -174,7 +172,7 @@ define(
 
     for (; ruleIndex < numRules; ruleIndex ++) {
       var rule = rules[ruleIndex],
-        value = inlineStyle.get(rule, 'cursor');
+        value = rule.style.cursor;
 
       // Find the cursor type (auto, pointer, etc) and replace the style with our generated image.
       for (cursorTypeIndex = 0; cursorTypeIndex < CURSOR_TYPES.length; cursorTypeIndex ++) {

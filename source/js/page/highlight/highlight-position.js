@@ -447,7 +447,7 @@ define(
       // Turn off zoom CSS hacks for comboboxes
       comboElem.setAttribute('data-sc-dropdown-fix-off', '');
       // Turn off transition temporarily if it's there, otherwise it prevents us from getting the correct rect
-      inlineStyle.set(comboElem, {
+      inlineStyle.override(comboElem, {
         transitionProperty : 'none'
       });
       // Get what the rect would have been

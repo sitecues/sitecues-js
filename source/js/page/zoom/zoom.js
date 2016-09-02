@@ -171,11 +171,11 @@ define(
     }
     inlineStyle.restore(body, ['width', platform.transformProperty]);
     bodyGeo.refreshOriginalBodyInfo();
-    inlineStyle.set(body, style.getZoomCss(state.completedZoom));
+    inlineStyle.override(body, style.getZoomCss(state.completedZoom));
     if (config.shouldRestrictWidth) {
       // Restrict the width of the body so that it works similar to browser zoom
       // Documents designed to fit the width of the page still will
-      inlineStyle.set(body, {
+      inlineStyle.override(body, {
         width : bodyGeo.getRestrictedBodyWidth(state.completedZoom)
       });
     }

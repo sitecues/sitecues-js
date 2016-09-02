@@ -304,7 +304,7 @@ define(
   function prepareMovement() {
     // Hide current HLB so it doesn't interfere with getElementFromPoint
     if (hlbElement) {
-      inlineStyle.get(hlbElement).display = 'none';
+      inlineStyle(hlbElement).display = 'none';
     }
 
     fixedElements.disableMouseEvents();
@@ -325,7 +325,7 @@ define(
 
     // Make lens visible again
     if (hlbElement) {
-      inlineStyle.get(hlbElement).display = 'block';
+      inlineStyle(hlbElement).display = 'block';
       // Scroll back to original position if the lens is now offscreen
       if (typeof origPanX === 'number') {
         var lensRect = hlbElement.getBoundingClientRect();
@@ -658,7 +658,7 @@ define(
       var debugDiv = $('<div class="sc-debug-dots">')
         .appendTo('html');
 
-      inlineStyle.set(debugDiv.get(), {
+      inlineStyle.set(debugDiv[0], {
         position: 'absolute',
         left: (x + window.pageXOffset) + 'px',
         top: (y + window.pageYOffset) + 'px',
@@ -666,7 +666,7 @@ define(
         height: '0px',
         outline: '3px solid ' + color,
         zIndex: 999999
-      }, { doProxy : false });
+      });
     }
 
     // Need to use something that's not a container of the last picked item

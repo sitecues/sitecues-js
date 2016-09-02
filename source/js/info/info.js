@@ -78,7 +78,7 @@ define(
   }
 
   function close() {
-    inlineStyle.set($iframe[0], INITIAL_CSS, { doProxy : false });
+    inlineStyle.set($iframe[0], INITIAL_CSS);
     nativeFn.setTimeout(function() {
       $iframe.remove();
       $iframe = $();
@@ -140,8 +140,8 @@ define(
     $iframe = $('<iframe>')
       .attr('src', pageUrl + anchor);
 
-    inlineStyle.set($iframe[0], INITIAL_CSS, { doProxy : false });
-    inlineStyle.get($iframe[0]).border = getBorderCss();
+    inlineStyle.set($iframe[0], INITIAL_CSS);
+    inlineStyle($iframe[0]).border = getBorderCss();
 
     $iframe
       .one('load', onload)
@@ -156,7 +156,7 @@ define(
     dimmer.dimBackgroundContent(DIMMER_SPEED, $iframe);
 
     nativeFn.setTimeout(function () {
-      inlineStyle.set($iframe.get(), ENLARGED_CSS);
+      inlineStyle.set($iframe[0], ENLARGED_CSS);
       var iframeEl = $iframe[0];
       if (iframeEl.contentWindow) {
         iframeEl.contentWindow.focus();
@@ -179,24 +179,23 @@ define(
 
   function addCloseButton() {
     var
-      styleOpts = { doProxy : false },
       helpRect = $iframe[0].getBoundingClientRect(),
       offsetLeft = platform.browser.isMS ? -30 : -17, // Deal with big scrollbars on Windows
       offsetTop = platform.browser.isMS ? -6 : -1;
 
     $closeButton =
       $('<scx style="display:block" class="scp-hand-cursor"><scx style="position:relative;left:14px;top:23px;color:#ccc">x</scx></scx>');
-    inlineStyle.set($closeButton[0], CLOSE_BUTTON_CSS, styleOpts);
+    inlineStyle.set($closeButton[0], CLOSE_BUTTON_CSS);
     inlineStyle.set($closeButton[0], {
         left: (helpRect.right - BUTTON_SIZE / 2 + offsetLeft) + 'px',  // Subtracts border width as well
         top: (helpRect.top - BUTTON_SIZE / 2 + offsetTop) + 'px'
-    }, styleOpts);
+    });
     $closeButton
         .appendTo('html')
         .one('click', close);
 
     addCloseButtonTimer = nativeFn.setTimeout(function () {
-      inlineStyle.get($closeButton[0]).opacity = '1';
+      inlineStyle($closeButton[0]).opacity = '1';
     }, 100);
   }
 
@@ -210,22 +209,18 @@ define(
 
   function enableWebPagePointerEvents(doEnable) {
     var collection = $('body,#scp-bp-container');
-    inlineStyle.set(collection.get(), {
-      pointerEvents : doEnable ? '' :'none'
+    inlineStyle.override(collection.get(), {
+      pointerEvents : doEnable ? '' : 'none'
     });
   }
 
   function enableScrolling(doEnable) {
+    var docElem = document.documentElement;
     if (doEnable) {
-      inlineStyle.set(document.documentElement, {
-        overflowX : enableScrolling.origOverflowX,
-        overflowY : enableScrolling.origOverflowY
-      });
+      inlineStyle.restoreLast(docElem, ['overflow-x', 'overflow-y']);
     }
     else {
-      enableScrolling.origOverflowX = inlineStyle.get(document.documentElement, 'overflowX');
-      enableScrolling.origOverflowY = inlineStyle.get(document.documentElement, 'overflowY');
-      inlineStyle.set(document.documentElement, {
+      inlineStyle.override(docElem, {
         overflowX : 'hidden',
         overflowY : 'hidden'
       });

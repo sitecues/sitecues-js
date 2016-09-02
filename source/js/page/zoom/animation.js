@@ -123,7 +123,7 @@ define(
     // Temporarily indicate that zooming is in progress -- this is used by the sitecues-zoom-form-fix stylesheet
     $body.attr('data-sc-zooming', '');
 
-    inlineStyle.set($body.get(), {
+    inlineStyle.override($body.get(), {
       // Temporarily disable mouse cursor events and CSS behavior, to help with zoom performance
       pointerEvents : 'none'
     });
@@ -240,7 +240,7 @@ define(
   function performJsAnimateZoomOperation() {
     function jsZoomStep() {  // Firefox passes in a weird startZoomTime that can't be compared with Date.now()
       var midAnimationZoom = getMidAnimationZoom();
-      inlineStyle.set($origBody[0], style.getZoomCss(midAnimationZoom));
+      inlineStyle.override($origBody[0], style.getZoomCss(midAnimationZoom));
       if (midAnimationZoom === state.currentTargetZoom && !isSliderActive()) {
         zoomAnimator = requestFrame(finishZoomOperation);
       }
@@ -269,7 +269,7 @@ define(
       };
 
     // Apply the new CSS
-    inlineStyle.set($origBody[0], animationCss);
+    inlineStyle.override($origBody[0], animationCss);
 
     // No zoomStopRequested() received for initial zoom
     $origBody.one(ANIMATION_END_EVENTS, onGlideStopped);
@@ -320,7 +320,7 @@ define(
         });
     }
     else {
-      inlineStyle.set($origBody[0], zoomCss);
+      inlineStyle.override($origBody[0], zoomCss);
     }
     if (thumbChangeListener) {
       thumbChangeListener(state.currentTargetZoom);
@@ -384,7 +384,7 @@ define(
     }
     var styles = style.getZoomCss(state.currentTargetZoom);
     styles.animation = '';
-    inlineStyle.set($origBody[0], styles);
+    inlineStyle.override($origBody[0], styles);
     finishZoomOperation();
   }
 
@@ -400,7 +400,7 @@ define(
 
     if (elementDotAnimatePlayer) {
       // Can't leave animation player around, as it will prevent future animations
-      inlineStyle.set($origBody[0], style.getZoomCss(state.currentTargetZoom));
+      inlineStyle.override($origBody[0], style.getZoomCss(state.currentTargetZoom));
       elementDotAnimatePlayer.onfinish = null;
       elementDotAnimatePlayer.cancel();
     }
@@ -420,7 +420,7 @@ define(
     scrollbars.onBodyRectChange();
 
     // Restore mouse cursor events and CSS behavior
-    inlineStyle.set($body.get(), {
+    inlineStyle.override($body.get(), {
       pointerEvents : ''
     });
 
@@ -514,7 +514,7 @@ define(
 
   function freezeZoom() {
     state.currentTargetZoom = getActualZoom();
-    inlineStyle.set($origBody[0], style.getZoomCss(state.currentTargetZoom));
+    inlineStyle.override($origBody[0], style.getZoomCss(state.currentTargetZoom));
     if (elementDotAnimatePlayer) {
       elementDotAnimatePlayer.onfinish = null;
       elementDotAnimatePlayer.cancel();
@@ -555,7 +555,7 @@ define(
     zoomAnimator = requestFrame(function () {
       // Stop the key-frame animation at the current zoom level
       // Yes, it's crazy, but this sequence helps the zoom stop where it is supposed to, and not jump back a little
-      inlineStyle.set($origBody[0], {
+      inlineStyle.override($origBody[0], {
         animationPlayState: 'paused'
       });
       zoomAnimator = requestFrame(function() {

@@ -111,7 +111,7 @@ define(
       // Clear filter
       styles[filterProperty] = savedFilter || '';
     }
-    inlineStyle.set($img.get(), styles);
+    inlineStyle.override($img.get(), styles);
   }
 
   // Invert image via our reversal proxy web service
@@ -191,7 +191,7 @@ define(
   function getFilterProperty() {
     var
       div = document.createElement('div'),
-      divStyle = inlineStyle.get(div);
+      divStyle = inlineStyle(div);
     divStyle.filter = 'invert(1)';
     return divStyle.filter ? 'filter' : platform.cssPrefix + 'filter';
   }

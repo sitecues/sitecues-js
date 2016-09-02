@@ -126,7 +126,7 @@ define(
       fixit = true;
 
       allHLBChildren.each(function () {
-        inlineStyle.get(this).maxWidth = getChildWidth(this, $hlb) + 'px';
+        inlineStyle(this).maxWidth = getChildWidth(this, $hlb) + 'px';
       });
 
     }
@@ -155,7 +155,7 @@ define(
         // Performing this check because http://www.nvblindchildren.org/give.html top navigation..
         childRect = this.getBoundingClientRect();
         if (childRect.left < hlbRect.left || childRect.right + scrollDiff > hlbRect.right) {
-          inlineStyle.get(this).maxWidth = (parseFloat(getComputedStyle(this).maxWidth) - scrollDiff) + 'px';
+          inlineStyle(this).maxWidth = (parseFloat(getComputedStyle(this).maxWidth) - scrollDiff) + 'px';
         }
       });
 
@@ -282,7 +282,7 @@ define(
       }
 
       // 'ch' units are equal to the width of the "0" character
-      inlineStyle.get($hlb[0]).maxWidth = characterWidthLimit + 'ch';
+      inlineStyle($hlb[0]).maxWidth = characterWidthLimit + 'ch';
     }
 
   }
@@ -292,19 +292,18 @@ define(
    * @param  {[jQuery element]} $hlb [HLB]
    */
   function mitigateVerticalScroll($hlb) {
-
+    var hlb = $hlb[0];
     // If the HLB has a vertical scrollbar and has a height less than the safe zone height
-    if (common.hasVertScroll($hlb[0]) &&
+    if (common.hasVertScroll(hlb) &&
         scaleRectFromCenter($hlb).height < hlbSafeArea.getSafeZoneBoundingBox().height) {
 
       // Set to the scroll height minus 4 (half of the padding)
       // It is necessary to subtract the padding because scrollHeight includes padding.
-      inlineStyle.get($hlb[0]).height = ($hlb[0].scrollHeight - parseInt(getComputedStyle($hlb[0]).paddingBottom)) + 'px';
+      inlineStyle(hlb).height = (hlb.scrollHeight - parseInt(getComputedStyle(hlb).paddingBottom)) + 'px';
       // Now that we have set the height of the cloned element to the height of the scroll height...
       // we need to test that the element's height does not exceed the height of the safe area.
       constrainHeightToSafeArea($hlb);
     }
-
   }
 
   /**
@@ -346,6 +345,7 @@ define(
   function constrainHeightToSafeArea($hlb) {
 
     var hlb            = $hlb[0],
+        hlbStyle       = inlineStyle(hlb),
         originalHeight = scaleRectFromCenter($hlb).height,
         safeZoneHeight = hlbSafeArea.getSafeZoneBoundingBox().height;
 
@@ -353,7 +353,7 @@ define(
     if (originalHeight > safeZoneHeight) {
 
       // height is now the "safe zone" height, minus the padding/border
-      inlineStyle.get(hlb).height = ((safeZoneHeight / getFinalScale($hlb) / getInheritedZoom($hlb)) -
+      hlbStyle.height = ((safeZoneHeight / getFinalScale($hlb) / getInheritedZoom($hlb)) -
           (hlbStyling.defaultBorder +
             hlbStyling.defaultBorder +
             parseInt($hlb.css('paddingTop')) +
@@ -365,7 +365,7 @@ define(
       if (isVisualMedia(hlb)) {
 
         // We need to recalculate the bounding client rect of the HLB element, because we just changed it.
-        inlineStyle.get(hlb).width = (hlb.getBoundingClientRect().width / getInheritedZoom($hlb) *
+        hlbStyle.width = (hlb.getBoundingClientRect().width / getInheritedZoom($hlb) *
           (safeZoneHeight / originalHeight)) + 'px';
       }
     }
@@ -379,6 +379,7 @@ define(
   function constrainWidthToSafeArea($hlb) {
 
     var hlb           = $hlb[0],
+        hlbStyle      = inlineStyle(hlb),
         originalWidth = scaleRectFromCenter($hlb).width,
         safeZoneWidth = hlbSafeArea.getSafeZoneBoundingBox().width;
 
@@ -386,14 +387,14 @@ define(
     if (originalWidth > safeZoneWidth) {
 
       // width is now the "safe zone" width, minus the padding/border
-      inlineStyle.get(hlb).width = ((safeZoneWidth / getFinalScale($hlb) / getInheritedZoom($hlb)) -
+      hlbStyle.width = ((safeZoneWidth / getFinalScale($hlb) / getInheritedZoom($hlb)) -
         (hlbStyling.defaultBorder + hlbStyling.defaultPadding + getExtraLeftPadding($hlb) / 2) * 2) + 'px';
 
       // Keep aspect ratio if HLB is an image
       if (isVisualMedia(hlb)) {
 
         // We need to recalculate the bounding client rect of the HLB element, because we just changed it.
-        inlineStyle.get(hlb).height = (hlb.getBoundingClientRect().height / getInheritedZoom($hlb) *
+        hlbStyle.height = (hlb.getBoundingClientRect().height / getInheritedZoom($hlb) *
           (safeZoneWidth / originalWidth)) + 'px';
       }
     }
@@ -413,7 +414,7 @@ define(
     inlineStyle.set($hlb[0], {
       width  : width, //Preserve dimensional ratio
       height : height //Preserve dimensional ratio
-    }, { doProxy : false });
+    });
 
     // This fixes the HLB being too wide or tall (lots of whitespace) for www.faast.org/news
     // when HLBing "News" header.  Because we copy computedStyles, we sometimes get an HLB
@@ -422,7 +423,7 @@ define(
     // TODO: cache descendants because we use it alot
     inlineStyle.set($hlb.find('*').get(), {
       maxWidth : width
-    }, { doProxy : false });
+    });
   }
 
   /**
@@ -453,7 +454,7 @@ define(
     var hlb = $hlb[0];
 
     if (common.hasVertScroll(hlb)) {
-      inlineStyle.get(hlb).overflowY = 'scroll';
+      inlineStyle(hlb).overflowY = 'scroll';
       // Adding a vertical scroll may sometimes make content overflow the width
       fixOverflowWidth($hlb);
     }
@@ -477,7 +478,7 @@ define(
       inlineStyle.set(hlbElement, {
         'width'    : hlbElement.scrollWidth + hlbStyling.defaultPadding + 'px',
         'maxWidth' : 'none'
-      }, { doProxy : false });
+      });
 
       // Again, we can't be positive that the increase in width does not overflow the safe area.
       constrainWidthToSafeArea($hlb);
@@ -508,7 +509,7 @@ define(
         originalHLBTopPadding  = parseFloat($hlb.css('paddingTop'));
 
     $hlb.find('*').each(function () {
-
+      var thisStyle = inlineStyle(this);
       // These elements to not make sense to check because their
       // bounding rects are not consistent with their visual position
       if (!$(this).is('br, option') &&
@@ -518,9 +519,9 @@ define(
         childBoundingRect  = this.getBoundingClientRect();
         childLeft          = childBoundingRect.left;
         childTop           = childBoundingRect.top;
-        hasBackgroundImage = inlineStyle.get(this, 'backgroundImage') !== 'none';
-        paddingLeft        = hasBackgroundImage ? 0 : parseFloat(inlineStyle.get(this, 'paddingLeft'));
-        paddingTop         = hasBackgroundImage ? 0 : parseFloat(inlineStyle.get(this, 'paddingTop'));
+        hasBackgroundImage = thisStyle.backgroundImage !== 'none';
+        paddingLeft        = hasBackgroundImage ? 0 : parseFloat(thisStyle.paddingLeft);
+        paddingTop         = hasBackgroundImage ? 0 : parseFloat(thisStyle.paddingTop);
 
         if (childLeft + paddingLeft < hlbLeft && hlbLeft - childLeft - paddingLeft > extraLeft) {
           if (SC_DEV) {
@@ -548,7 +549,7 @@ define(
           console.log('%cSPECIAL CASE: Reset HLB width to use padding for width...',  'background:orange;');
         }
 
-        inlineStyle.get($hlb[0]).width = (initialHLBRect.width / getPageZoom()  - extraLeft) + 'px';
+        inlineStyle($hlb[0]).width = (initialHLBRect.width / getPageZoom()  - extraLeft) + 'px';
 
         fixOverflowWidth($hlb);
       }
@@ -557,7 +558,7 @@ define(
     inlineStyle.set($hlb[0], {
       'paddingTop' : extraTop  ? originalHLBTopPadding  + extraTop  + hlbStyling.defaultPadding + hlbStyling.defaultBorder : originalHLBTopPadding,
       'paddingLeft': extraLeft ? originalHLBLeftPadding + extraLeft + hlbStyling.defaultPadding + hlbStyling.defaultBorder : originalHLBLeftPadding
-    }, { doProxy : false });
+    });
   }
 
   //////////////////////////
@@ -689,7 +690,7 @@ define(
     hlbStyles[platform.transformProperty] = 'scale(' + startAnimationZoom + ') ' + translateCSS;
     hlbStyles[platform.transformOriginProperty] = originCSS;
 
-    inlineStyle.set(hlb, hlbStyles, { doProxy : false });
+    inlineStyle.set(hlb, hlbStyles);
   }
 
   return {
