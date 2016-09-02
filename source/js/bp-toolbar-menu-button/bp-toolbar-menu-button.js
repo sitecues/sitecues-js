@@ -66,11 +66,8 @@ define([
   }
 
   function onBlur() {
-    var focusedElement = document.activeElement;
-    if (!menuButtonElement.contains(focusedElement)) {
-      clearTimeout(hideTimeout);
-      requestOpen(false);
-    }
+    clearTimeout(hideTimeout);
+    requestOpen(false);
   }
 
   function init(toolbarElement) {
@@ -118,10 +115,10 @@ define([
       nativeFn.setTimeout(onBlur, 0);  // Wait so that document.activeElement is properly updated
     });
     domEvents.on(menuButtonElement, 'keydown', function(event) {
-      if (!isExpanded()) {
+      if (event.target === menuButtonElement) {
         var keyCode = event.keyCode;
         if (keyCode === KEY_CODES.ENTER || keyCode === KEY_CODES.SPACE_KEY || keyCode === KEY_CODES.DOWN) {
-          toggle();
+          requestOpen(true);
         }
       }
     });

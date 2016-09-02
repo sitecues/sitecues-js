@@ -58,7 +58,6 @@ define([
 
     // Specify menu item element to focus.
     // If none specified, first menu item will receive focus
-    // TODO does not yet handle secondary menu option that slides over (Hide)
     function focusAdjacentVisibleItem(startElement, direction) {
       var nextProp = direction === 1 ? 'nextElementSibling' : 'previousElementSibling',
         wrapAroundProp = direction === 1 ? 'firstElementChild' : 'lastElementChild',
