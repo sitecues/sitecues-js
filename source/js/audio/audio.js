@@ -199,6 +199,12 @@ define(
       return locale.swapToPreferredRegion(contentLocale);
     }
 
+    // Get this first, because Google translate overwrites all text in the document, but not lang attributes
+    var translationLocale = locale.getTranslationLocale();
+    if (translationLocale) {
+      return toPreferredRegion(translationLocale);
+    }
+
     var node = optionalStartNode || document.body;
 
     if (node.nodeType !== node.ELEMENT_NODE) {
