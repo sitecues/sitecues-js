@@ -5,12 +5,16 @@
 define([
     'core/metric',
     'core/constants',
+    'core/bp/constants',
     'bp-toolbar-menu/bp-toolbar-view',
+    'core/dom-events',
     'core/conf/user/manager'
   ],
   function(metric,
            constants,
+           bpConstants,
            bpToolbarView,
+           domEvents,
            conf) {
 
     function hideMenu() {
@@ -21,6 +25,24 @@ define([
 
     function whatIsThis() {
       bpToolbarView.enableBlurb('what-is');
+
+      function showTips() {
+        console.log('hi');
+        require(['core/bp/controller/expand-controller'], function (expandController) {
+          expandController.expandPanel();
+          setTimeout(function() {
+            document.getElementById(bpConstants.MORE_BUTTON_CONTAINER_ID).click();
+          });
+        });
+
+      }
+
+      if (!whatIsThis.isInitialized) {
+        whatIsThis.isInitialized = true;
+        setTimeout(function() {
+          enableButtonActivation('scp-toolbar-what-is', showTips);
+        }, 100);
+      }
     }
 
     function share() {
@@ -67,6 +89,17 @@ define([
 
       document.addEventListener('keydown', checkF8);
       bpToolbarView.enableBlurb('unhide');
+    }
+
+    function enableButtonActivation(id, activateFn) {
+      var blurb = document.getElementById(id);
+      domEvents.on(blurb, 'click', activateFn);
+      domEvents.on(blurb, 'keydown', function(event) {
+        if (event.keyCode === constants.KEY_CODE.ENTER ||
+          event.keyCode === constants.KEY_CODE.SPACE) {
+          activateFn();
+        }
+      });
     }
 
     function activateFeatureById(id, hasFocus) {
