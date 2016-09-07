@@ -6,8 +6,8 @@
 *
 * This is important for a couple reasons:
  A complete reset of Sitecues should restore all the original styles. The problem with our past solution, caching an element's style value before setting
- our own style, is that it doesn't allow for dynamic re-setting of the style during the lifetime of the document, because we will overwrite the updated style
- with our cached value.
+ our own style, is that it doesn't allow for dynamic re-setting of the style during the lifetime of the document, so we end up overwriting
+ the updated style with our cached value.
 
  Even without a complete reset, we frequently want to restore individual elements to their intended state for certain operations.
  For example zoom resets the transform and width of the body element to an empty string when it recomputes the original body dimensions,
@@ -33,6 +33,9 @@ define(
       assignmentDictionary, assignmentRecords,
       lastStyleMap, intendedStyleMap,
       updateTimer, styleParser,
+      // Arbitrarily long timeout between updating the intended style.
+      // This isn't an especially well tuned number, we just don't need it to update very often
+      UPDATE_TIMEOUT = 300,
       cssNumbers = {
         "animation-iteration-count" : true,
         "column-count"              : true,
@@ -209,7 +212,7 @@ define(
     if (!updateTimer) {
       updateTimer = nativeFn.setTimeout(function () {
         updateIntendedStyles();
-      }, 300);
+      }, UPDATE_TIMEOUT);
     }
   }
 
@@ -333,6 +336,8 @@ define(
     /*jshint validthis: false */
   }
 
+  // This inserts a proxy to catch intended style changes set by other scripts, allowing those intended
+  // styles to be re-applied after Sitecues styles are removed.
   function insertStyleProxy(element) {
     var proxy = proxyMap.get(element);
 
