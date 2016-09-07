@@ -217,6 +217,8 @@ define(
       viewInfo.badgeLeft = Math.round(rect.left - window.pageXOffset);
     }
 
+    viewInfo.sensitivity = expandController.getSensitivity();
+
     return viewInfo;
   }
 
