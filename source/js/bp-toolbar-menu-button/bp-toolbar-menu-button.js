@@ -109,7 +109,7 @@ define([
       }
     });
     domEvents.on(menuButtonElement, 'mouseenter', function() {
-      clearTimeout(hideTimeout);
+        clearTimeout(hideTimeout);
       requestOpen(true);
     });
     domEvents.on(toolbarElement, 'mouseleave', function(event) {
