@@ -15,7 +15,7 @@ define(
     var basis = SC_EXTENSION ? getRawScriptUrl() : sitecues.require.toUrl(''),
       unsecureBaseUrl = basis.substring(0, basis.lastIndexOf('/js/') + 1);
 
-    return enforceHttps(unsecureBaseUrl);
+    return SC_EXTENSION ? unsecureBaseUrl : enforceHttps(unsecureBaseUrl);
   }
 
   // Change http:// or protocol-relative (just //) urls to use https
@@ -41,6 +41,9 @@ define(
   // URL string for sitecues.js
   // Enforces https so that all the resources we fetch and origin checking also uses https
   function getRawScriptUrl() {
+    if (SC_EXTENSION) {
+      return site.get('scriptUrl');
+    }
     return enforceHttps(site.get('scriptUrl') || site.get('script_url'));
   }
 

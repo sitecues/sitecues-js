@@ -25,10 +25,11 @@ var config = require('../build-config.js'),
       // In runtime config, via definePrim : 'Promise' to allow use of alameda's built-in Prim library
       'Promise': 'empty:',
       // DIFFERENT in the extension
+      'core/ab-test/ab-test': '../../extension/source/js/overrides/ab-test',
       'core/conf/user/storage-backup': '../../extension/source/js/overrides/storage-backup',
+      'core/errors': '../../extension/source/js/overrides/errors',
       'core/data-map': config.tmpDir + '/data-map',
       // UNUSED in the extension
-      'core/errors': 'empty:',
       'core/bp/badge/page-badge': 'empty:',
       'core/bp/badge/palette': 'empty:',
       'bp-img-placeholder/bp-img-placeholder/': 'empty:',
