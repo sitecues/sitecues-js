@@ -29,18 +29,16 @@ define([
       function showTips() {
         require(['core/bp/controller/expand-controller'], function (expandController) {
           expandController.expandPanel();
-          setTimeout(function() {
-            document.getElementById(bpConstants.MORE_BUTTON_CONTAINER_ID).click();
-          });
+          // nativeFn.setTimeout(function() {
+          //   document.getElementById(bpConstants.MORE_BUTTON_CONTAINER_ID).click();
+          // });
         });
 
       }
 
       if (!whatIsThis.isInitialized) {
         whatIsThis.isInitialized = true;
-        setTimeout(function() {
-          enableButtonActivation('scp-blurb-what-is', showTips);
-        }, 100);
+        enableButtonActivation('scp-blurb-what-is', showTips);
       }
     }
 
