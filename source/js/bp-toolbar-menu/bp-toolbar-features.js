@@ -73,18 +73,13 @@ define([
     // }
     //
     function turnOff() {
-      if (conf.isSitecuesUser()) {
-        require(['page/reset/reset'], function(reset) {
-          reset.init();
-          reset.resetAll();
+      require(['page/reset/reset'], function(reset) {
+        reset.init();
+        reset.resetAll();
 
-          bpToolbarView.enableBlurb('hide');
-          enableActivation('scp-blurb-hide-button', hide);
-        });
-      }
-      else {
-        hide();
-      }
+        bpToolbarView.enableBlurb('hide');
+        enableActivation('scp-blurb-hide-button', hide);
+      });
     }
 
     function hide() {

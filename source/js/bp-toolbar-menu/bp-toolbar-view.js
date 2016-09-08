@@ -11,10 +11,6 @@ define([
       origClasses,
       closeDelay;
 
-    function showHideOption() {
-      toggleClass('scp-show-hide', true);
-    }
-
     function toggleClass(name, doForce) {
       var classList = menuElement.classList;
       if (doForce) {
@@ -96,7 +92,6 @@ define([
 
     return {
       reset: reset,
-      showHideOption: showHideOption,
       enableBlurb: enableBlurb,
       enableFocus: enableFocus,
       init: init

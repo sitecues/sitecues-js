@@ -37,9 +37,6 @@ define([
         events.emit('bp/did-toggle-menu', doOpen);
         if (doOpen) {
           bpToolbarView.reset();
-          if (!conf.isSitecuesUser()) {
-            bpToolbarView.showHideOption();
-          }
           new metric.OptionMenuOpen().send();
         }
         var doFocusMenuItem = doOpen && isMenuButtonFocused();
