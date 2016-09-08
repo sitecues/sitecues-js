@@ -8,6 +8,7 @@ define([
     'core/bp/constants',
     'bp-toolbar-menu/bp-toolbar-view',
     'core/dom-events',
+    'core/native-functions',
     'core/conf/user/manager'
   ],
   function(metric,
@@ -15,6 +16,7 @@ define([
            bpConstants,
            bpToolbarView,
            domEvents,
+           nativeFn,
            conf) {
 
     function hideMenu() {
@@ -29,9 +31,9 @@ define([
       function showTips() {
         require(['core/bp/controller/expand-controller'], function (expandController) {
           expandController.expandPanel();
-          // nativeFn.setTimeout(function() {
-          //   document.getElementById(bpConstants.MORE_BUTTON_CONTAINER_ID).click();
-          // });
+          nativeFn.setTimeout(function() {
+            document.getElementById(bpConstants.MORE_BUTTON_CONTAINER_ID).click();
+          });
         });
 
       }
