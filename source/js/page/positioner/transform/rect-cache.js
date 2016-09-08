@@ -74,8 +74,9 @@ define(
     }
 
     if (rect) {
-
       if (isFixed) {
+        // If the rectangle is fixed, we don't need to update its location coordinates on scroll
+        // because fixed elements don't move on scroll
         return rect;
       }
 
@@ -125,6 +126,11 @@ define(
     }
 
     styleLock.init(function () {
+      styleListener.registerPropertyMutationHandler(element, 'top', function () {
+        clearCache.call(this);
+        handler.call(this);
+      });
+
       // We don't want to lock width or height because they are styles that a commonly animated, so a lock is impractical
       styleListener.registerPropertyMutationHandler(element, 'width', function () {
         /*jshint validthis: true */

@@ -129,18 +129,21 @@ define(
       implantNodeStructure(insertionTarget, parent, sibling);
     }
 
+
     function graftToOriginalBody(opts) {
       opts.hostBody = originalBody;
       graftToBody(opts);
-      disconnectRejectionListener(opts.root);
+      //disconnectRejectionListener(opts.root);
     }
 
     function graftToAuxiliaryBody(opts) {
       opts.hostBody = clone.getAuxiliaryBody();
       graftToBody(opts);
-      if (opts.handleTransplantRejection) {
-        listenForTransplantRejection(opts.root);
-      }
+
+      //This was part of an experiment for Pipeline (potential client) that isn't necessary anywhere else and needs additional testing
+      //if (opts.handleTransplantRejection) {
+      //  listenForTransplantRejection(opts.root);
+      //}
     }
 
     function init() {
