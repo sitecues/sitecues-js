@@ -99,10 +99,8 @@ define(
     return sensitivity;
   }
 
-  function getHoverDelayNoMove(isInBadge) {
-    var baseDelay = isInBadge? BP_CONST.HOVER_DELAY_NOMOVE_BADGE : BP_CONST.HOVER_DELAY_NOMOVE_TOOLBAR;
-
-    return baseDelay / sensitivity;
+  function getHoverDelayNoMove() {
+    return BP_CONST.HOVER_DELAY_NOMOVE_BADGE / sensitivity;
   }
 
   function getHoverDelayStayInside() {
