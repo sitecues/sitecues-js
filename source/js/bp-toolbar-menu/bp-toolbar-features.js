@@ -8,16 +8,14 @@ define([
     'bp-toolbar-menu/bp-toolbar-view',
     'core/events',
     'core/dom-events',
-    'core/native-functions',
-    'core/conf/user/manager'
+    'core/native-functions'
   ],
   function(metric,
            constants,
            bpToolbarView,
            events,
            domEvents,
-           nativeFn,
-           conf) {
+           nativeFn) {
 
     var EXTRA_DELAY_BETWEEN_VIEWS = 800;
 

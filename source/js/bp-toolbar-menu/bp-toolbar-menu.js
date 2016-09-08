@@ -12,7 +12,6 @@ define([
     'core/metric',
     'core/events',
     'core/dom-events',
-    'core/conf/user/manager',
     'core/native-functions'
   ],
   function(bpToolbarFeatures,
@@ -24,7 +23,6 @@ define([
            metric,
            events,
            domEvents,
-           conf,
            nativeFn) {
 
     var menuButtonElement,
