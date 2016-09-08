@@ -20,7 +20,8 @@ define([
     hideTimeout,
     bpToolbarMenu,
     KEY_CODES = CORE_CONST.KEY_CODE,
-    WAIT_BEFORE_CLOSE_MS = 300;
+    WAIT_BEFORE_CLOSE_MS = 300,
+    lastOpenTime;
 
   function insertSheet(name) {
     var cssLink = document.createElement('link'),
@@ -46,7 +47,14 @@ define([
         // Don't close while interacting with keyboard
         toggle();
       }
+      if (willOpen) {
+        lastOpenTime = getCurrentTime();
+      }
     }
+  }
+
+  function getCurrentTime() {
+    return new Date().getTime();
   }
 
   function toggle() {
@@ -93,8 +101,11 @@ define([
 
     // Interactions
     domEvents.on(menuButtonElement, 'click', function(event) {
-      if (event.target === menuButtonElement) {
-        toggle(); // Don't necessarily
+      if (event.target !== menuButtonElement) {
+        return;
+      }
+      if (!isExpanded() || getCurrentTime() - lastOpenTime > 1000) {
+        toggle();
       }
     });
     domEvents.on(menuButtonElement, 'mouseenter', function() {
