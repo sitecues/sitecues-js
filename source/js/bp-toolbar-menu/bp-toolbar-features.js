@@ -88,6 +88,8 @@ define([
     }
 
     function hide() {
+      var sitecuesToolbar = document.getElementById('sitecues-badge');
+
       function unhide() {
         document.removeEventListener('keydown', checkF8);
         localStorage.removeItem('sitecues-disabled');
@@ -106,7 +108,6 @@ define([
       }
 
       // Animate toolbar hiding
-      var sitecuesToolbar = document.getElementById('sitecues-badge');
       sitecuesToolbar.style.transition = 'top 500ms linear';
       requestAnimationFrame(function() {
         sitecuesToolbar.style.top = '-40px';
