@@ -166,6 +166,32 @@ define([
     return boundedResult;
   }
 
+  function processMouseMove(x, y, t) {
+    // Add move to queue
+    var currMove = { x: x, y: y, t: t },
+      numMoves = mousePositionsQueue.length,
+      lastMove = numMoves > 0 && mousePositionsQueue[numMoves - 1];
+
+    mousePositionsQueue.push(currMove);
+
+    var
+      lastDistance = lastMove ? getDistanceBetweenMoves(currMove, lastMove) : 0,
+      shakeVigor = getShakeVigor(numMoves, lastDistance),
+      shakeVigorPercent;
+
+    if (shakeVigor !== lastShakeVigor) {
+      shakeVigorPercent = Math.round(100 * shakeVigor / MAX_SHAKE_VIGOR);
+      fireNotifications(shakeVigorPercent);
+      lastShakeVigor = shakeVigor;
+      lastShakeVigorPercent = shakeVigorPercent;
+    }
+
+    // Shift oldest item out of moves queue
+    if (lastMove && numMoves > MOUSE_POSITIONS_ARRAY_SIZE) {
+      mousePositionsQueue.shift();
+    }
+  }
+
   function onMouseMove(evt) {
     var x = evt.screenX,
       y = evt.screenY,
@@ -173,38 +199,13 @@ define([
       numMoves = mousePositionsQueue.length,
       lastMove = numMoves > 0 && mousePositionsQueue[numMoves - 1];
 
-    if (lastMove) {
-      if (t - lastMove.t > MAX_TIME_BETWEEN_MOVES) {
-        mousePositionsQueue = []; // Start from scratch
-        numMoves = 0;
-        lastMove = null;
-      }
+    if (lastMove && t - lastMove.t > MAX_TIME_BETWEEN_MOVES) {
+      mousePositionsQueue = []; // Start from scratch
     }
 
-    function processMouseMove() {
-      // Add move to queue
-      var currMove = { x: x, y: y, t: t };
-      mousePositionsQueue.push(currMove);
-
-      var
-        lastDistance = lastMove ? getDistanceBetweenMoves(currMove, lastMove) : 0,
-        shakeVigor = getShakeVigor(numMoves, lastDistance),
-        shakeVigorPercent;
-
-      if (shakeVigor !== lastShakeVigor) {
-        shakeVigorPercent = Math.round(100 * shakeVigor / MAX_SHAKE_VIGOR);
-        fireNotifications(shakeVigorPercent);
-        lastShakeVigor = shakeVigor;
-        lastShakeVigorPercent = shakeVigorPercent;
-      }
-
-      // Shift oldest item out of moves queue
-      if (lastMove && numMoves > MOUSE_POSITIONS_ARRAY_SIZE) {
-        mousePositionsQueue.shift();
-      }
-    }
-
-    nativeFn.setTimeout(processMouseMove, 0);
+    nativeFn.setTimeout(function() {
+      processMouseMove(x, y, t);
+    }, 0);
   }
 
   // Rough approximation for faster math
