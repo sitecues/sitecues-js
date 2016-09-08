@@ -33,6 +33,15 @@ define([
   }
 
   function init() {
+    function insertOptionsMenu() {
+      if (site.get('hasOptionsMenu')) {
+        // Can do this async -- no need to hold up the rest of our initialization
+        require(['bp-toolbar-menu-button/bp-toolbar-menu-button'], function (bpToolbarMenuButton) {
+          bpToolbarMenuButton.init(toolbarElement);
+        });
+      }
+    }
+
     var toolbarElement = document.createElement('sc'),
       docElem = document.documentElement;
 
@@ -44,18 +53,12 @@ define([
     state.set('isPageBadge', false);
     state.set('isToolbarBadge', true);
 
-    if (site.get('hasOptionsMenu')) {
-      // Can do this async -- no need to hold up the rest of our initialization
-      require(['bp-toolbar-menu-button/bp-toolbar-menu-button'], function(bpToolbarMenuButton) {
-        bpToolbarMenuButton.init(toolbarElement);
-      });
-    }
-
     return palette.init(null)
       .then(function() {
         baseView.init(toolbarElement);
       })
-      .then(adjustFixedElementsBelowToolbar);
+      .then(adjustFixedElementsBelowToolbar)
+      .then(insertOptionsMenu);
   }
 
   return {
