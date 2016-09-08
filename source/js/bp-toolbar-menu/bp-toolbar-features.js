@@ -5,7 +5,6 @@
 define([
     'core/metric',
     'core/constants',
-    'core/bp/constants',
     'bp-toolbar-menu/bp-toolbar-view',
     'core/events',
     'core/dom-events',
@@ -14,7 +13,6 @@ define([
   ],
   function(metric,
            constants,
-           bpConstants,
            bpToolbarView,
            events,
            domEvents,
@@ -58,9 +56,9 @@ define([
       }
 
       function expandPanel() {
-        require(['core/bp/controller/expand-controller', 'bp-toolbar-menu-button/bp-toolbar-menu-button'],
-          function (expandController, bpToolbarMenuButton) {
-            bpToolbarMenuButton.toggle();
+        hideMenu();
+        require(['core/bp/controller/expand-controller'],
+          function (expandController) {
             expandController.init();
             expandController.expandPanel();
           });
@@ -70,10 +68,10 @@ define([
       enableActivation('scp-blurb-slider-bar', expandPanel);
     }
 
-    function share() {
-      hideMenu();
-    }
-
+    // function share() {
+    //   hideMenu();
+    // }
+    //
     function turnOff() {
       if (conf.isSitecuesUser()) {
         require(['page/reset/reset'], function(reset) {
@@ -135,7 +133,7 @@ define([
     function activateFeatureById(id, hasFocus) {
       var ALL_FEATURES = {
         'scp-toolbar-what-is': whatIsThis,
-        'scp-toolbar-share': share,
+        // 'scp-toolbar-share': share,
         'scp-toolbar-turn-off' : turnOff
       };
 
