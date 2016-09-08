@@ -139,3 +139,33 @@ sc-blurb {
 .scp-blurb-unhide > #scp-blurb-unhide {
   display: block;
 }
+
+
+/* Button */
+sc-blurb-button {
+  display: inline-block;
+  font-weight: 600;
+  background-color: #447AC4;
+  color: white;
+  border: 2px solid beige;
+  border-radius: 5px;
+  padding: 9px 20px;
+  transition: transform .5s;
+  position: relative;
+}
+
+sc-blurb-button:hover {
+  transform: scale(1.2);
+}
+
+/* Images */
+#scp-blurb-slider-bar {
+  display: inline-block;
+  text-align: center;
+  width: 180px;
+  height: 51px;
+  background: url('../images/bp-toolbar-menu/slider-bar.svg') no-repeat;
+}
+
+  /*background: url('../images/tips/slider-thumb-demo.svg') no-repeat;*/
+/*transform: translateX(90px) scale(1.6);*/

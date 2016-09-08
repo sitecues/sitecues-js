@@ -7,6 +7,7 @@ define([
     'core/constants',
     'core/bp/constants',
     'bp-toolbar-menu/bp-toolbar-view',
+    'core/events',
     'core/dom-events',
     'core/native-functions',
     'core/conf/user/manager'
@@ -15,9 +16,12 @@ define([
            constants,
            bpConstants,
            bpToolbarView,
+           events,
            domEvents,
            nativeFn,
            conf) {
+
+    var EXTRA_DELAY_BETWEEN_VIEWS = 800;
 
     function hideMenu() {
       require(['bp-toolbar-menu-button/bp-toolbar-menu-button'], function(bpToolbarMenuButton) {
@@ -29,19 +33,41 @@ define([
       bpToolbarView.enableBlurb('what-is');
 
       function showTips() {
-        require(['core/bp/controller/expand-controller'], function (expandController) {
-          expandController.expandPanel();
+        events.off('bp/did-open-subpanel', showTips);
+        require(['bp-secondary/bp-secondary'], function (bpSecondary) {
           nativeFn.setTimeout(function() {
-            document.getElementById(bpConstants.MORE_BUTTON_CONTAINER_ID).click();
-          });
+            bpSecondary.toggleFeature('tips');
+          }, EXTRA_DELAY_BETWEEN_VIEWS);
         });
-
       }
 
-      if (!whatIsThis.isInitialized) {
-        whatIsThis.isInitialized = true;
-        enableButtonActivation('scp-blurb-what-is', showTips);
+      function showSecondaryPanel() {
+        events.off('bp/did-expand', showSecondaryPanel);
+        require(['bp-expanded/view/more-button'], function(moreButton) {
+          moreButton.init();
+          moreButton.show(function() {
+            nativeFn.setTimeout(moreButton.activate, EXTRA_DELAY_BETWEEN_VIEWS);
+          });
+          events.on('bp/did-open-subpanel', showTips);
+        });
       }
+
+      function beginTipsTour() {
+        events.on('bp/did-expand', showSecondaryPanel);
+        expandPanel();
+      }
+
+      function expandPanel() {
+        require(['core/bp/controller/expand-controller', 'bp-toolbar-menu-button/bp-toolbar-menu-button'],
+          function (expandController, bpToolbarMenuButton) {
+            bpToolbarMenuButton.toggle();
+            expandController.init();
+            expandController.expandPanel();
+          });
+      }
+
+      enableActivation('scp-blurb-tour-tips', beginTipsTour);
+      enableActivation('scp-blurb-slider-bar', expandPanel);
     }
 
     function share() {
@@ -73,24 +99,29 @@ define([
       // Disable for next time, on this site
       localStorage.setItem('sitecues-disabled', true);
 
+      function unhide() {
+        document.removeEventListener('keydown', checkF8);
+        localStorage.removeItem('sitecues-disabled');
+        sitecuesToolbar.style.top = '';
+        var currentFocus = document.activeElement;
+        if (currentFocus.localName === 'sc-blurb') {
+          currentFocus.blur();
+        }
+      }
+
       function checkF8(event) {
         if (event.keyCode === constants.KEY_CODE.F8) {
           // Reenable Sitecues
-          document.removeEventListener('keydown', checkF8);
-          localStorage.removeItem('sitecues-disabled');
-          sitecuesToolbar.style.top = '';
-          var currentFocus = document.activeElement;
-          if (currentFocus.localName === 'sc-blurb') {
-            currentFocus.blur();
-          }
+          unhide();
         }
       }
 
       document.addEventListener('keydown', checkF8);
       bpToolbarView.enableBlurb('unhide');
+      enableActivation('scp-blurb-unhide', unhide);
     }
 
-    function enableButtonActivation(id, activateFn) {
+    function enableActivation(id, activateFn) {
       var blurb = document.getElementById(id);
       domEvents.on(blurb, 'click', activateFn);
       domEvents.on(blurb, 'keydown', function(event) {
