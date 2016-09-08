@@ -11,13 +11,8 @@ define([
       origClasses,
       closeDelay;
 
-    function showHideOption(doAnimate) {
-      if (doAnimate) {
-        toggleClass('scp-animate-hide', true);
-      }
-      requestAnimationFrame(function() {
-        toggleClass('scp-show-hide', true);
-      });
+    function showHideOption() {
+      toggleClass('scp-show-hide', true);
     }
 
     function toggleClass(name, doForce) {

@@ -82,10 +82,6 @@ sc-toolbar-menuitem:focus,.scp-show-hide sc-toolbar-menuitem:focus > #scp-toolba
   transform: translateX(-100%);
 }
 
-.scp-animate-hide  #scp-toolbar-turn-off {
-  transition: transform 500ms ease-out;
-}
-
 /* Repeated */
 /* TODO combine this with the definition on secondary.css (note that transition rule is missing here) */
 sc-kbd {
