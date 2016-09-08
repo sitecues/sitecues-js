@@ -78,7 +78,8 @@ define([
           reset.init();
           reset.resetAll();
 
-          bpToolbarView.showHideOption(true);
+          bpToolbarView.enableBlurb('hide');
+          enableActivation('scp-blurb-hide-button', hide);
         });
       }
       else {
@@ -87,16 +88,6 @@ define([
     }
 
     function hide() {
-      var sitecuesToolbar = document.getElementById('sitecues-badge');
-
-      sitecuesToolbar.style.transition = 'top 500ms linear';
-      requestAnimationFrame(function() {
-        sitecuesToolbar.style.top = '-40px';
-      });
-
-      // Disable for next time, on this site
-      localStorage.setItem('sitecues-disabled', true);
-
       function unhide() {
         document.removeEventListener('keydown', checkF8);
         localStorage.removeItem('sitecues-disabled');
@@ -114,7 +105,20 @@ define([
         }
       }
 
+      // Animate toolbar hiding
+      var sitecuesToolbar = document.getElementById('sitecues-badge');
+      sitecuesToolbar.style.transition = 'top 500ms linear';
+      requestAnimationFrame(function() {
+        sitecuesToolbar.style.top = '-40px';
+      });
+
+      // Disable for next time, on this site
+      localStorage.setItem('sitecues-disabled', true);
+
+      // F8 can reenable
       document.addEventListener('keydown', checkF8);
+
+      // Show new blurb on how to unhide
       bpToolbarView.enableBlurb('unhide');
       enableActivation('scp-blurb-unhide', unhide);
     }

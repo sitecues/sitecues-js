@@ -3,8 +3,9 @@
  */
 
 define([
+    'core/native-functions'
   ],
-  function() {
+  function(nativeFn) {
 
     var menuElement,
       origClasses,
@@ -35,26 +36,33 @@ define([
     }
 
     function enableBlurb(blurbName) {
-      var origRect = menuElement.getBoundingClientRect(),
+      var BLURB_ANIMATION_MS = 300,
+        origRect = menuElement.getBoundingClientRect(),
         targetRect,
-        blurbElement = document.getElementById('scp-blurb-' + blurbName);
+        blurbElement = document.getElementById('scp-blurb-' + blurbName),
+        oldBlurb = menuElement.getAttribute('data-blurb');
+
+      if (oldBlurb) {
+        toggleClass('scp-blurb-' + oldBlurb, false);
+      }
       toggleClass('scp-blurb-' + blurbName, true);
       toggleClass('scp-blurb', true);
+      menuElement.style.cssText = '';
+      menuElement.setAttribute('data-blurb', blurbName);
 
       // Fix to current screen position -- don't roll up with toolbar as it slides up
       menuElement.style.position = 'fixed';
       menuElement.style.top = origRect.top + 'px';
       menuElement.style.right = (window.innerWidth - origRect.right) + 'px';
-      menuElement.style.minHeight = origRect.height + 'px';
 
-        // Animate from original width:height
+      // Animate from original width:height
       targetRect = menuElement.getBoundingClientRect();
       setSize(origRect);
 
       // Animate to target width:height
       // jshint -W030
       menuElement.offsetHeight; // Ask layout engine to update
-      menuElement.style.transition = 'width 300ms, height 300ms';
+      menuElement.style.transition = 'width ' + BLURB_ANIMATION_MS + 'ms, height ' + BLURB_ANIMATION_MS + 'ms';
       menuElement.offsetHeight; // Ask layout engine to update
       setSize(targetRect);
       toggleClass('scp-blurb-fade-in-text', true);
@@ -68,6 +76,10 @@ define([
       // to ensure that it is read before accidentally disappearing.
       blurbElement.setAttribute('tabindex', '-1');
       blurbElement.focus();
+      blurbElement.removeAttribute('data-blurb-ready');
+      nativeFn.setTimeout(function() {
+        blurbElement.setAttribute('data-blurb-ready', '');
+      }, BLURB_ANIMATION_MS);
     }
 
     function enableFocus(isFocusEnabled) {
@@ -78,6 +90,7 @@ define([
     function reset() {
       menuElement.className = origClasses;
       menuElement.style.cssText = '';
+      menuElement.removeAttribute('data-blurb');
       closeDelay = 0;
     }
 

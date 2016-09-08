@@ -140,6 +140,17 @@ sc-blurb {
   display: block;
 }
 
+.scp-blurb-hide > #scp-blurb-hide {
+  display: block;
+}
+
+/* Focus outline for blurb */
+sc-blurb:focus {
+  outline: 0;
+}
+sc-blurb[data-blurb-ready]:focus {
+  border-bottom: 4px solid rgba(82, 168, 236, 0.8);
+}
 
 /* Button */
 sc-blurb-button {
