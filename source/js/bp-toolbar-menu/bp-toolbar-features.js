@@ -27,7 +27,6 @@ define([
       bpToolbarView.enableBlurb('what-is');
 
       function showTips() {
-        console.log('hi');
         require(['core/bp/controller/expand-controller'], function (expandController) {
           expandController.expandPanel();
           setTimeout(function() {
@@ -40,7 +39,7 @@ define([
       if (!whatIsThis.isInitialized) {
         whatIsThis.isInitialized = true;
         setTimeout(function() {
-          enableButtonActivation('scp-toolbar-what-is', showTips);
+          enableButtonActivation('scp-blurb-what-is', showTips);
         }, 100);
       }
     }
