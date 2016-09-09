@@ -11,13 +11,15 @@ define([
   'core/dom-events',
   'core/shake/constants',
   'core/platform',
-  'core/native-functions'
+  'core/native-functions',
+  'core/shake/badge-glow'
 ], function(metric,
             events,
             domEvents,
             constants,
             platform,
-            nativeFn) {
+            nativeFn,
+            badgeGlow) {
 
   'use strict';
 
@@ -252,10 +254,16 @@ define([
       nativeFn.setTimeout(function() {
         fireShakeVigorMetric(shakeVigorPercent);
       }, 0);
+      fireShakeReachedThreshold(true);
     }
     else if (shakeVigorPercent < METRIC_THRESHOLD_SHAKE_PERCENT_RESET) {
       canFireMetricAgain = true;
+      fireShakeReachedThreshold(false);
     }
+  }
+
+  function fireShakeReachedThreshold(isOn) {
+    sitecues.emit('shake/did-pass-threshold', isOn);
   }
 
   function fireShakeVigorMetric(shakeVigorPercent) {
@@ -288,6 +296,8 @@ define([
   function init() {
     domEvents.on(document, 'mousemove', onMouseMove);
     domEvents.on(document, 'mouseleave', onMouseLeave);
+
+    badgeGlow.init();
   }
 
   return {
