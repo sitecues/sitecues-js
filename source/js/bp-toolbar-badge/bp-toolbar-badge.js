@@ -33,6 +33,9 @@ define([
   }
 
   function init() {
+    var toolbarElement = document.createElement('sc'),
+      docElem = document.documentElement;
+
     function insertOptionsMenu() {
       if (site.get('hasOptionsMenu')) {
         // Can do this async -- no need to hold up the rest of our initialization
@@ -41,9 +44,6 @@ define([
         });
       }
     }
-
-    var toolbarElement = document.createElement('sc'),
-      docElem = document.documentElement;
 
     docElem.setAttribute('data-sitecues-toolbar', ''); // Enable default.css rules
     docElem.appendChild(toolbarElement);
