@@ -1,9 +1,9 @@
 // Alameda configuration
+// Must be inserted before alameda by the build process
 
-/* globals SC_RESOURCE_FOLDER_NAME, -sc_require */
-/* jshint -W098 */
+/* globals SC_RESOURCE_FOLDER_NAME  */
 
-var sc_require = {
+sitecues._require = {
   defaultErrback: function(error) {
     var event = new CustomEvent('SitecuesRequireFailure', {detail: error});
     window.dispatchEvent(event);

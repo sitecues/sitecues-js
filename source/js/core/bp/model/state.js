@@ -7,6 +7,7 @@ define([], function() {
     secondaryPanelTransitionTo: 0,
     scale                   : 1, // How much transform scale used on expanded BP
     isRealSettings          : true, // Are we currently showing the actual settings or fake settings?
+    isFirstBadgeUse         : true, // Is this a first time user?
     secondaryPanelName      : 'button-menu', // 'button-menu', 'tips', 'settings', 'feedback', 'about'
     isSecondaryExpanding    : false, // Is secondary panel currently expanding to accommodate new contents?
     isSecondaryExpanded     : false, // Is secondary panel fully expanded?
@@ -14,7 +15,6 @@ define([], function() {
     isClassicMode           : false, // Use question mark if browser support is weak or site is incompatible with themes
     doSuppressHovers        : false, // Suppress mouse hovers until next mousemove, because browser won't recompute them until then (useful for animations)
     isKeyboardMode          : false, // Show focus in this mode, support tab navigation
-    isOpenedWithHover       : false, // If opened with the hover, then user should be able to close with mouse out
     isOpenedWithScreenReader: false, // If opened with screen reader, be careful of spurious click events outside panel
     isMoreButtonVisible     : false, // Should the more button be shown?
     isPageBadge             : true,  // Is set to false if default badge is inserted
@@ -108,6 +108,10 @@ define([], function() {
     return isPanel() && data.secondaryPanelName === 'button-menu';
   }
 
+  function turnOnRealSettings() {
+    set('isRealSettings', true);    // Always use real settings once expanded
+  }
+
   return {
     get: get,
     set: set,
@@ -120,6 +124,7 @@ define([], function() {
     isShrinking: isShrinking,
     getSecondaryPanelName: getSecondaryPanelName,
     isButtonMenu: isButtonMenu,
+    turnOnRealSettings: turnOnRealSettings,
     getPanelName: getPanelName
   };
 

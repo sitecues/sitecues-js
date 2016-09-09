@@ -86,7 +86,7 @@ define(
 
     // Initialize zoom input info
     state.zoomInput = $.extend({
-      isSlider: false,                  // Slider in panel
+      isSlider: false,                 // Slider in panel
       isSliderDrag: false,             // True if the user drags the slider (as opposed to clicking in it)
       isSliderClick: false,            // True if the user dragged the slider and now stopped
       isLongGlide: false,              // Key or A button held down to glide extra
@@ -94,6 +94,7 @@ define(
       isButtonPress: false,            // Small or large A in panel
       isUnpinch: false,                // Trackpad unpinch
       isCtrlWheel: false,              // Ctrl+mousewheel
+      // isFirstBadgeUse: undefined,     // If first badge use? Not defined if this is not originating from the badge
       fromZoom: state.completedZoom    // Old zoom value
     }, input);
 
@@ -131,13 +132,13 @@ define(
   // Begin an operation to the glide toward the current zoom, if smooth zoom is currently supported.
   // If no smooth zoom, apply an instant zoom change to increase or decrease zoom by a constant amount.
   // If we are zooming with +/- or clicking A/a
-  function beginGlide(targetZoom, event) {
+  function beginGlide(targetZoom, event, inputInfo) {
     if (targetZoom === state.completedZoom) {
       return;
     }
 
     if (!isZoomOperationRunning()) {
-      var input = {};
+      var input = inputInfo || {};
       if (event) {
         if (event.keyCode) {
           // TODO should we differentiate between Enter on A/a vs +/- ?
@@ -430,7 +431,7 @@ define(
           audioCues.playZoomCue(state.completedZoom);
         });
       }
-      if (JSON.stringify(state.zoomInput) === '{}') {
+      if (nativeFn.JSON.stringify(state.zoomInput) === '{}') {
         errors.report(new Error('zoom metric empty details'));
       }
       new metric.ZoomChange(state.zoomInput).send();

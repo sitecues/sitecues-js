@@ -8,17 +8,24 @@ All notable changes to this project will be documented here.
  - **Deprecated** : Planned for removal in the near future.
  - **Removed**    : Disabled or deleted within the source code.
 
-## [Unreleased]
+## [4.2.6] - 2016-08-29
 ### Fixed
- - Only search for flash elements in valid documents
- - When checking whether inserted elements are flash elements, convert the collection to an array before using array specific methods
- - Combo-boxes can now be highlighted
- - Always invert SVG images with CSS
+ - No longer attempt to read text from cross-origin sources
+
+## [4.2.5] - 2016-08-26
+### Fixed
+ - Improve fixed positioning for flash elements. Ignore invalid documents.
+ - Improve performance for inverting SVG images.
+ - Improve debouncing for key-command metrics.
+ - Ensure local TTS errors are always reported.
+ - Background images are added to the Lens
 
 ### Changed
  - Fire panel-clicked metric when Enter or Space used to trigger item in panel
- - More careful about not firing multiple key-command metric for repeated keys across varied systems
- - Badge size, placement and color provided in all metrics
+
+### Added
+ - Add badge size, placement, and color to all metrics.
+ - Combo-boxes can now be highlighted.
 
 ## [4.2.1] - 2016-08-02
 ### Added

@@ -68,7 +68,7 @@ define([
 
   function init() {
     // Badge glow
-    events.on('core/mouseshake', onShake);
+    events.on('shake/did-change', onShake);
     // Badge glow not available while BP is open
     events.on('bp/will-expand', willExpand);
     events.on('bp/did-shrink', didShrink);

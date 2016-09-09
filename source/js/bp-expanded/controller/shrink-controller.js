@@ -59,8 +59,8 @@ define(
 
     // return truthy value if mouseout should cause panel to close
     function canShrinkFromMouseout() {
-      // Only allow close from hover if opened from hover, or mouse was in panel once
-      return state.get('wasMouseInPanel') || isOpenedWithHover();
+      // Only allow close from hover if mouse was in panel once
+      return state.get('wasMouseInPanel');
     }
 
     function winMouseMove(evt) {
@@ -98,9 +98,16 @@ define(
         ancestor = ancestor.parentNode;
       }
 
-      new metric.PanelClick({ target: id, role: role }).send();
+      new metric.PanelClick({
+        target: id,
+        role: role,
+        isFirstBadgeUse: isFirstBadgeUse()
+      }).send();
     }
 
+    function isFirstBadgeUse() {
+      return state.get('isFirstBadgeUse');
+    }
 
     function winMouseDown(evt) {
       if (SC_DEV && isSticky()) {
@@ -163,7 +170,9 @@ define(
       // Finally, begin the shrinking animation.
       view.update();
 
-      new metric.PanelClose().send();
+      new metric.PanelClose({
+        isFirstBadgeUse: isFirstBadgeUse()
+      }).send();
     }
 
     /*
@@ -187,10 +196,6 @@ define(
         }
         elem = elem.parentNode;
       }
-    }
-
-    function isOpenedWithHover() {
-      return state.get('isOpenedWithHover');
     }
 
     function getVisiblePanelRect() {

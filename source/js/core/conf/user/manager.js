@@ -3,7 +3,21 @@
  * properties represent the state of the user session, and are
  * persisted in the user preferences data store.
  */
-define(['Promise', 'core/conf/user/storage', 'core/conf/user/storage-backup' ], function (Promise, storage, storageBackup) {
+define(
+  [
+    'Promise',
+    'core/conf/user/storage',
+    'core/conf/user/storage-backup',
+    'core/native-functions'
+  ],
+  function (
+    Promise,
+    storage,
+    storageBackup,
+    nativeFn
+  ) {
+  'use strict';
+
   // private variables
   var handlers       = {},
       listeners      = {};
@@ -13,7 +27,7 @@ define(['Promise', 'core/conf/user/storage', 'core/conf/user/storage-backup' ], 
   }
 
   function copyFields(obj) {
-    return JSON.parse(JSON.stringify(obj));
+    return nativeFn.JSON.parse(nativeFn.JSON.stringify(obj));
   }
 
   // get preferences value(s)
@@ -45,6 +59,10 @@ define(['Promise', 'core/conf/user/storage', 'core/conf/user/storage-backup' ], 
       // call back if there is value for key (no immediate callback for settings that are not yet defined)
       callback(value);
     }
+  }
+
+  function has(key) {
+    return typeof get(key) !== 'undefined';
   }
 
   // set preferences value (or pass undefined to unset)
@@ -174,6 +192,7 @@ define(['Promise', 'core/conf/user/storage', 'core/conf/user/storage-backup' ], 
     init: init,
     getUserId: getUserId,
     get: get,
+    has: has,
     set: set,
     def: def,
     reset: reset

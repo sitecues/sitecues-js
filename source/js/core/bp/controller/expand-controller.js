@@ -7,9 +7,12 @@ define(
     'core/bp/model/state',
     'core/bp/helper',
     'core/metric',
+    'core/ab-test/ab-test',
     'core/conf/user/manager',
+    'core/conf/site',
     'core/bp/view/view',
     'core/events',
+    'core/dom-events',
     'core/native-functions'
   ],
   function (
@@ -17,29 +20,27 @@ define(
     state,
     helper,
     metric,
+    abTest,
     conf,
+    site,
     view,
     events,
+    domEvents,
     nativeFn
   ) {
 
   // How long we wait before expanding BP
-  var hoverDelayTimer,
+  var hoverIfNoMoveTimer,  // If mouse stays still inside badge, open
+    hoverIfStayInsideTimer,  // If mouse stays inside badge pr toolbar, open
     isInitialized,
     // We ignore the first mouse move when a window becomes active, otherwise badge opens
     // if the mouse happens to be over the badge/toolbar
-    doIgnoreNextMouseMove = true;
+    doIgnoreNextMouseMove = true,
+    DEFAULT_SENSITIVITY = 1,
+    sensitivity; /* How much more or less sensitive is the badge than usual, e.g. 1.5 = 50% more sensitive */
 
   function getBadgeElement() {
     return helper.byId(BP_CONST.BADGE_ID);
-  }
-
-  function isInActiveToolbarArea(evt, badgeRect) {
-    var middleOfBadge = badgeRect.left + badgeRect.width / 2,
-      allowedDistance = BP_CONST.ACTIVE_TOOLBAR_WIDTH / 2;
-
-    return evt.clientX > middleOfBadge - allowedDistance &&
-      evt.clientX < middleOfBadge + allowedDistance;
   }
 
   function isInBadgeArea(evt, badgeRect) {
@@ -47,11 +48,7 @@ define(
       evt.clientY >= badgeRect.top && evt.clientY <= badgeRect.bottom;
   }
 
-  function isInVerticalBadgeArea(evt, badgeRect) {
-    return evt.clientY >= badgeRect.top && evt.clientY<= badgeRect.bottom;
-  }
-
-  function getVisibleBadgeRect() {
+  function  getVisibleBadgeRect() {
     return helper.getRect(helper.byId(BP_CONST.MOUSEOVER_TARGET));
   }
 
@@ -73,31 +70,53 @@ define(
       return;  // Already expanding -> do nothing
     }
 
-    cancelHoverDelayTimer();
+    cancelHoverIfNoMoveTimer();
 
     // Is the event related to the visible contents of the badge?
     // (as opposed to the hidden areas around the badge)
-    var badgeRect = getVisibleBadgeRect(),
-      isInBadge = isInBadgeArea(evt, badgeRect),
-      isInToolbar = state.get('isToolbarBadge') && isInActiveToolbarArea(evt, badgeRect);
+    var badgeRect = getVisibleBadgeRect();
 
-    if (!isInVerticalBadgeArea(evt, badgeRect)) {
+    if (!isInBadgeArea(evt, badgeRect)) {
       return;
     }
 
     // Check if shrinking and need to reopen
     if (state.isShrinking()) {
-      if (isInBadge) {
-        changeModeToPanel();  // User changed their mind -- reverse course and reopen
-      }
+      changeModeToPanel();  // User changed their mind -- reverse course and reopen
       return;
     }
 
-    // Use the event
-    if (isInToolbar || isInBadge) {
-      hoverDelayTimer = nativeFn.setTimeout(changeModeToPanel,
-        isInBadge ? BP_CONST.HOVER_DELAY_BADGE : BP_CONST.HOVER_DELAY_TOOLBAR);
+    // Set timers to open the badge if the user stays inside of it
+    // We use two timers so that if the user actually stops, the badge opens faster (more responsive feeling)
+    // Hover if no move -- start a new timer every time mouse moves
+    hoverIfNoMoveTimer = nativeFn.setTimeout(changeModeToPanel, getHoverDelayNoMove());
+    if (!hoverIfStayInsideTimer) {
+      hoverIfStayInsideTimer = nativeFn.setTimeout(changeModeToPanel, getHoverDelayStayInside());
     }
+  }
+
+  function getSensitivity() {
+    return sensitivity;
+  }
+
+  function getHoverDelayNoMove() {
+    return BP_CONST.HOVER_DELAY_NOMOVE_BADGE / sensitivity;
+  }
+
+  function getHoverDelayStayInside() {
+    // First interaction is most sensitive
+    if (abTest.get('extraSensitiveBadgeNewUser') && isFirstInteraction()) {
+      return BP_CONST.HOVER_DELAY_STAY_INSIDE_FIRST_TIME;
+    }
+
+    // Second or later interaction
+    return BP_CONST.HOVER_DELAY_STAY_INSIDE_BADGE / sensitivity;
+  }
+
+  function isFirstInteraction() {
+    // Once the badge opens the first time, we show the actual zoom and tts states
+    // Before that, we don't show real settings (we show a zoom of about 2 and TTS on)
+    return !state.get('isRealSettings');
   }
 
   /*
@@ -109,37 +128,54 @@ define(
       return; // Already expanded or in the middle of shrinking
     }
 
+    var isFirstBadgeUse = isFirstInteraction();
+    state.set('isFirstBadgeUse', isFirstBadgeUse);  // Will stay true throught this use of the badge
+
     setPanelExpandedState(isOpenedWithHover);
 
     events.emit('bp/will-expand');
 
-    new metric.BadgeHover().send();
+    new metric.BadgeHover({
+      isFirstBadgeUse: isFirstBadgeUse
+    }).send();
 
     view.update();
   }
-
-  function turnOnRealSettings() {
-    state.set('isRealSettings', true);    // Always use real settings once expanded
+  function ensureFutureRealSettings() {   // Use real settings on next page load
+    // Save zoom level so that Sitecues does not see this as a first time user
+    if (!conf.has('zoom')) {
+      conf.set('zoom', 1);
+    }
   }
 
   function setPanelExpandedState(isOpenedWithHover) {
     state.set('isSecondaryExpanded', false); // Only main panel expanded, not secondary
     state.set('wasMouseInPanel', isOpenedWithHover);
-    state.set('isOpenedWithHover', isOpenedWithHover);
     state.set('transitionTo', BP_CONST.PANEL_MODE);
-    turnOnRealSettings();
+    state.turnOnRealSettings();
+    ensureFutureRealSettings();
   }
 
   function changeModeToPanel(isOpenedWithKeyboard) {
-    cancelHoverDelayTimer();
+    cancelHoverTimers();
     if (!state.get('isShrinkingFromKeyboard')) { // Don't re-expand while trying to close via Escape key
       expandPanel(!isOpenedWithKeyboard);
     }
   }
 
-  function cancelHoverDelayTimer() {
-    clearTimeout(hoverDelayTimer);
-    hoverDelayTimer = 0;
+  function cancelHoverTimers() {
+    cancelHoverIfNoMoveTimer();
+    cancelHoverIfStayInsideTimer();
+  }
+
+  function cancelHoverIfNoMoveTimer() {
+    clearTimeout(hoverIfNoMoveTimer);
+    hoverIfNoMoveTimer = 0;
+  }
+
+  function cancelHoverIfStayInsideTimer() {
+    clearTimeout(hoverIfStayInsideTimer);
+    hoverIfStayInsideTimer = 0;
   }
 
   // When a click happens on the badge, it can be from one of two things:
@@ -164,11 +200,11 @@ define(
         evt.preventDefault();
         return false;
       }
-      else if (isBadgeFocused || isChildClicked) {
+      else if (isBadgeFocused || isChildClicked) {   // Screen reader pseudo-click
         // Click is in visible area and badge has focus --
         // * or *
         // Click in invisible child -- only screen readers can do this -- NVDA does it
-        // Go ahead and open the panel
+        // Go ahead and open the panel in focus/keyboard mode
 
         // First ensure it has focus (it didn't in second case)
         badgeElem.focus();
@@ -179,6 +215,10 @@ define(
           // Set screen reader flag for the life of this page view
           state.set('isOpenedWithScreenReader', true);
         }, 0);
+      }
+      else {
+        // Actual click -- not fake screen reader click, so no need to focus
+        changeModeToPanel();
       }
     }
   }
@@ -201,7 +241,7 @@ define(
 
   function didZoom() {
     require(['bp-expanded/controller/slider-controller'], function (sliderController) {
-      turnOnRealSettings();
+      state.turnOnRealSettings();
       sliderController.init();
       view.update();
     });
@@ -210,7 +250,7 @@ define(
   function didChangeSpeech(isOn) {
     require(['bp-expanded/view/tts-button'], function(ttsButton) {
       // Update the TTS button view on any speech state change
-      turnOnRealSettings();
+      state.turnOnRealSettings();
       ttsButton.init();
       ttsButton.updateTTSStateView(isOn);
       view.update();
@@ -225,13 +265,15 @@ define(
     if (!isInitialized) {
       isInitialized = true;
 
-      var badgeElement = getBadgeElement();
-      badgeElement.addEventListener('keydown', processBadgeActivationKeys);
-      badgeElement.addEventListener('mousedown', clickToOpenPanel);
-      badgeElement.addEventListener('mousemove', onMouseMove);
-      badgeElement.addEventListener('mouseout', cancelHoverDelayTimer);
+      sensitivity = site.get('badgeSensitivity') || DEFAULT_SENSITIVITY;
 
-      window.addEventListener('focus', onWindowFocus);
+      var badgeElement = getBadgeElement();
+      domEvents.on(badgeElement, 'keydown', processBadgeActivationKeys, { passive: false });
+      domEvents.on(badgeElement, 'mousedown', clickToOpenPanel, { passive: false });
+      domEvents.on(badgeElement, 'mousemove', onMouseMove);
+      domEvents.on(badgeElement, 'mouseleave', cancelHoverTimers);
+
+      domEvents.on(window, 'focus', onWindowFocus);
       events.on('bp/did-expand', didExpand);
       events.on('zoom', didZoom);
       events.on('speech/did-change', didChangeSpeech);
@@ -253,6 +295,7 @@ define(
 
   return {
     init: init,
+    getSensitivity: getSensitivity,
     expandPanel: expandPanel
   };
 });

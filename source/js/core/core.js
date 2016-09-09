@@ -60,6 +60,9 @@ define(
     sitecues.expandPanel = expandPanel;
     sitecues.shrinkPanel = shrinkPanel;
 
+    // Sitecues reset
+    sitecues.reset = function() {};  // noop unless page module is loaded (if not loaded, there is nothing to reset)
+
     //Loading state enumerations
     sitecues.readyStates = state;
 
@@ -68,8 +71,8 @@ define(
   }
 
   function expandPanel() {
-    require(['core/bp/controller/bp-controller'], function(bpController) {
-      bpController.expandPanel();
+    require(['core/bp/controller/expand-controller'], function(expandController) {
+      expandController.expandPanel();
     });
   }
 

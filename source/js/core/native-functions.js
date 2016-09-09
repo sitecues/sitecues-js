@@ -3,17 +3,28 @@ define([], function () {
 
   var exports = {};
 
+  // Recover potentially overridden window methods from a nested browsing context
+  function getNativeWindow() {
+    return SC_EXTENSION ? window : sitecues._getHelperFrame('sitecues-context').contentWindow;
+  }
+
   function init() {
-    var frame = document.querySelector('#sitecues-native-context');
+    // Extension always uses window
+    // In-page library uses native iframe context if available
+    var nativeWindow = getNativeWindow();
 
-    exports.bindFn = frame.contentWindow.Function.prototype.bind;
+    exports.bindFn = nativeWindow.Function.prototype.bind;
 
-    function addWindowMethod(name) {
-      exports[name] = frame.contentWindow[name].bind(window);
+    function addWindowProperty(name) {
+      var value = nativeWindow[name];
+      // if `value` is a function, bind it to the top window
+      exports[name] = value.bind ? value.bind(window) : value;
     }
 
-    addWindowMethod('Map');
-    addWindowMethod('setTimeout');
+    addWindowProperty('Map');
+    addWindowProperty('setTimeout');
+    // Necessary on http://www.mgmresorts.com/
+    addWindowProperty('JSON');
   }
 
   exports.init = init;

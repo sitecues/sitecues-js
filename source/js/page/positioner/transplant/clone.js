@@ -244,7 +244,6 @@ define(
   function init() {
     docElem      = document.documentElement;
     originalBody = document.body;
-    elementInfo.setAuxiliaryBody(getAuxiliaryBody());
   }
 
   clone.init             = init;

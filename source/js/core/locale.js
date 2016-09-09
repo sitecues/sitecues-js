@@ -29,7 +29,7 @@ define([ 'core/data-map', 'Promise' ], function(dataMap, Promise) {
   function getPageLocale() {
     var
       docElem = document.documentElement,
-      docLocales = [docElem.lang, docElem.getAttribute('xml:lang'), getMetaTagLocale()],
+      docLocales = [getTranslationLocale(), docElem.lang, docElem.getAttribute('xml:lang'), getMetaTagLocale()],
       validDocLocale;
 
     docLocales.some(function (locale) {
@@ -40,6 +40,25 @@ define([ 'core/data-map', 'Promise' ], function(dataMap, Promise) {
     });
 
     return validDocLocale || mainBrowserLocale || DEFAULT_LOCALE;
+  }
+
+  function getCookies() {
+    var chunks = document.cookie.split('; '),
+      cookies = {}, index = chunks.length, nameValSplit;
+
+    while (index--) {
+      nameValSplit = chunks[index].split('=');
+      cookies[nameValSplit[0]] = nameValSplit[1];
+    }
+
+    return cookies;
+  }
+
+  // TODO bing translator
+  function getTranslationLocale() {
+    var googtrans = getCookies().googtrans;
+    // In format of /fromlang/tolang
+    return googtrans && googtrans.substring(googtrans.lastIndexOf('/') + 1);
   }
 
   function isValidLocale(locale) {
@@ -198,6 +217,7 @@ define([ 'core/data-map', 'Promise' ], function(dataMap, Promise) {
     getBrowserLang: getBrowserLocale,
     getPageLocale: getPageLocale,
     getUiLocale: getUiLocale,
+    getTranslationLocale: getTranslationLocale,
     isValidLocale: isValidLocale,
     swapToPreferredRegion: swapToPreferredRegion,
     translate: translate,

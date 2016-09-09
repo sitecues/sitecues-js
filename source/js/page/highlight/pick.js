@@ -326,7 +326,7 @@ define(
       if (secondBestIndex < 0) {
         var scores = scoreObjs.map(getNumericScore);
         if (SC_DEV && isVoteDebuggingOn) {
-          console.log('--> break no other competitors: ' + JSON.stringify(scores));
+          console.log('--> break no other competitors: ' + nativeFn.JSON.stringify(scores));
         }
         break;  // Only one valid candidate
       }

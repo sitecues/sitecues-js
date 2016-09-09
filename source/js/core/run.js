@@ -6,6 +6,9 @@
  *   4. Fire sitecues ready callback and page-visited metric
  */
 
+// Allow extra dependencies
+// jshint -W072
+
 define(
   [
     'core/conf/user/manager',
@@ -20,6 +23,7 @@ define(
     'Promise',
     'core/modifier-key-state',
     'core/native-functions',
+    'core/ab-test/ab-test',
     'core/shake/shake'
   ],
   function (
@@ -35,6 +39,7 @@ define(
     Promise,
     modifierKeyState,
     nativeFn,
+    abTest,
     shake
   ) {
   'use strict';
@@ -72,13 +77,15 @@ define(
   }
 
   function initSpeech() {
-    require([ 'audio/audio' ], function (audio) {
+    require([ 'audio/audio', 'page/page'  ], function (page, audio) {
+      page.init();
       audio.init();
     });
   }
 
   function initSitecuesOn() {
-    require([ 'page/highlight/highlight', 'page/keys/keys', 'page/highlight/move-keys' ], function (highlight, keys, moveKeys) {
+    require([ 'page/page', 'page/highlight/highlight', 'page/keys/keys', 'page/highlight/move-keys'], function (page, highlight, keys, moveKeys) {
+      page.init();
       highlight.init();
       keys.init();
       moveKeys.init();
@@ -86,7 +93,8 @@ define(
   }
 
   function initThemes() {
-    require([ 'theme/theme', 'page/focus/focus', 'page/keys/keys' ], function (theme, focus, keys) {
+    require([ 'page/page', 'theme/theme', 'page/focus/focus', 'page/keys/keys' ], function (page, theme, focus, keys) {
+      page.init();
       theme.init();
       focus.init();
       keys.init();
@@ -94,7 +102,8 @@ define(
   }
 
   function initMouse() {
-    require([ 'page/cursor/cursor', 'page/keys/keys' ], function (cursor, keys) {
+    require([ 'page/page', 'page/cursor/cursor', 'page/keys/keys' ], function (page, cursor, keys) {
+      page.init();
       cursor.init();
       keys.init();
     });
@@ -272,7 +281,7 @@ define(
     });
 
     // Copy sitecuesInitSummary so we can add to it
-    initialPageVisitDetails = JSON.parse(JSON.stringify(sitecuesInitSummary));
+    initialPageVisitDetails = nativeFn.JSON.parse(nativeFn.JSON.stringify(sitecuesInitSummary));
 
     // Add platform details
     initialPageVisitDetails.nativeZoom = platform.nativeZoom;
@@ -283,12 +292,16 @@ define(
       initialPageVisitDetails.isStorageUnsupported = true;
     }
 
+    // TODO remove this once we know enough about window.name usage to make a decision about using it for sessions
+    initialPageVisitDetails.windowName = window.name || undefined;
+
     metric.init();
   }
 
   function initConfAndMetrics() {
     return conf.init()
       .catch(function handlePrefsError(error) { return { error: error.message }; })
+      .then(abTest.init)
       .then(initMetrics);
   }
 
