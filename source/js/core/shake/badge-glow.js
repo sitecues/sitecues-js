@@ -16,18 +16,13 @@ define([
     changeBadgeGlow(false);
   }
 
-  function onShakePassedThreshold(isOn) {
-    changeBadgeGlow(isOn);
-  }
-
   function changeBadgeGlow(isOn) {
-    var MAX_BADGE_GLOW = 1,
-      glowAmount = isOn ? MAX_BADGE_GLOW : 0,
-      alpha = glowAmount,
+    var alpha = isOn ? 1 : 0,
       color = 'hsla(' + HUE + ',' + SATURATION + '%,' + LIGHTNESS + '%,' + alpha + ')',
+      bgColor = isOn ? color : 'transparent',
       boxShadow = isOn ? '-3px 2px 5px 12px ' + color : 'none';
 
-    badgeStyle.backgroundColor = color;
+    badgeStyle.backgroundColor = bgColor;
     badgeStyle.boxShadow = boxShadow;
   }
 
@@ -37,12 +32,13 @@ define([
 
   function init() {
     // Badge glow
-    events.on('shake/did-pass-threshold', onShakePassedThreshold);
+    events.on('shake/did-pass-threshold', changeBadgeGlow);
     // Badge glow not available while BP is open
     events.on('bp/will-expand', willExpand);
 
     badgeStyle = getBadgeStyle();
     badgeStyle.borderRadius = '99px'; // Rounded glow
+    badgeStyle.borderColor = 'transparent';
     badgeStyle.transition = 'background-color ' + TRANSITION_MS + 'ms, box-shadow ' + TRANSITION_MS + 'ms';
   }
 

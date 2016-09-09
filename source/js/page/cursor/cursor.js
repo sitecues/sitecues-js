@@ -44,6 +44,8 @@ define(
       MAX_USER_SPECIFIED_CURSOR_SIZE = 3.5,
       MAX_USER_SPECIFIED_MOUSE_HUE = 1.09,// If > 1.0 then use white
       autoSize,
+      pageZoom,
+      shakeVigorPercent,
       userSpecifiedSize,
       userSpecifiedHue;
 
@@ -303,7 +305,7 @@ define(
     for (; i < CURSOR_TYPES.length; i ++) {
       // Don't use hotspotOffset in IE because that's part of the .cur file.
       var type = CURSOR_TYPES[i],
-        css = cursorCss.getCursorCss(type, size, doUseMSCursors, getRealUserHue());
+        css = cursorCss.getCursorCss(type, size, doUseMSCursors, getHue(), shakeVigorPercent);
 
       cursorTypeUrls[CURSOR_TYPES[i]] = css;
     }
@@ -332,7 +334,7 @@ define(
     return hue;
   }
 
-  function getRealUserHue() {
+  function getHue() {
     return userSpecifiedHue > 0 && userSpecifiedHue <= 1 ? userSpecifiedHue : 0;
   }
 
@@ -341,18 +343,28 @@ define(
     return userSpecifiedSize || cursorCss.getCursorZoom(pageZoom || conf.get('zoom') || 1);
   }
 
-  function onPageZoom(pageZoom) {
+  function onPageZoom(_pageZoom) {
+    pageZoom = _pageZoom;
+    onInputsChanged();
+  }
+
+  function onInputsChanged() {
     if (userSpecifiedSize) {
       toggleZoomOptimization(); // Re-enable cursors -- they were disabled for zoom performance in IE
       return;
     }
     // At page zoom level 1.0, the cursor is the default size (same as us being off).
     // After that, the cursor grows faster than the zoom level, maxing out at 4x at zoom level 3
-    var newCursorZoom = cursorCss.getCursorZoom(pageZoom);
+    var newCursorZoom = cursorCss.getCursorZoom(pageZoom, shakeVigorPercent);
     if (autoSize !== newCursorZoom) {
       autoSize = newCursorZoom;
       refreshStylesheetsIfNecessary();
     }
+  }
+
+  function onShakeChange(_shakeVigorPercent) {
+    shakeVigorPercent = _shakeVigorPercent;
+    onInputsChanged();
   }
 
   function init() {
@@ -367,6 +379,8 @@ define(
     conf.get('mouseHue', onMouseHueSetting);
 
     events.on('zoom', onPageZoom);
+
+    events.on('shake/did-change', onShakeChange);
 
     constructBPCursorStylesheet();
     autoSize = getSize();

@@ -27,7 +27,10 @@ define(['core/platform', 'page/zoom/constants', 'page/util/color', 'core/conf/ur
           '<path d="m127,103l0,0c2,0 4,1 4,3l0,34c0,2 -2,3 -4,3l0,0c-2,0 -4,-1 -4,-3l0,-34c0,-2 2,-3 4,-3z"/>'
         }
       },
+      CURSOR_HUE_SATURATION = 1,
       CURSOR_HUE_LIGHTNESS = 0.7,
+      SHAKE_HUE = 50,
+      SHAKE_SATURATION = 0.5,
       MAX_CURSOR_SIZE_DEFAULT = 128,
       MAX_CURSOR_PIXELS_WIN = 71,
       CURSOR_ZOOM_MAX = platform.os.isWin? 3.15: 4,
@@ -42,18 +45,19 @@ define(['core/platform', 'page/zoom/constants', 'page/util/color', 'core/conf/ur
    * @param sizeRatio a number > 1 (e.g. 2 = 2x)
    * @param pixelRatio = 1 for normal, 2 for retina cursor
    */
-  function getCursorCss(type, sizeRatio, doUseAjaxCursors, hue) {
+  function getCursorCss(type, sizeRatio, doUseAjaxCursors, hue, shakeVigorPercent) {
     var doUseRetinaCursors = platform.isRetina() && platform.canUseRetinaCursors,
       pixelRatio = doUseRetinaCursors ? 2 : 1,
       cursorGeneratorFn = doUseRetinaCursors ? generateCursorStyle2x : generateCursorStyle1x;
 
-    var url = getUrl(type, sizeRatio, pixelRatio, doUseAjaxCursors, hue),
+    var hueString = getHueString(hue, shakeVigorPercent),
+      url = getUrl(type, sizeRatio, pixelRatio, doUseAjaxCursors, hueString),
       hotspotOffset = getCursorHotspotOffset(type, sizeRatio);
 
     return cursorGeneratorFn(url, hotspotOffset, type);
   }
 
-  function getUrl(type, sizeRatio, pixelRatio, doUseAjaxCursors, hue) {
+  function getUrl(type, sizeRatio, pixelRatio, doUseAjaxCursors, hueString) {
 
     if (sizeRatio > CURSOR_ZOOM_MAX) {
       sizeRatio = CURSOR_ZOOM_MAX;
@@ -64,7 +68,6 @@ define(['core/platform', 'page/zoom/constants', 'page/util/color', 'core/conf/ur
     }
 
     var maxCursorSize = platform.os.isWin ? MAX_CURSOR_PIXELS_WIN: MAX_CURSOR_SIZE_DEFAULT,
-        hueString = hue ? colorUtil.getColorString(colorUtil.hslToRgb(hue, 1, CURSOR_HUE_LIGHTNESS)) : '#FFF',
         prefix = PREFIX
         .replace(/SIZE/g, '' + sizeRatio * pixelRatio)
         .replace(/SIDE/g, '' + maxCursorSize * pixelRatio),
@@ -73,6 +76,21 @@ define(['core/platform', 'page/zoom/constants', 'page/util/color', 'core/conf/ur
 
     // TODO: escape() is deprecated, replace with custom helper
     return 'data:image/svg+xml,' + escape( cursorSvg );
+  }
+
+  function getHueString(hue, shakeVigorPercent) {
+    if (hue) {
+      return colorUtil.getColorString(colorUtil.hslToRgb(hue, CURSOR_HUE_SATURATION, CURSOR_HUE_LIGHTNESS))
+    }
+    if (!shakeVigorPercent) {
+      return '#fff';
+    }
+
+    var lightnessPercent = 100 - shakeVigorPercent / 2.5;
+    
+    return 'hsl(' + SHAKE_HUE + ',' + SHAKE_SATURATION + '%,' + lightnessPercent + '%)';
+  }
+
   }
 
   /**
@@ -125,8 +143,8 @@ define(['core/platform', 'page/zoom/constants', 'page/util/color', 'core/conf/ur
     return Math.max(Math.min(rounded, MAX_AJAX_CURSOR_SIZE), MIN_AJAX_CURSOR_SIZE);
   }
 
-  function getCursorZoom(pageZoom) {
-    var zoomDiff = pageZoom - ZOOM_CONST.MIN_ZOOM,
+  function getCursorZoom(pageZoom, shakeVigorPercent) {
+    var zoomDiff = (pageZoom || 1) - ZOOM_CONST.MIN_ZOOM,
     // SC-1431 Need to keep the cursor smaller than MAX_CURSOR_SIZE_WIN (defined in custom.js)
     // when on Windows OS, otherwise the cursor intermittently can become a large black square.
     // Therefore, on Windows we cannot zoom the cursor up as much as on the Mac (3.5x instead of 4x)
@@ -134,7 +152,12 @@ define(['core/platform', 'page/zoom/constants', 'page/util/color', 'core/conf/ur
       CURSOR_ZOOM_RANGE = CURSOR_ZOOM_MAX - CURSOR_ZOOM_MIN;
 
     // ALGORITHM - SINUSOIDAL EASING OUT HOLLADAY SPECIAL: Decelerating to zero velocity, more quickly.
-    return CURSOR_ZOOM_RANGE * Math.sin(zoomDiff / ZOOM_CONST.ZOOM_RANGE * (Math.PI / 2.8)) + CURSOR_ZOOM_MIN;
+    var cursorSize = CURSOR_ZOOM_RANGE * Math.sin(zoomDiff / ZOOM_CONST.ZOOM_RANGE * (Math.PI / 2.8)) + CURSOR_ZOOM_MIN;
+    if (shakeVigorPercent) {
+      cursorSize += shakeVigorPercent / 75;  // Boost from mouse shake
+      cursorSize = Math.min(cursorSize, CURSOR_ZOOM_MAX);
+    }
+    return cursorSize;
   }
 
   return {

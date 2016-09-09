@@ -24,10 +24,10 @@ define([
   'use strict';
 
   var mousePositionsQueue = [],
-    lastShakeTimeout,
+    lastShakeChangeFiredTime = 0,
     lastShakeVigor = 0,
     lastShakeVigorPercent = 0,
-    canFireMetricAgain = true,
+    wasUnderThreshold = true,
     MIN_DIR_SWITCHES_FOR_SHAKE = constants.MIN_DIR_SWITCHES_FOR_SHAKE,
     MOUSE_POSITIONS_ARRAY_SIZE = constants.MOUSE_POSITIONS_ARRAY_SIZE,
     MIN_SHAKE_DIST = constants.MIN_SHAKE_DIST,
@@ -45,7 +45,6 @@ define([
 
   function reset() {
     mousePositionsQueue = [];
-    clearTimeout(lastShakeTimeout);
     if (lastShakeVigor > 0) {
       lastShakeVigor = lastShakeVigorPercent = 0;
       fireNotifications(0);
@@ -234,32 +233,35 @@ define([
   }
 
   function fireNotifications(shakeVigorPercent) {
-    // Internal change event
-    if (!lastShakeTimeout) {
-      lastShakeTimeout = nativeFn.setTimeout(function() {
-        fireShakeVigorChange(shakeVigorPercent);
-      }, constants.MS_BETWEEN_SHAKE_EVENTS);
-    }
-
-    // Debugging
-    // Too noisy for main build
-    // if (SC_DEV) {
-    //   console.log('Shake value: ' + shakeVigorPercent);
-    // }
-
     // Metric
     // Fires only when it goes over the threshold, to limit network requests
-    if (shakeVigorPercent >= METRIC_THRESHOLD_SHAKE_PERCENT_FIRE && canFireMetricAgain) {
-      canFireMetricAgain = false;
+    var didPassThreshold;
+
+    if (shakeVigorPercent >= METRIC_THRESHOLD_SHAKE_PERCENT_FIRE && wasUnderThreshold) {
+      wasUnderThreshold = false;
+      didPassThreshold = true;
       nativeFn.setTimeout(function() {
         fireShakeVigorMetric(shakeVigorPercent);
       }, 0);
       fireShakeReachedThreshold(true);
     }
-    else if (shakeVigorPercent < METRIC_THRESHOLD_SHAKE_PERCENT_RESET) {
-      canFireMetricAgain = true;
+    else if (shakeVigorPercent < METRIC_THRESHOLD_SHAKE_PERCENT_RESET && !wasUnderThreshold) {
+      wasUnderThreshold = true;
+      didPassThreshold = true;
       fireShakeReachedThreshold(false);
     }
+
+    var currentTime = getCurrentTime();
+    // Fire change event when we pass the threshold or there was enough time between events
+    if (didPassThreshold || shakeVigorPercent === 0 ||
+        currentTime - lastShakeChangeFiredTime > constants.MS_BETWEEN_SHAKE_EVENTS) {
+      lastShakeChangeFiredTime = currentTime;
+      fireShakeVigorChange(shakeVigorPercent);
+    }
+  }
+
+  function getCurrentTime() {
+    return new Date().getTime();
   }
 
   function fireShakeReachedThreshold(isOn) {
@@ -289,7 +291,6 @@ define([
   }
 
   function fireShakeVigorChange(shakeVigorPercent) {
-    lastShakeTimeout = 0;
     events.emit('shake/did-change', shakeVigorPercent);
   }
 
