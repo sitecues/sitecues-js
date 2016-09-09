@@ -45,7 +45,7 @@ define([
         }
         bpToolbarView.enableFocus(doFocusMenuItem);
         // jshint -W030
-        menuElement.offsetHeight;
+        menuElement.offsetHeight;  // Browser: wke up from your slumber!
         // jshint +W030
         menuElement.setAttribute('aria-hidden', !doOpen);
       }

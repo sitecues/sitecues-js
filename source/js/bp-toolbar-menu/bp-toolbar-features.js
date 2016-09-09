@@ -17,16 +17,15 @@ define([
            domEvents,
            nativeFn) {
 
-    var EXTRA_DELAY_BETWEEN_VIEWS = 800;
-
     function hideMenu() {
       require(['bp-toolbar-menu-button/bp-toolbar-menu-button'], function(bpToolbarMenuButton) {
         bpToolbarMenuButton.toggle();
       });
     }
 
+    // Provide basic info on Sitecues and allow user to jump directly to tips panel
     function whatIsThis() {
-      bpToolbarView.enableBlurb('what-is');
+      var EXTRA_DELAY_BETWEEN_VIEWS = 800;
 
       function showTips() {
         events.off('bp/did-open-subpanel', showTips);
@@ -62,28 +61,38 @@ define([
           });
       }
 
-      enableActivation('scp-blurb-tour-tips', beginTipsTour);
-      enableActivation('scp-blurb-slider-bar', expandPanel);
+      bpToolbarView.showBlurb('what-is');
+      enableBlurbItem('scp-blurb-tour-tips', beginTipsTour);
+      enableBlurbItem('scp-blurb-slider-bar', expandPanel);
     }
 
-    // function share() {
-    //   hideMenu();
-    // }
-    //
+    // Reset Sitecues settings
     function turnOff() {
       require(['page/reset/reset'], function(reset) {
+        // Reset Sitecues settings
         reset.init();
         reset.resetAll();
 
-        bpToolbarView.enableBlurb('hide');
-        enableActivation('scp-blurb-hide-button', hide);
+        // Enable option to completely hide Sitecues
+        bpToolbarView.showBlurb('hide');
+        enableBlurbItem('scp-blurb-hide-button', hide);
       });
     }
 
+    // Hide Sitecues
     function hide() {
       var sitecuesToolbar = document.getElementById('sitecues-badge');
 
+      function checkF8(event) {
+        if (event.keyCode === constants.KEY_CODE.F8) {
+          // Reenable Sitecues
+          unhide();
+        }
+      }
+
       function unhide() {
+        // Unhide Sitecues:
+        // User has pressed F8 or clicked unhide option (after initially hiding Sitecues)
         document.removeEventListener('keydown', checkF8);
         localStorage.removeItem('sitecues-disabled');
         sitecuesToolbar.style.top = '';
@@ -93,14 +102,7 @@ define([
         }
       }
 
-      function checkF8(event) {
-        if (event.keyCode === constants.KEY_CODE.F8) {
-          // Reenable Sitecues
-          unhide();
-        }
-      }
-
-      // Animate toolbar hiding
+      // Animate hiding of Sitecues toolbar
       sitecuesToolbar.style.transition = 'top 500ms linear';
       requestAnimationFrame(function() {
         sitecuesToolbar.style.top = '-40px';
@@ -113,11 +115,11 @@ define([
       document.addEventListener('keydown', checkF8);
 
       // Show new blurb on how to unhide
-      bpToolbarView.enableBlurb('unhide');
-      enableActivation('scp-blurb-unhide', unhide);
+      bpToolbarView.showBlurb('unhide');
+      enableBlurbItem('scp-blurb-unhide', unhide);
     }
 
-    function enableActivation(id, activateFn) {
+    function enableBlurbItem(id, activateFn) {
       var blurb = document.getElementById(id);
       domEvents.on(blurb, 'click', activateFn);
       domEvents.on(blurb, 'keydown', function(event) {
@@ -131,7 +133,6 @@ define([
     function activateFeatureById(id, hasFocus) {
       var ALL_FEATURES = {
         'scp-toolbar-what-is': whatIsThis,
-        // 'scp-toolbar-share': share,
         'scp-toolbar-turn-off' : turnOff
       };
 

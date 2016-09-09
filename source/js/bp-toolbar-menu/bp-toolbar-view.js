@@ -26,51 +26,67 @@ define([
       menuElement.style.height = rect.height + 'px';
     }
 
-    function enableBlurb(blurbName) {
+    function showBlurb(blurbName) {
       var BLURB_ANIMATION_MS = 300,
         origRect = menuElement.getBoundingClientRect(),
         targetRect,
         blurbElement = document.getElementById('scp-blurb-' + blurbName),
-        oldBlurb = menuElement.getAttribute('data-blurb');
+        previouslyVisibleBlurb = menuElement.getAttribute('data-blurb');
 
-      if (oldBlurb) {
-        toggleClass('scp-blurb-' + oldBlurb, false);
+      function updateDomForBlurb() {
+        if (previouslyVisibleBlurb) {
+          toggleClass('scp-blurb-' + previouslyVisibleBlurb, false);
+        }
+        toggleClass('scp-blurb-' + blurbName, true);
+        toggleClass('scp-blurb', true);
+        menuElement.setAttribute('data-blurb', blurbName);
+        blurbElement.removeAttribute('data-blurb-ready');
       }
-      toggleClass('scp-blurb-' + blurbName, true);
-      toggleClass('scp-blurb', true);
-      menuElement.style.cssText = '';
-      menuElement.setAttribute('data-blurb', blurbName);
-
       // Fix to current screen position -- don't roll up with toolbar as it slides up
-      menuElement.style.position = 'fixed';
-      menuElement.style.top = origRect.top + 'px';
-      menuElement.style.right = (window.innerWidth - origRect.right) + 'px';
+      function fixScreenPosition() {
+        menuElement.style.position = 'fixed';
+        menuElement.style.top = origRect.top + 'px';
+        menuElement.style.right = (window.innerWidth - origRect.right) + 'px';
+      }
 
-      // Animate from original width:height
-      targetRect = menuElement.getBoundingClientRect();
-      setSize(origRect);
+      function animateToTargetSize() {
+        // Animate from original width:height
+        targetRect = menuElement.getBoundingClientRect();
+        setSize(origRect);
 
-      // Animate to target width:height
-      // jshint -W030
-      menuElement.offsetHeight; // Ask layout engine to update
-      menuElement.style.transition = 'width ' + BLURB_ANIMATION_MS + 'ms, height ' + BLURB_ANIMATION_MS + 'ms';
-      menuElement.offsetHeight; // Ask layout engine to update
-      setSize(targetRect);
-      toggleClass('scp-blurb-fade-in-text', true);
-      menuElement.offsetHeight; // Ask layout engine to update
-      // jshint +W030
+        // Animate to target width:height
+        // jshint -W030
+        menuElement.offsetHeight; // Ask layout engine to update
+        menuElement.style.transition = 'width ' + BLURB_ANIMATION_MS + 'ms, height ' + BLURB_ANIMATION_MS + 'ms';
+        menuElement.offsetHeight; // Ask layout engine to update
 
-      // Focus the blurb so that it is spoken
-      // Pressing escape or clicking outside will close it
-      // (Mousing out won't close while focus is there)
-      // Overall, the experience of the blurb is that it stays on screen unless intentionally dismissed with click/Escape,
-      // to ensure that it is read before accidentally disappearing.
-      blurbElement.setAttribute('tabindex', '-1');
-      blurbElement.focus();
-      blurbElement.removeAttribute('data-blurb-ready');
-      nativeFn.setTimeout(function() {
+        // Set target size
+        setSize(targetRect);
+        toggleClass('scp-blurb-fade-in-text', true);
+        menuElement.offsetHeight; // Ask layout engine to update
+        // jshint +W030
+      }
+
+      function enableKeyboard() {
+        // Focus the blurb so that it is spoken
+        // Pressing escape or clicking outside will close it
+        // (Mousing out won't close while focus is there)
+        // Overall, the experience of the blurb is that it stays on screen unless intentionally dismissed with click/Escape,
+        // to ensure that it is read before accidentally disappearing.
+        blurbElement.setAttribute('tabindex', '-1');
+        blurbElement.focus();
+      }
+
+      function onAnimationComplete() {
         blurbElement.setAttribute('data-blurb-ready', '');
-      }, BLURB_ANIMATION_MS);
+      }
+
+      updateDomForBlurb();
+      menuElement.style.cssText = '';  // Reset styles
+      fixScreenPosition();
+      animateToTargetSize();
+      enableKeyboard();
+      nativeFn.setTimeout(onAnimationComplete, BLURB_ANIMATION_MS);
     }
 
     function enableFocus(isFocusEnabled) {
@@ -92,7 +108,7 @@ define([
 
     return {
       reset: reset,
-      enableBlurb: enableBlurb,
+      showBlurb: showBlurb,
       enableFocus: enableFocus,
       init: init
     };
