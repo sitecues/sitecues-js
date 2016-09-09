@@ -136,7 +136,7 @@ define(
     function initLibrary() {
       // Enums for sitecues loading state
       if (SC_DEV) {
-        logToConsole('SITECUES MODE: SC_DEV');
+        logToConsole('SITECUES MODE: SC_DEV' + (SC_EXTENSION ? ' + SC_EXTENSION' : ''));
         logToConsole('SITECUES VERSION: ' + sitecues.version);
       }
 
