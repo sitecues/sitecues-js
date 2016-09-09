@@ -63,13 +63,13 @@ define([
   }
 
   function toggle() {
+    var willOpen = !isExpanded(),
+      ready = Promise.resolve();
+
     function doToggle() {
       setOpen(willOpen);
       bpToolbarMenu.requestOpen(willOpen);
     }
-
-    var willOpen = !isExpanded(),
-      ready = Promise.resolve();
 
     if (willOpen && !bpToolbarMenu) {
       // Styles for menu
