@@ -34,7 +34,6 @@
   opacity: 1 !important;
   max-height: 999px;   /* Allows animation to auto size */
   max-width: 999px;   /* Allows animation to auto size */
-
 }
 
 #scp-toolbar-menu[aria-hidden="true"] {
@@ -70,8 +69,8 @@ sc-toolbar-menuitem:focus {
 }
 
 /* Repeated */
-/* TODO combine this with the definition on secondary.css (note that transition rule is missing here) */
-sc-kbd {
+/* TODO maybe combine this with sc-kbd definition on secondary.css (note that transition rule is missing here) */
+sc-blurb-kbd {
   display: inline-block;
   white-space: nowrap;
   position: relative;
