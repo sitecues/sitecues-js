@@ -87,10 +87,8 @@ define(['core/platform', 'page/zoom/constants', 'page/util/color', 'core/conf/ur
     }
 
     var lightnessPercent = 100 - shakeVigorPercent / 2.5;
-    
-    return 'hsl(' + SHAKE_HUE + ',' + SHAKE_SATURATION + '%,' + lightnessPercent + '%)';
-  }
 
+    return 'hsl(' + SHAKE_HUE + ',' + SHAKE_SATURATION + '%,' + lightnessPercent + '%)';
   }
 
   /**
