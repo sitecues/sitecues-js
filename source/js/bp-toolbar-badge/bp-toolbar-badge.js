@@ -6,6 +6,7 @@
 
 define([
   'Promise',
+    'core/conf/site',
   'core/bp/constants',
   'core/bp/model/state',
   'core/bp/helper',
@@ -13,6 +14,7 @@ define([
   'core/bp/view/view'
 ],
   function(Promise,
+           site,
            BP_CONST,
            state,
            helper,
@@ -34,6 +36,15 @@ define([
     var toolbarElement = document.createElement('sc'),
       docElem = document.documentElement;
 
+    function insertOptionsMenu() {
+      if (site.get('hasOptionsMenu')) {
+        // Can do this async -- no need to hold up the rest of our initialization
+        require(['bp-toolbar-menu-button/bp-toolbar-menu-button'], function (bpToolbarMenuButton) {
+          bpToolbarMenuButton.init(toolbarElement);
+        });
+      }
+    }
+
     docElem.setAttribute('data-sitecues-toolbar', ''); // Enable default.css rules
     docElem.appendChild(toolbarElement);
 
@@ -46,7 +57,8 @@ define([
       .then(function() {
         baseView.init(toolbarElement);
       })
-      .then(adjustFixedElementsBelowToolbar);
+      .then(adjustFixedElementsBelowToolbar)
+      .then(insertOptionsMenu);
   }
 
   return {

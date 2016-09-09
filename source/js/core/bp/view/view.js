@@ -73,7 +73,7 @@ define([
 
   // If the settings are not undefined it means sitecues has been turned on before
   function hasSitecuesEverBeenOn() {
-    return conf.has('zoom') || conf.has('ttsOn');
+    return conf.isSitecuesUser();
   }
 
   // Insert badge label into an element (using aria-label didn't work as NVDA cut off the label text at 100 characters)
