@@ -6,7 +6,7 @@
 
 define([
   'Promise',
-  'core/conf/site',
+    'core/conf/site',
   'core/bp/constants',
   'core/bp/model/state',
   'core/bp/helper',

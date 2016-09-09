@@ -7,16 +7,17 @@ define([
   'core/dom-events',
   'core/locale',
   'core/constants',
+  'Promise',
   'core/native-functions'
   ],
   function(urls,
            domEvents,
            locale,
            CORE_CONST,
+           Promise,
            nativeFn) {
 
   var menuButtonElement,
-    wasEverOpen,
     hideTimeout,
     bpToolbarMenu,
     KEY_CODES = CORE_CONST.KEY_CODE,
@@ -24,12 +25,16 @@ define([
     lastOpenTime;
 
   function insertSheet(name) {
-    var cssLink = document.createElement('link'),
-      cssUrl = urls.resolveResourceUrl('css/' + name + '.css');
-    cssLink.setAttribute('rel', 'stylesheet');
-    cssLink.setAttribute('href', cssUrl);
-    cssLink.id = 'sitecues-js-' + name;
-    document.querySelector('head').appendChild(cssLink);
+    return new Promise(function(resolve, reject) {
+      var cssLink = document.createElement('link'),
+        cssUrl = urls.resolveResourceUrl('css/' + name + '.css');
+      cssLink.setAttribute('rel', 'stylesheet');
+      cssLink.setAttribute('href', cssUrl);
+      cssLink.id = 'sitecues-js-' + name;
+      domEvents.on(cssLink, 'load', resolve);
+      domEvents.on(cssLink, 'error', reject);
+      document.querySelector('head').appendChild(cssLink);
+    });
   }
 
   function setOpen(doExpand) {
@@ -58,19 +63,27 @@ define([
   }
 
   function toggle() {
-    var willOpen = !isExpanded();
-    if (willOpen && !wasEverOpen) {
-      // Styles for both button and menu
-      insertSheet('bp-toolbar-menu');
-      wasEverOpen = true;
+    function doToggle() {
+      setOpen(willOpen);
+      bpToolbarMenu.requestOpen(willOpen);
     }
-    require(['bp-toolbar-menu/bp-toolbar-menu'], function(_bpToolbarMenu) {
-      bpToolbarMenu = _bpToolbarMenu;
-      bpToolbarMenu.init(menuButtonElement, function() {
-        setOpen(willOpen);
-        bpToolbarMenu.requestOpen(willOpen);
-      });
-    });
+
+    var willOpen = !isExpanded(),
+      ready = Promise.resolve();
+
+    if (willOpen && !bpToolbarMenu) {
+      // Styles for menu
+      var sheetLoaded = insertSheet('bp-toolbar-menu'),
+        toolbarInitialized = new Promise(function(resolve) {
+          require(['bp-toolbar-menu/bp-toolbar-menu'], function (_bpToolbarMenu) {
+            bpToolbarMenu = _bpToolbarMenu;
+            bpToolbarMenu.init(menuButtonElement, resolve);
+          });
+        });
+      ready = Promise.all([sheetLoaded, toolbarInitialized]);
+    }
+
+    ready.then(doToggle);
   }
 
   function onBlur() {
