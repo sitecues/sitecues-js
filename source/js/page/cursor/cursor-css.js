@@ -80,7 +80,7 @@ define(['core/platform', 'page/zoom/constants', 'page/util/color', 'core/conf/ur
 
   function getHueString(hue, shakeVigorPercent) {
     if (hue) {
-      return colorUtil.getColorString(colorUtil.hslToRgb(hue, CURSOR_HUE_SATURATION, CURSOR_HUE_LIGHTNESS))
+      return colorUtil.getColorString(colorUtil.hslToRgb(hue, CURSOR_HUE_SATURATION, CURSOR_HUE_LIGHTNESS));
     }
     if (!shakeVigorPercent) {
       return '#fff';
