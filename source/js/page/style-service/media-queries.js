@@ -3,14 +3,14 @@
  */
 define([], function () {
 
-
   function isActiveMediaQuery(mediaQuery) {
     // No media query or a matching one
-    return !mediaQuery || window.matchMedia(mediaQuery).matches;
+    var trimmedQuery = typeof mediaQuery === 'string' ? mediaQuery.trim() : '';
+    return !trimmedQuery || window.matchMedia(trimmedQuery).matches;
   }
 
   return {
     isActiveMediaQuery: isActiveMediaQuery
   };
-
 });
+

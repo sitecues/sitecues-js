@@ -8,6 +8,10 @@ All notable changes to this project will be documented here.
  - **Deprecated** : Planned for removal in the near future.
  - **Removed**    : Disabled or deleted within the source code.
 
+## Unreleased
+### Fixed
+ - Remove whitespace when evaluating media queries
+
 ## [4.2.6] - 2016-08-29
 ### Fixed
  - No longer attempt to read text from cross-origin sources
