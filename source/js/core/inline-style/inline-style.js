@@ -81,9 +81,9 @@ define(
      * 'property: value; ...'
      * ['property', 'value', 'importance']
      * */
-  // @param callback  : if a callback is defined, instead of inserting a style proxy for each element, cached their intended styles, apply our style values,
+  // @param callback  : if a callback is defined, instead of inserting a style proxy for each element, cache their intended styles, apply our style values,
   // run the callback function, and then restore the intended styles. By doing this in a synchronous block we can guarantee that no other scripts will have an opportunity
-  // to apply an style value
+  // to assign a new value
   function overrideStyle(elmts, styleInfo, callback) {
     var assignmentFn = getAssignmentFunction(styleInfo),
         elements     = arrayUtil.wrap(elmts),
@@ -115,7 +115,7 @@ define(
     if (hasCallback) {
       callback();
       // After running the callback, we restore the last inline values of each element before the current override. Importantly we don't
-      // restore the intended styles, because we may be overriding a prior override. Restoring to the intended styles needs to be done
+      // restore the intended styles, because we might override a preceding override. Restoring to intended values needs to be done
       // explicitly with an inlineStyle.restore() call
       elements.forEach(function (element) {
         var props = getModifiedProperties(element, styleInfo),
@@ -161,6 +161,8 @@ define(
         return Object.keys(styleInfo).map(toKebabCase);
 
       case 'string':
+        // String values for now can only be used to assign directly to cssText, overriding all other inline styles.
+        // Therefore the modified styles are the union of the current and former assigned style properties
         var current = Object.keys(getCurrentStyles(element) || {}),
             last    = Object.keys(getLastStyles(element) || {});
         return arrayUtil.union(current, last);
@@ -188,7 +190,7 @@ define(
     getStyle(element).removeProperty(toKebabCase(property));
   }
 
-  // Remove the style attribute from @element
+  // Remove the style attribute from element
   function removeAttribute(element) {
     element.removeAttribute('style');
   }
@@ -221,6 +223,7 @@ define(
       var cssObject,
         element          = record.element,
         styleInfo        = record.styleInfo,
+        // cssText was assigned to in this case
         isCssOverwritten = typeof styleInfo === 'string',
         intendedStyles   = isCssOverwritten ? {} : intendedStyleMap.get(element) || {},
         lastStyles       = isCssOverwritten ? {} : lastStyleMap.get(element) || {};
@@ -235,6 +238,8 @@ define(
 
       Object.keys(cssObject).forEach(function (property) {
         intendedStyles[property] = cssObject[property];
+        // We don't want a reversion to the `last styles`, the inline values of an element cached before its latest override, to clobber
+        // dynamic updates to its intended styles.
         lastStyles[property]     = cssObject[property];
       });
 
@@ -366,34 +371,34 @@ define(
   }
 
   function createProxy(element) {
-  var styleChain        = element.style,
-      styleProxy        = {},
-      proxiedProperties = {};
+    var styleChain        = element.style,
+        styleProxy        = {},
+        proxiedProperties = {};
 
-  function interceptProperty(property) {
-    if (proxiedProperties[property]) {
-      return;
+    function interceptProperty(property) {
+      if (proxiedProperties[property]) {
+        return;
+      }
+
+      var boundGetter = nativeFn.bindFn.call(styleProxyGetter, element, property),
+          boundSetter = nativeFn.bindFn.call(styleProxySetter, element, property);
+
+      proxiedProperties[property] = true;
+
+      Object.defineProperty(styleProxy, property, {
+        get : boundGetter,
+        set : boundSetter
+      });
     }
 
-    var boundGetter = nativeFn.bindFn.call(styleProxyGetter, element, property),
-        boundSetter = nativeFn.bindFn.call(styleProxySetter, element, property);
+    while (styleChain) {
+      Object.getOwnPropertyNames(styleChain).forEach(interceptProperty);
+      styleChain = Object.getPrototypeOf(styleChain);
+    }
 
-    proxiedProperties[property] = true;
-
-    Object.defineProperty(styleProxy, property, {
-      get : boundGetter,
-      set : boundSetter
-    });
+    proxyMap.set(element, styleProxy);
+    return styleProxy;
   }
-
-  while (styleChain) {
-    Object.getOwnPropertyNames(styleChain).forEach(interceptProperty);
-    styleChain = Object.getPrototypeOf(styleChain);
-  }
-
-  proxyMap.set(element, styleProxy);
-  return styleProxy;
-}
 
   function isStyleProxied(element) {
     return element.style === element._scStyleProxy;
