@@ -14,9 +14,9 @@
   },
   "bin": "binary/web.js",
   "scripts": {
-    "test": "intern-runner --config=config/intern",
-    "test-cloud": "intern-runner config=config/intern-cloud",
-    "test-ci": "intern-runner config=config/intern-ci"
+    "test": "intern run --webdriver --config=config/intern.js",
+    "test-cloud": "intern run --webdriver --config=config/intern-cloud.js",
+    "test-ci": "intern run --webdriver --config=config/intern-ci.js"
   },
   "dependencies": {
     "bg-runner": "https://s3.amazonaws.com/npm.sitecues.com/bg-runner-0.0.2.tgz",
@@ -51,7 +51,7 @@
     "html-minifier": "^0.8.0",
     "htmlclean": "^2.7.7",
     "intern": "^3.3.1",
-    "intern-cli": "^0.1.0",
+    "intern-cli": "^0.1.1",
     "jshint": "^2.9.2",
     "jshint-stylish": "^2.1.0",
     "mkdirp": "^0.5.1",
