@@ -176,16 +176,17 @@
                     dependencies.
                 </p>
                 <p>
-                    Congrats, the testing framework is now ready to be used. However, it lives at
-                    <code>node_modules/.bin/intern-runner</code> and that is no fun to type.
-                    So let's do <code>npm install intern --global</code> and now you can
-                    simply type <code>intern-runner</code> instead, to use it.
+                    Congrats, the testing framework is now ready to use. However, it lives at
+                    <code>node_modules/.bin/intern</code> and that is no fun to type.
+                    So let's do <code>npm install intern-cli --global</code> and now you can
+                    simply type <code>intern</code> instead, to use it.
                 </p>
                 <p>
-                    Now we will run the unit tests. All you need to do is host
-                    <code>node_modules/intern/client.html</code> on an HTTP server of some kind and visit its URL.
-                    For convenience, host it by running <code>intern-runner proxyOnly config=config/intern</code>
-                    and then visit <a href="run.html">test/run.html</a>, which will forward you to where it lives.
+                    Now we will run the unit tests. All we need to do is host
+                    <code>node_modules/intern/client.html</code> on an HTTP server somewhere
+                    and visit its URL. For convenience, you can simply run <code>test/run.sh</code> to do so.
+                    That will start a server and open the browser client. If you have the server running,
+                    you can visit <a href="run.html">test/run.html</a> to get back to the browser client at any time.
                 </p>
             </section>
             <section>

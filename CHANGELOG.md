@@ -10,11 +10,17 @@ All notable changes to this project will be documented here.
 
 ## Unreleased
 ### Fixed
- - Remove whitespace when evaluating media queries
+ -
+
+## [4.2.7] - 2016-09-13
+### Fixed
+ - Ignore irrelevant whitespace when evaluating media queries.
+ - Better detection of backgrounds for the Lens.
+ - Improved handling of fixed position elements.
 
 ## [4.2.6] - 2016-08-29
 ### Fixed
- - No longer attempt to read text from cross-origin sources
+ - No longer attempt to read text from cross-origin sources.
 
 ## [4.2.5] - 2016-08-26
 ### Fixed
