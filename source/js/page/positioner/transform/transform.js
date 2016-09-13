@@ -182,9 +182,7 @@ define(
     }
 
     function setNewTransform(element, translateX, translateY, scale) {
-      var styles = {};
-      styles[transformProperty] = 'translate3d(' + translateX + 'px, ' + translateY + 'px, 0) scale(' + scale + ')';
-      inlineStyle.override(element, styles);
+      inlineStyle.override(element, [transformProperty, 'translate3d(' + translateX + 'px, ' + translateY + 'px, 0) scale(' + scale + ')']);
     }
 
     function calculateXTranslation(args) {
