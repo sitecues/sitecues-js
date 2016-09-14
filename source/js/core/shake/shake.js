@@ -28,6 +28,8 @@ define([
     lastShakeVigor = 0,
     lastShakeVigorPercent = 0,
     wasUnderThreshold = true,
+    lastIncreaseTime,
+    numShakes = 0,
     MIN_DIR_SWITCHES_FOR_SHAKE = constants.MIN_DIR_SWITCHES_FOR_SHAKE,
     MOUSE_POSITIONS_ARRAY_SIZE = constants.MOUSE_POSITIONS_ARRAY_SIZE,
     MIN_SHAKE_DIST = constants.MIN_SHAKE_DIST,
@@ -41,7 +43,8 @@ define([
     MIN_MOVE_SIZE_FOR_SHAKE = constants.MIN_MOVE_SIZE_FOR_SHAKE,
     MAX_TIME_BETWEEN_MOVES = constants.MAX_TIME_BETWEEN_MOVES,
     METRIC_THRESHOLD_SHAKE_PERCENT_FIRE = constants.METRIC_THRESHOLD_SHAKE_PERCENT_FIRE,
-    METRIC_THRESHOLD_SHAKE_PERCENT_RESET = constants.METRIC_THRESHOLD_SHAKE_PERCENT_RESET;
+    METRIC_THRESHOLD_SHAKE_PERCENT_RESET = constants.METRIC_THRESHOLD_SHAKE_PERCENT_RESET,
+    WAIT_BEFORE_DECREASE = constants.WAIT_BEFORE_DECREASE;
 
   function reset() {
     mousePositionsQueue = [];
@@ -60,8 +63,8 @@ define([
   function getMovementSummary() {
     var
       prevMove = mousePositionsQueue[0],
-      xDir = mousePositionsQueue[1].x > prevMove.x ? 1 : -1,
-      yDir = mousePositionsQueue[1].y > prevMove.y ? 1 : -1,
+      xDir = mousePositionsQueue.length > 1 && mousePositionsQueue[1].x > prevMove.x ? 1 : -1,
+      yDir = mousePositionsQueue.length > 1 && mousePositionsQueue[1].y > prevMove.y ? 1 : -1,
       totalDist = 0,
       xDirectionSwitches = 0,
       yDirectionSwitches = 0,
@@ -121,7 +124,7 @@ define([
     };
   }
 
-  function getShakeVigorIncrease() {
+  function getShakeVigorDelta(isIncreaseAllowed, lastDistance, currTime) {
     var
       isShakeX,
       isShakeY,
@@ -153,10 +156,17 @@ define([
       }
     }
 
-    if (isMouseShake()) {
+    if (isIncreaseAllowed && isMouseShake()) {
+      lastIncreaseTime = currTime;
       var distanceFactor = Math.max(movementSummary.totalXDist, movementSummary.totalYDist);
       return Math.min(Math.pow(distanceFactor, SHAKE_INCREASE_POWER), MAX_SHAKE_VIGOR_INCREASE); // Shake vigor grows exponentially with last move distance
     }
+
+    if (currTime - lastIncreaseTime > WAIT_BEFORE_DECREASE && movementSummary.xSwitches + movementSummary.ySwitches <= 1) {
+      return -getShakeVigorDecrease(lastDistance);
+    }
+
+    return 0;
   }
 
   function getShakeVigorDecrease(lastDistance) {
@@ -177,7 +187,7 @@ define([
 
     var
       lastDistance = lastMove ? getDistanceBetweenMoves(currMove, lastMove) : 0,
-      shakeVigor = getShakeVigor(numMoves, lastDistance),
+      shakeVigor = getShakeVigor(numMoves, lastDistance, lastMove),
       shakeVigorPercent;
 
     if (shakeVigor !== lastShakeVigor) {
@@ -214,11 +224,10 @@ define([
     return Math.abs(move2.x - move1.x) + Math.abs(move2.y - move1.y);
   }
 
-  function getShakeVigor(numMoves, lastDistance) {
+  function getShakeVigor(numMoves, lastDistance, lastMove) {
     var shakeVigor,
       isShakeIncreaseAllowed = numMoves >= MOUSE_POSITIONS_ARRAY_SIZE && (lastShakeVigor || lastDistance >= MIN_MOVE_SIZE_FOR_SHAKE),
-      shakeVigorIncrease = isShakeIncreaseAllowed && getShakeVigorIncrease(),
-      shakeVigorDelta = shakeVigorIncrease || - getShakeVigorDecrease(lastDistance);
+      shakeVigorDelta = getShakeVigorDelta(isShakeIncreaseAllowed, lastDistance, lastMove.t);
 
     shakeVigor = lastShakeVigor + shakeVigorDelta;
 
@@ -240,6 +249,8 @@ define([
     if (shakeVigorPercent >= METRIC_THRESHOLD_SHAKE_PERCENT_FIRE && wasUnderThreshold) {
       wasUnderThreshold = false;
       didPassThreshold = true;
+      ++ numShakes;
+      persistNumShakesInSession();
       nativeFn.setTimeout(function() {
         fireShakeVigorMetric(shakeVigorPercent);
       }, 0);
@@ -271,7 +282,7 @@ define([
   function fireShakeVigorMetric(shakeVigorPercent) {
     var details = {
       vigor: shakeVigorPercent,
-      sessionCount: incrementSessionShakes()
+      sessionCount: getNumShakesInSession()
     };
 
     if (SC_DEV) {
@@ -281,17 +292,18 @@ define([
     new metric.MouseShake(details).send();
   }
 
-  function incrementSessionShakes() {
+  function getNumShakesInSession() {
+    return sessionStorage.getItem(constants.SESSION_SHAKE_COUNT_KEY) || 0;
+  }
+
+  function persistNumShakesInSession() {
     if (!platform.isStorageUnsupported) {
-      var numShakes = sessionStorage.getItem(constants.SESSION_SHAKE_COUNT_KEY) || 0;
-      ++ numShakes;
       sessionStorage.setItem(constants.SESSION_SHAKE_COUNT_KEY, numShakes);
-      return numShakes;
     }
   }
 
   function fireShakeVigorChange(shakeVigorPercent) {
-    events.emit('shake/did-change', shakeVigorPercent);
+    events.emit('shake/did-change', shakeVigorPercent, numShakes);
   }
 
   function init() {
@@ -302,6 +314,7 @@ define([
   }
 
   return {
-    init: init
+    init: init,
+    getNumShakesInSession: getNumShakesInSession
   };
 });

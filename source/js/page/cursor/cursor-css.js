@@ -29,8 +29,6 @@ define(['core/platform', 'page/zoom/constants', 'page/util/color', 'core/conf/ur
       },
       CURSOR_HUE_SATURATION = 1,
       CURSOR_HUE_LIGHTNESS = 0.7,
-      SHAKE_HUE = 50,
-      SHAKE_SATURATION = 50,
       MAX_CURSOR_SIZE_DEFAULT = 128,
       MAX_CURSOR_PIXELS_WIN = 71,
       CURSOR_ZOOM_MAX = platform.os.isWin? 3.15: 4,
@@ -147,7 +145,7 @@ define(['core/platform', 'page/zoom/constants', 'page/util/color', 'core/conf/ur
     // ALGORITHM - SINUSOIDAL EASING OUT HOLLADAY SPECIAL: Decelerating to zero velocity, more quickly.
     var cursorSize = CURSOR_ZOOM_RANGE * Math.sin(zoomDiff / ZOOM_CONST.ZOOM_RANGE * (Math.PI / 2.8)) + CURSOR_ZOOM_MIN;
     if (shakeVigorPercent) {
-      cursorSize += shakeVigorPercent / 75;  // Boost from mouse shake
+      cursorSize += shakeVigorPercent / 60;  // Boost from mouse shake
       cursorSize = Math.min(cursorSize, CURSOR_ZOOM_MAX);
     }
     return cursorSize;

@@ -8,7 +8,7 @@ define([], function () {
     MAX_DIST_NON_SHAKE_AXIS: 30,    // Max pixels moved on axis not being shaken (vertical/horizontal)
     MIN_SHAKE_VIGOR_DECREASE: 4,    // Minimum speed of shake decrease
     MAX_SHAKE_VIGOR_DECREASE: 32,   // Maximum speed of shake decrease
-    SHAKE_DECREASE_MULTIPLIER: 6,       // Magic value for shake decreases based on mouse speed
+    SHAKE_DECREASE_MULTIPLIER: 3,   // Magic value for shake decreases based on mouse speed
     SHAKE_INCREASE_POWER: 1.2,      // Magic value for exponential shake increase based on mouse speed
     MAX_SHAKE_VIGOR_INCREASE: 100,  // Max shake increase (out of total possible MAX_SHAKE_VIGOR)
     MAX_SHAKE_VIGOR: 400,           // Max total shake vigor
@@ -16,6 +16,7 @@ define([], function () {
     MS_BETWEEN_SHAKE_EVENTS: 50,    // ms between internal shake events
     MAX_TIME_BETWEEN_MOVES: 100,    // if more ms than this since last mouse move, reset
     METRIC_THRESHOLD_SHAKE_PERCENT_RESET: 10, // Shake percent must dip below this amount before firing again
-    METRIC_THRESHOLD_SHAKE_PERCENT_FIRE: 50   // Only fire metric when shake vigor suddenly jumps over this % of MAX_SHAKE_VIGOR
+    METRIC_THRESHOLD_SHAKE_PERCENT_FIRE: 50,   // Only fire metric when shake vigor suddenly jumps over this % of MAX_SHAKE_VIGOR
+    WAIT_BEFORE_DECREASE: 500       // At least this much time since last increase before we begin to decrease
   };
 });

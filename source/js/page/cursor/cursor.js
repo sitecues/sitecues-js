@@ -14,6 +14,7 @@ define(
     'page/cursor/cursor-css',
     'core/platform',
     'core/events',
+    'core/shake/shake',
     'core/native-functions'
   ],
   function (
@@ -23,6 +24,7 @@ define(
     cursorCss,
     platform,
     events,
+    shake,
     nativeFn
   ) {
   'use strict';
@@ -45,7 +47,7 @@ define(
       MAX_USER_SPECIFIED_MOUSE_HUE = 1.09,// If > 1.0 then use white
       autoSize,
       pageZoom,
-      shakeVigorPercent,
+      shakeVigorPercent = 0,
       userSpecifiedSize,
       userSpecifiedHue;
 
@@ -362,8 +364,18 @@ define(
     }
   }
 
-  function onShakeChange(_shakeVigorPercent) {
-    shakeVigorPercent = _shakeVigorPercent;
+  // Boost mouse cursor size when the user shakes
+  function handleShake(_shakeVigorPercent, numShakes) {
+    // Every time the user shakes the mouse, we boost an extra 10 percent and keep the cursor larger,
+    // up to a max extra boost of 50%
+    function getRepeatedShakeBoost(numShakes) {
+      var NUM_SHAKES_PERCENT_BOOST = 10,
+        MAX_NUM_SHAKES_BOOST = 50;
+      return Math.min(numShakes * NUM_SHAKES_PERCENT_BOOST, MAX_NUM_SHAKES_BOOST);
+    }
+
+    shakeVigorPercent = _shakeVigorPercent + getRepeatedShakeBoost(numShakes);
+    console.log(_shakeVigorPercent);
     onInputsChanged();
   }
 
@@ -380,7 +392,11 @@ define(
 
     events.on('zoom', onPageZoom);
 
-    events.on('shake/did-change', onShakeChange);
+    events.on('shake/did-change', handleShake);
+    var numShakes = shake.getNumShakesInSession();
+    if (numShakes) {
+      handleShake(0, numShakes);
+    }
 
     constructBPCursorStylesheet();
     autoSize = getSize();
