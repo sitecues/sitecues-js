@@ -305,7 +305,7 @@ define(
     for (; i < CURSOR_TYPES.length; i ++) {
       // Don't use hotspotOffset in IE because that's part of the .cur file.
       var type = CURSOR_TYPES[i],
-        css = cursorCss.getCursorCss(type, size, doUseMSCursors, getHue(), shakeVigorPercent);
+        css = cursorCss.getCursorCss(type, size, doUseMSCursors, getHue());
 
       cursorTypeUrls[CURSOR_TYPES[i]] = css;
     }

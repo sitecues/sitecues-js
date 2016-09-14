@@ -30,7 +30,7 @@ define(['core/platform', 'page/zoom/constants', 'page/util/color', 'core/conf/ur
       CURSOR_HUE_SATURATION = 1,
       CURSOR_HUE_LIGHTNESS = 0.7,
       SHAKE_HUE = 50,
-      SHAKE_SATURATION = 0.5,
+      SHAKE_SATURATION = 50,
       MAX_CURSOR_SIZE_DEFAULT = 128,
       MAX_CURSOR_PIXELS_WIN = 71,
       CURSOR_ZOOM_MAX = platform.os.isWin? 3.15: 4,
@@ -45,12 +45,12 @@ define(['core/platform', 'page/zoom/constants', 'page/util/color', 'core/conf/ur
    * @param sizeRatio a number > 1 (e.g. 2 = 2x)
    * @param pixelRatio = 1 for normal, 2 for retina cursor
    */
-  function getCursorCss(type, sizeRatio, doUseAjaxCursors, hue, shakeVigorPercent) {
+  function getCursorCss(type, sizeRatio, doUseAjaxCursors, hue) {
     var doUseRetinaCursors = platform.isRetina() && platform.canUseRetinaCursors,
       pixelRatio = doUseRetinaCursors ? 2 : 1,
       cursorGeneratorFn = doUseRetinaCursors ? generateCursorStyle2x : generateCursorStyle1x;
 
-    var hueString = getHueString(hue, shakeVigorPercent),
+    var hueString = getHueString(hue),
       url = getUrl(type, sizeRatio, pixelRatio, doUseAjaxCursors, hueString),
       hotspotOffset = getCursorHotspotOffset(type, sizeRatio);
 
@@ -78,17 +78,12 @@ define(['core/platform', 'page/zoom/constants', 'page/util/color', 'core/conf/ur
     return 'data:image/svg+xml,' + escape( cursorSvg );
   }
 
-  function getHueString(hue, shakeVigorPercent) {
+  function getHueString(hue) {
     if (hue) {
       return colorUtil.getColorString(colorUtil.hslToRgb(hue, CURSOR_HUE_SATURATION, CURSOR_HUE_LIGHTNESS));
     }
-    if (!shakeVigorPercent) {
-      return '#fff';
-    }
 
-    var lightnessPercent = 100 - shakeVigorPercent / 2.5;
-
-    return 'hsl(' + SHAKE_HUE + ',' + SHAKE_SATURATION + '%,' + lightnessPercent + '%)';
+    return '#fff';
   }
 
   /**
