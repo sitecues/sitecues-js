@@ -9,7 +9,8 @@ define(
     'page/zoom/constants',
     'page/zoom/util/body-geometry',
     'page/zoom/config/config',
-    'core/native-functions'
+    'core/native-functions',
+    'core/inline-style/inline-style'
   ],
   function (
     $,
@@ -18,7 +19,8 @@ define(
     constants,
     bodyGeo,
     config,
-    nativeFn
+    nativeFn,
+    inlineStyle
   ) {
   'use strict';
 
@@ -27,8 +29,6 @@ define(
     $zoomStyleSheet,            // <style> element we insert to correct form issues in WebKit
     $zoomFormsStyleSheet,       // <style> element we insert to correct form issues in WebKit
     TRANSFORM_PROP_CSS,
-    // We store their current applied transition shorthand property, to revert to when we finish the zoom operation
-    cachedTransitionValue,
     // Optimize fonts for legibility? Helps a little bit with Chrome on Windows
     shouldOptimizeLegibility,
     // Should we repaint when zoom is finished (after any animations)?
@@ -173,25 +173,25 @@ define(
     return KEYFRAMES_ID + '-' + Math.round(state.completedZoom * 1000) + '-' + Math.round(targetZoom * 1000);
   }
 
-    // Get keyframes css for animating from completed zoom to target zoom
-    function getAnimationCSS(targetZoom) {
-      var animationName = getCssAnimationName(targetZoom),
-        keyFramesCssProperty = platform.browser.isWebKit ? '@-webkit-keyframes ' : '@keyframes ',
-        keyFramesCss = animationName + ' {\n',
-        keyFrames = getCssKeyFrames(targetZoom, state.isInitialLoadZoom, true),
-        numSteps = keyFrames.length - 1,
-        step = 0;
+  // Get keyframes css for animating from completed zoom to target zoom
+  function getAnimationCSS(targetZoom) {
+    var animationName = getCssAnimationName(targetZoom),
+      keyFramesCssProperty = platform.browser.isWebKit ? '@-webkit-keyframes ' : '@keyframes ',
+      keyFramesCss = animationName + ' {\n',
+      keyFrames = getCssKeyFrames(targetZoom, state.isInitialLoadZoom, true),
+      numSteps = keyFrames.length - 1,
+      step = 0;
 
-      for (; step <= numSteps; ++step) {
-        var keyFrame = keyFrames[step],
-          zoomCssString = TRANSFORM_PROP_CSS + ': ' + keyFrame[TRANSFORM_PROP_CSS] + (keyFrame.width ? '; width: ' + keyFrame.width : '');
+    for (; step <= numSteps; ++step) {
+      var keyFrame = keyFrames[step],
+        zoomCssString = TRANSFORM_PROP_CSS + ': ' + keyFrame[TRANSFORM_PROP_CSS] + (keyFrame.width ? '; width: ' + keyFrame.width : '');
 
-        keyFramesCss += Math.round(10000 * keyFrame.timePercent) / 100 + '% { ' + zoomCssString + ' }\n';
-      }
-      keyFramesCss += '}\n\n';
-
-      return keyFramesCssProperty + keyFramesCss;
+      keyFramesCss += Math.round(10000 * keyFrame.timePercent) / 100 + '% { ' + zoomCssString + ' }\n';
     }
+    keyFramesCss += '}\n\n';
+
+    return keyFramesCssProperty + keyFramesCss;
+  }
 
   // Get a CSS object for the targetZoom level
   //This needs to return the formatted translate x / width only when we're zooming the primary body
@@ -211,9 +211,11 @@ define(
   function fixZoomBodyCss() {
     // Allow the content to be horizontally centered, unless it would go
     // offscreen to the left, in which case start zooming the content from the left-side of the window
-    body.style[platform.transformOriginProperty] = config.shouldRestrictWidth ? '0 0' : '50% 0';
+    inlineStyle.override(body, [platform.transformOriginProperty, config.shouldRestrictWidth ? '0 0' : '50% 0']);
     if (shouldOptimizeLegibility) {
-      body.style.textRendering = 'optimizeLegibility';
+      inlineStyle.override(body, {
+        textRendering : 'optimizeLegibility'
+      });
     }
   }
 
@@ -237,30 +239,30 @@ define(
     }, REPAINT_FOR_CRISP_TEXT_DELAY);
 
     var MAX_ZINDEX = 2147483647,
-      appendedDiv = $('<sc>')
-        .css({
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          opacity: 1,
-          backgroundColor: 'transparent',
-          zIndex: MAX_ZINDEX,
-          pointerEvents: 'none'
-        })
-        .appendTo('html');
+      $appendedDiv = $('<sc>');
+
+    inlineStyle.set($appendedDiv[0], {
+      position        : 'fixed',
+      top             : 0,
+      left            : 0,
+      width           : '100%',
+      height          : '100%',
+      opacity         : 1,
+      backgroundColor : 'transparent',
+      zIndex          : MAX_ZINDEX,
+      pointerEvents   : 'none'
+    });
+
+    $appendedDiv.appendTo('html');
+
     nativeFn.setTimeout(function () {
-      appendedDiv.remove();
+      $appendedDiv.remove();
     }, 0);
   }
 
   //Restore the intended inline style when we're done transforming the body
   function restoreBodyTransitions() {
-    if (typeof cachedTransitionValue === 'string') {
-      body.style.transition = cachedTransitionValue;
-    }
-    cachedTransitionValue = null;
+    inlineStyle.restore(body, 'transition');
   }
 
   //If there is a transition style applied to the body, we need to be sure that it doesn't apply to transformations
@@ -284,11 +286,14 @@ define(
     }
 
     if (property.indexOf('all') >= 0 || property.indexOf('transform') >= 0) {
-      cachedTransitionValue = body.style.transition;
-      if (body.style.transition) {
-        body.style.transition += ', ';
+      var transitionValue = inlineStyle(body).transition;
+      if (transitionValue) {
+        transitionValue += ', ';
       }
-      body.style.transition += 'transform 0s';
+      transitionValue += 'transform 0s';
+      inlineStyle.override(body, {
+        transition : transitionValue
+      });
     }
 
   }

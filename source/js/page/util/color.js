@@ -1,7 +1,14 @@
 /**
  * Service that converts color strings into an rgba object { r: number, g: number, b: number, a: number }
  */
-define([], function () {
+define(
+  [
+    'core/inline-style/inline-style'
+  ],
+  function (
+    inlineStyle
+  ) {
+  'use strict';
 
   var TRANSPARENT = 'rgba(0, 0, 0, 0)',
     MIN_LUMINOSITY_LIGHT_TONE = 0.62;
@@ -39,30 +46,32 @@ define([], function () {
 
   // Convert color names such as 'white', 'black', 'transparent' to rgba object or TRANSPARENT
   function convertColorNameToRgbFormat(colorName) {
-// APPROACH #1 is fast but bloats library by 1.6k with COLOR_NAMES_MAP
-//    var hexVal = colorUtil.COLOR_NAMES_MAP[colorName];
-//    if (typeof hexVal === 'undefined') {
-//      return 'rgba(0, 0, 0, 0)';
-//    }
-//
-//    var red = Math.floor(hexVal / 0x10000) % 256,
-//      green = Math.floor(hexVal / 0x100) % 256,
-//      blue = hexVal % 256;
-//
-//    return 'rgb(' + red + ', ' + green + ', ' + blue + ')';
+  // APPROACH #1 is fast but bloats library by 1.6k with COLOR_NAMES_MAP
+  //    var hexVal = colorUtil.COLOR_NAMES_MAP[colorName];
+  //    if (typeof hexVal === 'undefined') {
+  //      return 'rgba(0, 0, 0, 0)';
+  //    }
+  //
+  //    var red = Math.floor(hexVal / 0x10000) % 256,
+  //      green = Math.floor(hexVal / 0x100) % 256,
+  //      blue = hexVal % 256;
+  //
+  //    return 'rgb(' + red + ', ' + green + ', ' + blue + ')';
+  
+  // APPROACH #2 is slower (~34ms on Chrome) but does not require COLOR_NAMES_MAP
+  // Setting the border on the <body> and then immediately resetting will not cause a visible change
+    var rgb,
+      docElem = document.documentElement;
 
-// APPROACH #2 is slower (~34ms on Chrome) but does not require COLOR_NAMES_MAP
-// Setting the border on the <body> and then immediately resetting will not cause a visible change
-    var docElt = document.documentElement,
-      docStyle = docElt.style,
-      oldBorderColor = docStyle.outlineColor;
     if (colorName === 'initial' || colorName === 'inherit' || colorName === 'transparent') {
       return TRANSPARENT;
     }
-    docStyle.outlineColor = colorName;
-    var isLegalColor = docStyle.outlineColor,  // Browser didn't set the border color -> not a legal color
-      rgb = isLegalColor && getComputedStyle(docElt).outlineColor;
-    docStyle.outlineColor = oldBorderColor;
+
+    inlineStyle.override(docElem, { outlineColor : colorName });
+    var isLegalColor = inlineStyle(docElem).outlineColor;  // Browser didn't set the border color -> not a legal color
+    rgb = isLegalColor && getComputedStyle(docElem).outlineColor;
+    inlineStyle.restore(docElem, 'outline-color');
+
     return rgb;
   }
 
@@ -117,7 +126,7 @@ define([], function () {
 //    // System color names -- currently based on OS X colors
 //    // To get a color code for a certain system color, do the following:
 //    // function getHexCode(color) {
-//    //   document.body.style.color = color; var rgb = getRgba(getComputedStyle(document.body).color); var num = rgb.r * 256 * 256 + rgb.g * 256 + rgb.b; console.log('0x' + num.toString(16));
+//    //   document.body. style.color = color; var rgb = getRgba(getComputedStyle(document.body).color); var num = rgb.r * 256 * 256 + rgb.g * 256 + rgb.b; console.log('0x' + num.toString(16));
 //    // }
 //
 //    buttonface: 0xc0c0c0,

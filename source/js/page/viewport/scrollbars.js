@@ -11,17 +11,20 @@ define(
     'core/platform',
     'page/viewport/viewport',
     'core/native-functions',
-    'page/zoom/util/body-geometry'
+    'page/zoom/util/body-geometry',
+    'core/inline-style/inline-style'
   ],
   function (
     platform,
     viewport,
     nativeFn,
-    bodyGeo
+    bodyGeo,
+    inlineStyle
   ) {
   'use strict';
 
-  var mainBodyRect,
+  var
+    mainBodyRect, docElem,
     shouldComputeMainBodyScrollbars,
     doForceHorizScrollbar,
     doForceVertScrollbar,
@@ -61,12 +64,18 @@ define(
   }
 
   function setOverflow(overflowX, overflowY) {
-    var docElemStyle = document.documentElement.style;
-    if (docElemStyle.overflowX !== overflowX) {
-      docElemStyle.overflowX = overflowX;
+    var docStyle = inlineStyle(docElem);
+
+    if (docStyle.overflowX !== overflowX) {
+      inlineStyle.override(docElem, {
+        overflowX : overflowX
+      });
     }
-    if (docElemStyle.overflowY !== overflowY) {
-      docElemStyle.overflowY = overflowY;
+
+    if (docStyle.overflowY !== overflowY) {
+      inlineStyle.override(docElem, {
+        overflowY : overflowY
+      });
     }
   }
 
@@ -78,21 +87,16 @@ define(
   // By controlling the visibility of the scrollbars ourselves, the bug magically goes away.
   // This is also good because we're better than IE at determining when content is big enough to need scrollbars.
   function determineScrollbars() {
-
+    var docStyle = inlineStyle(docElem);
     mainBodyRect = bodyGeo.getCurrentBodyInfo();
 
-    var docElemStyle = document.documentElement.style;
-
     // -- Clear the scrollbars --
-    if (!isInitialized) {
-      if (shouldComputeMainBodyScrollbars) {
-        defaultOverflowX = defaultOverflowY = 'hidden';
-      }
-      else {
-        defaultOverflowX = docElemStyle.overflowX;
-        defaultOverflowY = docElemStyle.overflowY;
-      }
-      isInitialized = true;
+    if (shouldComputeMainBodyScrollbars) {
+      defaultOverflowX = defaultOverflowY = 'hidden';
+    }
+    else {
+      defaultOverflowX = docStyle.overflowX;
+      defaultOverflowY = docStyle.overflowY;
     }
 
     // -- Set the scrollbars after a delay --
@@ -103,12 +107,14 @@ define(
     // deal with zoom first, and then scrollbars separately
     // The delay also allows us to collect several concurrent requests and handle them once.
     clearTimeout(finalizeScrollbarsTimer);
-    var doUseHorizScrollbar = doForceHorizScrollbar || isBodyTooWide(),
-      doUseVertScrollbar = doForceVertScrollbar || isBodyTooTall(),
-      newOverflowX = doUseHorizScrollbar ? 'scroll' : defaultOverflowX,
-      newOverflowY = doUseVertScrollbar ? 'scroll' : defaultOverflowY;
 
-    if (newOverflowX !== docElemStyle.overflowX || newOverflowY !== docElemStyle.overflowY) {
+    var
+      doUseHorizScrollbar = doForceHorizScrollbar || isBodyTooWide(),
+      doUseVertScrollbar  = doForceVertScrollbar  || isBodyTooTall(),
+      newOverflowX        = doUseHorizScrollbar ? 'scroll' : defaultOverflowX,
+      newOverflowY        = doUseVertScrollbar  ? 'scroll' : defaultOverflowY;
+
+    if (newOverflowX !== docStyle.overflowX || newOverflowY !== docStyle.overflowY) {
       if (shouldComputeMainBodyScrollbars) {
         // MS browsers need to reset first, otherwise causes SC-3722
         setOverflow('hidden', 'hidden');
@@ -120,9 +126,14 @@ define(
   }
 
   function init() {
+    if (isInitialized) {
+      return;
+    }
+    isInitialized = true;
     // IE/Edge don't know when to put in scrollbars after CSS transform
     // Edge does, but we need to do this because of SC-3722 -- jiggling of Sitecues toolbar during vertical scrolls
     shouldComputeMainBodyScrollbars = platform.browser.isMS;
+    docElem = document.documentElement;
   }
 
   return {

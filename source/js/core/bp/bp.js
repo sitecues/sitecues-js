@@ -24,7 +24,8 @@ define(
     'core/bp/model/classic-mode',
     'core/bp/view/badge/page-badge',
     'Promise',
-    'core/native-functions'
+    'core/native-functions',
+    'core/inline-style/inline-style'
   ],
   function (
     expandController,
@@ -35,8 +36,10 @@ define(
     classicMode,
     pageBadgeView,
     Promise,
-    nativeFn
+    nativeFn,
+    inlineStyle
   ) {
+  'use strict';
 
   /*
    *** Public methods ***
@@ -44,6 +47,7 @@ define(
 
   // The htmlContainer has all of the SVG inside of it, and can take keyboard focus
   var byId = helper.byId,
+      docElem,
       badgeView;
 
   /**
@@ -176,19 +180,23 @@ define(
   function fixDimensionsOfBody() {
     var body = document.body,
       bodyStyle   = getComputedStyle(body),
-      docStyle    = getComputedStyle(document.documentElement),
+      docStyle    = getComputedStyle(docElem),
       botMargin   = parseFloat(bodyStyle.marginBottom),
       topMargin   = bodyStyle.marginTop,
       leftMargin  = bodyStyle.marginLeft,
       rightMargin = bodyStyle.marginRight;
 
     if (parseFloat(bodyStyle.height) < parseFloat(docStyle.height)) {
-      body.style.height = docStyle.height;
+      inlineStyle.override(body, {
+        height : docStyle.height
+      });
     }
     if (botMargin !== 0) {
       //marginBottom doesn't override bottom margins that are set with the shorthand 'margin' style,
       //so we get all the margins and set our own inline shorthand margin
-      body.style.margin = topMargin + ' ' + rightMargin + ' 0px ' + leftMargin;
+      inlineStyle.override(body, {
+        margin : topMargin + ' ' + rightMargin + ' 0px ' + leftMargin
+      });
     }
   }
 
@@ -247,6 +255,7 @@ define(
    *   5. Missing badge and document complete (causes toolbar)
    */
   function init() {
+    docElem = document.documentElement;
 
     // Get whether the BP will run in classic mode (still needed for MS Edge)
     initClassicMode();
