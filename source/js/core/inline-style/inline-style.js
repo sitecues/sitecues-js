@@ -190,7 +190,6 @@ define(
     getStyle(element).removeProperty(toKebabCase(property));
   }
 
-  // Remove the style attribute from element
   function removeAttribute(element) {
     element.removeAttribute('style');
   }
@@ -223,7 +222,7 @@ define(
       var cssObject,
         element          = record.element,
         styleInfo        = record.styleInfo,
-        // cssText was assigned to in this case
+        // cssText was assigned in this case
         isCssOverwritten = typeof styleInfo === 'string',
         intendedStyles   = isCssOverwritten ? {} : intendedStyleMap.get(element) || {},
         lastStyles       = isCssOverwritten ? {} : lastStyleMap.get(element) || {};
@@ -244,6 +243,7 @@ define(
       });
 
       intendedStyleMap.set(element, intendedStyles);
+      lastStyleMap.set(element, lastStyles);
     });
 
     assignmentRecords = [];
@@ -259,18 +259,27 @@ define(
       return;
     }
 
-    var style = getStyle(element);
+    var
+      style      = getStyle(element),
+      properties = arrayUtil.wrap(props).map(toKebabCase);
 
-    arrayUtil.wrap(props).map(toKebabCase).forEach(function (property) {
-      var value = lastStyles[property];
-
-      if (value) {
-        style[property] = value;
-      }
-      else {
-        removeProperty(element, property);
-      }
+    properties.forEach(function (property) {
+      restoreStyleValue(style, property, lastStyles);
     });
+  }
+
+  // @param property must be kebab case in order to look up the cached styles
+  function restoreStyleValue(style, property, cachedStyles) {
+    var value, priority,
+      declaration = cachedStyles[property];
+    if (declaration && declaration.value) {
+      value    = declaration.value;
+      priority = declaration.priority;
+      style.setProperty(property, value, priority);
+    }
+    else {
+      style.removeProperty(property);
+    }
   }
 
   /*
@@ -278,7 +287,7 @@ define(
   * */
   function restore(element, props) {
     var properties,
-      style = getStyle(element),
+      style          = getStyle(element),
       intendedStyles = getIntendedStyles(element);
 
     if (!intendedStyles) {
@@ -289,15 +298,9 @@ define(
     if (props) {
       properties = arrayUtil.wrap(props).map(toKebabCase);
       properties.forEach(function (property) {
-        var value = intendedStyles[property];
-
-        if (value) {
-          style[property] = value;
-        }
-        else {
-          removeProperty(element, property);
-        }
+        restoreStyleValue(style, property, intendedStyles);
       });
+      // Only restore the specified properties
       return;
     }
 
@@ -414,20 +417,38 @@ define(
 
   function stringifyCss(cssObject) {
     styleParser.cssText = '';
+
     Object.keys(cssObject).forEach(function (property) {
-      styleParser[property] = cssObject[property];
+      var value, priority,
+        propertyData = cssObject[property];
+
+      if (typeof propertyData === 'object') {
+        value    = cssObject[property].value;
+        priority = cssObject[property].priority;
+      }
+      else {
+        value    = propertyData;
+        priority = '';
+      }
+
+      styleParser.setProperty(property, value, priority);
     });
+
     return styleParser.cssText;
   }
 
+  // Returns an object keyed with style properties to a property data object containing value and priority
+  // @return { property : { value : foo, priority : 'important' } }
   function parseCss(cssText) {
     var cssObj = {};
-
     styleParser.cssText = cssText;
 
     for (var i = 0; i < styleParser.length; i++) {
       var property = styleParser[i];
-      cssObj[property] = styleParser[property];
+      cssObj[property] = {
+        value    : styleParser.getPropertyValue(property) || '',
+        priority : styleParser.getPropertyPriority(property) || ''
+      };
     }
 
     return cssObj;
