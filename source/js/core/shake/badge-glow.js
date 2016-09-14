@@ -6,7 +6,10 @@ define([
   'core/events'
 ], function(events) {
 
-  var badgeStyle,
+  var
+    badgeElem,
+    badgeStyle,
+    origCss,
     HUE = 50, // Out of 360
     SATURATION = 72, // Out of 100
     LIGHTNESS = 88, // Out of 100
@@ -17,17 +20,24 @@ define([
   }
 
   function changeBadgeGlow(isOn) {
-    var alpha = isOn ? 1 : 0,
-      color = 'hsla(' + HUE + ',' + SATURATION + '%,' + LIGHTNESS + '%,' + alpha + ')',
-      bgColor = isOn ? color : 'transparent',
-      boxShadow = isOn ? '-3px 2px 5px 12px ' + color : 'none';
+    if (isOn) {
+      var alpha = 1,
+        color = 'hsla(' + HUE + ',' + SATURATION + '%,' + LIGHTNESS + '%,' + alpha + ')',
+        bgColor = color,
+        boxShadow = '-3px 2px 5px 12px ' + color;
 
-    badgeStyle.backgroundColor = bgColor;
-    badgeStyle.boxShadow = boxShadow;
+      badgeStyle.borderRadius = '99px'; // Rounded glow
+      badgeStyle.borderColor = 'transparent';
+      badgeStyle.backgroundColor = bgColor;
+      badgeStyle.boxShadow = boxShadow;
+    }
+    else {
+      badgeElem.setAttribute('style', origCss);
+    }
   }
 
-  function getBadgeStyle() {
-    return document.getElementById('sitecues-badge').style;
+  function getBadge() {
+    return document.getElementById('sitecues-badge');
   }
 
   function init() {
@@ -36,10 +46,10 @@ define([
     // Badge glow not available while BP is open
     events.on('bp/will-expand', willExpand);
 
-    badgeStyle = getBadgeStyle();
-    badgeStyle.borderRadius = '99px'; // Rounded glow
-    badgeStyle.borderColor = 'transparent';
+    badgeElem = getBadge();
+    badgeStyle = badgeElem.style;
     badgeStyle.transition = 'background-color ' + TRANSITION_MS + 'ms, box-shadow ' + TRANSITION_MS + 'ms';
+    origCss = badgeStyle.cssText;
   }
 
   return {

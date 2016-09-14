@@ -375,7 +375,6 @@ define(
     }
 
     shakeVigorPercent = _shakeVigorPercent + getRepeatedShakeBoost(numShakes);
-    console.log(_shakeVigorPercent);
     onInputsChanged();
   }
 
