@@ -19,6 +19,7 @@ define(
     platform,
     nativeFn
   ) {
+  'use strict';
 
   var PATH = 'html/prefs.html',
     SITECUES_PREFS_IFRAME_ID = 'sitecues-prefs',

@@ -6,7 +6,7 @@
 * */
 define(
   [
-    'page/positioner/util/array-utility'
+    'core/util/array-utility'
   ],
   function (
     arrayUtil

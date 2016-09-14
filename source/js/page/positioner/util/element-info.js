@@ -1,20 +1,23 @@
 define(
   [
-    '$',
     'page/positioner/util/element-map',
     'page/zoom/state',
-    'core/platform'
+    'core/platform',
+    'core/events',
+    'core/util/array-utility',
+    'hlb/hlb'
   ],
   function (
-    $,
     elementMap,
     state,
-    platform
+    platform,
+    events,
+    arrayUtil,
+    hlb
   ) {
-
   'use strict';
 
-  var originalBody, docElem;
+  var originalBody, docElem, didCacheBPElements, bpElementMap;
 
   function getScale(element, position) {
     // If we've never scaled this element before, it's possible that this element is inheriting a transformation from the original body
@@ -132,8 +135,40 @@ define(
     return !isClone(element) && !isPlaceholder(element);
   }
 
-  function isSitecuesElement(element, value) {
-    return getOrSet(element, 'sitecuesElement', value) || element.localName === 'sc';
+  function isBPElement(element) {
+    if (!didCacheBPElements) {
+      var
+        badge         = document.getElementById('sitecues-badge'),
+        bp            = document.getElementById('scp-bp-container'),
+        badgeElems    = badge ? arrayUtil.toArray(badge.querySelectorAll('*')).concat(badge) : [],
+        bpElems       = bp    ? arrayUtil.toArray(bp.querySelectorAll('*')).concat(bp)       : [];
+
+      badgeElems.concat(bpElems).forEach(function (el) {
+        bpElementMap.set(el, true);
+      });
+
+      // If the badge hasn't been inserted yet, don't bother saving the cached list (it's empty)
+      didCacheBPElements = Boolean(badge);
+    }
+    return Boolean(bpElementMap.get(element));
+  }
+
+  function isHLBElement(element) {
+    var hlbElement = hlb.getElement();
+    if (hlbElement) {
+      var ancestor = element.parentElement;
+      while (ancestor) {
+        if (ancestor === hlbElement) {
+          return true;
+        }
+        ancestor = ancestor.parentElement;
+      }
+    }
+    return false;
+  }
+
+  function isSitecuesElement(element) {
+    return isBPElement(element) || isHLBElement(element);
   }
 
   function isTransplantRoot(element, value) {
@@ -166,14 +201,11 @@ define(
   function init() {
     originalBody = document.body;
     docElem      = document.documentElement;
+    bpElementMap = new WeakMap();
 
-    var
-      sitecuesSet = $(docElem).find('#sitecues-badge').find('*').addBack().get(),
-      length = sitecuesSet.length;
-
-    for (var i = 0; i < length; i++) {
-      isSitecuesElement(sitecuesSet[i], true);
-    }
+    events.on('bp/did-insert-secondary-markup bp/content-loaded bp/did-insert-bp-element', function () {
+      didCacheBPElements = false;
+    });
   }
 
   return {

@@ -15,7 +15,8 @@ define(
     'page/util/geo',
     'core/metric',
     'hlb/constants',
-    'core/events'
+    'core/events',
+    'core/inline-style/inline-style'
   ],
   function (
     $,
@@ -29,7 +30,8 @@ define(
     geo,
     metric,
     constants,
-    events
+    events,
+    inlineStyle
   ) {
   'use strict';
 
@@ -432,6 +434,7 @@ define(
 
     // The cloned element (HLB)
     $hlb = $($foundation[0].cloneNode(true));
+    var hlb = $hlb[0];
 
     // Copies form values from the foundation to the HLB
     // Need to do this on a timeout in order to enable Safari input fix hack
@@ -439,8 +442,6 @@ define(
     // .setTimeout(function() {
     mapForm($foundation, $hlb);
     // }, 0);
-
-    hlbStyling.filter.bind(mapForm);
 
     // Clone styles of HLB and children of HLB, so layout is preserved
     hlbStyling.initializeStyles($foundation, $hlb, initialHLBRect);
@@ -457,15 +458,14 @@ define(
     hlbStyles = hlbStyling.getHLBStyles($picked, $foundation, highlight);
 
     // Set the styles for the HLB and append to the wrapping element
-    $hlb
-      .css(hlbStyles)
-      .appendTo($hlbWrapper);
+    inlineStyle.set(hlb, hlbStyles);
+    $hlb.appendTo($hlbWrapper);
 
     // Fixes problem with TexasAT home page when opening the top nav (Home, Sitemap, Contact Us) in HLB
     hlbStyling.setHLBChildTextColor($hlb);
 
     // Set the ID of the hlb.
-    $hlb[0].id = constants.HLB_ID;
+    hlb.id = constants.HLB_ID;
   }
 
   /**
@@ -500,23 +500,25 @@ define(
 
     // It is important to clone the styles of the parent <ul> of the original element, because it may
     // have important styles such as background images, etc.
-    $foundation[0].style.cssText = hlbStyling.getComputedStyleCssText($picked.parents('ul, ol')[0]);
+    inlineStyle($foundation[0]).cssText = hlbStyling.getComputedStyleCssText($picked.parents('ul, ol')[0]);
 
     // Create, position, and style this element so that it overlaps the element chosen by the picker.
-    $foundation.css({
-      'position'       : 'absolute',
-      'left'           : (pickedElementBoundingBox.left + window.pageXOffset) / inheritedZoom,
-      'top'            : (pickedElementBoundingBox.top  + window.pageYOffset) / inheritedZoom,
-      'opacity'        : 0,
-      'padding'        : 0,
-      'margin'         : 0,
-      'width'          : pickedElementBoundingBox.width / inheritedZoom,
-      'list-style-type': pickedElementComputedStyle.listStyleType || 'none'
-    }).insertAfter('body');
+    inlineStyle.set($foundation[0], {
+      'position'      : 'absolute',
+      'left'          : (pickedElementBoundingBox.left + window.pageXOffset) / inheritedZoom,
+      'top'           : (pickedElementBoundingBox.top  + window.pageYOffset) / inheritedZoom,
+      'opacity'       : 0,
+      'padding'       : 0,
+      'margin'        : 0,
+      'width'         : pickedElementBoundingBox.width / inheritedZoom,
+      'listStyleType' : pickedElementComputedStyle.listStyleType || 'none'
+    });
+
+    $foundation.insertAfter('body');
 
     // Map all picked elements children CSS to cloned children CSS
     for (i = 0; i < $pickedAndDescendants.length; i += 1) {
-      $pickedCloneAndDescendants[i].style.cssText = hlbStyling.getComputedStyleCssText($pickedAndDescendants[i]);
+      inlineStyle($pickedCloneAndDescendants[i]).cssText = hlbStyling.getComputedStyleCssText($pickedAndDescendants[i]);
     }
 
     return $foundation;
@@ -540,7 +542,7 @@ define(
     removeTemporaryFoundation = true;
 
     // Create, position, and style this element so that it overlaps the element chosen by the picker.
-    $foundation.css({
+    inlineStyle.set($foundation[0], {
       'position'       : 'absolute',
       'left'           : (pickedElementsBoundingBox.left + window.pageXOffset) / inheritedZoom,
       'top'            : (pickedElementsBoundingBox.top  + window.pageYOffset) / inheritedZoom,
@@ -548,11 +550,12 @@ define(
       'padding'        : 0,
       'margin'         : 0,
       'width'          : pickedElementsBoundingBox.width / inheritedZoom
-    }).insertAfter('body');
+    });
+    $foundation.insertAfter('body');
 
     // Map all picked elements children CSS to cloned children CSS
     for (i = 0; i < $pickedAndDescendants.length; i += 1) {
-      $pickedCloneAndDescendants[i].style.cssText = hlbStyling.getComputedStyleCssText($pickedAndDescendants[i]);
+      inlineStyle($pickedCloneAndDescendants[i]).cssText = hlbStyling.getComputedStyleCssText($pickedAndDescendants[i]);
     }
 
     return $foundation;
@@ -593,7 +596,7 @@ define(
     removeTemporaryFoundation = true;
 
     // Create, position, and style this element so that it overlaps the element chosen by the picker.
-    $foundation.css({
+    inlineStyle.set($foundation[0], {
       'position'       : 'absolute',
       'left'           : (pickedElementsBoundingBox.left + window.pageXOffset) / inheritedZoom,
       'top'            : (pickedElementsBoundingBox.top  + window.pageYOffset) / inheritedZoom,
@@ -601,11 +604,12 @@ define(
       'padding'        : 0,
       'margin'         : 0,
       'width'          : pickedElementsBoundingBox.width / inheritedZoom
-    }).insertAfter('body');
+    });
+    $foundation.insertAfter('body');
 
     // Map all picked elements children CSS to cloned children CSS
     for (i = 0; i < $pickedAndDescendants.length; i += 1) {
-      $pickedCloneAndDescendants[i].style.cssText = hlbStyling.getComputedStyleCssText($pickedAndDescendants[i]);
+      inlineStyle($pickedCloneAndDescendants[i]).cssText = hlbStyling.getComputedStyleCssText($pickedAndDescendants[i]);
     }
 
     return $foundation;
@@ -704,18 +708,19 @@ define(
    */
   function getOrCreateHLBWrapper() {
 
-    return $hlbWrapper ||
+    var $wrapper =  $hlbWrapper ||
             $('<sc>', {
               'id': constants.HLB_WRAPPER_ID
-            })
-            .css({
-              'padding' : 0,
-              'margin'  : 0,
-              'top'     : 0,
-              'left'    : 0,
-              'position': 'absolute',
-              'overflow': 'visible'
             });
+    inlineStyle.set($wrapper[0], {
+      'padding'  : 0,
+      'margin'   : 0,
+      'top'      : 0,
+      'left'     : 0,
+      'position' : 'absolute',
+      'overflow' : 'visible'
+    });
+    return $wrapper;
   }
 
   /**

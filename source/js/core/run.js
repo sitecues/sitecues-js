@@ -5,10 +5,6 @@
  *   3. Listen to anything that should wake up sitecues features
  *   4. Fire sitecues ready callback and page-visited metric
  */
-
-// Allow extra dependencies
-// jshint -W072
-
 define(
   [
     'core/conf/user/manager',
@@ -24,8 +20,10 @@ define(
     'core/modifier-key-state',
     'core/native-functions',
     'core/ab-test/ab-test',
-    'core/shake/shake'
+    'core/shake/shake',
+    'core/inline-style/inline-style'
   ],
+  /*jshint -W072 */ //Currently there are too many dependencies, so we need to tell JSHint to ignore it for now
   function (
     conf,
     session,
@@ -40,8 +38,10 @@ define(
     modifierKeyState,
     nativeFn,
     abTest,
-    shake
+    shake,
+    inlineStyle
   ) {
+  /*jshint +W072 */
   'use strict';
 
   var
@@ -311,6 +311,7 @@ define(
     events.on('zoom/ready', onZoomInitialized);
 
     // Start initialization
+    inlineStyle.init();
     platform.init();
     nativeFn.init();
 

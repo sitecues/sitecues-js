@@ -3,8 +3,24 @@
 //   sets background, sets default styles, computes some styles,
 //   and cloned child styles from the original element to the HLB.
 //  */
-define(['$', 'core/platform', 'page/util/common', 'core/conf/user/manager', 'hlb/constants'],
-  function ($, platform, common, conf, constants) {
+define(
+  [
+    '$',
+    'core/platform',
+    'page/util/common',
+    'core/conf/user/manager',
+    'hlb/constants',
+    'core/inline-style/inline-style'
+  ],
+  function (
+    $,
+    platform,
+    common,
+    conf,
+    constants,
+    inlineStyle
+  ) {
+  'use strict';
 
   ///////////////////////////
   // PUBLIC PROPERTIES
@@ -153,9 +169,9 @@ define(['$', 'core/platform', 'page/util/common', 'core/conf/user/manager', 'hlb
    * [filterElements removes css styles in HLBCSSBlacklist from the HLB element, but not its children]
    * @param  {[DOM element]} $hlb [HLB element]
    */
-  function filterStyles ($hlb) {
+  function filterStyles($hlb) {
     for (var i = 0; i < HLBCSSBlacklist.length; i += 1) {
-      $hlb[0].style.removeProperty([HLBCSSBlacklist[i]]);
+      inlineStyle.removeProperty($hlb[0], HLBCSSBlacklist[i]);
     }
   }
 
@@ -163,7 +179,7 @@ define(['$', 'core/platform', 'page/util/common', 'core/conf/user/manager', 'hlb
    * [filterAttributes removes html attributes in HLBAttributeBlacklist]
    * @param  {[DOM element]} $hlb [HLB element]
   */
-  function filterAttributes ($hlb) {
+  function filterAttributes($hlb) {
     for (var i = 0; i < HLBAttributeBlacklist.length; i += 1) {
       $hlb.removeAttr(HLBAttributeBlacklist[i]);
     }
@@ -494,9 +510,7 @@ define(['$', 'core/platform', 'page/util/common', 'core/conf/user/manager', 'hlb
    * @param  {[jQuery element]} $hlb      [The HLB element]
    */
   function initializeHLBElementStyles ($foundation, $hlb) {
-
-    $hlb[0].style.cssText = getComputedStyleCssText($foundation[0]);
-
+    inlineStyle($hlb[0]).cssText =  getComputedStyleCssText($foundation[0]);
   }
 
    /**
@@ -537,10 +551,10 @@ define(['$', 'core/platform', 'page/util/common', 'core/conf/user/manager', 'hlb
       foundationDescendantStyle = getComputedStyle(foundationDescendant);
 
       // Copy the original elements child styles to the HLB elements child.
-      hlbDescendant.style.cssText = getComputedStyleCssText(foundationDescendant);
+      inlineStyle(hlbDescendant).cssText = getComputedStyleCssText(foundationDescendant);
 
       if (shouldRemovePadding($foundationDescendant, initialHLBRect)) {
-        $hlbDescendant.css(getChildPadding($foundationDescendant, initialHLBRect));
+        inlineStyle.set(hlbDescendant, getChildPadding($foundationDescendant, initialHLBRect));
       }
 
       // Compute styles that are more complicated than copying cssText.
@@ -558,7 +572,7 @@ define(['$', 'core/platform', 'page/util/common', 'core/conf/user/manager', 'hlb
       }
 
       // Set the childs css.
-      $hlbDescendant.css(computedChildStyles);
+      inlineStyle.set(hlbDescendant, computedChildStyles);
 
       // Ran into issues with children inheriting styles because of class and id CSS selectors.
       // Filtering children of these attributes solves the problem.
@@ -672,7 +686,7 @@ define(['$', 'core/platform', 'page/util/common', 'core/conf/user/manager', 'hlb
         });
 
         if (forceTextColor) {
-          $(this).css('color', HLB_DEFAULT_TEXT_COLOR);
+          inlineStyle(this).color = HLB_DEFAULT_TEXT_COLOR;
         }
 
       }
@@ -694,7 +708,7 @@ define(['$', 'core/platform', 'page/util/common', 'core/conf/user/manager', 'hlb
         backgroundStyles      = getHLBBackgroundImage($picked, elementComputedStyle),
         backgroundColor       = getHLBBackgroundColor($picked, elementComputedStyle),
         calculatedHLBStyles   = {
-          'paddingLeft' : getHLBLeftPadding($foundation, elementComputedStyle),
+          'paddingLeft'  : getHLBLeftPadding($foundation, elementComputedStyle),
           'display'      : getHLBDisplay(elementComputedStyle),
           'left'         : originalElementRect.left + window.scrollLeft,
           'top'          : originalElementRect.top + window.scrollTop

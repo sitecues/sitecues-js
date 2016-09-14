@@ -34,7 +34,8 @@ define(
     'page/highlight/traitcache',
     'page/highlight/traits',
     'page/highlight/judge',
-    'core/native-functions'
+    'core/native-functions',
+    'core/inline-style/inline-style'
   ],
   function (
     $,
@@ -44,7 +45,8 @@ define(
     traitcache,
     traits,
     judge,
-    nativeFn
+    nativeFn,
+    inlineStyle
   ) {
   'use strict';
 
@@ -385,16 +387,26 @@ define(
 
     if (SC_DEV && isVoteDebuggingOn) {
       if (origBestIndex !== bestIndex) {
-        candidates[origBestIndex].style.outline = '2px solid red';
-        candidates[bestIndex].style.outline = '2px solid green';
+        inlineStyle.set(candidates[origBestIndex], {
+          outline : '2px solid red'
+        });
+        inlineStyle.set(candidates[bestIndex], {
+          outline : '2px solid green'
+        });
       }
       else {
         console.log('Extra work ' + extraWork);
-        candidates[bestIndex].style.outline = (extraWork * 4) + 'px solid orange';
+        inlineStyle.set(candidates[bestIndex], {
+          outline : (extraWork * 4) + 'px solid orange'
+        });
       }
       nativeFn.setTimeout(function () {
-        candidates[origBestIndex].style.outline = '';
-        candidates[bestIndex].style.outline = '';
+        inlineStyle.set(candidates[origBestIndex], {
+          outline : ''
+        });
+        inlineStyle.set(candidates[bestIndex], {
+          outline : ''
+        });
       }, 1000);
     }
     return bestIndex;
