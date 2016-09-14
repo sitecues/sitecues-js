@@ -14,7 +14,6 @@ define([
   'core/bp/view/panel/panel-classes',
   'core/bp/view/badge/badge-classes',
   'core/events',
-  'core/bp/view/styles',
   'core/history-change-events'
 ],
   function(BP_CONST,
@@ -29,7 +28,6 @@ define([
             panelClasses,
             badgeClasses,
             events,
-            styles,
             historyChange) {
 
   var byId = helper.byId,
