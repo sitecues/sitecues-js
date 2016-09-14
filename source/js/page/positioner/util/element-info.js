@@ -17,7 +17,7 @@ define(
   ) {
   'use strict';
 
-  var originalBody, docElem, didCacheBPElements, bpElementMap;
+  var originalBody, docElem, didCacheBPElements, bpElementMap, isInitialized;
 
   function getScale(element, position) {
     // If we've never scaled this element before, it's possible that this element is inheriting a transformation from the original body
@@ -199,6 +199,10 @@ define(
   }
 
   function init() {
+    if (isInitialized) {
+      return;
+    }
+    isInitialized = true;
     originalBody = document.body;
     docElem      = document.documentElement;
     bpElementMap = new WeakMap();
