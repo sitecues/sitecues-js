@@ -604,7 +604,7 @@ define(
       'padding'        : 0,
       'margin'         : 0,
       'width'          : pickedElementsBoundingBox.width / inheritedZoom
-    }, { doProxy : false });
+    });
     $foundation.insertAfter('body');
 
     // Map all picked elements children CSS to cloned children CSS
@@ -708,11 +708,11 @@ define(
    */
   function getOrCreateHLBWrapper() {
 
-    var wrapper =  $hlbWrapper ||
+    var $wrapper =  $hlbWrapper ||
             $('<sc>', {
               'id': constants.HLB_WRAPPER_ID
             });
-    inlineStyle.set(wrapper[0], {
+    inlineStyle.set($wrapper[0], {
       'padding'  : 0,
       'margin'   : 0,
       'top'      : 0,
@@ -720,7 +720,7 @@ define(
       'position' : 'absolute',
       'overflow' : 'visible'
     });
-    return wrapper;
+    return $wrapper;
   }
 
   /**

@@ -30,9 +30,12 @@ define(
   'use strict';
 
   var proxyMap,
-      assignmentDictionary, assignmentRecords,
-      lastStyleMap, intendedStyleMap,
-      updateTimer, styleParser,
+      assignmentDictionary,
+      assignmentRecords,
+      lastStyleMap,
+      intendedStyleMap,
+      updateTimer,
+      styleParser,
       // Arbitrarily long timeout between updating the intended style.
       // This isn't an especially well tuned number, we just don't need it to update very often
       UPDATE_TIMEOUT = 300,
@@ -84,53 +87,22 @@ define(
   // @param callback  : if a callback is defined, instead of inserting a style proxy for each element, cache their intended styles, apply our style values,
   // run the callback function, and then restore the intended styles. By doing this in a synchronous block we can guarantee that no other scripts will have an opportunity
   // to assign a new value
-  function overrideStyle(elmts, styleInfo, callback) {
+  function overrideStyle(elmts, styleInfo) {
     var assignmentFn = getAssignmentFunction(styleInfo),
-        elements     = arrayUtil.wrap(elmts),
-        hasCallback  = typeof callback === 'function';
+        elements     = arrayUtil.wrap(elmts);
 
     elements.forEach(function (element) {
-      var styleProperty, currentStyles,
-          shouldProxyStyle = !hasCallback,
-          isProxied        = isStyleProxied(element);
+      var currentStyles = getCurrentStyles(element);
 
-      currentStyles = getCurrentStyles(element);
-      lastStyleMap.set(element, currentStyles);
+      lastStyleMap.set(element, objectUtil.assign({}, currentStyles));
 
-      if (isProxied) {
-        styleProperty = '_scStyle';
-      }
-      else {
-        styleProperty = shouldProxyStyle ? '_scStyle' : 'style';
-  
-        if (shouldProxyStyle) {
-          intendedStyleMap.set(element, objectUtil.assign({}, currentStyles));
-          insertStyleProxy(element);
-        }
+      if (!isStyleProxied(element)) {
+        intendedStyleMap.set(element, objectUtil.assign({}, currentStyles));
+        insertStyleProxy(element);
       }
 
-      assignmentFn(element, styleInfo, styleProperty);
+      assignmentFn(element, styleInfo, '_scStyle');
     });
-
-    if (hasCallback) {
-      callback();
-      // After running the callback, we restore the last inline values of each element before the current override. Importantly we don't
-      // restore the intended styles, because we might override a preceding override. Restoring to intended values needs to be done
-      // explicitly with an inlineStyle.restore() call
-      elements.forEach(function (element) {
-        var properties = getModifiedProperties(element, styleInfo),
-            lastStyles = getLastStyles(element),
-            style      = getStyle(element);
-
-        properties.forEach(function (property) {
-          restoreStyleValue(style, property, lastStyles);
-        });
-        
-        if (!isStyleProxied(element)) {
-          lastStyleMap.delete(element);
-        }
-      });
-    }
   }
 
   function toKebabCase(str) {
@@ -148,24 +120,6 @@ define(
 
   function getLastStyles(element) {
     return lastStyleMap.get(element);
-  }
-
-  // Return the properties to restore if this styleInfo has been assigned
-  function getModifiedProperties(element, styleInfo) {
-    switch (getStyleType(styleInfo)) {
-      case 'array':
-        return [toKebabCase(styleInfo[0])];
-
-      case 'object':
-        return Object.keys(styleInfo).map(toKebabCase);
-
-      case 'string':
-        // String values for now can only be used to assign directly to cssText, overriding all other inline styles.
-        // Therefore the modified styles are the union of the current and former assigned style properties
-        var current = Object.keys(getCurrentStyles(element) || {}),
-            last    = Object.keys(getLastStyles(element) || {});
-        return arrayUtil.union(current, last);
-    }
   }
 
   function getStyleType(styleInfo) {
@@ -189,7 +143,7 @@ define(
     getStyle(element).removeProperty(toKebabCase(property));
   }
 
-  function removeAttribute(element) {
+  function clearStyle(element) {
     element.removeAttribute('style');
   }
 
@@ -253,8 +207,8 @@ define(
   function restoreLast(element, props) {
     var lastStyles = getLastStyles(element);
 
+    // Styles only need to be restored if we have overridden them.
     if (!lastStyles) {
-      // If we haven't saved last styles, do nothing
       return;
     }
 
@@ -289,8 +243,8 @@ define(
       style          = getStyle(element),
       intendedStyles = getIntendedStyles(element);
 
+    // Styles only need to be restored if we have overridden them.
     if (!intendedStyles) {
-      // If we haven't saved intended styles, there is nothing to restore.
       return;
     }
 
@@ -309,20 +263,13 @@ define(
       style.cssText = cssText;
     }
     else {
-      element.removeAttribute('style');
+      clearStyle(element);
     }
 
     delete element.style;
     delete element._scStyle;
     delete element._scStyleProxy;
   }
-
-  // Proxying the style object doesn't allow us to intercept style changes via setAttribute and setAttributeNode
-  // value, nodeValue, textContent would have to be intercepted on the attributeNode
-  // TODO: proxy element.removeAttribute, element.setAttribute, style.setProperty, style.removeProperty
-  //function proxySetAttribute(element) {
-  //
-  //}
 
   function styleProxyGetter(property) {
     /*jshint validthis: true */
@@ -469,13 +416,13 @@ define(
     };
   }
 
-  getStyle.override        = overrideStyle;
-  getStyle.set             = setStyle;
-  getStyle.restore         = restore;
-  getStyle.restoreLast     = restoreLast;
-  getStyle.removeProperty  = removeProperty;
-  getStyle.removeAttribute = removeAttribute;
-  getStyle.init            = init;
+  getStyle.override       = overrideStyle;
+  getStyle.set            = setStyle;
+  getStyle.restore        = restore;
+  getStyle.restoreLast    = restoreLast;
+  getStyle.removeProperty = removeProperty;
+  getStyle.clear          = clearStyle;
+  getStyle.init           = init;
 
   return getStyle;
 });
