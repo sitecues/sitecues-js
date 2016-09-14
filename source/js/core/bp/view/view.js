@@ -14,6 +14,7 @@ define([
   'core/bp/view/panel/panel-classes',
   'core/bp/view/badge/badge-classes',
   'core/events',
+  'core/bp/view/styles',
   'core/history-change-events'
 ],
   function(BP_CONST,
@@ -28,6 +29,7 @@ define([
             panelClasses,
             badgeClasses,
             events,
+            styles,
             historyChange) {
 
   var byId = helper.byId,
@@ -149,6 +151,10 @@ define([
     updateElements('[filter]', 'filter');
   }
 
+  function isToolbar() {
+    return state.get('isToolbarBadge');
+  }
+
   // This function augments the badge placement element, which is passed in.
   // This is an element that will have <svg> and other markup inserted inside of it.
   //
@@ -190,6 +196,7 @@ define([
 
   return {
     init: init,
+    isToolbar: isToolbar,
     update: update
   };
 });

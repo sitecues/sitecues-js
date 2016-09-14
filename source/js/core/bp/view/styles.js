@@ -6,8 +6,6 @@ define(['core/bp/helper', 'core/platform', 'core/conf/site'],
 
     isAnimationDebuggingOn = false,
 
-    palette,
-    hasCustomPalette,
     customBadgePalette,
 
     doWebKitPrefix,
@@ -506,10 +504,15 @@ define(['core/bp/helper', 'core/platform', 'core/conf/site'],
     document.head.appendChild(sheet);
   }
 
+  function getCustomPalette() {
+    var palette = site.get('palette'),
+      hasCustomPalette = typeof palette === 'object';
+    return (hasCustomPalette && palette.badge);
+  }
+
   function init() {
-    palette = site.get('palette');
-    hasCustomPalette = typeof palette === 'object';
-    customBadgePalette = (hasCustomPalette && palette.badge) || {};
+    customBadgePalette = getCustomPalette() || {};
+
     doWebKitPrefix = platform.browser.isSafari;
     initBaseCss();
 
