@@ -203,7 +203,7 @@ define(
     docElem      = document.documentElement;
     bpElementMap = new WeakMap();
 
-    events.on('bp/did-insert-secondary-markup bp/content-loaded bp/did-inserted-bp-element', function () {
+    events.on('bp/did-insert-secondary-markup bp/content-loaded bp/did-insert-bp-element', function () {
       didCacheBPElements = false;
     });
   }

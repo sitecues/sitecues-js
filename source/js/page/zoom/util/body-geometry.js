@@ -80,10 +80,10 @@ define(
       origWidth = originalBodyInfo.mainNode.clientWidth,
       newWidth,
       isFluid;
-    inlineStyle.override(body, { width : (viewport.getInnerWidth() / 5) + 'px' }, function () {
-      newWidth = originalBodyInfo.mainNode.clientWidth;
-      isFluid = origWidth !== newWidth;
-    });
+    inlineStyle.override(body, { width : (viewport.getInnerWidth() / 5) + 'px' });
+    newWidth = originalBodyInfo.mainNode.clientWidth;
+    isFluid = origWidth !== newWidth;
+    inlineStyle.restore(body, 'width');
     return isFluid;
   }
 

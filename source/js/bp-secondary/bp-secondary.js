@@ -446,10 +446,13 @@ define(
   function resetWebKitLayout(elem) {
     // Hack to fix Chrome/Safari bug where the more button was in the wrong place after resetting styles
     // This forces WebKit to reflow the element's layout.
-    inlineStyle.override(elem, { display : 'none' }, function () {
-      // jshint unused:false
-      var unused = getBPContainer().offsetHeight; // Force layout refresh
-    });
+    var
+      style   = inlineStyle(elem),
+      display = style.display;
+    style.display = 'none';
+    // jshint unused:false
+    var unused = getBPContainer().offsetHeight; // Force layout refresh
+    style.display = display;
   }
 
   function resetButtonStyles() {
