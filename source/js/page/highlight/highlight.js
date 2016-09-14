@@ -1436,7 +1436,7 @@ define(
 
   // This addresses the stickiness of the focus on the dropdown select element on fairfieldcountybank.com
   function setFocus(evt) {
-    if (evt.target !== document.activeElement) {
+    if (evt.target !== document.activeElement && typeof evt.target.focus === 'function') {
       evt.target.focus();
     }
     testFocus();

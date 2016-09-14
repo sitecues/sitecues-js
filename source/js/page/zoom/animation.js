@@ -408,7 +408,6 @@ define(
     var didUnzoom   = state.completedZoom > state.currentTargetZoom;
 
     state.completedZoom = getActualZoom();
-    state.translation   = common.getComputedTranslation(body);
     state.fixedZoom     = restrictZoom.forFixedZoomTarget(state.completedZoom);
     state.startZoomTime = 0;
 

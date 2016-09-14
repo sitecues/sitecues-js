@@ -5,7 +5,6 @@ define([], function () {
   var state = {
     completedZoom: 1,         // Current zoom as of the last finished operation
     fixedZoom: 1,             // Restricted zoom for fixed elements
-    translation: 0,
     currentTargetZoom: 1,     // Zoom we are aiming for in the current operation
     startZoomTime: 0,         // If no current zoom operation, this is cleared (0 or undefined)
     isInitialLoadZoom: false, // Is this the initial zoom for page load? (The one based on previous user settings)
