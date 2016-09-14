@@ -1,11 +1,27 @@
+// This module assists with transforming elements with transition styles
 define(
   [
-    'core/inline-style/inline-style'
+    'core/inline-style/inline-style',
+    'core/util/array-utility',
+    'core/platform',
+    'core/native-functions',
+    'page/viewport/viewport'
   ],
   function (
-    inlineStyle
+    inlineStyle,
+    arrayUtil,
+    platform,
+    nativeFn
   ) {
   'use strict';
+  var positionStyles = [
+    'top',
+    'bottom',
+    'left',
+    'right',
+    'height',
+    'width'
+  ];
 
   function disableTransformTransition(element) {
     var style  = getComputedStyle(element),
@@ -37,7 +53,22 @@ define(
     }
   }
 
+  function applyInstantTransform(elmnts, transform) {
+    var elements = arrayUtil.wrap(elmnts);
+    elements.forEach(disableTransformTransition);
+    inlineStyle.override(elements, [platform.transformProperty, transform]);
+    nativeFn.setTimeout(function () {
+      elements.forEach(restoreTransition);
+    }, 0);
+  }
+
+  function restoreTransition(element) {
+    inlineStyle.restore(element, 'transition');
+  }
+
   return {
-    disableTransformTransition : disableTransformTransition
+    applyInstantTransform : applyInstantTransform,
+    disableTransformTransition : disableTransformTransition,
+    restoreTransition : restoreTransition
   };
 });

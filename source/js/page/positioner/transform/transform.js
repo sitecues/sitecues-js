@@ -29,7 +29,8 @@ define(
     'page/zoom/config/config',
     'core/events',
     'core/native-functions',
-    'core/inline-style/inline-style'
+    'core/inline-style/inline-style',
+    'page/util/transform-util'
   ],
   function (
     elementMap,
@@ -47,7 +48,8 @@ define(
     config,
     events,
     nativeFn,
-    inlineStyle
+    inlineStyle,
+    transformUtil
   ) {
     /*jshint +W072 */
     'use strict';
@@ -182,7 +184,8 @@ define(
     }
 
     function setNewTransform(element, translateX, translateY, scale) {
-      inlineStyle.override(element, [transformProperty, 'translate3d(' + translateX + 'px, ' + translateY + 'px, 0) scale(' + scale + ')']);
+      var transform = 'translate3d(' + translateX + 'px, ' + translateY + 'px, 0) scale(' + scale + ')';
+      transformUtil.applyInstantTransform(element, transform);
     }
 
     function calculateXTranslation(args) {
@@ -411,7 +414,6 @@ define(
         specifiedTop   = getComputedStyle(element).top,
         specifiedValue = parseFloat(specifiedTop);
 
-
       if (!isNaN(specifiedValue) && specifiedTop.indexOf('px') >= 0) {
         inlineStyle.override(element, {
           top : (specifiedValue * state.fixedZoom) + 'px'
@@ -426,9 +428,7 @@ define(
     }
 
     function onTargetAdded(element) {
-      var styles = {};
-      styles[transformOriginProperty] = isTransformXOriginCentered ? '50% 0' : '0 0';
-      inlineStyle.override(element, styles);
+      inlineStyle.override(element, [transformOriginProperty, isTransformXOriginCentered ? '50% 0' : '0 0']);
       // This handler runs when a style relevant to @element's bounding rectangle has mutated
       rectCache.listenForMutatedRect(element, function () {
         /*jshint validthis: true */

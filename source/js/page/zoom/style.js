@@ -10,7 +10,8 @@ define(
     'page/zoom/util/body-geometry',
     'page/zoom/config/config',
     'core/native-functions',
-    'core/inline-style/inline-style'
+    'core/inline-style/inline-style',
+    'page/util/transform-util'
   ],
   function (
     $,
@@ -20,7 +21,8 @@ define(
     bodyGeo,
     config,
     nativeFn,
-    inlineStyle
+    inlineStyle,
+    transformUtil
   ) {
   'use strict';
 
@@ -262,40 +264,13 @@ define(
 
   //Restore the intended inline style when we're done transforming the body
   function restoreBodyTransitions() {
-    inlineStyle.restore(body, 'transition');
+    transformUtil.restoreTransition(body);
   }
 
   //If there is a transition style applied to the body, we need to be sure that it doesn't apply to transformations
   //otherwise our zoom logic will break
   function fixBodyTransitions() {
-    var style  = getComputedStyle(body),
-      property = style.transitionProperty,
-      delay    = style.transitionDelay.split(',').some(function (dly) {
-        return parseFloat(dly);
-      }),
-      duration;
-
-    if (!delay) {
-      duration = style.transitionDuration.split(',').some(function (drtn) {
-        return parseFloat(drtn);
-      });
-    }
-
-    if (!delay && !duration) {
-      return;
-    }
-
-    if (property.indexOf('all') >= 0 || property.indexOf('transform') >= 0) {
-      var transitionValue = inlineStyle(body).transition;
-      if (transitionValue) {
-        transitionValue += ', ';
-      }
-      transitionValue += 'transform 0s';
-      inlineStyle.override(body, {
-        transition : transitionValue
-      });
-    }
-
+    transformUtil.disableTransformTransition(body);
   }
 
   function getZoomStyleSheet() {

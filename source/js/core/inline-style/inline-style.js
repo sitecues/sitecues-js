@@ -118,14 +118,13 @@ define(
       // restore the intended styles, because we might override a preceding override. Restoring to intended values needs to be done
       // explicitly with an inlineStyle.restore() call
       elements.forEach(function (element) {
-        var props = getModifiedProperties(element, styleInfo),
+        var properties = getModifiedProperties(element, styleInfo),
             lastStyles = getLastStyles(element),
-            style = getStyle(element);
-        
-        for (var i = 0; i < props.length; i++) {
-          var property = props[i];
-          style[property] = lastStyles[property] || '';
-        }
+            style      = getStyle(element);
+
+        properties.forEach(function (property) {
+          restoreStyleValue(style, property, lastStyles);
+        });
         
         if (!isStyleProxied(element)) {
           lastStyleMap.delete(element);
