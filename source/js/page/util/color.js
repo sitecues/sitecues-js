@@ -46,31 +46,31 @@ define(
 
   // Convert color names such as 'white', 'black', 'transparent' to rgba object or TRANSPARENT
   function convertColorNameToRgbFormat(colorName) {
-// APPROACH #1 is fast but bloats library by 1.6k with COLOR_NAMES_MAP
-//    var hexVal = colorUtil.COLOR_NAMES_MAP[colorName];
-//    if (typeof hexVal === 'undefined') {
-//      return 'rgba(0, 0, 0, 0)';
-//    }
-//
-//    var red = Math.floor(hexVal / 0x10000) % 256,
-//      green = Math.floor(hexVal / 0x100) % 256,
-//      blue = hexVal % 256;
-//
-//    return 'rgb(' + red + ', ' + green + ', ' + blue + ')';
-
-// APPROACH #2 is slower (~34ms on Chrome) but does not require COLOR_NAMES_MAP
-// Setting the border on the <body> and then immediately resetting will not cause a visible change
+  // APPROACH #1 is fast but bloats library by 1.6k with COLOR_NAMES_MAP
+  //    var hexVal = colorUtil.COLOR_NAMES_MAP[colorName];
+  //    if (typeof hexVal === 'undefined') {
+  //      return 'rgba(0, 0, 0, 0)';
+  //    }
+  //
+  //    var red = Math.floor(hexVal / 0x10000) % 256,
+  //      green = Math.floor(hexVal / 0x100) % 256,
+  //      blue = hexVal % 256;
+  //
+  //    return 'rgb(' + red + ', ' + green + ', ' + blue + ')';
+  
+  // APPROACH #2 is slower (~34ms on Chrome) but does not require COLOR_NAMES_MAP
+  // Setting the border on the <body> and then immediately resetting will not cause a visible change
     var rgb,
-      docElt = document.documentElement;
+      docElem = document.documentElement;
 
     if (colorName === 'initial' || colorName === 'inherit' || colorName === 'transparent') {
       return TRANSPARENT;
     }
 
-    inlineStyle.override(docElt, { outlineColor : colorName }, function () {
-      var isLegalColor = inlineStyle(docElt).outlineColor;  // Browser didn't set the border color -> not a legal color
-      rgb = isLegalColor && getComputedStyle(docElt).outlineColor;
-    });
+    inlineStyle.override(docElem, { outlineColor : colorName });
+    var isLegalColor = inlineStyle(docElem).outlineColor;  // Browser didn't set the border color -> not a legal color
+    rgb = isLegalColor && getComputedStyle(docElem).outlineColor;
+    inlineStyle.restore(docElem, 'outline-color');
 
     return rgb;
   }

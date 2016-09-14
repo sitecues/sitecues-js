@@ -6,8 +6,8 @@
 *
 * This is important for a couple reasons:
  A complete reset of Sitecues should restore all the original styles. The problem with our past solution, caching an element's style value before setting
- our own style, is that it doesn't allow for dynamic re-setting of the style during the lifetime of the document, because we will overwrite the updated style
- with our cached value.
+ our own style, is that it doesn't allow for dynamic re-setting of the style during the lifetime of the document, so we end up overwriting
+ the updated style with our cached value.
 
  Even without a complete reset, we frequently want to restore individual elements to their intended state for certain operations.
  For example zoom resets the transform and width of the body element to an empty string when it recomputes the original body dimensions,
@@ -30,9 +30,15 @@ define(
   'use strict';
 
   var proxyMap,
-      assignmentDictionary, assignmentRecords,
-      lastStyleMap, intendedStyleMap,
-      updateTimer, styleParser,
+      assignmentDictionary,
+      assignmentRecords,
+      lastStyleMap,
+      intendedStyleMap,
+      updateTimer,
+      styleParser,
+      // Arbitrarily long timeout between updating the intended style.
+      // This isn't an especially well tuned number, we just don't need it to update very often
+      UPDATE_TIMEOUT = 300,
       cssNumbers = {
         "animation-iteration-count" : true,
         "column-count"              : true,
@@ -78,57 +84,25 @@ define(
      * 'property: value; ...'
      * ['property', 'value', 'importance']
      * */
-  // @param callback  : if a callback is defined, instead of inserting a style proxy for each element, cached their intended styles, apply our style values,
+  // @param callback  : if a callback is defined, instead of inserting a style proxy for each element, cache their intended styles, apply our style values,
   // run the callback function, and then restore the intended styles. By doing this in a synchronous block we can guarantee that no other scripts will have an opportunity
-  // to apply an style value
-  function overrideStyle(elmts, styleInfo, callback) {
+  // to assign a new value
+  function overrideStyle(elmts, styleInfo) {
     var assignmentFn = getAssignmentFunction(styleInfo),
-        elements     = arrayUtil.wrap(elmts),
-        hasCallback  = typeof callback === 'function';
+        elements     = arrayUtil.wrap(elmts);
 
     elements.forEach(function (element) {
-      var styleProperty, currentStyles,
-          shouldProxyStyle = !hasCallback,
-          isProxied        = isStyleProxied(element);
+      var currentStyles = getCurrentStyles(element);
 
-      currentStyles = getCurrentStyles(element);
-      lastStyleMap.set(element, currentStyles);
+      lastStyleMap.set(element, objectUtil.assign({}, currentStyles));
 
-      if (isProxied) {
-        styleProperty = '_scStyle';
-      }
-      else {
-        styleProperty = shouldProxyStyle ? '_scStyle' : 'style';
-  
-        if (shouldProxyStyle) {
-          intendedStyleMap.set(element, objectUtil.assign({}, currentStyles));
-          insertStyleProxy(element);
-        }
+      if (!isStyleProxied(element)) {
+        intendedStyleMap.set(element, objectUtil.assign({}, currentStyles));
+        insertStyleProxy(element);
       }
 
-      assignmentFn(element, styleInfo, styleProperty);
+      assignmentFn(element, styleInfo, '_scStyle');
     });
-
-    if (hasCallback) {
-      callback();
-      // After running the callback, we restore the last inline values of each element before the current override. Importantly we don't
-      // restore the intended styles, because we may be overriding a prior override. Restoring to the intended styles needs to be done
-      // explicitly with an inlineStyle.restore() call
-      elements.forEach(function (element) {
-        var props = getModifiedProperties(element, styleInfo),
-            lastStyles = getLastStyles(element),
-            style = getStyle(element);
-        
-        for (var i = 0; i < props.length; i++) {
-          var property = props[i];
-          style[property] = lastStyles[property] || '';
-        }
-        
-        if (!isStyleProxied(element)) {
-          lastStyleMap.delete(element);
-        }
-      });
-    }
   }
 
   function toKebabCase(str) {
@@ -146,22 +120,6 @@ define(
 
   function getLastStyles(element) {
     return lastStyleMap.get(element);
-  }
-
-  // Return the properties to restore if this styleInfo has been assigned
-  function getModifiedProperties(element, styleInfo) {
-    switch (getStyleType(styleInfo)) {
-      case 'array':
-        return [toKebabCase(styleInfo[0])];
-
-      case 'object':
-        return Object.keys(styleInfo).map(toKebabCase);
-
-      case 'string':
-        var current = Object.keys(getCurrentStyles(element) || {}),
-            last    = Object.keys(getLastStyles(element) || {});
-        return arrayUtil.union(current, last);
-    }
   }
 
   function getStyleType(styleInfo) {
@@ -185,8 +143,7 @@ define(
     getStyle(element).removeProperty(toKebabCase(property));
   }
 
-  // Remove the style attribute from @element
-  function removeAttribute(element) {
+  function clearStyle(element) {
     element.removeAttribute('style');
   }
 
@@ -209,7 +166,7 @@ define(
     if (!updateTimer) {
       updateTimer = nativeFn.setTimeout(function () {
         updateIntendedStyles();
-      }, 300);
+      }, UPDATE_TIMEOUT);
     }
   }
 
@@ -218,6 +175,7 @@ define(
       var cssObject,
         element          = record.element,
         styleInfo        = record.styleInfo,
+        // cssText was assigned in this case
         isCssOverwritten = typeof styleInfo === 'string',
         intendedStyles   = isCssOverwritten ? {} : intendedStyleMap.get(element) || {},
         lastStyles       = isCssOverwritten ? {} : lastStyleMap.get(element) || {};
@@ -232,10 +190,13 @@ define(
 
       Object.keys(cssObject).forEach(function (property) {
         intendedStyles[property] = cssObject[property];
+        // We don't want a reversion to the `last styles`, the inline values of an element cached before its latest override, to clobber
+        // dynamic updates to its intended styles.
         lastStyles[property]     = cssObject[property];
       });
 
       intendedStyleMap.set(element, intendedStyles);
+      lastStyleMap.set(element, lastStyles);
     });
 
     assignmentRecords = [];
@@ -246,23 +207,32 @@ define(
   function restoreLast(element, props) {
     var lastStyles = getLastStyles(element);
 
+    // Styles only need to be restored if we have overridden them.
     if (!lastStyles) {
-      // If we haven't saved last styles, do nothing
       return;
     }
 
-    var style = getStyle(element);
+    var
+      style      = getStyle(element),
+      properties = arrayUtil.wrap(props).map(toKebabCase);
 
-    arrayUtil.wrap(props).map(toKebabCase).forEach(function (property) {
-      var value = lastStyles[property];
-
-      if (value) {
-        style[property] = value;
-      }
-      else {
-        removeProperty(element, property);
-      }
+    properties.forEach(function (property) {
+      restoreStyleValue(style, property, lastStyles);
     });
+  }
+
+  // @param property must be kebab case in order to look up the cached styles
+  function restoreStyleValue(style, property, cachedStyles) {
+    var value, priority,
+      declaration = cachedStyles[property];
+    if (declaration && declaration.value) {
+      value    = declaration.value;
+      priority = declaration.priority;
+      style.setProperty(property, value, priority);
+    }
+    else {
+      style.removeProperty(property);
+    }
   }
 
   /*
@@ -270,26 +240,20 @@ define(
   * */
   function restore(element, props) {
     var properties,
-      style = getStyle(element),
+      style          = getStyle(element),
       intendedStyles = getIntendedStyles(element);
 
+    // Styles only need to be restored if we have overridden them.
     if (!intendedStyles) {
-      // If we haven't saved intended styles, there is nothing to restore.
       return;
     }
 
     if (props) {
       properties = arrayUtil.wrap(props).map(toKebabCase);
       properties.forEach(function (property) {
-        var value = intendedStyles[property];
-
-        if (value) {
-          style[property] = value;
-        }
-        else {
-          removeProperty(element, property);
-        }
+        restoreStyleValue(style, property, intendedStyles);
       });
+      // Only restore the specified properties
       return;
     }
 
@@ -299,20 +263,13 @@ define(
       style.cssText = cssText;
     }
     else {
-      element.removeAttribute('style');
+      clearStyle(element);
     }
 
     delete element.style;
     delete element._scStyle;
     delete element._scStyleProxy;
   }
-
-  // Proxying the style object doesn't allow us to intercept style changes via setAttribute and setAttributeNode
-  // value, nodeValue, textContent would have to be intercepted on the attributeNode
-  // TODO: proxy element.removeAttribute, element.setAttribute, style.setProperty, style.removeProperty
-  //function proxySetAttribute(element) {
-  //
-  //}
 
   function styleProxyGetter(property) {
     /*jshint validthis: true */
@@ -333,6 +290,8 @@ define(
     /*jshint validthis: false */
   }
 
+  // This inserts a proxy to catch intended style changes set by other scripts, allowing those intended
+  // styles to be re-applied after Sitecues styles are removed.
   function insertStyleProxy(element) {
     var proxy = proxyMap.get(element);
 
@@ -361,34 +320,34 @@ define(
   }
 
   function createProxy(element) {
-  var styleChain        = element.style,
-      styleProxy        = {},
-      proxiedProperties = {};
+    var styleChain        = element.style,
+        styleProxy        = {},
+        proxiedProperties = {};
 
-  function interceptProperty(property) {
-    if (proxiedProperties[property]) {
-      return;
+    function interceptProperty(property) {
+      if (proxiedProperties[property]) {
+        return;
+      }
+
+      var boundGetter = nativeFn.bindFn.call(styleProxyGetter, element, property),
+          boundSetter = nativeFn.bindFn.call(styleProxySetter, element, property);
+
+      proxiedProperties[property] = true;
+
+      Object.defineProperty(styleProxy, property, {
+        get : boundGetter,
+        set : boundSetter
+      });
     }
 
-    var boundGetter = nativeFn.bindFn.call(styleProxyGetter, element, property),
-        boundSetter = nativeFn.bindFn.call(styleProxySetter, element, property);
+    while (styleChain) {
+      Object.getOwnPropertyNames(styleChain).forEach(interceptProperty);
+      styleChain = Object.getPrototypeOf(styleChain);
+    }
 
-    proxiedProperties[property] = true;
-
-    Object.defineProperty(styleProxy, property, {
-      get : boundGetter,
-      set : boundSetter
-    });
+    proxyMap.set(element, styleProxy);
+    return styleProxy;
   }
-
-  while (styleChain) {
-    Object.getOwnPropertyNames(styleChain).forEach(interceptProperty);
-    styleChain = Object.getPrototypeOf(styleChain);
-  }
-
-  proxyMap.set(element, styleProxy);
-  return styleProxy;
-}
 
   function isStyleProxied(element) {
     return element.style === element._scStyleProxy;
@@ -404,20 +363,38 @@ define(
 
   function stringifyCss(cssObject) {
     styleParser.cssText = '';
+
     Object.keys(cssObject).forEach(function (property) {
-      styleParser[property] = cssObject[property];
+      var value, priority,
+        propertyData = cssObject[property];
+
+      if (typeof propertyData === 'object') {
+        value    = cssObject[property].value;
+        priority = cssObject[property].priority;
+      }
+      else {
+        value    = propertyData;
+        priority = '';
+      }
+
+      styleParser.setProperty(property, value, priority);
     });
+
     return styleParser.cssText;
   }
 
+  // Returns an object keyed with style properties to a property data object containing value and priority
+  // @return { property : { value : foo, priority : 'important' } }
   function parseCss(cssText) {
     var cssObj = {};
-
     styleParser.cssText = cssText;
 
     for (var i = 0; i < styleParser.length; i++) {
       var property = styleParser[i];
-      cssObj[property] = styleParser[property];
+      cssObj[property] = {
+        value    : styleParser.getPropertyValue(property) || '',
+        priority : styleParser.getPropertyPriority(property) || ''
+      };
     }
 
     return cssObj;
@@ -439,13 +416,13 @@ define(
     };
   }
 
-  getStyle.override        = overrideStyle;
-  getStyle.set             = setStyle;
-  getStyle.restore         = restore;
-  getStyle.restoreLast     = restoreLast;
-  getStyle.removeProperty  = removeProperty;
-  getStyle.removeAttribute = removeAttribute;
-  getStyle.init            = init;
+  getStyle.override       = overrideStyle;
+  getStyle.set            = setStyle;
+  getStyle.restore        = restore;
+  getStyle.restoreLast    = restoreLast;
+  getStyle.removeProperty = removeProperty;
+  getStyle.clear          = clearStyle;
+  getStyle.init           = init;
 
   return getStyle;
 });

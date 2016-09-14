@@ -9,6 +9,7 @@ define(
     'core/metric',
     'core/ab-test/ab-test',
     'core/conf/user/manager',
+    'core/conf/site',
     'core/bp/view/view',
     'core/events',
     'core/dom-events',
@@ -21,6 +22,7 @@ define(
     metric,
     abTest,
     conf,
+    site,
     view,
     events,
     domEvents,
@@ -33,27 +35,17 @@ define(
     isInitialized,
     // We ignore the first mouse move when a window becomes active, otherwise badge opens
     // if the mouse happens to be over the badge/toolbar
-    doIgnoreNextMouseMove = true;
+    doIgnoreNextMouseMove = true,
+    DEFAULT_SENSITIVITY = 1,
+    sensitivity; /* How much more or less sensitive is the badge than usual, e.g. 1.5 = 50% more sensitive */
 
   function getBadgeElement() {
     return helper.byId(BP_CONST.BADGE_ID);
   }
 
-  function isInActiveToolbarArea(evt, badgeRect) {
-    var middleOfBadge = badgeRect.left + badgeRect.width / 2,
-      allowedDistance = BP_CONST.ACTIVE_TOOLBAR_WIDTH / 2;
-
-    return evt.clientX > middleOfBadge - allowedDistance &&
-      evt.clientX < middleOfBadge + allowedDistance;
-  }
-
   function isInBadgeArea(evt, badgeRect) {
     return evt.clientX >= badgeRect.left && evt.clientX <= badgeRect.right &&
       evt.clientY >= badgeRect.top && evt.clientY <= badgeRect.bottom;
-  }
-
-  function isInVerticalBadgeArea(evt, badgeRect) {
-    return evt.clientY >= badgeRect.top && evt.clientY<= badgeRect.bottom;
   }
 
   function  getVisibleBadgeRect() {
@@ -82,34 +74,33 @@ define(
 
     // Is the event related to the visible contents of the badge?
     // (as opposed to the hidden areas around the badge)
-    var badgeRect = getVisibleBadgeRect(),
-      isInBadge = isInBadgeArea(evt, badgeRect),
-      isInToolbar = state.get('isToolbarBadge') && isInActiveToolbarArea(evt, badgeRect);
+    var badgeRect = getVisibleBadgeRect();
 
-    if (!isInVerticalBadgeArea(evt, badgeRect)) {
+    if (!isInBadgeArea(evt, badgeRect)) {
       return;
     }
 
     // Check if shrinking and need to reopen
     if (state.isShrinking()) {
-      if (isInBadge) {
-        changeModeToPanel();  // User changed their mind -- reverse course and reopen
-      }
+      changeModeToPanel();  // User changed their mind -- reverse course and reopen
       return;
     }
 
     // Set timers to open the badge if the user stays inside of it
     // We use two timers so that if the user actually stops, the badge opens faster (more responsive feeling)
-    if (isInToolbar || isInBadge) {
-      // Hover if no move -- start a new timer every time mouse moves
-      hoverIfNoMoveTimer = nativeFn.setTimeout(changeModeToPanel,
-        isInBadge ? BP_CONST.HOVER_DELAY_NOMOVE_BADGE : BP_CONST.HOVER_DELAY_NOMOVE_TOOLBAR);
-    }
-
-    // Hover if stay inside -- start a new timer first time inside badge
-    if (isInBadge && !hoverIfStayInsideTimer) {
+    // Hover if no move -- start a new timer every time mouse moves
+    hoverIfNoMoveTimer = nativeFn.setTimeout(changeModeToPanel, getHoverDelayNoMove());
+    if (!hoverIfStayInsideTimer) {
       hoverIfStayInsideTimer = nativeFn.setTimeout(changeModeToPanel, getHoverDelayStayInside());
     }
+  }
+
+  function getSensitivity() {
+    return sensitivity;
+  }
+
+  function getHoverDelayNoMove() {
+    return BP_CONST.HOVER_DELAY_NOMOVE_BADGE / sensitivity;
   }
 
   function getHoverDelayStayInside() {
@@ -119,7 +110,7 @@ define(
     }
 
     // Second or later interaction
-    return BP_CONST.HOVER_DELAY_STAY_INSIDE_BADGE;
+    return BP_CONST.HOVER_DELAY_STAY_INSIDE_BADGE / sensitivity;
   }
 
   function isFirstInteraction() {
@@ -160,7 +151,6 @@ define(
   function setPanelExpandedState(isOpenedWithHover) {
     state.set('isSecondaryExpanded', false); // Only main panel expanded, not secondary
     state.set('wasMouseInPanel', isOpenedWithHover);
-    state.set('isOpenedWithHover', isOpenedWithHover);
     state.set('transitionTo', BP_CONST.PANEL_MODE);
     state.turnOnRealSettings();
     ensureFutureRealSettings();
@@ -210,11 +200,11 @@ define(
         evt.preventDefault();
         return false;
       }
-      else if (isBadgeFocused || isChildClicked) {
+      else if (isBadgeFocused || isChildClicked) {   // Screen reader pseudo-click
         // Click is in visible area and badge has focus --
         // * or *
         // Click in invisible child -- only screen readers can do this -- NVDA does it
-        // Go ahead and open the panel
+        // Go ahead and open the panel in focus/keyboard mode
 
         // First ensure it has focus (it didn't in second case)
         badgeElem.focus();
@@ -225,6 +215,10 @@ define(
           // Set screen reader flag for the life of this page view
           state.set('isOpenedWithScreenReader', true);
         }, 0);
+      }
+      else {
+        // Actual click -- not fake screen reader click, so no need to focus
+        changeModeToPanel();
       }
     }
   }
@@ -271,6 +265,8 @@ define(
     if (!isInitialized) {
       isInitialized = true;
 
+      sensitivity = site.get('badgeSensitivity') || DEFAULT_SENSITIVITY;
+
       var badgeElement = getBadgeElement();
       domEvents.on(badgeElement, 'keydown', processBadgeActivationKeys, { passive: false });
       domEvents.on(badgeElement, 'mousedown', clickToOpenPanel, { passive: false });
@@ -299,6 +295,7 @@ define(
 
   return {
     init: init,
+    getSensitivity: getSensitivity,
     expandPanel: expandPanel
   };
 });

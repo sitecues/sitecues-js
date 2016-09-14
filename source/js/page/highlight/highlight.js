@@ -1662,7 +1662,7 @@ define(
       state.savedBgColors = [];
 
       if (state.picked.attr('style') === '') {
-        inlineStyle.removeAttribute(state.picked[0]); // Full cleanup of attribute
+        inlineStyle.clear(state.picked[0]); // Full cleanup of attribute
       }
       removeMouseWheelListener();
     }

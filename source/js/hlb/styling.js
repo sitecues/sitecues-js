@@ -279,26 +279,26 @@ define(
    * @return {[String]}                       [CSS background-image property]
    */
   function getNonEmptyBackgroundImage ($picked, ancestorCount) {
-
     var backgroundStyles = {},
         $parents = $picked.parents();
 
-    $parents.each(function (count) {
-      if (count > ancestorCount) {
+    $parents.each(function (index) {
+      if (index >= ancestorCount) {
         return false;
       }
-
-      if ($(this).css('backgroundImage') !== 'none') {
-        backgroundStyles.backgroundImage      = $(this).css('backgroundImage');
-        backgroundStyles.backgroundRepeat     = $(this).css('backgroundRepeat');
+  
+      var $ancestor = $(this);
+  
+      if ($ancestor.css('backgroundImage') !== 'none') {
+        backgroundStyles.backgroundImage      = $ancestor.css('backgroundImage');
+        backgroundStyles.backgroundRepeat     = $ancestor.css('backgroundRepeat');
         backgroundStyles.backgroundAttachment = 'local';
-        backgroundStyles.count                = count;
+        backgroundStyles.$ancestor            = $ancestor;
         return false;
       }
     });
 
     return backgroundStyles;
-
   }
 
   /**
@@ -374,7 +374,6 @@ define(
    * @return {[String]}                          [The background image that will be used by the $hlbElement]
    */
   function getHLBBackgroundImage ($picked, elementComputedStyle) {
-
     var newBackgroundImage;
 
     // If the original element doesnt have a background image and the original element has a transparent background...
@@ -384,11 +383,8 @@ define(
       newBackgroundImage = getNonEmptyBackgroundImage($picked, BACKGROUND_IMAGE_ANCESTOR_TRAVERSAL_COUNT);
 
       if (newBackgroundImage) {
-
         return newBackgroundImage;
-
       }
-
     }
 
     return {
@@ -396,7 +392,6 @@ define(
       'backgroundRepeat'    : elementComputedStyle.backgroundRepeat,
       'backgroundAttachment': 'local'
     };
-
   }
 
   /**
@@ -724,8 +719,7 @@ define(
         animationOptimizationStyles = {
           willChange: platform.transformPropertyCss,
           backfaceVisibility: 'hidden'
-        },
-        $parent;
+        };
 
     // If the background color is the same as the text color, use default text and background colors
     if (backgroundColor === $foundation.css('color')) {
@@ -739,29 +733,24 @@ define(
     // This was implemented to fix SC-1830
     // If the background image repeats, there is no need to preserve the padding.
     if ($foundation.css('backgroundImage') !== 'none' && $foundation.css('backgroundRepeat') !== 'repeat') {
-
       calculatedHLBStyles.paddingLeft   = $foundation.css('paddingLeft');
       calculatedHLBStyles.paddingTop    = $foundation.css('paddingTop');
       calculatedHLBStyles.paddingBottom = $foundation.css('paddingBottom');
       calculatedHLBStyles.paddingRight  = $foundation.css('paddingRight');
-
-    } else if (backgroundStyles.count >= 0) {
-
-      $parent = $($(originalElement).parents()[backgroundStyles.count]);
+    } 
+    else if (backgroundStyles.$ancestor) {
+      var $ancestor = backgroundStyles.$ancestor;
 
       // If the background image repeats, there is no need to preserve the padding.
-      if ($parent.css('backgroundRepeat') !== 'repeat') {
-
-        calculatedHLBStyles.paddingLeft   = $parent.css('paddingLeft');
-        calculatedHLBStyles.paddingTop    = $parent.css('paddingTop');
-        calculatedHLBStyles.paddingBottom = $parent.css('paddingBottom');
-        calculatedHLBStyles.paddingRight  = $parent.css('paddingRight');
-
+      if ($ancestor.css('backgroundRepeat') !== 'repeat') {
+        calculatedHLBStyles.paddingLeft   = $ancestor.css('paddingLeft');
+        calculatedHLBStyles.paddingTop    = $ancestor.css('paddingTop');
+        calculatedHLBStyles.paddingBottom = $ancestor.css('paddingBottom');
+        calculatedHLBStyles.paddingRight  = $ancestor.css('paddingRight');
       }
-
     }
 
-    delete backgroundStyles.count;
+    delete backgroundStyles.$ancestor;
 
     return $.extend({},
       defaultHLBStyles,
@@ -770,7 +759,6 @@ define(
       backgroundStyles,
       animationOptimizationStyles
     );
-
   }
 
   /**

@@ -9,7 +9,8 @@ define(
     'core/util/array-utility',
     'page/positioner/util/element-info',
     'page/positioner/transplant/graft',
-    'page/positioner/transplant/anchors'
+    'page/positioner/transplant/anchors',
+    'page/positioner/transplant/mutation-relay'
   ],
   function (
     $,
@@ -19,7 +20,8 @@ define(
     arrayUtil,
     elementInfo,
     graft,
-    anchors
+    anchors,
+    mutationRelay
   ) {
 
   'use strict';
@@ -441,6 +443,7 @@ define(
     originalBody = document.body;
     insertStylesheet();
     clone.init();
+    mutationRelay.init();
     graft.init();
   }
 

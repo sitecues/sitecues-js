@@ -84,10 +84,7 @@ define(
     inlineStyle(moreOpacityElem).opacity = 1;
 
     // Scale the button to 0.5 and then animate it to a scale of 1
-    if (useInstantTransition) {
-      setSize(1);
-    }
-    else {
+    if (!useInstantTransition) {
       setSize(0.5);
       // Delay to fix Chrome animation bug
       // TODO WTF? We need to wait 30 ms? Tried requestAnimationFrame() and only 50% success rate

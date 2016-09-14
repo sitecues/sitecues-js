@@ -11,9 +11,10 @@ See the [full documentation](https://equinox.atlassian.net/wiki/pages/viewpage.a
 ### Run a Test
 
 Move up one directory and use the build system to do it.
-````bash
-cd .. && npm install && grunt test
-````
+
+```sh
+cd .. && npm install && npm test
+```
 
 ### Write a Test
 
