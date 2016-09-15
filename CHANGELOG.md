@@ -12,6 +12,12 @@ All notable changes to this project will be documented here.
 ### Fixed
  -
 
+## [4.2.8] - 2016-09-15
+### Fixed
+ - Improved support for Google Translate.
+ - Improved support for dropdown menus in Firefox.
+ - Improved support for sites that use transtions.
+
 ## [4.2.7] - 2016-09-13
 ### Fixed
  - Ignore irrelevant whitespace when evaluating media queries.
