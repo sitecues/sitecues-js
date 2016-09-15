@@ -26,8 +26,8 @@ define(
 
             test('Override and restore a style value', () => {
                 const element       = document.createElement('div');
-                const intendedValue = 'none';
                 const overrideValue = 'block';
+                const intendedValue = 'none';
 
                 element.style.display = intendedValue;
                 inlineStyle.override(element, {
@@ -40,9 +40,9 @@ define(
             });
 
             test('Override a style, change the intended style, restore the intended style', () => {
-                let element       = document.createElement('div'),
-                    intendedValue = '0',
-                    overrideValue = '1';
+                const element       = document.createElement('div'),
+                const overrideValue = '1';
+                let intendedValue = '0',
 
                 element.style.zIndex = intendedValue;
                 inlineStyle.override(element, {
