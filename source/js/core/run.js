@@ -293,7 +293,11 @@ define(
     }
 
     // TODO remove this once we know enough about window.name usage to make a decision about using it for sessions
-    initialPageVisitDetails.windowName = window.name || undefined;
+    var winName = window.name;
+    if (winName) {
+      // Just keep the first 30 chars so we get an idea of the format -- don't want to fill up the logs
+      initialPageVisitDetails.windowName = winName.substr(0, 30);
+    }
 
     metric.init();
   }
