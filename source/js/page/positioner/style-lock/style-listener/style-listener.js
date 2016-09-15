@@ -432,6 +432,7 @@ define(
     switch (readyState) {
       case READY_STATE.UNINITIALIZED:
         callbacks.push(callback);
+        elementInfo.init();
         readyState   = READY_STATE.INITIALIZING;
         docElem      = document.documentElement;
         originalBody = document.body;
