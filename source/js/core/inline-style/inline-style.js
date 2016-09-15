@@ -20,12 +20,14 @@ define(
   [
     'core/native-functions',
     'core/util/array-utility',
-    'core/util/object-utility'
+    'core/util/object-utility',
+    'core/inline-style/css'
   ],
   function (
     nativeFn,
     arrayUtil,
-    objectUtil
+    objectUtil,
+    css
   ) {
   'use strict';
 
@@ -35,7 +37,6 @@ define(
       lastStyleMap,
       intendedStyleMap,
       updateTimer,
-      styleParser,
       // Arbitrarily long timeout between updating the intended style.
       // This isn't an especially well tuned number, we just don't need it to update very often
       UPDATE_TIMEOUT = 300,
@@ -62,13 +63,13 @@ define(
   }
 
   function arrayAssignment(element, styleInfo, styleProperty) {
-    var property = toKebabCase(styleInfo[0]);
+    var property = css.toKebabCase(styleInfo[0]);
     element[styleProperty].setProperty(property, fixUnits(property, styleInfo[1]), styleInfo[2] || '');
   }
 
   function objectAssignment(element, styleInfo, styleProperty) {
     Object.keys(styleInfo).forEach(function (prop) {
-      var property = toKebabCase(prop);
+      var property = css.toKebabCase(prop);
       element[styleProperty][prop] = fixUnits(property, styleInfo[prop]);
     });
   }
@@ -105,17 +106,13 @@ define(
     });
   }
 
-  function toKebabCase(str) {
-    return str.replace(/([a-z][A-Z])/g, function (g) { return g[0] + '-' + g[1].toLowerCase(); });
-  }
-
   function getIntendedStyles(element) {
     updateIntendedStyles();
     return intendedStyleMap.get(element);
   }
 
   function getCurrentStyles(element) {
-    return parseCss(getCssText(element));
+    return css.parse(getCssText(element));
   }
 
   function getLastStyles(element) {
@@ -140,7 +137,7 @@ define(
   }
 
   function removeProperty(element, property) {
-    getStyle(element).removeProperty(toKebabCase(property));
+    getStyle(element).removeProperty(css.toKebabCase(property));
   }
 
   function clearStyle(element) {
@@ -181,11 +178,11 @@ define(
         lastStyles       = isCssOverwritten ? {} : lastStyleMap.get(element) || {};
 
       if (isCssOverwritten) {
-        cssObject = parseCss(styleInfo);
+        cssObject = css.parse(styleInfo);
       }
       else {
         // This gives us kebab-case property names
-        cssObject = parseCss(stringifyCss(styleInfo));
+        cssObject = css.parse(css.stringify(styleInfo));
       }
 
       Object.keys(cssObject).forEach(function (property) {
@@ -214,7 +211,7 @@ define(
 
     var
       style      = getStyle(element),
-      properties = arrayUtil.wrap(props).map(toKebabCase);
+      properties = arrayUtil.wrap(props).map(css.toKebabCase);
 
     properties.forEach(function (property) {
       restoreStyleValue(style, property, lastStyles);
@@ -249,7 +246,7 @@ define(
     }
 
     if (props) {
-      properties = arrayUtil.wrap(props).map(toKebabCase);
+      properties = arrayUtil.wrap(props).map(css.toKebabCase);
       properties.forEach(function (property) {
         restoreStyleValue(style, property, intendedStyles);
       });
@@ -257,7 +254,7 @@ define(
       return;
     }
 
-    var cssText = stringifyCss(intendedStyles);
+    var cssText = css.stringify(intendedStyles);
 
     if (cssText) {
       style.cssText = cssText;
@@ -361,46 +358,8 @@ define(
     return getStyle(element).cssText;
   }
 
-  function stringifyCss(cssObject) {
-    styleParser.cssText = '';
-
-    Object.keys(cssObject).forEach(function (property) {
-      var value, priority,
-        propertyData = cssObject[property];
-
-      if (typeof propertyData === 'object') {
-        value    = cssObject[property].value;
-        priority = cssObject[property].priority;
-      }
-      else {
-        value    = propertyData;
-        priority = '';
-      }
-
-      styleParser.setProperty(property, value, priority);
-    });
-
-    return styleParser.cssText;
-  }
-
-  // Returns an object keyed with style properties to a property data object containing value and priority
-  // @return { property : { value : foo, priority : 'important' } }
-  function parseCss(cssText) {
-    var cssObj = {};
-    styleParser.cssText = cssText;
-
-    for (var i = 0; i < styleParser.length; i++) {
-      var property = styleParser[i];
-      cssObj[property] = {
-        value    : styleParser.getPropertyValue(property) || '',
-        priority : styleParser.getPropertyPriority(property) || ''
-      };
-    }
-
-    return cssObj;
-  }
-
   function init() {
+    css.init();
     // element -> intended css object
     intendedStyleMap     = new WeakMap();
     // element -> last css object
@@ -408,7 +367,6 @@ define(
     // element -> style proxy object
     proxyMap             = new WeakMap();
     assignmentRecords    = [];
-    styleParser          = document.createElement('div').style;
     assignmentDictionary = {
       'array'  : arrayAssignment,
       'object' : objectAssignment,
