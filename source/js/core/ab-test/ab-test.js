@@ -89,7 +89,8 @@ define(
     // get('qqqq') => undefined   (not a current A/B test)
     // get('iconText.qqq') => undefined (not a current A/B test)
     function get(key, defaultVal) {
-      if (userAbConfig[0] === 'NONE') {
+      if (!userAbConfig.length ||  // Occurs when AB testing was never initialized (e.g. when not a supported platform)
+        userAbConfig[0] === 'NONE') {
         return defaultVal;
       }
 

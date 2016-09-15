@@ -135,6 +135,11 @@ define(
       return false;
     }
 
+    // Transplant iFrames causes the content to reload, which is problematic for scripts
+    if (element.localName === 'iframe') {
+      return false;
+    }
+
     var
       isFixed           = flags.isFixed,
       isInOriginalBody  = flags.isInOriginalBody,
