@@ -13,10 +13,7 @@ define(
     ) {
         'use strict';
 
-        var suite      = tdd.suite,
-            test       = tdd.test,
-            before     = tdd.before,
-            beforeEach = tdd.beforeEach;
+        const { suite, test, before, beforeEach } = tdd;
 
         suite('Inline Style', () => {
             before(() => {
@@ -40,9 +37,9 @@ define(
             });
 
             test('Override a style, change the intended style, restore the intended style', () => {
-                const element       = document.createElement('div'),
+                const element       = document.createElement('div');
                 const overrideValue = '1';
-                let intendedValue = '0',
+                let intendedValue = '0';
 
                 element.style.zIndex = intendedValue;
                 inlineStyle.override(element, {
@@ -59,10 +56,9 @@ define(
             });
 
             test('Override a style override, and restore the last styles', () => {
-                let element             = document.createElement('div'),
-                    intendedValue       = '0',
-                    firstOverrideValue  = '1',
-                    secondOverrideValue = '2';
+                const element             = document.createElement('div');
+                const intendedValue       = '0';
+                const firstOverrideValue  = '1';
 
                 element.style.zIndex = intendedValue;
                 inlineStyle.override(element, {
@@ -71,6 +67,7 @@ define(
 
                 assert.strictEqual(element.style.zIndex, firstOverrideValue, 'The style value hasn\'t been overridden');
 
+                const secondOverrideValue = '2';
                 inlineStyle.override(element, {
                     zIndex : secondOverrideValue
                 });
