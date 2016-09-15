@@ -25,9 +25,9 @@ define(
             });
 
             test('Override and restore a style value', () => {
-                let element       = document.createElement('div'),
-                    intendedValue = 'none',
-                    overrideValue = 'block';
+                const element       = document.createElement('div');
+                const intendedValue = 'none';
+                const overrideValue = 'block';
 
                 element.style.display = intendedValue;
                 inlineStyle.override(element, {
