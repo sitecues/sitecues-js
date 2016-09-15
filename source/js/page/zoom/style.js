@@ -127,35 +127,38 @@ define(
         var comboBoxes = arrayUtil.toArray(document.querySelectorAll(selector));
         comboBoxes.forEach(function (box) {
           inlineStyle.restore(box, ['font-size', 'width', 'height']);
-          if (zoom > 1) {
-            var style     = getComputedStyle(box),
-                height    = parseFloat(style.height) / (lastZoom ? lastZoom : 1),
-                width     = parseFloat(style.width) / (lastZoom ? lastZoom : 1),
-                newWidth  = width * zoom,
-                newHeight = height * zoom;
 
-            inlineStyle.override(box, {
-              fontSize : zoom + 'em',
-              height   : newHeight + 'px',
-              width    : newWidth + 'px'
-            });
+          if (zoom === 1) {
+            // We don't need to fix combo boxes if we aren't zooming
+            return;
           }
+
+          var style     = getComputedStyle(box),
+              height    = parseFloat(style.height) / (lastZoom ? lastZoom : 1),
+              width     = parseFloat(style.width) / (lastZoom ? lastZoom : 1),
+              newWidth  = width * zoom,
+              newHeight = height * zoom;
+
+          inlineStyle.override(box, {
+            fontSize : zoom + 'em',
+            height   : newHeight + 'px',
+            width    : newWidth + 'px'
+          });
         });
         lastZoom = zoom;
       }
 
       // Don't use any of these rules in print
       css = '@media screen {\n' + css + '\n }';
-      if (!$zoomFormsStyleSheet) {
+      if ($zoomFormsStyleSheet) {
+        $zoomFormsStyleSheet.text(css);
+      }
+      else {
         $zoomFormsStyleSheet = $('<style>')
           .text(css)
           .attr('id', SITECUES_ZOOM_FORMS_ID)
           .appendTo('head');
       }
-      else {
-        $zoomFormsStyleSheet.text(css);
-      }
-
     }
 
   // This is used to repaint the DOM after a zoom in WebKit to ensure crisp text
