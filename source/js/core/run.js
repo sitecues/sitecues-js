@@ -302,10 +302,16 @@ define(
     metric.init();
   }
 
+  function initABTest(sitecuesInitSummary) {
+    abTest.init();
+    return sitecuesInitSummary;  // Must be passed on through the promise chain
+  }
+
+
   function initConfAndMetrics() {
     return conf.init()
       .catch(function handlePrefsError(error) { return { error: error.message }; })
-      .then(abTest.init)
+      .then(initABTest)
       .then(initMetrics);
   }
 
