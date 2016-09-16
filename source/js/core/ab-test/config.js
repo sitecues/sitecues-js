@@ -37,7 +37,7 @@ define([], function () {
       // Test Marc's idea to have an extra sensitive badge for first time users
       weight: 1
     },
-    'moreButtonTimerGood': {
+    'moreButtonTimerV2': {
       weight: 1,
       values: [
         0,
