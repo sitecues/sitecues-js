@@ -17,8 +17,9 @@ define([
     isToolbar,
     badgeElem,
     badgeStyle,
-    TRANSITION_MS = 800,
-    TIMING_FUNCTION = 'ease-out',
+    pulseTimer,
+    TRANSITION_MS = 600,
+    TIMING_FUNCTION = 'ease-in-out',
     CSS_TRANSITION = TIMING_FUNCTION + ' ' + TRANSITION_MS + 'ms';
 
   function willExpand() {
@@ -63,31 +64,51 @@ define([
   }
 
   function getLightGlow() {
-    var HUE = 56, // Out of 360 (56 = yellow, 210 = light blue)
+    var HUE = 210, // Out of 360 (56 = yellow, 210 = light blue)
       SATURATION = 100, // Out of 100
       LIGHTNESS = 90; // Out of 100
 
     return getHslString(HUE, SATURATION, LIGHTNESS);
   }
 
+  function getBoxShadow(color, multiplier) {
+    function getLayer(size, offset) {
+      return '0 0 ' + size * multiplier + 'px ' + offset * multiplier + 'px ' + color;
+    }
+    return ['0 0 3px 1px ' + color, getLayer(4, 2), getLayer(15, 3), getLayer(22,6),  getLayer(30, 6)].join(',');
+  }
+
   function changeBadgeGlow(isOn) {
+    var pulseNum = 0,
+      MAX_PULSES = 3;
+    function pulse() {
+      inlineStyle.override(badgeElem, {
+        boxShadow: getBoxShadow(color, pulseNum % 2 ? 1.8 : 1.2)
+      });
+      if (++pulseNum < MAX_PULSES) {
+        setTimeout(pulse, TRANSITION_MS);
+      }
+    }
+
     if (isOn) {
       if (isFirstGlow) {
         onFirstGlow();
         isFirstGlow = false;
       }
-      var color = isDarkBadge() ? getLightGlow() : getDarkGlow();
-
-      var newStyles = {
-        backgroundColor: color
-      };
+      var
+        color = isDarkBadge() ? getLightGlow() : getDarkGlow(),
+        newStyles = {
+          backgroundColor: color
+        };
       if (!isToolbar) {
-        //boxShadow = '-3.5px 2px 12px 10px ' + color;
-        newStyles.boxShadow = '-4px 2px 20px 0px ' + color  + ', -4px 2px 32px 6px ' + color + ', -4px 2px 44px 6px ' + color;
+        newStyles.boxShadow = getBoxShadow(color, 1.8);
+        // Pulse the box shadow
+        setTimeout(pulse, TRANSITION_MS);
       }
       inlineStyle.override(badgeElem, newStyles);
     }
     else {
+      clearInterval(pulseTimer);
       inlineStyle.restore(badgeElem);
     }
   }
