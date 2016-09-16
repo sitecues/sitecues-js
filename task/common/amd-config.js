@@ -30,7 +30,7 @@ var config = require('../build-config'),
     // Core module special treatment
     core: {
       // Rename core.js to sitecues.js
-      out: config.buildDir + '/js/sitecues.js',
+      out: config.resourceDir + '/js/core.js',
       // sitecues.js gets version number
       wrap: {
         start:

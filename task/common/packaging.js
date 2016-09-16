@@ -13,7 +13,7 @@ function createPackage(callback) {
 
 // Create a copy of sitecues.js in the buildDir with a name in the format sitecues-[VERSION_NAME].js
 function createVersionedSitecuesJsCopy(callback) {
-  exec('cp ' + config.buildDir + '/js/sitecues.js ' + config.buildDir + '/sitecues-' + config.version + '.js', callback);
+  exec('cp ' + config.buildDir + '/js/core.js ' + config.buildDir + '/core-' + config.version + '.js', callback);
 }
 
 function saveVersionTxt(callback) {
