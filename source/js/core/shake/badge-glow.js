@@ -5,18 +5,21 @@
 define([
   'core/events',
   'core/bp/constants',
-  'core/bp/view/view'
+  'core/bp/view/view',
+  'core/inline-style/inline-style'
 ], function(events,
             BP_CONST,
-            badgeView) {
+            badgeView,
+            inlineStyle) {
 
   var
     isFirstGlow = true,
     isToolbar,
     badgeElem,
     badgeStyle,
-    origCss,
-    TRANSITION_MS = 400;
+    TRANSITION_MS = 800,
+    TIMING_FUNCTION = 'ease-out',
+    CSS_TRANSITION = TIMING_FUNCTION + ' ' + TRANSITION_MS + 'ms';
 
   function willExpand() {
     changeBadgeGlow(false);
@@ -60,9 +63,9 @@ define([
   }
 
   function getLightGlow() {
-    var HUE = 50, // Out of 360
-      SATURATION = 72, // Out of 100
-      LIGHTNESS = 88; // Out of 100
+    var HUE = 56, // Out of 360 (56 = yellow, 210 = light blue)
+      SATURATION = 100, // Out of 100
+      LIGHTNESS = 90; // Out of 100
 
     return getHslString(HUE, SATURATION, LIGHTNESS);
   }
@@ -73,21 +76,19 @@ define([
         onFirstGlow();
         isFirstGlow = false;
       }
-      var color = isDarkBadge() ? getLightGlow() : getDarkGlow(),
-        bgColor = color,
-        boxShadow = '-3.5px 2px 4px 10px ' + color;
+      var color = isDarkBadge() ? getLightGlow() : getDarkGlow();
 
-      badgeStyle.backgroundColor = bgColor;
+      var newStyles = {
+        backgroundColor: color
+      };
       if (!isToolbar) {
-        badgeStyle.borderColor = 'transparent';
-        badgeStyle.boxShadow = boxShadow;
-        if (!isToolbar && getComputedStyle(badgeElem).borderRadius === '0px') {
-          badgeStyle.borderRadius = '99px'; // Rounded glow
-        }
+        //boxShadow = '-3.5px 2px 12px 10px ' + color;
+        newStyles.boxShadow = '-4px 2px 20px 0px ' + color  + ', -4px 2px 32px 6px ' + color + ', -4px 2px 44px 6px ' + color;
       }
+      inlineStyle.override(badgeElem, newStyles);
     }
     else {
-      badgeElem.setAttribute('style', origCss);
+      inlineStyle.restore(badgeElem);
     }
   }
 
@@ -101,8 +102,7 @@ define([
 
     isToolbar = badgeView.isToolbar();
     badgeStyle = badgeElem.style;
-    badgeStyle.transition = 'background-color ' + TRANSITION_MS + 'ms, border-radius ' + TRANSITION_MS * 1.5 + 'ms, box-shadow ' + TRANSITION_MS + 'ms';
-    origCss = badgeStyle.cssText;
+    badgeStyle.transition = 'background-color ' + CSS_TRANSITION + ', box-shadow ' + CSS_TRANSITION;
   }
 
   // Only allow glow if it won't be clipped by an ancestor
@@ -110,7 +110,7 @@ define([
     badgeElem = getBadge();
     var ancestor = badgeElem,
       badgeRect = badgeElem.getBoundingClientRect(),
-      SAFETY_ZONE = 10,
+      SAFETY_ZONE = 6,
       safeRect = {
         left: badgeRect.left - SAFETY_ZONE,
         right: badgeRect.right + SAFETY_ZONE,
@@ -142,6 +142,11 @@ define([
     // Badge glow
     if (isGlowAllowed()) {
       events.on('shake/did-pass-threshold', changeBadgeGlow);
+    }
+    else {
+      if (SC_DEV) {
+        console.log('Sitecues badge glow disallowed');
+      }
     }
   }
 
