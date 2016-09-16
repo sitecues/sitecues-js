@@ -1,6 +1,22 @@
 // Markup for the secondary panel
-define(['core/bp/view/markup-finalizer', 'core/bp/helper', 'core/platform', 'bp-secondary/font-charset', 'core/conf/urls'],
-  function(finalizer, helper, platform, fontCharset, urls) {
+define(
+  [
+    'core/bp/view/markup-finalizer',
+    'core/bp/helper',
+    'core/platform',
+    'bp-secondary/font-charset',
+    'core/conf/urls',
+    'core/events'
+  ],
+  function (
+    finalizer,
+    helper,
+    platform,
+    fontCharset,
+    urls,
+    events
+  ) {
+  'use strict';
   /*jshint multistr: true */
 
 var isInitialized,
@@ -171,6 +187,7 @@ htmlSecondary =
       insertHtml('scp-html-secondary-anchor', htmlSecondary);
       insertSvg('scp-secondary-anchor', svgSecondary);
       insertSheets();
+      events.emit('bp/did-insert-secondary-markup');
     }
   }
 

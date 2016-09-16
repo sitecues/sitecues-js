@@ -8,7 +8,8 @@ define(
     'page/util/geo',
     'core/events',
     'page/highlight/fixed-elements',
-    'core/native-functions'
+    'core/native-functions',
+    'core/inline-style/inline-style'
   ],
   function (
     $,
@@ -19,7 +20,8 @@ define(
     geo,
     events,
     fixedElements,
-    nativeFn
+    nativeFn,
+    inlineStyle
   ) {
   'use strict';
 
@@ -302,7 +304,7 @@ define(
   function prepareMovement() {
     // Hide current HLB so it doesn't interfere with getElementFromPoint
     if (hlbElement) {
-      hlbElement.style.display = 'none';
+      inlineStyle(hlbElement).display = 'none';
     }
 
     fixedElements.disableMouseEvents();
@@ -323,7 +325,7 @@ define(
 
     // Make lens visible again
     if (hlbElement) {
-      hlbElement.style.display = 'block';
+      inlineStyle(hlbElement).display = 'block';
       // Scroll back to original position if the lens is now offscreen
       if (typeof origPanX === 'number') {
         var lensRect = hlbElement.getBoundingClientRect();
@@ -653,17 +655,18 @@ define(
     var target = document.elementFromPoint(x, y);
     if (SC_DEV && isShowingDebugPoints) {
       // Briefly display the points being tested
-      $('<div class="sc-debug-dots">')
-        .appendTo('html')
-        .css({
-          position: 'absolute',
-          left: (x + window.pageXOffset) + 'px',
-          top: (y + window.pageYOffset) + 'px',
-          width: '0px',
-          height: '0px',
-          outline: '3px solid ' + color,
-          zIndex: 999999
-        });
+      var debugDiv = $('<div class="sc-debug-dots">')
+        .appendTo('html');
+
+      inlineStyle.set(debugDiv[0], {
+        position: 'absolute',
+        left: (x + window.pageXOffset) + 'px',
+        top: (y + window.pageYOffset) + 'px',
+        width: '0px',
+        height: '0px',
+        outline: '3px solid ' + color,
+        zIndex: 999999
+      });
     }
 
     // Need to use something that's not a container of the last picked item
@@ -825,7 +828,7 @@ define(
       isKeyRepeating = false;
     });
 
-    events.on('hlb/did-create', function($hlb) {
+    events.on('hlb/did-create', function ($hlb) {
       hlbElement = $hlb[0];
     });
 

@@ -6,13 +6,15 @@ define(
     'core/bp/constants',
     'core/bp/helper',
     'core/events',
-    'core/native-functions'
+    'core/native-functions',
+    'core/inline-style/inline-style'
   ],
   function (
     BP_CONST,
     helper,
     events,
-    nativeFn
+    nativeFn,
+    inlineStyle
   ) {
   'use strict';
 
@@ -83,9 +85,9 @@ define(
     if (elem) {
       // Reset element back to normal position instantly (temporarily turn of animations)
       elem.setAttribute('data-demo', false);
-      elem.style.transitionDuration = '0s';
+      inlineStyle(elem).transitionDuration = '0s';
       nativeFn.setTimeout(function () {
-        elem.style.transitionDuration = '';
+        inlineStyle(elem).transitionDuration = '';
       }, 20); // Wait at least one frame tick to turn animations back on
     }
   }

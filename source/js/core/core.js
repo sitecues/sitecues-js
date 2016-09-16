@@ -180,7 +180,6 @@ define(
 
     //Set sitecues state flag to initializing
     sitecues.readyState = state.INITIALIZING;
-
     // Run sitecues
     run.init();
   }

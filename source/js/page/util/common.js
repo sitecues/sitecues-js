@@ -1,7 +1,18 @@
 /**
  * This is module for common utilities that might need to be used across all of the different modules.
  */
-define(['page/util/element-classifier', 'core/platform'], function (elemClassifier, platform) {
+define(
+  [
+    'page/util/element-classifier',
+    'core/platform',
+    'core/inline-style/inline-style'
+  ],
+  function (
+    elemClassifier,
+    platform,
+    inlineStyle
+  ) {
+  'use strict';
 
   function isTransparentColor(color) {
     // NOTE: Doesn't check HSLA colors for transparency
@@ -188,12 +199,13 @@ define(['page/util/element-classifier', 'core/platform'], function (elemClassifi
   function getEmsToPx(fontSize, ems) {
     // Create a div to measure the number of px in an em with this font-size
     var measureDiv = document.createElement('div'),
-      measureStyle = measureDiv.style,
       px;
     document.body.appendChild(measureDiv);
-    measureStyle.fontSize = fontSize;
-    measureStyle.width = ems + 'em';
-    measureStyle.visibility = 'hidden';
+    inlineStyle.set(measureDiv, {
+      fontSize   : fontSize,
+      width      : ems + 'em',
+      visibility : 'hidden'
+    });
     // Multiply by zoom because our <div> is not affected by the document's current zoom level
     px = measureDiv.clientWidth;
     document.body.removeChild(measureDiv);

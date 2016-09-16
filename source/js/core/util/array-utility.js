@@ -48,7 +48,7 @@ define([], function () {
     return fromSet(set);
   }
 
-  // Returns the an array with elements that are in all of the passed arrays
+  // Returns an array with elements that are in all of the passed arrays
   function intersection() {
     var
       arrays = arguments,
@@ -109,14 +109,19 @@ define([], function () {
     return Array.prototype.slice.call(arrayLike, 0);
   }
 
+  function wrap(data) {
+    return Array.isArray(data) ? data : [data];
+  }
+
   return {
-    remove: remove,
-    addUnique: addUnique,
-    unique: unique,
-    symmetricDifference: symmetricDifference,
-    union: union,
-    intersection: intersection,
-    fromSet: fromSet,
-    toArray: toArray
+    remove    : remove,
+    addUnique : addUnique,
+    unique    : unique,
+    symmetricDifference : symmetricDifference,
+    union : union,
+    intersection : intersection,
+    fromSet : fromSet,
+    toArray : toArray,
+    wrap    : wrap
   };
 });

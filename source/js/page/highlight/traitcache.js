@@ -5,7 +5,16 @@
  * Note: the traitcache keeps a unique ID for each element, via $(data) with the key 'sc'
  * This unique ID can be used for other caches (for example the pickedItemsCache in pick.js uses it).
  */
-define(['$', 'page/zoom/zoom'], function($, zoomMod) {
+define(
+  [
+    '$',
+    'page/zoom/zoom'
+  ],
+  function (
+    $,
+    zoomMod
+  ) {
+  'use strict';
 
   var uniqueIdCounter = 0,
     styleCache = {},
@@ -87,7 +96,7 @@ define(['$', 'page/zoom/zoom'], function($, zoomMod) {
       rect = rectCache[id];
     if (!rect) {
       // Copy rect object into our own object so we can modify values
-      if (!element.getBoundingClientRect) {
+      if (SC_DEV && !element.getBoundingClientRect) {
         console.log('Error in traitcache#getRect');
         console.log(element);
         console.trace();

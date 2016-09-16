@@ -8,9 +8,29 @@ All notable changes to this project will be documented here.
  - **Deprecated** : Planned for removal in the near future.
  - **Removed**    : Disabled or deleted within the source code.
 
+## Unreleased
+### Fixed
+ -
+
+## [4.2.9] - 2016-09-16
+### Fixed
+ - Fixed a regression in Internet Explorer where we failed to clean up after ourselves. That left the page in a weird state.
+
+## [4.2.8] - 2016-09-15
+### Fixed
+ - Improved support for Google Translate.
+ - Improved support for dropdown menus in Firefox.
+ - Improved support for sites that use transtions.
+
+## [4.2.7] - 2016-09-13
+### Fixed
+ - Ignore irrelevant whitespace when evaluating media queries.
+ - Better detection of backgrounds for the Lens.
+ - Improved handling of fixed position elements.
+
 ## [4.2.6] - 2016-08-29
 ### Fixed
- - No longer attempt to read text from cross-origin sources
+ - No longer attempt to read text from cross-origin sources.
 
 ## [4.2.5] - 2016-08-26
 ### Fixed

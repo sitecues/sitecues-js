@@ -3,13 +3,17 @@ define(
     'core/events',
     'page/zoom/state',
     'core/conf/urls',
-    'page/positioner/util/array-utility'
+    'core/util/array-utility',
+    'core/inline-style/inline-style',
+    'core/platform'
   ],
   function (
     events,
     state,
     urls,
-    arrayUtil
+    arrayUtil,
+    inlineStyle,
+    platform
   ) {
 
   'use strict';
@@ -69,9 +73,10 @@ define(
       while(!isTransformable(ancestor)) {
         ancestor = ancestor.parentElement;
       }
-
-      ancestor.style.transform       = 'scale(' + zoomReciprocal + ')';
-      ancestor.style.transformOrigin = '0 0';
+      var styles = {};
+      styles[platform.transformProperty]       = 'scale(' + zoomReciprocal + ')';
+      styles[platform.transformOriginProperty] = '0 0';
+      inlineStyle.override(ancestor, styles);
 
       var
         originalDimensions = dimensionsMap.get(element) || {},
