@@ -52,9 +52,9 @@ define([
   }
 
   function getDarkGlow() {
-    var HUE = 245, // Out of 360
+    var HUE = 230, // Out of 360
       SATURATION = 62, // Out of 100
-      LIGHTNESS = 34; // Out of 100
+      LIGHTNESS = 44; // Out of 100
 
     return getHslString(HUE, SATURATION, LIGHTNESS);
   }
@@ -75,10 +75,16 @@ define([
       }
       var color = isDarkBadge() ? getLightGlow() : getDarkGlow(),
         bgColor = color,
-        boxShadow = '-3px 2px 5px 12px ' + color;
+        boxShadow = '-3.5px 2px 4px 10px ' + color;
 
       badgeStyle.backgroundColor = bgColor;
-      badgeStyle.boxShadow = boxShadow;
+      if (!isToolbar) {
+        badgeStyle.borderColor = 'transparent';
+        badgeStyle.boxShadow = boxShadow;
+        if (!isToolbar && getComputedStyle(badgeElem).borderRadius === '0px') {
+          badgeStyle.borderRadius = '99px'; // Rounded glow
+        }
+      }
     }
     else {
       badgeElem.setAttribute('style', origCss);
@@ -93,20 +99,50 @@ define([
     // Badge glow not available while BP is open
     events.on('bp/will-expand', willExpand);
 
-    badgeElem = getBadge();
     isToolbar = badgeView.isToolbar();
     badgeStyle = badgeElem.style;
-    badgeStyle.transition = 'background-color ' + TRANSITION_MS + 'ms, box-shadow ' + TRANSITION_MS + 'ms';
-    badgeStyle.borderColor = 'transparent';
-    if (!isToolbar) {
-      badgeStyle.borderRadius = '99px'; // Rounded glow
-    }
+    badgeStyle.transition = 'background-color ' + TRANSITION_MS + 'ms, border-radius ' + TRANSITION_MS * 1.5 + 'ms, box-shadow ' + TRANSITION_MS + 'ms';
     origCss = badgeStyle.cssText;
+  }
+
+  // Only allow glow if it won't be clipped by an ancestor
+  function isGlowAllowed() {
+    badgeElem = getBadge();
+    var ancestor = badgeElem,
+      badgeRect = badgeElem.getBoundingClientRect(),
+      SAFETY_ZONE = 10,
+      safeRect = {
+        left: badgeRect.left - SAFETY_ZONE,
+        right: badgeRect.right + SAFETY_ZONE,
+        top: badgeRect.top - SAFETY_ZONE,
+        bottom: badgeRect.bottom + SAFETY_ZONE
+      },
+      css,
+      rect;
+    while (ancestor) {
+      css = getComputedStyle(ancestor);
+      if (css.overflow !== 'visible' || css.clip !== 'auto') {
+        return false;
+      }
+      ancestor = ancestor.parentElement;
+      if (ancestor === document.documentElement) {
+        break;
+      }
+
+      rect = ancestor.getBoundingClientRect();
+      if (rect.left < safeRect.left && rect.top < safeRect.top && rect.right > safeRect.right && rect.bottom > safeRect.bottom) {
+        break; // No need to keep checking for clip
+      }
+    }
+
+    return true;
   }
 
   function init() {
     // Badge glow
-    events.on('shake/did-pass-threshold', changeBadgeGlow);
+    if (isGlowAllowed()) {
+      events.on('shake/did-pass-threshold', changeBadgeGlow);
+    }
   }
 
   return {
