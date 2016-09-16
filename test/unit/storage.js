@@ -2,17 +2,27 @@ define(
     [
         'intern!tdd',
         'intern/chai!assert',
+        'core/native-functions',
         'core/conf/user/storage'
     ],
-    function (tdd, assert, storage) {
-
+    function (
+        tdd,
+        assert,
+        nativeFn,
+        storage
+    ) {
         'use strict';
 
-        var suite  = tdd.suite,
-            test   = tdd.test,
-            beforeEach = tdd.beforeEach;
+        var suite      = tdd.suite;
+        var test       = tdd.test;
+        var before     = tdd.before;
+        var beforeEach = tdd.beforeEach;
 
         suite('Storage', function () {
+
+            before(function () {
+              nativeFn.init();
+            });
 
             beforeEach(function () {
                 localStorage.clear();

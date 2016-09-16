@@ -34,7 +34,7 @@ define(
 
     // IMPORTANT! Increment METRICS_VERSION this every time metrics change in any way
     // IMPORTANT! Have the backend team review all metrics changes!!!
-    var METRICS_VERSION = 18,
+    var METRICS_VERSION = 19,
         isInitialized,
         doSuppressMetrics,
         doLogMetrics,
