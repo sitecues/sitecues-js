@@ -29,10 +29,9 @@ define([], function () {
   }
 
   function removeVerificationFrame() {
-    document.getElementById(verificationId).remove();
+    var verificationFrame = document.getElementById(verificationId);
+    verificationFrame.parentElement.removeChild(verificationFrame);
   }
-
-
 
   function init() {
     // Extension always uses window
