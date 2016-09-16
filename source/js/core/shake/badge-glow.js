@@ -6,10 +6,12 @@ define([
   'core/events',
   'core/bp/constants',
   'core/bp/view/view',
+  'core/native-functions',
   'core/inline-style/inline-style'
 ], function(events,
             BP_CONST,
             badgeView,
+            nativeFn,
             inlineStyle) {
 
   var
@@ -64,7 +66,7 @@ define([
   }
 
   function getLightGlow() {
-    var HUE = 210, // Out of 360 (56 = yellow, 210 = light blue)
+    var HUE = 56, // Out of 360 (56 = yellow, 210 = light blue)
       SATURATION = 100, // Out of 100
       LIGHTNESS = 90; // Out of 100
 
@@ -80,13 +82,13 @@ define([
 
   function changeBadgeGlow(isOn) {
     var pulseNum = 0,
-      MAX_PULSES = 3;
+      MAX_PULSES = 5;
     function pulse() {
-      inlineStyle.override(badgeElem, {
-        boxShadow: getBoxShadow(color, pulseNum % 2 ? 1.8 : 1.2)
+      inlineStyle.set(badgeElem, {
+        boxShadow: getBoxShadow(color, pulseNum % 2 ? 2.2 : 1.2)
       });
       if (++pulseNum < MAX_PULSES) {
-        setTimeout(pulse, TRANSITION_MS);
+        pulseTimer = nativeFn.setTimeout(pulse, TRANSITION_MS);
       }
     }
 
@@ -101,14 +103,14 @@ define([
           backgroundColor: color
         };
       if (!isToolbar) {
-        newStyles.boxShadow = getBoxShadow(color, 1.8);
+        newStyles.boxShadow = getBoxShadow(color, 2.2);
         // Pulse the box shadow
-        setTimeout(pulse, TRANSITION_MS);
+        pulseTimer = nativeFn.setTimeout(pulse, TRANSITION_MS);
       }
       inlineStyle.override(badgeElem, newStyles);
     }
     else {
-      clearInterval(pulseTimer);
+      clearTimeout(pulseTimer);
       inlineStyle.restore(badgeElem);
     }
   }
