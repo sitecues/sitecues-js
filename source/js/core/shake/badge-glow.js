@@ -66,7 +66,7 @@ define([
   }
 
   function getLightGlow() {
-    var HUE = 56, // Out of 360 (56 = yellow, 210 = light blue)
+    var HUE = 210, // Out of 360 (56 = yellow, 210 = light blue)
       SATURATION = 100, // Out of 100
       LIGHTNESS = 90; // Out of 100
 
@@ -82,7 +82,8 @@ define([
 
   function changeBadgeGlow(isOn) {
     var pulseNum = 0,
-      MAX_PULSES = 5;
+      MAX_PULSES = 5,
+      color;
     function pulse() {
       inlineStyle.set(badgeElem, {
         boxShadow: getBoxShadow(color, pulseNum % 2 ? 2.2 : 1.2)
@@ -97,11 +98,10 @@ define([
         onFirstGlow();
         isFirstGlow = false;
       }
-      var
-        color = isDarkBadge() ? getLightGlow() : getDarkGlow(),
-        newStyles = {
-          backgroundColor: color
-        };
+      color = isDarkBadge() ? getLightGlow() : getDarkGlow();
+      var newStyles = {
+        backgroundColor: color
+      };
       if (!isToolbar) {
         newStyles.boxShadow = getBoxShadow(color, 2.2);
         // Pulse the box shadow
