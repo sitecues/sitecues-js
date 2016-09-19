@@ -31,7 +31,6 @@ define(
     $zoomStyleSheet,            // <style> element we insert to correct form issues in WebKit
     $zoomFormsStyleSheet,       // <style> element we insert to correct form issues in WebKit
     TRANSFORM_PROP_CSS,
-    lastZoom,
     // Optimize fonts for legibility? Helps a little bit with Chrome on Windows
     shouldOptimizeLegibility,
     // Should we repaint when zoom is finished (after any animations)?
@@ -105,61 +104,48 @@ define(
       }
     }
 
-    function applyZoomFormFixes(zoom) {
-      var css;
-      if (platform.browser.isWebKit) {
-        // Add useful zoom fixes for forms that render incorrectly with CSS transform
-        // We turn them off when data-sc-dropdown-fix off is set (need to temporarily turn off for highlight position calculation elsewhere)
-        css ='select[size="1"]:not([data-sc-dropdown-fix-off]),select:not([size]):not([data-sc-dropdown-fix-off]) {' +
-          platform.transformPropertyCss + ':scale(' + 1 / zoom + ') !important;' +
-          'transform-origin:0% 62% !important;' +
-          'margin-right:' + (13 * (1 - zoom)) + '% !important;' +
-          'margin-top:' + (8 * (1-zoom)) + 'px !important;' +
-          'margin-bottom:' + (8 * (1-zoom)) + 'px !important;' +
-          'zoom:' + zoom + ' !important;}' +
-          '\nbody[data-sc-zooming] select { transition-property: none !important; }'; // Turn off any page transitions for select during zoom, otherwise it will potentially animate the above changes
-      }
-      else {
-        var selector = 'select[size="1"],select:not([size])';
-        css = selector + ' {' +
-          platform.transformPropertyCss + ': scale(' + 1 / zoom + ') !important;' +
-          'transform-origin: 100% 0 !important; }' ;
-        var comboBoxes = arrayUtil.toArray(document.querySelectorAll(selector));
-        comboBoxes.forEach(function (box) {
-          inlineStyle.restore(box, ['font-size', 'width', 'height']);
+  function applyZoomFormFixes(zoom) {
+    var
+      newFormScale = Math.pow(zoom, 1.3),
+      selector = 'select[size="1"],select:not([size])',
+      css = selector + ' {' +
+        'transform-origin: 0 0 !important; }' ;
 
-          if (zoom === 1) {
-            // We don't need to fix combo boxes if we aren't zooming
-            return;
-          }
+    var comboBoxes = arrayUtil.toArray(document.querySelectorAll(selector));
+    comboBoxes.forEach(function (box) {
+      inlineStyle.restore(box, ['font-size', 'width', 'height', 'transform']);
 
-          var style     = getComputedStyle(box),
-              height    = parseFloat(style.height) / (lastZoom ? lastZoom : 1),
-              width     = parseFloat(style.width) / (lastZoom ? lastZoom : 1),
-              newWidth  = width * zoom,
-              newHeight = height * zoom;
-
-          inlineStyle.override(box, {
-            fontSize : zoom + 'em',
-            height   : newHeight + 'px',
-            width    : newWidth + 'px'
-          });
-        });
-        lastZoom = zoom;
+      if (zoom === 1) {
+        // We don't need to fix combo boxes if we aren't zooming
+        return;
       }
 
-      // Don't use any of these rules in print
-      css = '@media screen {\n' + css + '\n }';
-      if ($zoomFormsStyleSheet) {
-        $zoomFormsStyleSheet.text(css);
-      }
-      else {
-        $zoomFormsStyleSheet = $('<style>')
-          .text(css)
-          .attr('id', SITECUES_ZOOM_FORMS_ID)
-          .appendTo('head');
-      }
+      var style     = getComputedStyle(box),
+          height    = parseFloat(style.height),
+          width     = parseFloat(style.width),
+          newWidth  = width  * newFormScale,
+          newHeight = height * newFormScale;
+
+      inlineStyle.override(box, {
+        fontSize  : zoom + 'em',
+        height    : newHeight + 'px',
+        width     : newWidth + 'px',
+        transform : 'scale(' + (1 / zoom) + ')'
+      });
+    });
+
+    // Don't use any of these rules in print
+    css = '@media screen {\n' + css + '\n }';
+    if ($zoomFormsStyleSheet) {
+      $zoomFormsStyleSheet.text(css);
     }
+    else {
+      $zoomFormsStyleSheet = $('<style>')
+        .text(css)
+        .attr('id', SITECUES_ZOOM_FORMS_ID)
+        .appendTo('head');
+    }
+  }
 
   // This is used to repaint the DOM after a zoom in WebKit to ensure crisp text
   function getCssCrispingFixes() {
