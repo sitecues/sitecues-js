@@ -17,9 +17,9 @@ define(
   'use strict';
 
   var uniqueIdCounter = 0,
-    styleCache = {},
-    rectCache = {},
-
+    styleCache    = {},
+    rectCache     = {},
+    treeDimensionsCache = new WeakMap(),
     cachedViewSize = {  // If any of these view size metrics change, we must invalidate the cache
       height: null,
       width: null,
@@ -135,6 +135,40 @@ define(
     return rect;
   }
 
+  function getTreeSize(element) {
+    var dimensions = treeDimensionsCache.get(element) || {};
+    if (typeof dimensions.size !== 'number') {
+      dimensions.size = element.querySelectorAll('*').length;
+      treeDimensionsCache.set(element, dimensions);
+    }
+    return dimensions.size;
+  }
+
+  function getTreeDepth(element, childDepth) {
+    function findDepth(element, depth) {
+      var descendantDepth = 0,
+          children = Array.prototype.slice.call(element.children, 0);
+
+      if (!children.length) {
+        return depth;
+      }
+
+      children.forEach(function (child) {
+        descendantDepth = Math.max(findDepth(child, depth + 1), descendantDepth);
+      });
+      return descendantDepth;
+    }
+
+    var dimensions = treeDimensionsCache.get(element) || {};
+
+    if (typeof dimensions.depth !== 'number') {
+      dimensions.depth = typeof childDepth === 'number' ? childDepth + 1 : findDepth(element, 1);
+      treeDimensionsCache.set(element, dimensions);
+    }
+
+    return dimensions.depth;
+  }
+
   // Hidden for any reason? Includes offscreen or dimensionless, or tiny (if doTreatTinyAsHidden == true)
   function isHidden(element, doTreatTinyAsHidden) {
     var rect = getRect(element),
@@ -175,8 +209,9 @@ define(
     getStyleProp: getStyleProp,
     getScreenRect: getScreenRect,
     getRect: getRect,
+    getTreeSize: getTreeSize,
+    getTreeDepth: getTreeDepth,
     isHidden: isHidden,
     getUniqueId: getUniqueId
   };
-
 });

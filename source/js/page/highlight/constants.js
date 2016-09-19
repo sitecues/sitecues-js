@@ -8,5 +8,5 @@ define([], function() {
     constants.HIGHLIGHT_TOGGLE_EVENT    = 'mh/did-toggle-visibility';
     constants.POINTER_ATTR              = 'data-sc-pointer-events';
 
-    return constants;
+  return constants;
 });

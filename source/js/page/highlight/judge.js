@@ -76,6 +76,7 @@ define(
     MAX_CELL_GROUP_GROWTH_PER_SIBLING = 2,       // For each sibling, allow the cell group's area to be this much larger than the cell
     VERY_SMALL_GROWTH_FACTOR = 1.04,
     SMALL_GROWTH_FACTOR = 1.2,
+    DEEP_TREE_DEPTH   = 5,
     MIN_IMAGE_GROUP_HEIGHT = 50,                 // Image groups must be taller than this
     MAX_CHILDREN_IMAGE_GROUP = 4,                // If more children than this, it does not typically fit the pattern of an image group, so don't do the expensive check
     MAX_ANCESTOR_INDEX_IMAGE_GROUP = 5,          // If ancestor index is larger than this, it does not typically fit the pattern of an image group, so don't do the expensive check
@@ -617,6 +618,18 @@ define(
       traits.childCount === 2; // A heading grouped with a single item
 
     domJudgements.isParentOfOnlyChild = traits.childCount === 1;
+
+    var depth = traitcache.getTreeDepth(node, childJudgements && childJudgements.treeDepth);
+
+    domJudgements.isDeepTree  = depth > DEEP_TREE_DEPTH ? 1 : 0;
+    domJudgements.treeDepth   = depth;
+    // penalty for being an especially deep tree
+    domJudgements.extraDepth  = Math.max(0, depth - DEEP_TREE_DEPTH);
+
+    if (!domJudgements.isDeepTree) {
+      var size = traitcache.getTreeSize(node);
+      domJudgements.perFiveDescendants = Math.floor(size / 5);
+    }
 
     return domJudgements;
   }
