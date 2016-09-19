@@ -6,12 +6,14 @@
 define(
   [
     'Promise',
+    'core/conf/user/user',
     'core/conf/user/storage',
     'core/conf/user/storage-backup',
     'core/native-functions'
   ],
   function (
     Promise,
+    user,
     storage,
     storageBackup,
     nativeFn
@@ -23,7 +25,7 @@ define(
       listeners      = {};
 
   function getUserId() {
-    return storage.getUserId();
+    return user.getId();
   }
 
   function copyFields(obj) {
@@ -36,7 +38,7 @@ define(
   function get(key, callback) {
 
     // handle sync getting of value
-    var settings = copyFields(storage.getPrefs()), // For safety, ensure we don't pass back object that we don't want written to
+    var settings = copyFields(user.getPrefs()), // For safety, ensure we don't pass back object that we don't want written to
       value;
 
     if (!key) {
@@ -85,7 +87,7 @@ define(
     }
 
     // Save the data from localStorage: User ID namespace.
-    storage.setPref(key, value);
+    user.setPref(key, value);
 
     // if list isn't empty, call each listener
     // about new value
@@ -106,7 +108,7 @@ define(
   }
 
   function saveToBackup() {
-    storageBackup.save(storage.getAppData())
+    storageBackup.save(storage.getAll())
       .catch(function(error) {
         throw new Error(error);   // TODO find a cleaner way to log our errors/rejections once we move to native promises
       });
@@ -123,7 +125,7 @@ define(
   // Reset all settings as if it is a new user
   function reset() {
     // Undefine all settings and call setting notification callbacks
-    var allSettings = Object.keys(storage.getPrefs());
+    var allSettings = Object.keys(user.getPrefs());
     allSettings.forEach(unset);
   }
 
@@ -131,7 +133,7 @@ define(
     if (SC_DEV) {
       //console.log('New Sitecues user created');
     }
-    storage.createUser();
+    user.create();
     saveToBackup();
   }
 
@@ -144,12 +146,12 @@ define(
 
     function globalUser(globalPrefsData) {
       // Prefer user in storage-backup -- it's a different user id
-      if (SC_DEV && storage.getUserId()) {
+      if (SC_DEV && user.getId()) {
         console.log('User discrepancy found: preferring global user');
       }
       // This discrepancy is a rare case - when it happens we just use the global prefs data
       // to remove the conflict
-      storage.setAppData(globalPrefsData);
+      storage.setAll(globalPrefsData);
       return {
         didUseStorageBackup: true,
         isSameUser: false
@@ -164,7 +166,7 @@ define(
     }
 
     function getBestUser(globalPrefsData) {
-      var localUserId = storage.getUserId(),
+      var localUserId = user.getId(),
         globalUserId = globalPrefsData && globalPrefsData.userId;
 
       if (globalUserId && globalUserId !== localUserId) {

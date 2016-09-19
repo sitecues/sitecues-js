@@ -85,8 +85,8 @@ define(
   }
 
   return {
-    setAppData : setAll,
-    getAppData : getAll,
+    setAll : setAll,
+    getAll : getAll,
     clearCache : clearCache
   };
 });
