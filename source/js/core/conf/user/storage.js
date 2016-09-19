@@ -35,127 +35,58 @@ define(
     cachedAppData = undefined;
   }
 
-  /*
-   * Friendly API for overwriting all data we have put into storage.
-   * If you can, use clearCache() or setPref() instead.
-   */
-  function setAppData(data) {
-
-    /*
-     * Overwrite the entire namespace that we use for storing data.
-     */
-    function setRawAppData(dataString) {
-      try {
-        localStorage.setItem(NAMESPACE, dataString);
-      }
-      catch(ex) {}
-    }
-
-    /*
-     * Get the final representation that we will put into storage.
-     */
-    function serialize(data) {
-      return nativeFn.JSON.stringify(data || {});
-    }
-
-    // Saves data for this page view
-    cachedAppData = data;
-
-    // Tries to save data for future page views
-    var dataString = serialize(data);
-    setRawAppData(dataString);
+  // Overwrite the entire namespace that we use for storing data.
+  function setAllRaw(dataString) {
+    try {
+      localStorage.setItem(NAMESPACE, dataString);
+    } catch (err) {}
   }
 
-  /*
-   * Friendly API for retrieving all data we have put into storage.
-   * If you can, use getPrefs(), instead.
-   */
-  function getAppData() {
-    /*
-     * Get value of the entire namespace that we use for storing data.
-     * @returns {DOMString or null}
-     */
-    function getRawAppData() {
-      return localStorage.getItem(NAMESPACE);
-    }
+  // Get value of the entire namespace that we use for storing data.
+  // You should probably NOT use this! Prefer getAll().
+  function getAllRaw() {
+    return localStorage.getItem(NAMESPACE);
+  }
 
-    /*
-     * Get the normalized representation of what was in storage.
-     */
-    function deserialize(dataString) {
-      return dataString ? nativeFn.JSON.parse(dataString) : {};
-    }
+  // Get the final representation that we will put into storage.
+  function serialize(data) {
+    return nativeFn.JSON.stringify(data || {});
+  }
 
+  // Get the normalized representation of what was in storage.
+  function deserialize(dataString) {
+    return dataString ? nativeFn.JSON.parse(dataString) : {};
+  }
+
+  // Friendly API for overwriting all data we have put into storage.
+  function setAll(data) {
+    cachedAppData = data;
+    setAllRaw(serialize(data));
+  }
+
+  // Friendly API for retrieving all data we have put into storage.
+  // Returns an object.
+  function getAll() {
     if (cachedAppData) {
       return cachedAppData;
     }
-
-    var dataString = getRawAppData();
-    return deserialize(dataString);
+    return deserialize(getAllRaw());
   }
 
-  /*
-   * Overwrite only the userId portion of the data currently in storage.
-   */
-  function createUser() {
-    var userId = uuid(),
-      appData = { userId : userId };
-    appData[userId] = {};
-    console.log('New user ', userId);
-    setAppData(appData);
-  }
-
-  /*
-   * Get current userId from Local Storage under "sitecues" namespace.
-   * @returns {String|undefined}
-   */
-  function getUserId() {
-    return getAppData().userId;
-  }
-
-  /**
-   * Update LocalStorage data in name, value format | sitecues:userID namespace.
-   * @param {String} name
-   * @param {String} value
-   * @returns {void}
-   */
-  function setPref(name, value) {
-
-    var userId = getUserId();
-
-    if (!userId) {
-      throw new Error('No user ID is set to save preferences for.');
-    }
-
-    var
-      userPreferences = getPrefs(),
-      appData = getAppData();
-
-    userPreferences[name] = value;
-
-    appData[userId] = userPreferences;
-    setAppData(appData);
-  }
-
-  /**
-   * Get the user settings we have stored, nested within app data.
-   * @returns {Object}
-   */
-  function getPrefs() {
-    var
-      appData = getAppData(),
-      userPreferences = appData[getUserId()];
-
-    return userPreferences || {};
+  // Merge some new data into the existing store, with the
+  // new data taking precedence.
+  function set(input) {
+    var appData = getAll();
+    // TODO: Switch to Object.assign() when possible.
+    Object.keys(input).forEach(function (key) {
+      appData[key] = input[key];
+    });
+    setAll(appData);
   }
 
   return {
-    createUser: createUser,
-    getUserId: getUserId,
-    setPref: setPref,
-    getPrefs: getPrefs,
-    setAppData: setAppData,
-    getAppData: getAppData,
-    clearCache: clearCache
+    setAppData : setAll,
+    getAppData : getAll,
+    clearCache : clearCache
   };
 });
