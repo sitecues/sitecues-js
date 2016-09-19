@@ -11,7 +11,7 @@ define(
     'page/zoom/config/config',
     'core/native-functions',
     'core/inline-style/inline-style',
-    'core/util/array-utility'
+    'page/zoom/combo-boxes'
   ],
   function (
     $,
@@ -22,7 +22,7 @@ define(
     config,
     nativeFn,
     inlineStyle,
-    arrayUtil
+    comboBoxes
   ) {
   'use strict';
 
@@ -41,7 +41,6 @@ define(
     shouldRepaintOnZoomChange,
     // Key frame animations
     SITECUES_ZOOM_ID       = constants.SITECUES_ZOOM_ID,
-    SITECUES_ZOOM_FORMS_ID = constants.SITECUES_ZOOM_FORMS_ID,
     CRISPING_ATTRIBUTE   = constants.CRISPING_ATTRIBUTE,
     MAX                  = constants.MAX_ZOOM,
     MIN                  = constants.MIN_ZOOM,
@@ -51,99 +50,56 @@ define(
     // This is conjured out of thin air. Just seems to work.
     REPAINT_FOR_CRISP_TEXT_DELAY = constants.REPAINT_FOR_CRISP_TEXT_DELAY;
 
-    // Create <style> for keyframes animations
-    // For initial zoom, call with the targetZoom
-    // Otherwise, it will create a reverse (zoom-out) and forward (zoom-in) style sheet
-    //This needs to set up a keyframe stylesheet for each zoom target
-    /*
-    * Each zoom target will need to calculate a desired zoom level:
-    *   a. Primary body, 0th zoom target, will calculate full zoom range and translate x / width animations as necessary
-    *   b. each succeeding zoom target will use its calculated zoom level (depending on ratio of dimensions to screen size)
-    * */
-    //instead of taking target zoom on the initial zoom stylesheet, just take a boolean clarifying if it is
-    //the initial zoom or not
-    function setupNextZoomStyleSheet(targetZoom, doUseKeyFrames) {
-      var css = '';
+  // Create <style> for keyframes animations
+  // For initial zoom, call with the targetZoom
+  // Otherwise, it will create a reverse (zoom-out) and forward (zoom-in) style sheet
+  //This needs to set up a keyframe stylesheet for each zoom target
+  /*
+  * Each zoom target will need to calculate a desired zoom level:
+  *   a. Primary body, 0th zoom target, will calculate full zoom range and translate x / width animations as necessary
+  *   b. each succeeding zoom target will use its calculated zoom level (depending on ratio of dimensions to screen size)
+  * */
+  //instead of taking target zoom on the initial zoom stylesheet, just take a boolean clarifying if it is
+  //the initial zoom or not
+  function setupNextZoomStyleSheet(targetZoom, doUseKeyFrames) {
+    var css = '';
 
-      if (doUseKeyFrames) {
-        if (targetZoom) {
-          // Style sheet to zoom exactly to targetZoom
-          css = getAnimationCSS(targetZoom);
-        }
-        else {
-          if (state.completedZoom > MIN) {
-            // Style sheet for reverse zoom (zoom-out to 1x)
-            css += getAnimationCSS(MIN);
-          }
-          if (state.completedZoom < MAX) {
-            // Style sheet for forward zoom (zoom-in to 3x)
-            css += getAnimationCSS(MAX);
-          }
-        }
+    if (doUseKeyFrames) {
+      if (targetZoom) {
+        // Style sheet to zoom exactly to targetZoom
+        css = getAnimationCSS(targetZoom);
       }
-
-      css += getCssCrispingFixes();
-
-      applyZoomStyleSheet(css);
-    }
-
-    // Replace current zoom stylesheet or insert a new one with the
-    // requested styles plus generic stylesheet fixes for the current configuration.
-    function applyZoomStyleSheet(additionalCss) {
-      var styleSheetText = additionalCss || '';
-      if (styleSheetText) {
-        if ($zoomStyleSheet) {
-          $zoomStyleSheet.text(styleSheetText);
+      else {
+        if (state.completedZoom > MIN) {
+          // Style sheet for reverse zoom (zoom-out to 1x)
+          css += getAnimationCSS(MIN);
         }
-        else {
-          $zoomStyleSheet = $('<style>')
-            .text(styleSheetText)
-            .attr('id', SITECUES_ZOOM_ID)
-            .appendTo('head');
+        if (state.completedZoom < MAX) {
+          // Style sheet for forward zoom (zoom-in to 3x)
+          css += getAnimationCSS(MAX);
         }
       }
     }
 
-  function applyZoomFormFixes(zoom) {
-    var
-      newFormScale = Math.pow(zoom, 1.3),
-      selector = 'select[size="1"],select:not([size])',
-      css = selector + ' {' +
-        'transform-origin: 0 0 !important; }' ;
+    css += getCssCrispingFixes();
 
-    var comboBoxes = arrayUtil.toArray(document.querySelectorAll(selector));
-    comboBoxes.forEach(function (box) {
-      inlineStyle.restore(box, ['font-size', 'width', 'height', 'transform']);
+    applyZoomStyleSheet(css);
+  }
 
-      if (zoom === 1) {
-        // We don't need to fix combo boxes if we aren't zooming
-        return;
+  // Replace current zoom stylesheet or insert a new one with the
+  // requested styles plus generic stylesheet fixes for the current configuration.
+  function applyZoomStyleSheet(additionalCss) {
+    var styleSheetText = additionalCss || '';
+    if (styleSheetText) {
+      if ($zoomStyleSheet) {
+        $zoomStyleSheet.text(styleSheetText);
       }
-
-      var style     = getComputedStyle(box),
-          height    = parseFloat(style.height),
-          width     = parseFloat(style.width),
-          newWidth  = width  * newFormScale,
-          newHeight = height * newFormScale;
-
-      inlineStyle.override(box, {
-        fontSize  : zoom + 'em',
-        height    : newHeight + 'px',
-        width     : newWidth + 'px',
-        transform : 'scale(' + (1 / zoom) + ')'
-      });
-    });
-
-    // Don't use any of these rules in print
-    css = '@media screen {\n' + css + '\n }';
-    if ($zoomFormsStyleSheet) {
-      $zoomFormsStyleSheet.text(css);
-    }
-    else {
-      $zoomFormsStyleSheet = $('<style>')
-        .text(css)
-        .attr('id', SITECUES_ZOOM_FORMS_ID)
-        .appendTo('head');
+      else {
+        $zoomStyleSheet = $('<style>')
+          .text(styleSheetText)
+          .attr('id', SITECUES_ZOOM_ID)
+          .appendTo('head');
+      }
     }
   }
 
@@ -321,6 +277,7 @@ define(
     TRANSFORM_PROP_CSS        = platform.transformPropertyCss;
     shouldRepaintOnZoomChange = platform.browser.isChrome;
     shouldOptimizeLegibility  = platform.browser.isChrome && platform.os.isWin;
+    comboBoxes.init();
   }
 
   return {
@@ -332,7 +289,6 @@ define(
     repaintToEnsureCrispText: repaintToEnsureCrispText,
     fixBodyTransitions: fixBodyTransitions,
     restoreBodyTransitions: restoreBodyTransitions,
-    applyZoomFormFixes: applyZoomFormFixes,
     init: init
   };
 });
