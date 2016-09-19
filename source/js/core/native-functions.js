@@ -3,6 +3,7 @@ define([], function () {
 
   var nativeWindow,
     // In order to make a regex to lint for direct access to certain functions, we suffix certain functions with 'Fn' so that we can distinguish correct uses
+    // from potentially breaking direct references to fn.bind
     suffixedFields = [
       'bind'
     ],
@@ -21,18 +22,18 @@ define([], function () {
   // The difference between this iframe and the `native window` frame is that the native window iframe needs to be persistent beyond the scope of this module's
   // initialization, whereas this iframe is removed from the DOM at the end of the init method
   function getVerificationWindow() {
-    // We don't need to care about the styling of this iframe because it will never be rendered
     var iframe = document.createElement('iframe');
+    // This iframe should never be rendered, but just to be defensive this styling will hide the element
+    iframe.style.cssText = 'position:absolute;width:1px;height:1px;left:-9999px;visibility:hidden;';
     iframe.id = verificationId;
     document.documentElement.appendChild(iframe);
     return iframe.contentWindow;
   }
 
   function removeVerificationFrame() {
-    document.getElementById(verificationId).remove();
+    var iframe = document.getElementById(verificationId);
+    iframe.parentElement.removeChild(iframe);
   }
-
-
 
   function init() {
     // Extension always uses window
@@ -41,14 +42,38 @@ define([], function () {
         functionToString   = verificationWindow.Function.prototype.toString,
         objectToString     = verificationWindow.Object.prototype.toString;
 
+    /*
+    * isSignatureVerified compares the toString value of two objects or functions, and returns true if they are identical
+    *
+    * @param top : the value of a given field on a top level native object
+    * @param verification : the value of the same field on the `verification` iframe's content window
+    * */
     function isSignatureVerified(top, verification) {
-      var type = typeof top;
-      if (type === 'object') {
-        return objectToString.call(top) === objectToString.call(verification);
+      var toString;
+
+      if (SC_EXTENSION) {
+        // The extension is running as a content script, so there is no chance that a top level field has been overridden by another script
+        return true;
       }
-      else if (type === 'function') {
-        return functionToString.call(top) === functionToString.call(verification);
+
+      // toString isn't a generic method, so we need to pick the correct one
+      switch (typeof top) {
+        case 'object':
+          toString = objectToString;
+          break;
+
+        case 'function':
+          toString = functionToString;
+          break;
+
+        default:
+          // If the top value isn't an object or function, we know that it's been overridden
+          return false;
       }
+
+      // compares the toString value of the top window function/object the value of the same field on the verification window
+      // If they're the same, we know that the top field hasn't been overridden by another script
+      return toString.call(top) === toString.call(verification);
     }
 
     function addFunctionProperty(name) {
@@ -57,26 +82,17 @@ define([], function () {
         topValue          = window.Function.prototype[name],
         verificationValue = verificationWindow.Function.prototype[name];
 
-      if (isSignatureVerified(topValue, verificationValue)) {
-        exports[exportName] = topValue;
-      }
-      else {
-        exports[exportName] = getNativeWindow().Function.prototype[name];
-      }
+      exports[exportName] = isSignatureVerified(topValue, verificationValue) ? topValue : getNativeWindow().Function.prototype[name];
     }
 
     function addWindowProperty(name) {
       var
         topValue          = window[name],
-        verificationValue = verificationWindow[name];
+        verificationValue = verificationWindow[name],
+        nativeValue       = isSignatureVerified(topValue, verificationValue) ? topValue : getNativeWindow()[name];
 
-      if (isSignatureVerified(topValue, verificationValue)) {
-        exports[name] = typeof topValue === 'function' ? topValue.bind(window) : topValue;
-      }
-      else {
-        var nativeValue = getNativeWindow().Function.prototype[name];
-        exports[name] = typeof nativeValue === 'function' ? nativeValue.bind(window) : nativeValue;
-      }
+      // It's especially important to bind setTimeout to the top window
+      exports[name] = typeof nativeValue === 'function' ? nativeValue.bind(window) : topValue;
     }
 
     addFunctionProperty('bind');
