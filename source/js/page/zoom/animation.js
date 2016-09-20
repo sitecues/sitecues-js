@@ -5,7 +5,7 @@ define(
     'core/conf/user/manager',
     'core/platform',
     'core/events',
-    'core/metric',
+    'core/metric/metric',
     'core/errors',
     'page/util/common',
     'page/zoom/state',

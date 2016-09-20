@@ -13,7 +13,7 @@ define(
     'page/util/element-classifier',
     'hlb/animation',
     'page/util/geo',
-    'core/metric',
+    'core/metric/metric',
     'hlb/constants',
     'core/events',
     'core/inline-style/inline-style'
