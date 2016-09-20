@@ -309,7 +309,7 @@ define(
 
   function addPagePerformanceDetails(details) {
     var t0 = performance.timing.fetchStart;
-    details.startPageLoad= performance.timing.domLoading - t0;
+    details.startPageLoad = performance.timing.responseEnd - t0;
     details.startPageInteractive = performance.timing.domInteractive - t0;
     details.startSitecuesLoad = startSitecuesLoad;
     details.startSitecuesInteractive = getCurrentTime();
