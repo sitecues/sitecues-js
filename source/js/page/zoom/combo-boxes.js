@@ -45,13 +45,13 @@ define(
 
     var heightScale, widthScale, fontSize,
       styles        = {},
-      computedStyle = getComputedStyle(element);
+      computedStyle = getComputedStyle(element),
+      height        = parseFloat(computedStyle.height),
+      width         = parseFloat(computedStyle.width);
     
     if (platform.browser.isFirefox) {
-      var scale = Math.pow(zoom, 1.3);
-      widthScale  = scale;
-      heightScale = scale;
-      fontSize = zoom;
+      widthScale  = Math.pow(zoom, 1.1);
+      fontSize    = zoom;
       styles.transform = 'scale(' + (1 / zoom) + ')';
       styles.transformOrigin = '0 62%';
     }
@@ -59,17 +59,11 @@ define(
       widthScale  = 1.5;
       heightScale = 1.3;
       fontSize    = 1 + (zoom - 1) * 0.4;
+      styles.height = height * heightScale;
     }
 
-    var
-      height       = parseFloat(computedStyle.height),
-      width        = parseFloat(computedStyle.width),
-      newWidth     = width  * widthScale,
-      newHeight    = height * heightScale;
-
     styles.fontSize = fontSize + 'em';
-    styles.height   = newHeight + 'px';
-    styles.width    = newWidth + 'px';
+    styles.width    = (width * widthScale) + 'px';
 
     if (computedStyle[appearance] === 'menulist') {
       styles[appearance] = 'menulist-button';
