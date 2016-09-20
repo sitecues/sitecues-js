@@ -35,7 +35,8 @@ define(
     'page/highlight/traits',
     'page/highlight/judge',
     'core/native-functions',
-    'core/inline-style/inline-style'
+    'core/inline-style/inline-style',
+    'core/platform'
   ],
   function (
     $,
@@ -46,7 +47,8 @@ define(
     traits,
     judge,
     nativeFn,
-    inlineStyle
+    inlineStyle,
+    platform
   ) {
   'use strict';
 
@@ -149,6 +151,12 @@ define(
    */
   function find(startElement, doSuppressVoting) {
     var candidates, picked;
+
+    if (platform.browser.isFirefox && startElement.localName === 'select') {
+      // Firefox mispositions select elements drop down menus when their ancestors are transformed, which is unavoidable
+      // with the current lens architecture
+      return null;
+    }
 
     function processResult(result) {
       lastPicked = result && result[0];

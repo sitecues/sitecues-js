@@ -19,9 +19,9 @@ define(
       selector = 'select[size="1"],select:not([size])';
 
   function listenForNewComboBoxes(records) {
-    records.forEach(function (record) {
+    records.some(function (record) {
       var addedNodes = arrayUtil.from(record.addedNodes);
-      addedNodes.some(function (node) {
+      return addedNodes.some(function (node) {
         if (node.localName === 'select' ||
           (typeof node.querySelectorAll === 'function' && node.querySelectorAll(selector).length)) {
             fixAllSelectElements();
