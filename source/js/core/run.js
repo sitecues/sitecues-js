@@ -10,7 +10,7 @@ define(
     'core/conf/user/manager',
     'core/util/session',
     'core/locale',
-    'core/metric',
+    'core/metric/metric',
     'core/platform',
     'core/bp/bp',
     'core/constants',
@@ -20,6 +20,7 @@ define(
     'core/modifier-key-state',
     'core/native-functions',
     'core/ab-test/ab-test',
+    'core/metric/bounce',
     'core/shake/shake',
     'core/inline-style/inline-style'
   ],
@@ -38,6 +39,7 @@ define(
     modifierKeyState,
     nativeFn,
     abTest,
+    bounce,
     shake,
     inlineStyle
   ) {
@@ -55,6 +57,7 @@ define(
     isKeyHandlingInitialized,
     wasSitecuesEverOn,
     initialPageVisitDetails,
+    startSitecuesLoad,
     // Keys that can init sitecues
     INIT_CODES = CORE_CONST.INIT_CODES,
     // Enums for sitecues loading states
@@ -299,7 +302,21 @@ define(
       initialPageVisitDetails.windowName = winName.substr(0, 30);
     }
 
+    addPagePerformanceDetails(initialPageVisitDetails);
+
     metric.init();
+  }
+
+  function addPagePerformanceDetails(details) {
+    var t0 = performance.timing.fetchStart;
+    details.startPageLoad = performance.timing.responseEnd - t0;
+    details.startPageInteractive = performance.timing.domInteractive - t0;
+    details.startSitecuesLoad = startSitecuesLoad;
+    details.startSitecuesInteractive = getCurrentTime();
+  }
+
+  function getCurrentTime() {
+    return Math.floor(performance.now());
   }
 
   function initABTest(sitecuesInitSummary) {
@@ -307,15 +324,16 @@ define(
     return sitecuesInitSummary;  // Must be passed on through the promise chain
   }
 
-
   function initConfAndMetrics() {
     return conf.init()
       .catch(function handlePrefsError(error) { return { error: error.message }; })
       .then(initABTest)
-      .then(initMetrics);
+      .then(initMetrics)
+      .then(bounce.init);
   }
 
   function init() {
+    startSitecuesLoad = getCurrentTime();
     // When keyboard listening is ready
     events.on('keys/did-init', onKeyHandlingInitialized);
     events.on('zoom/ready', onZoomInitialized);

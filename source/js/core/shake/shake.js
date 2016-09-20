@@ -6,7 +6,7 @@
  * - Ideas for use -- make mouse larger, make badge glow temporarily
  */
 define([
-  'core/metric',
+  'core/metric/metric',
   // 'core/events',
   'core/dom-events',
   'core/shake/constants',
