@@ -12,7 +12,10 @@ var config = require('../build-config'),
   JS_SOURCE_DIR = config.librarySourceDir + '/js',
   PATHS = {
     '$': 'empty:', 
-    'Promise': 'empty:'   // In runtime config, via definePrim : 'Promise' to allow use of alameda's built-in Prim library
+    'Promise': 'empty:',   // In runtime config, via definePrim : 'Promise' to allow use of alameda's built-in Prim library
+    'core/native-functions': 'empty:',  // Defined by minicore shared code
+    'core/conf/user/storage': 'empty:',  // Defined by minicore shared code
+    'core/conf/user/storage-backup': 'empty:'  // Definied by minicore shared code
   },
   AMD_BASE_CONFIG = {
     wrap: {
@@ -38,11 +41,10 @@ var config = require('../build-config'),
         'Object.defineProperty(sitecues, "version", { value: "' + config.version + '", writable: false });\n' +
         '"use strict";\n' +
         fs.readFileSync(JS_SOURCE_DIR + '/core/prereq/custom-event-polyfill.js') +
-        fs.readFileSync(JS_SOURCE_DIR + '/core/prereq/helper-frame.js') +
         fs.readFileSync(JS_SOURCE_DIR + '/core/prereq/alameda-config.js')
       },
       // Include alameda in core
-      include: [ 'core/alameda-custom', 'core/errors' ],
+      include: [ 'core/prereq/alameda-custom', 'core/prereq/shared', 'core/errors' ],
       // Make sure core initializes itself
       insertRequire: [ 'core/errors', 'core/core' ]
     },

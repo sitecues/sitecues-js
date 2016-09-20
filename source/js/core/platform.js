@@ -285,9 +285,7 @@ define([], function() {
 
     var platformWarning = getPlatformWarning(exports.os, exports.browser);
     if (platformWarning) {
-      exports.platformWarning = platformWarning;
-      exports.isUnsupportedPlatform = true;
-      return;
+      throw new Error(platformWarning);
     }
 
     exports.isStorageUnsupported = isStorageUnsupported();

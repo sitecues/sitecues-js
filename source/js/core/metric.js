@@ -4,7 +4,7 @@
 define(
   [
     'core/conf/user/manager',
-    'core/util/session',
+    'core/util/ids',
     'core/conf/site',
     'core/locale',
     'core/util/xhr',
@@ -18,7 +18,7 @@ define(
   ],
   function (
     conf,
-    session,
+    ids,
     site,
     locale,
     xhr,
@@ -240,10 +240,10 @@ define(
       sessionData = {
         scVersion: sitecues.getVersion(),
         metricVersion: METRICS_VERSION,
-        sessionId: session.sessionId,
-        pageViewId: session.pageViewId,
+        sessionId: ids.sessionId,
+        pageViewId: ids.pageViewId,
         siteId: site.getSiteId(),
-        userId: conf.getUserId(),
+        userId: ids.userId,
         abTest: abTest.get(),
         pageUrl: getPageUrl(source),
         browserUserAgent: navigator.userAgent,
@@ -259,8 +259,7 @@ define(
         osVersion: platform.os.fullVersion,
         browser: platform.browser.is,
         browserVersion: platform.browser.version,
-        navPlatform: navigator.platform, // For debugging -- we no longer use it to determine OS
-        isUnsupportedPlatform: platform.isUnsupportedPlatform ? true : undefined  // Don't export field when supported
+        navPlatform: navigator.platform // For debugging -- we no longer use it to determine OS
       };
     }
 
@@ -279,10 +278,10 @@ define(
       KeyCommand: wrap(name.KEY_COMMAND),
       LensOpen: wrap(name.LENS_OPEN),
       MouseShake: wrap(name.MOUSE_SHAKE),
-      PageVisit: wrap(name.PAGE_VISIT),
       PanelClick: wrap(name.PANEL_CLICK),
       PanelClose: wrap(name.PANEL_CLOSE),
       PanelFocusMove: wrap(name.PANEL_FOCUS_MOVE),
+      SitecuesReady: wrap(name.SITECUES_READY),
       SliderSettingChange: wrap(name.SLIDER_SETTING_CHANGE),
       TtsRequest: wrap(name.TTS_REQUEST),
       ZoomChange: wrap(name.ZOOM_CHANGE)

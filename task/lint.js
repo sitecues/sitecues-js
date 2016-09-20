@@ -4,7 +4,7 @@ var gulp = require('gulp'),
   jshint = require('gulp-jshint'),
   check = require('gulp-check'),
   amdCheck = require('gulp-amdcheck'),
-  ES5_LINT_GLOB = [ 'source/js/**/*.js', '!source/js/**/jquery.js', '!source/js/core/alameda-custom.js', '!source/js/core/native-functions' ],
+  ES5_LINT_GLOB = [ 'source/js/**/*.js', '!source/js/**/jquery.js', '!source/js/core/prereq/alameda-custom.js' ],
   ES6_LINT_GLOB = [
     'extension/source/js/**/*.js', '!extension/source/js/templated-code/**/*',
     // TODO lint tests

@@ -15,7 +15,7 @@ define([], function () {
     KEY_COMMAND: 'key-command',
     LENS_OPEN: 'hlb-opened',
     MOUSE_SHAKE: 'mouse-shake',
-    PAGE_VISIT: 'page-visited',
+    SITECUES_READY: 'sc-ready',
     PANEL_CLICK: 'panel-clicked',
     PANEL_CLOSE: 'panel-closed',
     PANEL_FOCUS_MOVE: 'panel-focus-moved',

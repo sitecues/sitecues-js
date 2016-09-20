@@ -1,5 +1,5 @@
 /**
- * Overrides core/conf/user/store-backup implementation
+ * Overrides core/conf/user/storage-backup implementation
  * Implements same API but uses chrome.storage.local for the backup storage.
  * Note: we could use chrome.storage.sync if we really wanted settings to be saved across devices,
  * but we probably don't since devices can have very different screen sizes and uses.

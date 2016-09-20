@@ -23,10 +23,11 @@
         isFluid : 1,
         maxRewrapZoom: 3
       },
-      parentConfig: {
-        // Not in sitecues.config because we don't consider this normally configurable
-        sessionId: sessionId,
-        pageViewId: pageViewId
+      session: {
+        id: sessionId
+      },
+      pageView: {
+        id: pageViewId
       }
     };
 

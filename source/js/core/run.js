@@ -8,7 +8,7 @@
 define(
   [
     'core/conf/user/manager',
-    'core/util/session',
+    'core/util/ids',
     'core/locale',
     'core/metric',
     'core/platform',
@@ -16,7 +16,6 @@ define(
     'core/constants',
     'core/events',
     'core/dom-events',
-    'Promise',
     'core/modifier-key-state',
     'core/native-functions',
     'core/ab-test/ab-test',
@@ -26,7 +25,7 @@ define(
   /*jshint -W072 */ //Currently there are too many dependencies, so we need to tell JSHint to ignore it for now
   function (
     conf,
-    session,
+    ids,
     locale,
     metric,
     platform,
@@ -34,7 +33,6 @@ define(
     CORE_CONST,
     events,
     domEvents,
-    Promise,
     modifierKeyState,
     nativeFn,
     abTest,
@@ -54,7 +52,7 @@ define(
     isKeyReleased,
     isKeyHandlingInitialized,
     wasSitecuesEverOn,
-    initialPageVisitDetails,
+    startSitecuesLoad,
     // Keys that can init sitecues
     INIT_CODES = CORE_CONST.INIT_CODES,
     // Enums for sitecues loading states
@@ -132,8 +130,22 @@ define(
   }
 
   function firePageVisitedMetric() {
-    new metric.PageVisit(initialPageVisitDetails).send();
+    // Copy sitecuesInitSummary so we can add to it
+    var initDetails = {
+      startSitecuesLoad: startSitecuesLoad,
+      startSitecuesInteractive: getCurrentTime(),
+      nativeZoom: platform.nativeZoom,
+      isRetina: platform.isRetina(),
+      isStorageUnsupported: platform.isStorageUnsupported   // E.g. Safari private browsing
+    };
+
+    new metric.SitecuesReady(initDetails).send();
   }
+
+  function getCurrentTime() {
+    return Math.floor(performance.now());
+  }
+
 
   function onSitecuesReady() {
     firePageVisitedMetric();
@@ -266,81 +278,27 @@ define(
     return isSitecuesOn;
   }
 
-  function initMetrics(sitecuesInitSummary) {
-    // sitecuesInitSummary can contain the following fields:
-    // isSameUser
-    // didUseStorageBackup
-    // isUnsupportedPlatform
-    // error (a string)
-    sitecuesInitSummary = sitecuesInitSummary || {};
-
-    session.init({
-      // Do not reuse session if user changes
-      // If unsupported platform, allow session id to remain consistent
-      canReuseSession: sitecuesInitSummary.isSameUser || sitecuesInitSummary.isUnsupportedPlatform
-    });
-
-    // Copy sitecuesInitSummary so we can add to it
-    initialPageVisitDetails = nativeFn.JSON.parse(nativeFn.JSON.stringify(sitecuesInitSummary));
-
-    // Add platform details
-    initialPageVisitDetails.nativeZoom = platform.nativeZoom;
-    initialPageVisitDetails.isRetina = platform.isRetina();
-    if (platform.isStorageUnsupported) {
-      // This occurs in Safari private browsing mode
-      // Leave field undefined in the edge case
-      initialPageVisitDetails.isStorageUnsupported = true;
-    }
-
-    // TODO remove this once we know enough about window.name usage to make a decision about using it for sessions
-    var winName = window.name;
-    if (winName) {
-      // Just keep the first 30 chars so we get an idea of the format -- don't want to fill up the logs
-      initialPageVisitDetails.windowName = winName.substr(0, 30);
-    }
-
-    metric.init();
-  }
-
-  function initABTest(sitecuesInitSummary) {
-    abTest.init();
-    return sitecuesInitSummary;  // Must be passed on through the promise chain
-  }
-
-
-  function initConfAndMetrics() {
-    return conf.init()
-      .catch(function handlePrefsError(error) { return { error: error.message }; })
-      .then(initABTest)
-      .then(initMetrics);
-  }
-
   function init() {
+    startSitecuesLoad = getCurrentTime();
+
     // When keyboard listening is ready
     events.on('keys/did-init', onKeyHandlingInitialized);
     events.on('zoom/ready', onZoomInitialized);
 
-    // Start initialization
+    // Synchronous initialization
+    ids.init();
     inlineStyle.init();
     platform.init();
     nativeFn.init();
+    domEvents.init();
+    abTest.init();
+    metric.init();
 
-    if (platform.isUnsupportedPlatform) {
-      // Unsupported platform: fail early but fire page-visited metric
-      initMetrics({
-        isUnsupportedPlatform: true
-      });
-      firePageVisitedMetric();
-      console.log('Note: Sitecues is not supported on this platform: ' + platform.platformWarning);
-    }
-    else {
-      domEvents.init();
-      // Supported platform: continue to init Sitecues
-      Promise.all([initConfAndMetrics(), locale.init()])
-        .then(bp.init)
-        .then(metric.initViewInfo)
-        .then(initPageFeatureListeners);
-    }
+    // Async initialization
+    locale.init()
+      .then(bp.init)
+      .then(metric.initViewInfo)
+      .then(initPageFeatureListeners);
   }
 
   return {

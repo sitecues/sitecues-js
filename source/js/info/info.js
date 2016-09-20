@@ -8,7 +8,7 @@ define(
     'core/locale',
     'page/util/color',
     'core/events',
-    'core/util/session',
+    'core/util/ids',
     'core/native-functions',
     'core/inline-style/inline-style'
   ],
@@ -21,7 +21,7 @@ define(
     locale,
     colorUtil,
     events,
-    session,
+    ids,
     nativeFn,
     inlineStyle
   ) {
@@ -130,8 +130,8 @@ define(
           scUrl: sitecuesJsUrl,
           siteId: site.getSiteId(),
           siteUrl: hostUrl.protocol + '//' + hostUrl.hostname + ':' + hostUrl.port,
-          sessionId: session.sessionId,
-          pageViewId: session.pageViewId,
+          sessionId: ids.sessionId,
+          pageViewId: ids.pageViewId,
           prefs: window.localStorage.sitecues
         });
 

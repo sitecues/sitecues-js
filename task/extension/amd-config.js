@@ -25,6 +25,7 @@ var config = require('../build-config.js'),
       // In runtime config, via definePrim : 'Promise' to allow use of alameda's built-in Prim library
       'Promise': 'empty:',
       // DIFFERENT in the extension
+      'core/conf/user/storage': '../../extension/source/js/overrides/storage',
       'core/conf/user/storage-backup': '../../extension/source/js/overrides/storage-backup',
       'core/data-map': config.tmpDir + '/data-map',
       // UNUSED in the extension

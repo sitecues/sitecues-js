@@ -5,13 +5,11 @@
  */
 define(
   [
-    'Promise',
     'core/conf/user/storage',
     'core/conf/user/storage-backup',
     'core/native-functions'
   ],
   function (
-    Promise,
     storage,
     storageBackup,
     nativeFn
@@ -23,7 +21,7 @@ define(
       listeners      = {};
 
   function getUserId() {
-    return storage.getUserId();
+    return window.user.id;
   }
 
   function copyFields(obj) {
@@ -127,69 +125,7 @@ define(
     allSettings.forEach(unset);
   }
 
-  function createUser() {
-    if (SC_DEV) {
-      //console.log('New Sitecues user created');
-    }
-    storage.createUser();
-    saveToBackup();
-  }
-
-  function init() {
-
-    function onPrefsError(error) {
-      createUser();
-      return Promise.reject(error);
-    }
-
-    function globalUser(globalPrefsData) {
-      // Prefer user in storage-backup -- it's a different user id
-      if (SC_DEV && storage.getUserId()) {
-        console.log('User discrepancy found: preferring global user');
-      }
-      // This discrepancy is a rare case - when it happens we just use the global prefs data
-      // to remove the conflict
-      storage.setAppData(globalPrefsData);
-      return {
-        didUseStorageBackup: true,
-        isSameUser: false
-      };
-    }
-
-    function localUser() {
-      return {
-        didUseStorageBackup: false,
-        isSameUser: true
-      };
-    }
-
-    function getBestUser(globalPrefsData) {
-      var localUserId = storage.getUserId(),
-        globalUserId = globalPrefsData && globalPrefsData.userId;
-
-      if (globalUserId && globalUserId !== localUserId) {
-        // Use global user if it exists and it is different from the local user
-        // (or no local user id but a global one exists)
-        return globalUser(globalPrefsData);
-      }
-      else if (localUserId) {
-        // Has a valid local user
-        return localUser();
-      }
-      else {
-        // No or invalid user: generate one
-        createUser();
-      }
-    }
-
-    storageBackup.init();
-    return storageBackup.load()
-      .then(getBestUser)
-      .catch(onPrefsError);
-  }
-
   return {
-    init: init,
     getUserId: getUserId,
     get: get,
     has: has,
