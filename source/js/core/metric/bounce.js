@@ -37,7 +37,7 @@ define(
     function init() {
       domEvents.on(window, 'mousedown', onClick);
       domEvents.on(window, 'scroll', onScroll);
-      domEvents.on(window, 'unload', onUnload);
+      domEvents.on(window, 'beforeunload', onUnload);
     }
 
     return {
