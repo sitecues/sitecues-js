@@ -29,7 +29,6 @@ define(
   var
     body,
     $zoomStyleSheet,            // <style> element we insert to correct form issues in WebKit
-    $zoomFormsStyleSheet,       // <style> element we insert to correct form issues in WebKit
     TRANSFORM_PROP_CSS,
     // Optimize fonts for legibility? Helps a little bit with Chrome on Windows
     shouldOptimizeLegibility,
