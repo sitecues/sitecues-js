@@ -12,6 +12,10 @@ All notable changes to this project will be documented here.
 ### Fixed
  -
 
+## [4.2.9] - 2016-09-16
+### Fixed
+ - Fixed a regression in Internet Explorer where we failed to clean up after ourselves. That left the page in a weird state.
+
 ## [4.2.8] - 2016-09-15
 ### Fixed
  - Improved support for Google Translate.

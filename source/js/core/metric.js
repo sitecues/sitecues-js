@@ -34,7 +34,7 @@ define(
 
     // IMPORTANT! Increment METRICS_VERSION this every time metrics change in any way
     // IMPORTANT! Have the backend team review all metrics changes!!!
-    var METRICS_VERSION = 18,
+    var METRICS_VERSION = 19,
         isInitialized,
         doSuppressMetrics,
         doLogMetrics,
@@ -79,13 +79,16 @@ define(
       data.details = details;
       data.settings = settings;
       data.has = (function () {
-        var target = {};
-        Object.keys(target).forEach(function (key) {
+        var bool = {};
+        Object.keys(has).forEach(function (key) {
+          // In the future, some has tests might be functions (may have side effects),
+          // here we are careful to not copy those, ensuring no downstream code can
+          // accidentally stringify them and send source code with the metric.
           if (typeof has[key] === 'boolean') {
-            target[key] = has[key];
+            bool[key] = has[key];
           }
         });
-        return target;
+        return bool;
       }());
     }
 
