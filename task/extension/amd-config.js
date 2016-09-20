@@ -27,6 +27,7 @@ var config = require('../build-config.js'),
       // DIFFERENT in the extension
       'core/conf/user/storage': '../../extension/source/js/overrides/storage',
       'core/conf/user/storage-backup': '../../extension/source/js/overrides/storage-backup',
+      'core/native-functions': '../../extension/source/js/overrides/native-functions',
       'core/data-map': config.tmpDir + '/data-map',
       // UNUSED in the extension
       'core/errors': 'empty:',
