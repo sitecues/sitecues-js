@@ -50,14 +50,21 @@ define(
       width         = parseFloat(computedStyle.width);
     
     if (platform.browser.isFirefox) {
+      // As we zoom, the width of the element needs to grow both to contain the font size and to compensate for the inverse transform
       widthScale  = Math.pow(zoom, 1.1);
+      // setting the em font size to the scale factor seems to work well
       fontSize    = zoom;
+      // Select elements in Firefox misposition their drop down menus if their ancestors are scaled, so we apply the inverse transform
+      // and bump up the width as needed. The height of the element grows to contain the font size automatically
       styles.transform = 'scale(' + (1 / zoom) + ')';
+      // This transform origin was taken from previous code, it keeps elements in their intended location
       styles.transformOrigin = '0 62%';
     }
     else {
+      // These are scales so that boxes expand to fit the larger font size
       widthScale  = 1.5;
       heightScale = 1.3;
+      // Arbitrary scale so that font size of the drop down items grow with the zoom
       fontSize    = 1 + (zoom - 1) * 0.4;
       styles.height = height * heightScale;
     }
@@ -66,6 +73,7 @@ define(
     styles.width    = (width * widthScale) + 'px';
 
     if (computedStyle[appearance] === 'menulist') {
+      // Menulist styles prevent certain css styles from taking effect, in this case width and height
       styles[appearance] = 'menulist-button';
     }
 
