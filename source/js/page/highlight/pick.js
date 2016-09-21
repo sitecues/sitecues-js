@@ -35,7 +35,8 @@ define(
     'page/highlight/traits',
     'page/highlight/judge',
     'core/native-functions',
-    'core/inline-style/inline-style'
+    'core/inline-style/inline-style',
+    'core/platform'
   ],
   function (
     $,
@@ -46,7 +47,8 @@ define(
     traits,
     judge,
     nativeFn,
-    inlineStyle
+    inlineStyle,
+    platform
   ) {
   'use strict';
 
@@ -138,6 +140,26 @@ define(
     isVotingOn = true,
     lastPicked;
 
+  function isValidStart(node) {
+    if (!node) {
+      return false;
+    }
+
+    switch (node.localName) {
+      case 'html':
+        return false;
+
+      case 'body':
+        return false;
+
+      case 'select':
+        // Firefox mispositions the dropdown menu of comboboxes with size 1 in the lens, so we don't allow them to be picked
+        return node.size >= 2 || !platform.browser.isFirefox;
+    }
+    
+    return !isInSitecuesUI(node);
+  }
+
   /*
    * ----------------------- PUBLIC -----------------------
    *
@@ -156,7 +178,7 @@ define(
     }
 
     // 1. Don't pick anything in the sitecues UI
-    if (!startElement || $(startElement).is('html,body') || isInSitecuesUI(startElement)) {
+    if (!isValidStart(startElement)) {
       return null;
     }
 
@@ -869,6 +891,7 @@ define(
       console.log('Auto pick debugging: ' + (isAutoPickDebuggingOn = !isAutoPickDebuggingOn));
     };
   }
+
   return {
     find: find,
     reset: reset,
@@ -876,5 +899,4 @@ define(
     provideCustomSelectors: provideCustomSelectors,
     provideCustomWeights: provideCustomWeights
   };
-
 });

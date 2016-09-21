@@ -11,7 +11,7 @@ define(
     'page/zoom/config/config',
     'core/native-functions',
     'core/inline-style/inline-style',
-    'core/util/array-utility'
+    'page/zoom/combo-boxes'
   ],
   function (
     $,
@@ -22,16 +22,14 @@ define(
     config,
     nativeFn,
     inlineStyle,
-    arrayUtil
+    comboBoxes
   ) {
   'use strict';
 
   var
     body,
     $zoomStyleSheet,            // <style> element we insert to correct form issues in WebKit
-    $zoomFormsStyleSheet,       // <style> element we insert to correct form issues in WebKit
     TRANSFORM_PROP_CSS,
-    lastZoom,
     // Optimize fonts for legibility? Helps a little bit with Chrome on Windows
     shouldOptimizeLegibility,
     // Should we repaint when zoom is finished (after any animations)?
@@ -42,7 +40,6 @@ define(
     shouldRepaintOnZoomChange,
     // Key frame animations
     SITECUES_ZOOM_ID       = constants.SITECUES_ZOOM_ID,
-    SITECUES_ZOOM_FORMS_ID = constants.SITECUES_ZOOM_FORMS_ID,
     CRISPING_ATTRIBUTE   = constants.CRISPING_ATTRIBUTE,
     MAX                  = constants.MAX_ZOOM,
     MIN                  = constants.MIN_ZOOM,
@@ -52,114 +49,58 @@ define(
     // This is conjured out of thin air. Just seems to work.
     REPAINT_FOR_CRISP_TEXT_DELAY = constants.REPAINT_FOR_CRISP_TEXT_DELAY;
 
-    // Create <style> for keyframes animations
-    // For initial zoom, call with the targetZoom
-    // Otherwise, it will create a reverse (zoom-out) and forward (zoom-in) style sheet
-    //This needs to set up a keyframe stylesheet for each zoom target
-    /*
-    * Each zoom target will need to calculate a desired zoom level:
-    *   a. Primary body, 0th zoom target, will calculate full zoom range and translate x / width animations as necessary
-    *   b. each succeeding zoom target will use its calculated zoom level (depending on ratio of dimensions to screen size)
-    * */
-    //instead of taking target zoom on the initial zoom stylesheet, just take a boolean clarifying if it is
-    //the initial zoom or not
-    function setupNextZoomStyleSheet(targetZoom, doUseKeyFrames) {
-      var css = '';
+  // Create <style> for keyframes animations
+  // For initial zoom, call with the targetZoom
+  // Otherwise, it will create a reverse (zoom-out) and forward (zoom-in) style sheet
+  //This needs to set up a keyframe stylesheet for each zoom target
+  /*
+  * Each zoom target will need to calculate a desired zoom level:
+  *   a. Primary body, 0th zoom target, will calculate full zoom range and translate x / width animations as necessary
+  *   b. each succeeding zoom target will use its calculated zoom level (depending on ratio of dimensions to screen size)
+  * */
+  //instead of taking target zoom on the initial zoom stylesheet, just take a boolean clarifying if it is
+  //the initial zoom or not
+  function setupNextZoomStyleSheet(targetZoom, doUseKeyFrames) {
+    var css = '';
 
-      if (doUseKeyFrames) {
-        if (targetZoom) {
-          // Style sheet to zoom exactly to targetZoom
-          css = getAnimationCSS(targetZoom);
-        }
-        else {
-          if (state.completedZoom > MIN) {
-            // Style sheet for reverse zoom (zoom-out to 1x)
-            css += getAnimationCSS(MIN);
-          }
-          if (state.completedZoom < MAX) {
-            // Style sheet for forward zoom (zoom-in to 3x)
-            css += getAnimationCSS(MAX);
-          }
-        }
+    if (doUseKeyFrames) {
+      if (targetZoom) {
+        // Style sheet to zoom exactly to targetZoom
+        css = getAnimationCSS(targetZoom);
       }
-
-      css += getCssCrispingFixes();
-
-      applyZoomStyleSheet(css);
-    }
-
-    // Replace current zoom stylesheet or insert a new one with the
-    // requested styles plus generic stylesheet fixes for the current configuration.
-    function applyZoomStyleSheet(additionalCss) {
-      var styleSheetText = additionalCss || '';
-      if (styleSheetText) {
-        if ($zoomStyleSheet) {
-          $zoomStyleSheet.text(styleSheetText);
+      else {
+        if (state.completedZoom > MIN) {
+          // Style sheet for reverse zoom (zoom-out to 1x)
+          css += getAnimationCSS(MIN);
         }
-        else {
-          $zoomStyleSheet = $('<style>')
-            .text(styleSheetText)
-            .attr('id', SITECUES_ZOOM_ID)
-            .appendTo('head');
+        if (state.completedZoom < MAX) {
+          // Style sheet for forward zoom (zoom-in to 3x)
+          css += getAnimationCSS(MAX);
         }
       }
     }
 
-    function applyZoomFormFixes(zoom) {
-      var css;
-      if (platform.browser.isWebKit) {
-        // Add useful zoom fixes for forms that render incorrectly with CSS transform
-        // We turn them off when data-sc-dropdown-fix off is set (need to temporarily turn off for highlight position calculation elsewhere)
-        css ='select[size="1"]:not([data-sc-dropdown-fix-off]),select:not([size]):not([data-sc-dropdown-fix-off]) {' +
-          platform.transformPropertyCss + ':scale(' + 1 / zoom + ') !important;' +
-          'transform-origin:0% 62% !important;' +
-          'margin-right:' + (13 * (1 - zoom)) + '% !important;' +
-          'margin-top:' + (8 * (1-zoom)) + 'px !important;' +
-          'margin-bottom:' + (8 * (1-zoom)) + 'px !important;' +
-          'zoom:' + zoom + ' !important;}' +
-          '\nbody[data-sc-zooming] select { transition-property: none !important; }'; // Turn off any page transitions for select during zoom, otherwise it will potentially animate the above changes
+    css += getCssCrispingFixes();
+
+    applyZoomStyleSheet(css);
+  }
+
+  // Replace current zoom stylesheet or insert a new one with the
+  // requested styles plus generic stylesheet fixes for the current configuration.
+  function applyZoomStyleSheet(additionalCss) {
+    var styleSheetText = additionalCss || '';
+    if (styleSheetText) {
+      if ($zoomStyleSheet) {
+        $zoomStyleSheet.text(styleSheetText);
       }
       else {
-        var selector = 'select[size="1"],select:not([size])';
-        css = selector + ' {' +
-          platform.transformPropertyCss + ': scale(' + 1 / zoom + ') !important;' +
-          'transform-origin: 100% 0 !important; }' ;
-        var comboBoxes = arrayUtil.toArray(document.querySelectorAll(selector));
-        comboBoxes.forEach(function (box) {
-          inlineStyle.restore(box, ['font-size', 'width', 'height']);
-
-          if (zoom === 1) {
-            // We don't need to fix combo boxes if we aren't zooming
-            return;
-          }
-
-          var style     = getComputedStyle(box),
-              height    = parseFloat(style.height) / (lastZoom ? lastZoom : 1),
-              width     = parseFloat(style.width) / (lastZoom ? lastZoom : 1),
-              newWidth  = width * zoom,
-              newHeight = height * zoom;
-
-          inlineStyle.override(box, {
-            fontSize : zoom + 'em',
-            height   : newHeight + 'px',
-            width    : newWidth + 'px'
-          });
-        });
-        lastZoom = zoom;
-      }
-
-      // Don't use any of these rules in print
-      css = '@media screen {\n' + css + '\n }';
-      if ($zoomFormsStyleSheet) {
-        $zoomFormsStyleSheet.text(css);
-      }
-      else {
-        $zoomFormsStyleSheet = $('<style>')
-          .text(css)
-          .attr('id', SITECUES_ZOOM_FORMS_ID)
+        $zoomStyleSheet = $('<style>')
+          .text(styleSheetText)
+          .attr('id', SITECUES_ZOOM_ID)
           .appendTo('head');
       }
     }
+  }
 
   // This is used to repaint the DOM after a zoom in WebKit to ensure crisp text
   function getCssCrispingFixes() {
@@ -335,6 +276,7 @@ define(
     TRANSFORM_PROP_CSS        = platform.transformPropertyCss;
     shouldRepaintOnZoomChange = platform.browser.isChrome;
     shouldOptimizeLegibility  = platform.browser.isChrome && platform.os.isWin;
+    comboBoxes.init();
   }
 
   return {
@@ -346,7 +288,6 @@ define(
     repaintToEnsureCrispText: repaintToEnsureCrispText,
     fixBodyTransitions: fixBodyTransitions,
     restoreBodyTransitions: restoreBodyTransitions,
-    applyZoomFormFixes: applyZoomFormFixes,
     init: init
   };
 });

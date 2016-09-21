@@ -424,8 +424,6 @@ define(
       pointerEvents : ''
     });
 
-    style.applyZoomFormFixes(state.completedZoom);
-
     // Indicate that zooming has finished -- this is used by the sitecues-zoom-form-fix stylesheet
     nativeFn.setTimeout(function() {
       $('body').removeAttr('data-sc-zooming');
