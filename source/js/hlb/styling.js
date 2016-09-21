@@ -10,7 +10,8 @@ define(
     'page/util/common',
     'core/conf/user/manager',
     'hlb/constants',
-    'core/inline-style/inline-style'
+    'core/inline-style/inline-style',
+    'core/util/array-utility'
   ],
   function (
     $,
@@ -18,7 +19,8 @@ define(
     common,
     conf,
     constants,
-    inlineStyle
+    inlineStyle,
+    arrayUtil
   ) {
   'use strict';
 
@@ -128,41 +130,21 @@ define(
    */
   function filterHiddenElements ($hlb, $picked, hiddenElements) {
 
-    var hiddenElementsLength    = hiddenElements.length,
-        hiddenElementsRemoved   = 0,
-        pickedElementIsListItem = $picked.is('li'),
-        $pickedDescendants      = $picked.find('*'),
-        $hlbDescendants         = pickedElementIsListItem ? $hlb.children().find('*') : $hlb.find('*'),
-        currentChild            = 0,
-        currentElementToRemove  = 0;
+    var pickedElementIsListItem = $picked.is('li'),
+        pickedDescendants      = $picked.find('*').get(),
+        hlbDescendants         = (pickedElementIsListItem ? $hlb.children().find('*') : $hlb.find('*')).get();
 
     if (SC_DEV) {
-      if ($pickedDescendants.length !== $hlbDescendants.length) {
+      if (pickedDescendants.length !== hlbDescendants.length) {
         console.warn('There is not a 1:1 mapping for filterHiddenElements!');
       }
-      if (hiddenElementsLength) {
-        console.log('%cSPECIAL CASE: Filtering hidden elements.',  'background:orange;');
-      }
     }
 
-    // I really dislike nested for loops...
-    // TODO it's not just about hidden children -- could be any descendant (e.g. grandchild)
-    // TODO let's not add them in the first place
-    if (hiddenElementsLength) {
-      for (; currentChild < $pickedDescendants.length; currentChild += 1) {
-        for (; currentElementToRemove < hiddenElementsLength; currentElementToRemove += 1) {
-          if ($pickedDescendants[currentChild] === hiddenElements[currentElementToRemove]) {
-            $($hlbDescendants[currentChild]).remove();
-            hiddenElementsRemoved += 1;
-            if (hiddenElementsRemoved === hiddenElementsLength) {
-              return;
-            }
-          }
-        }
-        currentElementToRemove = 0;
+    pickedDescendants.forEach(function (element, index) {
+      if (hiddenElements.get(element)) {
+        $(hlbDescendants[index]).remove();
       }
-    }
-
+    });
   }
 
   /**
@@ -525,43 +507,50 @@ define(
     * @param  {[jQuery element]} $hlb      [The HLB element]
     */
 
-  function initializeHLBDescendantStyles ($foundation, $hlb, initialHLBRect) {
+  function initializeHLBDescendantStyles ($foundation, $hlb, initialHLBRect, hiddenElements) {
 
-    var $foundationDescendants = $foundation.find('*'),
-        $hlbDescendants        = $hlb.find('*'),
-        $hlbDescendant,
-        hlbDescendant,
-        $foundationDescendant,
-        foundationDescendant,
+    var foundation = $foundation[0],
+        hlb        = $hlb[0],
         foundationDescendantStyle,
         computedChildStyles,
         removeMargins = true,
-        i = 0;
+        foundationNodes = [foundation],
+        hlbNodes        = [hlb];
 
-    for (; i < $foundationDescendants.length; i += 1) {
+    // Iterate through each node in the foundation, in document order, and exclude elements we've identified as hidden
+    // This is important because it's very expensive to call getComputedStyleCssText for each node in the tree in Firefox
+    while (foundationNodes.length) {
+      var foundationNode = foundationNodes.pop(),
+          hlbNode        = hlbNodes.pop();
+      
+      if (hiddenElements.get(foundationNode)) {
+        continue;
+      }
 
-      // Cache the HLB child.
-      hlbDescendant        = $hlbDescendants[i];
-      foundationDescendant = $foundationDescendants[i];
+      initializeCloneStyle(foundationNode, hlbNode);
 
-      $hlbDescendant        = $(hlbDescendant);
-      $foundationDescendant = $(foundationDescendant);
+      foundationNodes = foundationNodes.concat(arrayUtil.toArray(foundationNode.children));
+      hlbNodes        = hlbNodes.concat(arrayUtil.toArray(hlbNode.children));
+    }
 
+    function initializeCloneStyle(originalNode, cloneNode) {
+      var $original = $(originalNode),
+          $clone    = $(cloneNode);
       // Cache the HLB child computed style
-      foundationDescendantStyle = getComputedStyle(foundationDescendant);
+      foundationDescendantStyle = getComputedStyle(originalNode);
 
       // Copy the original elements child styles to the HLB elements child.
-      inlineStyle(hlbDescendant).cssText = getComputedStyleCssText(foundationDescendant);
+      inlineStyle(cloneNode).cssText = getComputedStyleCssText(originalNode);
 
-      if (shouldRemovePadding($foundationDescendant, initialHLBRect)) {
-        inlineStyle.set(hlbDescendant, getChildPadding($foundationDescendant, initialHLBRect));
+      if (shouldRemovePadding($original, initialHLBRect)) {
+        inlineStyle.set(cloneNode, getChildPadding($original, initialHLBRect));
       }
 
       // Compute styles that are more complicated than copying cssText.
-      computedChildStyles = getDescendantStyles($hlbDescendant, foundationDescendantStyle);
+      computedChildStyles = getDescendantStyles($original, foundationDescendantStyle);
 
       // Added to fix HLB sizing when selecting last 2 paragraphs on http://www.ticc.com/
-      if (shouldRemoveHorizontalMargins($foundationDescendant, $foundation)) {
+      if (shouldRemoveHorizontalMargins($original, $foundation)) {
         if (SC_DEV) {
           console.log('%cSPECIAL CASE: Removing left and right margins.',  'background:orange;');
         }
@@ -572,12 +561,11 @@ define(
       }
 
       // Set the childs css.
-      inlineStyle.set(hlbDescendant, computedChildStyles);
+      inlineStyle.set(cloneNode, computedChildStyles);
 
       // Ran into issues with children inheriting styles because of class and id CSS selectors.
       // Filtering children of these attributes solves the problem.
-      filterAttributes($hlbDescendant);
-
+      filterAttributes($clone);
     }
   }
 
@@ -782,11 +770,11 @@ define(
    * @param  {[DOM element]} $foundation [sanitized picked element]
    * @param  {[DOM element]} $hlb [The HLB]
    */
-  function initializeStyles($foundation, $hlb, initialHLBRect) {
+  function initializeStyles($foundation, $hlb, initialHLBRect, hiddenElements) {
 
     initializeHLBElementStyles($foundation, $hlb);
 
-    initializeHLBDescendantStyles($foundation, $hlb, initialHLBRect);
+    initializeHLBDescendantStyles($foundation, $hlb, initialHLBRect, hiddenElements);
 
   }
 
