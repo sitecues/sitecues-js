@@ -36,7 +36,7 @@ define(
   function fixSelectElement(element, zoom) {
     var appearance;
 
-    if (platform.browser.isWebkit) {
+    if (platform.browser.isWebKit) {
       appearance = '-webkit-appearance';
     }
     else {
