@@ -140,6 +140,26 @@ define(
     isVotingOn = true,
     lastPicked;
 
+  function isValidStart(node) {
+    if (!node) {
+      return false;
+    }
+
+    switch (node.localName) {
+      case 'html':
+        return false;
+
+      case 'body':
+        return false;
+
+      case 'select':
+        // Firefox mispositions the dropdown menu of comboboxes with size 1 in the lens, so we don't allow them to be picked
+        return node.size >= 2 || !platform.browser.isFirefox;
+    }
+    
+    return !isInSitecuesUI(node);
+  }
+
   /*
    * ----------------------- PUBLIC -----------------------
    *
@@ -152,19 +172,13 @@ define(
   function find(startElement, doSuppressVoting) {
     var candidates, picked;
 
-    if (platform.browser.isFirefox && startElement.localName === 'select') {
-      // Firefox mispositions select elements drop down menus when their ancestors are transformed, which is unavoidable
-      // with the current lens architecture
-      return null;
-    }
-
     function processResult(result) {
       lastPicked = result && result[0];
       return result;
     }
 
     // 1. Don't pick anything in the sitecues UI
-    if (!startElement || $(startElement).is('html,body') || isInSitecuesUI(startElement)) {
+    if (!isValidStart(startElement)) {
       return null;
     }
 
@@ -877,6 +891,7 @@ define(
       console.log('Auto pick debugging: ' + (isAutoPickDebuggingOn = !isAutoPickDebuggingOn));
     };
   }
+
   return {
     find: find,
     reset: reset,
@@ -884,5 +899,4 @@ define(
     provideCustomSelectors: provideCustomSelectors,
     provideCustomWeights: provideCustomWeights
   };
-
 });

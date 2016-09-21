@@ -770,5 +770,4 @@ define(
     toggleHLB: toggleHLB,
     retargetHLB: retargetHLB
   };
-
 });
