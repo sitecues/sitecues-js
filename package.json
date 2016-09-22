@@ -47,6 +47,7 @@
     "gulp-replace": "^0.5.4",
     "gulp-size": "^2.0.0",
     "gulp-uglify": "^2.0.0",
+    "gulp-yaml-validate": "1.0.2",
     "handlebars": "^4.0.5",
     "html-minifier": "^0.8.0",
     "htmlclean": "^2.7.7",
