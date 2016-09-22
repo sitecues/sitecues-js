@@ -11,6 +11,7 @@ define(
     'page/zoom/config/config',
     'core/native-functions',
     'core/inline-style/inline-style',
+    'page/zoom/combo-boxes',
     'page/util/transform-util'
   ],
   function (
@@ -22,6 +23,7 @@ define(
     config,
     nativeFn,
     inlineStyle,
+    comboBoxes,
     transformUtil
   ) {
   'use strict';
@@ -29,7 +31,6 @@ define(
   var
     body,
     $zoomStyleSheet,            // <style> element we insert to correct form issues in WebKit
-    $zoomFormsStyleSheet,       // <style> element we insert to correct form issues in WebKit
     TRANSFORM_PROP_CSS,
     // Optimize fonts for legibility? Helps a little bit with Chrome on Windows
     shouldOptimizeLegibility,
@@ -41,7 +42,6 @@ define(
     shouldRepaintOnZoomChange,
     // Key frame animations
     SITECUES_ZOOM_ID       = constants.SITECUES_ZOOM_ID,
-    SITECUES_ZOOM_FORMS_ID = constants.SITECUES_ZOOM_FORMS_ID,
     CRISPING_ATTRIBUTE   = constants.CRISPING_ATTRIBUTE,
     MAX                  = constants.MAX_ZOOM,
     MIN                  = constants.MIN_ZOOM,
@@ -100,37 +100,6 @@ define(
             .text(styleSheetText)
             .attr('id', SITECUES_ZOOM_ID)
             .appendTo('head');
-        }
-      }
-    }
-
-    function applyZoomFormFixes(zoom) {
-      if (platform.browser.isWebKit) {
-        // Add useful zoom fixes for forms that render incorrectly with CSS transform
-        // We turn them off when data-sc-dropdown-fix off is set (need to temporarily turn off for highlight position calculation elsewhere)
-        var css =
-          'select[size="1"]:not([data-sc-dropdown-fix-off]),select:not([size]):not([data-sc-dropdown-fix-off]){' +
-          platform.transformPropertyCss + ':scale(' + 1 / zoom + ') !important;' +
-          'transform-origin:0% 62% !important;' +
-          'margin-right:' + (13 * (1 - zoom)) + '% !important;' +
-          'margin-top:' + (8 * (1-zoom)) + 'px !important;' +
-          'margin-bottom:' + (8 * (1-zoom)) + 'px !important;' +
-          'zoom:' + zoom + ' !important;}';
-
-        // Turn off any page transitions for select during zoom, otherwise it will potentially animate the above changes
-        css +=
-          '\nbody[data-sc-zooming] select { transition-property: none !important; }';
-
-        // Don't use any of these rules in print
-        css = '@media screen {\n' + css + '\n}';
-        if (!$zoomFormsStyleSheet) {
-          $zoomFormsStyleSheet = $('<style>')
-            .text(css)
-            .attr('id', SITECUES_ZOOM_FORMS_ID)
-            .appendTo('head');
-        }
-        else {
-          $zoomFormsStyleSheet.text(css);
         }
       }
     }
@@ -282,6 +251,7 @@ define(
     TRANSFORM_PROP_CSS        = platform.transformPropertyCss;
     shouldRepaintOnZoomChange = platform.browser.isChrome;
     shouldOptimizeLegibility  = platform.browser.isChrome && platform.os.isWin;
+    comboBoxes.init();
   }
 
   return {
@@ -293,7 +263,6 @@ define(
     repaintToEnsureCrispText: repaintToEnsureCrispText,
     fixBodyTransitions: fixBodyTransitions,
     restoreBodyTransitions: restoreBodyTransitions,
-    applyZoomFormFixes: applyZoomFormFixes,
     init: init
   };
 });

@@ -17,7 +17,7 @@ define(
   ) {
   'use strict';
 
-  var originalBody, docElem, didCacheBPElements, bpElementMap;
+  var originalBody, docElem, didCacheBPElements, bpElementMap, isInitialized;
 
   function getScale(element, position) {
     // If we've never scaled this element before, it's possible that this element is inheriting a transformation from the original body
@@ -140,8 +140,8 @@ define(
       var
         badge         = document.getElementById('sitecues-badge'),
         bp            = document.getElementById('scp-bp-container'),
-        badgeElems    = badge ? arrayUtil.toArray(badge.querySelectorAll('*')).concat(badge) : [],
-        bpElems       = bp    ? arrayUtil.toArray(bp.querySelectorAll('*')).concat(bp)       : [];
+        badgeElems    = badge ? arrayUtil.from(badge.querySelectorAll('*')).concat(badge) : [],
+        bpElems       = bp    ? arrayUtil.from(bp.querySelectorAll('*')).concat(bp)       : [];
 
       badgeElems.concat(bpElems).forEach(function (el) {
         bpElementMap.set(el, true);
@@ -199,6 +199,10 @@ define(
   }
 
   function init() {
+    if (isInitialized) {
+      return;
+    }
+    isInitialized = true;
     originalBody = document.body;
     docElem      = document.documentElement;
     bpElementMap = new WeakMap();

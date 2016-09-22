@@ -4,7 +4,7 @@ define(
     'core/bp/helper',
     'core/conf/user/manager',
     'core/bp/model/state',
-    'core/metric',
+    'core/metric/metric',
     'core/platform',
     'page/cursor/cursor',
     'core/events',

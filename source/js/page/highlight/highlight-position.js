@@ -49,7 +49,7 @@ define(
     var
       accumulatedPositionInfo = {
         allRects: [],
-        hiddenElements: []
+        hiddenElements: new WeakMap()
       },
       $selector = $(selector);
 
@@ -344,7 +344,7 @@ define(
 
       // --- Invisible elements ---
       if (isInvisible(style)) {
-        hiddenElements.push(this);
+        hiddenElements.set(this, true);
         return;
       }
 
@@ -357,13 +357,13 @@ define(
       if (thisRect.right < -viewPos.x || thisRect.bottom < -viewPos.y) {
         // Hidden off the page
         // This is a technique used to hide contents offscreen without hiding it from screen readers
-        hiddenElements.push(this);
+        hiddenElements.set(this, true);
         return;
       }
 
       // -- Out of flow and is not the top element --
       if (!isTop && isOutOfFlow(this, style, thisRect)) {
-        hiddenElements.push(this);
+        hiddenElements.set(this, true);
         return;
       }
 
