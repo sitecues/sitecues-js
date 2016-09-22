@@ -16,6 +16,7 @@
 
 define(
   [
+    'core/events',
     'core/bp/controller/expand-controller',
     'core/bp/model/state',
     'core/bp/helper',
@@ -28,6 +29,7 @@ define(
     'core/inline-style/inline-style'
   ],
   function (
+    events,
     expandController,
     state,
     helper,
@@ -46,7 +48,9 @@ define(
    */
 
   // The htmlContainer has all of the SVG inside of it, and can take keyboard focus
-  var byId = helper.byId,
+  var
+      hasFixedBody = false,
+      byId = helper.byId,
       docElem,
       badgeView;
 
@@ -92,7 +96,12 @@ define(
     return initBPView()
       .then(function() {
         expandController.init();
-        fixDimensionsOfBody();
+        events.on('zoom/begin', function () {
+          if (!hasFixedBody) {
+            fixDimensionsOfBody();
+            hasFixedBody = true;
+          }
+        });
         return getViewInfo();
       });
   }
@@ -179,12 +188,12 @@ define(
   //TODO: Check client site CNIB's absolutely positioned elements if this gets changed
   function fixDimensionsOfBody() {
     var body = document.body,
-      bodyStyle   = getComputedStyle(body),
-      docStyle    = getComputedStyle(docElem),
-      botMargin   = parseFloat(bodyStyle.marginBottom),
-      topMargin   = bodyStyle.marginTop,
-      leftMargin  = bodyStyle.marginLeft,
-      rightMargin = bodyStyle.marginRight;
+        bodyStyle   = getComputedStyle(body),
+        docStyle    = getComputedStyle(docElem),
+        botMargin   = parseFloat(bodyStyle.marginBottom),
+        topMargin   = bodyStyle.marginTop,
+        leftMargin  = bodyStyle.marginLeft,
+        rightMargin = bodyStyle.marginRight;
 
     if (parseFloat(bodyStyle.height) < parseFloat(docStyle.height)) {
       inlineStyle.override(body, {
