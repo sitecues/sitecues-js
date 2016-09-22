@@ -69,7 +69,7 @@ define(
   function objectAssignment(element, styleInfo, styleProperty) {
     Object.keys(styleInfo).forEach(function (prop) {
       var property = toKebabCase(prop);
-      element[styleProperty][prop] = fixUnits(property, styleInfo[prop]);
+      element[styleProperty].setProperty(property, fixUnits(property, styleInfo[prop]));
     });
   }
 
@@ -106,7 +106,7 @@ define(
   }
 
   function toKebabCase(str) {
-    return str.replace(/([a-z][A-Z])/g, function (g) { return g[0] + '-' + g[1].toLowerCase(); });
+    return str.replace(/([A-Z])/g, function (g) { return '-' + g[0].toLowerCase(); });
   }
 
   function getIntendedStyles(element) {

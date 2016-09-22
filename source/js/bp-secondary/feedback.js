@@ -3,7 +3,7 @@ define(
     'core/bp/constants',
     'core/bp/helper',
     'core/bp/model/state',
-    'core/metric',
+    'core/metric/metric',
     'core/bp/view/view',
     'core/events',
     'core/native-functions',

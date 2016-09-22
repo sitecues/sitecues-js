@@ -140,8 +140,8 @@ define(
       var
         badge         = document.getElementById('sitecues-badge'),
         bp            = document.getElementById('scp-bp-container'),
-        badgeElems    = badge ? arrayUtil.toArray(badge.querySelectorAll('*')).concat(badge) : [],
-        bpElems       = bp    ? arrayUtil.toArray(bp.querySelectorAll('*')).concat(bp)       : [];
+        badgeElems    = badge ? arrayUtil.from(badge.querySelectorAll('*')).concat(badge) : [],
+        bpElems       = bp    ? arrayUtil.from(bp.querySelectorAll('*')).concat(bp)       : [];
 
       badgeElems.concat(bpElems).forEach(function (el) {
         bpElementMap.set(el, true);
