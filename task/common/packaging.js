@@ -1,6 +1,7 @@
 'use strict';
 
 var config = require('../build-config'),
+  gulp = require('gulp'),
   fs = require('fs'),
   exec = require('child_process').exec,
   mkdirp = require('mkdirp');
@@ -37,8 +38,14 @@ function createMetaData(callback) {
   });
 }
 
+function copySiteIdVersionMap() {
+  return gulp.src('./versions-by-site.yml')
+    .pipe(gulp.dest(config.buildDir));
+}
+
 module.exports = {
   createMetaData: createMetaData,
+  copySiteIdVersionMap: copySiteIdVersionMap,
   createPackage: createPackage
 };
 

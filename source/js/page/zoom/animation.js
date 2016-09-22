@@ -5,7 +5,7 @@ define(
     'core/conf/user/manager',
     'core/platform',
     'core/events',
-    'core/metric',
+    'core/metric/metric',
     'core/errors',
     'page/util/common',
     'page/zoom/state',
@@ -423,8 +423,6 @@ define(
     inlineStyle.override($body.get(), {
       pointerEvents : ''
     });
-
-    style.applyZoomFormFixes(state.completedZoom);
 
     // Indicate that zooming has finished -- this is used by the sitecues-zoom-form-fix stylesheet
     nativeFn.setTimeout(function() {

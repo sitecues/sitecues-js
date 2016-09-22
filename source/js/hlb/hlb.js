@@ -13,7 +13,7 @@ define(
     'page/util/element-classifier',
     'hlb/animation',
     'page/util/geo',
-    'core/metric',
+    'core/metric/metric',
     'hlb/constants',
     'core/events',
     'core/inline-style/inline-style'
@@ -444,7 +444,7 @@ define(
     // }, 0);
 
     // Clone styles of HLB and children of HLB, so layout is preserved
-    hlbStyling.initializeStyles($foundation, $hlb, initialHLBRect);
+    hlbStyling.initializeStyles($foundation, $hlb, initialHLBRect, highlight.hiddenElements);
 
     // Remove any elements and styles we dont want on the cloned element (such as <script>, id, margin)
     // Filtering must happen after initializeStyles() because we map all children of the original element
@@ -770,5 +770,4 @@ define(
     toggleHLB: toggleHLB,
     retargetHLB: retargetHLB
   };
-
 });
