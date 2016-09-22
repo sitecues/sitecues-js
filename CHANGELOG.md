@@ -12,6 +12,10 @@ All notable changes to this project will be documented here.
 ### Fixed
  -
 
+## [4.2.12] - 2016-09-22
+### Fixed
+ - Lens is more stable and performant
+
 ## [4.2.9] - 2016-09-16
 ### Fixed
  - Fixed a regression in Internet Explorer where we failed to clean up after ourselves. That left the page in a weird state.
