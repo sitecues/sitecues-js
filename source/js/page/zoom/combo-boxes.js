@@ -65,10 +65,10 @@ define(
       var parent = element.parentElement;
       if (parent && getComputedStyle(parent).display === 'inline') {
         // If the containing element is inline, we should try to keep it grouped with the rest of the line (important for Fairfield Bank)
-        styles.transformOrigin = '100% 100%';
+        styles.transformOrigin = '100% 75%';
       }
       else {
-        styles.transformOrigin = '0 85%';
+        styles.transformOrigin = '0 75%';
       }
     }
     else {
