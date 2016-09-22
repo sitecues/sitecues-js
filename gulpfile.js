@@ -73,10 +73,10 @@ gulp.task(cleanAll);
 gulp.task(cleanTarget);
 gulp.task('build', build);
 gulp.task(reportConfig);
-var defaultSeries = [reportConfig, clean, 'build', packaging.createMetaData, packaging.copySiteIdVersionMap ]
+var defaultSeries = [reportConfig, clean, 'build', packaging.prepare ]
   .concat(config.postBuildCommand ? runPostBuildCommand : []);
 gulp.task('default', gulp.series.apply(gulp, defaultSeries));
-gulp.task('package', gulp.series('default', packaging.createPackage));
+gulp.task('package', gulp.series('default', packaging.finalize));
 
 // Watcher tasks
 gulp.task(function watch() {
