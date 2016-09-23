@@ -47,7 +47,7 @@ var config = require('../build-config'),
             end : '\n'
           }
         }) +
-        fs.readFileSync(JS_SOURCE_DIR + '/core/prereq/sitecues-impl.js') +
+        fs.readFileSync(JS_SOURCE_DIR + '/core/prereq/global-assignments.js') +
         fs.readFileSync(JS_SOURCE_DIR + '/core/prereq/alameda-config.js')
       },
       // Include alameda in core
