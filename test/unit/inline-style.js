@@ -20,6 +20,7 @@ define(
 
         suite('Inline Style', function () {
             before(function () {
+                window.SC_EXTENSION = false;
                 nativeFn.init();
                 inlineStyle.init();
             });
@@ -176,6 +177,20 @@ define(
                 inlineStyle.restore(element, 'z-index');
 
                 assert.strictEqual(element.style.getPropertyPriority('z-index'), intendedPriority, 'The style hasn\'t been restored with the correct priority');
+            });
+
+            test('Override a style with importance, and restore it to its last value', function () {
+              var element          = document.createElement('div'),
+                  property         = 'position',
+                  overrideValue    = 'static',
+                  overridePriority = 'important',
+                  intendedValue    = 'absolute';
+              element.style[property] = intendedValue;
+              inlineStyle.override(element, [property, overrideValue, overridePriority]);
+              assert.strictEqual(element.style[property], overrideValue, 'Style value was not successfully overridden');
+              assert.strictEqual(element.style.getPropertyPriority(property), overridePriority, 'Override priority was not successfully set');
+              inlineStyle.restoreLast(element, property);
+              assert.strictEqual(element.style[property], intendedValue, 'Style value was not successfully restored to its last value');
             });
         });
     }
