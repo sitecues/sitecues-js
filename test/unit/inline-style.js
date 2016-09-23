@@ -13,21 +13,21 @@ define(
     ) {
         'use strict';
 
-        var suite      = tdd.suite,
-            test       = tdd.test,
-            before     = tdd.before,
-            beforeEach = tdd.beforeEach;
+        var suite = tdd.suite;
+        var test = tdd.test;
+        var before = tdd.before;
+        var beforeEach = tdd.beforeEach;
 
-        suite('Inline Style', () => {
-            before(() => {
+        suite('Inline Style', function () {
+            before(function () {
                 nativeFn.init();
                 inlineStyle.init();
             });
 
-            test('Override and restore a style value', () => {
-                let element       = document.createElement('div'),
-                    intendedValue = 'none',
-                    overrideValue = 'block';
+            test('Override and restore a style value', function () {
+                var element = document.createElement('div');
+                var overrideValue = 'block';
+                var intendedValue = 'none';
 
                 element.style.display = intendedValue;
                 inlineStyle.override(element, {
@@ -39,10 +39,10 @@ define(
                 assert.strictEqual(element.style.display, intendedValue, 'The style value hasn\'t been restored');
             });
 
-            test('Override a style, change the intended style, restore the intended style', () => {
-                let element       = document.createElement('div'),
-                    intendedValue = '0',
-                    overrideValue = '1';
+            test('Override a style, change the intended style, restore the intended style', function () {
+                var element = document.createElement('div');
+                var overrideValue = '1';
+                var intendedValue = '0';
 
                 element.style.zIndex = intendedValue;
                 inlineStyle.override(element, {
@@ -58,11 +58,10 @@ define(
                 assert.strictEqual(element.style.zIndex, intendedValue, 'The style value hasn\'t been restored');
             });
 
-            test('Override a style override, and restore the last styles', () => {
-                let element             = document.createElement('div'),
-                    intendedValue       = '0',
-                    firstOverrideValue  = '1',
-                    secondOverrideValue = '2';
+            test('Override a style override, and restore the last styles', function () {
+                var element = document.createElement('div');
+                var intendedValue = '0';
+                var firstOverrideValue = '1';
 
                 element.style.zIndex = intendedValue;
                 inlineStyle.override(element, {
@@ -71,6 +70,7 @@ define(
 
                 assert.strictEqual(element.style.zIndex, firstOverrideValue, 'The style value hasn\'t been overridden');
 
+                var secondOverrideValue = '2';
                 inlineStyle.override(element, {
                     zIndex : secondOverrideValue
                 });
@@ -82,10 +82,10 @@ define(
                 assert.strictEqual(element.style.zIndex, firstOverrideValue, 'The previous style value hasn\'t been restored');
             });
 
-            test('Override a style value, clear all inline styles, restore the intended styles', () => {
-                let element       = document.createElement('div'),
-                    intendedValue = '0',
-                    overrideValue = '1';
+            test('Override a style value, clear all inline styles, restore the intended styles', function () {
+                var element       = document.createElement('div');
+                var intendedValue = '0';
+                var overrideValue = '1';
 
                 element.style.zIndex = intendedValue;
                 inlineStyle.override(element, {
@@ -100,9 +100,9 @@ define(
                 assert.strictEqual(element.style.zIndex, intendedValue, 'The intended style value hasn\'t been restored');
             });
 
-            test('Restoring a non-overridden style has no effect', () => {
-                let element       = document.createElement('div'),
-                    intendedValue = '0';
+            test('Restoring a non-overridden style has no effect', function () {
+                var element = document.createElement('div');
+                var intendedValue = '0';
 
                 element.style.zIndex = intendedValue;
                 inlineStyle.restore(element);
@@ -110,10 +110,10 @@ define(
                 assert.strictEqual(element.style.zIndex, intendedValue, 'The intended style value hasn\'t been preserved');
             });
 
-            test('Override cssText and restore intended styles', () => {
-                let element       = document.createElement('div'),
-                    intendedValue = 'height: 100px; width: 100px; z-index: 99;',
-                    overrideValue = 'left: 10px; opacity: 0.5; min-width: 800px;';
+            test('Override cssText and restore intended styles', function () {
+                var element = document.createElement('div');
+                var intendedValue = 'height: 100px; width: 100px; z-index: 99;';
+                var overrideValue = 'left: 10px; opacity: 0.5; min-width: 800px;';
 
                 element.style.cssText = intendedValue;
                 inlineStyle.override(element, overrideValue);
@@ -130,10 +130,10 @@ define(
                 assert.strictEqual(element.style.cssText, intendedValue, 'The intended cssText hasn\'t been restored');
             });
 
-            test('Proxy an element\'s style field when a style value is overridden', () => {
-                let element       = document.createElement('div'),
-                    overrideValue = '0',
-                    intendedValue = '1';
+            test('Proxy an element\'s style field when a style value is overridden', function () {
+                var element = document.createElement('div');
+                var overrideValue = '0';
+                var intendedValue = '1';
 
                 element.style.zIndex = intendedValue;
                 inlineStyle.override(element, {
@@ -143,11 +143,11 @@ define(
                 assert.strictEqual(element.style, element._scStyleProxy, 'Element hasn\'t been proxied');
             });
 
-            test('De-proxy an element\'s style field when it is completely restored', () => {
-                let element       = document.createElement('div'),
-                    elementStyle  = element.style,
-                    overrideValue = '0',
-                    intendedValue = '1';
+            test('De-proxy an element\'s style field when it is completely restored', function () {
+                var element = document.createElement('div');
+                var elementStyle = element.style;
+                var overrideValue = '0';
+                var intendedValue = '1';
 
                 element.style.zIndex = intendedValue;
                 inlineStyle.override(element, ['zIndex', overrideValue]);
@@ -160,11 +160,11 @@ define(
                 assert.isUndefined(element._scStyleProxy, 'The proxy field hasn\'t been deleted');
             });
 
-            test('Restore an style value with its correct priority', () => {
-                let element       = document.createElement('div'),
-                    overrideValue = '0',
-                    intendedValue = '1',
-                    intendedPriority = 'important';
+            test('Restore an style value with its correct priority', function () {
+                var element       = document.createElement('div');
+                var overrideValue = '0';
+                var intendedValue = '1';
+                var intendedPriority = 'important';
 
                 element.style.setProperty('z-index', intendedValue, intendedPriority);
                 inlineStyle.override(element, {

@@ -154,7 +154,7 @@ define(
 
     // After NO_INPUT_TIMEOUT, we will be able to determine if the user has
     // pressed their mouse button.  If they have not, show the additional button.
-    var noInputTimeoutMs = abTest.get('moreButtonTimer', NO_INPUT_TIMEOUT_DEFAULT);
+    var noInputTimeoutMs = abTest.get('moreButtonTimerV2', NO_INPUT_TIMEOUT_DEFAULT);
     userInputTimeoutId = nativeFn.setTimeout(showButtonIfNoUserInput, noInputTimeoutMs);
   }
 

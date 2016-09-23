@@ -13,10 +13,10 @@ define(
     ) {
         'use strict';
 
-        var suite      = tdd.suite,
-            test       = tdd.test,
-            beforeEach = tdd.beforeEach,
-            before     = tdd.before;
+        var suite      = tdd.suite;
+        var test       = tdd.test;
+        var before     = tdd.before;
+        var beforeEach = tdd.beforeEach;
 
         suite('Storage', function () {
 

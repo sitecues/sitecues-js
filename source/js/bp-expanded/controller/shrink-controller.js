@@ -6,7 +6,7 @@ define(
     'core/bp/constants',
     'core/bp/model/state',
     'core/bp/helper',
-    'core/metric',
+    'core/metric/metric',
     'core/bp/view/view',
     'core/events',
     'core/dom-events',

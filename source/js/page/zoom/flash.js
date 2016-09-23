@@ -28,7 +28,7 @@ define(
 
   function onDocumentMutation(mutations) {
     mutations.forEach(function (mutation) {
-      arrayUtil.toArray(mutation.addedNodes).forEach(function (node) {
+      arrayUtil.from(mutation.addedNodes).forEach(function (node) {
         if (isFlashElement(node)) {
           fixFlashElements(node);
         }

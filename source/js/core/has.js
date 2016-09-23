@@ -18,8 +18,8 @@ define(
             orientationEvents : hasEvent('deviceorientation'),
             batteryApi        : typeof navigator.getBattery === 'function',
             vibrateApi        : typeof navigator.vibrate === 'function',
-            ttsApi            : typeof speechSynthesis === 'object' && Boolean(speechSynthesis),
-            transcribeApi     : typeof SpeechRecognition === 'function'
+            speechSynthApi    : typeof speechSynthesis === 'object' && Boolean(speechSynthesis),
+            speechRecApi      : typeof SpeechRecognition === 'function'
         };
     }
 );
