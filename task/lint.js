@@ -12,7 +12,6 @@ var gulp = require('gulp'),
     'gulpfile.js', 'task/**/*.js'
   ];
 
-
 function lintES5() {
   return gulp.src(ES5_LINT_GLOB)
   .pipe(jshint())
@@ -27,17 +26,17 @@ function lintES6() {
     .pipe(jshint.reporter('fail'));
 }
 
- //Don't allow calls to setTimeout, Map, bind from the global scope, they may have been overridden
- function checkForNativeFns() {
-   return gulp.src(ES5_LINT_GLOB)
-     .pipe(check(/[^\.\w]JSON *\(/))
-     .pipe(check(/[^\.\w]setTimeout *\(/))
-     .pipe(check(/[^\.\w]Map *\(/))
-     .pipe(check(/[^\.\w]bind *\(/))
-     .on('error', function (err) {
-       console.log('Don\'t allow calls to setTimeout, Map, bind from the global scope, they may have been overridden:\n' + err);
-     });
- }
+//Don't allow calls to setTimeout, Map, bind from the global scope, they may have been overridden
+function checkForNativeFns() {
+  return gulp.src(ES5_LINT_GLOB)
+    .pipe(check(/[^\.\w]JSON *\(/))
+    .pipe(check(/[^\.\w]setTimeout *\(/))
+    .pipe(check(/[^\.\w]Map *\(/))
+    .pipe(check(/[^\.\w]bind *\(/))
+    .on('error', function (err) {
+      console.log('Don\'t allow calls to setTimeout, Map, bind from the global scope, they may have been overridden:\n' + err);
+    });
+}
 
 function checkAmd() {
   return gulp.src(ES5_LINT_GLOB)
