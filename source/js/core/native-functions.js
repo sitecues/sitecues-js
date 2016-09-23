@@ -1,4 +1,4 @@
-define([], function () {
+define(['iframeFactory'], function (iframeFactory) {
   'use strict';
 
   var nativeWindow,
@@ -15,7 +15,7 @@ define([], function () {
     if (nativeWindow) {
       return nativeWindow;
     }
-    nativeWindow = SC_EXTENSION ? window : sitecues._getHelperFrame('sitecues-context').contentWindow;
+    return SC_EXTENSION ? window : iframeFactory('sitecues-context').contentWindow;
     return nativeWindow;
   }
 
