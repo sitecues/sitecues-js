@@ -3,6 +3,7 @@
 'use strict';
 
 var config = require('../build-config'),
+  amdclean = require('amdclean'),
   sourceConfig = require('../source-folders.json'),
   bundleFolders = sourceConfig.bundleFolders,
   dataFolders = sourceConfig.dataFolders,
@@ -11,7 +12,8 @@ var config = require('../build-config'),
   fs = require('fs'),
   JS_SOURCE_DIR = config.librarySourceDir + '/js',
   PATHS = {
-    '$': 'empty:', 
+    'iframeFactory': 'empty:',
+    '$': 'empty:',
     'Promise': 'empty:'   // In runtime config, via definePrim : 'Promise' to allow use of alameda's built-in Prim library
   },
   AMD_BASE_CONFIG = {
@@ -38,11 +40,18 @@ var config = require('../build-config'),
         'Object.defineProperty(sitecues, "version", { value: "' + config.version + '", writable: false });\n' +
         '"use strict";\n' +
         fs.readFileSync(JS_SOURCE_DIR + '/core/prereq/custom-event-polyfill.js') +
-        fs.readFileSync(JS_SOURCE_DIR + '/core/prereq/helper-frame.js') +
+        amdclean.clean({
+          filePath : './source/js/core/prereq/iframe-factory.js',
+          wrap : {
+            start : '\n',
+            end : '\n'
+          }
+        }) +
+        fs.readFileSync(JS_SOURCE_DIR + '/core/prereq/sitecues-impl.js') +
         fs.readFileSync(JS_SOURCE_DIR + '/core/prereq/alameda-config.js')
       },
       // Include alameda in core
-      include: [ 'core/alameda-custom', 'core/errors' ],
+      include: [ 'core/alameda-custom', 'core/errors', 'core/prereq/iframe-factory' ],
       // Make sure core initializes itself
       insertRequire: [ 'core/errors', 'core/core' ]
     },

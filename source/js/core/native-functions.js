@@ -1,11 +1,11 @@
-define([], function () {
+define(['iframeFactory'], function (iframeFactory) {
   'use strict';
 
   var exports = {};
 
   // Recover potentially overridden window methods from a nested browsing context
   function getNativeWindow() {
-    return SC_EXTENSION ? window : sitecues._getHelperFrame('sitecues-context').contentWindow;
+    return SC_EXTENSION ? window : iframeFactory('sitecues-context').contentWindow;
   }
 
   function init() {
