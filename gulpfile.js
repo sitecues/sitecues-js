@@ -67,6 +67,7 @@ var build =
     resources.svg,
     resources.raster,
     resources.earcons,
+    resources.versionMap,
     'js'
   );
 gulp.task(cleanAll);

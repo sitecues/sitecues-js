@@ -2,7 +2,6 @@
 
 var gulp = require('gulp'),
   jshint = require('gulp-jshint'),
-  yamlValidate = require('gulp-yaml-validate'),
   check = require('gulp-check'),
   amdCheck = require('gulp-amdcheck'),
   ES5_LINT_GLOB = [ 'source/js/**/*.js', '!source/js/**/jquery.js', '!source/js/core/alameda-custom.js', '!source/js/core/native-functions' ],
@@ -11,9 +10,7 @@ var gulp = require('gulp'),
     // TODO lint tests
     //'test/**/*.js', '!test/legacy/**/*.js'.
     'gulpfile.js', 'task/**/*.js'
-  ],
-  YAML_LINT_GLOB = [ './*.yml' ];
-
+  ];
 
 function lintES5() {
   return gulp.src(ES5_LINT_GLOB)
@@ -49,18 +46,12 @@ function checkAmd() {
     }));
 }
 
-function lintYaml() {
-  return gulp.src(YAML_LINT_GLOB)
-    .pipe(yamlValidate());
-}
-
 var lintTasks =
   gulp.parallel(
     lintES5,
     lintES6,
     checkAmd,
-    checkForNativeFns,
-    lintYaml
+    checkForNativeFns
   );
 
 module.exports = lintTasks;

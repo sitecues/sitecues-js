@@ -48,13 +48,8 @@ function metaDataTxtFiles(callback) {
   });
 }
 
-function copySiteIdVersionMap() {
-  return gulp.src('./versions-by-site.yml')
-    .pipe(gulp.dest(config.buildDir));
-}
-
 module.exports = {
-  prepare: gulp.parallel(metaDataTxtFiles, copySiteIdVersionMap),
+  prepare: metaDataTxtFiles,
   finalize: gulp.parallel(useDelivr, createPackage)
 };
 
