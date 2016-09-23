@@ -1,11 +1,14 @@
-// Create the Sitecues iframe used to get native methods and store global prefs
-// Apologies for putting this on the native window
-// Must be inserted before alameda by the build process
+// We need to hard code the module name here for amdclean
+define('iframeFactory', [], function () {
+  'use strict';
 
-sitecues._getHelperFrame = function(id, optionalSrc) {
-  var frame = document.getElementById(id);
+  function getHelperIframe(id, optionalSrc) {
+    var frame = document.getElementById(id);
 
-  if (!frame) {
+    if (frame) {
+      return frame;
+    }
+
     frame = document.createElement('iframe');
     frame.id = id;
     frame.setAttribute('aria-hidden', true);
@@ -23,7 +26,9 @@ sitecues._getHelperFrame = function(id, optionalSrc) {
       frame.src = optionalSrc;
     }
     document.documentElement.appendChild(frame);
+
+    return frame;
   }
 
-  return frame;
-};
+  return getHelperIframe;
+});
