@@ -1,4 +1,16 @@
-define(['core/bp/constants', 'core/bp/helper', 'core/conf/urls'], function (BP_CONST, helper, urls) {
+define(
+  [
+    'core/bp/constants',
+    'core/bp/helper',
+    'core/conf/urls'
+  ],
+  function (
+    BP_CONST,
+    helper,
+    urls
+  ) {
+  'use strict';
+
   var byId = helper.byId,
     isInitialized;
 
@@ -34,5 +46,4 @@ define(['core/bp/constants', 'core/bp/helper', 'core/conf/urls'], function (BP_C
     getGeometryTargets: getGeometryTargets,
     init: init
   };
-
 });

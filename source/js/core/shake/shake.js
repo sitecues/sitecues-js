@@ -5,20 +5,21 @@
  * - For now, only fires a metric so that we can measure the potential usefulness
  * - Ideas for use -- make mouse larger, make badge glow temporarily
  */
-define([
-  'core/metric/metric',
-  // 'core/events',
-  'core/dom-events',
-  'core/shake/constants',
-  'core/platform',
-  'nativeFn'
-], function(metric,
-            // events,
-            domEvents,
-            constants,
-            platform,
-            nativeFn) {
-
+define(
+  [
+    'core/metric/metric',
+    'core/dom-events',
+    'core/shake/constants',
+    'core/platform',
+    'nativeFn'
+  ],
+  function (
+    metric,
+    domEvents,
+    constants,
+    platform,
+    nativeFn
+  ) {
   'use strict';
 
   var mousePositionsQueue = [],

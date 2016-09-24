@@ -2,8 +2,16 @@
  * This is the audio cue library.  It listens to sitecues events and plays appropriate verbal cues.
  * Not to be confused with earcons, which are just sounds.
  */
-
-define(['core/conf/user/manager', 'audio/audio'], function(conf, audio) {
+define(
+  [
+    'core/conf/user/manager',
+    'audio/audio'
+  ],
+  function (
+    conf,
+    audio
+  ) {
+  'use strict';
 
   // The high zoom threshold for the zoom-based verbal cue
   var HIGH_ZOOM_THRESHOLD = 1.6,
@@ -44,7 +52,6 @@ define(['core/conf/user/manager', 'audio/audio'], function(conf, audio) {
    * Play speech on cue if necessary
    */
   function playSpeechCue(isEnabled) {
-
     if (!isEnabled) {
       // *** Speech off cue ***
       audio.speakCueByName(VERBAL_CUE_SPEECH_OFF);
@@ -58,7 +65,8 @@ define(['core/conf/user/manager', 'audio/audio'], function(conf, audio) {
     // Give the hint max three times, or until the user successfully uses the spacebar once with TTS on.
     if(!shouldPlayDescriptiveSpeechOnCue()) {
       audio.speakCueByName(VERBAL_CUE_SPEECH_ON);
-    } else {
+    }
+    else {
       audio.speakCueByName(VERBAL_CUE_SPEECH_ON_DESCRIPTIVE);
       // Signals that the "descriptive speech on" cue has played
       conf.set(DESCRIPTIVE_SPEECH_ON_PARAM, Date.now());

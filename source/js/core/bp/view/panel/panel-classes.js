@@ -1,4 +1,13 @@
-define(['core/bp/constants', 'core/bp/model/state'], function(BP_CONST, state) {
+define(
+  [
+    'core/bp/constants',
+    'core/bp/model/state'
+  ],
+  function (
+    BP_CONST,
+    state
+  ) {
+  'use strict';
 
   /**
    *** Getters ***
@@ -6,7 +15,6 @@ define(['core/bp/constants', 'core/bp/model/state'], function(BP_CONST, state) {
 
   // These classes add styles based on the current state of the panel
   function getViewClasses() {
-
     var classBuilder = '',
       isSecondary = state.isSecondaryPanelRequested(); // Is or will be secondary panel
 
@@ -66,5 +74,4 @@ define(['core/bp/constants', 'core/bp/model/state'], function(BP_CONST, state) {
   return {
     getViewClasses: getViewClasses
   };
-
 });

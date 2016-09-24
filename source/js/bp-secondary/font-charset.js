@@ -1,11 +1,19 @@
 // Return the extended font charset name, e.g. 'latin-ext'
 
-define(['core/locale'], function(locale) {
+define(
+  [
+    'core/locale'
+  ],
+  function (
+    locale
+  ) {
+  'use strict';
+
   /**
    * Return 'latin-ext' if latin-ext font needed, etc.
    * @returns {*}
    */
-  return function() {
+  return function () {
     var lang = locale.getLang(),
       EXTENDED_LANGS = {
         'latin-ext': [

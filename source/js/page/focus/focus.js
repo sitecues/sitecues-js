@@ -1,5 +1,15 @@
 // focus enhancement (make focus easier to see)
-define(['$', 'core/conf/user/manager', 'page/util/color'], function($, conf) {
+define(
+  [
+    '$',
+    'core/conf/user/manager',
+    'page/util/color'
+  ],
+  function (
+    $,
+    conf
+  ) {
+  'use strict';
 
   var MIN_ZOOM = 1.4,   // minimum zoom at which focus enhancement appears
     FOCUS_RING_COLOR_ON_LIGHT = 'rgba(82,168,236,.8)',    // color of focus enhancement on normal/warm/bold theme
@@ -56,8 +66,6 @@ define(['$', 'core/conf/user/manager', 'page/util/color'], function($, conf) {
     // determinate should focus enhancement
     // be enabled or not
     isEnabled = newZoomLevel >= MIN_ZOOM || willBeDark;
-
-
 
     // if state of enhancement was changed
     // refresh module bindings on the page

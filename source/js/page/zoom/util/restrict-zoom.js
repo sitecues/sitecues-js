@@ -1,5 +1,12 @@
-define(['page/zoom/constants', 'page/zoom/config/config'], function (constants, config) {
-
+define(
+  [
+    'page/zoom/constants',
+    'page/zoom/config/config'
+  ],
+  function (
+    constants,
+    config
+  ) {
   'use strict';
 
   var
@@ -47,5 +54,4 @@ define(['page/zoom/constants', 'page/zoom/config/config'], function (constants, 
     forFluidWidth: forFluidWidth,
     forFixedZoomTarget: forFixedZoomTarget
   };
-
 });

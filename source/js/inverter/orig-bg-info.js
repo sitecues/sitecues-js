@@ -19,14 +19,18 @@
  *  We only create this sheet once.
  */
 
-define([
-  'Promise',
-  'page/util/color',
-  'page/style-service/style-service'
-],
-function(Promise,
-         colorUtil,
-         styleService) {
+define(
+  [
+    'Promise',
+    'page/util/color',
+    'page/style-service/style-service'
+  ],
+  function (
+    Promise,
+    colorUtil,
+    styleService
+  ) {
+  'use strict';
 
   var DARK_HINTS_ID = 'sitecues-js-orig-info',
     FLAG_BG_DARK = '"D"',
@@ -112,5 +116,4 @@ function(Promise,
     init: init,
     wasOnDarkBackground: wasOnDarkBackground
   };
-
 });

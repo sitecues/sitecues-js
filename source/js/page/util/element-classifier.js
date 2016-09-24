@@ -2,6 +2,55 @@
  * This is module for common utilities that might need to be used across all of the different modules.
  */
 define([], function () {
+  'use strict';
+
+  var VISUAL_MEDIA_ELEMENTS = {
+    img     : 1,
+    picture : 1,
+    canvas  : 1,
+    video   : 1,
+    embed   : 1,
+    object  : 1,
+    iframe  : 1,
+    frame   : 1,
+    audio   : 1
+  };
+
+  var FORM_ELEMENTS = {
+    input    : 1,
+    textarea : 1,
+    select   : 1,
+    button   : 1
+  };
+
+  var NON_EDITABLE_SPACEBAR_ELEMENTS = {
+    video  : 1,
+    embed  : 1,
+    object : 1,
+    iframe : 1,
+    frame  : 1,
+    audio  : 1,
+    button : 1,
+    input  : 1,
+    select : 1
+  };
+
+  var EDITABLE_INPUT_TYPES = [
+    'text',
+    'email',
+    'password',
+    'search',
+    'tel',
+    'url',
+    'color',
+    'date',
+    'datetime',
+    'datetime-local',
+    'month',
+    'number',
+    'time',
+    'week'
+  ];
 
   function hasMatchingTag(tags, element) {
     return tags.hasOwnProperty(element.localName);
@@ -10,7 +59,6 @@ define([], function () {
   /**
    * Checks if the element has media contents which can be rendered.
    */
-  var VISUAL_MEDIA_ELEMENTS = { img:1, picture:1, canvas:1, video:1, embed:1, object:1, iframe:1, frame:1, audio:1 };
   function isVisualMedia(element) {
     return hasMatchingTag(VISUAL_MEDIA_ELEMENTS, element);
   }
@@ -18,7 +66,6 @@ define([], function () {
   /**
    * Checks if the element is a form control
    */
-  var FORM_ELEMENTS = { input:1, textarea:1, select:1, button: 1};
   function isFormControl(element) {
     return hasMatchingTag(FORM_ELEMENTS, element);
   }
@@ -31,7 +78,6 @@ define([], function () {
    * @returns {*|boolean}
    */
   // Define set of elements that need the spacebar but are not editable
-  var NON_EDITABLE_SPACEBAR_ELEMENTS = { video:1, embed:1, object:1, iframe:1, frame:1, audio:1, button:1, input:1, select: 1};
   function isSpacebarConsumer(eventTarget) {
     return eventTarget.nodeType === Node.ELEMENT_NODE && // Added because window somehow came in here sometimes, causing exception
       hasMatchingTag(NON_EDITABLE_SPACEBAR_ELEMENTS, eventTarget) ||
@@ -49,13 +95,12 @@ define([], function () {
    * @param element
    * @returns {boolean} True if editable
    */
-  var EDITABLE_INPUT_TYPES = [ 'text', 'email', 'password', 'search', 'tel', 'url', 'color', 'date', 'datetime', 'datetime-local',
-    'month','number','time','week' ];
   function isEditable(element) {
     if (element.localName === 'input') {
       var type = element.getAttribute('type');
       return !type || EDITABLE_INPUT_TYPES.indexOf(type) >= 0;
     }
+
     return document.designMode === 'on' ||
       element.localName === 'textarea' ||
       isContentEditable(element);
@@ -67,5 +112,4 @@ define([], function () {
     isSpacebarConsumer: isSpacebarConsumer,
     isEditable: isEditable
   };
-
 });

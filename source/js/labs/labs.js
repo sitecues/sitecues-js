@@ -6,9 +6,18 @@
  * NOTE: currently we are not using/building this
  */
 
-define(['core/conf/user/manager', '$', 'core/events'], function(conf, $, events) {
-
-
+define(
+  [
+    'core/conf/user/manager',
+    '$',
+    'core/events'
+  ],
+  function (
+    conf,
+    $,
+    events
+  ) {
+  'use strict';
 
   var labSettings = $.extend({}, conf.get('labs'));
 

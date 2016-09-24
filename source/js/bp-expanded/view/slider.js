@@ -9,8 +9,20 @@
 // The thumb position only changes based on the thumb change callback!!
 // Effectively this means the zoom module needs is in control of the thumb position.
 
-define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/locale'],
-  function (BP_CONST, state, helper, locale) {
+define(
+  [
+    'core/bp/constants',
+    'core/bp/model/state',
+    'core/bp/helper',
+    'core/locale'
+  ],
+  function (
+    BP_CONST,
+    state,
+    helper,
+    locale
+  ) {
+  'use strict';
 
   /*
    *** Public methods ***
@@ -53,7 +65,7 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/loca
     // We do this when zoom is finished so that the screen reader is not trying to read every
     // new value during an animation which would be way too verbose
     var sliderElement = helper.byId(BP_CONST.ZOOM_SLIDER_BAR_ID),
-        roundedZoom = currZoom ? Math.floor((currZoom + 0.0999) * 10) / 10 : 1,
+        roundedZoom   = currZoom ? Math.floor((currZoom + 0.0999) * 10) / 10 : 1,
         zoomText      = getLocalizedZoomValue(roundedZoom);
 
     sliderElement.setAttribute('aria-valuenow', roundedZoom ? roundedZoom.toString() : 1);
@@ -79,13 +91,13 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/loca
 
     // 1.3x, etc.
     var preZoomText = locale.translate(BP_CONST.ZOOM_STATE_LABELS.PRE_ZOOM),
-      postZoomText = locale.translate(BP_CONST.ZOOM_STATE_LABELS.POST_ZOOM);
+      postZoomText  = locale.translate(BP_CONST.ZOOM_STATE_LABELS.POST_ZOOM);
     return preZoomText + locale.translateNumber(currZoom, 2) + postZoomText;
   }
+
   return {
     updateThumbPosition: updateThumbPosition,
     render: render,
     updateZoomValue: updateZoomValue
   };
-
 });

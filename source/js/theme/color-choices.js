@@ -9,7 +9,17 @@
 // - Bad photo reversal guesses:
 //   http://www.leadingage.org/ and // - http://www.leadingage.org/
 
-define(['$', 'page/util/color'], function ($, colorUtil) {
+define(
+  [
+    '$',
+    'page/util/color'
+  ],
+  function (
+    $,
+    colorUtil
+  ) {
+  'use strict';
+
   var hslToRgb = colorUtil.hslToRgb,
     rgbToHsl = colorUtil.rgbToHsl;
 
@@ -347,5 +357,4 @@ define(['$', 'page/util/color'], function ($, colorUtil) {
     bold: bold,
     warm: warm
   };
-
 });
