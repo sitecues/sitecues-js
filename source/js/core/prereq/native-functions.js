@@ -2,61 +2,54 @@
 define(
   'nativeFn',
   [
+    'exports',
     'iframeFactory'
   ],
   function (
+    exports,
     iframeFactory
   ) {
   'use strict';
 
-  var nativeWindow,
+  var cleanFrame,
+    isInitialized,
     // In order to make a regex to lint for direct access to certain functions, we suffix certain functions with 'Fn' so that we can distinguish correct uses
     // from potentially breaking direct references to fn.bind
-    suffixedFields = [
-      'bind'
-    ],
-    verificationId = 'sitecues-verification',
-    exports = {};
+    suffixedFields = {
+      bind : 'bindFn'
+    };
 
   // Recover potentially overridden window methods from a nested browsing context
-  function getNativeWindow() {
-    if (nativeWindow) {
-      return nativeWindow;
+  function getCleanFrame() {
+    if (!cleanFrame) {
+      cleanFrame = SC_EXTENSION ? window : iframeFactory('sitecues-clean-frame');
     }
-    nativeWindow = SC_EXTENSION ? window : iframeFactory('sitecues-context').contentWindow;
-    return nativeWindow;
+    return cleanFrame;
   }
 
-  // The difference between this iframe and the `native window` frame is that the native window iframe needs to be persistent beyond the scope of this module's
-  // initialization, whereas this iframe is removed from the DOM at the end of the init method
-  function getVerificationWindow() {
-    var iframe = document.createElement('iframe');
-    // This iframe should never be rendered, but just to be defensive this styling will hide the element
-    iframe.style.cssText = 'position:absolute;width:1px;height:1px;left:-9999px;visibility:hidden;';
-    iframe.id = verificationId;
-    document.documentElement.appendChild(iframe);
-    return iframe.contentWindow;
-  }
-
-  function removeVerificationFrame() {
-    var iframe = document.getElementById(verificationId);
-    iframe.parentElement.removeChild(iframe);
+  function removeCleanFrame() {
+    cleanFrame.parentElement.removeChild(cleanFrame);
   }
 
   function init() {
-    // Extension always uses window
-    // In-page library uses native iframe context if available
-    var verificationWindow = getVerificationWindow(),
-        functionToString   = verificationWindow.Function.prototype.toString,
-        objectToString     = verificationWindow.Object.prototype.toString;
+    if (isInitialized) {
+      return;
+    }
+    isInitialized = true;
 
+    // Extension always uses window
+    // In-page library uses clean iframe context if available
+    var didRetrieveValue,
+        cleanWindow      = getCleanFrame().contentWindow,
+        functionToString = cleanWindow.Function.prototype.toString,
+        objectToString   = cleanWindow.Object.prototype.toString;
     /*
-    * isSignatureVerified compares the toString value of two objects or functions, and returns true if they are identical
-    *
-    * @param top : the value of a given field on a top level native object
-    * @param verification : the value of the same field on the `verification` iframe's content window
-    * */
-    function isSignatureVerified(top, verification) {
+     * isVerified compares the toString value of two objects or functions, and returns true if they are identical
+     *
+     * @param top : the value of a given field on a top level native object
+     * @param verification : the value of the same field on the `clean` iframe's content window
+     * */
+    function isSignatureVerified(top, clean) {
       var toString;
 
       if (SC_EXTENSION) {
@@ -81,26 +74,34 @@ define(
 
       // compares the toString value of the top window function/object the value of the same field on the verification window
       // If they're the same, we know that the top field hasn't been overridden by another script
-      return toString.call(top) === toString.call(verification);
+      return toString.call(top) === toString.call(clean);
+    }
+
+    function getNativeValue(top, clean) {
+      if (isSignatureVerified(top, clean)) {
+        return top;
+      }
+      didRetrieveValue = true;
+      return clean;
     }
 
     function addFunctionProperty(name) {
       var
-        exportName        = suffixedFields.indexOf(name) >= 0 ? name + 'Fn' : name,
-        topValue          = window.Function.prototype[name],
-        verificationValue = verificationWindow.Function.prototype[name];
+        exportName = suffixedFields[name] || name,
+        topValue   = window.Function.prototype[name],
+        cleanValue = cleanWindow.Function.prototype[name];
 
-      exports[exportName] = isSignatureVerified(topValue, verificationValue) ? topValue : getNativeWindow().Function.prototype[name];
+      exports[exportName] = getNativeValue(topValue, cleanValue);
     }
 
     function addWindowProperty(name) {
       var
-        topValue          = window[name],
-        verificationValue = verificationWindow[name],
-        nativeValue       = isSignatureVerified(topValue, verificationValue) ? topValue : getNativeWindow()[name];
+        topValue    = window[name],
+        cleanValue  = cleanWindow[name],
+        nativeValue = getNativeValue(topValue, cleanValue);
 
       // It's especially important to bind setTimeout to the top window
-      exports[name] = typeof nativeValue === 'function' ? nativeValue.bind(window) : topValue;
+      exports[name] = typeof nativeValue === 'function' ? nativeValue.bind(window) : nativeValue;
     }
 
     addFunctionProperty('bind');
@@ -109,7 +110,9 @@ define(
     // Necessary on http://www.mgmresorts.com/
     addWindowProperty('JSON');
 
-    removeVerificationFrame();
+    if (!didRetrieveValue) {
+      removeCleanFrame();
+    }
   }
 
   exports.init = init;

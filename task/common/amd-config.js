@@ -56,7 +56,7 @@ var config = require('../build-config'),
 function buildCorePreamble() {
   const prefix = 'if (sitecues && sitecues.exists) throw new Error("The sitecues library already exists on this page.");\n' +
     'Object.defineProperty(sitecues, "version", { value: "' + config.version + '", writable: false });\n' +
-    '"use strict";\n';
+    '"use strict";';
 
   function getPrereqPath(fileName) {
     return JS_SOURCE_DIR + '/core/prereq/' + fileName;
@@ -70,8 +70,8 @@ function buildCorePreamble() {
     return amdclean.clean({
       filePath : getPrereqPath(fileName),
       wrap : {
-        start : '\n',
-        end : '\n'
+        start : '',
+        end : ''
       }
     });
   }
@@ -83,7 +83,7 @@ function buildCorePreamble() {
     getUnwrappedPrereq('native-functions.js'),
     getPrereqContent('global-assignments.js'),
     getPrereqContent('alameda-config.js')
-  ].join('');
+  ].join('\n');
 }
 
 function isDataFolder(sourceFolderName) {
