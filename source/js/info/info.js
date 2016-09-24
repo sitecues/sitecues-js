@@ -9,7 +9,7 @@ define(
     'page/util/color',
     'core/events',
     'core/util/session',
-    'core/native-functions',
+    'nativeFn',
     'core/inline-style/inline-style'
   ],
   function (

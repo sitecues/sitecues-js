@@ -1,5 +1,16 @@
 // We do not want the mouse wheel to scroll the document when it's over the BP
-define(['core/events', 'core/bp/helper', 'core/bp/constants'], function(events, helper, BP_CONST) {
+define(
+  [
+    'core/events',
+    'core/bp/helper',
+    'core/bp/constants'
+  ],
+  function (
+    events,
+    helper,
+    BP_CONST
+  ) {
+  'use strict';
 
   var isInitialized;
 
@@ -22,6 +33,7 @@ define(['core/events', 'core/bp/helper', 'core/bp/constants'], function(events, 
 
   function shouldCancelScrollEvent(evt) {
     var target = helper.getEventTarget(evt);
+
     if (!target.hasAttribute('data-allow-scroll')) {
       // Most elements in BP don't allow scrolling at all
       return true;

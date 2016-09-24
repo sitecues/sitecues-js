@@ -3,7 +3,17 @@
  * - Not currently used in extension
  * - Does not require init() so that it's easier to add/remove in different builds
  */
-define(['core/metric/metric', 'core/conf/urls'], function(metric, urls) {
+define(
+  [
+    'core/metric/metric',
+    'core/conf/urls'
+  ],
+  function (
+    metric,
+    urls
+  ) {
+  'use strict';
+
   function isSitecuesError(source) {
     return urls.parseUrl(source).origin === urls.getScriptOrigin();
   }

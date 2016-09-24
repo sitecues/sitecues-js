@@ -1,4 +1,11 @@
-define(['core/util/uuid'], function(uuid) {
+define(
+  [
+    'core/util/uuid'
+  ], function (
+    uuid
+  ) {
+  'use strict';
+
   var
     exports = {
       sessionId: null,
@@ -29,7 +36,6 @@ define(['core/util/uuid'], function(uuid) {
 
   function getReusableSessionId() {
     return getParentSessionId() || getPrevSessionId();
-
   }
 
   function createSessionId() {

@@ -21,14 +21,12 @@ define([], function() {
    * @return {number} [pixels]
    */
   function getUnsafePixels() {
-
     var hypotenuse = Math.sqrt(
       Math.pow(window.innerHeight, 2) +
       Math.pow(window.innerWidth, 2)
     );
 
     return hypotenuse * HLB_SAFE_AREA;
-
   }
 
   /////////////////////////
@@ -37,7 +35,6 @@ define([], function() {
 
   // Returns a rectangle the represents the area in which the HLB is allowed to occupy
   function getSafeZoneBoundingBox() {
-
     var unsafePixels = getUnsafePixels();
 
     return {
@@ -53,5 +50,4 @@ define([], function() {
   return {
     getSafeZoneBoundingBox: getSafeZoneBoundingBox
   };
-
 });

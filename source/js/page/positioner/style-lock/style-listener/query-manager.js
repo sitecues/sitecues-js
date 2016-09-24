@@ -9,7 +9,7 @@ define(
   [
     'page/positioner/style-lock/style-listener/selector-map',
     'core/util/array-utility',
-    'core/native-functions'
+    'nativeFn'
   ],
   function (
     selectorMap,

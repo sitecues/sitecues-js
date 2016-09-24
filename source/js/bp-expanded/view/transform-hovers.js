@@ -3,8 +3,22 @@
  * Currently this module implements data-hover="[transform attributes]"
  */
 
-define(['core/bp/helper', 'core/bp/constants', 'bp-expanded/view/transform-util', 'bp-expanded/view/transform-animate', 'core/events'],
-  function(helper, BP_CONST, transformUtil, animate, events) {
+define(
+  [
+    'core/bp/helper',
+    'core/bp/constants',
+    'bp-expanded/view/transform-util',
+    'bp-expanded/view/transform-animate',
+    'core/events'
+  ],
+  function (
+    helper,
+    BP_CONST,
+    transformUtil,
+    animate,
+    events
+  ) {
+  'use strict';
 
   var isActivePanel = false,
     byId = helper.byId,
@@ -20,7 +34,6 @@ define(['core/bp/helper', 'core/bp/constants', 'bp-expanded/view/transform-util'
   }
 
   function toggleHover(target, isActiveHover) {
-
     if (target.getAttribute('aria-disabled') === 'true' ||
       !target.hasAttribute('data-hover')) {
       return;

@@ -28,7 +28,7 @@ define(
     'page/viewport/scrollbars',
     'page/zoom/config/config',
     'core/events',
-    'core/native-functions',
+    'nativeFn',
     'core/inline-style/inline-style'
   ],
   function (

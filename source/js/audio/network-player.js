@@ -2,7 +2,20 @@
  * This is the audio player we use for remote speech and anything
  * that is not speech.
  */
-define(['$', 'core/conf/urls', 'core/conf/site', 'Promise' ], function ($, urls, site, Promise) {
+define(
+  [
+    '$',
+    'core/conf/urls',
+    'core/conf/site',
+    'Promise'
+  ],
+  function (
+    $,
+    urls,
+    site,
+    Promise
+  ) {
+  'use strict';
 
   var audioElementsToPlay = [],
     ERR_NO_NETWORK_TTS = 'Sitecues network speech is not available on this website.';
@@ -123,7 +136,7 @@ define(['$', 'core/conf/urls', 'core/conf/site', 'Promise' ], function ($, urls,
 
     getNetworkSpeechConfig.isRetrieving = true;
 
-    fetchNetworkSpeechConfig(function(speechConfig, error) {
+    fetchNetworkSpeechConfig(function (speechConfig, error) {
       getNetworkSpeechConfig.isRetrieving = false;
       getNetworkSpeechConfig.cached = speechConfig;
       callbackFn(speechConfig, error);
@@ -131,14 +144,14 @@ define(['$', 'core/conf/urls', 'core/conf/site', 'Promise' ], function ($, urls,
   }
 
   function fetchNetworkSpeechConfig(callbackFn) {
-    require(['core/util/xhr'], function(xhr) {
+    require(['core/util/xhr'], function (xhr) {
       xhr.getJSON({
         // The 'provided.siteId' parameter must exist, or else core would have aborted the loading of modules.
         url: urls.getApiUrl('2/site/' + site.getSiteId() + '/config'),
         success: function (data) {
-          var origSettings = data.settings,
-            currentSetting,
-            i = 0;
+          var currentSetting,
+            origSettings = data.settings,
+            speechConfig = {};
           // Map the incoming format
           // From:
           //   [ { key: foo, value: bar}, { key: foo2, value: bar2} ... ] to
@@ -146,14 +159,13 @@ define(['$', 'core/conf/urls', 'core/conf/site', 'Promise' ], function ($, urls,
           //   { key: bar, key2: bar2 }
 
           // Copy the fetched key/value pairs into the speechConfig
-          var speechConfig = {};
-          for (; i < origSettings.length; i++) {
+          for (var i = 0; i < origSettings.length; i++) {
             currentSetting = origSettings[i];
             speechConfig[currentSetting.key] = currentSetting.value;
           }
           callbackFn(speechConfig);
         },
-        error: function(error) {
+        error: function (error) {
           callbackFn({}, error);
         }
       });
@@ -166,4 +178,3 @@ define(['$', 'core/conf/urls', 'core/conf/site', 'Promise' ], function ($, urls,
     isBusy : isBusy
   };
 });
-

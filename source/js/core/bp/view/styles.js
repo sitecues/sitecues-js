@@ -1,5 +1,15 @@
-define(['core/bp/helper', 'core/platform', 'core/conf/site'],
-  function (helper, platform, site) {
+define(
+  [
+    'core/bp/helper',
+    'core/platform',
+    'core/conf/site'
+  ],
+  function (
+    helper,
+    platform,
+    site
+  ) {
+  'use strict';
 
   var
     isInitialized,
@@ -27,9 +37,7 @@ define(['core/bp/helper', 'core/platform', 'core/conf/site'],
     BASE_CSS;
 
   function toCSS(jsonObject) {
-
     var styles = HIDE_IN_PRINT_MEDIA;
-
     var isTransformPrefixNeeded = document.createElement('p').style.transform === undefined;
 
     for (var selector in jsonObject) {

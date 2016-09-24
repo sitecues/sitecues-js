@@ -1,42 +1,50 @@
 // Functionality for resetting Sitecues or turning it off
 
-define(['page/zoom/zoom', 'core/conf/user/manager'],
-  function(zoomMod, conf) {
+define(
+  [
+    'page/zoom/zoom',
+    'core/conf/user/manager'
+  ],
+  function (
+    zoomMod,
+    conf
+  ) {
+  'use strict';
 
-    function resetZoom() {
-      zoomMod.resetZoom();
-    }
+  function resetZoom() {
+    zoomMod.resetZoom();
+  }
 
-    function resetAudio(callback) {
-      require(['audio/audio'], function (audio) {
-        audio.init();
-        audio.setSpeechState(false, true);
-        audio.stopAudio();
-        if (callback) {
-          callback();
-        }
-      });
-    }
+  function resetAudio(callback) {
+    require(['audio/audio'], function (audio) {
+      audio.init();
+      audio.setSpeechState(false, true);
+      audio.stopAudio();
+      if (callback) {
+        callback();
+      }
+    });
+  }
 
-    function resetMinorSettings() {
-      conf.reset();
-    }
+  function resetMinorSettings() {
+    conf.reset();
+  }
 
-    function resetAll() {
-      resetZoom();
-      resetAudio(resetMinorSettings);
-    }
+  function resetAll() {
+    resetZoom();
+    resetAudio(resetMinorSettings);
+  }
 
-    function init() {
-      // Redefine (previously exported as noop function when Sitecues was off)
-      sitecues.reset = resetAll;
-    }
+  function init() {
+    // Redefine (previously exported as noop function when Sitecues was off)
+    sitecues.reset = resetAll;
+  }
 
-    return {
-      resetZoom: resetZoom,
-      resetAudio: resetAudio,
-      resetMinorSettings: resetMinorSettings,
-      resetAll: resetAll,
-      init: init
-    };
-  });
+  return {
+    resetZoom: resetZoom,
+    resetAudio: resetAudio,
+    resetMinorSettings: resetMinorSettings,
+    resetAll: resetAll,
+    init: init
+  };
+});

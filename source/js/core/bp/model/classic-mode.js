@@ -3,7 +3,16 @@
  * Classic mode is where the ? shows up instead of the down arrow. This can be necessary if themes aren't working.
  */
 
-define(['core/conf/site', 'core/platform'], function(site, platform) {
+define(
+  [
+    'core/conf/site',
+    'core/platform'
+  ], function (
+    site,
+    platform
+  ) {
+  'use strict';
+
   var CLASSIC_SITES = {
     // 's-b737790f': 1  // http://www.window-eyes.at
   };

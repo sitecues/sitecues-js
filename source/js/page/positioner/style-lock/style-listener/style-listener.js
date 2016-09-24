@@ -18,7 +18,7 @@ define(
     'page/positioner/util/element-map',
     'page/positioner/constants',
     'core/constants',
-    'core/native-functions',
+    'nativeFn',
     'core/inline-style/inline-style'
   ],
   function (

@@ -1,13 +1,18 @@
-define([
-  'page/zoom/zoom',
-  'page/highlight/move-keys',
-  'page/highlight/highlight',
-  'page/reset/reset'
+define(
+  [
+    'page/zoom/zoom',
+    'page/highlight/move-keys',
+    'page/highlight/highlight',
+    'page/reset/reset'
   ],
-  function(zoomMod,
-           moveKeys,
-           mh,
-           reset) {
+  function (
+    zoomMod,
+    moveKeys,
+    mh,
+    reset
+  ) {
+  'use strict';
+
   return {
     decreaseZoom: function(event) {
       zoomMod.init();

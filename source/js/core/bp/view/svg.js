@@ -6,7 +6,16 @@ The purpose of some elements:
 - #scpspeechtarget adds animation styles for speech icon waves
 -
  */
-define(['core/bp/view/markup-finalizer', 'core/bp/view/styles'], function(finalizer, styles) {
+define(
+  [
+    'core/bp/view/markup-finalizer',
+    'core/bp/view/styles'
+  ],
+  function (
+    finalizer,
+    styles
+  ) {
+  'use strict';
   /*jshint multistr: true */
 
   var svg = '\

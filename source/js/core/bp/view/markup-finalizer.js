@@ -1,5 +1,13 @@
 // Fix urls and localize strings in markup
-define(['core/locale'], function(locale) {
+define(
+  [
+    'core/locale'
+  ],
+  function (
+    locale
+  ) {
+  'use strict';
+
   function removeHash(loc) {
     return loc.replace(/\#.*/, '');
   }

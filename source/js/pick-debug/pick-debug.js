@@ -5,6 +5,8 @@
 // This helps debug the picker. Use sitecues.togglePickerDebugging() to turn
 // on useful console log messages related to picker heuristics.
 define([], function () {
+  'use strict';
+
   var DEBUG_LABEL_STYLE = 'font-weight: normal; color: purple';
 
   // -------- Logging section ---------
@@ -33,6 +35,7 @@ define([], function () {
     var index, scoreObj;
     var numUnusableAtTop = 0;
     var startItem = scoreObjs.length - 1;
+
     scoreObjs.some(function (scoreObj) {
       if (!scoreObj.judgements) {
         ++numUnusableAtTop;
@@ -40,6 +43,7 @@ define([], function () {
       }
       return true;
     });
+
     if (numUnusableAtTop) {
       //startItem -= numUnusableAtTop - 1;  // Only show last unusable item
     }
@@ -59,6 +63,7 @@ define([], function () {
         logArray('Non-factors', scoreObj.factors.filter(isNonFactor).map(getScoreFactorString));
       }
     }
+
     scoreObjs.forEach(function () {
       console.groupEnd();
     });
@@ -123,8 +128,8 @@ define([], function () {
       console.groupEnd();
     }
   }
+
   return {
     logHeuristicResult: logHeuristicResult
   };
-
 });

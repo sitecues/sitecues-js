@@ -2,7 +2,7 @@ define(
     [
         'intern!tdd',
         'intern/chai!assert',
-        'core/native-functions',
+        'nativeFn',
         'core/conf/user/storage'
     ],
     function (
@@ -17,10 +17,12 @@ define(
         var test       = tdd.test;
         var before     = tdd.before;
         var beforeEach = tdd.beforeEach;
+        var after      = tdd.after;
 
         suite('Storage', function () {
 
             before(function () {
+              window.SC_EXTENSION = false;
               nativeFn.init();
             });
 
@@ -226,6 +228,10 @@ define(
                     {},
                     'A default must be assumed for convenience'
                 );
+            });
+
+            after(function () {
+                delete window.SC_EXTENSION;
             });
         });
     }

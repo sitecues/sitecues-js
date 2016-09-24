@@ -2,7 +2,15 @@
  * Track status of modifier keys
  * For now, we are only using this to track the Ctrl key (to help understand wheel events)
  */
-define([ 'core/dom-events', 'core/constants' ], function(domEvents, constants) {
+define(
+  [
+    'core/dom-events',
+    'core/constants'
+  ], function (
+    domEvents,
+    constants
+  ) {
+  'use strict';
 
   var isCtrlKeyDownNow = false,
     CTRL_KEY_CODE = constants.KEY_CODE.CTRL;

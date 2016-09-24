@@ -1,16 +1,21 @@
-define([
-  'core/bp/constants',
-  'bp-secondary/tips',
-  'bp-secondary/settings',
-  'bp-secondary/feedback',
-  'bp-secondary/about',
-  'bp-secondary/cards'
-], function(BP_CONST,
-              tips,
-              settings,
-              feedback,
-              about,
-              cards) {
+define(
+  [
+    'core/bp/constants',
+    'bp-secondary/tips',
+    'bp-secondary/settings',
+    'bp-secondary/feedback',
+    'bp-secondary/about',
+    'bp-secondary/cards'
+  ],
+  function(
+    BP_CONST,
+    tips,
+    settings,
+    feedback,
+    about,
+    cards
+  ) {
+  'use strict';
 
   var featureDefs = {
     tips: {

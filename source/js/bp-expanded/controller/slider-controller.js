@@ -1,30 +1,35 @@
 /*
  Slider Controller
  */
-define([
-  'core/bp/constants',
-  'page/zoom/constants',
-  'core/bp/helper',
-  'core/platform',
-  'core/bp/model/state',
-  'bp-expanded/view/slider',
-  'page/zoom/zoom',
-  'page/zoom/animation',
-  'core/events',
-  'core/dom-events'
-],
-  function (BP_CONST,
-            ZOOM_CONST,
-            helper,
-            platform,
-            state,
-            sliderView,
-            zoomMod,
-            animation,
-            events,
-            domEvents) {
+define(
+  [
+    'core/bp/constants',
+    'page/zoom/constants',
+    'core/bp/helper',
+    'core/platform',
+    'core/bp/model/state',
+    'bp-expanded/view/slider',
+    'page/zoom/zoom',
+    'page/zoom/animation',
+    'core/events',
+    'core/dom-events'
+  ],
+  function (
+    BP_CONST,
+    ZOOM_CONST,
+    helper,
+    platform,
+    state,
+    sliderView,
+    zoomMod,
+    animation,
+    events,
+    domEvents
+  ) {
+  'use strict';
 
-  var isListeningToWindowMouseMoveEvents,
+  var
+    isListeningToWindowMouseMoveEvents,
     isListeningToWindowMouseUpEvents,
     isInitialized;
 
@@ -33,7 +38,6 @@ define([
    * If the slider is ready for input, begin sending zoom new values for every mouse move.
    */
   function initialMouseDown(evt) {
-
     if (!state.isPanel()) {
       return; // Panel not ready for input
     }
@@ -65,16 +69,15 @@ define([
       domEvents.off(window, 'mousemove', moveThumb, { passive: false });
       isListeningToWindowMouseMoveEvents = false;
     }
+
     if (isListeningToWindowMouseMoveEvents) {
       domEvents.off(window, 'mouseup', finishZoomChanges, { passive : false });
       isListeningToWindowMouseUpEvents = false;
     }
-
   }
 
   // Mouse button was pressed down over slider and mouse cursor has moved
   function moveThumb(evt) {
-
     var
       sliderThumbRect = helper.getRectById(BP_CONST.ZOOM_SLIDER_THUMB_ID),
       sliderRect      = helper.getRectById(BP_CONST.ZOOM_SLIDER_BAR_ID),
@@ -89,7 +92,6 @@ define([
     zoomMod.jumpTo(newValue, { isFirstBadgeUse : isFirstBadgeUse() });
 
     evt.preventDefault();
-
   }
 
   function isFirstBadgeUse() {
@@ -100,7 +102,6 @@ define([
    * Handler when click on small or large A.
    */
   function handleAButtonsPress(evt) {
-
     var target = helper.getEventTarget(evt),
         isDecrease   = (target.id === BP_CONST.SMALL_A_ID);
 

@@ -1,10 +1,16 @@
-define(['$', 'core/conf/site'], function ($, site) {
-
+define(
+  [
+    '$',
+    'core/conf/site'
+  ],
+  function (
+    $,
+    site
+  ) {
   'use strict';
 
-  var
-    // Default zoom configuration
-    config = { // Can be customized via provideCustomConfig()
+  // Default zoom configuration
+  var config = { // Can be customized via provideCustomConfig()
       // Should smooth zoom animations be enabled?
       provideCustomZoomConfig: provideCustomZoomConfig,
       init: init
@@ -49,5 +55,4 @@ define(['$', 'core/conf/site'], function ($, site) {
   }
 
   return config;
-
 });

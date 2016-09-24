@@ -1,11 +1,16 @@
 /**
  * Badge, toolbar and panel base view
  */
-define([
-  'core/bp/constants',
-  'core/bp/model/state'
-], function(BP_CONST,
-            state) {
+define(
+  [
+    'core/bp/constants',
+    'core/bp/model/state'
+  ],
+  function (
+    BP_CONST,
+    state
+  ) {
+  'use strict';
 
   /**
    *** Public ***

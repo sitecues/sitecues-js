@@ -5,7 +5,14 @@
  * Stop event from bubbling up to window/document object.
  */
 // TODO: Call this module scrolling.js
-define(['$' ], function($) {
+define(
+  [
+    '$'
+  ],
+  function (
+    $
+  ) {
+  'use strict';
 
   /////////////////////////
   // PRIVATE VARIABLES
@@ -22,9 +29,7 @@ define(['$' ], function($) {
    * [releaseWheelEvents disables the capturing of wheel events.  This is called once the HLB is closed.]
    */
   function releaseWheelEvents() {
-
     window.removeEventListener('wheel', wheelEventCallback);
-
     isCapturing = false;
   }
 
@@ -33,7 +38,6 @@ define(['$' ], function($) {
    * @param  {[jQuery Element]} $hlb [The HLB element]
    */
   function captureWheelEvents($hlb) {
-
     if (isCapturing) {
       return; // Already capturing
     }
@@ -55,7 +59,6 @@ define(['$' ], function($) {
       // Sometimes there is no deltaY number, or a deltaY of "0"
       // (when the user is scrolling horizontally along X)
       if (!deltaY) {
-
         // We prevent the scroll event for horizontal scrolls
         return preventScroll(event);
       }
@@ -129,7 +132,6 @@ define(['$' ], function($) {
         event.returnValue = false;
         return false;
       }
-
     };
 
 
@@ -141,5 +143,4 @@ define(['$' ], function($) {
     releaseWheelEvents: releaseWheelEvents,
     captureWheelEvents: captureWheelEvents
   };
-
 });
