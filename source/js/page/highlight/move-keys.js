@@ -8,7 +8,7 @@ define(
     'page/util/geo',
     'core/events',
     'page/highlight/fixed-elements',
-    'core/native-functions',
+    'nativeFn',
     'core/inline-style/inline-style'
   ],
   function (

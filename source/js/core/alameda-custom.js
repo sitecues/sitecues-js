@@ -284,16 +284,10 @@ var requirejs, require, define;
   }
 
   // ----- BEGIN SITECUES CUSTOM BLOCK -----
-  // Recover potentially overridden window methods from a nested browsing context
-  function getNativeWindow() {
-    return SC_EXTENSION ? window : sitecues._getHelperFrame('sitecues-context').contentWindow;
-  }
-
   function cacheNativeFnReferences() {
-    var nativeWindow = getNativeWindow();
-    hasOwn     = nativeWindow.Object.prototype.hasOwnProperty;
-    setTimeout = nativeWindow.setTimeout.bind(window);
-    slice      = nativeWindow.Array.prototype.slice;
+    hasOwn     = Object.prototype.hasOwnProperty;
+    setTimeout = sitecues._nativeFn.setTimeout;
+    slice      = Array.prototype.slice;
   }
   // ----- END SITECUES CUSTOM BLOCK -----
 

@@ -1,5 +1,5 @@
 define(['page/util/element-classifier', 'page/keys/commands', 'core/metric/metric', 'core/events', 'page/highlight/constants',
-        'core/constants', 'core/native-functions'],
+        'core/constants', 'nativeFn'],
   function(elemClassifier, commands, metric, events, HIGHLIGHT_CONST, CORE_CONST, nativeFn) {
 
   var

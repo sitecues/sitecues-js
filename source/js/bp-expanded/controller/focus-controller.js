@@ -8,7 +8,7 @@ define(
     'core/bp/view/view',
     'core/events',
     'core/constants',
-    'core/native-functions',
+    'nativeFn',
     'core/inline-style/inline-style'
   ],
   function (

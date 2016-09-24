@@ -1,4 +1,12 @@
-define(['iframeFactory'], function (iframeFactory) {
+// We need to hard code the module name here for amdclean
+define(
+  'nativeFn',
+  [
+    'iframeFactory'
+  ],
+  function (
+    iframeFactory
+  ) {
   'use strict';
 
   var nativeWindow,
@@ -15,7 +23,7 @@ define(['iframeFactory'], function (iframeFactory) {
     if (nativeWindow) {
       return nativeWindow;
     }
-    return SC_EXTENSION ? window : iframeFactory('sitecues-context').contentWindow;
+    nativeWindow = SC_EXTENSION ? window : iframeFactory('sitecues-context').contentWindow;
     return nativeWindow;
   }
 
