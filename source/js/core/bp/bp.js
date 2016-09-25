@@ -25,7 +25,7 @@ define(
     'core/bp/model/classic-mode',
     'core/bp/view/badge/page-badge',
     'Promise',
-    'core/native-functions',
+    'nativeFn',
     'core/inline-style/inline-style'
   ],
   function (

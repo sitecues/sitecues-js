@@ -7,7 +7,7 @@ define(
     'core/conf/user/manager',
     'core/events',
     'core/platform',
-    'core/native-functions',
+    'nativeFn',
     'core/inline-style/inline-style'
   ],
   function (

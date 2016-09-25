@@ -14,7 +14,7 @@ define(
     'page/cursor/cursor-css',
     'core/platform',
     'core/events',
-    'core/native-functions'
+    'nativeFn'
   ],
   function (
     $,

@@ -28,8 +28,8 @@ define(
     'page/viewport/scrollbars',
     'page/zoom/config/config',
     'core/events',
-    'core/native-functions',
-    'core/inline-style/inline-style',
+    'nativeFn',
+    'core/inline-style/inline-style'
     'page/util/transform-util'
   ],
   function (

@@ -18,7 +18,7 @@
 * */
 define(
   [
-    'core/native-functions',
+    'nativeFn',
     'core/util/array-utility',
     'core/util/object-utility'
   ],
@@ -119,6 +119,7 @@ define(
   }
 
   function getLastStyles(element) {
+    updateIntendedStyles();
     return lastStyleMap.get(element);
   }
 
@@ -364,13 +365,15 @@ define(
   function stringifyCss(cssObject) {
     styleParser.cssText = '';
 
-    Object.keys(cssObject).forEach(function (property) {
+    Object.keys(cssObject).forEach(function (prop) {
       var value, priority,
-        propertyData = cssObject[property];
+        //setProperty only takes kebab-case
+        property     = toKebabCase(prop),
+        propertyData = cssObject[prop];
 
-      if (typeof propertyData === 'object') {
-        value    = cssObject[property].value;
-        priority = cssObject[property].priority;
+      if (propertyData && typeof propertyData === 'object') {
+        value    = cssObject[prop].value;
+        priority = cssObject[prop].priority;
       }
       else {
         value    = propertyData;
