@@ -4,8 +4,7 @@ define(
     'core/inline-style/inline-style',
     'core/util/array-utility',
     'core/platform',
-    'core/native-functions',
-    'page/viewport/viewport'
+    'nativeFn'
   ],
   function (
     inlineStyle,
@@ -14,14 +13,6 @@ define(
     nativeFn
   ) {
   'use strict';
-  var positionStyles = [
-    'top',
-    'bottom',
-    'left',
-    'right',
-    'height',
-    'width'
-  ];
 
   function disableTransformTransition(element) {
     var style  = getComputedStyle(element),
@@ -67,8 +58,8 @@ define(
   }
 
   return {
-    applyInstantTransform : applyInstantTransform,
+    applyInstantTransform      : applyInstantTransform,
     disableTransformTransition : disableTransformTransition,
-    restoreTransition : restoreTransition
+    restoreTransition          : restoreTransition
   };
 });

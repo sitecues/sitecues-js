@@ -29,8 +29,8 @@ define(
     'page/zoom/config/config',
     'core/events',
     'nativeFn',
-    'core/inline-style/inline-style'
-    'page/util/transform-util'
+    'core/inline-style/inline-style',
+    'page/util/transition-util'
   ],
   function (
     elementMap,
@@ -49,7 +49,7 @@ define(
     events,
     nativeFn,
     inlineStyle,
-    transformUtil
+    transitionUtil
   ) {
     /*jshint +W072 */
     'use strict';
@@ -185,7 +185,7 @@ define(
 
     function setNewTransform(element, translateX, translateY, scale) {
       var transform = 'translate3d(' + translateX + 'px, ' + translateY + 'px, 0) scale(' + scale + ')';
-      transformUtil.applyInstantTransform(element, transform);
+      transitionUtil.applyInstantTransform(element, transform);
     }
 
     function calculateXTranslation(args) {
@@ -368,7 +368,7 @@ define(
       var doTransformOnResize = Boolean(targets.getCount());
 
       if (!isTransformingOnResize && doTransformOnResize) {
-        // There may be css media rules that change the positioning when the viewport is resized
+        // There may be css media rules that change positioning of fixed elements when the viewport is resized
         window.addEventListener('resize', onResize);
       }
       else if (isTransformingOnResize && !doTransformOnResize) {
@@ -405,9 +405,7 @@ define(
       // that only specified top values are returned with the computed style
       // EXCEPTION: IE returns the used value for both
       if (!platform.browser.isIE) {
-        inlineStyle.override(element, {
-          position : 'static'
-        });
+        inlineStyle.override(element, ['position', 'static', 'important']);
       }
 
       var
@@ -420,7 +418,7 @@ define(
         });
       }
 
-      inlineStyle.restore(element, 'position');
+      inlineStyle.restoreLast(element, 'position');
     }
 
     function restoreTop(element) {

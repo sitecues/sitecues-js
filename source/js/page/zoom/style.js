@@ -12,7 +12,7 @@ define(
     'nativeFn',
     'core/inline-style/inline-style',
     'page/zoom/combo-boxes',
-    'page/util/transform-util'
+    'page/util/transition-util'
   ],
   function (
     $,
@@ -24,7 +24,7 @@ define(
     nativeFn,
     inlineStyle,
     comboBoxes,
-    transformUtil
+    transitionUtil
   ) {
   'use strict';
 
@@ -233,13 +233,13 @@ define(
 
   //Restore the intended inline style when we're done transforming the body
   function restoreBodyTransitions() {
-    transformUtil.restoreTransition(body);
+    transitionUtil.restoreTransition(body);
   }
 
   //If there is a transition style applied to the body, we need to be sure that it doesn't apply to transformations
   //otherwise our zoom logic will break
   function fixBodyTransitions() {
-    transformUtil.disableTransformTransition(body);
+    transitionUtil.disableTransformTransition(body);
   }
 
   function getZoomStyleSheet() {

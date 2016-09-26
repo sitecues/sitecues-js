@@ -13,8 +13,8 @@ define(
     ) {
         'use strict';
 
-        var suite = tdd.suite;
-        var test = tdd.test;
+        var suite  = tdd.suite;
+        var test   = tdd.test;
         var before = tdd.before;
         var after  = tdd.after;
 
@@ -179,7 +179,7 @@ define(
                 assert.strictEqual(element.style.getPropertyPriority('z-index'), intendedPriority, 'The style must be restored with its original priority');
             });
 
-            test('Override a style with importance, and restore it to its last value', function () {
+            test('Override a style with importance, and restore it to its intended value', function () {
                 var element          = document.createElement('div'),
                     property         = 'position',
                     overrideValue    = 'static',
@@ -189,8 +189,77 @@ define(
                 inlineStyle.override(element, [property, overrideValue, overridePriority]);
                 assert.strictEqual(element.style[property], overrideValue, 'Style value must be overridden');
                 assert.strictEqual(element.style.getPropertyPriority(property), overridePriority, 'Style must be overridden with important priority');
-                inlineStyle.restoreLast(element, property);
-                assert.strictEqual(element.style[property], intendedValue, 'Style value must be restored to its last value');
+                inlineStyle.restore(element, property);
+                assert.strictEqual(element.style[property], intendedValue, 'Style value must be restored to its intended value');
+            });
+
+            test('Override style A, override style B, restore A to intended value', function () {
+                var element        = document.createElement('div'),
+                    propertyA      = 'position',
+                    overrideValueA = 'static',
+                    overridePriorityA = 'important',
+                    intendedValueA = 'absolute',
+                    propertyB      = 'z-index',
+                    overrideValueB = '99';
+                element.style[propertyA] = intendedValueA;
+                inlineStyle.override(element, [propertyA, overrideValueA, overridePriorityA]);
+                inlineStyle.override(element, [propertyB, overrideValueB]);
+                inlineStyle.restore(element, propertyA);
+                assert.strictEqual(element.style[propertyA], intendedValueA, 'Style value must be restored to its intended value')
+            });
+
+            test('Override style A, override style A again, override style B, restore A to its intended value', function () {
+                var element            = document.createElement('div'),
+                    propertyA          = 'position',
+                    overrideValueA1    = 'static',
+                    overrideValueA2    = 'fixed',
+                    overridePriorityA2 = 'important',
+                    intendedValueA     = 'absolute',
+                    propertyB          = 'z-index',
+                    overrideValueB     = '99';
+
+                element.style[propertyA] = intendedValueA;
+                inlineStyle.override(element, [propertyA, overrideValueA1]);
+                inlineStyle.override(element, [propertyA, overrideValueA2, overridePriorityA2]);
+                inlineStyle.override(element, [propertyB, overrideValueB]);
+                inlineStyle.restore(element, propertyA);
+                assert.strictEqual(element.style[propertyA], intendedValueA, 'Style value must be restored to its last value')
+            });
+
+            test('Override style A, override style A again, override style B, restore A to last value', function () {
+              var element         = document.createElement('div'),
+                  propertyA       = 'position',
+                  overrideValueA1 = 'static',
+                  overrideValueA2 = 'fixed',
+                  intendedValueA  = 'absolute',
+                  propertyB       = 'z-index',
+                  overrideValueB  = '99';
+
+              element.style[propertyA] = intendedValueA;
+              inlineStyle.override(element, [propertyA, overrideValueA1]);
+              inlineStyle.override(element, [propertyA, overrideValueA2]);
+              inlineStyle.override(element, [propertyB, overrideValueB]);
+              inlineStyle.restoreLast(element, propertyA);
+              assert.strictEqual(element.style[propertyA], overrideValueA1, 'Style value must be restored to its last value')
+            });
+
+            test('Override style A with importance, override style A again, override style B, restore A to last value and priority', function () {
+                var element            = document.createElement('div'),
+                    propertyA          = 'position',
+                    overrideValueA1    = 'static',
+                    overrideValueA2    = 'fixed',
+                    overridePriorityA1 = 'important',
+                    intendedValueA     = 'absolute',
+                    propertyB          = 'z-index',
+                    overrideValueB     = '99';
+
+                element.style[propertyA] = intendedValueA;
+                inlineStyle.override(element, [propertyA, overrideValueA1, overridePriorityA1]);
+                inlineStyle.override(element, [propertyA, overrideValueA2]);
+                inlineStyle.override(element, [propertyB, overrideValueB]);
+                inlineStyle.restoreLast(element, propertyA);
+                assert.strictEqual(element.style.getPropertyPriority(propertyA), overridePriorityA1, 'Style priority must be restored to its last value');
+                assert.strictEqual(element.style[propertyA], overrideValueA1, 'Style value must be restored to its last value');
             });
 
           after(function () {
