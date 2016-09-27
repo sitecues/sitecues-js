@@ -18,7 +18,7 @@
 define(
   [
     'core/util/uuid',
-    'core/native-functions'
+    'nativeFn'
   ],
   function (
     uuid,

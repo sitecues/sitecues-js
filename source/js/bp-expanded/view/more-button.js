@@ -15,7 +15,7 @@ define(
     'core/events',
     'core/inline-style/inline-style',
     'core/ab-test/ab-test',
-    'core/native-functions'
+    'nativeFn'
   ],
   function (
     BP_CONST,

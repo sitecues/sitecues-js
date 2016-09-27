@@ -104,7 +104,7 @@ define(
 
   function updateRect(element, rect) {
     var currentRectData = elementToRectDataMap.get(element);
-    // The rect may have been invalidated already, in which case we should recalculate the data on the next request
+    // The rect may have been invalidated already, in which case we should recalculate the rectangle on the next request
     if (currentRectData) {
       currentRectData.rect    = rect;
       currentRectData.offsets = viewport.getPageOffsets();
