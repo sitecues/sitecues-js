@@ -442,7 +442,8 @@ define(
     var
       scoreObjs = getScores(candidates),
       pickingDisabledSelector = getPickingDisabledSelector(),
-      bestIndex;
+      bestIndex,
+      votedBestIndex;
 
     function processResult(pickedIndex) {
       // Log the results if necessary for debugging
@@ -481,7 +482,11 @@ define(
 
     // 3. Get the best candidate after voting by other nearby textnodes
     if (doAllowVoting) {
-      bestIndex = performVote(scoreObjs, bestIndex, candidates);
+      votedBestIndex = performVote(scoreObjs, bestIndex, candidates);
+      // If the voted best index is a container, we need to doublecheck that it's allowable (no picker-disabled items)
+      if (votedBestIndex >= bestIndex || !containsItemsDisabledForPicker(votedBestIndex)) {
+        bestIndex = votedBestIndex;
+      }
     }
 
     return processResult(bestIndex);
