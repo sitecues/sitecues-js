@@ -18,7 +18,7 @@ define(
     'core/dom-events',
     'Promise',
     'core/modifier-key-state',
-    'core/native-functions',
+    'nativeFn',
     'core/ab-test/ab-test',
     'core/metric/bounce',
     'core/shake/shake',

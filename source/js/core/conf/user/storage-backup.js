@@ -10,7 +10,7 @@ define(
     'core/conf/site',
     'Promise',
     'core/platform',
-    'core/native-functions',
+    'nativeFn',
     'iframeFactory'
   ],
   function (

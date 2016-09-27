@@ -4,7 +4,7 @@ define(
     'page/positioner/constants',
     'page/positioner/style-lock/style-listener/style-listener',
     'core/util/array-utility',
-    'core/native-functions'
+    'nativeFn'
   ],
   function (
     constants,

@@ -45,7 +45,8 @@ define(
                     { name : 'utility',     location: testDir + 'util',        main : 'index' }
                 ],
                 paths : {
-                    'iframeFactory' : 'core/prereq/iframe-factory'
+                    'iframeFactory' : 'core/prereq/iframe-factory',
+                    'nativeFn'      : 'core/prereq/native-functions'
                 }
             },
 

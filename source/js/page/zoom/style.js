@@ -9,9 +9,10 @@ define(
     'page/zoom/constants',
     'page/zoom/util/body-geometry',
     'page/zoom/config/config',
-    'core/native-functions',
+    'nativeFn',
     'core/inline-style/inline-style',
-    'page/zoom/combo-boxes'
+    'page/zoom/combo-boxes',
+    'page/util/transition-util'
   ],
   function (
     $,
@@ -22,7 +23,8 @@ define(
     config,
     nativeFn,
     inlineStyle,
-    comboBoxes
+    comboBoxes,
+    transitionUtil
   ) {
   'use strict';
 
@@ -49,58 +51,58 @@ define(
     // This is conjured out of thin air. Just seems to work.
     REPAINT_FOR_CRISP_TEXT_DELAY = constants.REPAINT_FOR_CRISP_TEXT_DELAY;
 
-  // Create <style> for keyframes animations
-  // For initial zoom, call with the targetZoom
-  // Otherwise, it will create a reverse (zoom-out) and forward (zoom-in) style sheet
-  //This needs to set up a keyframe stylesheet for each zoom target
-  /*
-  * Each zoom target will need to calculate a desired zoom level:
-  *   a. Primary body, 0th zoom target, will calculate full zoom range and translate x / width animations as necessary
-  *   b. each succeeding zoom target will use its calculated zoom level (depending on ratio of dimensions to screen size)
-  * */
-  //instead of taking target zoom on the initial zoom stylesheet, just take a boolean clarifying if it is
-  //the initial zoom or not
-  function setupNextZoomStyleSheet(targetZoom, doUseKeyFrames) {
-    var css = '';
+    // Create <style> for keyframes animations
+    // For initial zoom, call with the targetZoom
+    // Otherwise, it will create a reverse (zoom-out) and forward (zoom-in) style sheet
+    //This needs to set up a keyframe stylesheet for each zoom target
+    /*
+    * Each zoom target will need to calculate a desired zoom level:
+    *   a. Primary body, 0th zoom target, will calculate full zoom range and translate x / width animations as necessary
+    *   b. each succeeding zoom target will use its calculated zoom level (depending on ratio of dimensions to screen size)
+    * */
+    //instead of taking target zoom on the initial zoom stylesheet, just take a boolean clarifying if it is
+    //the initial zoom or not
+    function setupNextZoomStyleSheet(targetZoom, doUseKeyFrames) {
+      var css = '';
 
-    if (doUseKeyFrames) {
-      if (targetZoom) {
-        // Style sheet to zoom exactly to targetZoom
-        css = getAnimationCSS(targetZoom);
-      }
-      else {
-        if (state.completedZoom > MIN) {
-          // Style sheet for reverse zoom (zoom-out to 1x)
-          css += getAnimationCSS(MIN);
+      if (doUseKeyFrames) {
+        if (targetZoom) {
+          // Style sheet to zoom exactly to targetZoom
+          css = getAnimationCSS(targetZoom);
         }
-        if (state.completedZoom < MAX) {
-          // Style sheet for forward zoom (zoom-in to 3x)
-          css += getAnimationCSS(MAX);
+        else {
+          if (state.completedZoom > MIN) {
+            // Style sheet for reverse zoom (zoom-out to 1x)
+            css += getAnimationCSS(MIN);
+          }
+          if (state.completedZoom < MAX) {
+            // Style sheet for forward zoom (zoom-in to 3x)
+            css += getAnimationCSS(MAX);
+          }
+        }
+      }
+
+      css += getCssCrispingFixes();
+
+      applyZoomStyleSheet(css);
+    }
+
+    // Replace current zoom stylesheet or insert a new one with the
+    // requested styles plus generic stylesheet fixes for the current configuration.
+    function applyZoomStyleSheet(additionalCss) {
+      var styleSheetText = additionalCss || '';
+      if (styleSheetText) {
+        if ($zoomStyleSheet) {
+          $zoomStyleSheet.text(styleSheetText);
+        }
+        else {
+          $zoomStyleSheet = $('<style>')
+            .text(styleSheetText)
+            .attr('id', SITECUES_ZOOM_ID)
+            .appendTo('head');
         }
       }
     }
-
-    css += getCssCrispingFixes();
-
-    applyZoomStyleSheet(css);
-  }
-
-  // Replace current zoom stylesheet or insert a new one with the
-  // requested styles plus generic stylesheet fixes for the current configuration.
-  function applyZoomStyleSheet(additionalCss) {
-    var styleSheetText = additionalCss || '';
-    if (styleSheetText) {
-      if ($zoomStyleSheet) {
-        $zoomStyleSheet.text(styleSheetText);
-      }
-      else {
-        $zoomStyleSheet = $('<style>')
-          .text(styleSheetText)
-          .attr('id', SITECUES_ZOOM_ID)
-          .appendTo('head');
-      }
-    }
-  }
 
   // This is used to repaint the DOM after a zoom in WebKit to ensure crisp text
   function getCssCrispingFixes() {
@@ -231,40 +233,13 @@ define(
 
   //Restore the intended inline style when we're done transforming the body
   function restoreBodyTransitions() {
-    inlineStyle.restore(body, 'transition');
+    transitionUtil.restoreTransition(body);
   }
 
   //If there is a transition style applied to the body, we need to be sure that it doesn't apply to transformations
   //otherwise our zoom logic will break
   function fixBodyTransitions() {
-    var style  = getComputedStyle(body),
-      property = style.transitionProperty,
-      delay    = style.transitionDelay.split(',').some(function (dly) {
-        return parseFloat(dly);
-      }),
-      duration;
-
-    if (!delay) {
-      duration = style.transitionDuration.split(',').some(function (drtn) {
-        return parseFloat(drtn);
-      });
-    }
-
-    if (!delay && !duration) {
-      return;
-    }
-
-    if (property.indexOf('all') >= 0 || property.indexOf('transform') >= 0) {
-      var transitionValue = inlineStyle(body).transition;
-      if (transitionValue) {
-        transitionValue += ', ';
-      }
-      transitionValue += 'transform 0s';
-      inlineStyle.override(body, {
-        transition : transitionValue
-      });
-    }
-
+    transitionUtil.disableTransformTransition(body);
   }
 
   function getZoomStyleSheet() {

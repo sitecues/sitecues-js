@@ -8,7 +8,7 @@ define(
     'page/style-service/user-agent-css',
     'core/conf/urls',
     'page/style-service/media-queries',
-    'core/native-functions'
+    'nativeFn'
   ],
   function (
     $,
