@@ -38,7 +38,7 @@ define(
     isInitialized = true;
 
     // Extension always uses window
-    // In-page library uses clean iframe context if available
+    // In-page application uses clean iframe context if necessary
     var didRetrieveValue,
         cleanWindow      = getCleanFrame().contentWindow,
         functionToString = cleanWindow.Function.prototype.toString,
