@@ -7,7 +7,7 @@ var gulp = require('gulp'),
   ES5_LINT_GLOB = [
     'source/js/**/*.js',
     '!source/js/**/jquery.js',
-    '!source/js/core/alameda-custom.js',
+    '!source/js/core/prereq/alameda-custom.js',
     '!source/js/core/prereq/global-assignments.js'
   ],
   ES6_LINT_GLOB = [
