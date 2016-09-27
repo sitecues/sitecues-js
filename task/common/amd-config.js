@@ -3,6 +3,7 @@
 'use strict';
 
 var config = require('../build-config'),
+  amdclean = require('amdclean'),
   sourceConfig = require('../source-folders.json'),
   bundleFolders = sourceConfig.bundleFolders,
   dataFolders = sourceConfig.dataFolders,
@@ -67,10 +68,22 @@ function buildCorePreamble() {
     return fs.readFileSync(getPrereqPath(fileName));
   }
 
+  function getUnwrappedPrereq(fileName) {
+    return amdclean.clean({
+      filePath : getPrereqPath(fileName),
+      wrap : {
+        start : '',
+        end : ''
+      }
+    });
+  }
+
   return [
     prefix,
     getPrereqContent('shared-modules.js'),
     getPrereqContent('custom-event-polyfill.js'),
+    getUnwrappedPrereq('iframe-factory.js'),
+    getUnwrappedPrereq('native-functions.js'),
     getPrereqContent('global-assignments.js'),
     getPrereqContent('alameda-config.js')
   ].join('\n');
