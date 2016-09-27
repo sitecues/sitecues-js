@@ -13,7 +13,7 @@ define(
     'core/bp/view/view',
     'core/events',
     'core/dom-events',
-    'core/native-functions'
+    'nativeFn'
   ],
   function (
     BP_CONST,

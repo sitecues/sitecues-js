@@ -28,8 +28,9 @@ define(
     'page/viewport/scrollbars',
     'page/zoom/config/config',
     'core/events',
-    'core/native-functions',
-    'core/inline-style/inline-style'
+    'nativeFn',
+    'core/inline-style/inline-style',
+    'page/util/transition-util'
   ],
   function (
     elementMap,
@@ -47,7 +48,8 @@ define(
     config,
     events,
     nativeFn,
-    inlineStyle
+    inlineStyle,
+    transitionUtil
   ) {
     /*jshint +W072 */
     'use strict';
@@ -182,9 +184,8 @@ define(
     }
 
     function setNewTransform(element, translateX, translateY, scale) {
-      var styles = {};
-      styles[transformProperty] = 'translate3d(' + translateX + 'px, ' + translateY + 'px, 0) scale(' + scale + ')';
-      inlineStyle.override(element, styles);
+      var transform = 'translate3d(' + translateX + 'px, ' + translateY + 'px, 0) scale(' + scale + ')';
+      transitionUtil.applyInstantTransform(element, transform);
     }
 
     function calculateXTranslation(args) {
@@ -367,7 +368,7 @@ define(
       var doTransformOnResize = Boolean(targets.getCount());
 
       if (!isTransformingOnResize && doTransformOnResize) {
-        // There may be css media rules that change the positioning when the viewport is resized
+        // There may be css media rules that change positioning of fixed elements when the viewport is resized
         window.addEventListener('resize', onResize);
       }
       else if (isTransformingOnResize && !doTransformOnResize) {
@@ -404,15 +405,12 @@ define(
       // that only specified top values are returned with the computed style
       // EXCEPTION: IE returns the used value for both
       if (!platform.browser.isIE) {
-        inlineStyle.override(element, {
-          position : 'static'
-        });
+        inlineStyle.override(element, ['position', 'static', 'important']);
       }
 
       var
         specifiedTop   = getComputedStyle(element).top,
         specifiedValue = parseFloat(specifiedTop);
-
 
       if (!isNaN(specifiedValue) && specifiedTop.indexOf('px') >= 0) {
         inlineStyle.override(element, {
@@ -420,7 +418,7 @@ define(
         });
       }
 
-      inlineStyle.restore(element, 'position');
+      inlineStyle.restoreLast(element, 'position');
     }
 
     function restoreTop(element) {
@@ -428,9 +426,7 @@ define(
     }
 
     function onTargetAdded(element) {
-      var styles = {};
-      styles[transformOriginProperty] = isTransformXOriginCentered ? '50% 0' : '0 0';
-      inlineStyle.override(element, styles);
+      inlineStyle.override(element, [transformOriginProperty, isTransformXOriginCentered ? '50% 0' : '0 0']);
       // This handler runs when a style relevant to @element's bounding rectangle has mutated
       rectCache.listenForMutatedRect(element, function () {
         /*jshint validthis: true */

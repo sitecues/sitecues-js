@@ -18,7 +18,7 @@
 * */
 define(
   [
-    'core/native-functions',
+    'nativeFn',
     'core/util/array-utility',
     'core/util/object-utility'
   ],
@@ -30,6 +30,7 @@ define(
   'use strict';
 
   var proxyMap,
+      kebabCaseCache,
       assignmentDictionary,
       assignmentRecords,
       lastStyleMap,
@@ -61,20 +62,20 @@ define(
     return typeof value === 'number' && value !== 0 && !cssNumbers[property] ? value + 'px' : value;
   }
 
-  function arrayAssignment(element, styleInfo, styleProperty) {
+  function arrayAssignment(element, styleInfo, styleField) {
     var property = toKebabCase(styleInfo[0]);
-    element[styleProperty].setProperty(property, fixUnits(property, styleInfo[1]), styleInfo[2] || '');
+    element[styleField].setProperty(property, fixUnits(property, styleInfo[1]), styleInfo[2] || '');
   }
 
-  function objectAssignment(element, styleInfo, styleProperty) {
+  function objectAssignment(element, styleInfo, styleField) {
     Object.keys(styleInfo).forEach(function (prop) {
       var property = toKebabCase(prop);
-      element[styleProperty].setProperty(property, fixUnits(property, styleInfo[prop]));
+      element[styleField].setProperty(property, fixUnits(property, styleInfo[prop]));
     });
   }
 
-  function stringAssignment(element, styleInfo, styleProperty) {
-    element[styleProperty].cssText = styleInfo;
+  function stringAssignment(element, styleInfo, styleField) {
+    element[styleField].cssText = styleInfo;
   }
 
   // @param elmts     : the elements to apply inline styles to
@@ -88,15 +89,17 @@ define(
   // run the callback function, and then restore the intended styles. By doing this in a synchronous block we can guarantee that no other scripts will have an opportunity
   // to assign a new value
   function overrideStyle(elmts, styleInfo) {
-    var assignmentFn = getAssignmentFunction(styleInfo),
-        elements     = arrayUtil.wrap(elmts);
+    var assignmentFn  = getAssignmentFunction(styleInfo),
+        elements      = arrayUtil.wrap(elmts);
 
     elements.forEach(function (element) {
       var currentStyles = getCurrentStyles(element);
 
-      lastStyleMap.set(element, objectUtil.assign({}, currentStyles));
-
-      if (!isStyleProxied(element)) {
+      if (isStyleProxied(element)) {
+        updateLastStyles(element, styleInfo, currentStyles);
+      }
+      else {
+        lastStyleMap.set(element, objectUtil.assign({}, currentStyles));
         intendedStyleMap.set(element, objectUtil.assign({}, currentStyles));
         insertStyleProxy(element);
       }
@@ -106,7 +109,11 @@ define(
   }
 
   function toKebabCase(str) {
-    return str.replace(/([A-Z])/g, function (g) { return '-' + g[0].toLowerCase(); });
+    var memoizedValue = kebabCaseCache[str];
+    if (typeof memoizedValue !== 'string') {
+      memoizedValue = kebabCaseCache[str] = str.replace(/([A-Z])/g, function (g) { return '-' + g[0].toLowerCase(); });
+    }
+    return memoizedValue;
   }
 
   function getIntendedStyles(element) {
@@ -119,6 +126,7 @@ define(
   }
 
   function getLastStyles(element) {
+    updateIntendedStyles();
     return lastStyleMap.get(element);
   }
 
@@ -170,6 +178,36 @@ define(
     }
   }
 
+  // when we override a proxied element, we need to update the last style cache
+  // for element, saving the current field values before the overriding values are assigned
+  // Fields that are untouched by this new override retain their existing last value
+  function updateLastStyles(element, styleInfo, currentStyles) {
+    var lastStyles = getLastStyles(element),
+        styleType  = getStyleType(styleInfo),
+        styleObj   = getStyle(element);
+
+    function updateProperty(prop) {
+      var property = toKebabCase(prop);
+      saveStyleValue(styleObj, property, lastStyles);
+    }
+
+    switch (styleType) {
+      case 'array':
+        updateProperty(styleInfo[0]);
+        break;
+
+      case 'object':
+        Object.keys(styleInfo).forEach(updateProperty);
+        break;
+
+      case 'string':
+        lastStyles = currentStyles;
+        break;
+    }
+
+    lastStyleMap.set(element, lastStyles);
+  }
+
   function updateIntendedStyles() {
     assignmentRecords.forEach(function (record) {
       var cssObject,
@@ -189,10 +227,11 @@ define(
       }
 
       Object.keys(cssObject).forEach(function (property) {
-        intendedStyles[property] = cssObject[property];
+        var declaration = cssObject[property];
+        intendedStyles[property] = objectUtil.assign({}, declaration);
         // We don't want a reversion to the `last styles`, the inline values of an element cached before its latest override, to clobber
         // dynamic updates to its intended styles.
-        lastStyles[property]     = cssObject[property];
+        lastStyles[property]     = objectUtil.assign({}, declaration);
       });
 
       intendedStyleMap.set(element, intendedStyles);
@@ -233,6 +272,16 @@ define(
     else {
       style.removeProperty(property);
     }
+  }
+
+  // @param property must be kebab case in order to look up the cached styles
+  function saveStyleValue(style, property, cachedStyles) {
+    var value    = style.getPropertyValue(property) || '',
+        priority = style.getPropertyPriority(property) || '';
+    cachedStyles[property] = {
+      value    : value,
+      priority : priority
+    };
   }
 
   /*
@@ -364,13 +413,15 @@ define(
   function stringifyCss(cssObject) {
     styleParser.cssText = '';
 
-    Object.keys(cssObject).forEach(function (property) {
+    Object.keys(cssObject).forEach(function (prop) {
       var value, priority,
-        propertyData = cssObject[property];
+        //setProperty only takes kebab-case
+        property     = toKebabCase(prop),
+        propertyData = cssObject[prop];
 
-      if (typeof propertyData === 'object') {
-        value    = cssObject[property].value;
-        priority = cssObject[property].priority;
+      if (propertyData && typeof propertyData === 'object') {
+        value    = cssObject[prop].value;
+        priority = cssObject[prop].priority;
       }
       else {
         value    = propertyData;
@@ -391,10 +442,7 @@ define(
 
     for (var i = 0; i < styleParser.length; i++) {
       var property = styleParser[i];
-      cssObj[property] = {
-        value    : styleParser.getPropertyValue(property) || '',
-        priority : styleParser.getPropertyPriority(property) || ''
-      };
+      saveStyleValue(styleParser, property, cssObj);
     }
 
     return cssObj;
@@ -414,6 +462,7 @@ define(
       'object' : objectAssignment,
       'string' : stringAssignment
     };
+    kebabCaseCache = {};
   }
 
   getStyle.override       = overrideStyle;

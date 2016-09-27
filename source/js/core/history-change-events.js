@@ -4,7 +4,7 @@
 
 define(
   [
-    'core/native-functions'
+    'nativeFn'
   ],
   function (
     nativeFn

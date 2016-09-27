@@ -17,7 +17,7 @@ define(
     'core/events',
     'core/dom-events',
     'core/modifier-key-state',
-    'core/native-functions',
+    'nativeFn',
     'core/ab-test/ab-test',
     'core/shake/shake',
     'core/inline-style/inline-style'

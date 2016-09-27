@@ -7,7 +7,7 @@ define(
     '$',
     'core/events',
     'audio/constant',
-    'core/native-functions'
+    'nativeFn'
   ],
   function (
     $,

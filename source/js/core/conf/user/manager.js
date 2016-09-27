@@ -7,7 +7,7 @@ define(
   [
     'core/conf/user/storage',
     'core/conf/user/storage-backup',
-    'core/native-functions'
+    'nativeFn'
   ],
   function (
     storage,

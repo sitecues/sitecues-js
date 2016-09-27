@@ -43,7 +43,11 @@ define(
                     { name : FUNC_PKG,      location: testDir + 'functional' },
                     { name : 'page-object', location: testDir + 'page-object', main : 'index' },
                     { name : 'utility',     location: testDir + 'util',        main : 'index' }
-                ]
+                ],
+                paths : {
+                    'iframeFactory' : 'core/prereq/iframe-factory',
+                    'nativeFn'      : 'core/prereq/native-functions'
+                }
             },
 
             // The provider for a WebDriver server.
