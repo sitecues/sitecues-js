@@ -37,4 +37,3 @@ define('core/conf/user/storage-backup', [], function() {
     clear: clear
   };
 });
-

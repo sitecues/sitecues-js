@@ -2,7 +2,6 @@
 // Currently only needed for IE11
 // Used for SitecuesPromiseError events, which help log errors that occur inside Sitecues promises
 // Must be inserted before alameda by the build process
-
 (function () {
 
   if ( typeof window.CustomEvent === "function" ) {
@@ -20,5 +19,3 @@
 
   window.CustomEvent = CustomEvent;
 })();
-
-

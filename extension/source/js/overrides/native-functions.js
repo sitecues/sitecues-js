@@ -5,7 +5,7 @@
 define('core/native-functions', [], function() {
   return {
     Map: Map,
-    setTimeout: setTimeout,
+    setTimeout: setTimeout.bind(window),
     JSON: JSON,
     bindFn: window.Function.prototype.bind
   };
