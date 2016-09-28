@@ -214,7 +214,7 @@ define(
 
   function getComputedScale(elem) {
     var style = getComputedStyle(elem),
-      transform = style[platform.transformProperty];
+      transform = style.transform;
     return parseFloat(transform.substring(7)) || 1;
   }
 

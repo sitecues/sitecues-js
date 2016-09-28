@@ -685,10 +685,10 @@ define(
 
     // Position the HLB without it being scaled (so we can animate the scale).
     var startAnimationZoom = getPageZoom() / inheritedZoom,
-      hlbStyles = {};
-
-    hlbStyles[platform.transformProperty] = 'scale(' + startAnimationZoom + ') ' + translateCSS;
-    hlbStyles[platform.transformOriginProperty] = originCSS;
+      hlbStyles = {
+        transform: 'scale(' + startAnimationZoom + ') ' + translateCSS,
+        transformOrigin: originCSS
+      };
 
     inlineStyle.set(hlb, hlbStyles);
   }

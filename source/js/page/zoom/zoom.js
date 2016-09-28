@@ -169,7 +169,7 @@ define(
     if (!$origBody) {
       return;
     }
-    inlineStyle.restore(body, ['width', platform.transformProperty]);
+    inlineStyle.restore(body, ['width', 'transform']);
     bodyGeo.refreshOriginalBodyInfo();
     inlineStyle.override(body, style.getZoomCss(state.completedZoom));
     if (config.shouldRestrictWidth) {

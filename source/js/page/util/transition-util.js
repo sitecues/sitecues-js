@@ -47,7 +47,7 @@ define(
   function applyInstantTransform(elmnts, transform) {
     var elements = arrayUtil.wrap(elmnts);
     elements.forEach(disableTransformTransition);
-    inlineStyle.override(elements, [platform.transformProperty, transform]);
+    inlineStyle.override(elements, ['transform', transform]);
     nativeFn.setTimeout(function () {
       elements.forEach(restoreTransition);
     }, 0);

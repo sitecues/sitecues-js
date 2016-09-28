@@ -236,7 +236,7 @@ define(
       // Strange bug, don't really understand it, but visible elements nested in hidden elements don't show up as
       // expected when the original body has overflowY set to scroll (reproduces on Desire To Learn)
       bodyStyle.visibility               = getComputedStyle(originalBody).overflowY === 'scroll' ? '' : 'hidden';
-      bodyStyle[platform.transformProperty] = 'none';
+      bodyStyle.transform                = 'none';
       bodyStyle.pointerEvents            = '';
       bodyStyle.position                 = 'absolute';
       bodyStyle.top                      = 0;

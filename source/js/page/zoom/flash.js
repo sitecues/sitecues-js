@@ -74,8 +74,8 @@ define(
         ancestor = ancestor.parentElement;
       }
       var styles = {};
-      styles[platform.transformProperty]       = 'scale(' + zoomReciprocal + ')';
-      styles[platform.transformOriginProperty] = '0 0';
+      styles.transform       = 'scale(' + zoomReciprocal + ')';
+      styles.transformOrigin = '0 0';
       inlineStyle.override(ancestor, styles);
 
       var

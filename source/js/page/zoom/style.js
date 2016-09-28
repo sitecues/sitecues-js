@@ -182,7 +182,7 @@ define(
   function fixZoomBodyCss() {
     // Allow the content to be horizontally centered, unless it would go
     // offscreen to the left, in which case start zooming the content from the left-side of the window
-    inlineStyle.override(body, [platform.transformOriginProperty, config.shouldRestrictWidth ? '0 0' : '50% 0']);
+    inlineStyle.override(body, [ 'transformOrigin', config.shouldRestrictWidth ? '0 0' : '50% 0']);
     if (shouldOptimizeLegibility) {
       inlineStyle.override(body, {
         textRendering : 'optimizeLegibility'
@@ -248,7 +248,7 @@ define(
 
   function init() {
     body                      = document.body;
-    TRANSFORM_PROP_CSS        = platform.transformPropertyCss;
+    TRANSFORM_PROP_CSS        = 'transform';
     shouldRepaintOnZoomChange = platform.browser.isChrome;
     shouldOptimizeLegibility  = platform.browser.isChrome && platform.os.isWin;
     comboBoxes.init();
