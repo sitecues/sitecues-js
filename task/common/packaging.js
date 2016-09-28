@@ -1,7 +1,7 @@
 'use strict';
 
 var config = require('../build-config'),
-  delivr = require('delivr'),
+  //delivr = require('delivr'),
   gulp = require('gulp'),
   fs = require('fs'),
   exec = require('child_process').exec,
@@ -13,14 +13,14 @@ function createPackage(callback) {
   exec(gzipCommand, callback);
 }
 
-function useDelivr() {
-  return delivr.prepare({ bucket: 'sitecues-js' })
-    .then(function(build) {
-      gulp.src(config.buildDir + '/**/*')
-        .pipe(gulp.dest(build.path))
-        .on('end', build.finalize);
-    });
-}
+// function useDelivr() {
+//   return delivr.prepare({ bucket: 'sitecues-js' })
+//     .then(function(build) {
+//       gulp.src(config.buildDir + '/**/*')
+//         .pipe(gulp.dest(build.path))
+//         .on('end', build.finalize);
+//     });
+// }
 
 // Create a copy of sitecues.js in the buildDir with a name in the format sitecues-[VERSION_NAME].js
 function createVersionedSitecuesJsCopy(callback) {
@@ -50,6 +50,6 @@ function metaDataTxtFiles(callback) {
 
 module.exports = {
   prepare: metaDataTxtFiles,
-  finalize: gulp.parallel(useDelivr, createPackage)
+  finalize: gulp.parallel(/* useDelivr, */ createPackage)
 };
 
