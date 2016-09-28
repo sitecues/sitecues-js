@@ -135,7 +135,7 @@ define(
       return false;
     }
 
-    // Transplant iFrames causes the content to reload, which is problematic for scripts
+    // Transplant iframes causes the content to reload, which is problematic for nested scripts
     if (element.localName === 'iframe') {
       return false;
     }
@@ -147,7 +147,7 @@ define(
       isTransplantRoot  = flags.isTransplantRoot,
       isNestedElement   = !isTransplantRoot && isInAuxBody;
 
-    // Basic transplant case, if an element is fixed or absolute with elevated z-index, transplant the element
+    // Basic transplant case, if an element is fixed then transplant the element
     if (isInOriginalBody && isFixed) {
       return true;
     }
@@ -160,7 +160,7 @@ define(
     }
 
     // Nested elements that need to be transplanted if their anchor root is re-planted should have their
-    // cached transplant information updated and be protected from transplant rejection (see graft module)
+    // cached transplant information updated
     if (isNestedElement && isFixed) {
       return true;
     }

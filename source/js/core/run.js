@@ -18,7 +18,7 @@ define(
     'core/dom-events',
     'Promise',
     'core/modifier-key-state',
-    'core/native-functions',
+    'nativeFn',
     'core/ab-test/ab-test',
     'core/metric/bounce',
     'core/shake/shake',
@@ -149,6 +149,13 @@ define(
       sitecues.onReady.call(sitecues);
     }
     Object.defineProperty(sitecues, 'readyState', { writable: false }); // Do not allow reassignment, e.g. sitecues.readyState = 0;
+
+    createPageCssHook();
+  }
+
+  // Page can make any special badge callouts visible when data-sitecues-active="desktop"
+  function createPageCssHook() {
+    document.documentElement.setAttribute('data-sitecues-active', 'desktop');
   }
 
   // Initialize page feature listeners

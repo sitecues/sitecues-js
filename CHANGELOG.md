@@ -12,6 +12,10 @@ All notable changes to this project will be documented here.
 ### Fixed
  -
 
+## [4.2.14] - 2016-09-28
+### Fixed
+ - data-sc-pick="disable" works correctly. The picker won't pick any ancestor of something marked as such
+
 ## [4.2.12] - 2016-09-22
 ### Fixed
  - Lens is more stable and performant
