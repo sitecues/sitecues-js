@@ -3,13 +3,11 @@ define(
   [
     'core/inline-style/inline-style',
     'core/util/array-utility',
-    'core/platform',
     'nativeFn'
   ],
   function (
     inlineStyle,
     arrayUtil,
-    platform,
     nativeFn
   ) {
   'use strict';

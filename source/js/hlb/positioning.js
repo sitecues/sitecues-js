@@ -12,7 +12,6 @@ define(
     'page/util/common',
     'page/util/element-classifier',
     'hlb/safe-area',
-    'core/platform',
     'core/inline-style/inline-style'
   ],
   function (
@@ -22,7 +21,6 @@ define(
     common,
     elemClassifier,
     hlbSafeArea,
-    platform,
     inlineStyle
   ) {
   'use strict';

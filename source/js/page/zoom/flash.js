@@ -4,16 +4,14 @@ define(
     'page/zoom/state',
     'core/conf/urls',
     'core/util/array-utility',
-    'core/inline-style/inline-style',
-    'core/platform'
+    'core/inline-style/inline-style'
   ],
   function (
     events,
     state,
     urls,
     arrayUtil,
-    inlineStyle,
-    platform
+    inlineStyle
   ) {
 
   'use strict';

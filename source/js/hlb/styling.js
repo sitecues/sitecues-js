@@ -6,7 +6,6 @@
 define(
   [
     '$',
-    'core/platform',
     'page/util/common',
     'core/conf/user/manager',
     'hlb/constants',
@@ -15,7 +14,6 @@ define(
   ],
   function (
     $,
-    platform,
     common,
     conf,
     constants,

@@ -15,8 +15,7 @@ define(
     'page/positioner/style-lock/style-lock',
     'page/positioner/constants',
     'page/viewport/viewport',
-    'core/inline-style/inline-style',
-    'core/platform'
+    'core/inline-style/inline-style'
   ],
   function (
     $,
@@ -25,8 +24,7 @@ define(
     styleLock,
     constants,
     viewport,
-    inlineStyle,
-    platform
+    inlineStyle
   ) {
 
   'use strict';

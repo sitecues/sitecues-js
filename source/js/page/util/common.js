@@ -4,12 +4,10 @@
 define(
   [
     'page/util/element-classifier',
-    'core/platform',
     'core/inline-style/inline-style'
   ],
   function (
     elemClassifier,
-    platform,
     inlineStyle
   ) {
   'use strict';
