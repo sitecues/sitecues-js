@@ -29,6 +29,8 @@
   },
   "devDependencies": {
     "amdclean": "^2.7.0",
+    "babel-core": "^6.14.0",
+    "babel-preset-es2015": "^6.16.0",
     "chai": "^3.5.0",
     "clean-css": "^3.4.9",
     "closure-compiler": "^0.2.12",
