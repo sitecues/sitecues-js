@@ -18,8 +18,7 @@ define(
     'page/viewport/scrollbars',
     'nativeFn',
     'page/zoom/flash',
-    'core/inline-style/inline-style',
-    'core/platform'
+    'core/inline-style/inline-style'
   ],
   /*jshint -W072 */ //Currently there are too many dependencies, so we need to tell JSHint to ignore it for now
   function (
@@ -37,8 +36,7 @@ define(
     scrollbars,
     nativeFn,
     flash,
-    inlineStyle,
-    platform
+    inlineStyle
   ) {
   /*jshint +W072 */
   'use strict';
@@ -169,7 +167,7 @@ define(
     if (!$origBody) {
       return;
     }
-    inlineStyle.restore(body, ['width', platform.transformProperty]);
+    inlineStyle.restore(body, ['width', 'transform']);
     bodyGeo.refreshOriginalBodyInfo();
     inlineStyle.override(body, style.getZoomCss(state.completedZoom));
     if (config.shouldRestrictWidth) {

@@ -463,7 +463,7 @@ define(
     if (state.completedZoom === 1) {
       // Fixed elements are broken when we apply a transformation, and it takes work for us to correct that, so we remove the transformation
       // from the body when possible
-      inlineStyle.restore(body, platform.transformProperty);
+      inlineStyle.restore(body, 'transform');
     }
 
     // Un-Blur text in Chrome

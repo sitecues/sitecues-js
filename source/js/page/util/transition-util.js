@@ -3,13 +3,11 @@ define(
   [
     'core/inline-style/inline-style',
     'core/util/array-utility',
-    'core/platform',
     'nativeFn'
   ],
   function (
     inlineStyle,
     arrayUtil,
-    platform,
     nativeFn
   ) {
   'use strict';
@@ -47,7 +45,7 @@ define(
   function applyInstantTransform(elmnts, transform) {
     var elements = arrayUtil.wrap(elmnts);
     elements.forEach(disableTransformTransition);
-    inlineStyle.override(elements, [platform.transformProperty, transform]);
+    inlineStyle.override(elements, ['transform', transform]);
     nativeFn.setTimeout(function () {
       elements.forEach(restoreTransition);
     }, 0);

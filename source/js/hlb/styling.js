@@ -6,7 +6,6 @@
 define(
   [
     '$',
-    'core/platform',
     'page/util/common',
     'core/conf/user/manager',
     'hlb/constants',
@@ -15,7 +14,6 @@ define(
   ],
   function (
     $,
-    platform,
     common,
     conf,
     constants,
@@ -35,7 +33,7 @@ define(
   // Transition property used for hlb animation (-webkit, -moz)
   // This is used to transition the transform property for HLB
   // inflation/deflation animation
-  var transitionProperty = platform.cssPrefix + 'transform ';
+  var transitionProperty = 'transform ';
 
   ///////////////////////////
   // PRIVATE VARIABLES
@@ -705,7 +703,7 @@ define(
           borderColor: highlight.hasDarkBackgroundColor ? highlight.highlightBorderColor : '#000'
         },
         animationOptimizationStyles = {
-          willChange: platform.transformPropertyCss,
+          willChange: 'transform',
           backfaceVisibility: 'hidden'
         };
 

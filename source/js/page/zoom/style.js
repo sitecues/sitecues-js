@@ -31,7 +31,6 @@ define(
   var
     body,
     $zoomStyleSheet,            // <style> element we insert to correct form issues in WebKit
-    TRANSFORM_PROP_CSS,
     // Optimize fonts for legibility? Helps a little bit with Chrome on Windows
     shouldOptimizeLegibility,
     // Should we repaint when zoom is finished (after any animations)?
@@ -155,7 +154,7 @@ define(
 
     for (; step <= numSteps; ++step) {
       var keyFrame = keyFrames[step],
-        zoomCssString = TRANSFORM_PROP_CSS + ': ' + keyFrame[TRANSFORM_PROP_CSS] + (keyFrame.width ? '; width: ' + keyFrame.width : '');
+        zoomCssString = 'transform: ' + keyFrame.transform + (keyFrame.width ? '; width: ' + keyFrame.width : '');
 
       keyFramesCss += Math.round(10000 * keyFrame.timePercent) / 100 + '% { ' + zoomCssString + ' }\n';
     }
@@ -167,10 +166,10 @@ define(
   // Get a CSS object for the targetZoom level
   //This needs to return the formatted translate x / width only when we're zooming the primary body
   function getZoomCss(targetZoom) {
-    var transform = 'scale(' + targetZoom.toFixed(ZOOM_PRECISION) + ') ' + bodyGeo.getFormattedTranslateX(targetZoom),
-      css = {};
+    var css = {
+      transform: 'scale(' + targetZoom.toFixed(ZOOM_PRECISION) + ') ' + bodyGeo.getFormattedTranslateX(targetZoom)
+    };
 
-    css[TRANSFORM_PROP_CSS] = transform;
     if (config.shouldRestrictWidth) {
       css.width = bodyGeo.getRestrictedBodyWidth(targetZoom);
     }
@@ -182,7 +181,7 @@ define(
   function fixZoomBodyCss() {
     // Allow the content to be horizontally centered, unless it would go
     // offscreen to the left, in which case start zooming the content from the left-side of the window
-    inlineStyle.override(body, [platform.transformOriginProperty, config.shouldRestrictWidth ? '0 0' : '50% 0']);
+    inlineStyle.override(body, [ 'transformOrigin', config.shouldRestrictWidth ? '0 0' : '50% 0']);
     if (shouldOptimizeLegibility) {
       inlineStyle.override(body, {
         textRendering : 'optimizeLegibility'
@@ -248,7 +247,6 @@ define(
 
   function init() {
     body                      = document.body;
-    TRANSFORM_PROP_CSS        = platform.transformPropertyCss;
     shouldRepaintOnZoomChange = platform.browser.isChrome;
     shouldOptimizeLegibility  = platform.browser.isChrome && platform.os.isWin;
     comboBoxes.init();

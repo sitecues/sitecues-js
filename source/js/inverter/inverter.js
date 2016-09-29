@@ -188,6 +188,8 @@ define(
       });
   }
 
+  // No longer needed once we kill off Chrome <= 52 and Safari <= 9.2
+  // At that point it will only be 'filter'
   function getFilterProperty() {
     var
       div = document.createElement('div'),

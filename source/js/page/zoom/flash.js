@@ -4,16 +4,14 @@ define(
     'page/zoom/state',
     'core/conf/urls',
     'core/util/array-utility',
-    'core/inline-style/inline-style',
-    'core/platform'
+    'core/inline-style/inline-style'
   ],
   function (
     events,
     state,
     urls,
     arrayUtil,
-    inlineStyle,
-    platform
+    inlineStyle
   ) {
 
   'use strict';
@@ -74,8 +72,8 @@ define(
         ancestor = ancestor.parentElement;
       }
       var styles = {};
-      styles[platform.transformProperty]       = 'scale(' + zoomReciprocal + ')';
-      styles[platform.transformOriginProperty] = '0 0';
+      styles.transform       = 'scale(' + zoomReciprocal + ')';
+      styles.transformOrigin = '0 0';
       inlineStyle.override(ancestor, styles);
 
       var

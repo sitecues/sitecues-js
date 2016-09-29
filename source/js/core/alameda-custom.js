@@ -6,7 +6,7 @@
 /*jslint sloppy: true, nomen: true, regexp: true */
 /*global document, navigator, importScripts, Promise, setTimeout */
 
-// Supports IE 11, Edge, Safari 8+, modern Chrome, modern Firefox
+// Supports IE 11, Edge, Safari 9+, modern Chrome, modern Firefox
 // Only uses prim for IE11
 // No support for certain config options: packages, bundles, shim, deps
 
