@@ -58,14 +58,14 @@ define(
 
   // Get <img> that can have its pixel data read --
   // 1. Must be completely loaded
-  // 2. We have permission (either we're in the extension, the img is not cross-domain, or we can load it through the proxy)
+  // 2. We have permission (either we're in the extension, the img is not cross-origin, or we can load it through the proxy)
   // Either pass img or src, but not both
   function getReadableImage(img, src, onReadableImageAvailable, onReadableImageError) {
     // Unsafe cross-origin request
-    // - Will run into cross-domain restrictions because URL is from different domain
-    // This is not an issue with the extension, because the content script doesn't have cross-domain restrictions
+    // - Will run into cross-origin restrictions because URL is from different origin
+    // This is not an issue with the extension, because the content script doesn't have cross-origin restrictions
     var url = src || img.getAttribute('src'),
-      isSafeRequest = urls.isSameDomain(url),
+      isSafeRequest = urls.isSameOrigin(url),
       safeUrl;
 
     function returnImageWhenComplete(loadableImg, isInverted) {
