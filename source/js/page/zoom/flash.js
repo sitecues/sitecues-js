@@ -149,7 +149,7 @@ define(
       observeDocument(document);
 
       nestedFrames.forEach(function (frame) {
-        if (!frame.src || urls.isSameDomain(frame.src)) {
+        if (!frame.src || urls.isSameOrigin(frame.src)) {
           documentsToSearch.push(frame.contentDocument);
         }
       });

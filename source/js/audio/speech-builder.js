@@ -257,7 +257,7 @@ define(
 
     doWalkChildren = appendTextEquivAndValue(node, $node, doWalkChildren);
 
-    if (node.localName === 'iframe' && node.src && urls.isCrossDomain(node.src)) {
+    if (node.localName === 'iframe' && node.src && urls.isCrossOrigin(node.src)) {
       // Don't try to access the nested document of cross origin iframes
       return;
     }

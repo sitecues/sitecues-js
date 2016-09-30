@@ -903,7 +903,7 @@ var requirejs, require, define;
 
         script = document.createElement('script');
         // ----- BEGIN SITECUES CUSTOM BLOCK -----
-        // We need this so that we have permission to log unhandled rejections/exceptions from our cross-domain scripts
+        // We need this so that we have permission to log unhandled rejections/exceptions from our cross-origin scripts
         script.setAttribute('crossorigin', 'anonymous');
         // ----- END SITECUES CUSTOM BLOCK -----
         script.setAttribute('data-requiremodule', id);
