@@ -28,7 +28,7 @@ define(
     'page/viewport/scrollbars',
     'page/zoom/config/config',
     'core/events',
-    'nativeFn',
+    'mini-core/native-functions',
     'core/inline-style/inline-style',
     'page/util/transition-util'
   ],

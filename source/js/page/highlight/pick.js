@@ -34,7 +34,7 @@ define(
     'page/highlight/traitcache',
     'page/highlight/traits',
     'page/highlight/judge',
-    'nativeFn',
+    'mini-core/native-functions',
     'core/inline-style/inline-style',
     'core/platform'
   ],

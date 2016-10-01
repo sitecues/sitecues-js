@@ -18,7 +18,7 @@
 * */
 define(
   [
-    'nativeFn',
+    'mini-core/native-functions',
     'core/util/array-utility',
     'core/util/object-utility'
   ],

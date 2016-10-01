@@ -4,7 +4,7 @@ define(
     'core/inline-style/inline-style',
     'core/util/array-utility',
     'core/platform',
-    'nativeFn'
+    'mini-core/native-functions'
   ],
   function (
     inlineStyle,

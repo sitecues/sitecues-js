@@ -3,7 +3,7 @@
 
 define(
   [
-    'nativeFn'
+    'mini-core/native-functions'
   ],
   function (
     nativeFn

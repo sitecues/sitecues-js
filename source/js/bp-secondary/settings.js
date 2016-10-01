@@ -9,7 +9,7 @@ define(
     'page/cursor/cursor',
     'core/events',
     'core/dom-events',
-    'nativeFn',
+    'mini-core/native-functions',
     'core/inline-style/inline-style'
   ],
   function (

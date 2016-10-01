@@ -8,7 +8,7 @@ define(
     'core/bp/helper',
     'core/platform',
     'core/events',
-    'nativeFn',
+    'mini-core/native-functions',
     'core/inline-style/inline-style'
   ],
   function (

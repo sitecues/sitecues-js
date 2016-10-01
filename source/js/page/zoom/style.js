@@ -9,7 +9,7 @@ define(
     'page/zoom/constants',
     'page/zoom/util/body-geometry',
     'page/zoom/config/config',
-    'nativeFn',
+    'mini-core/native-functions',
     'core/inline-style/inline-style',
     'page/zoom/combo-boxes',
     'page/util/transition-util'

@@ -10,7 +10,7 @@ define(
   [
     'core/platform',
     'page/viewport/viewport',
-    'nativeFn',
+    'mini-core/native-functions',
     'page/zoom/util/body-geometry',
     'core/inline-style/inline-style'
   ],

@@ -4,7 +4,7 @@ define(
     'core/util/xhr',
     'core/conf/user/manager',
     'core/conf/site',
-    'nativeFn'
+    'mini-core/native-functions'
   ],
   function (
     urls,

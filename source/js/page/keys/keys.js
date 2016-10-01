@@ -6,7 +6,7 @@ define(
     'core/events',
     'page/highlight/constants',
     'core/constants',
-    'nativeFn'
+    'mini-core/native-functions'
   ],
   function (
     elemClassifier,

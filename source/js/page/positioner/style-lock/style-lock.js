@@ -16,7 +16,7 @@ define(
     'page/positioner/constants',
     'core/constants',
     'page/positioner/util/element-info',
-    'nativeFn'
+    'mini-core/native-functions'
   ],
   function (
     styleListener,

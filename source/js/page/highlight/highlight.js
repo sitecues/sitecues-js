@@ -19,7 +19,7 @@ define(
     'core/dom-events',
     'page/zoom/zoom',
     'page/zoom/util/body-geometry',
-    'nativeFn',
+    'mini-core/native-functions',
     'core/inline-style/inline-style'
   ],
   function (

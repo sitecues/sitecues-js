@@ -38,15 +38,18 @@ define(
             loaderOptions : {
                 baseUrl : 'source/js',
                 packages : [
+                    { name : 'mini-core',   location: testDir + 'mini-core'},
                     { name : 'test',        location: testDir },
                     { name : UNIT_PKG,      location: testDir + 'unit' },
                     { name : FUNC_PKG,      location: testDir + 'functional' },
                     { name : 'page-object', location: testDir + 'page-object', main : 'index' },
                     { name : 'utility',     location: testDir + 'util',        main : 'index' }
                 ],
-                paths : {
-                    'iframeFactory' : 'core/prereq/iframe-factory',
-                    'nativeFn'      : 'core/prereq/native-functions'
+                map : {
+                    '*' : {
+                        './native-functions' : 'mini-core/native-functions',
+                        './iframe-factory'   : 'mini-core/iframe-factory'
+                    }
                 }
             },
 

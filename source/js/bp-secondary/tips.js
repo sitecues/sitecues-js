@@ -6,7 +6,7 @@ define(
     'core/bp/constants',
     'core/bp/helper',
     'core/events',
-    'nativeFn',
+    'mini-core/native-functions',
     'core/inline-style/inline-style'
   ],
   function (

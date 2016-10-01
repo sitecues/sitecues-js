@@ -10,7 +10,7 @@ define(
     'core/platform',
     '$',
     'hlb/constants',
-    'nativeFn',
+    'mini-core/native-functions',
     'core/inline-style/inline-style'
   ],
   function (

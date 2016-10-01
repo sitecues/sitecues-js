@@ -3,6 +3,5 @@
  * IMPORTANT: they must be marked as 'empty:' in task/common/amd-config
  * sitecues._getHelperFrame must also be defined by the minicore
  */
-sitecues.define('nativeFn', [], function () { return sitecues._shared.nativeFn; });
-sitecues.define('core/conf/user/storage', [], function () { return sitecues._shared.storage; });
-sitecues.define('core/conf/user/storage-backup', [], function () { return sitecues._shared.storageBackup; });
+sitecues.define('mini-core/native-functions', [], function () { return sitecues._shared.nativeFn; });
+sitecues.define('mini-core/storage', [], function () { return sitecues._shared.storage; });

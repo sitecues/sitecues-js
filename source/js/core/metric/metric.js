@@ -14,7 +14,7 @@ define(
     'core/platform',
     'core/has',
     'core/ab-test/ab-test',
-    'nativeFn'
+    'mini-core/native-functions'
   ],
   function (
     conf,

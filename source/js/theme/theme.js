@@ -13,7 +13,7 @@ define(
     'page/util/color',
     'theme/custom-site-theme',
     'core/events',
-    'nativeFn',
+    'mini-core/native-functions',
     'core/inline-style/inline-style'
   ],
   function(

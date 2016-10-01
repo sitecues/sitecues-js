@@ -6,7 +6,7 @@ define(
     'core/metric/metric',
     'core/bp/view/view',
     'core/events',
-    'nativeFn',
+    'mini-core/native-functions',
     'core/inline-style/inline-style'
   ],
   function (

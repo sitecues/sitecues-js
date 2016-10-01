@@ -11,7 +11,7 @@ define([
   'core/dom-events',
   'core/shake/constants',
   'core/platform',
-  'nativeFn'
+  'mini-core/native-functions'
 ], function(metric,
             // events,
             domEvents,

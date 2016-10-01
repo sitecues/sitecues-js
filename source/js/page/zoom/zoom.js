@@ -16,7 +16,7 @@ define(
     'page/zoom/util/restrict-zoom',
     'page/zoom/style',
     'page/viewport/scrollbars',
-    'nativeFn',
+    'mini-core/native-functions',
     'page/zoom/flash',
     'core/inline-style/inline-style',
     'core/platform'

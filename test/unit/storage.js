@@ -2,8 +2,8 @@ define(
     [
         'intern!tdd',
         'intern/chai!assert',
-        'nativeFn',
-        'core/conf/user/storage'
+        'mini-core/native-functions'
+        //'core/conf/user/storage'
     ],
     function (
         tdd,

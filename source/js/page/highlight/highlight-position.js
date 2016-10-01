@@ -9,7 +9,7 @@ define(
     'page/util/element-classifier',
     'page/zoom/zoom',
     'page/highlight/traitcache',
-    'nativeFn',
+    'mini-core/native-functions',
     'core/inline-style/inline-style'
   ],
   function (

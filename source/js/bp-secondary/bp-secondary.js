@@ -14,7 +14,7 @@ define(
     'bp-secondary/insert-secondary-markup',
     'bp-secondary/bp-secondary-features',
     'core/events',
-    'nativeFn',
+    'mini-core/native-functions',
     'core/inline-style/inline-style'
   ],
   function (

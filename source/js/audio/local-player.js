@@ -3,7 +3,7 @@
 define(
   [
     'Promise',
-    'nativeFn'
+    'mini-core/native-functions'
   ],
   function (
     Promise,

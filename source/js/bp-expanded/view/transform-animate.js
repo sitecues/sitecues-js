@@ -8,7 +8,7 @@ define(
     'core/inline-style/inline-style',
     'bp-expanded/view/transform-util',
     'core/platform',
-    'nativeFn'
+    'mini-core/native-functions'
   ],
   function (
     inlineStyle,

@@ -16,7 +16,7 @@ define(
     'core/conf/urls',
     'inverter/invert-url',
     'inverter/orig-bg-info',
-    'nativeFn'
+    'mini-core/native-functions'
   ],
   function (
     $,
