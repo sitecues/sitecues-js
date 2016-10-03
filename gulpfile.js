@@ -94,9 +94,6 @@ gulp.task(function watch() {
   gulp.watch(config.earconsGlob, resources.earcons);
   gulp.watch(config.svgGlob, resources.svg);
   gulp.watch(config.rasterGlob, resources.raster);
-  if (config.metaDataGlob) {
-    gulp.watch(config.metaDataGlob, packaging.createMetaData);
-  }
 
   if (config.postBuildCommand) {
     gulp.watch(config.buildDir + '/**/*', { name: 'postBuildCommand' }, runPostBuildCommand);
