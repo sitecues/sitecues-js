@@ -7,7 +7,7 @@ define(
   ) {
   'use strict';
 
-  var apiDomain,  // Either ws.sitecues.com/ or ws.dev.sitecues.com/
+  var apiPrefix,  // Either ws.sitecues.com/ or ws.dev.sitecues.com/
     scriptOrigin,  // Either http[s]://js.sitecues.com/ or http[s]://js.dev.sitecues.com/
     BASE_RESOURCE_URL;
 
@@ -26,7 +26,7 @@ define(
 
   // URL string for API calls
   function getApiUrl(restOfUrl) {
-    return 'https://' + apiDomain + 'sitecues/api/' + restOfUrl;
+    return 'https://' + apiPrefix + 'sitecues/api/' + restOfUrl;
   }
 
   // Get an API like http://ws.sitecues.com/sitecues/api/css/passthrough/?url=http%3A%2F%2Fportal.dm.gov.ae%2FHappiness...
@@ -185,15 +185,13 @@ define(
     return urlStr;
   }
 
-  function isCrossDomain(url) {
-    // Will cross-domain restrictions possibly burn us?
-    var hostName = parseUrl(url).origin;
-    // For our purposes, hostname is the same as the domain
-    return hostName !== window.location.origin;
+  function isSameOrigin(url) {
+    return parseUrl(url).origin === window.location.origin;
   }
 
-  function isSameDomain(url) {
-    return !isCrossDomain(url);
+  // Will cross-origin restrictions possibly burn us?
+  function isCrossOrigin(url) {
+    return !isSameOrigin(url);
   }
 
   // Returns the resource file extension, or an empty string if one isn't found
@@ -205,7 +203,7 @@ define(
   function init() {
     var domainEnding = isProduction() ? '.sitecues.com' : '.dev.sitecues.com';
     BASE_RESOURCE_URL = getBaseResourceUrl();
-    apiDomain = 'ws' + domainEnding + '/';
+    apiPrefix = 'ws' + domainEnding + '/';
   }
 
   return {
@@ -217,8 +215,8 @@ define(
     getRawScriptUrl: getRawScriptUrl,
     resolveResourceUrl: resolveResourceUrl,
     parseUrl: parseUrl,
-    isCrossDomain: isCrossDomain,
-    isSameDomain: isSameDomain,
+    isSameOrigin: isSameOrigin,
+    isCrossOrigin: isCrossOrigin,
     isProduction: isProduction,
     resolveUrl: resolveUrl,
     extname: extname

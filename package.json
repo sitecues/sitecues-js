@@ -16,7 +16,8 @@
   "scripts": {
     "test": "intern run --webdriver --config=config/intern.js",
     "test-cloud": "intern run --webdriver --config=config/intern-cloud.js",
-    "test-ci": "intern run --webdriver --config=config/intern-ci.js"
+    "test-ci": "intern run --webdriver --config=config/intern-ci.js",
+    "build": "make package"
   },
   "dependencies": {
     "bg-runner": "https://s3.amazonaws.com/npm.sitecues.com/bg-runner-0.0.2.tgz",

@@ -922,7 +922,7 @@ define(
     var isFixed = traitcache.getStyleProp(overlayContainerElem, 'position') === 'fixed';
 
     if (isFixed) {
-      var elemTransform = inlineStyle(overlayContainerElem)[platform.transformProperty],
+      var elemTransform = inlineStyle(overlayContainerElem).transform,
         scaleSplit = elemTransform.split('scale(');
       return parseFloat(scaleSplit[1]) || 1;
     }

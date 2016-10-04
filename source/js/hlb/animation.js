@@ -45,7 +45,7 @@ define(
       speed = doShowQuickly ? INFLATION_SPEED_FAST : INFLATION_SPEED,
       startingScale = getStartingScale($hlb);
 
-    inlineStyle($hlb[0])[platform.transformOriginProperty] = data.originCSS;
+    inlineStyle($hlb[0]).transformOrigin = data.originCSS;
 
     animateCss($hlb[0], startingScale, hlbPositioning.getFinalScale($hlb), speed, data.translateCSS, data.onHLBReady);
   }
@@ -81,8 +81,9 @@ define(
   function animateCss(hlbElement, startScale, endScale, speed, translateCSS, onCompleteFn) {
     var
       fromCss = {},
-      toCss   = {};
-    toCss[platform.transformProperty] = 'scale(' + endScale + ') ' + translateCSS;
+      toCss   = {
+        transform: 'scale(' + endScale + ') ' + translateCSS
+      };
 
     inlineStyle(hlbElement).transitionProperty = 'none';// Clear any existing transition
 
@@ -94,7 +95,7 @@ define(
     }
 
     // Animate fromCss -> toCss
-    fromCss[platform.transformProperty] = 'scale(' + startScale + ') ' + translateCSS;
+    fromCss.transform = 'scale(' + startScale + ') ' + translateCSS;
     inlineStyle.set(hlbElement, fromCss);
 
     function onTransitionEnd() {
@@ -105,7 +106,7 @@ define(
     // Allow the from CSS to register so that setting the toCss actually animates there
     // rather than just setting the toCss and ignoring the fromCss
     nativeFn.setTimeout(function () {
-      toCss.transition = platform.transformProperty + ' ' + speed + 'ms ease-in-out';
+      toCss.transition = 'transform ' + speed + 'ms ease-in-out';
       inlineStyle.set(hlbElement, toCss);
       hlbElement.addEventListener(platform.transitionEndEvent, onTransitionEnd);
     }, 0);

@@ -6,7 +6,7 @@
 /*jslint sloppy: true, nomen: true, regexp: true */
 /*global document, navigator, importScripts, Promise, setTimeout */
 
-// Supports IE 11, Edge, Safari 8+, modern Chrome, modern Firefox
+// Supports IE 11, Edge, Safari 9+, modern Chrome, modern Firefox
 // Only uses prim for IE11
 // No support for certain config options: packages, bundles, shim, deps
 
@@ -903,7 +903,7 @@ var requirejs, require, define;
 
         script = document.createElement('script');
         // ----- BEGIN SITECUES CUSTOM BLOCK -----
-        // We need this so that we have permission to log unhandled rejections/exceptions from our cross-domain scripts
+        // We need this so that we have permission to log unhandled rejections/exceptions from our cross-origin scripts
         script.setAttribute('crossorigin', 'anonymous');
         // ----- END SITECUES CUSTOM BLOCK -----
         script.setAttribute('data-requiremodule', id);

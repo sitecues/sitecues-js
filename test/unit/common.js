@@ -14,7 +14,6 @@ define(
 
         suite('Common', function () {
             before(function () {
-                platform.init();
                 inlineStyle.init();
             });
 

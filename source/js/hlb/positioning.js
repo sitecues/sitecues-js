@@ -12,7 +12,6 @@ define(
     'page/util/common',
     'page/util/element-classifier',
     'hlb/safe-area',
-    'core/platform',
     'core/inline-style/inline-style'
   ],
   function (
@@ -22,7 +21,6 @@ define(
     common,
     elemClassifier,
     hlbSafeArea,
-    platform,
     inlineStyle
   ) {
   'use strict';
@@ -685,10 +683,10 @@ define(
 
     // Position the HLB without it being scaled (so we can animate the scale).
     var startAnimationZoom = getPageZoom() / inheritedZoom,
-      hlbStyles = {};
-
-    hlbStyles[platform.transformProperty] = 'scale(' + startAnimationZoom + ') ' + translateCSS;
-    hlbStyles[platform.transformOriginProperty] = originCSS;
+      hlbStyles = {
+        transform: 'scale(' + startAnimationZoom + ') ' + translateCSS,
+        transformOrigin: originCSS
+      };
 
     inlineStyle.set(hlb, hlbStyles);
   }

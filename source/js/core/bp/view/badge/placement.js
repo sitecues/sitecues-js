@@ -94,8 +94,9 @@ define(
   // in-place inside the page where it is attached.
   // Also, position and size the bpContainer and set height and width of the SVG
   function switchToBadgeParent() {
-    var styles = {};
-    styles[platform.transformProperty] = '';
+    var styles = {
+      tranform: ''
+    };
     // Remove transform/translate so that badge is fully returned to origin state
     inlineStyle.set(bpElement, styles);
 
@@ -213,9 +214,9 @@ define(
     setBPProperty('height');
     var styles = {
       top  : 0,
-      left : 0
+      left : 0,
+      transform: 'translate(' + badgeRect.left / appliedZoom + 'px,' + badgeRect.top / appliedZoom + 'px)'
     };
-    styles[platform.transformProperty] = 'translate(' + badgeRect.left / appliedZoom + 'px,' + badgeRect.top / appliedZoom + 'px)';
     inlineStyle.set(bpElement, styles);
   }
 
@@ -302,7 +303,7 @@ define(
 
   function executeWhileElementIsRendered(element, fn) {
     var isReparented,
-        inlineTransform = inlineStyle(element)[platform.transformProperty],
+        inlineTransform = inlineStyle(element).transform,
         nextSibling     = element.nextSibling,
         parent          = element.parentElement,
         rect            = helper.getRect(element);
@@ -311,7 +312,7 @@ define(
     // This way we can be confident that an ancestor of the element isn't hiding it
     // This doesn't guarantee that a stylesheet isn't hiding the element, but it is sufficient for our current purposes
     if (rectHasNoArea(rect)) {
-      inlineStyle(element)[platform.transformPropery] = 'translate(-99999px,-99999px)';
+      inlineStyle(element).transform = 'translate(-99999px,-99999px)';
       documentElement.appendChild(element);
       isReparented = true;
     }
@@ -319,7 +320,7 @@ define(
     fn();
 
     if (isReparented) {
-      inlineStyle(element)[platform.transformProperty] = inlineTransform;
+      inlineStyle(element).transform = inlineTransform;
       if (nextSibling) {
         parent.insertBefore(element, nextSibling);
       }
