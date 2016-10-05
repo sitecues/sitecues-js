@@ -10,15 +10,18 @@ define(
     'core/conf/site',
     'Promise',
     'core/platform',
-    'core/native-functions'
+    'nativeFn',
+    'iframeFactory'
   ],
   function (
     urls,
     site,
     Promise,
     platform,
-    nativeFn
+    nativeFn,
+    iframeFactory
   ) {
+  'use strict';
 
   var PATH = 'html/prefs.html',
     SITECUES_PREFS_IFRAME_ID = 'sitecues-prefs',
@@ -175,7 +178,7 @@ define(
 
       // Create iframe
       // jshint -W117
-      iframe = sitecues._getHelperFrame(SITECUES_PREFS_IFRAME_ID, urls.resolveResourceUrl(PATH));
+      iframe = iframeFactory(SITECUES_PREFS_IFRAME_ID, urls.resolveResourceUrl(PATH));
       // jshint +W117
 
       addListeners();

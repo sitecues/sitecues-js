@@ -3,9 +3,10 @@ define(
         'intern!tdd',
         'intern/chai!assert',
         'page/util/common',
-        'core/platform'
+        'core/platform',
+        'core/inline-style/inline-style'
     ],
-    function (tdd, assert, common, platform) {
+    function (tdd, assert, common, platform, inlineStyle) {
         'use strict';
         var suite  = tdd.suite,
             test   = tdd.test,
@@ -13,7 +14,7 @@ define(
 
         suite('Common', function () {
             before(function () {
-                platform.init();
+                inlineStyle.init();
             });
 
             test('.isTransparentColor() cares about colors', function () {

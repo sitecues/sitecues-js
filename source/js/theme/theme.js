@@ -13,7 +13,8 @@ define(
     'page/util/color',
     'theme/custom-site-theme',
     'core/events',
-    'core/native-functions'
+    'nativeFn',
+    'core/inline-style/inline-style'
   ],
   function(
     $,
@@ -25,7 +26,8 @@ define(
     colorUtil,
     customTheme,
     events,
-    nativeFn
+    nativeFn,
+    inlineStyle
   ) {
   'use strict';
 
@@ -391,9 +393,9 @@ define(
       isRepaintNeeded = true;
     }
     else {
-      document.documentElement.style.transform = 'translateY(0.01px)';
+      inlineStyle.override(document.documentElement, ['transform', 'translateY(0.01px)']);
       nativeFn.setTimeout(function () {
-        document.documentElement.style.transform = '';
+        inlineStyle.restore(document.documentElement, 'transform');
       }, REPAINT_MS);
     }
   }

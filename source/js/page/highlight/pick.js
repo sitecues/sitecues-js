@@ -34,7 +34,9 @@ define(
     'page/highlight/traitcache',
     'page/highlight/traits',
     'page/highlight/judge',
-    'core/native-functions'
+    'nativeFn',
+    'core/inline-style/inline-style',
+    'core/platform'
   ],
   function (
     $,
@@ -44,7 +46,9 @@ define(
     traitcache,
     traits,
     judge,
-    nativeFn
+    nativeFn,
+    inlineStyle,
+    platform
   ) {
   'use strict';
 
@@ -60,7 +64,7 @@ define(
     PICK_RULE_IGNORE = 'ignore',   // don't pick this item
     // Use hack to avoid IE bugs where HLB on inputs does not allow editing
     GLOBAL_DISABLE_PICKER_SELECTOR =
-      'iframe[name="google_conversion_frame"]', // Don't pick invisible Google Adwords iframe
+      '#sitecues-badge,iframe[name="google_conversion_frame"],[data-sc-pick="' + PICK_RULE_DISABLE + '"]', // Don't pick invisible Google Adwords iframe
 
     // The following weights are used to multiple each judgement of the same name, defined in judgements.js
     // The score is a sum of these weights * judgements
@@ -136,6 +140,26 @@ define(
     isVotingOn = true,
     lastPicked;
 
+  function isValidStart(node) {
+    if (!node) {
+      return false;
+    }
+
+    switch (node.localName) {
+      case 'html':
+        return false;
+
+      case 'body':
+        return false;
+
+      case 'select':
+        // Firefox mispositions the dropdown menu of comboboxes with size 1 in the lens, so we don't allow them to be picked
+        return node.size >= 2 || !platform.browser.isFirefox;
+    }
+    
+    return !isInSitecuesUI(node);
+  }
+
   /*
    * ----------------------- PUBLIC -----------------------
    *
@@ -154,7 +178,7 @@ define(
     }
 
     // 1. Don't pick anything in the sitecues UI
-    if (!startElement || $(startElement).is('html,body') || isInSitecuesUI(startElement)) {
+    if (!isValidStart(startElement)) {
       return null;
     }
 
@@ -199,8 +223,7 @@ define(
 
   function getCandidates(startElement) {
     var allAncestors = $(startElement).parentsUntil('body'),
-      visibleAncestors = getVisibleAncestors(allAncestors),
-      validAncestors = visibleAncestors.not(visibleAncestors.has('#sitecues-badge'));
+      validAncestors = getVisibleAncestors(allAncestors);
 
     if (validAncestors.length === 0) {
       return [ startElement ]; // Always at least one valid candidate -- the startElement
@@ -264,10 +287,7 @@ define(
 
     function checkPickRuleForElement(item) {
       var pickRule = $(item).attr('data-sc-pick');
-      if (pickRule === PICK_RULE_DISABLE) {
-        picked = $(); // Don't pick anything in this chain
-      }
-      else if (pickRule === PICK_RULE_PREFER) {
+      if (pickRule === PICK_RULE_PREFER) {
         picked = $(item);
       }
       // Else keep going
@@ -285,6 +305,9 @@ define(
     // TODO: Once HLB'd form controls no longer crashes MS Edge we can remove it, at least for those versions
     // For now: make sure we don't pick those controls by adding them to the custom disabled selector
     selector = (selector ? selector + ',' : '') + GLOBAL_DISABLE_PICKER_SELECTOR;
+    if (platform.isFirefox) {
+      selector += ',select[size="1"],select:not([size])';  // Lens causes issues for placement of select popup in Firefox
+    }
     return selector;
   }
 
@@ -314,7 +337,10 @@ define(
 
   // --------- Heuristic results ---------
 
-  function performVote(scoreObjs, bestIndex, candidates, extraWork, origBestIndex) {
+  function performVote(scoreObjs, origBestIndex, candidates) {
+    var bestIndex = origBestIndex,
+      extraWork = 0;
+
     function getNumericScore(scoreObj) {
       return scoreObj.score;
     }
@@ -385,16 +411,26 @@ define(
 
     if (SC_DEV && isVoteDebuggingOn) {
       if (origBestIndex !== bestIndex) {
-        candidates[origBestIndex].style.outline = '2px solid red';
-        candidates[bestIndex].style.outline = '2px solid green';
+        inlineStyle.set(candidates[origBestIndex], {
+          outline : '2px solid red'
+        });
+        inlineStyle.set(candidates[bestIndex], {
+          outline : '2px solid green'
+        });
       }
       else {
         console.log('Extra work ' + extraWork);
-        candidates[bestIndex].style.outline = (extraWork * 4) + 'px solid orange';
+        inlineStyle.set(candidates[bestIndex], {
+          outline : (extraWork * 4) + 'px solid orange'
+        });
       }
       nativeFn.setTimeout(function () {
-        candidates[origBestIndex].style.outline = '';
-        candidates[bestIndex].style.outline = '';
+        inlineStyle.set(candidates[origBestIndex], {
+          outline : ''
+        });
+        inlineStyle.set(candidates[bestIndex], {
+          outline : ''
+        });
       }, 1000);
     }
     return bestIndex;
@@ -405,9 +441,9 @@ define(
     // 1. Get the best candidate (pre-voting)
     var
       scoreObjs = getScores(candidates),
-      bestIndex = getCandidateWithHighestScore(scoreObjs),
-      origBestIndex = bestIndex,
-      extraWork = 0;
+      pickingDisabledSelector = getPickingDisabledSelector(),
+      bestIndex,
+      votedBestIndex;
 
     function processResult(pickedIndex) {
       // Log the results if necessary for debugging
@@ -420,13 +456,37 @@ define(
       return pickedIndex < 0 ? null : candidates[pickedIndex];
     }
 
-    if (bestIndex < 0) {
-      return processResult(-1); // No valid candidate
+    function containsItemsDisabledForPicker(index) {
+      return $(candidates[index]).has(pickingDisabledSelector).length > 0;
     }
 
-    // 2. Get the second best candidate
+    // 2. Get the best candidate that's not disabled in the picker
+    while (true) {
+      bestIndex = getCandidateWithHighestScore(scoreObjs);
+
+      if (bestIndex < 0) {
+        return processResult(-1); // No valid candidate
+      }
+
+      if (!containsItemsDisabledForPicker(bestIndex)) {
+        // Does not contain picker-disabled item -- therefore this result is legal
+        // We know the candidate itself is not picker-disabled, because those are filtered out in an earlier stage,
+        // but here we did the more expensive check of looking at all descendants
+        break;
+      }
+
+      // Remove all of the candidates that include the disabled item, and then try again
+      candidates = candidates.slice(bestIndex + 1);
+      scoreObjs = scoreObjs.slice(bestIndex + 1);
+    }
+
+    // 3. Get the best candidate after voting by other nearby textnodes
     if (doAllowVoting) {
-      bestIndex = performVote(scoreObjs, bestIndex, candidates, extraWork, origBestIndex);
+      votedBestIndex = performVote(scoreObjs, bestIndex, candidates);
+      // If the voted best index is a container, we need to doublecheck that it's allowable (no picker-disabled items)
+      if (votedBestIndex >= bestIndex || !containsItemsDisabledForPicker(votedBestIndex)) {
+        bestIndex = votedBestIndex;
+      }
     }
 
     return processResult(bestIndex);
@@ -857,6 +917,7 @@ define(
       console.log('Auto pick debugging: ' + (isAutoPickDebuggingOn = !isAutoPickDebuggingOn));
     };
   }
+
   return {
     find: find,
     reset: reset,
@@ -864,5 +925,4 @@ define(
     provideCustomSelectors: provideCustomSelectors,
     provideCustomWeights: provideCustomWeights
   };
-
 });

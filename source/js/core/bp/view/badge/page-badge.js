@@ -5,9 +5,16 @@ define(
   [
     'core/bp/view/view',
     'core/bp/view/palette',
-    'Promise'
+    'Promise',
+    'core/inline-style/inline-style'
   ],
-  function(baseView, palette, Promise) {
+  function (
+    baseView,
+    palette,
+    Promise,
+    inlineStyle
+  ) {
+  'use strict';
 
   // Make sure the badge has non-static positioning to make it easy to place
   // the position: absolute sc-bp-container inside of it
@@ -16,7 +23,7 @@ define(
     var existingPositionCss = getComputedStyle(badge).position;
 
     if (existingPositionCss === 'static') {
-      badge.style.position = 'relative';
+      inlineStyle(badge).position = 'relative';
     }
   }
 

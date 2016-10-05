@@ -64,19 +64,12 @@
 // enough that all such attempts are guarded in a try block.
   "use strict";
 
-  // Recover potentially overridden window methods from a nested browsing context
-  function getNativeWindow() {
-    // jshint -W117
-    return SC_EXTENSION ? window : sitecues._getHelperFrame('sitecues-context').contentWindow;
-    // jshint +W117
-  }
-
   function cacheSetTimeoutReference() {
-    return getNativeWindow().setTimeout.bind(window);
+    return sitecues._nativeFn.setTimeout;
   }
 
   function cacheJSONReference() {
-    return getNativeWindow().JSON;
+    return sitecues._nativeFn.JSON;
   }
 
   var arr = [];

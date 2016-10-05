@@ -1,5 +1,9 @@
 // TODO we can save a lot of bytes by setting these directly on the state object (instead of inside .data)
-define([], function() {
+define(
+  [],
+  function () {
+  'use strict';
+
   var data = {
     currentMode             : 0,     // 0 - 1, 0 is badge, 1 is panel, anything in between means its currently transitioning
     transitionTo            : 0,     // 0 or 1, 0 is badge, 1 is panel, it cannot be anything in between (doesn't seem to make sense to transition to anything other than the badge or panel state)
@@ -15,7 +19,6 @@ define([], function() {
     isClassicMode           : false, // Use question mark if browser support is weak or site is incompatible with themes
     doSuppressHovers        : false, // Suppress mouse hovers until next mousemove, because browser won't recompute them until then (useful for animations)
     isKeyboardMode          : false, // Show focus in this mode, support tab navigation
-    isOpenedWithHover       : false, // If opened with the hover, then user should be able to close with mouse out
     isOpenedWithScreenReader: false, // If opened with screen reader, be careful of spurious click events outside panel
     isMoreButtonVisible     : false, // Should the more button be shown?
     isPageBadge             : true,  // Is set to false if default badge is inserted
@@ -128,5 +131,4 @@ define([], function() {
     turnOnRealSettings: turnOnRealSettings,
     getPanelName: getPanelName
   };
-
 });

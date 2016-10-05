@@ -18,7 +18,7 @@ define(
     '$',
     'audio/speech-builder',
     'core/locale',
-    'core/metric',
+    'core/metric/metric',
     'core/conf/urls',
     'audio/text-select',
     'core/data-map',

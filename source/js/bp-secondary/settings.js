@@ -4,12 +4,13 @@ define(
     'core/bp/helper',
     'core/conf/user/manager',
     'core/bp/model/state',
-    'core/metric',
+    'core/metric/metric',
     'core/platform',
     'page/cursor/cursor',
     'core/events',
     'core/dom-events',
-    'core/native-functions'
+    'nativeFn',
+    'core/inline-style/inline-style'
   ],
   function (
     BP_CONST,
@@ -21,7 +22,8 @@ define(
     cursor,
     events,
     domEvents,
-    nativeFn
+    nativeFn,
+    inlineStyle
   ) {
   'use strict';
 
@@ -240,7 +242,7 @@ define(
         LEFT_COLOR + ' ' + percent + ',' +
         RIGHT_COLOR + ' ' + percent + ',' +
         RIGHT_COLOR + ' 100%)';
-    slider.style.backgroundImage = gradient;
+    inlineStyle(slider).backgroundImage = gradient;
   }
 
   // Native input change

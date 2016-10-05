@@ -5,15 +5,18 @@
 
 define(
   [
+    'core/inline-style/inline-style',
     'bp-expanded/view/transform-util',
     'core/platform',
-    'core/native-functions'
+    'nativeFn'
   ],
   function (
+    inlineStyle,
     transformUtil,
     platform,
     nativeFn
   ) {
+  'use strict';
 
   var requestFrameFn = window.requestAnimationFrame,
       cancelFrameFn  = window.cancelAnimationFrame,
@@ -130,10 +133,15 @@ define(
     function initTransitionStyles(transition) {
       elements.forEach(function(elem) {
         if (elem) {
-          elem.style.transition = transition;
+          var css = {
+            transition : transition
+          };
+
           if (transition) {
-            elem.style.transitionTimingFunction = timingFunctionName;
+            css.transitionTimingFunction = timingFunctionName;
           }
+
+          inlineStyle.set(elem, css);
         }
       });
     }
@@ -184,7 +192,7 @@ define(
 
     function beginTransition() {
       addTransitionEndListener();
-      initTransitionStyles(platform.transformPropertyCss + ' ' + duration + 'ms');
+      initTransitionStyles('transform ' + duration + 'ms');
       getComputedStyle(elements[0]);  // Force layout update
       requestAnimationFrame(initTransforms);
     }

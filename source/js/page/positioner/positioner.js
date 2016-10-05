@@ -15,7 +15,7 @@ define(
     'page/positioner/constants',
     'page/zoom/util/body-geometry',
     'core/events',
-    'core/native-functions'
+    'nativeFn'
   ],
   function (
     platform,

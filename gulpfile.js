@@ -67,16 +67,17 @@ var build =
     resources.svg,
     resources.raster,
     resources.earcons,
+    resources.versionMap,
     'js'
   );
 gulp.task(cleanAll);
 gulp.task(cleanTarget);
 gulp.task('build', build);
 gulp.task(reportConfig);
-var defaultSeries = [reportConfig, clean, 'build', packaging.createMetaData]
+var defaultSeries = [reportConfig, clean, 'build', packaging.prepare ]
   .concat(config.postBuildCommand ? runPostBuildCommand : []);
 gulp.task('default', gulp.series.apply(gulp, defaultSeries));
-gulp.task('package', gulp.series('default', packaging.createPackage));
+gulp.task('package', gulp.series('default', packaging.finalize));
 
 // Watcher tasks
 gulp.task(function watch() {
@@ -93,9 +94,6 @@ gulp.task(function watch() {
   gulp.watch(config.earconsGlob, resources.earcons);
   gulp.watch(config.svgGlob, resources.svg);
   gulp.watch(config.rasterGlob, resources.raster);
-  if (config.metaDataGlob) {
-    gulp.watch(config.metaDataGlob, packaging.createMetaData);
-  }
 
   if (config.postBuildCommand) {
     gulp.watch(config.buildDir + '/**/*', { name: 'postBuildCommand' }, runPostBuildCommand);

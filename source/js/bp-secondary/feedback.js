@@ -3,10 +3,11 @@ define(
     'core/bp/constants',
     'core/bp/helper',
     'core/bp/model/state',
-    'core/metric',
+    'core/metric/metric',
     'core/bp/view/view',
     'core/events',
-    'core/native-functions'
+    'nativeFn',
+    'core/inline-style/inline-style'
   ],
   function (
     BP_CONST,
@@ -15,7 +16,8 @@ define(
     metric,
     view,
     events,
-    nativeFn
+    nativeFn,
+    inlineStyle
   ) {
   'use strict';
 
@@ -51,7 +53,7 @@ define(
   }
 
   function autoSizeTextarea() {
-    var feedbackTextareaStyle = getFeedbackArea().style,
+    var feedbackTextarea = getFeedbackArea(),
       feedbackInputRect = getFeedbackInputRect().getBoundingClientRect(),
       scale = state.get('scale'),
       ROOM_FOR_ROUNDED_OUTLINE = 22,
@@ -59,10 +61,12 @@ define(
       width = (feedbackInputRect.width - ROOM_FOR_ROUNDED_OUTLINE) / scale,
       height = (feedbackInputRect.height - ROOM_FOR_ROUNDED_OUTLINE) / scale;
 
-    feedbackTextareaStyle.width = width + 'px';
-    feedbackTextareaStyle.height = height + 'px';
-    // Hide scrollbar by clipping horizontally - don't clip vertically (just large height of 999px for that)
-    feedbackTextareaStyle.clip = 'rect(0,' + (width - ROOM_FOR_SCROLLBAR) + 'px,999px,0)';
+    inlineStyle.set(feedbackTextarea, {
+      width  : width + 'px',
+      height : height + 'px',
+      // Hide scrollbar by clipping horizontally - don't clip vertically (just large height of 999px for that)
+      clip   : 'rect(0,' + (width - ROOM_FOR_SCROLLBAR) + 'px,999px,0)'
+    });
   }
 
   function onPanelUpdate() {

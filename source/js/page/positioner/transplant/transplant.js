@@ -6,7 +6,7 @@ define(
     'page/positioner/util/element-map',
     'page/positioner/transplant/clone',
     'page/positioner/constants',
-    'page/positioner/util/array-utility',
+    'core/util/array-utility',
     'page/positioner/util/element-info',
     'page/positioner/transplant/graft',
     'page/positioner/transplant/anchors',
@@ -135,6 +135,11 @@ define(
       return false;
     }
 
+    // Transplant iframes causes the content to reload, which is problematic for nested scripts
+    if (element.localName === 'iframe') {
+      return false;
+    }
+
     var
       isFixed           = flags.isFixed,
       isInOriginalBody  = flags.isInOriginalBody,
@@ -142,7 +147,7 @@ define(
       isTransplantRoot  = flags.isTransplantRoot,
       isNestedElement   = !isTransplantRoot && isInAuxBody;
 
-    // Basic transplant case, if an element is fixed or absolute with elevated z-index, transplant the element
+    // Basic transplant case, if an element is fixed then transplant the element
     if (isInOriginalBody && isFixed) {
       return true;
     }
@@ -155,7 +160,7 @@ define(
     }
 
     // Nested elements that need to be transplanted if their anchor root is re-planted should have their
-    // cached transplant information updated and be protected from transplant rejection (see graft module)
+    // cached transplant information updated
     if (isNestedElement && isFixed) {
       return true;
     }

@@ -1,6 +1,23 @@
-define(['page/util/element-classifier', 'page/keys/commands', 'core/metric', 'core/events', 'page/highlight/constants',
-        'core/constants', 'core/native-functions'],
-  function(elemClassifier, commands, metric, events, HIGHLIGHT_CONST, CORE_CONST, nativeFn) {
+define(
+  [
+    'page/util/element-classifier',
+    'page/keys/commands',
+    'core/metric/metric',
+    'core/events',
+    'page/highlight/constants',
+    'core/constants',
+    'nativeFn'
+  ],
+  function (
+    elemClassifier,
+    commands,
+    metric,
+    events,
+    HIGHLIGHT_CONST,
+    CORE_CONST,
+    nativeFn
+  ) {
+  'use strict';
 
   var
     // KEY_TESTS defines keys used to bind actions to hotkeys.
