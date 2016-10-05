@@ -90,7 +90,6 @@ define(
 
   var validateConfiguration = function() {
 
-<<<<<<< HEAD
     //Initialize configuration module
     site.init();
     // Initialize API and services URLs
@@ -99,15 +98,6 @@ define(
     if (!sitecues.config) {
       console.error('The ' + sitecues.config + ' object was not provided.');
       return;
-=======
-    if (!SC_EXTENSION) {
-      if (document.documentElement.hasAttribute('data-sitecues-everywhere')) {
-        // Don't run if the extension has planted its flag.
-        // (The sitecues.exists field is not accessible here if it's set in an extension context.)
-        logToConsole('Sitecues Everywhere prioritized over Sitecues from webpage.');
-        return;
-      }
->>>>>>> hamburger-menu
     }
 
     if (typeof sitecues.config !== 'object') {
@@ -133,7 +123,6 @@ define(
 
     // Continue loading sitecues
     return true;
-<<<<<<< HEAD
   };
 
   //////////////////////////////////////////////////////////////////////////////////////////
@@ -208,6 +197,4 @@ define(
   else {
     initLibrary();
   }
-=======
->>>>>>> hamburger-menu
 });
