@@ -14,7 +14,8 @@ define(
     'page/positioner/util/element-info',
     'page/positioner/style-lock/style-lock',
     'page/positioner/constants',
-    'page/viewport/viewport'
+    'page/viewport/viewport',
+    'core/inline-style/inline-style'
   ],
   function (
     $,
@@ -22,7 +23,8 @@ define(
     elementInfo,
     styleLock,
     constants,
-    viewport
+    viewport,
+    inlineStyle
   ) {
 
   'use strict';
@@ -227,15 +229,17 @@ define(
       auxiliaryBody = cloneElement(originalBody);
       // Removes position lock from clone
       styleLock.unlockStyle(auxiliaryBody);
+
+      var bodyStyle = inlineStyle(auxiliaryBody);
       // Strange bug, don't really understand it, but visible elements nested in hidden elements don't show up as
       // expected when the original body has overflowY set to scroll (reproduces on Desire To Learn)
-      auxiliaryBody.style.visibility    = getComputedStyle(originalBody).overflowY === 'scroll' ? '' : 'hidden';
-      auxiliaryBody.style.transform     = 'none';
-      auxiliaryBody.style.pointerEvents = '';
-      auxiliaryBody.style.position      = 'absolute';
-      auxiliaryBody.style.top           = 0;
-      auxiliaryBody.style.height        = viewport.getInnerHeight();
-      auxiliaryBody.style.width         = viewport.getInnerWidth();
+      bodyStyle.visibility               = getComputedStyle(originalBody).overflowY === 'scroll' ? '' : 'hidden';
+      bodyStyle.transform                = 'none';
+      bodyStyle.pointerEvents            = '';
+      bodyStyle.position                 = 'absolute';
+      bodyStyle.top                      = 0;
+      bodyStyle.height                   = viewport.getInnerHeight();
+      bodyStyle.width                    = viewport.getInnerWidth();
       docElem.appendChild(auxiliaryBody);
     }
     return auxiliaryBody;

@@ -8,7 +8,7 @@ define(
     'Promise',
     'core/conf/user/storage',
     'core/conf/user/storage-backup',
-    'core/native-functions'
+    'nativeFn'
   ],
   function (
     Promise,

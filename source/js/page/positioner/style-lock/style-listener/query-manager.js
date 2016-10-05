@@ -8,8 +8,8 @@
 define(
   [
     'page/positioner/style-lock/style-listener/selector-map',
-    'page/positioner/util/array-utility',
-    'core/native-functions'
+    'core/util/array-utility',
+    'nativeFn'
   ],
   function (
     selectorMap,

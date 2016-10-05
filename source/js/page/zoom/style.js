@@ -9,7 +9,10 @@ define(
     'page/zoom/constants',
     'page/zoom/util/body-geometry',
     'page/zoom/config/config',
-    'core/native-functions'
+    'nativeFn',
+    'core/inline-style/inline-style',
+    'page/zoom/combo-boxes',
+    'page/util/transition-util'
   ],
   function (
     $,
@@ -18,17 +21,16 @@ define(
     constants,
     bodyGeo,
     config,
-    nativeFn
+    nativeFn,
+    inlineStyle,
+    comboBoxes,
+    transitionUtil
   ) {
   'use strict';
 
   var
     body,
     $zoomStyleSheet,            // <style> element we insert to correct form issues in WebKit
-    $zoomFormsStyleSheet,       // <style> element we insert to correct form issues in WebKit
-    TRANSFORM_PROP_CSS,
-    // We store their current applied transition shorthand property, to revert to when we finish the zoom operation
-    cachedTransitionValue,
     // Optimize fonts for legibility? Helps a little bit with Chrome on Windows
     shouldOptimizeLegibility,
     // Should we repaint when zoom is finished (after any animations)?
@@ -39,7 +41,6 @@ define(
     shouldRepaintOnZoomChange,
     // Key frame animations
     SITECUES_ZOOM_ID       = constants.SITECUES_ZOOM_ID,
-    SITECUES_ZOOM_FORMS_ID = constants.SITECUES_ZOOM_FORMS_ID,
     CRISPING_ATTRIBUTE   = constants.CRISPING_ATTRIBUTE,
     MAX                  = constants.MAX_ZOOM,
     MIN                  = constants.MIN_ZOOM,
@@ -102,37 +103,6 @@ define(
       }
     }
 
-    function applyZoomFormFixes(zoom) {
-      if (platform.browser.isWebKit) {
-        // Add useful zoom fixes for forms that render incorrectly with CSS transform
-        // We turn them off when data-sc-dropdown-fix off is set (need to temporarily turn off for highlight position calculation elsewhere)
-        var css =
-          'select[size="1"]:not([data-sc-dropdown-fix-off]),select:not([size]):not([data-sc-dropdown-fix-off]){' +
-          platform.transformPropertyCss + ':scale(' + 1 / zoom + ') !important;' +
-          'transform-origin:0% 62% !important;' +
-          'margin-right:' + (13 * (1 - zoom)) + '% !important;' +
-          'margin-top:' + (8 * (1-zoom)) + 'px !important;' +
-          'margin-bottom:' + (8 * (1-zoom)) + 'px !important;' +
-          'zoom:' + zoom + ' !important;}';
-
-        // Turn off any page transitions for select during zoom, otherwise it will potentially animate the above changes
-        css +=
-          '\nbody[data-sc-zooming] select { transition-property: none !important; }';
-
-        // Don't use any of these rules in print
-        css = '@media screen {\n' + css + '\n}';
-        if (!$zoomFormsStyleSheet) {
-          $zoomFormsStyleSheet = $('<style>')
-            .text(css)
-            .attr('id', SITECUES_ZOOM_FORMS_ID)
-            .appendTo('head');
-        }
-        else {
-          $zoomFormsStyleSheet.text(css);
-        }
-      }
-    }
-
   // This is used to repaint the DOM after a zoom in WebKit to ensure crisp text
   function getCssCrispingFixes() {
     if (shouldRepaintOnZoomChange) {
@@ -173,33 +143,33 @@ define(
     return KEYFRAMES_ID + '-' + Math.round(state.completedZoom * 1000) + '-' + Math.round(targetZoom * 1000);
   }
 
-    // Get keyframes css for animating from completed zoom to target zoom
-    function getAnimationCSS(targetZoom) {
-      var animationName = getCssAnimationName(targetZoom),
-        keyFramesCssProperty = platform.browser.isWebKit ? '@-webkit-keyframes ' : '@keyframes ',
-        keyFramesCss = animationName + ' {\n',
-        keyFrames = getCssKeyFrames(targetZoom, state.isInitialLoadZoom, true),
-        numSteps = keyFrames.length - 1,
-        step = 0;
+  // Get keyframes css for animating from completed zoom to target zoom
+  function getAnimationCSS(targetZoom) {
+    var animationName = getCssAnimationName(targetZoom),
+      keyFramesCssProperty = platform.browser.isWebKit ? '@-webkit-keyframes ' : '@keyframes ',
+      keyFramesCss = animationName + ' {\n',
+      keyFrames = getCssKeyFrames(targetZoom, state.isInitialLoadZoom, true),
+      numSteps = keyFrames.length - 1,
+      step = 0;
 
-      for (; step <= numSteps; ++step) {
-        var keyFrame = keyFrames[step],
-          zoomCssString = TRANSFORM_PROP_CSS + ': ' + keyFrame[TRANSFORM_PROP_CSS] + (keyFrame.width ? '; width: ' + keyFrame.width : '');
+    for (; step <= numSteps; ++step) {
+      var keyFrame = keyFrames[step],
+        zoomCssString = 'transform: ' + keyFrame.transform + (keyFrame.width ? '; width: ' + keyFrame.width : '');
 
-        keyFramesCss += Math.round(10000 * keyFrame.timePercent) / 100 + '% { ' + zoomCssString + ' }\n';
-      }
-      keyFramesCss += '}\n\n';
-
-      return keyFramesCssProperty + keyFramesCss;
+      keyFramesCss += Math.round(10000 * keyFrame.timePercent) / 100 + '% { ' + zoomCssString + ' }\n';
     }
+    keyFramesCss += '}\n\n';
+
+    return keyFramesCssProperty + keyFramesCss;
+  }
 
   // Get a CSS object for the targetZoom level
   //This needs to return the formatted translate x / width only when we're zooming the primary body
   function getZoomCss(targetZoom) {
-    var transform = 'scale(' + targetZoom.toFixed(ZOOM_PRECISION) + ') ' + bodyGeo.getFormattedTranslateX(targetZoom),
-      css = {};
+    var css = {
+      transform: 'scale(' + targetZoom.toFixed(ZOOM_PRECISION) + ') ' + bodyGeo.getFormattedTranslateX(targetZoom)
+    };
 
-    css[TRANSFORM_PROP_CSS] = transform;
     if (config.shouldRestrictWidth) {
       css.width = bodyGeo.getRestrictedBodyWidth(targetZoom);
     }
@@ -211,9 +181,11 @@ define(
   function fixZoomBodyCss() {
     // Allow the content to be horizontally centered, unless it would go
     // offscreen to the left, in which case start zooming the content from the left-side of the window
-    body.style[platform.transformOriginProperty] = config.shouldRestrictWidth ? '0 0' : '50% 0';
+    inlineStyle.override(body, [ 'transformOrigin', config.shouldRestrictWidth ? '0 0' : '50% 0']);
     if (shouldOptimizeLegibility) {
-      body.style.textRendering = 'optimizeLegibility';
+      inlineStyle.override(body, {
+        textRendering : 'optimizeLegibility'
+      });
     }
   }
 
@@ -237,60 +209,36 @@ define(
     }, REPAINT_FOR_CRISP_TEXT_DELAY);
 
     var MAX_ZINDEX = 2147483647,
-      appendedDiv = $('<sc>')
-        .css({
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          opacity: 1,
-          backgroundColor: 'transparent',
-          zIndex: MAX_ZINDEX,
-          pointerEvents: 'none'
-        })
-        .appendTo('html');
+      $appendedDiv = $('<sc>');
+
+    inlineStyle.set($appendedDiv[0], {
+      position        : 'fixed',
+      top             : 0,
+      left            : 0,
+      width           : '100%',
+      height          : '100%',
+      opacity         : 1,
+      backgroundColor : 'transparent',
+      zIndex          : MAX_ZINDEX,
+      pointerEvents   : 'none'
+    });
+
+    $appendedDiv.appendTo('html');
+
     nativeFn.setTimeout(function () {
-      appendedDiv.remove();
+      $appendedDiv.remove();
     }, 0);
   }
 
   //Restore the intended inline style when we're done transforming the body
   function restoreBodyTransitions() {
-    if (typeof cachedTransitionValue === 'string') {
-      body.style.transition = cachedTransitionValue;
-    }
-    cachedTransitionValue = null;
+    transitionUtil.restoreTransition(body);
   }
 
   //If there is a transition style applied to the body, we need to be sure that it doesn't apply to transformations
   //otherwise our zoom logic will break
   function fixBodyTransitions() {
-    var style  = getComputedStyle(body),
-      property = style.transitionProperty,
-      delay    = style.transitionDelay.split(',').some(function (dly) {
-        return parseFloat(dly);
-      }),
-      duration;
-
-    if (!delay) {
-      duration = style.transitionDuration.split(',').some(function (drtn) {
-        return parseFloat(drtn);
-      });
-    }
-
-    if (!delay && !duration) {
-      return;
-    }
-
-    if (property.indexOf('all') >= 0 || property.indexOf('transform') >= 0) {
-      cachedTransitionValue = body.style.transition;
-      if (body.style.transition) {
-        body.style.transition += ', ';
-      }
-      body.style.transition += 'transform 0s';
-    }
-
+    transitionUtil.disableTransformTransition(body);
   }
 
   function getZoomStyleSheet() {
@@ -299,9 +247,9 @@ define(
 
   function init() {
     body                      = document.body;
-    TRANSFORM_PROP_CSS        = platform.transformPropertyCss;
     shouldRepaintOnZoomChange = platform.browser.isChrome;
     shouldOptimizeLegibility  = platform.browser.isChrome && platform.os.isWin;
+    comboBoxes.init();
   }
 
   return {
@@ -313,7 +261,6 @@ define(
     repaintToEnsureCrispText: repaintToEnsureCrispText,
     fixBodyTransitions: fixBodyTransitions,
     restoreBodyTransitions: restoreBodyTransitions,
-    applyZoomFormFixes: applyZoomFormFixes,
     init: init
   };
 });

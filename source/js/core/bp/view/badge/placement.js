@@ -47,10 +47,24 @@
  *    Parent: #scp-bp-container
  *    Accessibility: uses ARIA to describe controls
  */
-define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/platform', 'core/events'],
-  function(state, BP_CONST, helper, platform, events) {
-
-    'use strict';
+define(
+  [
+    'core/bp/model/state',
+    'core/bp/constants',
+    'core/bp/helper',
+    'core/platform',
+    'core/events',
+    'core/inline-style/inline-style'
+  ],
+  function (
+    state,
+    BP_CONST,
+    helper,
+    platform,
+    events,
+    inlineStyle
+  ) {
+  'use strict';
 
   var BADGE_PARENT = BP_CONST.BADGE_MODE,
       HTML_PARENT  = BP_CONST.PANEL_MODE,
@@ -80,9 +94,11 @@ define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/plat
   // in-place inside the page where it is attached.
   // Also, position and size the bpContainer and set height and width of the SVG
   function switchToBadgeParent() {
-
+    var styles = {
+      tranform: ''
+    };
     // Remove transform/translate so that badge is fully returned to origin state
-    bpElement.style[platform.transformProperty] = '';
+    inlineStyle.set(bpElement, styles);
 
     badgeElement.appendChild(bpElement);
 
@@ -154,10 +170,11 @@ define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/plat
       return parseFloat(badgeComputedStyle['padding' + property]) * appliedZoom;
     }
 
-
     // Used for setting the bpContainer left, top, width, and height
     function setBPProperty(prop) {
-      bpElement.style[prop] = (badgeRect[prop] / appliedZoom) + 'px';
+      var styles = {};
+      styles[prop] = (badgeRect[prop] / appliedZoom) + 'px';
+      inlineStyle.set(bpElement, styles);
     }
 
     // If the badge is currently dimensionless, use the cached badge dimensions
@@ -195,10 +212,12 @@ define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/plat
     // Set left and top for positioning.
     setBPProperty('width');
     setBPProperty('height');
-
-    bpElement.style.top  = 0;
-    bpElement.style.left = 0;
-    bpElement.style[platform.transformProperty] = 'translate(' + badgeRect.left / appliedZoom + 'px,' + badgeRect.top / appliedZoom + 'px)';
+    var styles = {
+      top  : 0,
+      left : 0,
+      transform: 'translate(' + badgeRect.left / appliedZoom + 'px,' + badgeRect.top / appliedZoom + 'px)'
+    };
+    inlineStyle.set(bpElement, styles);
   }
 
   // This makes the collapsed svg large enough so that even with
@@ -206,12 +225,13 @@ define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/plat
   // So it should be the actual svg width / badge width
   function fitSVGtoBadgeRect() {
 
-    var svgStyle  = svgElement.style,
-        svgWidth  = badgeRect.width * getRatioOfSVGToVisibleBadgeSize(badgeRect) / getAppliedBPZoom(),
+    var svgWidth  = badgeRect.width * getRatioOfSVGToVisibleBadgeSize(badgeRect) / getAppliedBPZoom(),
         svgHeight = svgWidth / svgAspectRatio;
 
-    svgStyle.width  = svgWidth  + 'px';
-    svgStyle.height = svgHeight + 'px';
+    inlineStyle.set(svgElement, {
+      width  : svgWidth + 'px',
+      height : svgHeight + 'px'
+    });
 
     // Do not animate the adjustment of the SVG to fit the size of the badge
     // We only animate large-scale size changes (badge->panel or panel->badge)
@@ -236,8 +256,7 @@ define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/plat
 
     // First get the height for the third wave in the speech button, useful for measurements
     // It is the tallest and rightmost element
-    var svgStyle         = svgElement.style,
-        badgeRectWidth   = badgeRect.width,
+    var badgeRectWidth   = badgeRect.width,
         waveHeight;
 
     // Set default height and width, because this normalizes cross browser inconsistencies
@@ -245,8 +264,10 @@ define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/plat
     // attribute effects the values of the boundingClient height and width of the SVG in Chrome,
     // but not IE.  Therefore, setting these values allows getRatioOfSVGToVisibleBadgeSize() to return the proper
     // values no matter the browser.
-    svgStyle.width  = badgeRectWidth + 'px';
-    svgStyle.height = badgeRectWidth / svgAspectRatio + 'px';
+    inlineStyle.set(svgElement, {
+      width  : badgeRectWidth + 'px',
+      height : badgeRectWidth / svgAspectRatio + 'px'
+    });
     waveHeight = getWaveHeight() || badgeGeometry.waveHeight;
 
     ratioOfSVGToVisibleBadgeSize = badgeRect.height / waveHeight;
@@ -268,8 +289,7 @@ define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/plat
     if (rectHasNoArea(badgeRect)) {
       badgeRect = badgeGeometry.cachedRect;
     }
-
-    bpElement.style.clip =  'rect(0,' + (badgeRect.width  + EXTRA_PIXELS_WIDTH) + 'px,' + (badgeRect.height + EXTRA_PIXELS_HEIGHT) + 'px,0)';
+    inlineStyle(bpElement).clip = 'rect(0,' + (badgeRect.width  + EXTRA_PIXELS_WIDTH) + 'px,' + (badgeRect.height + EXTRA_PIXELS_HEIGHT) + 'px,0)';
   }
 
   function onZoomChange(zoomLevel) {
@@ -283,7 +303,7 @@ define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/plat
 
   function executeWhileElementIsRendered(element, fn) {
     var isReparented,
-        inlineTransform = element.style[platform.transformProperty],
+        inlineTransform = inlineStyle(element).transform,
         nextSibling     = element.nextSibling,
         parent          = element.parentElement,
         rect            = helper.getRect(element);
@@ -292,7 +312,7 @@ define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/plat
     // This way we can be confident that an ancestor of the element isn't hiding it
     // This doesn't guarantee that a stylesheet isn't hiding the element, but it is sufficient for our current purposes
     if (rectHasNoArea(rect)) {
-      element.style[platform.transformProperty] = 'translate(-99999px,-99999px)';
+      inlineStyle(element).transform = 'translate(-99999px,-99999px)';
       documentElement.appendChild(element);
       isReparented = true;
     }
@@ -300,7 +320,7 @@ define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/plat
     fn();
 
     if (isReparented) {
-      element.style[platform.transformProperty] = inlineTransform;
+      inlineStyle(element).transform = inlineTransform;
       if (nextSibling) {
         parent.insertBefore(element, nextSibling);
       }
@@ -318,6 +338,8 @@ define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/plat
   function initBadgeGeometry() {
     badgeElement.appendChild(bpElement);
 
+    events.emit('bp/did-insert-bp-element');
+
     executeWhileElementIsRendered(badgeElement, function () {
       var cachedRect = helper.getRect(badgeElement),
           contentBox = Object.create(cachedRect),
@@ -330,17 +352,20 @@ define(['core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/plat
       contentBox.width  -= paddingLeft + paddingRight;
       contentBox.height -= paddingTop  + paddingBottom;
 
-      bpElement.style.width   = contentBox.width;
-      bpElement.style.height  = contentBox.height;
+      inlineStyle.set(bpElement, {
+        width  : contentBox.width,
+        height : contentBox.height
+      });
 
-      svgElement.style.width  = contentBox.width + 'px';
-      svgElement.style.height = (contentBox.width / svgAspectRatio) + 'px';
+      inlineStyle.set(svgElement, {
+        width  : contentBox.width + 'px',
+        height : (contentBox.width / svgAspectRatio) + 'px'
+      });
 
       badgeGeometry = {
         cachedRect : cachedRect,
         waveHeight : getWaveHeight()
       };
-
     });
 
   }

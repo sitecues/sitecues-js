@@ -3,7 +3,10 @@
 var gulp = require('gulp'),
   cleanHtml = require('gulp-cleanhtml'),
   minifyCss = require('gulp-minify-css'),
-  config = require('./build-config');
+  config = require('./build-config'),
+  yaml = require('node-yaml'),
+  path = require('path'),
+  fs = require('fs');
 
 // CSS -- minify
 function css() {
@@ -40,10 +43,64 @@ function earcons() {
     .pipe(gulp.dest(config.resourceDir + '/earcons'));
 }
 
+function writeSimplifiedVersionMap(sourceVersionMap) {
+  function checkVersion(version) {
+    const VERSION_REGEX = /^\d{1,2}\.\d{1,3}\.\d{1,3}$/;
+    if (version !== 'latest' && !version.match(VERSION_REGEX)) {
+      throw new Error('Invalid version ' + version + ' in version map');
+    }
+  }
+
+  function getFinalVersion(version) {
+    return version === 'latest' ? config.version.replace('-RELEASE', '') : version;
+  }
+
+  function checkSiteId(siteId) {
+    const SITEID_REGEX = /^s-[a-f\d]{8}$/;
+    if (!siteId.match(SITEID_REGEX)) {
+      throw new Error('Invalid site id ' + siteId + ' in version map');
+    }
+  }
+
+  return new Promise(function(resolve) {
+    checkVersion(sourceVersionMap.DefaultVersion);
+    let stringBuilder = 'default|' + getFinalVersion(sourceVersionMap.DefaultVersion),
+      allSiteIds = new Set();
+
+    for (let version of Object.keys(sourceVersionMap.MappedVersions)) {
+      checkVersion(version);
+      const siteIdTable = sourceVersionMap.MappedVersions[version];
+      for (let siteId of Object.keys(siteIdTable)) {
+        if (allSiteIds.has(siteId)) {
+          throw new Error('Duplicate site id in version map');
+        }
+        checkSiteId(siteId);
+        allSiteIds.add(siteId);
+        // siteId|version|friendlyName
+        const friendlyName = siteIdTable[siteId];
+        stringBuilder += '\n' + siteId + '|' + getFinalVersion(version) + '|' + friendlyName;
+      }
+    }
+    const outputFileName = path.join(config.buildDir, 'version-map.bsv');
+    fs.writeFile(outputFileName, stringBuilder, (err) => {
+      if (err) {
+        throw err;
+      }
+      resolve();
+    });
+  });
+}
+
+function versionMap() {
+  return yaml.read(path.join('..', 'version-map.yml'))
+    .then(writeSimplifiedVersionMap);
+}
+
 module.exports = {
   css: css,
   html: html,
   svg: svg,
   raster: raster,
-  earcons: earcons
+  earcons: earcons,
+  versionMap: versionMap
 };

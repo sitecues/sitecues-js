@@ -10,14 +10,9 @@ define([], function() {
     os: null,
     canUseRetinaCursors: null,
     cssPrefix: null,
-    transformPropertyCss: null,
-    transformProperty: null,
-    transformOriginProperty: null,
     transitionEndEvent: null,
     nativeZoom: null,
     isRetina: isRetina,
-    isCssPropSupported: isCssPropSupported,
-    getCssProp: getCssProp,
     isUnsupportedPlatform: false,
     platformWarning: null,
     init: init
@@ -46,18 +41,6 @@ define([], function() {
         currBrowser.isMS    ?
           '-ms-'        :
           '';
-  }
-
-  // Is the given CSS property supported by the current browser?
-  function isCssPropSupported(propName) {
-    return typeof document.documentElement.style[propName] === 'string';
-  }
-
-  // Get the name or vendor-prefixed property name, whichever is supported
-  // For example getCssProp('transform" returns 'transform', '-webkit-transform', '-moz-transform' or 'transform' as appropriate
-  // Note: Regarding 'transform', we only need to do this for Safari 8 at this point
-  function getCssProp(propName) {
-    return isCssPropSupported(propName) ? propName : exports.cssPrefix + propName;
   }
 
   // Set globally accessible browser constants
@@ -248,7 +231,7 @@ define([], function() {
       return version < 34 && 'for Firefox, version 34 or later is required';
     }
     if (browser.isSafari) {
-      return version < 8 && 'for Safari, version 8 or later is required';
+      return version < 9 && 'for Safari, version 9 or later is required';
     }
     if (browser.isChrome) {
       return version < 41 && 'for Chrome, version 41 or later is required';
@@ -293,9 +276,6 @@ define([], function() {
     exports.isStorageUnsupported = isStorageUnsupported();
     exports.canUseRetinaCursors = exports.browser.isChrome;
     exports.cssPrefix = getCssPrefix(exports.browser);
-    exports.transformPropertyCss = exports.browser.isWebKit && !isCssPropSupported('transform') ? '-webkit-transform' : 'transform';
-    exports.transformProperty = exports.transformPropertyCss.replace('-t', 'T').replace('-', '');
-    exports.transformOriginProperty = exports.transformProperty + 'Origin';
     exports.transitionEndEvent = exports.browser.isWebKit ? 'webkitTransitionEnd' : 'transitionend';
     exports.featureSupport = {
       themes: !exports.browser.isMS

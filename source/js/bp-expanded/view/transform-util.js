@@ -1,11 +1,20 @@
 /**
  * This file contains helper methods for dealing with the string that is returned
- * when using Element.style.transform or Element.getAttribute('transform')
+ * when using Element#style.transform or Element.getAttribute('transform')
  * This module supports translateX, translateY, scale, scaleY and rotate.
  * In the case of scaleY it is get/set as a scale(1,y) value with a paired property scaleType = 'scaleY'
  */
 
-define([ 'core/platform' ], function(platform) {
+define(
+  [
+    'core/inline-style/inline-style',
+    'core/platform'
+  ],
+  function (
+    inlineStyle,
+    platform
+  ) {
+  'use strict';
 
   var SHOULD_USE_CSS_TRANSFORM_IN_SVG =
     !platform.browser.isMS &&       // MS does not support CSS in SVG
@@ -36,7 +45,7 @@ define([ 'core/platform' ], function(platform) {
       transformString = getTransformString(transformMap, useCss);
 
     if (useCss) {  // Always use CSS, even in SVG
-      elem.style[platform.transformProperty] = transformString;
+      inlineStyle(elem).transform = transformString;
     }
     else if (transformString) {
       elem.setAttribute('transform', transformString);
@@ -48,7 +57,7 @@ define([ 'core/platform' ], function(platform) {
 
   // Always get style transform
   function getStyleTransformMap(elem) {
-    return getTransformMap(elem.style[platform.transformProperty]);
+    return getTransformMap(inlineStyle(elem).transform);
   }
 
   function getElemTransformMap(elem) {

@@ -23,12 +23,14 @@ define(
     'core/platform',
     'page/positioner/transform/rect-cache',
     'core/dom-events',
-    'page/positioner/util/array-utility',
+    'core/util/array-utility',
     'page/zoom/style',
     'page/viewport/scrollbars',
     'page/zoom/config/config',
     'core/events',
-    'core/native-functions'
+    'nativeFn',
+    'core/inline-style/inline-style',
+    'page/util/transition-util'
   ],
   function (
     elementMap,
@@ -45,7 +47,9 @@ define(
     scrollbars,
     config,
     events,
-    nativeFn
+    nativeFn,
+    inlineStyle,
+    transitionUtil
   ) {
     /*jshint +W072 */
     'use strict';
@@ -54,7 +58,6 @@ define(
       shouldRestrictWidth, originalBody,
       isTransformXOriginCentered,
       shouldRepaintOnZoomChange,
-      transformProperty, transformOriginProperty,
       // Fixed elements taller than the viewport
       tallElements           = [],
       // Fixed elements wider than the viewport
@@ -164,7 +167,7 @@ define(
 
     function getTranslationValues(element) {
       var
-        split  = element.style[transformProperty].split(/(?:\()|(?:px,*)/),
+        split  = inlineStyle(element).transform.split(/(?:\()|(?:px,*)/),
         index  = split.indexOf('translate3d'),
         values = { x: 0, y: 0 };
       if (index >= 0) {
@@ -180,7 +183,8 @@ define(
     }
 
     function setNewTransform(element, translateX, translateY, scale) {
-      element.style[transformProperty] = 'translate3d(' + translateX + 'px, ' + translateY + 'px, 0) scale(' + scale + ')';
+      var transform = 'translate3d(' + translateX + 'px, ' + translateY + 'px, 0) scale(' + scale + ')';
+      transitionUtil.applyInstantTransform(element, transform);
     }
 
     function calculateXTranslation(args) {
@@ -363,7 +367,7 @@ define(
       var doTransformOnResize = Boolean(targets.getCount());
 
       if (!isTransformingOnResize && doTransformOnResize) {
-        // There may be css media rules that change the positioning when the viewport is resized
+        // There may be css media rules that change positioning of fixed elements when the viewport is resized
         window.addEventListener('resize', onResize);
       }
       else if (isTransformingOnResize && !doTransformOnResize) {
@@ -386,61 +390,42 @@ define(
       if (platform.browser.isIE) {
         var zIndex = getComputedStyle(element).zIndex;
         if (zIndex === 'auto') {
-          element.style.zIndex = '999999';
+          inlineStyle.override(element, {
+            zIndex : '999999'
+          });
         }
       }
     }
 
     function scaleTop(element) {
-      var
-        currentInlinePosition = element.style.position,
-        currentInlineTop      = element.style.top,
-        cachedInitialTop      = elementMap.getField(element, 'initialTop'),
-        cachedAppliedTop      = elementMap.getField(element, 'appliedTop');
+      restoreTop(element);
 
-      if (currentInlineTop !== cachedAppliedTop) {
-        cachedInitialTop = currentInlineTop;
-      }
-
-      element.style.top      = cachedInitialTop;
       // Absolute elements return the used top value if there isn't one specified. Setting the position to static ensures
       // that only specified top values are returned with the computed style
       // EXCEPTION: IE returns the used value for both
       if (!platform.browser.isIE) {
-        element.style.position = 'static';
+        inlineStyle.override(element, ['position', 'static', 'important']);
       }
 
       var
         specifiedTop   = getComputedStyle(element).top,
         specifiedValue = parseFloat(specifiedTop);
 
-
       if (!isNaN(specifiedValue) && specifiedTop.indexOf('px') >= 0) {
-        element.style.top = (specifiedValue * state.fixedZoom) + 'px';
+        inlineStyle.override(element, {
+          top : (specifiedValue * state.fixedZoom) + 'px'
+        });
       }
 
-      element.style.position = currentInlinePosition;
-      cachedAppliedTop       = element.style.top;
-      elementMap.setField(element, 'initialTop', cachedInitialTop);
-      elementMap.setField(element, 'appliedTop', cachedAppliedTop);
+      inlineStyle.restoreLast(element, 'position');
     }
 
     function restoreTop(element) {
-      var
-        currentInlineTop = element.style.top,
-        cachedInitialTop = elementMap.getField(element, 'initialTop'),
-        cachedAppliedTop = elementMap.getField(element, 'appliedTop');
-
-      // The inline top value has mutated from what we've set, so keep the current value
-      if (currentInlineTop !== cachedAppliedTop) {
-        return;
-      }
-
-      element.style.top = cachedInitialTop;
+      inlineStyle.restore(element, 'top');
     }
 
     function onTargetAdded(element) {
-      element.style[transformOriginProperty] = isTransformXOriginCentered ? '50% 0' : '0 0';
+      inlineStyle.override(element, ['transformOrigin', isTransformXOriginCentered ? '50% 0' : '0 0']);
       // This handler runs when a style relevant to @element's bounding rectangle has mutated
       rectCache.listenForMutatedRect(element, function () {
         /*jshint validthis: true */
@@ -456,9 +441,7 @@ define(
     }
 
     function onTargetRemoved(element) {
-      element.style[transformProperty]       = '';
-      element.style[transformOriginProperty] = '';
-      restoreTop(element);
+      inlineStyle.restore(element, ['transform', 'transformOrigin', 'top']);
       rectCache.delete(element);
       // This is the cached metadata we used for transforming the element. We need to clear it now that
       // the information is stale
@@ -560,7 +543,7 @@ define(
     function clearInvalidTransforms() {
       targets.forEach(function (element) {
         if (!platform.browser.isIE && state.completedZoom === 1 && elementInfo.isInOriginalBody(element)) {
-          element.style[transformProperty] = '';
+          inlineStyle.restore(element, 'transform');
         }
       });
     }
@@ -582,8 +565,6 @@ define(
       rectCache.init(isTransformXOriginCentered);
       // In Chrome we have to trigger a repaint after we transform elements because it causes blurriness
       shouldRepaintOnZoomChange  = platform.browser.isChrome;
-      transformProperty          = platform.transformProperty;
-      transformOriginProperty    = platform.transformOriginProperty;
       targets.init();
       targets.registerAddHandler(onTargetAdded);
       targets.registerRemoveHandler(onTargetRemoved);
