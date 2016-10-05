@@ -11,15 +11,25 @@ define(['core/bp/helper', 'core/platform', 'core/conf/site'],
     customBadgePalette,
 
     doWebKitPrefix,
-    doMsPrefix,
+
+    MAX_ZINDEX       = 2147483647,
 
     BASE_SHEET_ID    = 'sitecues-js-bp-css',
+
+    HIDE_IN_PRINT_MEDIA =
+      // Turn off toolbar, dimmer, lens and zoom
+      // TODO needs more work to reset body width if page sets it to something different
+      '@media print { ' +
+      '.scp-toolbar, #scp-bp-container, #sitecues-background-dimmer, #sitecues-hlb-wrapper { display: none !important; } ' +
+      'body { transform: none !important; width: auto !important; } ' +
+      '}',
 
     BASE_CSS;
 
   function toCSS(jsonObject) {
 
-    var styles = '';
+    var styles = HIDE_IN_PRINT_MEDIA;
+
     var isTransformPrefixNeeded = document.createElement('p').style.transform === undefined;
 
     for (var selector in jsonObject) {
@@ -38,8 +48,6 @@ define(['core/bp/helper', 'core/platform', 'core/conf/site'],
                 if (doWebKitPrefix) {
                   attribute = '-webkit-' + attribute;
                   value = value.replace('transform', '-webkit-transform');
-                } else if (doMsPrefix && attribute !== 'transition') {
-                  attribute = '-ms-' + attribute;
                 }
               }
             }
@@ -105,10 +113,10 @@ define(['core/bp/helper', 'core/platform', 'core/conf/site'],
 
       /***************** Loading/badge  ****************/
 
-      // If there is an old badge image, it will fade out
-      '#sitecues-badge>img': {
-        'transition': 'opacity 1.5s',
-        'opacity': '1 !important'
+      // If there is an old badge image, do not show it -- we will show new BP-based badge in place of it
+      'img#sitecues-badge, #sitecues-badge>img': {
+        'visibility': 'hidden !important',
+        'opacity': '0 !important'
       },
 
       // When panel is closed, we use position: absolute
@@ -120,7 +128,8 @@ define(['core/bp/helper', 'core/platform', 'core/conf/site'],
       // Fade in the badge when it appears
       '#scp-bp-container': {
         'position': 'fixed',
-        'z-index': '9999999',
+        'direction': 'ltr !important',
+        'z-index': MAX_ZINDEX,
         'transition': 'opacity 1.5s',
         'transform-origin': '0 0',
         'text-align': 'left', // To prevent style pollution found on http://codecanyon.net/
@@ -132,6 +141,7 @@ define(['core/bp/helper', 'core/platform', 'core/conf/site'],
       },
 
       '#scp-svg': {
+        'direction': 'ltr !important',
         'max-width': 'none',
         'overflow': 'hidden',
         'position': 'absolute'
@@ -166,7 +176,8 @@ define(['core/bp/helper', 'core/platform', 'core/conf/site'],
         'box-shadow': '1px 1px 15px 0 rgba(9, 9, 9, .5)',
         'padding': '6px 0 8px calc(50% - 66px)',
         'background-color': customBadgePalette.toolbar || '#f7fcff',  // Ensure our own theme engine doesn't turn the toolbar dark
-        'z-index': '9999999'
+        'z-index': MAX_ZINDEX,
+        'direction': 'ltr !important'
       },
 
       '.scp-toolbar > #scp-bp-container': {
@@ -222,12 +233,12 @@ define(['core/bp/helper', 'core/platform', 'core/conf/site'],
         'pointer-events': 'none'
       },
 
-      '.scp-want-panel.scp-ie9-false #scp-shadow-container': {
+      '.scp-want-panel #scp-shadow-container': {
         'transition': 'opacity 1s',
         'display': 'block'
       },
 
-      '.scp-is-panel.scp-ie9-false #scp-shadow-container': {
+      '.scp-is-panel #scp-shadow-container': {
         'opacity': 1
       },
 
@@ -280,7 +291,7 @@ define(['core/bp/helper', 'core/platform', 'core/conf/site'],
       },
 
       '.scp-classic-false #scp-question': {
-        'display': 'none'   // IE9 and sites incompatible with themes -- provide help only
+        'display': 'none'   // Classic mode: weak browsers and sites incompatible with themes -- provide help only
       },
 
       '#scp-more-button-opacity': {
@@ -288,16 +299,9 @@ define(['core/bp/helper', 'core/platform', 'core/conf/site'],
         'pointer-events': 'all'
       },
 
-      '.scp-transition-opacity' : {
-        'transition': 'opacity .8s'
-      },
-
       '.scp-transition-opacity-fast' : {
-        'transition': 'opacity 0.4s'
-      },
-
-      '.scp-transition-opacity-instant' : {
-        'transition': 'opacity 0s'
+        'transition': 'opacity 0.4s',
+        'opacity': 1
       },
 
       '#scp-secondary, .scp-secondary-feature': {
@@ -308,10 +312,6 @@ define(['core/bp/helper', 'core/platform', 'core/conf/site'],
 
       '.scp-hidden-target': {
         'opacity': 0
-      },
-
-      '.scp-ie9-true .scp-hidden-target': {
-        'opacity': 0.001    // Can't be seen but still gets click events
       },
 
       /*************** Focus **************************/
@@ -511,7 +511,6 @@ define(['core/bp/helper', 'core/platform', 'core/conf/site'],
     hasCustomPalette = typeof palette === 'object';
     customBadgePalette = (hasCustomPalette && palette.badge) || {};
     doWebKitPrefix = platform.browser.isSafari;
-    doMsPrefix = platform.browser.isIE9;
     initBaseCss();
 
     if (!isInitialized) {

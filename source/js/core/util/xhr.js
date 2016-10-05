@@ -1,27 +1,27 @@
-// Cheap, extremely minimal XHR for IE9+ and other browsers
+// Cheap, extremely minimal XHR
 // Takes subset of $.ajax params -- data, contentType, headers, cache, dataType, url, success, error
 
-define([], function () {
+define(
+  [
+    'nativeFn'
+  ],
+  function (
+    nativeFn
+  ) {
+  'use strict';
 
   // -- PRIVATE --
 
-  // Cross-browser XHR requests (supports IE9)
+  // Cross-browser XHR requests
   function initRequest(postData, requestObj, optionalContentTypeOverride, successFnOverride) {
     var xhr = new XMLHttpRequest(),
       type = postData ? 'POST' : 'GET',
       contentType = optionalContentTypeOverride || requestObj.contentType;
 
-    if ('withCredentials' in xhr) {
-      // Everything except for IE9
-      xhr.open(type, requestObj.url, true);
-      if (contentType) {
-        // If post, the content type is what we're sending, if get it's what we're receiving
-        xhr.setRequestHeader(postData ? 'Content-Type' : 'Accept', contentType); // Can be set on XHR but not XDomainRequest
-      }
-    } else {
-      // IE9 only
-      xhr = new XDomainRequest();
-      xhr.open(type, requestObj.url);
+    xhr.open(type, requestObj.url, true);
+    if (contentType) {
+      // If post, the content type is what we're sending, if get it's what we're receiving
+      xhr.setRequestHeader(postData ? 'Content-Type' : 'Accept', contentType);
     }
 
     xhr.onload = function() {
@@ -40,12 +40,7 @@ define([], function () {
     };
 
     // Send it!
-    if (postData) {
-      xhr.send(postData);
-    }
-    else {
-      xhr.send();
-    }
+    xhr.send(postData);
   }
 
   // -- PUBLIC ---
@@ -53,7 +48,7 @@ define([], function () {
   // Gets the JSON text and returns a JS object
   function getJSON(requestObj) {
     initRequest(null, requestObj, 'application/json', function(jsonText) {
-      requestObj.success(JSON.parse(jsonText));
+      requestObj.success(nativeFn.JSON.parse(jsonText));
     });
   }
 
@@ -65,7 +60,7 @@ define([], function () {
     // Sending with text/plain instead of application/json avoids the extra CORS preflight requests
     // This is called a "Simple CORS Request" and has a number of requirements.
     // https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS#Simple_requests
-    initRequest(JSON.stringify(requestObj.data), requestObj, 'text/plain');
+    initRequest(nativeFn.JSON.stringify(requestObj.data), requestObj, 'text/plain');
   }
 
   return {

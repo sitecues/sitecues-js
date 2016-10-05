@@ -2,43 +2,62 @@
 
 var gulp = require('gulp'),
   jshint = require('gulp-jshint'),
-  check = require('gulp-check');
-
-function lint() {
-  var LINT_GLOB = [
-    'source/js/**/*.js', '!source/js/**/jquery.js', '!source/js/core/alameda-custom.js',
+  check = require('gulp-check'),
+  amdCheck = require('gulp-amdcheck'),
+  ES5_LINT_GLOB = [
+    'source/js/**/*.js',
+    '!source/js/**/jquery.js',
+    '!source/js/core/alameda-custom.js',
+    '!source/js/core/native-functions',
+    '!source/js/core/prereq/global-assignments.js'
+  ],
+  ES6_LINT_GLOB = [
     'extension/source/js/**/*.js', '!extension/source/js/templated-code/**/*',
     // TODO lint tests
     //'test/**/*.js', '!test/legacy/**/*.js'.
     'gulpfile.js', 'task/**/*.js'
   ];
 
-  return gulp.src(LINT_GLOB)
+function lintES5() {
+  return gulp.src(ES5_LINT_GLOB)
   .pipe(jshint())
   .pipe(jshint.reporter('jshint-stylish'))
   .pipe(jshint.reporter('fail'));
 }
 
-// Don't allow Function.prototype.bind() usage as it conflicts with Mootools
-// It's okay if it is commented -- preceded by //
-function checkForBindUsage() {
-  var LINT_GLOB = [
-    'source/js/**/*.js'
-  ];
+function lintES6() {
+  return gulp.src(ES6_LINT_GLOB)
+    .pipe(jshint())
+    .pipe(jshint.reporter('jshint-stylish'))
+    .pipe(jshint.reporter('fail'));
+}
 
-  return gulp.src(LINT_GLOB)
-    .pipe(check(/\.bind *\(/))
+//Don't allow calls to setTimeout, Map, bind from the global scope, they may have been overridden
+function checkForNativeFns() {
+  return gulp.src(ES5_LINT_GLOB)
+    .pipe(check(/[^\.\w]JSON *\(/))
+    .pipe(check(/[^\.\w]setTimeout *\(/))
+    .pipe(check(/[^\.\w]Map *\(/))
+    .pipe(check(/[^\.\w]bind *\(/))
     .on('error', function (err) {
-      console.log('Don\'t use Function.prototype.bind() as it is incompatible with Mootools:\n' + err);
+      console.log('Don\'t allow calls to setTimeout, Map, bind from the global scope, they may have been overridden:\n' + err);
     });
 }
 
-checkForBindUsage.displayName = 'checkForBindUsage';
+function checkAmd() {
+  return gulp.src(ES5_LINT_GLOB)
+    .pipe(amdCheck({
+      errorOnUnusedDependencies: true,
+      logUnusedDependencyPaths: false
+    }));
+}
 
 var lintTasks =
   gulp.parallel(
-    lint,
-    checkForBindUsage
+    lintES5,
+    lintES6,
+    checkAmd,
+    checkForNativeFns
   );
 
 module.exports = lintTasks;

@@ -1,32 +1,42 @@
 /**
  * Badge, toolbar and panel base view
  */
-define([
-  'core/bp/constants',
-  'core/bp/helper',
-  'core/bp/view/svg',
-  'core/bp/view/badge/placement',
-  'core/bp/model/state',
-  'core/conf/user/manager',
-  'core/bp/view/size-animation',
-  'core/platform',
-  'core/locale',
-  'core/conf/site',
-  'core/bp/view/panel/panel-classes',
-  'core/bp/view/badge/badge-classes',
-  'core/events'], function(BP_CONST,
-            helper,
-            bpSVG,
-            placement,
-            state,
-            conf,
-            sizeAnimation,
-            platform,
-            locale,
-            site,
-            panelClasses,
-            badgeClasses,
-            events) {
+define(
+  [
+    'core/bp/constants',
+    'core/bp/helper',
+    'core/bp/view/svg',
+    'core/bp/view/badge/placement',
+    'core/bp/model/state',
+    'core/conf/user/manager',
+    'core/bp/view/size-animation',
+    'core/locale',
+    'core/conf/site',
+    'core/bp/view/panel/panel-classes',
+    'core/bp/view/badge/badge-classes',
+    'core/events',
+    'core/history-change-events',
+    'core/inline-style/inline-style'
+  ],
+  /*jshint -W072 */ //Currently there are too many dependencies, so we need to tell JSHint to ignore it for now
+  function (
+    BP_CONST,
+    helper,
+    bpSVG,
+    placement,
+    state,
+    conf,
+    sizeAnimation,
+    locale,
+    site,
+    panelClasses,
+    badgeClasses,
+    events,
+    historyChange,
+    inlineStyle
+  ) {
+  /*jshint +W072 */
+  'use strict';
 
   var byId = helper.byId,
     bpContainer,
@@ -44,14 +54,14 @@ define([
   // The bpContainer lives just inside the badge placeholder, contains all the visible BP content, and can change size
   function createBpContainer() {
     // Create the svg container
-    var bpContainer = document.createElement('sc');
+    var bpContainerElem = document.createElement('sc');
 
     // Set attributes
-    helper.setAttributes(bpContainer, BP_CONST.PANEL_CONTAINER_ATTRS);
+    helper.setAttributes(bpContainerElem, BP_CONST.PANEL_CONTAINER_ATTRS);
 
-    bpContainer.innerHTML = bpSVG();
+    bpContainerElem.innerHTML = bpSVG();
 
-    return bpContainer;
+    return bpContainerElem;
   }
 
   // Can get SVG element whether currently attached to document or not
@@ -71,8 +81,7 @@ define([
 
   // If the settings are not undefined it means sitecues has been turned on before
   function hasSitecuesEverBeenOn() {
-    return typeof conf.get('zoom') !== 'undefined' ||
-      typeof conf.get('ttsOn') !== 'undefined';
+    return conf.has('zoom') || conf.has('ttsOn');
   }
 
   // Insert badge label into an element (using aria-label didn't work as NVDA cut off the label text at 100 characters)
@@ -80,8 +89,11 @@ define([
   function addLabel(badgeOrToolbarElement) {
     var badgeLabelElement = document.createElement('sc');
     badgeLabelElement.innerHTML = locale.translate(BP_CONST.STRINGS.BADGE_LABEL);
-    badgeLabelElement.style.position = 'absolute';
-    badgeLabelElement.style.left = '-9999px';
+
+    inlineStyle.set(badgeLabelElement, {
+      position : 'absolute',
+      left     : '-9999px'
+    });
 
     badgeOrToolbarElement.appendChild(badgeLabelElement);
   }
@@ -97,7 +109,6 @@ define([
     // Get the view classes that will create the desired appearance
     var isOrWillBePanel = state.isPanelRequested(),
       classes = isOrWillBePanel ? panelClasses.getViewClasses() : badgeClasses.getViewClasses();
-    classes += ' scp-ie9-' + platform.browser.isIE9;
 
     // This will cause the CSS to update
     bpContainer.setAttribute('class', classes);
@@ -124,6 +135,31 @@ define([
     badgeElement.setAttribute('class', newBadgeClassAttr);
   }
 
+  // Location of page has changed via history API.
+  // We must update our hashes so that they are not pointing to the wrong place,
+  // otherwise the badge/panel will show up empty (SC-3797)
+  function updateSvgHashes(oldPath, newPath) {
+    function updateAttribute(element, attribute) {
+      var oldValue = element.getAttribute(attribute),
+        newValue = oldValue.replace(oldPath + '#', newPath + '#');
+
+      element.setAttribute(attribute, newValue);
+    }
+
+    function updateElements(selector, attribute) {
+      var elements = svgElement.querySelectorAll(selector),
+        index = elements.length;
+
+      while (index --) {
+        updateAttribute(elements[index], attribute);
+      }
+
+    }
+    updateElements('use', 'xlink:href');
+    updateElements('a', 'href');
+    updateElements('[filter]', 'filter');
+  }
+
   // This function augments the badge placement element, which is passed in.
   // This is an element that will have <svg> and other markup inserted inside of it.
   //
@@ -131,12 +167,14 @@ define([
   // the websites placeholder.  It sets the SVG height and width so that it visually covers the
   // placeholder/badgeElement.  It binds event handlers to append the BPContainer to <html> or
   // the badgeElement (switching parent).
-  function init(badgePlacementElem, onComplete) {
+  function init(badgePlacementElem) {
 
     // Create the container and insert the SVG
     badgeElement = badgePlacementElem;
     bpContainer = createBpContainer();
     svgElement = getSVGElement(bpContainer);
+
+    historyChange.on(updateSvgHashes);
 
     // Real settings or fake initial settings?
     if (!SC_EXTENSION) {
@@ -159,10 +197,6 @@ define([
 
     // Set badge classes. Render the badge. Render slider.
     update();
-
-    // Completion
-    onComplete();
-
   }
 
   return {

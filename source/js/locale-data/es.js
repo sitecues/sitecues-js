@@ -5,8 +5,8 @@ define([], function() {
   return {
     // ARIA labels
     // - Main
-    sitecues_main_panel: 'Panel principal de sitecues',
-    badge_label: 'Herramientas de acercamiento y de voz de sitecues. sitecues ayuda a los usuarios que no tienen su propio lector de pantalla o magnificador de pantalla.',
+    sitecues_main_panel: 'Panel principal de Sitecues',
+    badge_label: 'Herramientas de acercamiento y de voz de Sitecues. Sitecues ayuda a los usuarios que no tienen su propio lector de pantalla o magnificador de pantalla.',
     zoom_in: 'aumentar acercamiento',
     zoom_out: 'aisminuir acercamiento',
     // - Secondary
@@ -41,7 +41,7 @@ define([], function() {
     tell_us_something: 'Cuéntanos algo...',
     thank_you: 'Gracias',
     // - About
-    about_preamble: 'Este sitio web ha añadido sitecues para que sea más fácil de ver, oír y usar. Para mayor información por favor visite ',
+    about_preamble: 'Este sitio web ha añadido Sitecues para que sea más fácil de ver, oír y usar. Para mayor información por favor visite ',
     about_rate_us: 'Le animamos a proporcionar comentarios sobre su experiencia.',
     zoom_and_speech: 'amplia y habla'
   };

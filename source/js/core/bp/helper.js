@@ -1,5 +1,12 @@
 // It is too similar to utils.js which is confusing
-define(['core/platform', 'core/bp/constants'], function(platform, BP_CONST) {
+define(
+  [
+    'core/bp/constants'
+  ],
+  function(
+    BP_CONST
+  ) {
+  'use strict';
   /**
    *** Getters ***
    */
@@ -53,6 +60,7 @@ define(['core/platform', 'core/bp/constants'], function(platform, BP_CONST) {
 
   // Leave this method here rather than take it out to 'util / common' to avoid extra modules deps.
   // In the end, we only want to load badge on the page w/o any other modules.
+  // Important note: do not use this function to set inline styles on original (non-Sitecues) elements
   function setAttributes(element, attrs) {
     for (var attrName in attrs) {
       if (attrs.hasOwnProperty(attrName)) {
@@ -144,6 +152,25 @@ define(['core/platform', 'core/bp/constants'], function(platform, BP_CONST) {
     });
   }
 
+  // This will roughly help us group similar types of element clicks
+  function getAriaOrNativeRole(elem) {
+    var role = elem.getAttribute('role'),
+      tag;
+    if (!role) {
+      // No role: use tag name
+      tag = elem.localName;
+      if (tag === 'input') {
+        // Tag name is input, use @type
+        role = elem.getAttribute('type');
+      }
+      else if (tag === 'g' || tag === 'div') {
+        // Tag name is g|div, use 'group'
+        role = 'group';
+      }
+    }
+    return role;
+  }
+
   return {
     byId: byId,
     invalidateId: invalidateId,
@@ -154,6 +181,7 @@ define(['core/platform', 'core/bp/constants'], function(platform, BP_CONST) {
     getNumberFromString: getNumberFromString,
     getEventTarget: getEventTarget,
     cancelEvent: cancelEvent,
-    fixTextAnchors: fixTextAnchors
+    fixTextAnchors: fixTextAnchors,
+    getAriaOrNativeRole: getAriaOrNativeRole
   };
 });

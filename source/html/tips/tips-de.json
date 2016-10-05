@@ -28,7 +28,7 @@
   "guide": {
     "full": {
       "label": "Vollständige Dokumentation",
-      "action": "sitecues verwenden"
+      "action": "Sitecues verwenden"
     },
     "keyboard": {
       "label": "Hilfe zu Tastatur",
@@ -48,6 +48,6 @@
 
   "demopage": {
     "welcome": "Willkommen!",
-    "blurb": "sitecues liest das Web."
+    "blurb": "Sitecues liest das Web."
   }
 }

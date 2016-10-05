@@ -9,7 +9,8 @@ define([], function () {
 
   constants.ZOOM_PRECISION = 3; // Decimal places allowed
 
-  constants.SITECUES_ZOOM_ID = 'sitecues-js-zoom';
+  constants.KEYFRAMES_ID    = 'sc-keyframes-zoom';
+  constants.ZOOM_TARGETS_ID = 'sc-zoom-targets';
 
   constants.ANIMATION_END_EVENTS = 'animationend webkitAnimationEnd MSAnimationEnd';
 
@@ -22,6 +23,13 @@ define([], function () {
   constants.REPAINT_FOR_CRISP_TEXT_DELAY = 100;          // This is conjured out of thin air. Just seems to work.
 
   constants.CRISPING_ATTRIBUTE = 'data-sc-crisp';
+  constants.ZOOM_TARGET_ATTR   = 'data-sc-zoom-target';
+
+  constants.ZOOM_TARGET_SELECTOR  = '[' + constants.ZOOM_TARGET_ATTR + ']';
+  constants.ZOOM_TARGET_ID        = 'sitecues-zoom-targets';
+
+  constants.SITECUES_ZOOM_ID = 'sitecues-js-zoom';
+  constants.SITECUES_ZOOM_FORMS_ID = 'sitecues-js-zoom-form-fix';
 
   constants.UNPINCH_FACTOR = 0.015; // How much the unpinch delta affects zoom
 
@@ -34,5 +42,4 @@ define([], function () {
   constants.GLIDE_CHANGE_INTERVAL_MS = 30;  // How often to call back with a new zoom value
 
   return constants;
-
 });

@@ -1,19 +1,6 @@
 /* ----------- Remove .scp-no-ie elements ------------*/
 .scp-no-ie { display: none; }
 
-/* ----------- Current theme indicator ---------------*/
-
-sc-button[data-setting-name="themeName"][aria-pressed="true"]:after {
-  content: "";
-  position: absolute;
-  left: calc(50% - 10px);
-  background-image: url('../images/settings/theme-indicator.svg');
-  top: 85px;
-  height: 20px !important;
-  width: 24px !important;
-  pointer-events: none;
-}
-
 /* ------------- Textarea placeholder ------------ */
 
 #scp-feedback-textarea:-ms-input-placeholder {

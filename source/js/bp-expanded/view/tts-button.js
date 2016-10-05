@@ -1,5 +1,28 @@
-define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/locale', 'core/conf/user/manager', 'core/events', 'core/platform'],
-  function (BP_CONST, helper, state, locale, conf, events, platform) {
+define(
+  [
+    'core/bp/constants',
+    'core/bp/helper',
+    'core/bp/model/state',
+    'core/locale',
+    'core/conf/user/manager',
+    'core/events',
+    'core/platform',
+    'nativeFn',
+    'core/inline-style/inline-style'
+  ],
+  function (
+    BP_CONST,
+    helper,
+    state,
+    locale,
+    conf,
+    events,
+    platform,
+    nativeFn,
+    inlineStyle
+  ) {
+  'use strict';
+
   var
     waveAnimationTimer,
     waveAnimationStepNum,
@@ -10,7 +33,9 @@ define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/loca
 
   function toggleSpeech() {
     require(['audio/audio'], function(audio) {
-      audio.toggleSpeech();
+      // We do a timeout here so that this occurs after any key handlers that stop speech
+      // Otherwise, the same Enter/space press that starts speaking the cue could immediately silence the same cue
+      nativeFn.setTimeout(audio.toggleSpeech, 0);
     });
   }
 
@@ -96,12 +121,12 @@ define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/loca
         opacityData = BP_CONST.ANIMATE_WAVES_OPACITY;
 
     for (var waveNum = 0; waveNum < waves.length; waveNum ++) {
-      waves[waveNum].style.opacity = opacityData[waveNum][waveAnimationStepNum];
+      inlineStyle(waves[waveNum]).opacity = opacityData[waveNum][waveAnimationStepNum];
     }
 
     if (++ waveAnimationStepNum < opacityData[0].length) {
       // Not finished with animation, do it again
-      waveAnimationTimer = setTimeout(nextWaveAnimationStep, BP_CONST.ANIMATE_WAVES_STEP_DURATION);
+      waveAnimationTimer = nativeFn.setTimeout(nextWaveAnimationStep, BP_CONST.ANIMATE_WAVES_STEP_DURATION);
     }
     else {
       endWaveAnimation();
@@ -117,7 +142,7 @@ define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/loca
     waveAnimationStepNum = 0;
 
     for (var waveNum = 0; waveNum < waves.length; waveNum ++) {
-      waves[waveNum].style.opacity = '';
+      inlineStyle(waves[waveNum]).opacity = '';
     }
 
   }

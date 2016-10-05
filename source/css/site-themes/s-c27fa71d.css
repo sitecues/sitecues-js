@@ -3,39 +3,39 @@
 /* -------------- Dark theme --------------- */
 
 /* Foreground text was too dark */
-.sitecues-reverse-theme .story, .sitecues-reverse-theme .storynews {
+.sitecues-dark-theme .story, .sitecues-dark-theme .storynews {
   color: #eee !important;
 }
 
 /* Content wrapper background image created white background in dark theme */
-.sitecues-reverse-theme #h_contentwrapper {
+.sitecues-dark-theme #h_contentwrapper {
   background-image: none !important;
 }
 
 /* Avoid light text on light bg */
-.sitecues-reverse-theme .RadMenu_QuickLinks .link {
+.sitecues-dark-theme .RadMenu_QuickLinks .link {
   color: #000;
 }
 
-/* Badge did not get auto-reversed */
-.sitecues-reverse-theme #scp-zoom-slider-thumb {
-  fill: #447AC4
+/* Badge did not get auto-darkd */
+.sitecues-dark-theme #scp-zoom-slider-thumb {
+  fill: #447AC4;
 }
 
-.sitecues-reverse-theme #scp-wave1 {
-  fill: #80A9F8
+.sitecues-dark-theme #scp-wave1 {
+  fill: #80A9F8;
 }
 
-.sitecues-reverse-theme #scp-wave2 {
-  fill: #6B9AE0
+.sitecues-dark-theme #scp-wave2 {
+  fill: #6B9AE0;
 }
 
-.sitecues-reverse-theme #scp-wave3 {
-  fill: #447AC4
+.sitecues-dark-theme #scp-wave3 {
+  fill: #447AC4;
 }
 
-.sitecues-reverse-theme .scp-A-button, .sitecues-reverse-theme #scp-head, .sitecues-reverse-theme #scp-zoom-slider-bar {
-  fill: #fff
+.sitecues-dark-theme .scp-A-button, .sitecues-dark-theme #scp-head, .sitecues-dark-theme #scp-zoom-slider-bar {
+  fill: #fff;
 }
 
 

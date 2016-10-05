@@ -17,22 +17,20 @@ define(
     'core/conf/site',
     '$',
     'audio/speech-builder',
-    'core/platform',
     'core/locale',
-    'core/metric',
+    'core/metric/metric',
     'core/conf/urls',
     'audio/text-select',
-    'core/events'
+    'core/data-map',
+    'core/events',
+    'audio/local-player',
+    'audio/network-player'
   ],
-  function(constant, conf, site, $, builder, platform, locale, metric, urls, textSelect, events) {
+  function(constant, conf, site, $, builder, locale, metric, urls, textSelect, dataMap, events, localPlayer, networkPlayer) {
 
   var ttsOn = false,
     lastPlayer,
     isInitialized,
-    // TODO add more trigger types, e.g. shift+arrow, shift+space
-    TRIGGER_TYPES = {
-      HIGHLIGHT: 'shift'
-    },
     speechStrategy = constant.speechStrategy;
 
   function isBusy() {
@@ -46,30 +44,29 @@ define(
     if (!content) {
       return; // Nothing to read
     }
-    stopAudio();
 
-    speakContentImpl(content, TRIGGER_TYPES.HIGHLIGHT);
+    speakContentImpl(content, constant.TRIGGER_TYPES.HIGHLIGHT);
   }
 
   function speakContentImpl($content, triggerType) {
+    stopAudio();
+
     var text = builder.getText($content);
     if (text) {
-      speakText(text, getElementAudioLang($content[0]), triggerType);
+      speakText(text, $content[0], triggerType);
     }
   }
 
-  function noop() {
-  }
-
   // text and triggerType are optional
-  // @lang is the full or partial language for the speech as we know it, e.g. en-US or en
-  function speakText(text, lang, triggerType) {
+  // @rootNode is root node of the text to be spoken, if available -- it will be used to get the locale
+  function speakText(text, rootNode, triggerType) {
     stopAudio();  // Stop any currently playing audio and halt keydown listener until we're playing again
     if (!text.trim()) {
       return; // Nothing to speak
     }
 
-    var startRequestTime = Date.now();
+    var startRequestTime = Date.now(),
+      textLocale = getAudioLocale(rootNode);
     addStopAudioHandlers();
 
     function onSpeechPlaying(isLocal) {
@@ -84,20 +81,22 @@ define(
     }
 
     function speakLocally(onUnavailable) {
-      var onUnavailableFn = onUnavailable || noop;
+      var onUnavailableFn = onUnavailable || fireNotBusyEvent;
       if (isLocalSpeechAllowed()) {
-        require(['local-player/local-player'], function (localPlayer) {
-          lastPlayer = localPlayer;
-          return localPlayer
-            .speak({
-              text: text,
-              locale: lang,
-              onStart: function () {
-                onSpeechPlaying(true);
-              }
-            })
-            .catch(onUnavailableFn);
-        });
+        lastPlayer = localPlayer;
+        fireBusyEvent();
+        return localPlayer
+          .speak({
+            text: text,
+            locale: textLocale,
+            onStart: function () {
+              onSpeechPlaying(true);
+            }
+          })
+          .then(fireNotBusyEvent)
+          .catch(function() {
+            onUnavailableFn(); // Call with no arguments (don't pass on the error value)
+          });
       }
       else {
         onUnavailableFn();
@@ -105,32 +104,32 @@ define(
     }
 
     function speakViaNetwork(onUnavailable) {
-      var onUnavailableFn = onUnavailable || noop;
-      if (isNetworkSpeechAllowed(lang)) {
-        require(['network-player/network-player'], function (networkPlayer) {
-          lastPlayer = networkPlayer;
+      var onUnavailableFn = onUnavailable || fireNotBusyEvent;
+      if (isNetworkSpeechAllowed(textLocale)) {
+        lastPlayer = networkPlayer;
+        fireBusyEvent();
 
-          var TTSUrl = getTTSUrl(text, lang);
+        var ttsUrl = getTTSUrl(text, textLocale);
 
-          networkPlayer
-            .play({
-              url: TTSUrl,
-              onStart: function () {
-                onSpeechPlaying(false);
-              }
-            })
-            .catch(function() {
-              rerouteNetworkSpeechLang(lang);
-              onUnavailableFn();
-            });
-        });
+        networkPlayer
+          .play({
+            url: ttsUrl,
+            onStart: function () {
+              onSpeechPlaying(false);
+            }
+          })
+          .then(fireNotBusyEvent)
+          .catch(function() {
+            rerouteNetworkSpeechLang(textLocale);
+            onUnavailableFn();   // Call with no arguments (don't pass on the error value)
+          });
       }
       else {
         onUnavailableFn();
       }
     }
 
-    var speakViaNetworkFn = SC_LOCAL ? noop : speakViaNetwork; // Helps the minifier
+    var speakViaNetworkFn = SC_LOCAL ? fireNotBusyEvent : speakViaNetwork; // Helps the minifier
 
     if (isLocalSpeechPreferred()) {
       speakLocally(speakViaNetworkFn);
@@ -165,44 +164,99 @@ define(
     }
   }
 
-  // Get language that applies to element (optional param)
-  // Fallback on document and then browser default language
-  function getElementAudioLang(element) {
-    while (element) {
-      var lang = element.getAttribute('lang') || element.getAttribute('xml:lang');
-      if (lang) {
-        return locale.getAudioLocale(lang);
-      }
-      element = element.parentElement;
+  function fireBusyEvent() {
+    if (isBusy()) {
+      // Already fired
+      return;
     }
-
-    return locale.getAudioLocale();
+    events.emit(constant.AUDIO_BUSY_EVENT, true);
   }
 
-  function getDocumentAudioLang() {
-    return getElementAudioLang(document.body);
+  function fireNotBusyEvent() {
+    if (isBusy()) {
+      // Still has other audio to play -- one of the players is still busy
+      return;
+    }
+    events.emit(constant.AUDIO_BUSY_EVENT, false);
+  }
+
+  // Get language that applies to node (optional param), otherwise the document body
+  // If no locale found, falls back on document and then browser default language
+  // Returns a full country-affected language, like en-CA when the browser's language matches the site's language prefix.
+  // For example, if an fr-CA browser visits an fr-FR website, then fr-CA is returned instead of the page code,
+  // because that is the preferred accent for French.
+  // However, if the fr-CA browser visits an en-US or en-UK page, the page's code is returned because the
+  // user's preferred English accent in unknown
+  function getAudioLocale(optionalStartNode) {
+    function toPreferredRegion(contentLocale) {
+      return locale.swapToPreferredRegion(contentLocale);
+    }
+
+    // Get this first, because Google translate overwrites all text in the document, but not lang attributes
+    var translationLocale = locale.getTranslationLocale();
+    if (translationLocale) {
+      return toPreferredRegion(translationLocale);
+    }
+
+    var node = optionalStartNode || document.body;
+
+    if (node.nodeType !== node.ELEMENT_NODE) {
+      // May have started on text node
+      node = node.parentElement;
+    }
+
+    while (node) {
+      var nodeLocale = node.getAttribute('lang') || node.getAttribute('xml:lang');
+      if (nodeLocale && locale.isValidLocale(nodeLocale)) {
+        return toPreferredRegion(nodeLocale);
+      }
+      node = node.parentElement;
+    }
+
+    return toPreferredRegion(locale.getPageLocale());
+  }
+
+  function getAudioCueTextAsync(cueName, cueTextLocale, callback) {
+    var
+      AUDIO_CUE_DATA_PREFIX = 'locale-data/cue/',
+      cueModuleName = AUDIO_CUE_DATA_PREFIX + cueTextLocale;
+
+    dataMap.get(cueModuleName, function(data) {
+      callback(data[cueName] || '');
+    });
+  }
+
+  function toCueTextLocale(cueAudioLocale) {
+    var locale = cueAudioLocale.toLowerCase(),
+      lang = locale.split('-')[0];
+
+    function useIfAvailable(tryLocale) {
+      return constant.AVAILABLE_CUES[tryLocale] && tryLocale;
+    }
+
+    return useIfAvailable(locale) || useIfAvailable(lang);
   }
 
   // Puts in delimiters on both sides of the parameter -- ? before and & after
-  // lang is an optional parameter. If it doesn't exist, the document language will be used.
-  function getLanguageParameter(lang) {
-    return '?l=' + (lang || getDocumentAudioLang()) + '&';
+  // locale is a required parameter
+  function getLocaleParameter(locale) {
+    return '?l=' + locale + '&';
   }
 
-  function getAudioKeyUrl(key, lang) {  // TODO why does an audio cue need the site id?
+  function getCueUrl(name, locale) {  // TODO why does an audio cue need the site id?
     var restOfUrl = 'cue/site/' + site.getSiteId() + '/' +
-      key + '.' + getMediaTypeForNetworkAudio() + getLanguageParameter(lang);
+      name + '.' + getMediaTypeForNetworkAudio() + getLocaleParameter(locale);
     return urls.getApiUrl(restOfUrl);
   }
 
   /**
    * Get URL for speaking text
    * @param text  Text to be spoken
-   * @param lang  Optional language parameter -- defaults to document language
+   * @param locale  required locale parameter
    * @returns {string} url
    */
-  function getTTSUrl(text, lang) {
-    var restOfUrl = 'tts/site/' + site.getSiteId() + '/tts.' + getMediaTypeForNetworkAudio() + getLanguageParameter(lang) + 't=' + encodeURIComponent(text);
+  function getTTSUrl(text, locale) {
+    var restOfUrl = 'tts/site/' + site.getSiteId() + '/tts.' + getMediaTypeForNetworkAudio() + getLocaleParameter(locale) + 't=' + encodeURIComponent(text);
     return urls.getApiUrl(restOfUrl);
   }
 
@@ -228,30 +282,32 @@ define(
   }
 
   /*
-   * Uses a provisional player to play back audio by key, used for audio cues.
+   * Uses a provisional player to play back audio by cue name, used for audio cues.
    */
-  function speakByKey(key) {
+  function speakCueByName(name) {
     stopAudio();  // Stop any currently playing audio
 
-    var lang = getDocumentAudioLang(); // Use document language for cues, e.g. en-US or en
+    var cueAudioLocale = getAudioLocale(); // Use document language for cue voice, e.g. en-US or en
     addStopAudioHandlers();
 
     function speakLocally(onUnavailable) {
-      var onUnavailableFn = onUnavailable || noop,
-        cueLang = getCueLanguage(lang);
-      if (cueLang && isLocalSpeechAllowed()) {
-        require(['local-player/local-player'], function (localPlayer) {
-          lastPlayer = localPlayer;
-          locale.getAudioCueTextAsync(key, function (cueText) {
-            if (cueText) {
-              localPlayer
-                .speak({
-                  text: cueText,
-                  locale: cueLang
-                })
-                .catch(onUnavailableFn);
-            }
-          });
+      var onUnavailableFn = onUnavailable || fireNotBusyEvent,
+        cueTextLocale = toCueTextLocale(cueAudioLocale);  // Locale for text (likely just the 2-letter lang prefix)
+      if (cueTextLocale && isLocalSpeechAllowed()) {
+        lastPlayer = localPlayer;
+        fireBusyEvent();
+        getAudioCueTextAsync(name, cueTextLocale, function (cueText) {
+          if (cueText) {
+            localPlayer
+              .speak({
+                text: cueText,
+                locale: cueAudioLocale
+              })
+              .then(fireNotBusyEvent)
+              .catch(function() {
+                onUnavailableFn();
+              });
+          }
         });
       }
       else {
@@ -260,16 +316,19 @@ define(
     }
 
     function speakViaNetwork(onUnavailable) {
-      var onUnavailableFn = onUnavailable || noop;
-      if (isNetworkSpeechAllowed(lang)) {
-        require(['network-player/network-player'], function (networkPlayer) {
-          lastPlayer = networkPlayer;
-          var url = getAudioKeyUrl(key, lang);
-          networkPlayer
-            .play({
-              url: url
-            })
-            .catch(onUnavailableFn);
+      var onUnavailableFn = onUnavailable || fireNotBusyEvent;
+      if (isNetworkSpeechAllowed(cueAudioLocale)) {
+        lastPlayer = networkPlayer;
+        fireBusyEvent();
+        var url = getCueUrl(name, cueAudioLocale);
+        networkPlayer
+          .play({
+            isSpeech: true,
+            url: url
+          })
+          .then(fireNotBusyEvent)
+          .catch(function() {
+            onUnavailableFn();
           });
       }
       else {
@@ -277,7 +336,7 @@ define(
       }
     }
 
-    var speakViaNetworkFn = SC_LOCAL ? noop : speakViaNetwork;
+    var speakViaNetworkFn = SC_LOCAL ? fireNotBusyEvent : speakViaNetwork;
 
     if (isLocalSpeechPreferred()) {
       speakLocally(speakViaNetworkFn);
@@ -294,10 +353,8 @@ define(
 
       var url = urls.resolveResourceUrl('earcons/' + earconName + '.' + getMediaTypeForNetworkAudio());
 
-      require(['network-player/network-player'], function (networkPlayer) {
-        networkPlayer.play({
-          url: url
-        });
+      networkPlayer.play({
+        url: url
       });
     }
   }
@@ -356,9 +413,9 @@ define(
       if (getClientSpeechStrategy.cached === speechStrategy.AUTO) {
         getClientSpeechStrategy.cached = constant.autoStrategy;
       }
-      if (SC_DEV) {
-        console.log('Speech strategy: ' + getClientSpeechStrategy.cached);
-      }
+      // if (SC_DEV) {
+      //   console.log('Speech strategy: ' + getClientSpeechStrategy.cached);
+      // }
     }
 
     return getClientSpeechStrategy.cached;
@@ -385,20 +442,10 @@ define(
   // This language failed on the network -- disallow it for this tab (uses sessionStorage)
   function rerouteNetworkSpeechLang(lang) {
     // Set to any value to reroute this language to local speech
-    window.sessionStorage.setItem(getRerouteNetworkSpeechLangKey(lang), true);
-  }
-
-  function getCueLanguage(lang) {
-    var longLang = lang.toLowerCase(),
-      shortLang;
-
-    function useIfAvailable(tryLang) {
-      return constant.AVAILABLE_CUES[tryLang] && tryLang;
+    try {
+      window.sessionStorage.setItem(getRerouteNetworkSpeechLangKey(lang), true);
     }
-
-    shortLang = longLang.split('-')[0];
-
-    return useIfAvailable(longLang) || useIfAvailable(shortLang);
+    catch(ex) {}
   }
 
   function init() {
@@ -416,7 +463,7 @@ define(
      * A highlight box was closed.  Stop/abort/dispose of the player
      * attached to it.
      */
-    events.on('hlb/closed keys/non-shift-key-pressed', stopAudio);
+    events.on('hlb/closed', stopAudio);
 
     if (SC_DEV) {
       // For debugging purposes
@@ -435,7 +482,7 @@ define(
     toggleSpeech: toggleSpeech,
     isSpeechEnabled: isSpeechEnabled,
     isBusy: isBusy,
-    speakByKey: speakByKey,
+    speakCueByName: speakCueByName,
     speakContent: speakContent,
     speakText: speakText,
     playEarcon: playEarcon,

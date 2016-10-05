@@ -44,7 +44,7 @@ define(['core/conf/user/manager', 'audio/audio'], function(conf, audio) {
    * Play speech cue
    */
   function playSpeechCue(isEnabled) {
-    audio.speakByKey(isEnabled ? getSpeechOnCue() : VERBAL_CUE_SPEECH_OFF);
+    audio.speakCueByName(isEnabled ? getSpeechOnCue() : VERBAL_CUE_SPEECH_OFF);
   }
 
   // Play descriptive zoom cue if necessary
@@ -53,7 +53,7 @@ define(['core/conf/user/manager', 'audio/audio'], function(conf, audio) {
     // than we started, and we haven't already cued, then play an audio
     // cue to explain highlighting
     if (zoom >= HIGH_ZOOM_THRESHOLD && willPlayDescriptiveCue(VERBAL_CUE_HIGH_ZOOM)) {
-      audio.speakByKey(VERBAL_CUE_HIGH_ZOOM);
+      audio.speakCueByName(VERBAL_CUE_HIGH_ZOOM);
     }
   }
 

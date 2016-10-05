@@ -2,9 +2,11 @@ define(['page/zoom/constants', 'page/zoom/config/config'], function (constants, 
 
   'use strict';
 
-  var MAX            = constants.MAX_ZOOM,
-      MIN            = constants.MIN_ZOOM,
-      ZOOM_PRECISION = constants.ZOOM_PRECISION;
+  var
+    MAX_FIXED_ZOOM = 1.8,
+    MAX            = constants.MAX_ZOOM,
+    MIN            = constants.MIN_ZOOM,
+    ZOOM_PRECISION = constants.ZOOM_PRECISION;
 
   // Make sure the zoom value is within the min and max, and does not use more decimal places than we allow
   function toValidRange(value) {
@@ -16,7 +18,7 @@ define(['page/zoom/constants', 'page/zoom/config/config'], function (constants, 
     }
 
     // value is too big
-    if (value > MAX){
+    if (value > MAX) {
       return MAX;
     }
 
@@ -25,7 +27,7 @@ define(['page/zoom/constants', 'page/zoom/config/config'], function (constants, 
   }
 
   // This is the zoom that we will still restrict the width
-  function forFluidWidthRestriction(currZoom) {
+  function forFluidWidth(currZoom) {
     // Adjust max zoom for width restrictions for current window width
     // The max zoom for width restriction is set for a specific size of window
     // We use a maximized window on a MacBook pro retina screen (1440px wide)
@@ -36,9 +38,14 @@ define(['page/zoom/constants', 'page/zoom/config/config'], function (constants, 
     return Math.min(currZoom, maxZoomToRestrictWidth); // Can't be larger than current zoom
   }
 
+  function forFixedZoomTarget(completedZoom) {
+    return Math.min(MAX_FIXED_ZOOM, completedZoom);
+  }
+
   return {
     toValidRange: toValidRange,
-    forFluidWidthRestriction: forFluidWidthRestriction
+    forFluidWidth: forFluidWidth,
+    forFixedZoomTarget: forFixedZoomTarget
   };
 
 });

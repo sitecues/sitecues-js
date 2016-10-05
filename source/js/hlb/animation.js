@@ -2,18 +2,34 @@
   This module animates the HLB.  Depending on the browser, the mechanism
   of animation is either CSS3 Transitions or jQuery.animate.
  */
-define(['hlb/dimmer', 'page/util/common', 'hlb/positioning', 'core/platform', '$'],
-  function (dimmer, common, hlbPositioning, platform, $) {
+define(
+  [
+    'hlb/dimmer',
+    'page/util/common',
+    'hlb/positioning',
+    'core/platform',
+    '$',
+    'hlb/constants',
+    'nativeFn',
+    'core/inline-style/inline-style'
+  ],
+  function (
+    dimmer,
+    common,
+    hlbPositioning,
+    platform,
+    $,
+    constants,
+    nativeFn,
+    inlineStyle
+  ) {
+  'use strict';
 
   var INFLATION_SPEED = 400, // Default inflation duration
       INFLATION_SPEED_FAST = 0, // Inflation duration when retargeting -- need > 0 so that animation end fires correctly
       DEFLATION_SPEED = 150, // Default deflation duration
 
-      getStartingScale = hlbPositioning.getStartingScale,
-
-      animate = platform.browser.isIE9 ? animateJs : animateCss,
-
-      animationTimerIE9;
+      getStartingScale = hlbPositioning.getStartingScale;
 
   /**
    * [transitionInHLB animates the inflation of the HLB and background dimmer]
@@ -22,16 +38,16 @@ define(['hlb/dimmer', 'page/util/common', 'hlb/positioning', 'core/platform', '$
   function transitionInHLB(doShowQuickly, data) {
 
     // Dim the background!
-    dimmer.dimBackgroundContent(INFLATION_SPEED, data.$hlb.parent());
+    dimmer.dimBackgroundContent(INFLATION_SPEED, $('#' + constants.HLB_WRAPPER_ID));
 
-    var $hlb = data.$hlb,
+    var
+      $hlb  = data.$hlb,
       speed = doShowQuickly ? INFLATION_SPEED_FAST : INFLATION_SPEED,
-      startingScale = getStartingScale($hlb),
-      hlbStyle = $hlb[0].style;
+      startingScale = getStartingScale($hlb);
 
-    hlbStyle[platform.transformOriginProperty] = data.originCSS;
+    inlineStyle($hlb[0]).transformOrigin = data.originCSS;
 
-    animate($hlb[0], startingScale, hlbPositioning.getFinalScale($hlb), speed, data.translateCSS, data.onHLBReady);
+    animateCss($hlb[0], startingScale, hlbPositioning.getFinalScale($hlb), speed, data.translateCSS, data.onHLBReady);
   }
 
   /**
@@ -44,9 +60,6 @@ define(['hlb/dimmer', 'page/util/common', 'hlb/positioning', 'core/platform', '$
 
     // Un-dim the background!
     dimmer.undimBackgroundContent(DEFLATION_SPEED);
-
-    // Stop any IE9 animations
-    clearTimeout(animationTimerIE9);
 
     // Do we bother animating the deflation?
 
@@ -62,48 +75,28 @@ define(['hlb/dimmer', 'page/util/common', 'hlb/positioning', 'core/platform', '$
       return;
     }
 
-    animate($hlb[0], getCurrentScale($hlb), getStartingScale($hlb), DEFLATION_SPEED, data.translateCSS, data.onHLBClosed);
-  }
-
-  function animateJs(hlbElement, startScale, endScale, speed, translateCSS, onCompleteFn) {
-
-    var startTime = Date.now();
-
-    function nextFrame() {
-      var timeElapsed = Date.now() - startTime,
-        percentComplete = timeElapsed >= speed ? 1 : timeElapsed / speed,
-        currentScale = startScale + (endScale - startScale) * percentComplete,
-        transformValue = 'scale(' + currentScale + ') ' + translateCSS;
-
-      hlbElement.style[platform.transformProperty] = transformValue;
-      if (percentComplete < 1) {
-        animationTimerIE9 = setTimeout(nextFrame, 16);
-      }
-      else if (onCompleteFn) {
-        onCompleteFn();
-      }
-    }
-    nextFrame();
+    animateCss($hlb[0], getCurrentScale($hlb), getStartingScale($hlb), DEFLATION_SPEED, data.translateCSS, data.onHLBClosed);
   }
 
   function animateCss(hlbElement, startScale, endScale, speed, translateCSS, onCompleteFn) {
-    var $hlbElement = $(hlbElement),
-      fromCss,
-      toCss = { transition: '', transform : 'scale(' + endScale + ') ' + translateCSS };
+    var
+      fromCss = {},
+      toCss   = {
+        transform: 'scale(' + endScale + ') ' + translateCSS
+      };
+
+    inlineStyle(hlbElement).transitionProperty = 'none';// Clear any existing transition
 
     if (!speed) {
       // No animation -- do it immediately and return
-      $hlbElement.css(toCss);
+      inlineStyle.set(hlbElement, toCss);
       onCompleteFn();
       return;
     }
 
     // Animate fromCss -> toCss
-    fromCss = {
-      transition: '',
-      transform: 'scale(' + startScale + ') ' + translateCSS
-    };
-    $hlbElement.css(fromCss);
+    fromCss.transform = 'scale(' + startScale + ') ' + translateCSS;
+    inlineStyle.set(hlbElement, fromCss);
 
     function onTransitionEnd() {
       hlbElement.removeEventListener(platform.transitionEndEvent, onTransitionEnd);
@@ -112,9 +105,9 @@ define(['hlb/dimmer', 'page/util/common', 'hlb/positioning', 'core/platform', '$
 
     // Allow the from CSS to register so that setting the toCss actually animates there
     // rather than just setting the toCss and ignoring the fromCss
-    setTimeout(function() {
-      toCss.transition = platform.transformProperty + ' ' + speed + 'ms ease-in-out';
-      $hlbElement.css(toCss);
+    nativeFn.setTimeout(function () {
+      toCss.transition = 'transform ' + speed + 'ms ease-in-out';
+      inlineStyle.set(hlbElement, toCss);
       hlbElement.addEventListener(platform.transitionEndEvent, onTransitionEnd);
     }, 0);
   }
@@ -131,7 +124,6 @@ define(['hlb/dimmer', 'page/util/common', 'hlb/positioning', 'core/platform', '$
    * @example "matrix(1, 0, 0, 1, 1888.0610961914063, 2053.21875)"
    */
   function isHLBZoomed($hlb) {
-
     // If there isn't any transform, then it isn't scaled.
     var scale = getCurrentScale($hlb);
     return scale > hlbPositioning.getStartingScale($hlb);

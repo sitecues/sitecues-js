@@ -4,7 +4,17 @@
  * Currently the speech dictionary resides here until we can move it to the server.
  */
 
-define(['$'], function($) {
+define(
+  [
+    '$',
+    'core/conf/urls'
+  ],
+  function (
+    $,
+    urls
+  ) {
+  'use strict';
+
   var textBuffer = '',
     TEXT_NODE = 3,
     ELEMENT_NODE = 1;
@@ -178,7 +188,7 @@ define(['$'], function($) {
       textEquiv = textEquiv || node.getAttribute('title') || '';
     }
 
-    else if ($node.is('input,textarea')) {
+    else if ($node.is('input:not([type="password"]),textarea')) {
       // value, placeholder and title on these form controls
       textEquiv = textEquiv || getInputLabelAttributeText(node);
       value = node.value;
@@ -244,7 +254,13 @@ define(['$'], function($) {
     else {
       hasExtraSpace = parseFloat(styles.paddingRight) || parseFloat(styles.marginRight);
     }
+
     doWalkChildren = appendTextEquivAndValue(node, $node, doWalkChildren);
+
+    if (node.localName === 'iframe' && node.src && urls.isCrossOrigin(node.src)) {
+      // Don't try to access the nested document of cross origin iframes
+      return;
+    }
 
     if (doWalkChildren) {
       // Recursively add text from children (both elements and text nodes)

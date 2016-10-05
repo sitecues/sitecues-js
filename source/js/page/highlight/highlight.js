@@ -2,12 +2,48 @@
 // TODO Test! Especially in IE
 //TODO: Break this module down a bit, there are too many dependencies and it is huge
 /*jshint -W072 */ //Currently there are too many dependencies, so we need to tell JSHint to ignore it for now
-define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 'page/highlight/traitcache',
-        'page/highlight/highlight-position', 'page/util/common', 'page/util/color', 'page/util/geo', 'page/util/element-classifier',
-        'core/platform', 'page/highlight/constants', 'core/events', 'page/zoom/util/body-geometry'],
-  function($, conf, zoomMod, picker, traitcache, mhpos, common, colorUtil, geo, elementClassifier, platform, constants, events,
-           bodyGeo) {
+define(
+  [
+    '$',
+    'core/conf/user/manager',
+    'page/highlight/pick',
+    'page/highlight/traitcache',
+    'page/highlight/highlight-position',
+    'page/util/common',
+    'page/util/color',
+    'page/util/geo',
+    'page/util/element-classifier',
+    'core/platform',
+    'page/highlight/constants',
+    'core/events',
+    'core/dom-events',
+    'page/zoom/zoom',
+    'page/zoom/util/body-geometry',
+    'nativeFn',
+    'core/inline-style/inline-style'
+  ],
+  function (
+    $,
+    conf,
+    picker,
+    traitcache,
+    mhpos,
+    common,
+    colorUtil,
+    geo,
+    elementClassifier,
+    platform,
+    constants,
+    events,
+    domEvents,
+    zoomMod,
+    bodyGeo,
+    nativeFn,
+    inlineStyle
+  ) {
 /*jshint +W072 */
+  'use strict';
+
   var
 
   isInitialized,
@@ -70,7 +106,15 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
 
   // All CSS background properties except color
   // Image must be listed last for multiple backgrounds code to work
-  BG_PROPS = ['Position', 'Origin', 'Repeat', 'Clip', 'Attachment', 'Size', 'Image'],
+  BG_PROPS = [
+    'backgroundPosition', 
+    'backgroundOrigin', 
+    'backgroundRepeat', 
+    'backgroundClip', 
+    'backgroundAttachment', 
+    'backgroundSize', 
+    'backgroundImage'
+  ],
 
   state,
 
@@ -120,15 +164,21 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
     return colorUtil.getLuminanceFromColorName(colorValue) > MID_COLOR_INTENSITY;
   }
 
-  function getElementsContainingOwnText(selector) {
+  function getElementsContainingOwnVisibleText($subtree) {
     var TEXT_NODE = 3;
-    return $(selector).find('*').addBack().filter(function() {
+    return $subtree.filter(function() {
       var childNodes = this.childNodes,
         numChildNodes = childNodes.length,
         index,
-        testNode;
+        testNode,
+        css;
       if (this.childElementCount === numChildNodes) {
         return false; // Same number of elements as child nodes -- doesn't have it's own text nodes
+      }
+
+      css = traitcache.getStyle(this);
+      if (parseInt(css.textIndent) < -99) {
+        return false; // Used to hide text in conjunction with background image
       }
 
       for (index = 0; index < numChildNodes; index ++) {
@@ -142,43 +192,66 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
     });
   }
 
-  function hasLightText(selector) {
-    var textContainers = getElementsContainingOwnText(selector),
+  function getTextInfo(selector) {
+    var $subtree = $(selector).find('*').addBack(),
+      textContainers = getElementsContainingOwnVisibleText($subtree),
+      elementsToCheck = textContainers.length ? textContainers : $subtree,
       MAX_ELEMENTS_TO_CHECK = 100,
-      containsLightText = false;
+      containsLightText = false,
+      containsDarkText = false;
 
-    textContainers.each(function(index) {
+    elementsToCheck.each(function(index) {
       if (index >= MAX_ELEMENTS_TO_CHECK) {
         return false;
       }
       var textColor = traitcache.getStyleProp(this, 'color');
       if (isLightIntensity(textColor)) {
         containsLightText = true;
-        return false;
+      }
+      else {
+        containsDarkText = true;
       }
     });
-    return containsLightText;
+
+    return {
+      hasLightText: containsLightText,
+      hasDarkText: containsDarkText,
+      hasVisibleText: textContainers.length > 0
+    };
   }
 
-  function hasDarkBackgroundOnAnyOf(styles) {
+  function hasDarkBackgroundOnAnyOf(styles, textInfo) {
 
-    for (var count = 0; count < styles.length; count ++) {
-      var bgColor = styles[count].backgroundColor,
-        bgRgba = colorUtil.getRgba(bgColor),
+    var hasOnlyLightText = textInfo.hasLightText && !textInfo.hasDarkText,
+      count = 0;
+
+    for (; count < styles.length; count ++) {
+      var style = styles[count],
+        bgRgba = colorUtil.getRgba(style.backgroundColor),
         isMostlyOpaque = bgRgba.a > 0.8;
+      if (style.backgroundImage && style.backgroundImage !== 'none') {
+        if (hasOnlyLightText) {
+          return true; // Has a background image, has light text and NO dark text -- probably a dark background
+        }
+        if (!textInfo.hasVisibleText) {
+
+        }
+      }
       if (isMostlyOpaque) {
-        return !isLightIntensity(bgRgba);
+        return !isLightIntensity(bgRgba);     // Opaque, dark background
       }
     }
   }
 
   function updateColorApproach(picked, style) {
     // Get data on backgrounds and text colors used
-    state.hasDarkBackgroundColor = hasDarkBackgroundOnAnyOf(style);
-    state.hasLightText = hasLightText(picked);
+    var textInfo = getTextInfo(picked);
+    state.hasLightText = textInfo.hasLightText;
+    state.hasDarkText = textInfo.hasDarkText;
+    state.hasDarkBackgroundColor = hasDarkBackgroundOnAnyOf(style, textInfo);
 
     // Get the approach used for highlighting
-    if (picked.length > 1 || shouldAvoidBackgroundImage(picked) || state.hasLightText) {
+    if (picked.length > 1 || shouldAvoidBackgroundImage(picked) || state.hasLightText || !textInfo.hasVisibleText) {
       //  approach #1 -- use overlay for background color
       //                 use overlay for rounded outline
       //  pros: one single rectangle instead of potentially many
@@ -186,7 +259,8 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
       //        visually seamless
       //  cons: washes dark text out (does not have this problem with light text)
       //  when-to-use: for article or cases where multiple items are selected
-      //               when background sprites are used, which we don't want to overwrite with out background
+      //               when images or background sprites are used, which we don't want to overwrite with out background
+      //               a lack of text indicates a good opportunity to use technique as it is an indicator of image content
       state.bgColor = getTransparentBackgroundColor();
       state.doUseOverlayForBgColor = true; // Washes foreground out
     } else {
@@ -205,7 +279,7 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
   // The smaller the number, the less visible the highlight is
   function getHighlightVisibilityFactor() {
     var MIN_VISIBILITY_FACTOR_WITH_TTS = 2.1,
-        vizFactor = (state.zoom + 0.6) * 0.9;
+        vizFactor = (zoomMod.getCompletedZoom() + 0.6) * 0.9;
     if (isSpeechEnabled && vizFactor < MIN_VISIBILITY_FACTOR_WITH_TTS) {
       vizFactor = MIN_VISIBILITY_FACTOR_WITH_TTS;
     }
@@ -218,14 +292,14 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
       return DARK_BG_BORDER_COLOR;
     }
 
-    var viz = getHighlightVisibilityFactor(),
+    var viz = state.highlightIntensity,
       colorMultiplier = -80,
       color = Math.round(Math.max(0, 200 + viz * colorMultiplier));
     return 'rgb(' + color + ',' + color + ',' + (color + 30) +')';
   }
 
   function getHighlightBorderWidth() {
-    var viz = getHighlightVisibilityFactor(),
+    var viz = state.highlightIntensity,
         borderWidth = viz + 0.33 + (state.hasDarkBackgroundColor ? EXTRA_DARK_BG_BORDER_WIDTH : 0);
     return Math.max(1, borderWidth) * state.zoom;
   }
@@ -235,7 +309,7 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
     // change it drastically
     // This lightens at higher levels of zoom
     var maxViz = state.hasDarkBackgroundColor || state.hasLightText ? 1 : 9,
-      viz = Math.min(getHighlightVisibilityFactor(), maxViz),
+      viz = Math.min(state.highlightIntensity, maxViz),
       alpha = 0.11 * viz;
     return 'rgba(240, 240, 180, ' + alpha + ')'; // Works with any background -- lightens it slightly
   }
@@ -243,7 +317,7 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
   function getOpaqueBackgroundColor() {
     // Best to use opaque color, because inner overlay doesn't match up perfectly causing overlaps and gaps
     // It lightens at higher levels of zoom
-    var viz = getHighlightVisibilityFactor(),
+    var viz = state.highlightIntensity,
         decrement = viz * 1.4,
         red = Math.round(255 - decrement),
         green = red,
@@ -299,8 +373,8 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
     }
 
     // Update state to ensure it is current
-    state.zoom = zoomMod.getCompletedZoom();
     state.styles = getAncestorStyles(state.picked[0], document.documentElement);
+    state.highlightIntensity = getHighlightVisibilityFactor();
 
     updateColorApproach(state.picked, state.styles);
 
@@ -334,7 +408,7 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
 
     // Add event listeners to keep overlay view up-to-date
     addMouseWheelListener();
-    addEventListener('mouseout', onLeaveWindow);
+    addEventListener('mouseout', onLeaveWindow, { passive : true });
 
     // Update state
     didToggleVisibility(true);
@@ -393,29 +467,30 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
     }
   }
 
-  function setMultipleBackgrounds(style, newBg, origBg, doPlaceOrigOnTop) {
-    var hasOrigBgImage = origBg.backgroundImage !== 'none',
-      value;
-    BG_PROPS.forEach(function(prop) {
-      var fullName = 'background' + prop;
+  function setMultipleBackgrounds(element, newBg, origBg, doPlaceOrigOnTop) {
+    var value,
+      hasOrigBgImage = origBg.backgroundImage !== 'none',
+      styles = {};
+    BG_PROPS.forEach(function (property) {
       if (!hasOrigBgImage) {
-        value = newBg[fullName];
+        value = newBg[property];
       }
       else if (doPlaceOrigOnTop) {
-        value = origBg[fullName] + ',' + newBg[fullName];
+        value = origBg[property] + ',' + newBg[property];
       }
       else {
-        value = newBg[fullName] + ',' + newBg[fullName];
+        value = newBg[property] + ',' + newBg[property];
       }
-      style[fullName] = value;
+      styles[property] = value;
     });
+    inlineStyle.override(element, styles);
   }
 
-  function copyBackgroundCss(orig) {
-    var copy = {};
-    BG_PROPS.forEach(function (prop) {
-      var fullName = 'background' + prop;
-      copy[fullName] = orig[fullName].slice();
+  function copyBackgroundCss(origElem) {
+    var copy = {},
+        style = inlineStyle(origElem);
+    BG_PROPS.forEach(function (property) {
+      copy[property] = style[property].slice();
     });
     return copy;
   }
@@ -424,13 +499,14 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
   function getSVGDataURI(svgMarkup, width, height) {
     var attrs = width ? ' width="' + width + '" height="' + height + '" ' : '',
       wrappedSvg = '<svg xmlns="http://www.w3.org/2000/svg"' + attrs + '>' + svgMarkup + '</svg>';
-    return 'url("data:image/svg+xml,' + encodeURI(wrappedSvg) + '")';
+    // Use encodeURIComponent instead of encodeURI because we also want # -> %23,
+    // otherwise Firefox is unhappy when we set the fill color
+    return 'url("data:image/svg+xml,' + encodeURIComponent(wrappedSvg) + '")';
   }
 
   function updateElementBgImage() {
 
     var element = state.picked[0],
-        inlineStyle = element.style,
         offsetLeft,
         offsetTop;
 
@@ -482,10 +558,10 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
       doPlaceOrigOnTop = common.isSprite(origBgStyle);  // Place sprites on top of our background, and textures underneath it
 
     // Save the current inline style for later restoration when the highlight is hidden
-    state.savedCss = copyBackgroundCss(inlineStyle);
+    state.savedCss = copyBackgroundCss(element);
 
     // Set the new background
-    setMultipleBackgrounds(inlineStyle, newBgStyle, origBgStyle, doPlaceOrigOnTop);
+    setMultipleBackgrounds(element, newBgStyle, origBgStyle, doPlaceOrigOnTop);
   }
 
   function isCloseToHighlightColor(colorIntensity) {
@@ -522,10 +598,9 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
         colorIntensity = colorUtil.getPerceivedLuminance(bgColor);
         if (bgRgba.a === 1 && isCloseToHighlightColor(colorIntensity) &&
           !common.hasOwnBackgroundColor(this, style, state.styles[0])) { // If it's a unique color, we want to preserve it
-          state.savedBgColors.push({ elem: this, color: this.style.backgroundColor });
-          var prevStyle = this.getAttribute('style') || '';
+          state.savedBgColors.push({ elem: this, color: inlineStyle(this).backgroundColor });
           // Needed to do this as !important because of Perkins.org theme which also used !important
-          this.setAttribute('style', 'background-color: transparent !important; ' + prevStyle);
+          inlineStyle.override(this, ['background-color', 'transparent', 'important']);
         }
       }
     });
@@ -842,6 +917,20 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
     return svg;
   }
 
+  // TODO Make this robust -- what if the page itself is putting in a transform?
+  function getZoom(overlayContainerElem) {
+    var isFixed = traitcache.getStyleProp(overlayContainerElem, 'position') === 'fixed';
+
+    if (isFixed) {
+      var elemTransform = inlineStyle(overlayContainerElem).transform,
+        scaleSplit = elemTransform.split('scale(');
+      return parseFloat(scaleSplit[1]) || 1;
+    }
+
+    // Not a fixed element, so use the current zoom level on the body
+    return zoomMod.getCompletedZoom();
+  }
+
   function getOverlayRect() {
     var mainFixedRect = state.fixedContentRect,
       overlayRect = {
@@ -861,8 +950,7 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
           display: 'block'
         }),
         // For some reason using the <body> works better in FF version <= 32
-        isOldFirefox = platform.browser.isFirefox && platform.browser.version < 33,
-        offsetElement = isOldFirefox ? document.body : $measureDiv[0];
+        offsetElement = $measureDiv[0];
       offsetRect = offsetElement.getBoundingClientRect();
       $measureDiv.remove();
     }
@@ -905,8 +993,10 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
     while (++ index < numAncestors - 1) {
       ancestor = ancestor.parentElement;
       ancestorStyle = state.styles[index];
-      if (ancestorStyle.position !== 'static' && ancestorStyle.position !== 'relative' &&
-        hasVerticalOverflow()) {
+      if (ancestorStyle.position === 'fixed') {
+        return ancestor;  // fixed elements have their own zoom and panning
+      }
+      if (ancestorStyle.position === 'absolute' && hasVerticalOverflow()) {
         return ancestor;
       }
       // Don't tie to horizontal scroll -- these tend to not scrolled via
@@ -958,6 +1048,8 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
 
     element = state.picked[0];
     elementRect = element.getBoundingClientRect(); // Rough bounds
+    state.overlayContainer = getBestOverlayContainer();
+    state.zoom = getZoom(state.overlayContainer);
 
     // Get exact bounds
     var mhPositionInfo = mhpos.getHighlightPositionInfo(element, 0, stretchForSprites),
@@ -994,7 +1086,6 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
 
     state.isCreated = true;
 
-    state.overlayContainer = getBestOverlayContainer();
     state.overlayRect = getOverlayRect();
     state.absoluteRect = getAbsoluteRect();
 
@@ -1173,7 +1264,7 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
     // because listening to mousewheel can cause bad performance.
 
     if (!isTrackingWheelEvents) {
-      document.addEventListener('wheel', correctHighlightScreenRects);
+      domEvents.on(document, 'wheel', correctHighlightScreenRects);
       isTrackingWheelEvents = true;
     }
     traitcache.updateCachedViewPosition();
@@ -1181,7 +1272,7 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
 
   function removeMouseWheelListener() {
     if (isTrackingWheelEvents) {
-      document.removeEventListener('wheel', correctHighlightScreenRects);
+      domEvents.off(document, 'wheel', correctHighlightScreenRects);
       isTrackingWheelEvents = false;
     }
   }
@@ -1252,11 +1343,11 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
       // We have an old highlight and mouse moved.
       // What to do about the old highlight? Keep or hide? Depends on whether mouse is still in it
       if (!cursorPos || isScrollEvent(event)) {
-        cursorPos = getCursorPos(event, window.pageXOffset, window.pageYOffset);
+        cursorPos = getCursorPos(event);
       }
       else {
         // No need to recalculate scroll position -- it stayed the same
-        cursorPos = getCursorPos(event);
+        cursorPos = getCursorPos(event, cursorPos.pageXOffset, cursorPos.pageYOffset);
       }
 
       if (isExistingHighlightRelevant()) {
@@ -1269,7 +1360,7 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
       hide();
     }
 
-    pickFromMouseTimer = setTimeout(function () {
+    pickFromMouseTimer = nativeFn.setTimeout(function () {
       // In case doesn't move after fast velocity, check in a moment and update highlight if no movement
       pickFromMouseTimer = 0;
       pickFromMouse(event);
@@ -1322,37 +1413,33 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
     }
     isTrackingMouse = doTrackMouse;
 
-    if (isTrackingMouse) {
-      // handle mouse move on body
-      $(document)
-        .on('mousemove', onMouseMove)
-        .on('focusin focusout', testFocus)
-        .ready(testFocus);
-      if (platform.browser.isFirefox) {
-        $(document).on('mouseover', onMouseMove); // Mitigate lack of mousemove events when scroll finishes
-      }
-      $(window)
-        .on('focus', onFocusWindow)
-        .on('blur', onBlurWindow)
-        .on('resize', hide);
-    } else {
-      // remove mousemove listener from body
-      $(document)
-        .off('mousemove', onMouseMove)
-        .off('focusin focusout', testFocus);
+    var addOrRemoveFn = isTrackingMouse ? domEvents.on : domEvents.off;
+    addOrRemoveFn(document, 'mousemove', onMouseMove);
+    if (platform.browser.isFirefox) {
+      // Mitigate lack of mousemove events when scroll finishes
+      addOrRemoveFn(document, 'mouseover', onMouseMove);
+    }
 
+    addOrRemoveFn(document, 'focusin', testFocus);
+    addOrRemoveFn(document, 'focusout', testFocus);
+    addOrRemoveFn(window, 'focus', onFocusWindow);
+    addOrRemoveFn(window, 'blur', onBlur);
+    addOrRemoveFn(window, 'resize', hide);
+    addOrRemoveFn(window, 'mousedown', setFocus);
+
+    if (!isTrackingMouse) {
       removeMouseWheelListener();
-
-      if (platform.browser.isFirefox) {
-        $(document).off('mouseover', onMouseMove); // Mitigate lack of mousemove events when scroll finishes
-      }
-      $(window)
-        .off('focus', onFocusWindow)
-        .off('blur', onBlurWindow)
-        .off('resize', hide);
     }
 
     return isTrackingMouse;
+  }
+
+  // This addresses the stickiness of the focus on the dropdown select element on fairfieldcountybank.com
+  function setFocus(evt) {
+    if (evt.target !== document.activeElement && typeof evt.target.focus === 'function') {
+      evt.target.focus();
+    }
+    testFocus();
   }
 
   function getCursorPos(event, scrollX, scrollY) {
@@ -1361,8 +1448,8 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
       y: event.clientY,
       screenX: event.screenX,
       screenY: event.screenY,
-      scrollX: scrollX || window.pageXOffset,
-      scrollY: scrollY || window.pageYOffset,
+      scrollX: typeof scrollX === 'number' ? scrollX : window.pageXOffset,
+      scrollY: typeof scrollY === 'number' ? scrollY : window.pageYOffset,
       doCheckCursorInHighlight: true
     };
   }
@@ -1425,7 +1512,10 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
     testFocus();
   }
 
-  function onBlurWindow() {
+  function onBlur(event) {
+    if (event.target !== window) {
+      return;
+    }
     isWindowFocused = false;
     isAppropriateFocus = false;
     // When the user blurs (unfocuses) the window, we should
@@ -1506,7 +1596,7 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
     // Get first visible text and start from there
     function isAcceptableTextLeaf(node) {
       // Logic to determine whether to accept, reject or skip node
-      if (common.isEmpty(node)) {
+      if (common.isWhitespaceOrPunct(node)) {
         return; // Only whitespace or punctuation
       }
       var rect = traitcache.getScreenRect(node.parentNode);
@@ -1564,15 +1654,15 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
 
     if (state.picked && state.savedCss) {
       // Restore the previous CSS on the picked elements (remove highlight bg etc.)
-      $(state.picked).css(state.savedCss);
+      inlineStyle.restore(state.picked[0], BG_PROPS);
       state.savedCss = null;
-      state.savedBgColors.forEach(function(savedBg) {
-        savedBg.elem.style.backgroundColor = savedBg.color;
+      state.savedBgColors.forEach(function (savedBg) {
+        inlineStyle.restore(savedBg.elem, 'background-color');
       });
       state.savedBgColors = [];
 
-      if ($(state.picked).attr('style') === '') {
-        $(state.picked).removeAttr('style'); // Full cleanup of attribute
+      if (state.picked.attr('style') === '') {
+        inlineStyle.clear(state.picked[0]); // Full cleanup of attribute
       }
       removeMouseWheelListener();
     }
@@ -1652,6 +1742,9 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
     conf.get('ttsOn', onSpeechChanged);
 
     testFocus(); // Set initial focus state
+    if (document.readyState !== 'loading') {  // Focus is set again when document finishes loading
+      document.addEventListener('DOMContentLoaded', testFocus);
+    }
 
     refreshEventListeners();  // First time we initialize, highlighting should be turned on
   }
@@ -1698,6 +1791,7 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
     if (seed) {
       var elem = $(seed)[0];
       if (elem) {
+        traitcache.updateCachedViewPosition(); // Reset cache view to ensure scrolling accounted for
         state.picked = doUsePicker ? picker.find(elem, doSuppressVoting) : $(elem);
         state.target = elem;
         if (state.picked) {
@@ -1720,5 +1814,4 @@ define(['$', 'core/conf/user/manager', 'page/zoom/zoom', 'page/highlight/pick', 
     hide: hide,
     init: init
   };
-
 });

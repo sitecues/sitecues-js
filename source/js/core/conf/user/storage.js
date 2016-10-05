@@ -15,50 +15,54 @@
  *    }
  * }
  */
-define([], function() {
+define(
+  [
+    'core/util/uuid',
+    'nativeFn'
+  ],
+  function (
+    uuid,
+    nativeFn
+  ) {
+  'use strict';
 
   var
-    NAMESPACE = 'sitecues';
+    NAMESPACE = 'sitecues',
+    cachedAppData;
 
-  /*
-   * Overwrite the entire namespace that we use for storing data.
-   * You should probably NOT use this! Prefer setAppData().
-   */
-  function setRawAppData(dataString) {
-    localStorage.setItem(NAMESPACE, dataString);
-  }
-
-  /*
-   * Get value of the entire namespace that we use for storing data.
-   * You should probably NOT use this! Prefer getAppData().
-   * @returns {DOMString or null}
-   */
-  function getRawAppData() {
-    return localStorage.getItem(NAMESPACE);
-  }
-
-  /*
-   * Get the final representation that we will put into storage.
-   */
-  function serialize(data) {
-    return JSON.stringify(data || {});
-  }
-
-  /*
-   * Get the normalized representation of what was in storage.
-   */
-  function deserialize(dataString) {
-    return dataString ? JSON.parse(dataString) : {};
+  // For tests only! Do not use in product as it could result in poor performance.
+  function clearCache() {
+    cachedAppData = undefined;
   }
 
   /*
    * Friendly API for overwriting all data we have put into storage.
-   * If you can, use clear() or setPref() instead.
+   * If you can, use clearCache() or setPref() instead.
    */
   function setAppData(data) {
 
-    var dataString = serialize(data);
+    /*
+     * Overwrite the entire namespace that we use for storing data.
+     */
+    function setRawAppData(dataString) {
+      try {
+        localStorage.setItem(NAMESPACE, dataString);
+      }
+      catch(ex) {}
+    }
 
+    /*
+     * Get the final representation that we will put into storage.
+     */
+    function serialize(data) {
+      return nativeFn.JSON.stringify(data || {});
+    }
+
+    // Saves data for this page view
+    cachedAppData = data;
+
+    // Tries to save data for future page views
+    var dataString = serialize(data);
     setRawAppData(dataString);
   }
 
@@ -67,21 +71,38 @@ define([], function() {
    * If you can, use getPrefs(), instead.
    */
   function getAppData() {
+    /*
+     * Get value of the entire namespace that we use for storing data.
+     * @returns {DOMString or null}
+     */
+    function getRawAppData() {
+      return localStorage.getItem(NAMESPACE);
+    }
+
+    /*
+     * Get the normalized representation of what was in storage.
+     */
+    function deserialize(dataString) {
+      return dataString ? nativeFn.JSON.parse(dataString) : {};
+    }
+
+    if (cachedAppData) {
+      return cachedAppData;
+    }
 
     var dataString = getRawAppData();
-
     return deserialize(dataString);
   }
 
   /*
    * Overwrite only the userId portion of the data currently in storage.
    */
-  function setUserId(id) {
-    if (id) {
-      var appData = getAppData();
-      appData.userId = id;
-      setAppData(appData);
-    }
+  function createUser() {
+    var userId = uuid(),
+      appData = { userId : userId };
+    appData[userId] = {};
+    console.log('New user ', userId);
+    setAppData(appData);
   }
 
   /*
@@ -112,7 +133,7 @@ define([], function() {
 
     userPreferences[name] = value;
 
-    appData[getUserId()] = userPreferences;
+    appData[userId] = userPreferences;
     setAppData(appData);
   }
 
@@ -129,11 +150,12 @@ define([], function() {
   }
 
   return {
-    setUserId: setUserId,
+    createUser: createUser,
     getUserId: getUserId,
     setPref: setPref,
     getPrefs: getPrefs,
     setAppData: setAppData,
-    getRawAppData: getRawAppData
+    getAppData: getAppData,
+    clearCache: clearCache
   };
 });

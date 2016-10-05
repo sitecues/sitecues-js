@@ -1,13 +1,25 @@
 /**
  * This file contains helper methods for dealing with the string that is returned
- * when using Element.style.transform or Element.getAttribute('transform')
+ * when using Element#style.transform or Element.getAttribute('transform')
  * This module supports translateX, translateY, scale, scaleY and rotate.
  * In the case of scaleY it is get/set as a scale(1,y) value with a paired property scaleType = 'scaleY'
  */
 
-define([ 'core/platform' ], function(platform) {
+define(
+  [
+    'core/inline-style/inline-style',
+    'core/platform'
+  ],
+  function (
+    inlineStyle,
+    platform
+  ) {
+  'use strict';
 
-  var SHOULD_USE_CSS_TRANSFORM_IN_SVG = !platform.browser.isIE;
+  var SHOULD_USE_CSS_TRANSFORM_IN_SVG =
+    !platform.browser.isMS &&       // MS does not support CSS in SVG
+    !platform.browser.isSafari &&   // Safari CSS animations are actually slower
+    !platform.browser.isFirefox;    // FF breaks getBoundingClientRect() when CSS transform is used
 
   // Skips past non-numeric characters and get the next number as type 'number'
   // It will include a negative sign and decimal point if it exists in the string
@@ -33,7 +45,7 @@ define([ 'core/platform' ], function(platform) {
       transformString = getTransformString(transformMap, useCss);
 
     if (useCss) {  // Always use CSS, even in SVG
-      elem.style[platform.transformProperty] = transformString;
+      inlineStyle(elem).transform = transformString;
     }
     else if (transformString) {
       elem.setAttribute('transform', transformString);
@@ -45,7 +57,7 @@ define([ 'core/platform' ], function(platform) {
 
   // Always get style transform
   function getStyleTransformMap(elem) {
-    return getTransformMap(elem.style[platform.transformProperty]);
+    return getTransformMap(inlineStyle(elem).transform);
   }
 
   function getElemTransformMap(elem) {
@@ -68,18 +80,15 @@ define([ 'core/platform' ], function(platform) {
       scale = 1,
       rotate = 0,
 
-      // IE9 sometimes does not include a translation that is seperated by a comma;
-      translateSplitter,
-
       // We use String.prototype.split to extract the values we want, and we need a
       // variable to store the intermediary result.  I'm not a huge fan of this.
       rotateValues,
       transformValues;
 
     if (hasTranslate) {
-
-      translateSplitter = transformString.indexOf(',') !== -1 ? ',' : ' ';
-      transformValues = transformString.split(translateSplitter);
+      // translate is always first
+      var separator = transformString.indexOf(',') > 0 ? ',' : ' ';  // Attributes split by space, CSS by comma
+      transformValues = transformString.split(separator);
       translateX = transformValues[0] || 0;
       translateY = hasScale ? transformValues[1].split('scale')[0] : transformValues[1] || 0;
 

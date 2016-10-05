@@ -1,8 +1,35 @@
-define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 'core/locale', 'page/util/color', 'core/events', 'core/util/session'],
-  function($, site, urls, dimmer, platform, locale, colorUtil, events, session) {
+define(
+  [
+    '$',
+    'core/conf/site',
+    'core/conf/urls',
+    'hlb/dimmer',
+    'core/platform',
+    'core/locale',
+    'page/util/color',
+    'core/events',
+    'core/util/session',
+    'nativeFn',
+    'core/inline-style/inline-style'
+  ],
+  function (
+    $,
+    site,
+    urls,
+    dimmer,
+    platform,
+    locale,
+    colorUtil,
+    events,
+    session,
+    nativeFn,
+    inlineStyle
+  ) {
+  'use strict';
 
   var $iframe = $(),
     $closeButton = $(),
+    MAX_ZINDEX = 2147483647,
     INITIAL_CSS = {
       position: 'fixed',
       left: '15%',
@@ -10,12 +37,12 @@ define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 
       width: '70%',
       height: '80%',
       transform: 'scale3d(.7,.7,1)',
-      willChange: platform.transformPropertyCss,
+      willChange: 'transform',
       backgroundColor: '#fff',
       borderRadius: '8px',
       transition: 'opacity .9s, transform 1s',
       opacity: 0,
-      zIndex: 2147483645
+      zIndex: MAX_ZINDEX
     },
     ENLARGED_CSS = {
       opacity: 1,
@@ -32,7 +59,7 @@ define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 
       display: 'block',
       lineHeight: '0px',
       position: 'fixed',
-      zIndex: 2147483646,
+      zIndex: MAX_ZINDEX,
       margin: '8px',
       width: BUTTON_SIZE + 'px',
       height: BUTTON_SIZE + 'px',
@@ -51,8 +78,8 @@ define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 
   }
 
   function close() {
-    $iframe.css(INITIAL_CSS);
-    setTimeout(function() {
+    inlineStyle.set($iframe[0], INITIAL_CSS);
+    nativeFn.setTimeout(function() {
       $iframe.remove();
       $iframe = $();
       isModalOpen = false;
@@ -63,8 +90,7 @@ define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 
 
     window.removeEventListener('message', checkCloseMessage);
 
-    $('html')
-      .off('DOMMouseScroll mousewheel wheel', preventScroll);
+    enableScrolling(true);
 
     enableWebPagePointerEvents(true);
 
@@ -75,7 +101,7 @@ define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 
 
   function onload() {
     // Try to focus iframe
-    setTimeout(function() {
+    nativeFn.setTimeout(function () {
       var iframe = $iframe[0];
       try {
         iframe.contentWindow.focus();
@@ -84,11 +110,7 @@ define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 
 
       $(window).one('focus', close);
 
-
       window.addEventListener('message', checkCloseMessage);
-
-      $('html')
-        .on('DOMMouseScroll mousewheel wheel', preventScroll);
     }, 0);
 
   }
@@ -116,9 +138,12 @@ define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 
     events.emit('info/did-show');
 
     $iframe = $('<iframe>')
-      .attr('src', pageUrl + anchor)
-      .css(INITIAL_CSS)
-      .css('border', getBorderCss())
+      .attr('src', pageUrl + anchor);
+
+    inlineStyle.set($iframe[0], INITIAL_CSS);
+    inlineStyle($iframe[0]).border = getBorderCss();
+
+    $iframe
       .one('load', onload)
       .appendTo('html');
 
@@ -126,10 +151,12 @@ define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 
 
     enableWebPagePointerEvents(false);
 
-    dimmer.dimBackgroundContent(DIMMER_SPEED);
+    enableScrolling(false);
 
-    setTimeout(function() {
-      $iframe.css(ENLARGED_CSS);
+    dimmer.dimBackgroundContent(DIMMER_SPEED, $iframe);
+
+    nativeFn.setTimeout(function () {
+      inlineStyle.set($iframe[0], ENLARGED_CSS);
       var iframeEl = $iframe[0];
       if (iframeEl.contentWindow) {
         iframeEl.contentWindow.focus();
@@ -139,16 +166,9 @@ define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 
       }
     }, INITIAL_DELAY); // Waiting helps animation performance
 
-    addCloseButtonTimer = setTimeout(addCloseButton, INITIAL_DELAY + INFLATION_SPEED + 100);
+    addCloseButtonTimer = nativeFn.setTimeout(addCloseButton, INITIAL_DELAY + INFLATION_SPEED + 100);
 
     isModalOpen = true;
-  }
-
-  function preventScroll(evt) {
-    evt.stopPropagation();
-    evt.preventDefault();
-    evt.returnValue = false;
-    return false;
   }
 
   function checkCloseMessage(evt) {
@@ -158,22 +178,24 @@ define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 
   }
 
   function addCloseButton() {
-    var helpRect = $iframe[0].getBoundingClientRect(),
-      offsetLeft = platform.browser.isIE ? -30 : -17, // Deal with big scrollbars on Windows
-      offsetTop = platform.browser.isIE ? -6 : -1;
+    var
+      helpRect = $iframe[0].getBoundingClientRect(),
+      offsetLeft = platform.browser.isMS ? -30 : -17, // Deal with big scrollbars on Windows
+      offsetTop = platform.browser.isMS ? -6 : -1;
 
     $closeButton =
-      $('<scx style="display:block" class="scp-hand-cursor"><scx style="position:relative;left:14px;top:23px;color:#ccc">x</scx></scx>')
-        .css(CLOSE_BUTTON_CSS)
-        .css({
-          left: (helpRect.right - BUTTON_SIZE / 2 + offsetLeft) + 'px',  // Subtracts border width as well
-          top: (helpRect.top - BUTTON_SIZE / 2 + offsetTop) + 'px'
-        })
+      $('<scx style="display:block" class="scp-hand-cursor"><scx style="position:relative;left:14px;top:23px;color:#ccc">x</scx></scx>');
+    inlineStyle.set($closeButton[0], CLOSE_BUTTON_CSS);
+    inlineStyle.set($closeButton[0], {
+        left: (helpRect.right - BUTTON_SIZE / 2 + offsetLeft) + 'px',  // Subtracts border width as well
+        top: (helpRect.top - BUTTON_SIZE / 2 + offsetTop) + 'px'
+    });
+    $closeButton
         .appendTo('html')
         .one('click', close);
 
-    addCloseButtonTimer = setTimeout(function() {
-      $closeButton.css('opacity', 1);
+    addCloseButtonTimer = nativeFn.setTimeout(function () {
+      inlineStyle($closeButton[0]).opacity = '1';
     }, 100);
   }
 
@@ -186,8 +208,23 @@ define(['$', 'core/conf/site', 'core/conf/urls', 'hlb/dimmer', 'core/platform', 
   }
 
   function enableWebPagePointerEvents(doEnable) {
-    $('body,#scp-bp-container')
-      .css('pointerEvents', doEnable ? '' : 'none');
+    var collection = $('body,#scp-bp-container');
+    inlineStyle.override(collection.get(), {
+      pointerEvents : doEnable ? '' : 'none'
+    });
+  }
+
+  function enableScrolling(doEnable) {
+    var docElem = document.documentElement;
+    if (doEnable) {
+      inlineStyle.restoreLast(docElem, ['overflow-x', 'overflow-y']);
+    }
+    else {
+      inlineStyle.override(docElem, {
+        overflowX : 'hidden',
+        overflowY : 'hidden'
+      });
+    }
   }
 
   // jumpTo can be to a named anchor or id in the document, e.g. #keyboard

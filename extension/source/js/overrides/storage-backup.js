@@ -6,18 +6,24 @@
  */
 define('core/conf/user/storage-backup', [], function() {
   function save(data) {
-    chrome.storage.local.set({'sitecues': data });
-  }
-
-  function load(onDataAvailableFn) {
-    chrome.storage.local.get('sitecues', function (storage) {
-      onDataAvailableFn(storage.sitecues ? JSON.parse(storage.sitecues) : {});
+    return new Promise(function(resolve) {
+      chrome.storage.local.set(
+        {'sitecues': data },
+        resolve
+      );
     });
   }
 
-  function init(onReadyCallback) {
+  function load() {
+    return new Promise(function(resolve) {
+      chrome.storage.local.get('sitecues', function (storage) {
+        resolve(storage.sitecues || {});
+      });
+    });
+  }
+
+  function init() {
     // Nothing to do
-    onReadyCallback();
   }
 
   function clear() {

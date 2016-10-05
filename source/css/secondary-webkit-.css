@@ -1,21 +1,3 @@
-/* ----------- Current theme indicator ---------------*/
-sc-button[data-setting-name="themeName"]:after {
-  position: absolute;
-  content: "";
-  left: 0;
-  top: 85px;
-  height: 20px !important;
-  width: 100% !important;
-  background-color: rgba(0, 0, 0, .001);
-}
-
-sc-button[data-setting-name="themeName"][aria-pressed="true"]:after {
-  content: url('../images/settings/theme-indicator.svg');
-  padding-left: 50%;
-  margin-left: -10px;
-  pointer-events: none;
-}
-
 /* ------------- Textarea placeholder ------------ */
 
 #scp-feedback-textarea::-webkit-input-placeholder {
@@ -64,23 +46,10 @@ sc-button[data-setting-name="themeName"][aria-pressed="true"]:after {
   top: 3px;
   width: 19px;
   height: 45px;
-  background: url('../images/settings/slider-thumb.svg');
+  background: url('../images/settings/slider-thumb.svg') no-repeat;
 }
 .scp-hue-range::-webkit-slider-thumb {
   background-image: url('../images/settings/slider-thumb-with-hole.svg') !important;
-}
-
-/* ---------- Two-tone range --------------- */
-
-.scp-normal-range::-webkit-slider-thumb::before {
-  content:"";
-  position: absolute;
-  left:-600px;
-  right:19px;
-  top:6px;
-  height:27px;
-  background: #538eca;
-  pointer-events: none;
 }
 
 /* ----------- Button hover ---------- */

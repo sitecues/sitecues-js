@@ -4,12 +4,36 @@
  *  keyboard commands.
  */
 
-define(['core/bp/constants', 'core/bp/helper', 'bp-expanded/view/transform-util', 'bp-expanded/view/transform-animate',
-        'bp-expanded/view/transform-hovers', 'core/bp/model/state', 'core/events'],
-  function (BP_CONST, helper, transformUtil, animate, hovers, state, events) {
+define(
+  [
+    'core/bp/constants',
+    'core/bp/helper',
+    'bp-expanded/view/transform-util',
+    'bp-expanded/view/transform-animate',
+    'bp-expanded/view/transform-hovers',
+    'core/bp/model/state',
+    'core/events',
+    'core/inline-style/inline-style',
+    'core/ab-test/ab-test',
+    'nativeFn'
+  ],
+  function (
+    BP_CONST,
+    helper,
+    transformUtil,
+    animate,
+    hovers,
+    state,
+    events,
+    inlineStyle,
+    abTest,
+    nativeFn
+  ) {
+  'use strict';
 
-  var BUTTON_ENTER_ANIMATION_DURATION = 800, // Milliseconds
-      NO_INPUT_TIMEOUT                = 7000,
+  var BUTTON_ENTER_ANIMATION_DURATION = 500, // Milliseconds
+      BUTTON_ENTER_ANIMATION_DURATION_INSTANT = 0,
+      NO_INPUT_TIMEOUT_DEFAULT        = 3000,
       userInputTimeoutId,
       doAlwaysShowButton,
       isAfterUserInput,
@@ -29,7 +53,7 @@ define(['core/bp/constants', 'core/bp/helper', 'bp-expanded/view/transform-util'
       return;
     }
 
-    // Not IE9: go ahead with secondary panel
+    // Open secondary panel (not in classic mode)
     require(['bp-secondary/bp-secondary'], function(secondary) {
       // Show or hide the secondary panel.
       secondary.init();
@@ -47,36 +71,28 @@ define(['core/bp/constants', 'core/bp/helper', 'bp-expanded/view/transform-util'
     moreButtonContainer.addEventListener('click', onMouseClick);
   }
 
-  function setOpacityTransition(useInstantTransition) {
-    // Only use instant transition if true, not truthy, because mouse event is
-    // passed in when we use event listeners
-    var opacityType;
-
-    if (useInstantTransition) {
-      opacityType = '-instant';
-    } else {
-      opacityType = doAlwaysShowButton ? '' : '-fast';
-    }
-
-    moreOpacityElem.setAttribute('class', 'scp-transition-opacity' + opacityType);
-
-    // The class we set above takes care of the opacity animation...
-    moreOpacityElem.style.opacity = 1;
+  function setSize(size) {
+    transformUtil.setElemTransform(moreButtonContainer, { scale: size }); // Starting point
   }
 
   function showMoreButton (useInstantTransition) {
 
     byId(BP_CONST.BOTTOM_MOUSETARGET_ID).removeEventListener('mousemove', showMoreButtonSlowly);
+    clearTimeout(userInputTimeoutId);
 
-    setOpacityTransition(useInstantTransition);
+    moreOpacityElem.setAttribute('class', useInstantTransition ? '' : 'scp-transition-opacity-fast');
+    inlineStyle(moreOpacityElem).opacity = 1;
 
-    // The first time the button is presented to the user, scale the button to 0.5 and then animate it to a scale of 1
-    if (!doAlwaysShowButton && !useInstantTransition) {
-
-      transformUtil.setElemTransform(moreButtonContainer, { scale: 0.5 }); // Starting point
-      setTimeout(function() {
-        animate.animateTransformLinear(moreButtonContainer, { scale: 1 }, BUTTON_ENTER_ANIMATION_DURATION);
-      }, 0);
+    // Scale the button to 0.5 and then animate it to a scale of 1
+    if (!useInstantTransition) {
+      setSize(0.5);
+      // Delay to fix Chrome animation bug
+      // TODO WTF? We need to wait 30 ms? Tried requestAnimationFrame() and only 50% success rate
+      nativeFn.setTimeout(function () {
+        getComputedStyle(moreButtonContainer); // Force layout update
+        animate.animateTransformLinear(moreButtonContainer, {scale: 1},
+          useInstantTransition ? BUTTON_ENTER_ANIMATION_DURATION_INSTANT : BUTTON_ENTER_ANIMATION_DURATION);
+      }, 30);
     }
 
     // Once we show the button, always show it.
@@ -126,7 +142,7 @@ define(['core/bp/constants', 'core/bp/helper', 'bp-expanded/view/transform-util'
     // If the user has already been presented with the button (during this page load),
     // there is no reason to not show it immediately whenever the panel is expanded.
     if (doAlwaysShowButton) {
-      showMoreButton();
+      showMoreButtonSlowly();  // Or use showMoreButton() to go back to showing the button instantly in this case
       return;
     }
 
@@ -138,7 +154,8 @@ define(['core/bp/constants', 'core/bp/helper', 'bp-expanded/view/transform-util'
 
     // After NO_INPUT_TIMEOUT, we will be able to determine if the user has
     // pressed their mouse button.  If they have not, show the additional button.
-    userInputTimeoutId = setTimeout(showButtonIfNoUserInput, NO_INPUT_TIMEOUT);
+    var noInputTimeoutMs = abTest.get('moreButtonTimerV2', NO_INPUT_TIMEOUT_DEFAULT);
+    userInputTimeoutId = nativeFn.setTimeout(showButtonIfNoUserInput, noInputTimeoutMs);
   }
 
   function init() {
@@ -151,6 +168,9 @@ define(['core/bp/constants', 'core/bp/helper', 'bp-expanded/view/transform-util'
     // Get elements
     moreButtonContainer = byId(BP_CONST.MORE_BUTTON_CONTAINER_ID);
     moreOpacityElem = byId('scp-more-button-opacity');
+
+    // Show immediately?
+    doAlwaysShowButton = !state.get('isFirstBadgeUse');
 
     // After a complete expansion of the badge, determine if and when we will show
     // the "more" button.

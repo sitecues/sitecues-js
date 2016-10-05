@@ -3,21 +3,27 @@ define([], function () {
   var constants = {};
 
   constants.READY_STATE = {
-    INITIALIZING: 0,
-    COMPLETE: 1
+    UNINITIALIZED: 0,
+    INITIALIZING: 1,
+    COMPLETE: 2
   };
 
   constants.METRIC_NAME = {
-    TTS_REQUEST: 'tts-requested',
-    PANEL_FOCUS_MOVE: 'panel-focus-moved',
+    BADGE_HOVER: 'badge-hovered',
+    ERROR: 'error',
+    FEEDBACK: 'feedback-sent',
+    KEY_COMMAND: 'key-command',
+    LENS_OPEN: 'hlb-opened',
+    MOUSE_SHAKE: 'mouse-shake',
+    PAGE_CLICK_FIRST: 'page-clicked-first',
+    PAGE_SCROLL_FIRST: 'page-scrolled-first',
+    PAGE_UNLOAD: 'page-unloaded',
+    PAGE_VISIT: 'page-visited',
     PANEL_CLICK: 'panel-clicked',
     PANEL_CLOSE: 'panel-closed',
-    FEEDBACK: 'feedback-sent',
+    PANEL_FOCUS_MOVE: 'panel-focus-moved',
     SLIDER_SETTING_CHANGE: 'slider-setting-changed',
-    BADGE_HOVER: 'badge-hovered',
-    PAGE_VISIT: 'page-visited',
-    LENS_OPEN: 'hlb-opened',
-    KEY_COMMAND: 'key-command',
+    TTS_REQUEST: 'tts-requested',
     ZOOM_CHANGE: 'zoom-changed'
   };
 
@@ -52,6 +58,7 @@ define([], function () {
     DOWN: 40,
     LETTER_H: 72,
     SHIFT: 16,
+    CTRL: 17,
     F8: 119,
     TAB: 9,
     ENTER: 13
@@ -73,6 +80,8 @@ define([], function () {
 
   constants.INIT_CODES = [constants.KEY_CODE.QUOTE]
     .concat(constants.ZOOM_IN_CODES, constants.ZOOM_OUT_CODES);
+
+  constants.MIN_TIME_BETWEEN_KEYS = 80; // How quickly might humans reasonably repeat keys
 
   return constants;
 

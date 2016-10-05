@@ -4,125 +4,203 @@
  */
 
 // IMPORTANT: The extension defines this module in order to override the mechanism
-define(['core/conf/urls', 'core/platform'], function (urls, platform) {
+define(
+  [
+    'core/conf/urls',
+    'core/conf/site',
+    'Promise',
+    'core/platform',
+    'nativeFn',
+    'iframeFactory'
+  ],
+  function (
+    urls,
+    site,
+    Promise,
+    platform,
+    nativeFn,
+    iframeFactory
+  ) {
+  'use strict';
 
   var PATH = 'html/prefs.html',
-    ID = 'sitecues-prefs',
+    SITECUES_PREFS_IFRAME_ID = 'sitecues-prefs',
     iframe,
-    isLoaded,
-    isInitialized,
+    doLogStorageBackup,
+    isIframeLoaded,
+    ERROR_PREFIX = 'Sitecues storage backup - ',
     IS_BACKUP_DISABLED;
 
   // If data is defined, it is a set call, otherwise we are getting data
-  function postMessageToIframe(optionalData) {
-    if (iframe) {
-      iframe.contentWindow.postMessage(optionalData, urls.getScriptOrigin());
+  function postMessageToIframe(optionalDataToSend) {
+    var scriptOrigin = urls.getScriptOrigin();
+
+    if (doLogStorageBackup) {
+      // Trying to debug uncommon iframe errors (e.g. in SC-3307):
+      // Failed to execute 'postMessage' on 'DOMWindow': The target origin provided ('https://js.sitecues.com') does not match the recipient window's origin ('http://www.fullerton.edu').
+      console.log('Attempting to communicate with storage backup, script origin = ' + scriptOrigin);
+      console.log('Prefs iframe: ' + iframe.src);
     }
+
+    return new Promise(function(resolve, reject) {
+      if (doLogStorageBackup) {
+        if (optionalDataToSend) {
+          console.log('Saving data to Sitecues storage backup: %o', optionalDataToSend);
+        }
+        else {
+          console.log('Retrieving data from Sitecues storage backup');
+        }
+      }
+
+      window.addEventListener('message', onMessageReceived);
+
+      iframe.contentWindow.postMessage({ name: 'sc-storage-command', prefs: optionalDataToSend }, scriptOrigin);
+      var timeout = nativeFn.setTimeout(
+        onTimeout,  // Code to run when we are fed up with waiting.
+        3000        // The browser has this long to get results from the iframe
+      );
+      
+      function onMessageReceived(event) {
+        var eventData = event.data,
+          receivedData = eventData.rawAppData,
+          error = eventData.error;
+
+        if (eventData.name !== 'sc-storage-reply') {
+          if (doLogStorageBackup) {
+            console.log('Sitecues storage error -- event received by Sitecues is not for us (event name = %s)', eventData.name);
+          }
+          return; // Not for us
+        }
+
+        clearTimeout(timeout);
+        removeMessageListener();
+
+        if (error) {
+          reject(new Error(ERROR_PREFIX + error));
+          return;
+        }
+
+        if (event.origin !== scriptOrigin) {  // Best practice: check if message is from the expected origin
+          reject(new Error(ERROR_PREFIX + 'wrong origin: ' + event.origin + ' vs ' + scriptOrigin));
+          return;
+        }
+
+        if (doLogStorageBackup) {
+          if (optionalDataToSend) {
+            console.log('Saved data to Sitecues storage backup');
+          }
+          else if (receivedData) {
+            console.log('Received data from Sitecues storage backup: %o', receivedData);
+          }
+          else {
+            console.log('Sitecues storage backup empty');
+          }
+        }
+
+        resolve(receivedData);
+      }
+
+      function removeMessageListener() {
+        window.removeEventListener('message', onMessageReceived);
+      }
+
+      function onTimeout() {
+        removeMessageListener();
+        reject(new Error(ERROR_PREFIX + 'timed out'));
+      }
+    });
   }
 
-  function parseData(data) {
-    if (data && typeof data === 'string' && data.charAt(0) === '{') {
-      try {
-        return JSON.parse(data);
-      }
-      catch (ex) {
-        clear();
-        if (SC_DEV) {
-          console.log('Failed to parse backed-up prefs data');
-        }
-      }
-    }
-  }
-
-  function load(onDataAvailableFn) {
-    function onMessageReceived(event) {
-      var key,
-        isEmpty = true,
-        data = event.data,
-        parsedData = {};
-
-      if (event.origin === urls.getScriptOrigin()) {  // Best practice: check if message is from the expected origin
-        if (SC_DEV) {
-          console.log('Backup prefs retrieved');
-        }
-
-        parsedData = parseData(data);
-
-        // Check if parsed back-up storage has saved preferences or a site ID
-        /*jshint forin: false */
-        for (key in parsedData) {
-          isEmpty = false;
-        }
-        /*jshint forin: true */
-      }
-
-      window.removeEventListener('message', onMessageReceived);
-
-      if (isEmpty) {
-        onDataAvailableFn(); // Use callback even if we don't use the data -- otherwise sitecues won't load
-      }
-      else {
-        onDataAvailableFn(parsedData);
-      }
-    }
-
+  function performIframeAction(optionalData) {
     if (IS_BACKUP_DISABLED) {
-      onDataAvailableFn();
-      return;
+      return Promise.resolve();
     }
-    window.addEventListener('message', onMessageReceived);
-    if (SC_DEV) {
-      console.log('Retrieve backup prefs');
-    }
-    postMessageToIframe();
+
+    return createIframe()
+      .then(function() {
+        return postMessageToIframe(optionalData);
+      });
   }
 
-  function save(data) {
-    init(function () {
-      if (IS_BACKUP_DISABLED) {
+  function load() {
+    return performIframeAction();
+  }
+
+
+  function save(parsedData) {
+    return performIframeAction(parsedData);
+  }
+
+  function createIframe() {
+    return new Promise(function(resolve, reject) {
+      var timeout;
+
+      function onTimeout() {
+        removeListeners();
+        reject(new Error(ERROR_PREFIX + 'timed out'));
+      }
+
+      function removeListeners() {
+        iframe.removeEventListener('error', onError);
+        iframe.removeEventListener('load', onLoad);
+        clearTimeout(timeout);
+      }
+
+      function onLoad() {
+        isIframeLoaded = true;
+        resolve();
+      }
+
+      function onError(event) {
+        reject(new Error(event.error));
+      }
+
+      function addListeners() {
+        timeout = nativeFn.setTimeout(
+          onTimeout,  // Code to run when we are fed up with waiting.
+          3000        // The browser has this long to get results from the iframe
+        );
+
+        iframe.addEventListener('load', onLoad);
+        iframe.addEventListener('error', onError);
+      }
+
+      // Has existing iframe with prefs.html already loaded into it
+      if (iframe) {
+        if (isIframeLoaded) {
+          resolve();
+        }
+        else {
+          addListeners();
+        }
         return;
       }
-      if (SC_DEV) {
-        console.log('Backing up prefs: ' + data);
-      }
-      postMessageToIframe(data);
+
+      // Create iframe
+      // jshint -W117
+      iframe = iframeFactory(SITECUES_PREFS_IFRAME_ID, urls.resolveResourceUrl(PATH));
+      // jshint +W117
+
+      addListeners();
     });
   }
 
-  function clear() {
-    save('{}');
+  function init() {
+    IS_BACKUP_DISABLED =
+      platform.isStorageUnsupported ||
+      site.get('isStorageBackupDisabled') ||
+      // Disable for numeric ip addresses because we get strange origin mismatch errors with https
+      (SC_DEV && urls.getScriptOrigin().match(/https:\/\/\d/));
   }
 
-  // Optional callbacks
-  function init(onReadyCallback) {
-
-    IS_BACKUP_DISABLED = platform.browser.isIE && platform.browser.version <= 10;
-
-    if (isInitialized || isLoaded || IS_BACKUP_DISABLED) {
-      onReadyCallback();
-      return;
-    }
-    isInitialized = true;
-
-    if (!iframe) {
-      iframe = document.createElement('iframe');
-      iframe.setAttribute('aria-hidden', true);
-      iframe.setAttribute('role', 'presentation');
-      iframe.id = ID;
-      iframe.style.cssText = 'position:absolute;width:1px;height:1px;left:-9999px;';
-      iframe.src = urls.resolveResourceUrl(PATH);
-      document.documentElement.appendChild(iframe);
-    }
-
-    iframe.addEventListener('load', function () {
-      isLoaded = true;
-      onReadyCallback();
-    });
-  }
+  sitecues.toggleLogStorageBackup = function toggleLogStorageBackup() {
+    doLogStorageBackup = !doLogStorageBackup;
+    return doLogStorageBackup;
+  };
 
   return {
     init: init,
-    load: load,
-    save: save
+    load: load,   // Returns a promise
+    save: save    // Returns a promise
   };
 });

@@ -9,9 +9,8 @@ define(['core/conf/site', 'core/platform'], function(site, platform) {
   };
 
   function isClassicBrowser() {
-    // IE 9 is awful
     // Edge is too, at least for now
-    return platform.browser.isIE9 || platform.browser.isEdge;
+    return platform.browser.isEdge;
   }
 
   function isClassicSite() {

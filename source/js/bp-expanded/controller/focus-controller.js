@@ -1,13 +1,33 @@
 /* Focus Controller */
-define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metric', 'core/platform', 'core/bp/view/view', 'core/events',
-        'core/constants'],
-  function (BP_CONST, state, helper, metric, platform, view, events, CORE_CONST) {
+define(
+  [
+    'core/bp/constants',
+    'core/bp/model/state',
+    'core/bp/helper',
+    'core/metric/metric',
+    'core/bp/view/view',
+    'core/events',
+    'core/constants',
+    'nativeFn',
+    'core/inline-style/inline-style'
+  ],
+  function (
+    BP_CONST,
+    state,
+    helper,
+    metric,
+    view,
+    events,
+    CORE_CONST,
+    nativeFn,
+    inlineStyle
+  ) {
+  'use strict';
 
   var savedDocumentFocus,
     tabbedElement,
     isInitialized,
     isListeningToClicks,
-    renderFocusOutline = platform.browser.isFirefox ? renderFocusOutlineFirefox : renderFocusOutlineNotFirefox,
     byId   = helper.byId,
     keyCode = CORE_CONST.KEY_CODE,
     TAB    = keyCode.TAB,
@@ -63,7 +83,7 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
         'stars-3',
         'stars-4',
         'stars-5',
-        'feedback-send',
+        'feedback-send-link',
         'feedback-thanks',
         'tips-label',
         'settings-label',
@@ -137,8 +157,6 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
 
   function showFocus() {
 
-    new metric.PanelFocusMove().send();
-
     updateDOMFocusState();
 
     if (!tabbedElement || !isKeyboardMode()) {
@@ -186,7 +204,7 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
 
   function focusFirstItem() {
     if (isKeyboardMode()) {
-      setTimeout(function() {
+      nativeFn.setTimeout(function() {
         navigateInDirection(1, true);
       }, 0);
     }
@@ -267,15 +285,7 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
     }
   }
 
-  function renderFocusOutlineFirefox() {
-    // getBoundingClientRect() shows bad focus outlines in Firefox
-    var showFocusOn = getElementToShowFocusOn(),
-      type = showFocusOn instanceof SVGElement ? 'stroke-child': 'box-shadow';
-    showFocusOn.setAttribute('data-show-focus', type);
-  }
-
-
-  function renderFocusOutlineNotFirefox() {
+  function renderFocusOutline() {
     // @data-visible-focus-on = id of element to show focus on
     // @data-show-focus = focus to be shown on this element
     // @data-own-focus-ring = element will show it's own focus ring
@@ -293,15 +303,15 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
       var EXTRA_FOCUS_PADDING = 1,
         clientPanelRect = helper.getRect(getPanelContainer()),  // Focus rect is positioned relative to this
         clientFocusRect = helper.getRect(showFocusOn),
-        focusOutline = byId(BP_CONST.OUTLINE_ID),
-        focusOutlineStyle = focusOutline.style;
+        focusOutline = byId(BP_CONST.OUTLINE_ID);
 
       focusOutline.setAttribute('data-show', true);
-      focusOutlineStyle.width = getFinalCoordinate(clientFocusRect.width + 2 * EXTRA_FOCUS_PADDING);
-      focusOutlineStyle.height = getFinalCoordinate(clientFocusRect.height + 2 * EXTRA_FOCUS_PADDING);
-
-      focusOutlineStyle.top = getFinalCoordinate(clientFocusRect.top - EXTRA_FOCUS_PADDING - clientPanelRect.top);
-      focusOutlineStyle.left = getFinalCoordinate(clientFocusRect.left - EXTRA_FOCUS_PADDING - clientPanelRect.left);
+      inlineStyle.set(focusOutline, {
+        width  : getFinalCoordinate(clientFocusRect.width + 2 * EXTRA_FOCUS_PADDING),
+        height : getFinalCoordinate(clientFocusRect.height + 2 * EXTRA_FOCUS_PADDING),
+        top    : getFinalCoordinate(clientFocusRect.top - EXTRA_FOCUS_PADDING - clientPanelRect.top),
+        left   : getFinalCoordinate(clientFocusRect.left - EXTRA_FOCUS_PADDING - clientPanelRect.left)
+      });
     }
   }
 
@@ -455,6 +465,8 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
     // initMouseEvent instead of initEvent
     event.initEvent('click', true, true);
     element.dispatchEvent(event);
+
+    new metric.PanelClick({ target: element.id, role: helper.getAriaOrNativeRole(element) }).send();
   }
 
   function onZoomKeyUp() {
@@ -502,6 +514,7 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
     if (keyCode === TAB) {
       turnOnKeyboardMode();
       navigateInDirection(evt.shiftKey ? -1 : 1);
+      new metric.PanelFocusMove().send();
       return;
     }
 

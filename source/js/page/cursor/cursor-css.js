@@ -95,7 +95,7 @@ define(['core/platform', 'page/zoom/constants', 'page/util/color', 'core/conf/ur
    * @return {string} result A string in format 'x y' which is later used a part of cursor property value.
    */
   function getCursorHotspotOffset(type, zl) {
-    if (platform.browser.isIE) {  // Don't use in IE -- it will be part of .cur file
+    if (platform.browser.isMS) {  // Don't use in IE or Edge -- it will be part of .cur file
       return '';
     }
 

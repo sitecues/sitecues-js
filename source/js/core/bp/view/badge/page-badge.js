@@ -4,9 +4,17 @@
 define(
   [
     'core/bp/view/view',
-    'core/bp/view/palette'
+    'core/bp/view/palette',
+    'Promise',
+    'core/inline-style/inline-style'
   ],
-  function(baseView, palette) {
+  function (
+    baseView,
+    palette,
+    Promise,
+    inlineStyle
+  ) {
+  'use strict';
 
   // Make sure the badge has non-static positioning to make it easy to place
   // the position: absolute sc-bp-container inside of it
@@ -15,29 +23,35 @@ define(
     var existingPositionCss = getComputedStyle(badge).position;
 
     if (existingPositionCss === 'static') {
-      badge.style.position = 'relative';
+      inlineStyle(badge).position = 'relative';
     }
   }
 
-  function onBadgeReady(badge, onComplete, badgeFileName) {
-    palette.init(badgeFileName, function() {
-      ensureNonStaticPositioning(badge);
-      baseView.init(badge, onComplete);
-    });
-  }
-
-  function init(badge, onComplete) {
-    if (badge.localName === 'img') {
-      // If a customer uses the <img> placeholder...
-      require(['bp-img-placeholder/bp-img-placeholder'], function(imagePlaceHolder) {
-        var newBadge = imagePlaceHolder.init(badge);
-        onBadgeReady(newBadge, onComplete, badge.src);
+  function initBadgeView(badge, badgeFileName) {
+    return palette.init(badgeFileName)
+      .then(function() {
+        ensureNonStaticPositioning(badge);
+        baseView.init(badge);
       });
-    }
-    else {
-      // Normal placeholder badge
-      onBadgeReady(badge, onComplete);
-    }
+  }
+
+  function init(origBadgeElem) {
+    return new Promise(function(resolve) {
+      if (origBadgeElem.localName !== 'img') {
+        // Normal placeholder badge
+        return resolve({badgeElem: origBadgeElem});
+      }
+      // If a customer uses the <img> placeholder...
+      require(['bp-img-placeholder/bp-img-placeholder'], function (imagePlaceHolder) {
+        var newBadge = imagePlaceHolder.init(origBadgeElem);
+        resolve({
+          badgeElem: newBadge,
+          origSrc: origBadgeElem.src
+        });
+      });
+    }).then(function(badgeInfo) {
+      return initBadgeView(badgeInfo.badgeElem, badgeInfo.origSrc);
+    });
   }
 
   return {

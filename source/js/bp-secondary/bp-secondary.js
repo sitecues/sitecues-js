@@ -1,7 +1,9 @@
 /**
  * Secondary panel including animations
  */
-define(['core/bp/constants',
+define(
+  [
+    'core/bp/constants',
     'core/bp/model/state',
     'core/bp/view/view',
     'core/bp/helper',
@@ -11,18 +13,26 @@ define(['core/bp/constants',
     'core/platform',
     'bp-secondary/insert-secondary-markup',
     'bp-secondary/bp-secondary-features',
-    'core/events'],
-  function (BP_CONST,
-            state,
-            view,
-            helper,
-            animate,
-            transformUtil,
-            locale,
-            platform,
-            markup,
-            secondaryFeatures,
-            events) {
+    'core/events',
+    'nativeFn',
+    'core/inline-style/inline-style'
+  ],
+  function (
+    BP_CONST,
+    state,
+    view,
+    helper,
+    animate,
+    transformUtil,
+    locale,
+    platform,
+    markup,
+    secondaryFeatures,
+    events,
+    nativeFn,
+    inlineStyle
+  ) {
+  'use strict';
 
   var BUTTON_DROP_ANIMATION_MS = 800,
     ENABLED_PANEL_TRANSLATE_Y = 0,
@@ -109,10 +119,12 @@ define(['core/bp/constants',
 
   // Create an animation and store it in runningAnimations so we can cancel it if need be
   function createAnimation(elems, values, duration, onFinishFn) {
-    var newAnimation = animate.animateTransforms(elems, values, duration, onFinishFn);
+    nativeFn.setTimeout(function() {
+      var newAnimation = animate.animateTransforms(elems, values, duration, onFinishFn);
+      runningAnimations.push(newAnimation);
+  }, 18); // Wait one frame, for Firefox
 
-    runningAnimations.push(newAnimation);
-  }
+}
 
   // Move up to make sure we fit onscreen when the secondary feature expands
   function getAmountToShiftSecondaryTop() {
@@ -154,12 +166,10 @@ define(['core/bp/constants',
 
     transformUtil.setElemTransform(secondaryPanel, { translateY : fromTranslateY}); // Starting point
 
-    setTimeout(function() {
-      createAnimation(
-        [secondaryPanel, getMoreButton()],
-        [secondaryPanelTransform, moreButtonTransform],
-        BUTTON_DROP_ANIMATION_MS, onFinish);
-      }, 18); // Wait one frame, for Firefox
+    createAnimation(
+      [secondaryPanel, getMoreButton()],
+      [secondaryPanelTransform, moreButtonTransform],
+      BUTTON_DROP_ANIMATION_MS, onFinish);
   }
 
   function getGeometryTargets(featureName, menuButton) {
@@ -217,7 +227,7 @@ define(['core/bp/constants',
       animationsCompleteMs = Math.max(openFeatureDuration, heightAnimationDelay + heightAnimationDuration);  // When is feature fully visible
 
     function fadeInTextContentWhenLargeEnough() {
-      fadeInTimer = setTimeout(function () {
+      fadeInTimer = nativeFn.setTimeout(function () {
         state.set('isSecondaryExpanding', false);
         view.update();
       }, heightAnimationDelay + heightAnimationDuration * 0.7);
@@ -297,9 +307,9 @@ define(['core/bp/constants',
     openFeatureAnimation();
 
     // Animate the height at the right time
-    animateHeightTimer = setTimeout(animateHeight, heightAnimationDelay);
+    animateHeightTimer = nativeFn.setTimeout(animateHeight, heightAnimationDelay);
 
-    animationsCompleteTimer = setTimeout(onAnimationsComplete, animationsCompleteMs);
+    animationsCompleteTimer = nativeFn.setTimeout(onAnimationsComplete, animationsCompleteMs);
 
     fadeInTextContentWhenLargeEnough();
 
@@ -356,7 +366,7 @@ define(['core/bp/constants',
   }
 
   function updateMoreButtonLabel(doPointToMainPanel) {
-    setTimeout(function() {
+    nativeFn.setTimeout(function() {
       var labelName = doPointToMainPanel ? 'sitecues_main_panel' : 'more_features',
         localizedLabel = locale.translate(labelName);
       byId(BP_CONST.MORE_BUTTON_GROUP_ID).setAttribute('aria-label', localizedLabel);
@@ -424,7 +434,7 @@ define(['core/bp/constants',
       transformUtil.setElemTransform(elem, {});
       if (!platform.browser.isFirefox) {
         // Do not use will-change in Firefox as it caused SC-3421 on some sites
-        elem.style.willChange = 'transform';
+        inlineStyle(elem).willChange = 'transform';
       }
     });
 
@@ -436,10 +446,13 @@ define(['core/bp/constants',
   function resetWebKitLayout(elem) {
     // Hack to fix Chrome/Safari bug where the more button was in the wrong place after resetting styles
     // This forces WebKit to reflow the element's layout.
-    elem.style.display = 'none';
+    var
+      style   = inlineStyle(elem),
+      display = style.display;
+    style.display = 'none';
     // jshint unused:false
     var unused = getBPContainer().offsetHeight; // Force layout refresh
-    elem.style.display = 'block';
+    style.display = display;
   }
 
   function resetButtonStyles() {
@@ -486,8 +499,7 @@ define(['core/bp/constants',
 
       // Insert the markup for the secondary panel
       markup.init();
-      // Add mouse listeners once BP is ready
-      resetStyles();
+      resetButtonStyles();
 
       origOutlineHeight = getCurrentOutlineHeight();
       origFillHeight = parseFloat(getOutlineFill().getAttribute('height'));

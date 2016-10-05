@@ -9,6 +9,6 @@ window.sitecues = {
     scriptUrl: url,
     uiMode: 'toolbar',
     alwaysRealSettings: true
-  },
+  }
 };
 

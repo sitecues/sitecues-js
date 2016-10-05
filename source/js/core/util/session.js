@@ -27,16 +27,24 @@ define(['core/util/uuid'], function(uuid) {
     return window.sessionStorage.getItem(SESSION_ID_KEY);
   }
 
+  function getReusableSessionId() {
+    return getParentSessionId() || getPrevSessionId();
+
+  }
+
   function createSessionId() {
     var sessionId = uuid();
     // Save session id and save for future page views of this site in this tab
-    window.sessionStorage.setItem(SESSION_ID_KEY, sessionId);
+    try {
+      window.sessionStorage.setItem(SESSION_ID_KEY, sessionId);
+    }
+    catch (ex) {}
     return sessionId;
   }
 
-  function init() {
+  function init(options) {
     // Use session id and page view id from parent page if available
-    exports.sessionId  = getParentSessionId()  || getPrevSessionId() || createSessionId();
+    exports.sessionId  = (options.canReuseSession && getReusableSessionId()) || createSessionId();
     exports.pageViewId = getParentPageViewId() || uuid();
   }
 

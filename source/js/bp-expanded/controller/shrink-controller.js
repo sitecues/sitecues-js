@@ -1,8 +1,28 @@
 /*
  Panel Controller
  */
-define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metric', 'core/bp/view/view', 'core/events'],
-  function (BP_CONST, state, helper, metric, view, events) {
+define(
+  [
+    'core/bp/constants',
+    'core/bp/model/state',
+    'core/bp/helper',
+    'core/metric/metric',
+    'core/bp/view/view',
+    'core/events',
+    'core/dom-events',
+    'nativeFn'
+  ],
+  function (
+    BP_CONST,
+    state,
+    helper,
+    metric,
+    view,
+    events,
+    domEvents,
+    nativeFn
+  ) {
+  'use strict';
 
     var MIN_DISTANCE = 75, // Min distance before shrink
       mouseLeaveShrinkTimer,  // How long we wait before shrinking BP from any mouseout (even only just barely outside panel)
@@ -24,8 +44,6 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
     // Return truthy value if a button is pressed on a mouse event.
     // There are three properties for mouse buttons, and they all work differently -- both
     // in terms of browsers and on mousemove events in particular.
-    // DANGER! Does not work in IE9 -- always returns falsey value.
-    // If we need it in IE9 we'll need to globally track mousedown and mouseup events.
     function isButtonDown(mouseEvent) {
       return (typeof mouseEvent.buttons === 'undefined' ? mouseEvent.which : mouseEvent.buttons);
     }
@@ -35,8 +53,14 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
     // We don't know anything about the mouse other than the fact that it left the window
     function winMouseLeave(evt) {
       if (helper.getEventTarget(evt).id === BP_CONST.BADGE_ID) {
-        mouseLeaveShrinkTimer = setTimeout(shrinkPanel, BP_CONST.MOUSELEAVE_DELAY_SHRINK_BP);
+        mouseLeaveShrinkTimer = nativeFn.setTimeout(shrinkPanel, BP_CONST.MOUSELEAVE_DELAY_SHRINK_BP);
       }
+    }
+
+    // return truthy value if mouseout should cause panel to close
+    function canShrinkFromMouseout() {
+      // Only allow close from hover if mouse was in panel once
+      return state.get('wasMouseInPanel');
     }
 
     function winMouseMove(evt) {
@@ -49,7 +73,7 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
         if (SC_DEV && isSticky()) {
           return;
         }
-        if (state.get('wasMouseInPanel')) {
+        if (canShrinkFromMouseout()) {
           shrinkPanel();
         }
       }
@@ -59,31 +83,12 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
       }
     }
 
-    // This will roughly help us group similar types of element clicks
-    function getAriaOrNativeRole(elem) {
-      var role = elem.getAttribute('role'),
-        tag;
-      if (!role) {
-        // No role: use tag name
-        tag = elem.localName;
-        if (tag === 'input') {
-          // Tag name is input, use @type
-          role = elem.getAttribute('type');
-        }
-        else if (tag === 'g' || tag === 'div') {
-          // Tag name is g|div, use 'group'
-          role = 'group';
-        }
-      }
-      return role;
-    }
-
     function fireClickMetric(evt) {
       var ancestor = helper.getEventTarget(evt),
         role,
         id; // default name if we don't find a metric target
       while (ancestor) {
-        role = getAriaOrNativeRole(ancestor);
+        role = helper.getAriaOrNativeRole(ancestor);
         if (role !== 'presentation') {  // Do not fire metrics for items only included to help presentation, e.g. a shadow
           id = ancestor.id;
           if (id || id === BP_CONST.BP_CONTAINER_ID) {
@@ -93,9 +98,16 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
         ancestor = ancestor.parentNode;
       }
 
-      new metric.PanelClick({ target: id, role: role }).send();
+      new metric.PanelClick({
+        target: id,
+        role: role,
+        isFirstBadgeUse: isFirstBadgeUse()
+      }).send();
     }
 
+    function isFirstBadgeUse() {
+      return state.get('isFirstBadgeUse');
+    }
 
     function winMouseDown(evt) {
       if (SC_DEV && isSticky()) {
@@ -103,7 +115,9 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
       }
 
       if (isMouseOutsidePanel(evt, 0)) {
-        if (isOpenedWithHover()) { // Any click anywhere outside of visible contents, no safe-zone needed
+        if (!state.get('isOpenedWithScreenReader')) {
+          // Any click anywhere outside of visible contents should close panel, no safe-zone needed
+          // Unless opened by a screen reader in virtual cursor mode, because JAWS sends spurious clicks outside of panel (SC-3211)
           shrinkPanel();
         }
         return;
@@ -115,6 +129,12 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
       }
     }
 
+    function onBlur(event) {
+      if (event.target === window) {
+        maybeShrinkPanel();
+      }
+    }
+    
     function maybeShrinkPanel() {
       if (SC_DEV && isSticky()) {
         return;
@@ -150,7 +170,9 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
       // Finally, begin the shrinking animation.
       view.update();
 
-      new metric.PanelClose().send();
+      new metric.PanelClose({
+        isFirstBadgeUse: isFirstBadgeUse()
+      }).send();
     }
 
     /*
@@ -174,10 +196,6 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
         }
         elem = elem.parentNode;
       }
-    }
-
-    function isOpenedWithHover() {
-      return state.get('isOpenedWithHover');
     }
 
     function getVisiblePanelRect() {
@@ -208,17 +226,16 @@ define(['core/bp/constants', 'core/bp/model/state', 'core/bp/helper', 'core/metr
     // These listeners are temporary – only bound when the panel is open.
     // Good for performance – it prevents extra code from being run on every mouse move/click when we don't need it
     function toggleListeners(doTurnOn) {
-      var addOrRemoveFn = window[doTurnOn ? 'addEventListener' : 'removeEventListener'];
+      var addOrRemoveFn = doTurnOn ? domEvents.on : domEvents.off;
+      addOrRemoveFn(window, 'mousedown', winMouseDown);
 
-      // Pressing tab or shift tab when panel is open switches it to keyboard mode
-      addOrRemoveFn('mousedown', winMouseDown);
-      if (isOpenedWithHover()) {
-        // Only allow close from hover if opened from hover
-        addOrRemoveFn('mousemove', winMouseMove);
+      if (!state.get('isOpenedWithScreenReader')) {
+        // Mousemove can close panel after mouseout, unless opened with a screen reader
+        addOrRemoveFn(window, 'mousemove', winMouseMove);
       }
-      addOrRemoveFn('mouseout', winMouseLeave);
-      addOrRemoveFn('blur', maybeShrinkPanel);
-      addOrRemoveFn('resize', maybeShrinkPanel); // Don't allow user to resize window in middle of using panel, leads to layout issues
+      addOrRemoveFn(window, 'mouseout', winMouseLeave);
+      addOrRemoveFn(window, 'blur', onBlur);
+      addOrRemoveFn(window, 'resize', maybeShrinkPanel); // Don't allow user to resize window in middle of using panel, leads to layout issues
     }
 
     function refresh() {

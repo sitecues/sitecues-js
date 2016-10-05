@@ -14,7 +14,17 @@
 
  */
 
-define(['core/bp/constants', 'core/bp/helper'], function(BP_CONST, helper) {
+define(
+  [
+    'core/bp/constants',
+    'core/bp/helper',
+    'core/inline-style/inline-style'
+  ],
+  function (
+    BP_CONST,
+    helper,
+    inlineStyle
+  ) {
   'use strict';
   // Create <div> and put the existing badge inside it.
   // Transfer necessary styles from the <img> to the <div>
@@ -38,16 +48,20 @@ define(['core/bp/constants', 'core/bp/helper'], function(BP_CONST, helper) {
     // Transfer styles from placeholder <img> to <div>
     // Remove those styles from placeholder <img>
     function transferStylesFromExistingBadge(styles) {
-      var len = styles.length,
-        i  = 0;
-      for (; i < len; i++) {
-        newBadge.style[styles[i]] = helper.getNumberFromString(badgeComputedStyles[styles[i]]) + 'px';
-        badgeImg.style[styles[i]] = 0;
+      var
+        len = styles.length,
+        newBadgeStyles   = {},
+        badgeImageStyles = {};
+      for (var i = 0; i < len; i++) {
+        newBadgeStyles[styles[i]]   = helper.getNumberFromString(badgeComputedStyles[styles[i]]) + 'px';
+        badgeImageStyles[styles[i]] = 0;
       }
+      inlineStyle.set(newBadge, newBadgeStyles);
+      inlineStyle.set(badgeImg, badgeImageStyles);
     }
 
     // Added to fix issue on ruhglobal.com
-    if (badgeImg.style.position === 'relative') {
+    if (inlineStyle(badgeImg).position === 'relative') {
       stylesToTransfer.push('top');
       stylesToTransfer.push('left');
     }
@@ -55,24 +69,30 @@ define(['core/bp/constants', 'core/bp/helper'], function(BP_CONST, helper) {
     transferStylesFromExistingBadge(stylesToTransfer);
 
     // Set other styles that cannot be abstracted into a helper function.
-    newBadge.style.display = 'inline-block';
-    newBadge.style.height  = badgeImgBoundingBox.height - (badgeComputedStyles.paddingTop  + badgeComputedStyles.paddingBottom) + 'px';
-    newBadge.style.width   = badgeImgBoundingBox.width  - (badgeComputedStyles.paddingLeft + badgeComputedStyles.paddingRight)  + 'px';
-    newBadge.style.float   = badgeComputedStyles.float;
+    inlineStyle(newBadge).display = 'inline-block';
+
+    var
+      newHeight = badgeImgBoundingBox.height,
+      WIDTH_TO_HEIGHT_RATIO = 6.5,
+      newBadgeStyle = {};
+    newBadgeStyle.height = newHeight + 'px';
+    newBadgeStyle.width  = newHeight * WIDTH_TO_HEIGHT_RATIO + 'px';
+    newBadgeStyle.float  = badgeComputedStyles.float;
+
+    inlineStyle.set(newBadge, newBadgeStyle);
 
     // Existing badge is hidden from screen readers, because the new <sc> parent will be the real badge
     badgeImg.setAttribute('aria-hidden', true);
     badgeImg.parentElement.insertBefore(newBadge, badgeImg);
 
-    newBadge.appendChild(badgeImg);
-
     moveBadgeIdToParent(badgeImg, newBadge);
+
+    badgeImg.parentElement.removeChild(badgeImg);
 
     return newBadge;
   }
 
   function moveBadgeIdToParent(badgeImg, newBadge) {
-    badgeImg.removeAttribute('id');
     newBadge.id = BP_CONST.BADGE_ID;
 
     // Invalidate the id in the cache because we just removed the BADGE_ID

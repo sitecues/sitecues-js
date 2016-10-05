@@ -1,0 +1,22 @@
+/* Badge too hard to see on dark theme */
+.sitecues-dark-theme #scp-zoom-slider-thumb {
+  fill: #447AC4 !important;
+}
+
+.sitecues-dark-theme #scp-wave1 {
+  fill: #80A9F8 !important;
+}
+
+.sitecues-dark-theme #scp-wave2 {
+  fill: #6B9AE0 !important;
+}
+
+.sitecues-dark-theme #scp-wave3 {
+  fill: #447AC4 !important;
+}
+
+.sitecues-dark-theme .scp-A-button, .sitecues-dark-theme #scp-head, .sitecues-dark-theme #scp-zoom-slider-bar {
+  fill: #fff !important;
+}
+
+

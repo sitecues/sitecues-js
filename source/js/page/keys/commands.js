@@ -1,5 +1,13 @@
-define(['page/zoom/zoom', 'page/highlight/move-keys', 'core/conf/user/manager'],
-  function(zoomMod, moveKeys, conf) {
+define([
+  'page/zoom/zoom',
+  'page/highlight/move-keys',
+  'page/highlight/highlight',
+  'page/reset/reset'
+  ],
+  function(zoomMod,
+           moveKeys,
+           mh,
+           reset) {
   return {
     decreaseZoom: function(event) {
       zoomMod.init();
@@ -21,18 +29,14 @@ define(['page/zoom/zoom', 'page/highlight/move-keys', 'core/conf/user/manager'],
       // Alt+0 -> Also reset speech
       // Alt+Shift+0 -> Full reset for all of sitecues, including themes, cursors, cues ... everything
       // Turn off zoom
-      zoomMod.resetZoom();
+      reset.resetZoom();
       if (event.altKey) {
-        require(['audio/audio'], function(audio) {
-          audio.init();
-
-          // Turn off speech
-          audio.setSpeechState(false, true);
-          audio.stopAudio();
-
+        reset.resetAudio(function() {
           if (event.shiftKey) {
-            conf.reset();
-            audio.playEarcon('quit-organ');
+            reset.resetMinorSettings();
+            require(['audio/audio'], function (audio) {
+              audio.playEarcon('quit-organ');
+            });
           }
         });
       }
@@ -62,6 +66,12 @@ define(['page/zoom/zoom', 'page/highlight/move-keys', 'core/conf/user/manager'],
         if (doClearRememberedHighlight) {
           this.lastHighlight = null;
         }
+      });
+    },
+    stopAudio: function() {
+      require(['audio/audio'], function (audio) {
+        audio.init();
+        audio.stopAudio();
       });
     },
     toggleSpeech:  function() {

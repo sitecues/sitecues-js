@@ -11,14 +11,11 @@
     "theme",
     "audio",
     "audio-cues",
-    "network-player",
-    "local-player",
     "status",
     "info",
     "pick-debug",
     "labs",
-    "inverse-theme",
-    "zoom-forms"
+    "inverter"
   ],
   "dataFolders": [
     "locale-data"

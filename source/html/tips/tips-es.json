@@ -27,7 +27,7 @@
   "guide": {
     "full": {
       "label": "Guía completa",
-      "action": "Práctica sitecues"
+      "action": "Práctica Sitecues"
     },
     "keyboard": {
       "label": "Ayuda del teclado",
@@ -47,6 +47,6 @@
 
   "demopage": {
     "welcome": "¡Bienvenida!",
-    "blurb": "sitecues lee la web."
+    "blurb": "Sitecues lee la web."
   }
 }

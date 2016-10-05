@@ -1,13 +1,39 @@
-define(['core/bp/constants', 'core/bp/helper', 'core/conf/user/manager', 'core/bp/model/state', 'core/metric', 'core/platform',
-        'page/cursor/cursor', 'core/events'],
-  function (BP_CONST, helper, conf, state, metric, platform, cursor, events) {
+define(
+  [
+    'core/bp/constants',
+    'core/bp/helper',
+    'core/conf/user/manager',
+    'core/bp/model/state',
+    'core/metric/metric',
+    'core/platform',
+    'page/cursor/cursor',
+    'core/events',
+    'core/dom-events',
+    'nativeFn',
+    'core/inline-style/inline-style'
+  ],
+  function (
+    BP_CONST,
+    helper,
+    conf,
+    state,
+    metric,
+    platform,
+    cursor,
+    events,
+    domEvents,
+    nativeFn,
+    inlineStyle
+  ) {
+  'use strict';
 
   var byId = helper.byId,
     isActive = false,
     isInitialized,
     settingsPanel,
     lastDragUpdateTime = 0,
-    SLIDER_DRAG_UPDATE_MIN_INTERVAL= 50;
+    SLIDER_DRAG_UPDATE_MIN_INTERVAL= 50,
+    rangeValueMap = {};
 
   function onPanelUpdate() {
 
@@ -40,15 +66,20 @@ define(['core/bp/constants', 'core/bp/helper', 'core/conf/user/manager', 'core/b
 
     settingsPanel = byId(BP_CONST.SETTINGS_CONTENT_ID);
 
+    if (platform.featureSupport.themes) {
+      // MSIE/Edge -- no support yet
+      // TODO support themes in IE -- need to break up theme CSS into chunks for pages like atkratter.com,
+      // otherwise it locks up the page -- 537k of styles is a lot for IE to handle
+      require(['theme/theme'], function(theme) {
+        theme.init(true); // Preload theme code
+      });
+    }
+
     initButtons();
 
     initRanges();
 
     themeSlidersInit();
-
-    require(['theme/theme'], function(theme) {
-      theme.init(true); // Preload theme code
-    });
   }
 
   // Set up setting synchronization
@@ -111,7 +142,9 @@ define(['core/bp/constants', 'core/bp/helper', 'core/conf/user/manager', 'core/b
       rangeElem = rangeElems[index];
       settingName = rangeElem.getAttribute('data-setting-name');
       initRangeListener(settingName, rangeElem);
-      adjustRangeBackgroundForFirefox(rangeElem);
+      domEvents.on(rangeElem, 'blur', fireInputRangeMetric);
+      rangeValueMap[settingName] = conf.get(settingName);
+      adjustRangeBackground(rangeElem);
     }
 
   }
@@ -156,14 +189,22 @@ define(['core/bp/constants', 'core/bp/helper', 'core/conf/user/manager', 'core/b
     }
   }
 
-  function fireInputRangeMetric(id, settingName, newValue) {
-    var oldValue = conf.get(settingName);
-    new metric.SliderSettingChange({
-      id: id.split('scp-')[1] || id,  // Trim off scp- prefix
-      settingName: settingName,
-      old: oldValue,
-      new: newValue
-    }).send();
+  function fireInputRangeMetric(event) {
+    var target = event.target,
+      id = target.id,
+      settingName = target.getAttribute('data-setting-name'),
+      oldValue = rangeValueMap[settingName],
+      newValue = conf.get(settingName);
+
+    if (oldValue !== newValue) { // Only fire on change
+      rangeValueMap[settingName] = newValue;
+      new metric.SliderSettingChange({
+        id: id.split('scp-')[1] || id,  // Trim off scp- prefix
+        settingName: settingName,
+        old: oldValue,
+        new: newValue
+      }).send();
+    }
   }
 
   // Use native value for things like <input type="range">
@@ -174,16 +215,20 @@ define(['core/bp/constants', 'core/bp/helper', 'core/conf/user/manager', 'core/b
       var settingName = target.getAttribute('data-setting-name'),
         newValue = + target.value;
       if (settingName) {
-        fireInputRangeMetric(target.id, settingName, newValue);
         conf.set(settingName, newValue);
       }
     }
   }
 
   // Firefox doesn't have a pure CSS way of adjusting the background
-  function adjustRangeBackgroundForFirefox(slider) {
-    if (!platform.browser.isFirefox ||
-      slider.className.indexOf('scp-normal-range') < 0) {
+  function adjustRangeBackground(slider) {
+    if (platform.browser.isMS) {
+      // Not needed for IE/Edge, which do this via -ms- CSS
+      // We prefer CSS approach in IE, because JS may have trouble keeping up with slider thumb movements
+      return;
+    }
+
+    if (slider.className.indexOf('scp-normal-range') < 0) {
       return; // Don't do for hue ranges which have a rainbow bg
     }
     var value = + slider.value,
@@ -197,18 +242,18 @@ define(['core/bp/constants', 'core/bp/helper', 'core/conf/user/manager', 'core/b
         LEFT_COLOR + ' ' + percent + ',' +
         RIGHT_COLOR + ' ' + percent + ',' +
         RIGHT_COLOR + ' 100%)';
-    slider.style.backgroundImage = gradient;
+    inlineStyle(slider).backgroundImage = gradient;
   }
 
   // Native input change
   // For sliders, this occurs when thumb moves at all, it doesn't need to be dropped there
   // We don't want to update too much, hence the timer
   function onSettingsNativeInputChangeDrag(evt) {
-    adjustRangeBackgroundForFirefox(evt.target);
+    adjustRangeBackground(evt.target);
     var currTime = + Date.now();
     if (currTime - lastDragUpdateTime > SLIDER_DRAG_UPDATE_MIN_INTERVAL) {
       lastDragUpdateTime = currTime;
-      setTimeout(function() { onSettingsNativeInputChange(evt);}, 0 );
+      nativeFn.setTimeout(function() { onSettingsNativeInputChange(evt);}, 0 );
     }
   }
 

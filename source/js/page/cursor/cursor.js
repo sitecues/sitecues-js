@@ -6,8 +6,26 @@
  * - switches custom cursor image when hover over elements that demand certain - not default or auto - cursor;
  * - attaches correspondent window events so that handle custom cursor events.
  */
-define(['$', 'page/style-service/style-service', 'core/conf/user/manager', 'page/cursor/cursor-css', 'core/platform', 'core/conf/site', 'core/events'],
-  function ($, styleService, conf, cursorCss, platform, site, events) {
+define(
+  [
+    '$',
+    'page/style-service/style-service',
+    'core/conf/user/manager',
+    'page/cursor/cursor-css',
+    'core/platform',
+    'core/events',
+    'nativeFn'
+  ],
+  function (
+    $,
+    styleService,
+    conf,
+    cursorCss,
+    platform,
+    events,
+    nativeFn
+  ) {
+  'use strict';
 
   var isInitialized,
       // Regexp is used to match URL in the string given(see below).
@@ -27,8 +45,7 @@ define(['$', 'page/style-service/style-service', 'core/conf/user/manager', 'page
       MAX_USER_SPECIFIED_MOUSE_HUE = 1.09,// If > 1.0 then use white
       autoSize,
       userSpecifiedSize,
-      userSpecifiedHue,
-      doAllowCursors = !platform.browser.isIE || platform.browser.version >= 11 || site.get('disableCursorEnhancement') === false;
+      userSpecifiedHue;
 
   /*
    * Change a style rule in the sitecues-cursor stylesheet to use the new cursor URL
@@ -116,7 +133,7 @@ define(['$', 'page/style-service/style-service', 'core/conf/user/manager', 'page
 
     var url = getUrlFromCursorValue();
 
-    if (!platform.browser.isIE || isCursorReadyToUse(url)) {
+    if (!platform.browser.isMS || isCursorReadyToUse(url)) {
       // No prefetch needed
       setCursorStyle(rule, cursorValue);
     }
@@ -170,8 +187,12 @@ define(['$', 'page/style-service/style-service', 'core/conf/user/manager', 'page
 
   // Turning off custom cursor improves zoom animation in IE
   function toggleZoomOptimization(doDisable) {
-    if (platform.browser.isIE) { // Only necessary for IE
-      cursorStylesheetObject.disabled = Boolean(doDisable);
+    if (platform.browser.isMS) { // Only necessary for MS Browsers
+      // Still seems to help in Edge as of version 13
+      // The style service may not have initialized
+      if (cursorStylesheetObject) {
+        cursorStylesheetObject.disabled = Boolean(doDisable);
+      }
     }
   }
 
@@ -237,7 +258,7 @@ define(['$', 'page/style-service/style-service', 'core/conf/user/manager', 'page
     // Refresh document cursor stylesheet if we're using one
     if (cursorStylesheetObject) {
       refreshCursorStyles(cursorStylesheetObject, cursorTypeUrls);
-      setTimeout(toggleZoomOptimization, REENABLE_CURSOR_MS);
+      nativeFn.setTimeout(toggleZoomOptimization, REENABLE_CURSOR_MS);
     }
 
     // Refresh BP cursor stylesheet
@@ -247,9 +268,6 @@ define(['$', 'page/style-service/style-service', 'core/conf/user/manager', 'page
   }
 
   function isCustomCursorNeeded() {
-    if (!doAllowCursors) {
-      return false;
-    }
     return autoSize > 1 || userSpecifiedSize || userSpecifiedHue;
   }
 
@@ -279,26 +297,18 @@ define(['$', 'page/style-service/style-service', 'core/conf/user/manager', 'page
   function getCursorTypeUrls(size) {
     var cursorTypeUrls = [],
       i = 0,
-      doUseIECursors = platform.browser.isIE;
+      doUseMSCursors = platform.browser.isMS;
 
     // Generate cursor images for every cursor type...
     for (; i < CURSOR_TYPES.length; i ++) {
       // Don't use hotspotOffset in IE because that's part of the .cur file.
       var type = CURSOR_TYPES[i],
-        css = cursorCss.getCursorCss(type, size, doUseIECursors, getRealUserHue());
+        css = cursorCss.getCursorCss(type, size, doUseMSCursors, getRealUserHue());
 
       cursorTypeUrls[CURSOR_TYPES[i]] = css;
     }
 
     return cursorTypeUrls;
-  }
-
-  if (SC_DEV) {
-    sitecues.toggleCursors = function() {
-      doAllowCursors = !doAllowCursors;
-      refreshStylesheetsIfNecessary();
-      return doAllowCursors;
-    };
   }
 
   function onMouseSizeSetting(size) {

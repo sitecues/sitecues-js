@@ -29,7 +29,8 @@ define([], function() {
   // 2. sitecues.config.siteId (camelCase is the new way)
   // 3. sitecues.config.site_id (underscore in config field names is deprecated)
   function getSiteId() {
-    return everywhereConfig.siteId || providedSiteConfig.siteId || providedSiteConfig.site_id;
+    var siteId = everywhereConfig.siteId || providedSiteConfig.siteId || providedSiteConfig.site_id;
+    return siteId && siteId.trim();
   }
 
   // Get the entire site config object
@@ -38,6 +39,7 @@ define([], function() {
   }
 
   // Configuration for sitecues everywhere, if it exists
+  // TODO Should go away once we go to the new extension which is entirely in a content script
   function getEverywhereConfig() {
     return sitecues.everywhereConfig || {};
   }

@@ -12,11 +12,16 @@ define(
     'page/zoom/util/body-geometry',
     'page/util/element-classifier'
   ],
-  function($, traitcache, mhpos, bodyGeo, elemClassifier) {
+  function(
+    $, 
+    traitcache, 
+    mhpos, 
+    bodyGeo, 
+    elemClassifier
+  ) {
+  'use strict';
 
-    'use strict';
-
-    var bodyWidth, viewSize;
+  var bodyWidth, viewSize;
 
   // ---- PUBLIC ----
 
@@ -37,7 +42,7 @@ define(
     // Basic properties
     var zoom = viewSize.zoom,
       traits = {
-        style: traitcache.getStyle(node),
+        computedStyle: traitcache.getStyle(node),
         tag: node.localName,
         role: node.getAttribute('role'),
         childCount: node.childElementCount
@@ -47,7 +52,7 @@ define(
 
     var fastRect = traitcache.getRect(node);
 
-    traits.normDisplay = getNormalizedDisplay(traits.style, node, fastRect.height, zoom, traits);
+    traits.normDisplay = getNormalizedDisplay(traits.computedStyle, node, fastRect.height, zoom, traits);
 
     traits.rect = getRect(node, traits, fastRect);
 
@@ -64,18 +69,18 @@ define(
 
     // Style-based
     $.extend(traits, {
-      topPadding: parseFloat(traits.style.paddingTop),
-      bottomPadding: parseFloat(traits.style.paddingBottom),
-      leftPadding: parseFloat(traits.style.paddingLeft),
-      rightPadding: parseFloat(traits.style.paddingRight),
-      topBorder: parseFloat(traits.style.borderTopWidth),
-      bottomBorder: parseFloat(traits.style.borderBottomWidth),
-      leftBorder: parseFloat(traits.style.borderLeftWidth),
-      rightBorder: parseFloat(traits.style.borderRightWidth),
-      topMargin: Math.max(0, parseFloat(traits.style.marginTop)),
-      bottomMargin: Math.max(0, parseFloat(traits.style.marginBottom)),
-      leftMargin: Math.max(0, parseFloat(traits.style.marginLeft)),
-      rightMargin: Math.max(0, parseFloat(traits.style.marginRight))
+      topPadding: parseFloat(traits.computedStyle.paddingTop),
+      bottomPadding: parseFloat(traits.computedStyle.paddingBottom),
+      leftPadding: parseFloat(traits.computedStyle.paddingLeft),
+      rightPadding: parseFloat(traits.computedStyle.paddingRight),
+      topBorder: parseFloat(traits.computedStyle.borderTopWidth),
+      bottomBorder: parseFloat(traits.computedStyle.borderBottomWidth),
+      leftBorder: parseFloat(traits.computedStyle.borderLeftWidth),
+      rightBorder: parseFloat(traits.computedStyle.borderRightWidth),
+      topMargin: Math.max(0, parseFloat(traits.computedStyle.marginTop)),
+      bottomMargin: Math.max(0, parseFloat(traits.computedStyle.marginBottom)),
+      leftMargin: Math.max(0, parseFloat(traits.computedStyle.marginLeft)),
+      rightMargin: Math.max(0, parseFloat(traits.computedStyle.marginRight))
     });
 
     // Visible size at 1x (what it would be if not zoomed)
@@ -118,10 +123,13 @@ define(
       }
       else {
         var lineHeight = getApproximateLineHeight() * zoom;
-        if (height < lineHeight && mhpos.getContentsRangeRect(node.parentNode).height < lineHeight) {
-          // Treat single line inlines that are part of another single-line element as inline-block.
-          // This allows them to be picked -- they may be a row of buttons or part of a menubar.
-          doTreatAsInlineBlock = true;
+        if (height < lineHeight) {
+          var parentRect = mhpos.getContentsRangeRect(node.parentNode);
+          if (parentRect && parentRect.height < lineHeight) {
+            // Treat single line inlines that are part of another single-line element as inline-block.
+            // This allows them to be picked -- they may be a row of buttons or part of a menubar.
+            doTreatAsInlineBlock = true;
+          }
         }
       }
     }
@@ -151,7 +159,7 @@ define(
   }
 
   function isVisualMedia(traits, node) {
-    var style = traits.style;
+    var style = traits.computedStyle;
     return elemClassifier.isVisualMedia(node) ||
       // Or if one of those <div></div> empty elements just there to show a background image
       (

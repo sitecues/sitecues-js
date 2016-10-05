@@ -1,7 +1,18 @@
 /**
  * BackgroundDimmer can dim all content in the page behind a given z-index.
  */
-define(['$', 'core/conf/user/manager', 'page/util/common', 'core/platform'], function($, conf, common, platform) {
+define(
+  [
+    '$',
+    'hlb/constants',
+    'core/inline-style/inline-style'
+  ],
+  function (
+    $,
+    constants,
+    inlineStyle
+  ) {
+  'use strict';
 
   //////////////////////////////
   // PRIVATE VARIABLES
@@ -9,18 +20,10 @@ define(['$', 'core/conf/user/manager', 'page/util/common', 'core/platform'], fun
 
   var DIMMER_ID = 'sitecues-background-dimmer',
 
-      DIMMER_Z_INDEX = 2147483643,
-
       DIMMER_MIN_OPACITY = 0,
       DIMMER_MAX_OPACITY = 0.65,
 
-      isOldIE = platform.browser.isIE && platform.browser.version < 11,
-
-      requestFrameFn = window.requestAnimationFrame ||
-        window.msRequestAnimationFrame ||
-        function (fn) {
-          return setTimeout(fn, 16);
-        };
+      requestFrameFn = window.requestAnimationFrame;
 
   //////////////////////////////
   // PUBLIC FUNCTIONS
@@ -31,32 +34,39 @@ define(['$', 'core/conf/user/manager', 'page/util/common', 'core/platform'], fun
    * @param  {number}        inflationSpeed      The duration of the opacity transition
    * @param  {Object} (optional) $parentOfDimmer  A selector describing the node that should parent the dimmer
    */
-  function dimBackgroundContent(inflationSpeed, $parentOfDimmer) {
+  function dimBackgroundContent(inflationSpeed, $foreground) {
 
-    if (getDimmerElement()) {
-      return; // Background already dimmed
+    function createDimmerElement() {
+      var documentElement = document.documentElement,
+        width = Math.max(documentElement.scrollWidth, window.innerWidth),
+        height = Math.max(documentElement.scrollHeight, window.innerHeight),
+        // Draw a rectangle that does not capture any mouse events
+        useCss = {
+          display: 'block',
+          position: 'absolute',
+          zIndex: constants.MAX_ZINDEX,
+          top: 0,
+          left: 0,
+          width: width + 'px',
+          height: height + 'px',
+          backgroundColor: '#000',
+          pointerEvents: 'none',
+          willChange: 'opacity'
+        },
+        newDimmer = $('<sc>');
+
+      inlineStyle.set(newDimmer[0], useCss);
+      newDimmer = newDimmer.attr('id', DIMMER_ID)[0];
+
+      animateOpacity(newDimmer, DIMMER_MIN_OPACITY, DIMMER_MAX_OPACITY, inflationSpeed);
+
+      return newDimmer;
     }
 
-    var multiplySize = isOldIE ? 2 : 1, // Fixes bug with white line in the middle of the outline
-      documentElement = document.documentElement,
-      width = Math.max(documentElement.scrollWidth, window.innerWidth),
-      height = Math.max(documentElement.scrollHeight, window.innerHeight),
-      rect = {
-        left: 0,
-        top: 0,
-        width: width * multiplySize ,
-        height: height * multiplySize
-      },
-      $dimmerElement = drawRect(rect, '#000', $parentOfDimmer);
+    var dimmerElement = getDimmerElement() || createDimmerElement();
 
-    $dimmerElement
-      .attr('id', DIMMER_ID)
-      .css({
-        zIndex: DIMMER_Z_INDEX,
-        willChange: 'opacity'
-      });
-
-      animateOpacity($dimmerElement[0], DIMMER_MIN_OPACITY, DIMMER_MAX_OPACITY, inflationSpeed);
+    // If created before, will ensure it's moved before the current hlb wrapper
+    $(dimmerElement).insertBefore($foreground);
   }
 
   function animateOpacity(dimmerElement, startOpacity, endOpacity, speed, onCompleteFn) {
@@ -68,7 +78,8 @@ define(['$', 'core/conf/user/manager', 'page/util/common', 'core/platform'], fun
         percentComplete = timeElapsed > speed ? 1 : timeElapsed / speed,
         currentOpacity = startOpacity + (endOpacity - startOpacity) * percentComplete;
 
-      dimmerElement.style.opacity = currentOpacity;
+      inlineStyle(dimmerElement).opacity = currentOpacity;
+
       if (percentComplete < 1) {
         requestFrameFn(nextFrame);
       }
@@ -85,7 +96,11 @@ define(['$', 'core/conf/user/manager', 'page/util/common', 'core/platform'], fun
    */
   function undimBackgroundContent(deflationSpeed) {
 
-    animateOpacity(getDimmerElement(), DIMMER_MAX_OPACITY, DIMMER_MIN_OPACITY, deflationSpeed, onDimmerClosed);
+    var dimmer = getDimmerElement();
+
+    if (dimmer) { // Still there
+      animateOpacity(dimmer, DIMMER_MAX_OPACITY, DIMMER_MIN_OPACITY, deflationSpeed, onDimmerClosed);
+    }
 
   }
 
@@ -98,50 +113,6 @@ define(['$', 'core/conf/user/manager', 'page/util/common', 'core/platform'], fun
 
   function getDimmerElement() {
     return document.getElementById(DIMMER_ID);
-  }
-
-  // Draw a rectangle that does not capture any mouse events
-  // Implemented via zero-area element and CSS outline
-  // Useful because IE9/10 does not have pointer-events: none
-  // For example, if drawing a horizontal box we draw a line that is 0px high:
-  //
-  //       ---------------
-  //
-  // Then we fill in the outline around it using CSS:
-  //
-  //      OOOOOOOOOOOOOOOOO
-  //      O---------------O
-  //      OOOOOOOOOOOOOOOOO
-  //
-  function drawRect(absRect, color, optionalParent) {
-    var useCss = {
-        position: 'absolute',
-        outlineOffset: '-1px',  // Fill in extra space in middle of outline
-        outlineColor: color,
-        outlineStyle: 'solid'
-      },
-      elemThickness = (platform.browser.isIE ? 0 : 1) + 'px',
-      useOutlineWidth;
-
-    if (absRect.width > absRect.height) {   // Wider than tall: draw horizontal line
-      useOutlineWidth = absRect.height / 2;
-      useCss.width = absRect.width - 2 * useOutlineWidth + 'px';
-      useCss.height = elemThickness;
-    }
-    else {   // Taller than wide: draw vertical line
-      useOutlineWidth = absRect.width / 2;
-      useCss.height = absRect.height - 2 * useOutlineWidth + 'px';
-      useCss.width = elemThickness;
-    }
-
-    useCss.left = Math.round(absRect.left + useOutlineWidth) + 'px';
-    useCss.top = Math.round(absRect.top + useOutlineWidth) + 'px';
-    useCss.outlineWidth = Math.round(useOutlineWidth + 1) + 'px'; // Must round otherwise we get an outline in the middle
-    useCss.display = 'block';
-
-    return $('<sc>')
-      .css(useCss)
-      .appendTo(optionalParent || 'html');
   }
 
   return {

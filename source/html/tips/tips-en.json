@@ -27,7 +27,7 @@
   "guide": {
     "full": {
       "label": "Full guide",
-      "action": "Practice sitecues"
+      "action": "Practice Sitecues"
     },
     "keyboard": {
       "label": "Keyboard help",
@@ -47,6 +47,6 @@
 
   "demopage": {
     "welcome": "Welcome!",
-    "blurb": "sitecues reads the web."
+    "blurb": "Sitecues reads the web."
   }
 }

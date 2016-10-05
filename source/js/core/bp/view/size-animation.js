@@ -1,21 +1,29 @@
 /**
  * Expand or contract the BP
  */
-define([ 'core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/platform', 'core/events'],
-  function(state, BP_CONST, helper, platform, events) {
+define(
+  [
+    'core/bp/model/state',
+    'core/bp/constants',
+    'core/bp/helper',
+    'core/platform',
+    'core/events',
+    'nativeFn',
+    'core/inline-style/inline-style'
+  ],
+  function (
+    state,
+    BP_CONST,
+    helper,
+    platform,
+    events,
+    nativeFn,
+    inlineStyle
+  ) {
+  'use strict';
 
-    'use strict';
-
-  var requestFrameFn = window.requestAnimationFrame   ||
-                       window.msRequestAnimationFrame ||
-                       function (fn) {
-                         return setTimeout(fn, 16);
-                       },
-      cancelFrameFn  = window.cancelAnimationFrame   ||
-                       window.msCancelAnimationFrame ||
-                       function (fn) {
-                         clearTimeout(fn);
-                       },
+  var requestFrameFn = window.requestAnimationFrame,
+      cancelFrameFn  = window.cancelAnimationFrame,
       expandEasingFn   = function (t) { return (--t)*t*t+1;}, // https://gist.github.com/gre/1650294
       collapseEasingFn = function (t) { return t; },          // Linear looks better for collapse animation
       animationStartTime,
@@ -371,7 +379,7 @@ define([ 'core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/pla
   function getTargetSVGElementTransforms () {
 
     function copyObj (obj) {
-      return JSON.parse(JSON.stringify(obj));
+      return nativeFn.JSON.parse(nativeFn.JSON.stringify(obj));
     }
 
     var isPanelRequested = state.isPanelRequested(),
@@ -421,7 +429,7 @@ define([ 'core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/pla
 
   function getCurrentTransformPosition () {
 
-    var transform = byId(transformElementId).style[platform.transformProperty],
+    var transform = inlineStyle(byId(transformElementId)).transform,
         position  = {},
         transformValues,
         translateLeft,
@@ -460,7 +468,7 @@ define([ 'core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/pla
 
   function getCurrentScale () {
 
-    var transformStyle = byId(transformElementId).style[platform.transformProperty],
+    var transformStyle = inlineStyle(byId(transformElementId)).transform,
         transformValues;
 
     if (transformStyle.indexOf('scale') !== -1) {
@@ -475,21 +483,15 @@ define([ 'core/bp/model/state', 'core/bp/constants', 'core/bp/helper', 'core/pla
   }
 
   function setSize (size, crispFactor) {
-
-    var svgStyle = getSvgElement().style;
-
+    inlineStyle.set(getSvgElement(), {
     // Height and Width
-    svgStyle.width  = (size.width * crispFactor) + 'px';
-    svgStyle.height = (size.height * crispFactor) + 'px';
-
+      width  : (size.width * crispFactor) + 'px',
+      height : (size.height * crispFactor) + 'px'
+    });
   }
 
   function setTransform (left, top, transformScale) {
-
-    var transformStyle = byId(transformElementId).style;
-
-    transformStyle[platform.transformProperty] = 'translate(' + left + 'px' + ' , ' + top + 'px' + ') ' + 'scale(' + transformScale + ')';
-
+    inlineStyle(byId(transformElementId)).transform = 'translate(' + left + 'px' + ' , ' + top + 'px' + ') ' + 'scale(' + transformScale + ')';
   }
 
   /**

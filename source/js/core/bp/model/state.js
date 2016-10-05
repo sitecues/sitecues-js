@@ -1,5 +1,9 @@
 // TODO we can save a lot of bytes by setting these directly on the state object (instead of inside .data)
-define([], function() {
+define(
+  [],
+  function () {
+  'use strict';
+
   var data = {
     currentMode             : 0,     // 0 - 1, 0 is badge, 1 is panel, anything in between means its currently transitioning
     transitionTo            : 0,     // 0 or 1, 0 is badge, 1 is panel, it cannot be anything in between (doesn't seem to make sense to transition to anything other than the badge or panel state)
@@ -7,14 +11,15 @@ define([], function() {
     secondaryPanelTransitionTo: 0,
     scale                   : 1, // How much transform scale used on expanded BP
     isRealSettings          : true, // Are we currently showing the actual settings or fake settings?
+    isFirstBadgeUse         : true, // Is this a first time user?
     secondaryPanelName      : 'button-menu', // 'button-menu', 'tips', 'settings', 'feedback', 'about'
     isSecondaryExpanding    : false, // Is secondary panel currently expanding to accommodate new contents?
     isSecondaryExpanded     : false, // Is secondary panel fully expanded?
     isStickyPanel           : false, // Sticky panel is for debugging -- mouseout doesn't close the panel
-    isClassicMode           : false, // Use question mark if IE9 or site is incompatible with themes
+    isClassicMode           : false, // Use question mark if browser support is weak or site is incompatible with themes
     doSuppressHovers        : false, // Suppress mouse hovers until next mousemove, because browser won't recompute them until then (useful for animations)
     isKeyboardMode          : false, // Show focus in this mode, support tab navigation
-    isOpenedWithHover       : false, // If opened with the hover, then user should be able to close with mouse out
+    isOpenedWithScreenReader: false, // If opened with screen reader, be careful of spurious click events outside panel
     isMoreButtonVisible     : false, // Should the more button be shown?
     isPageBadge             : true,  // Is set to false if default badge is inserted
     isToolbarBadge          : false, // Set to true if using a badge toolbar. This may eventually become redundant with isPageBadge (the opposite of it) if we only use toolbar default badges.
@@ -22,8 +27,6 @@ define([], function() {
     paletteKey              : '',    // Current palette See BP_CONST.PALETTE_NAME_MAP for possible keys.
     defaultPaletteKey       : '',    // Palette to use if sitecues theme determines that default palette should be used based on the background behind the badge.
     isAdaptivePalette       : false, // Is an adaptive palette name
-    settingsIconVersion     : 1,     // Which settings icon to use?
-    aboutIconVersion        : 1,     // Which about icon to use?
     isShrinkingFromKeyboard : false, // Is the panel shrinking because of a keyboard command?
     isFeedbackSent          : false, // Is the feedback sent?
     ratioOfSVGToVisibleBadgeSize: undefined // ratio of svg to visible badge size
@@ -109,6 +112,10 @@ define([], function() {
     return isPanel() && data.secondaryPanelName === 'button-menu';
   }
 
+  function turnOnRealSettings() {
+    set('isRealSettings', true);    // Always use real settings once expanded
+  }
+
   return {
     get: get,
     set: set,
@@ -121,7 +128,7 @@ define([], function() {
     isShrinking: isShrinking,
     getSecondaryPanelName: getSecondaryPanelName,
     isButtonMenu: isButtonMenu,
+    turnOnRealSettings: turnOnRealSettings,
     getPanelName: getPanelName
   };
-
 });

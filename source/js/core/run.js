@@ -3,14 +3,50 @@
  *   1. Initialize settings and locale
  *   2. Initialize BP
  *   3. Listen to anything that should wake up sitecues features
- *   4. Fire sitecues ready callback and metric
+ *   4. Fire sitecues ready callback and page-visited metric
  */
+define(
+  [
+    'core/conf/user/manager',
+    'core/util/session',
+    'core/locale',
+    'core/metric/metric',
+    'core/platform',
+    'core/bp/bp',
+    'core/constants',
+    'core/events',
+    'core/dom-events',
+    'Promise',
+    'core/modifier-key-state',
+    'nativeFn',
+    'core/ab-test/ab-test',
+    'core/metric/bounce',
+    'core/shake/shake',
+    'core/inline-style/inline-style'
+  ],
+  /*jshint -W072 */ //Currently there are too many dependencies, so we need to tell JSHint to ignore it for now
+  function (
+    conf,
+    session,
+    locale,
+    metric,
+    platform,
+    bp,
+    CORE_CONST,
+    events,
+    domEvents,
+    Promise,
+    modifierKeyState,
+    nativeFn,
+    abTest,
+    bounce,
+    shake,
+    inlineStyle
+  ) {
+  /*jshint +W072 */
+  'use strict';
 
-define(['core/conf/user/manager', 'core/util/session', 'core/locale', 'core/metric', 'core/platform', 'core/bp/bp',
-        'core/constants', 'core/events'],
-  function (conf, session, locale, metric, platform, bp, CORE_CONST, events) {
   var
-    numPrereqsToComplete,
     areZoomEnhancementsInitialized,
     isZoomInitialized,
     isSpeechInitialized,
@@ -20,6 +56,8 @@ define(['core/conf/user/manager', 'core/util/session', 'core/locale', 'core/metr
     isKeyReleased,
     isKeyHandlingInitialized,
     wasSitecuesEverOn,
+    initialPageVisitDetails,
+    startSitecuesLoad,
     // Keys that can init sitecues
     INIT_CODES = CORE_CONST.INIT_CODES,
     // Enums for sitecues loading states
@@ -33,22 +71,24 @@ define(['core/conf/user/manager', 'core/util/session', 'core/locale', 'core/metr
   }
 
   function initZoomEnhancingFeatures() {
-    require([ 'page/hpan/hpan', 'page/zoom/fixed-position-fixer', 'page/focus/focus', 'page/cursor/cursor' ], function (hpan, fixer, focus, cursor) {
+    require([ 'page/hpan/hpan', 'page/positioner/positioner', 'page/focus/focus', 'page/cursor/cursor' ], function (hpan, positioner, focus, cursor) {
       hpan.init();
-      fixer.init();
+      positioner.initFromZoom();
       focus.init();
       cursor.init();
     });
   }
 
   function initSpeech() {
-    require([ 'audio/audio' ], function (audio) {
+    require([ 'audio/audio', 'page/page'  ], function (page, audio) {
+      page.init();
       audio.init();
     });
   }
 
   function initSitecuesOn() {
-    require([ 'page/highlight/highlight', 'page/keys/keys', 'page/highlight/move-keys' ], function (highlight, keys, moveKeys) {
+    require([ 'page/page', 'page/highlight/highlight', 'page/keys/keys', 'page/highlight/move-keys'], function (page, highlight, keys, moveKeys) {
+      page.init();
       highlight.init();
       keys.init();
       moveKeys.init();
@@ -56,7 +96,8 @@ define(['core/conf/user/manager', 'core/util/session', 'core/locale', 'core/metr
   }
 
   function initThemes() {
-    require([ 'theme/theme', 'page/focus/focus', 'page/keys/keys' ], function (theme, focus, keys) {
+    require([ 'page/page', 'theme/theme', 'page/focus/focus', 'page/keys/keys' ], function (page, theme, focus, keys) {
+      page.init();
       theme.init();
       focus.init();
       keys.init();
@@ -64,7 +105,8 @@ define(['core/conf/user/manager', 'core/util/session', 'core/locale', 'core/metr
   }
 
   function initMouse() {
-    require([ 'page/cursor/cursor', 'page/keys/keys' ], function (cursor, keys) {
+    require([ 'page/page', 'page/cursor/cursor', 'page/keys/keys' ], function (page, cursor, keys) {
+      page.init();
       cursor.init();
       keys.init();
     });
@@ -92,11 +134,12 @@ define(['core/conf/user/manager', 'core/util/session', 'core/locale', 'core/metr
     }
   }
 
+  function firePageVisitedMetric() {
+    new metric.PageVisit(initialPageVisitDetails).send();
+  }
+
   function onSitecuesReady() {
-    new metric.PageVisit({
-      nativeZoom: platform.nativeZoom,
-      isRetina  : platform.isRetina()
-    }).send();
+    firePageVisitedMetric();
 
     sitecues.readyState = state.COMPLETE;
     //Freeze readyState on load
@@ -106,6 +149,13 @@ define(['core/conf/user/manager', 'core/util/session', 'core/locale', 'core/metr
       sitecues.onReady.call(sitecues);
     }
     Object.defineProperty(sitecues, 'readyState', { writable: false }); // Do not allow reassignment, e.g. sitecues.readyState = 0;
+
+    createPageCssHook();
+  }
+
+  // Page can make any special badge callouts visible when data-sitecues-active="desktop"
+  function createPageCssHook() {
+    document.documentElement.setAttribute('data-sitecues-active', 'desktop');
   }
 
   // Initialize page feature listeners
@@ -131,11 +181,13 @@ define(['core/conf/user/manager', 'core/util/session', 'core/locale', 'core/metr
     });
 
     // -- Themes --
-    conf.get('themeName', function(themeName) {
-      if (themeName) {
-        initThemes();
-      }
-    });
+    if (platform.featureSupport.themes) {
+      conf.get('themeName', function (themeName) {
+        if (themeName) {
+          initThemes();
+        }
+      });
+    }
 
     // -- Mouse --
     conf.get('mouseSize', function(mouseSize) {
@@ -160,6 +212,10 @@ define(['core/conf/user/manager', 'core/util/session', 'core/locale', 'core/metr
     if (!isZoomInitialized) {
       window.addEventListener('wheel', onPossibleScreenPinch);
     }
+
+    modifierKeyState.init();
+
+    shake.init();
 
     onSitecuesReady();
   }
@@ -192,6 +248,8 @@ define(['core/conf/user/manager', 'core/util/session', 'core/locale', 'core/metr
       event.preventDefault();
       event.stopImmediatePropagation();
       require(['page/zoom/zoom'], function (zoomMod) {
+        // TODO IE11: TypeError: Unable to get property 'init' of undefined or null reference
+        // {"eventId":"10e771ce-97a8-4d53-985a-c4912485032a","serverTs":1463756071982,"clientIp":"10.235.39.83","siteKey":"s-0000ee0c","isTest":false,"userId":null,"clientData":{"scVersion":"4.0.73-RELEASE","metricVersion":12,"sessionId":"5fd5d275-5204-4e45-af83-c134e3c7bce8","pageViewId":"ceb79818-a1bf-47ec-8b3e-6b3419796adc","siteId":"s-0000ee0c","userId":"6f90e948-9980-4e19-87e0-9ec50958db05","pageUrl":"https://www.eeoc.gov/eeoc/publications/ada-leave.cfm","browserUserAgent":"Mozilla/5.0 (Windows NT 6.1; Trident/7.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0; .NET CLR 1.1.4322; InfoPath.3; .NET4.0C; .NET4.0E; Tablet PC 2.0; rv:11.0) like Gecko","isClassicMode":false,"clientLanguage":"en-US","source":"page","isTester":false,"name":"error","clientTimeMs":1463756071497,"zoomLevel":1,"ttsState":false,"details":{"message":"Unable to get property 'init' of undefined or null reference","stack":"TypeError: Unable to get property 'init' of undefined or null reference\n   at Anonymous function (https://js.sitecues.com/l/s;id=s-0000ee0c/js/sitecues.js:128:442)\n   at W (https://js.sitecues.com/l/s;id=s-0000ee0c/js/sitecues.js:8:256)\n   at O (https://js.sitecues.com/l/s;id=s-0000ee0c/js/sitecues.js:9:31)\n   at Anonymous function (https://js.sitecues.com/l/s;id=s-0000ee0c/js/sitecues.js:10:28)\n   at k (https://js.sitecues.com/l/s;id=s-0000ee0c/js/sitecues.js:20:460)\n   at Anonymous function (https://js.sitecues.com/l/s;id=s-0000ee0c/js/sitecues.js:21:72)\n   at Anonymous function (https://js.sitecues.com/l/s;id=s-0000ee0c/js/sitecues.js:19:226)\n   at Anonymous function (https://js.sitecues.com/l/s;id=s-0000ee0c/js/sitecues.js:19:204)\n   at a (https://js.sitecues.com/l/s;id=s-0000ee0c/js/sitecues.js:19:94)"}}}
         zoomMod.init(event);
       });
     }
@@ -214,31 +272,100 @@ define(['core/conf/user/manager', 'core/util/session', 'core/locale', 'core/metr
     window.removeEventListener('keyup', onKeyUp);
   }
 
-  function onPrereqComplete() {
-    if (--numPrereqsToComplete === 0) {
-      //Locale needs to be initialized before metric
-      metric.init();
-      // Both settings AND locale are now complete ... onto BP!!
-      bp.init(initPageFeatureListeners);
-    }
-  }
-
   function isOn() {
     return isSitecuesOn;
   }
 
+  function initMetrics(sitecuesInitSummary) {
+    // sitecuesInitSummary can contain the following fields:
+    // isSameUser
+    // didUseStorageBackup
+    // isUnsupportedPlatform
+    // error (a string)
+    sitecuesInitSummary = sitecuesInitSummary || {};
+
+    session.init({
+      // Do not reuse session if user changes
+      // If unsupported platform, allow session id to remain consistent
+      canReuseSession: sitecuesInitSummary.isSameUser || sitecuesInitSummary.isUnsupportedPlatform
+    });
+
+    // Copy sitecuesInitSummary so we can add to it
+    initialPageVisitDetails = nativeFn.JSON.parse(nativeFn.JSON.stringify(sitecuesInitSummary));
+
+    // Add platform details
+    initialPageVisitDetails.nativeZoom = platform.nativeZoom;
+    initialPageVisitDetails.isRetina = platform.isRetina();
+    if (platform.isStorageUnsupported) {
+      // This occurs in Safari private browsing mode
+      // Leave field undefined in the edge case
+      initialPageVisitDetails.isStorageUnsupported = true;
+    }
+
+    // TODO remove this once we know enough about window.name usage to make a decision about using it for sessions
+    var winName = window.name;
+    if (winName) {
+      // Just keep the first 30 chars so we get an idea of the format -- don't want to fill up the logs
+      initialPageVisitDetails.windowName = winName.substr(0, 30);
+    }
+
+    addPagePerformanceDetails(initialPageVisitDetails);
+
+    metric.init();
+  }
+
+  function addPagePerformanceDetails(details) {
+    var t0 = performance.timing.fetchStart;
+    details.startPageLoad = performance.timing.responseEnd - t0;
+    details.startPageInteractive = performance.timing.domInteractive - t0;
+    details.startSitecuesLoad = startSitecuesLoad;
+    details.startSitecuesInteractive = getCurrentTime();
+  }
+
+  function getCurrentTime() {
+    return Math.floor(performance.now());
+  }
+
+  function initABTest(sitecuesInitSummary) {
+    abTest.init();
+    return sitecuesInitSummary;  // Must be passed on through the promise chain
+  }
+
+  function initConfAndMetrics() {
+    return conf.init()
+      .catch(function handlePrefsError(error) { return { error: error.message }; })
+      .then(initABTest)
+      .then(initMetrics)
+      .then(bounce.init);
+  }
+
   function init() {
+    startSitecuesLoad = getCurrentTime();
     // When keyboard listening is ready
     events.on('keys/did-init', onKeyHandlingInitialized);
     events.on('zoom/ready', onZoomInitialized);
 
-    numPrereqsToComplete = 2;
-
     // Start initialization
-    session.init();
+    inlineStyle.init();
     platform.init();
-    conf.init(onPrereqComplete);
-    locale.init(onPrereqComplete);
+    nativeFn.init();
+
+    if (platform.isUnsupportedPlatform) {
+      // Unsupported platform: fail early but fire page-visited metric
+      initMetrics({
+        isUnsupportedPlatform: true
+      });
+      firePageVisitedMetric();
+      console.log('Note: Sitecues is not supported on this platform: ' + platform.platformWarning);
+    }
+    else {
+      domEvents.init();
+      // Supported platform: continue to init Sitecues
+      Promise.all([initConfAndMetrics(), locale.init()])
+        .then(bp.init)
+        .then(metric.initViewInfo)
+        .then(initPageFeatureListeners);
+    }
   }
 
   return {

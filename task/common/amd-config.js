@@ -3,14 +3,18 @@
 'use strict';
 
 var config = require('../build-config'),
+  amdclean = require('amdclean'),
   sourceConfig = require('../source-folders.json'),
   bundleFolders = sourceConfig.bundleFolders,
   dataFolders = sourceConfig.dataFolders,
   sourceFolders = bundleFolders.concat(dataFolders),
   extend = require('extend'),
+  fs = require('fs'),
   JS_SOURCE_DIR = config.librarySourceDir + '/js',
   PATHS = {
-    '$': 'empty:', 
+    'nativeFn' : 'empty:',
+    'iframeFactory': 'empty:',
+    '$': 'empty:',
     'Promise': 'empty:'   // In runtime config, via definePrim : 'Promise' to allow use of alameda's built-in Prim library
   },
   AMD_BASE_CONFIG = {
@@ -32,20 +36,55 @@ var config = require('../build-config'),
       out: config.buildDir + '/js/sitecues.js',
       // sitecues.js gets version number
       wrap: {
-        start:
-        'if (sitecues && sitecues.exists) throw new Error("The sitecues library already exists on this page.");\n' +
-        'Object.defineProperty(sitecues, "version", { value: "' + config.version + '", writable: false });\n' +
-        '"use strict";\n'
+        start: buildCorePreamble()
       },
       // Include alameda in core
-      include: [ 'core/alameda-custom' ],
+      include: [
+        'core/alameda-custom',
+        'core/errors',
+        'core/prereq/iframe-factory',
+        'core/prereq/native-functions'
+      ],
       // Make sure core initializes itself
-      insertRequire: [ 'core/core' ]
+      insertRequire: [ 'core/errors', 'core/core' ]
     },
     page: {
       include: [ 'page/jquery/jquery' ]
     }
   };
+
+function buildCorePreamble() {
+  const prefix = 'if (sitecues && sitecues.exists) throw new Error("The sitecues library already exists on this page.");\n' +
+    'Object.defineProperty(sitecues, "version", { value: "' + config.version + '", writable: false });\n' +
+    '"use strict";';
+
+  function getPrereqPath(fileName) {
+    return JS_SOURCE_DIR + '/core/prereq/' + fileName;
+  }
+
+  function getPrereqContent(fileName) {
+    return fs.readFileSync(getPrereqPath(fileName));
+  }
+
+  function getUnwrappedPrereq(fileName) {
+    return amdclean.clean({
+      filePath : getPrereqPath(fileName),
+      wrap : {
+        start : '',
+        end : ''
+      }
+    });
+  }
+
+  return [
+    prefix,
+    getPrereqContent('custom-event-polyfill.js'),
+    getUnwrappedPrereq('iframe-factory.js'),
+    getUnwrappedPrereq('native-functions.js'),
+    getPrereqContent('global-assignments.js'),
+    getPrereqContent('alameda-config.js')
+  ].join('\n');
+}
 
 function isDataFolder(sourceFolderName) {
   return dataFolders.indexOf(sourceFolderName) >= 0;

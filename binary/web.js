@@ -14,8 +14,7 @@ const
 
 // Boolean deserialization helper function.
 function strToBool(str) {
-    const trueValues = ['yes', 'on', 'true'];
-    return trueValues.indexOf(str && str.toLowerCase()) >= 0;
+    return ['yes', 'on', 'true'].includes(str && str.toLowerCase());
 }
 
 // Path join helper function that takes both strings and arrays.
@@ -27,20 +26,22 @@ function pathJoin() {
         return;
     }
 
-    const pathComps = [];
+    let pathComps = [];
     for (let i = 0; i < len; i += 1) {
         const arg = arguments[i];
 
-        if (arg instanceof Array) {
-            pathComps = pathComps.concat(arg);
-        } else if (typeof arg === 'string') {
+        if (Array.isArray(arg)) {
+            pathComps.push(...arg);
+        }
+        else if (typeof arg === 'string') {
             pathComps.push(arg);
-        } else {
+        }
+        else {
             return;
         }
     }
 
-    return path.join.apply(path, pathComps);
+    return path.join(...pathComps);
 };
 
 // Determine the project root, so that paths may be correctly resolved.
@@ -104,8 +105,8 @@ if (process.argv.length > 5) {
 app.use(express.logger());
 
 // Log listen events.
-app.on('listen', function (e) {
-    console.log('LISTEN: ' + JSON.stringify(e));
+app.on('listen', (event) => {
+    console.log('LISTEN: ' + JSON.stringify(event));
 });
 
 // CORS -- allow settings-[locale].html and tips-[locale].html to be loaded via xhr
@@ -114,6 +115,11 @@ app.all(/\/html\/|\/images\/cursors\//, function(req, res, next) {
     res.header("Access-Control-Allow-Headers", "Cache-Control, Pragma, Origin, Authorization, Content-Type, X-Requested-With");
     res.header("Access-Control-Allow-Methods", "GET, PUT, POST");
     return next();
+});
+
+app.all(/\/js\//, function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  return next();
 });
 
 // Set up the handling of the per-siteID URLs of the format /l/s;id=s-XXXXXXXX/*
@@ -341,7 +347,7 @@ app.use(express.static(pathJoin(projectRoot, 'target', 'common')));
 
 // Start the HTTP listener
 const port = process.env.PORT || process.argv[2] || 8000;
-app.listen(port, function (err) {
+app.listen(port, (err) => {
     if (err) {
         throw err;
     }
@@ -365,7 +371,7 @@ if (useHttps) {
     https.createServer({
         key  : fs.readFileSync('binary/cert/localhost.key'),
         cert : fs.readFileSync('binary/cert/localhost.cert')
-    }, app).listen(443, function (err) {
+    }, app).listen(443, (err) => {
         if (err) {
             throw err;
         }

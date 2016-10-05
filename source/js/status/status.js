@@ -3,9 +3,17 @@ define(
     'core/conf/urls',
     'core/util/xhr',
     'core/conf/user/manager',
-    'core/conf/site'
+    'core/conf/site',
+    'nativeFn'
   ],
-  function (urls, xhr, conf, site) {
+  function (
+    urls,
+    xhr,
+    conf,
+    site,
+    nativeFn
+  ) {
+  'use strict';
 
     function format(object) {
 
@@ -14,8 +22,8 @@ define(
       var INDENTATION = '    ',
             result = object;
 
-      if (JSON && JSON.stringify) {
-        result = JSON.stringify(object, null, INDENTATION);
+      if (nativeFn.JSON && nativeFn.JSON.stringify) {
+        result = nativeFn.JSON.stringify(object, null, INDENTATION);
       }
 
       return result;
@@ -136,7 +144,7 @@ define(
         });
       }
 
-      return 'Fetching sitecues status...';
+      return 'Fetching Sitecues status...';
     }
 
     return status;
