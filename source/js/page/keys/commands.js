@@ -1,12 +1,10 @@
 define([
   'page/zoom/zoom',
   'page/highlight/move-keys',
-  'page/highlight/highlight',
   'page/reset/reset'
   ],
   function(zoomMod,
            moveKeys,
-           mh,
            reset) {
   return {
     decreaseZoom: function(event) {
