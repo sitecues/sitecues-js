@@ -1,0 +1,5 @@
+# DefaultVersion can be the special string latest or a version number
+DefaultVersion: latest
+MappedVersions:
+  4.2.3:
+    s-1f9c2da4: Desire to Learn

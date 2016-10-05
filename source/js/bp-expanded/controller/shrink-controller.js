@@ -6,11 +6,11 @@ define(
     'core/bp/constants',
     'core/bp/model/state',
     'core/bp/helper',
-    'core/metric',
+    'core/metric/metric',
     'core/bp/view/view',
     'core/events',
     'core/dom-events',
-    'core/native-functions'
+    'nativeFn'
   ],
   function (
     BP_CONST,
@@ -59,8 +59,8 @@ define(
 
     // return truthy value if mouseout should cause panel to close
     function canShrinkFromMouseout() {
-      // Only allow close from hover if opened from hover, or mouse was in panel once
-      return state.get('wasMouseInPanel') || isOpenedWithHover();
+      // Only allow close from hover if mouse was in panel once
+      return state.get('wasMouseInPanel');
     }
 
     function winMouseMove(evt) {
@@ -196,10 +196,6 @@ define(
         }
         elem = elem.parentNode;
       }
-    }
-
-    function isOpenedWithHover() {
-      return state.get('isOpenedWithHover');
     }
 
     function getVisiblePanelRect() {

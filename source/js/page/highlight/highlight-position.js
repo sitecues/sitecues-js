@@ -9,7 +9,8 @@ define(
     'page/util/element-classifier',
     'page/zoom/zoom',
     'page/highlight/traitcache',
-    'core/native-functions'
+    'nativeFn',
+    'core/inline-style/inline-style'
   ],
   function (
     $,
@@ -17,7 +18,8 @@ define(
     elemClassifier,
     zoomMod,
     traitcache,
-    nativeFn
+    nativeFn,
+    inlineStyle
   ) {
   'use strict';
 
@@ -47,7 +49,7 @@ define(
     var
       accumulatedPositionInfo = {
         allRects: [],
-        hiddenElements: []
+        hiddenElements: new WeakMap()
       },
       $selector = $(selector);
 
@@ -342,7 +344,7 @@ define(
 
       // --- Invisible elements ---
       if (isInvisible(style)) {
-        hiddenElements.push(this);
+        hiddenElements.set(this, true);
         return;
       }
 
@@ -355,13 +357,13 @@ define(
       if (thisRect.right < -viewPos.x || thisRect.bottom < -viewPos.y) {
         // Hidden off the page
         // This is a technique used to hide contents offscreen without hiding it from screen readers
-        hiddenElements.push(this);
+        hiddenElements.set(this, true);
         return;
       }
 
       // -- Out of flow and is not the top element --
       if (!isTop && isOutOfFlow(this, style, thisRect)) {
-        hiddenElements.push(this);
+        hiddenElements.set(this, true);
         return;
       }
 
@@ -440,20 +442,20 @@ define(
 
   // Our hacky zoom combobox fixes can mess up highlight rects -- this corrects for that case
   function getComboboxRect(comboElem, comboRect) {
-    var isHackedCombobox = traitcache.getStyleProp(comboElem, 'zoom') > 1,
-      oldTransitionProp;
+    var isHackedCombobox = traitcache.getStyleProp(comboElem, 'zoom') > 1;
     if (isHackedCombobox) {
       // Turn off zoom CSS hacks for comboboxes
       comboElem.setAttribute('data-sc-dropdown-fix-off', '');
       // Turn off transition temporarily if it's there, otherwise it prevents us from getting the correct rect
-      oldTransitionProp = comboElem.style.transitionProperty;
-      comboElem.style.transitionProperty = 'none';
+      inlineStyle.override(comboElem, {
+        transitionProperty : 'none'
+      });
       // Get what the rect would have been
       comboRect = comboElem.getBoundingClientRect();
       // Restore CSS
-      nativeFn.setTimeout(function() {
+      nativeFn.setTimeout(function () {
         // Do this on a timeout otherwise it may animate our return changes
-        comboElem.style.transitionProperty = oldTransitionProp;
+        inlineStyle.restore(comboElem, 'transition-property');
       }, 0);
       comboElem.removeAttribute('data-sc-dropdown-fix');
     }

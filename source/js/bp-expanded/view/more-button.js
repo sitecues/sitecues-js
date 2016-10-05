@@ -13,8 +13,9 @@ define(
     'bp-expanded/view/transform-hovers',
     'core/bp/model/state',
     'core/events',
+    'core/inline-style/inline-style',
     'core/ab-test/ab-test',
-    'core/native-functions'
+    'nativeFn'
   ],
   function (
     BP_CONST,
@@ -24,6 +25,7 @@ define(
     hovers,
     state,
     events,
+    inlineStyle,
     abTest,
     nativeFn
   ) {
@@ -79,13 +81,10 @@ define(
     clearTimeout(userInputTimeoutId);
 
     moreOpacityElem.setAttribute('class', useInstantTransition ? '' : 'scp-transition-opacity-fast');
-    moreOpacityElem.style.opacity = 1;
+    inlineStyle(moreOpacityElem).opacity = 1;
 
     // Scale the button to 0.5 and then animate it to a scale of 1
-    if (useInstantTransition) {
-      setSize(1);
-    }
-    else {
+    if (!useInstantTransition) {
       setSize(0.5);
       // Delay to fix Chrome animation bug
       // TODO WTF? We need to wait 30 ms? Tried requestAnimationFrame() and only 50% success rate
@@ -166,7 +165,7 @@ define(
 
     // After NO_INPUT_TIMEOUT, we will be able to determine if the user has
     // pressed their mouse button.  If they have not, show the additional button.
-    var noInputTimeoutMs = abTest.get('moreButtonTimer', NO_INPUT_TIMEOUT_DEFAULT);
+    var noInputTimeoutMs = abTest.get('moreButtonTimerV2', NO_INPUT_TIMEOUT_DEFAULT);
     userInputTimeoutId = nativeFn.setTimeout(showButtonIfNoUserInput, noInputTimeoutMs);
   }
 

@@ -198,4 +198,7 @@ define(
     else {
       initLibrary();
     }
+
+    // Continue loading sitecues
+    return true;
 });

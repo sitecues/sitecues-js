@@ -19,7 +19,8 @@ define(
     'core/dom-events',
     'page/zoom/zoom',
     'page/zoom/util/body-geometry',
-    'core/native-functions'
+    'nativeFn',
+    'core/inline-style/inline-style'
   ],
   function (
     $,
@@ -37,7 +38,8 @@ define(
     domEvents,
     zoomMod,
     bodyGeo,
-    nativeFn
+    nativeFn,
+    inlineStyle
   ) {
 /*jshint +W072 */
   'use strict';
@@ -104,7 +106,15 @@ define(
 
   // All CSS background properties except color
   // Image must be listed last for multiple backgrounds code to work
-  BG_PROPS = ['Position', 'Origin', 'Repeat', 'Clip', 'Attachment', 'Size', 'Image'],
+  BG_PROPS = [
+    'backgroundPosition', 
+    'backgroundOrigin', 
+    'backgroundRepeat', 
+    'backgroundClip', 
+    'backgroundAttachment', 
+    'backgroundSize', 
+    'backgroundImage'
+  ],
 
   state,
 
@@ -457,29 +467,30 @@ define(
     }
   }
 
-  function setMultipleBackgrounds(style, newBg, origBg, doPlaceOrigOnTop) {
-    var hasOrigBgImage = origBg.backgroundImage !== 'none',
-      value;
-    BG_PROPS.forEach(function(prop) {
-      var fullName = 'background' + prop;
+  function setMultipleBackgrounds(element, newBg, origBg, doPlaceOrigOnTop) {
+    var value,
+      hasOrigBgImage = origBg.backgroundImage !== 'none',
+      styles = {};
+    BG_PROPS.forEach(function (property) {
       if (!hasOrigBgImage) {
-        value = newBg[fullName];
+        value = newBg[property];
       }
       else if (doPlaceOrigOnTop) {
-        value = origBg[fullName] + ',' + newBg[fullName];
+        value = origBg[property] + ',' + newBg[property];
       }
       else {
-        value = newBg[fullName] + ',' + newBg[fullName];
+        value = newBg[property] + ',' + newBg[property];
       }
-      style[fullName] = value;
+      styles[property] = value;
     });
+    inlineStyle.override(element, styles);
   }
 
-  function copyBackgroundCss(orig) {
-    var copy = {};
-    BG_PROPS.forEach(function (prop) {
-      var fullName = 'background' + prop;
-      copy[fullName] = orig[fullName].slice();
+  function copyBackgroundCss(origElem) {
+    var copy = {},
+        style = inlineStyle(origElem);
+    BG_PROPS.forEach(function (property) {
+      copy[property] = style[property].slice();
     });
     return copy;
   }
@@ -496,7 +507,6 @@ define(
   function updateElementBgImage() {
 
     var element = state.picked[0],
-        inlineStyle = element.style,
         offsetLeft,
         offsetTop;
 
@@ -548,10 +558,10 @@ define(
       doPlaceOrigOnTop = common.isSprite(origBgStyle);  // Place sprites on top of our background, and textures underneath it
 
     // Save the current inline style for later restoration when the highlight is hidden
-    state.savedCss = copyBackgroundCss(inlineStyle);
+    state.savedCss = copyBackgroundCss(element);
 
     // Set the new background
-    setMultipleBackgrounds(inlineStyle, newBgStyle, origBgStyle, doPlaceOrigOnTop);
+    setMultipleBackgrounds(element, newBgStyle, origBgStyle, doPlaceOrigOnTop);
   }
 
   function isCloseToHighlightColor(colorIntensity) {
@@ -588,10 +598,9 @@ define(
         colorIntensity = colorUtil.getPerceivedLuminance(bgColor);
         if (bgRgba.a === 1 && isCloseToHighlightColor(colorIntensity) &&
           !common.hasOwnBackgroundColor(this, style, state.styles[0])) { // If it's a unique color, we want to preserve it
-          state.savedBgColors.push({ elem: this, color: this.style.backgroundColor });
-          var prevStyle = this.getAttribute('style') || '';
+          state.savedBgColors.push({ elem: this, color: inlineStyle(this).backgroundColor });
           // Needed to do this as !important because of Perkins.org theme which also used !important
-          this.setAttribute('style', 'background-color: transparent !important; ' + prevStyle);
+          inlineStyle.override(this, ['background-color', 'transparent', 'important']);
         }
       }
     });
@@ -913,7 +922,7 @@ define(
     var isFixed = traitcache.getStyleProp(overlayContainerElem, 'position') === 'fixed';
 
     if (isFixed) {
-      var elemTransform = overlayContainerElem.style[platform.transformProperty],
+      var elemTransform = inlineStyle(overlayContainerElem).transform,
         scaleSplit = elemTransform.split('scale(');
       return parseFloat(scaleSplit[1]) || 1;
     }
@@ -1416,12 +1425,21 @@ define(
     addOrRemoveFn(window, 'focus', onFocusWindow);
     addOrRemoveFn(window, 'blur', onBlur);
     addOrRemoveFn(window, 'resize', hide);
+    addOrRemoveFn(window, 'mousedown', setFocus);
 
     if (!isTrackingMouse) {
       removeMouseWheelListener();
     }
 
     return isTrackingMouse;
+  }
+
+  // This addresses the stickiness of the focus on the dropdown select element on fairfieldcountybank.com
+  function setFocus(evt) {
+    if (evt.target !== document.activeElement && typeof evt.target.focus === 'function') {
+      evt.target.focus();
+    }
+    testFocus();
   }
 
   function getCursorPos(event, scrollX, scrollY) {
@@ -1641,15 +1659,15 @@ define(
 
     if (state.picked && state.savedCss) {
       // Restore the previous CSS on the picked elements (remove highlight bg etc.)
-      $(state.picked).css(state.savedCss);
+      inlineStyle.restore(state.picked[0], BG_PROPS);
       state.savedCss = null;
-      state.savedBgColors.forEach(function(savedBg) {
-        savedBg.elem.style.backgroundColor = savedBg.color;
+      state.savedBgColors.forEach(function (savedBg) {
+        inlineStyle.restore(savedBg.elem, 'background-color');
       });
       state.savedBgColors = [];
 
-      if ($(state.picked).attr('style') === '') {
-        $(state.picked).removeAttr('style'); // Full cleanup of attribute
+      if (state.picked.attr('style') === '') {
+        inlineStyle.clear(state.picked[0]); // Full cleanup of attribute
       }
       removeMouseWheelListener();
     }
@@ -1802,5 +1820,4 @@ define(
     hide: hide,
     init: init
   };
-
 });

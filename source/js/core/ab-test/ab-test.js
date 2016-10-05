@@ -51,15 +51,22 @@ define(
       return keys[numKeys - 1];
     }
 
+    function getArrayKeys(array) {
+      return array.map(function(value, index) {
+        return index;
+      });
+    }
+
     function selectTests(layerValues, userIdParts, layerIndex) {
       var
-        layerKeys = Object.keys(layerValues),
+        usesValuesArray = Array.isArray(layerValues),  // Otherwise Object map of key: value
+        layerKeys = usesValuesArray ? getArrayKeys(layerValues) : Object.keys(layerValues),
         seed = parseInt(userIdParts[layerIndex], 16),   // Choose an option in the layer based on this part of the user id
         selectedKey = selectKeyInLayer(seed, layerValues, layerKeys),
         nextLayerValues = layerValues[selectedKey].values;
 
       // If array is provided, use the simple value provided, otherwise the key
-      userAbConfig[layerIndex] = Array.isArray(layerValues) ? layerValues[selectedKey] : selectedKey;
+      userAbConfig[layerIndex] = usesValuesArray ? layerValues[selectedKey] : selectedKey;
       if (nextLayerValues) {
         ++ layerIndex;
         if (layerIndex > userIdParts.length) {  // Realistically this is always 5
@@ -89,7 +96,8 @@ define(
     // get('qqqq') => undefined   (not a current A/B test)
     // get('iconText.qqq') => undefined (not a current A/B test)
     function get(key, defaultVal) {
-      if (userAbConfig[0] === 'NONE') {
+      if (!userAbConfig.length ||  // Occurs when AB testing was never initialized (e.g. when not a supported platform)
+        userAbConfig[0] === 'NONE') {
         return defaultVal;
       }
 

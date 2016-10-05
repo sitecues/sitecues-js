@@ -2,17 +2,29 @@ define(
     [
         'intern!tdd',
         'intern/chai!assert',
+        'nativeFn',
         'core/conf/user/storage'
     ],
-    function (tdd, assert, storage) {
-
+    function (
+        tdd,
+        assert,
+        nativeFn,
+        storage
+    ) {
         'use strict';
 
-        var suite  = tdd.suite,
-            test   = tdd.test,
-            beforeEach = tdd.beforeEach;
+        var suite      = tdd.suite;
+        var test       = tdd.test;
+        var before     = tdd.before;
+        var beforeEach = tdd.beforeEach;
+        var after      = tdd.after;
 
         suite('Storage', function () {
+
+            before(function () {
+              window.SC_EXTENSION = false;
+              nativeFn.init();
+            });
 
             beforeEach(function () {
                 localStorage.clear();
@@ -216,6 +228,10 @@ define(
                     {},
                     'A default must be assumed for convenience'
                 );
+            });
+
+            after(function () {
+                delete window.SC_EXTENSION;
             });
         });
     }

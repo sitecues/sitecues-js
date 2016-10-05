@@ -9,7 +9,8 @@ define(
     'page/util/color',
     'core/events',
     'core/util/session',
-    'core/native-functions'
+    'nativeFn',
+    'core/inline-style/inline-style'
   ],
   function (
     $,
@@ -21,7 +22,8 @@ define(
     colorUtil,
     events,
     session,
-    nativeFn
+    nativeFn,
+    inlineStyle
   ) {
   'use strict';
 
@@ -35,7 +37,7 @@ define(
       width: '70%',
       height: '80%',
       transform: 'scale3d(.7,.7,1)',
-      willChange: platform.transformPropertyCss,
+      willChange: 'transform',
       backgroundColor: '#fff',
       borderRadius: '8px',
       transition: 'opacity .9s, transform 1s',
@@ -76,7 +78,7 @@ define(
   }
 
   function close() {
-    $iframe.css(INITIAL_CSS);
+    inlineStyle.set($iframe[0], INITIAL_CSS);
     nativeFn.setTimeout(function() {
       $iframe.remove();
       $iframe = $();
@@ -136,9 +138,12 @@ define(
     events.emit('info/did-show');
 
     $iframe = $('<iframe>')
-      .attr('src', pageUrl + anchor)
-      .css(INITIAL_CSS)
-      .css('border', getBorderCss())
+      .attr('src', pageUrl + anchor);
+
+    inlineStyle.set($iframe[0], INITIAL_CSS);
+    inlineStyle($iframe[0]).border = getBorderCss();
+
+    $iframe
       .one('load', onload)
       .appendTo('html');
 
@@ -151,7 +156,7 @@ define(
     dimmer.dimBackgroundContent(DIMMER_SPEED, $iframe);
 
     nativeFn.setTimeout(function () {
-      $iframe.css(ENLARGED_CSS);
+      inlineStyle.set($iframe[0], ENLARGED_CSS);
       var iframeEl = $iframe[0];
       if (iframeEl.contentWindow) {
         iframeEl.contentWindow.focus();
@@ -173,22 +178,24 @@ define(
   }
 
   function addCloseButton() {
-    var helpRect = $iframe[0].getBoundingClientRect(),
+    var
+      helpRect = $iframe[0].getBoundingClientRect(),
       offsetLeft = platform.browser.isMS ? -30 : -17, // Deal with big scrollbars on Windows
       offsetTop = platform.browser.isMS ? -6 : -1;
 
     $closeButton =
-      $('<scx style="display:block" class="scp-hand-cursor"><scx style="position:relative;left:14px;top:23px;color:#ccc">x</scx></scx>')
-        .css(CLOSE_BUTTON_CSS)
-        .css({
-          left: (helpRect.right - BUTTON_SIZE / 2 + offsetLeft) + 'px',  // Subtracts border width as well
-          top: (helpRect.top - BUTTON_SIZE / 2 + offsetTop) + 'px'
-        })
+      $('<scx style="display:block" class="scp-hand-cursor"><scx style="position:relative;left:14px;top:23px;color:#ccc">x</scx></scx>');
+    inlineStyle.set($closeButton[0], CLOSE_BUTTON_CSS);
+    inlineStyle.set($closeButton[0], {
+        left: (helpRect.right - BUTTON_SIZE / 2 + offsetLeft) + 'px',  // Subtracts border width as well
+        top: (helpRect.top - BUTTON_SIZE / 2 + offsetTop) + 'px'
+    });
+    $closeButton
         .appendTo('html')
         .one('click', close);
 
     addCloseButtonTimer = nativeFn.setTimeout(function () {
-      $closeButton.css('opacity', 1);
+      inlineStyle($closeButton[0]).opacity = '1';
     }, 100);
   }
 
@@ -201,20 +208,22 @@ define(
   }
 
   function enableWebPagePointerEvents(doEnable) {
-    $('body,#scp-bp-container')
-      .css('pointerEvents', doEnable ? '' : 'none');
+    var collection = $('body,#scp-bp-container');
+    inlineStyle.override(collection.get(), {
+      pointerEvents : doEnable ? '' : 'none'
+    });
   }
 
   function enableScrolling(doEnable) {
+    var docElem = document.documentElement;
     if (doEnable) {
-      document.documentElement.style.overflowX = enableScrolling.origOverflowX;
-      document.documentElement.style.overflowY = enableScrolling.origOverflowY;
+      inlineStyle.restoreLast(docElem, ['overflow-x', 'overflow-y']);
     }
     else {
-      enableScrolling.origOverflowX = document.documentElement.style.overflowX;
-      enableScrolling.origOverflowY = document.documentElement.style.overflowY;
-      document.documentElement.style.overflowX = 'hidden';
-      document.documentElement.style.overflowY = 'hidden';
+      inlineStyle.override(docElem, {
+        overflowX : 'hidden',
+        overflowY : 'hidden'
+      });
     }
   }
 

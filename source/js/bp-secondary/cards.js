@@ -1,8 +1,30 @@
 /**
  * Generic module for handling the cards used by tips and settings
  */
-define(['core/bp/constants', 'core/bp/helper', 'core/locale', 'core/bp/model/state', 'core/util/xhr', 'core/conf/urls', 'core/events', 'core/platform'],
-  function (BP_CONST, helper, locale, state, xhr, urls, events, platform) {
+define(
+  [
+    'core/bp/constants',
+    'core/bp/helper',
+    'core/locale',
+    'core/bp/model/state',
+    'core/util/xhr',
+    'core/conf/urls',
+    'core/events',
+    'core/platform',
+    'core/inline-style/inline-style'
+  ],
+  function (
+    BP_CONST,
+    helper,
+    locale,
+    state,
+    xhr,
+    urls,
+    events,
+    platform,
+    inlineStyle
+  ) {
+  'use strict';
 
   var
     PANELS_WITH_CARDS = { tips: 1, settings: 1},
@@ -204,7 +226,7 @@ define(['core/bp/constants', 'core/bp/helper', 'core/locale', 'core/bp/model/sta
     }
 
     // Set indicator
-    indicator.style.backgroundPosition = indicatorLeft + 'px 0';
+    inlineStyle(indicator).backgroundPosition = indicatorLeft + 'px 0';
     chosenItem.setAttribute('aria-selected', 'true');
   }
 

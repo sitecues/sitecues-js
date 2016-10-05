@@ -8,7 +8,8 @@ define(
     'core/bp/helper',
     'core/platform',
     'core/events',
-    'core/native-functions'
+    'nativeFn',
+    'core/inline-style/inline-style'
   ],
   function (
     state,
@@ -16,7 +17,8 @@ define(
     helper,
     platform,
     events,
-    nativeFn
+    nativeFn,
+    inlineStyle
   ) {
   'use strict';
 
@@ -427,7 +429,7 @@ define(
 
   function getCurrentTransformPosition () {
 
-    var transform = byId(transformElementId).style[platform.transformProperty],
+    var transform = inlineStyle(byId(transformElementId)).transform,
         position  = {},
         transformValues,
         translateLeft,
@@ -466,7 +468,7 @@ define(
 
   function getCurrentScale () {
 
-    var transformStyle = byId(transformElementId).style[platform.transformProperty],
+    var transformStyle = inlineStyle(byId(transformElementId)).transform,
         transformValues;
 
     if (transformStyle.indexOf('scale') !== -1) {
@@ -481,21 +483,15 @@ define(
   }
 
   function setSize (size, crispFactor) {
-
-    var svgStyle = getSvgElement().style;
-
+    inlineStyle.set(getSvgElement(), {
     // Height and Width
-    svgStyle.width  = (size.width * crispFactor) + 'px';
-    svgStyle.height = (size.height * crispFactor) + 'px';
-
+      width  : (size.width * crispFactor) + 'px',
+      height : (size.height * crispFactor) + 'px'
+    });
   }
 
   function setTransform (left, top, transformScale) {
-
-    var transformStyle = byId(transformElementId).style;
-
-    transformStyle[platform.transformProperty] = 'translate(' + left + 'px' + ' , ' + top + 'px' + ') ' + 'scale(' + transformScale + ')';
-
+    inlineStyle(byId(transformElementId)).transform = 'translate(' + left + 'px' + ' , ' + top + 'px' + ') ' + 'scale(' + transformScale + ')';
   }
 
   /**

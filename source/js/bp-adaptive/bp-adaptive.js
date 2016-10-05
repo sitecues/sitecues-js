@@ -13,7 +13,7 @@ define(
     'core/bp/model/state',
     'core/bp/view/view',
     'core/bp/constants',
-    'core/native-functions'
+    'nativeFn'
   ],
   function (
     state,

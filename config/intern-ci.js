@@ -6,7 +6,6 @@ define(
         './intern-cloud'
     ],
     function (config) {
-
         'use strict';
 
         // Setting properties on the config object here overrides the base configuration.
@@ -18,9 +17,6 @@ define(
         config.capabilities.name = config.capabilities.name.replace(
             /^.+?(?=\s)/, 'CI'
         );
-
-        // TODO: Re-enable functional tests in CI once they are more reliable.
-        config.functionalSuites = false;
 
         if (typeof process === 'object' && process.env) {
 

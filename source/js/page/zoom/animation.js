@@ -5,7 +5,7 @@ define(
     'core/conf/user/manager',
     'core/platform',
     'core/events',
-    'core/metric',
+    'core/metric/metric',
     'core/errors',
     'page/util/common',
     'page/zoom/state',
@@ -16,7 +16,8 @@ define(
     'page/zoom/util/restrict-zoom',
     'page/zoom/style',
     'page/viewport/scrollbars',
-    'core/native-functions'
+    'nativeFn',
+    'core/inline-style/inline-style'
   ],
   function (
     $,
@@ -34,7 +35,8 @@ define(
     restrictZoom,
     style,
     scrollbars,
-    nativeFn
+    nativeFn,
+    inlineStyle
   ) {
 /*jshint +W072 */
   'use strict';
@@ -116,11 +118,15 @@ define(
     // Correct the start zoom time with the real starting time
     state.startZoomTime = Date.now();
 
-    $('body')
+    var $body = $('body');
+
+    // Temporarily indicate that zooming is in progress -- this is used by the sitecues-zoom-form-fix stylesheet
+    $body.attr('data-sc-zooming', '');
+
+    inlineStyle.override($body.get(), {
       // Temporarily disable mouse cursor events and CSS behavior, to help with zoom performance
-      .css('pointer-events', 'none')
-      // Temporarily indicate that zooming is in progress -- this is used by the sitecues-zoom-form-fix stylesheet
-      .attr('data-sc-zooming', '');
+      pointerEvents : 'none'
+    });
 
     events.emit('zoom/begin');
 
@@ -224,8 +230,8 @@ define(
     var restrictingWidthInSafari = platform.browser.isSafari && config.shouldRestrictWidth;
 
     return !platform.browser.isMS &&  // IE/Edge are working better with JS animation (keyframes even taking too long to start/stop, not really smoother)
-      !restrictingWidthInSafari &&  // Safari is herky jerky if animating the width and using key frames
-      !shouldUseElementDotAnimate;  // Chrome will use element.animate();
+      !restrictingWidthInSafari   &&  // Safari is herky jerky if animating the width and using key frames
+      !shouldUseElementDotAnimate;    // Chrome will use element.animate();
   }
 
   // Animate until the currentTargetZoom, used for gliding zoom changes
@@ -234,7 +240,7 @@ define(
   function performJsAnimateZoomOperation() {
     function jsZoomStep() {  // Firefox passes in a weird startZoomTime that can't be compared with Date.now()
       var midAnimationZoom = getMidAnimationZoom();
-      $origBody.css(style.getZoomCss(midAnimationZoom));
+      inlineStyle.override($origBody[0], style.getZoomCss(midAnimationZoom));
       if (midAnimationZoom === state.currentTargetZoom && !isSliderActive()) {
         zoomAnimator = requestFrame(finishZoomOperation);
       }
@@ -263,7 +269,7 @@ define(
       };
 
     // Apply the new CSS
-    $origBody.css(animationCss);
+    inlineStyle.override($origBody[0], animationCss);
 
     // No zoomStopRequested() received for initial zoom
     $origBody.one(ANIMATION_END_EVENTS, onGlideStopped);
@@ -314,7 +320,7 @@ define(
         });
     }
     else {
-      $origBody.css(zoomCss);
+      inlineStyle.override($origBody[0], zoomCss);
     }
     if (thumbChangeListener) {
       thumbChangeListener(state.currentTargetZoom);
@@ -376,14 +382,16 @@ define(
       elementDotAnimatePlayer.cancel();
       elementDotAnimatePlayer = null;
     }
-    $origBody
-      .css(style.getZoomCss(state.currentTargetZoom))
-      .css('animation', '');
+    var styles = style.getZoomCss(state.currentTargetZoom);
+    styles.animation = '';
+    inlineStyle.override($origBody[0], styles);
     finishZoomOperation();
   }
 
   // Must be called at the end of a zoom operation.
   function finishZoomOperation() {
+    var $body = $('body');
+
     if (!isZoomOperationRunning()) {
       errors.report(new Error('zoom finish before start'));
     }
@@ -392,7 +400,7 @@ define(
 
     if (elementDotAnimatePlayer) {
       // Can't leave animation player around, as it will prevent future animations
-      $origBody.css(style.getZoomCss(state.currentTargetZoom));
+      inlineStyle.override($origBody[0], style.getZoomCss(state.currentTargetZoom));
       elementDotAnimatePlayer.onfinish = null;
       elementDotAnimatePlayer.cancel();
     }
@@ -412,9 +420,9 @@ define(
     scrollbars.onBodyRectChange();
 
     // Restore mouse cursor events and CSS behavior
-    $('body').css('pointerEvents', '');
-
-    style.applyZoomFormFixes(state.completedZoom);
+    inlineStyle.override($body.get(), {
+      pointerEvents : ''
+    });
 
     // Indicate that zooming has finished -- this is used by the sitecues-zoom-form-fix stylesheet
     nativeFn.setTimeout(function() {
@@ -455,7 +463,7 @@ define(
     if (state.completedZoom === 1) {
       // Fixed elements are broken when we apply a transformation, and it takes work for us to correct that, so we remove the transformation
       // from the body when possible
-      body.style.transform = '';
+      inlineStyle.restore(body, 'transform');
     }
 
     // Un-Blur text in Chrome
@@ -504,7 +512,7 @@ define(
 
   function freezeZoom() {
     state.currentTargetZoom = getActualZoom();
-    $origBody.css(style.getZoomCss(state.currentTargetZoom));
+    inlineStyle.override($origBody[0], style.getZoomCss(state.currentTargetZoom));
     if (elementDotAnimatePlayer) {
       elementDotAnimatePlayer.onfinish = null;
       elementDotAnimatePlayer.cancel();
@@ -545,7 +553,7 @@ define(
     zoomAnimator = requestFrame(function () {
       // Stop the key-frame animation at the current zoom level
       // Yes, it's crazy, but this sequence helps the zoom stop where it is supposed to, and not jump back a little
-      $origBody.css({
+      inlineStyle.override($origBody[0], {
         animationPlayState: 'paused'
       });
       zoomAnimator = requestFrame(function() {

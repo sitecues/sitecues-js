@@ -14,7 +14,7 @@ define(
     'core/platform',
     'core/has',
     'core/ab-test/ab-test',
-    'core/native-functions'
+    'nativeFn'
   ],
   function (
     conf,
@@ -34,7 +34,7 @@ define(
 
     // IMPORTANT! Increment METRICS_VERSION this every time metrics change in any way
     // IMPORTANT! Have the backend team review all metrics changes!!!
-    var METRICS_VERSION = 18,
+    var METRICS_VERSION = 20,
         isInitialized,
         doSuppressMetrics,
         doLogMetrics,
@@ -79,13 +79,16 @@ define(
       data.details = details;
       data.settings = settings;
       data.has = (function () {
-        var target = {};
-        Object.keys(target).forEach(function (key) {
+        var bool = {};
+        Object.keys(has).forEach(function (key) {
+          // In the future, some has tests might be functions (may have side effects),
+          // here we are careful to not copy those, ensuring no downstream code can
+          // accidentally stringify them and send source code with the metric.
           if (typeof has[key] === 'boolean') {
-            target[key] = has[key];
+            bool[key] = has[key];
           }
         });
-        return target;
+        return bool;
       }());
     }
 
@@ -281,7 +284,10 @@ define(
       MouseShake: wrap(name.MOUSE_SHAKE),
       OptionMenuOpen: wrap(name.OPTION_MENU_OPEN),
       OptionMenuItemSelection: wrap(name.OPTION_MENUITEM_SELECTION),
+      PageClickFirst: wrap(name.PAGE_CLICK_FIRST),
+      PageScrollFirst: wrap(name.PAGE_SCROLL_FIRST),
       PageVisit: wrap(name.PAGE_VISIT),
+      PageUnload: wrap(name.PAGE_UNLOAD),
       PanelClick: wrap(name.PANEL_CLICK),
       PanelClose: wrap(name.PANEL_CLOSE),
       PanelFocusMove: wrap(name.PANEL_FOCUS_MOVE),

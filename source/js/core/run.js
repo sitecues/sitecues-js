@@ -5,16 +5,12 @@
  *   3. Listen to anything that should wake up sitecues features
  *   4. Fire sitecues ready callback and page-visited metric
  */
-
-// Allow extra dependencies
-// jshint -W072
-
 define(
   [
     'core/conf/user/manager',
     'core/util/session',
     'core/locale',
-    'core/metric',
+    'core/metric/metric',
     'core/platform',
     'core/bp/bp',
     'core/constants',
@@ -22,10 +18,13 @@ define(
     'core/dom-events',
     'Promise',
     'core/modifier-key-state',
-    'core/native-functions',
+    'nativeFn',
     'core/ab-test/ab-test',
-    'core/shake/shake'
+    'core/metric/bounce',
+    'core/shake/shake',
+    'core/inline-style/inline-style'
   ],
+  /*jshint -W072 */ //Currently there are too many dependencies, so we need to tell JSHint to ignore it for now
   function (
     conf,
     session,
@@ -40,8 +39,11 @@ define(
     modifierKeyState,
     nativeFn,
     abTest,
-    shake
+    bounce,
+    shake,
+    inlineStyle
   ) {
+  /*jshint +W072 */
   'use strict';
 
   var
@@ -55,6 +57,7 @@ define(
     isKeyHandlingInitialized,
     wasSitecuesEverOn,
     initialPageVisitDetails,
+    startSitecuesLoad,
     // Keys that can init sitecues
     INIT_CODES = CORE_CONST.INIT_CODES,
     // Enums for sitecues loading states
@@ -146,6 +149,13 @@ define(
       sitecues.onReady.call(sitecues);
     }
     Object.defineProperty(sitecues, 'readyState', { writable: false }); // Do not allow reassignment, e.g. sitecues.readyState = 0;
+
+    createPageCssHook();
+  }
+
+  // Page can make any special badge callouts visible when data-sitecues-active="desktop"
+  function createPageCssHook() {
+    document.documentElement.setAttribute('data-sitecues-active', 'desktop');
   }
 
   // Initialize page feature listeners
@@ -293,24 +303,50 @@ define(
     }
 
     // TODO remove this once we know enough about window.name usage to make a decision about using it for sessions
-    initialPageVisitDetails.windowName = window.name || undefined;
+    var winName = window.name;
+    if (winName) {
+      // Just keep the first 30 chars so we get an idea of the format -- don't want to fill up the logs
+      initialPageVisitDetails.windowName = winName.substr(0, 30);
+    }
+
+    addPagePerformanceDetails(initialPageVisitDetails);
 
     metric.init();
+  }
+
+  function addPagePerformanceDetails(details) {
+    var t0 = performance.timing.fetchStart;
+    details.startPageLoad = performance.timing.responseEnd - t0;
+    details.startPageInteractive = performance.timing.domInteractive - t0;
+    details.startSitecuesLoad = startSitecuesLoad;
+    details.startSitecuesInteractive = getCurrentTime();
+  }
+
+  function getCurrentTime() {
+    return Math.floor(performance.now());
+  }
+
+  function initABTest(sitecuesInitSummary) {
+    abTest.init();
+    return sitecuesInitSummary;  // Must be passed on through the promise chain
   }
 
   function initConfAndMetrics() {
     return conf.init()
       .catch(function handlePrefsError(error) { return { error: error.message }; })
-      .then(abTest.init)
-      .then(initMetrics);
+      .then(initABTest)
+      .then(initMetrics)
+      .then(bounce.init);
   }
 
   function init() {
+    startSitecuesLoad = getCurrentTime();
     // When keyboard listening is ready
     events.on('keys/did-init', onKeyHandlingInitialized);
     events.on('zoom/ready', onZoomInitialized);
 
     // Start initialization
+    inlineStyle.init();
     platform.init();
     nativeFn.init();
 

@@ -6,14 +6,14 @@ define(
     'core/bp/constants',
     'core/bp/model/state',
     'core/bp/helper',
-    'core/metric',
+    'core/metric/metric',
     'core/ab-test/ab-test',
     'core/conf/user/manager',
     'core/conf/site',
     'core/bp/view/view',
     'core/events',
     'core/dom-events',
-    'core/native-functions'
+    'nativeFn'
   ],
   function (
     BP_CONST,
@@ -99,10 +99,8 @@ define(
     return sensitivity;
   }
 
-  function getHoverDelayNoMove(isInBadge) {
-    var baseDelay = isInBadge? BP_CONST.HOVER_DELAY_NOMOVE_BADGE : BP_CONST.HOVER_DELAY_NOMOVE_TOOLBAR;
-
-    return baseDelay / sensitivity;
+  function getHoverDelayNoMove() {
+    return BP_CONST.HOVER_DELAY_NOMOVE_BADGE / sensitivity;
   }
 
   function getHoverDelayStayInside() {
@@ -153,7 +151,6 @@ define(
   function setPanelExpandedState(isOpenedWithHover) {
     state.set('isSecondaryExpanded', false); // Only main panel expanded, not secondary
     state.set('wasMouseInPanel', isOpenedWithHover);
-    state.set('isOpenedWithHover', isOpenedWithHover);
     state.set('transitionTo', BP_CONST.PANEL_MODE);
     state.turnOnRealSettings();
     ensureFutureRealSettings();

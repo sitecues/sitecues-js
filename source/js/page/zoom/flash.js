@@ -3,13 +3,15 @@ define(
     'core/events',
     'page/zoom/state',
     'core/conf/urls',
-    'page/positioner/util/array-utility'
+    'core/util/array-utility',
+    'core/inline-style/inline-style'
   ],
   function (
     events,
     state,
     urls,
-    arrayUtil
+    arrayUtil,
+    inlineStyle
   ) {
 
   'use strict';
@@ -24,7 +26,7 @@ define(
 
   function onDocumentMutation(mutations) {
     mutations.forEach(function (mutation) {
-      arrayUtil.toArray(mutation.addedNodes).forEach(function (node) {
+      arrayUtil.from(mutation.addedNodes).forEach(function (node) {
         if (isFlashElement(node)) {
           fixFlashElements(node);
         }
@@ -69,9 +71,10 @@ define(
       while(!isTransformable(ancestor)) {
         ancestor = ancestor.parentElement;
       }
-
-      ancestor.style.transform       = 'scale(' + zoomReciprocal + ')';
-      ancestor.style.transformOrigin = '0 0';
+      var styles = {};
+      styles.transform       = 'scale(' + zoomReciprocal + ')';
+      styles.transformOrigin = '0 0';
+      inlineStyle.override(ancestor, styles);
 
       var
         originalDimensions = dimensionsMap.get(element) || {},
@@ -146,7 +149,7 @@ define(
       observeDocument(document);
 
       nestedFrames.forEach(function (frame) {
-        if (!frame.src || urls.isSameDomain(frame.src)) {
+        if (!frame.src || urls.isSameOrigin(frame.src)) {
           documentsToSearch.push(frame.contentDocument);
         }
       });
