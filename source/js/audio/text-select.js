@@ -19,7 +19,7 @@ define(['$', 'core/events'], function () {
       result = document.selection.createRange().text;
     }
     return result || '';
-  }
+    }
 
   function init() {
   }

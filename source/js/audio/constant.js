@@ -3,7 +3,6 @@ define(
   function () {
     // TODO add more trigger types, e.g. shift+arrow, shift+space
     var TRIGGER_TYPES = {
-      LENS: 'space',
       HIGHLIGHT: 'shift',
       SELECTION: 'selection'
     },
