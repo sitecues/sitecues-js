@@ -16,7 +16,8 @@
   "scripts": {
     "test": "node ./test/run-tests",
     "test-cloud": "intern run --webdriver --config=config/intern-cloud.js",
-    "test-ci": "intern run --webdriver --config=config/intern-ci.js"
+    "test-ci": "intern run --webdriver --config=config/intern-ci.js",
+    "build": "make package"
   },
   "dependencies": {
     "bg-runner": "https://s3.amazonaws.com/npm.sitecues.com/bg-runner-0.0.2.tgz",
@@ -37,7 +38,7 @@
     "closure-compiler": "^0.2.12",
     "dateformat": "^1.0.12",
     "del": "^2.2.2",
-    "delivr": "^0.2.1",
+    "delivr": "^0.4.0",
     "extend": "^3.0.0",
     "glob": "^7.0.6",
     "gulp": "github:gulpjs/gulp#4.0",

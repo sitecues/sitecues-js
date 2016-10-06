@@ -1,12 +1,5 @@
 # DefaultVersion can be the special string latest or a version number
-DefaultVersion: 4.2.11
+DefaultVersion: latest
 MappedVersions:
-  4.0.79:
-    s-390bdfa2: www.mtsac.edu
-  4.0.78:
-    s-1c8150e0: www.cornerstonecareoption.com
   4.2.3:
     s-1f9c2da4: Desire to Learn
-  4.2.12:
-    s-36b2e7c8: cnib.ca    
-    s-72ba8f1a: www.fairfieldcountybank.com

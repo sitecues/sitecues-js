@@ -37,7 +37,7 @@ define(
       width: '70%',
       height: '80%',
       transform: 'scale3d(.7,.7,1)',
-      willChange: platform.transformPropertyCss,
+      willChange: 'transform',
       backgroundColor: '#fff',
       borderRadius: '8px',
       transition: 'opacity .9s, transform 1s',

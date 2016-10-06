@@ -58,7 +58,6 @@ define(
       shouldRestrictWidth, originalBody,
       isTransformXOriginCentered,
       shouldRepaintOnZoomChange,
-      transformProperty, transformOriginProperty,
       // Fixed elements taller than the viewport
       tallElements           = [],
       // Fixed elements wider than the viewport
@@ -168,7 +167,7 @@ define(
 
     function getTranslationValues(element) {
       var
-        split  = inlineStyle(element)[transformProperty].split(/(?:\()|(?:px,*)/),
+        split  = inlineStyle(element).transform.split(/(?:\()|(?:px,*)/),
         index  = split.indexOf('translate3d'),
         values = { x: 0, y: 0 };
       if (index >= 0) {
@@ -426,7 +425,7 @@ define(
     }
 
     function onTargetAdded(element) {
-      inlineStyle.override(element, [transformOriginProperty, isTransformXOriginCentered ? '50% 0' : '0 0']);
+      inlineStyle.override(element, ['transformOrigin', isTransformXOriginCentered ? '50% 0' : '0 0']);
       // This handler runs when a style relevant to @element's bounding rectangle has mutated
       rectCache.listenForMutatedRect(element, function () {
         /*jshint validthis: true */
@@ -442,7 +441,7 @@ define(
     }
 
     function onTargetRemoved(element) {
-      inlineStyle.restore(element, [transformProperty, transformOriginProperty, 'top']);
+      inlineStyle.restore(element, ['transform', 'transformOrigin', 'top']);
       rectCache.delete(element);
       // This is the cached metadata we used for transforming the element. We need to clear it now that
       // the information is stale
@@ -544,7 +543,7 @@ define(
     function clearInvalidTransforms() {
       targets.forEach(function (element) {
         if (!platform.browser.isIE && state.completedZoom === 1 && elementInfo.isInOriginalBody(element)) {
-          inlineStyle.restore(element, transformProperty);
+          inlineStyle.restore(element, 'transform');
         }
       });
     }
@@ -566,8 +565,6 @@ define(
       rectCache.init(isTransformXOriginCentered);
       // In Chrome we have to trigger a repaint after we transform elements because it causes blurriness
       shouldRepaintOnZoomChange  = platform.browser.isChrome;
-      transformProperty          = platform.transformProperty;
-      transformOriginProperty    = platform.transformOriginProperty;
       targets.init();
       targets.registerAddHandler(onTargetAdded);
       targets.registerRemoveHandler(onTargetRemoved);

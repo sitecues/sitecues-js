@@ -192,7 +192,7 @@ define(
 
     function beginTransition() {
       addTransitionEndListener();
-      initTransitionStyles(platform.transformPropertyCss + ' ' + duration + 'ms');
+      initTransitionStyles('transform ' + duration + 'ms');
       getComputedStyle(elements[0]);  // Force layout update
       requestAnimationFrame(initTransforms);
     }

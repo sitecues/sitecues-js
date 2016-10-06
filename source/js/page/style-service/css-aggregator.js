@@ -99,13 +99,13 @@ define(
    */
   function createGetRequest(url) {
     // Unsafe cross-origin request
-    // - Will run into cross-domain restrictions because URL is from different domain
-    // This is not an issue with the extension, because the content script doesn't have cross-domain restrictions
-    var isUnsafeRequest = !SC_EXTENSION && urls.isCrossDomain(url);
+    // - Will run into cross-origin restrictions because URL is from different origin
+    // This is not an issue with the extension, because the content script doesn't have cross-origin restrictions
+    var isUnsafeRequest = !SC_EXTENSION && urls.isCrossOrigin(url);
 
     if (isUnsafeRequest) {
       if (SC_DEV) {
-        console.log('Cross-Domain: ' + url);
+        console.log('Cross-Origin: ' + url);
       }
       // Use sitecues CSS proxy to bypass CORS restrictions on fetching CSS text for analysis
       url = getCssProxyUrl(url);

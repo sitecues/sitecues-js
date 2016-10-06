@@ -16,7 +16,7 @@ function createPackage(callback) {
 function useDelivr() {
   return delivr.prepare({ bucket: 'sitecues-js' })
     .then(function(build) {
-      gulp.src(config.buildDir + '/**/*')
+      return gulp.src(config.buildDir + '/**/*')
         .pipe(gulp.dest(build.path))
         .on('end', build.finalize);
     });

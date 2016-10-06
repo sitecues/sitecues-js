@@ -15,8 +15,7 @@ define(
     'page/positioner/style-lock/style-lock',
     'page/positioner/constants',
     'page/viewport/viewport',
-    'core/inline-style/inline-style',
-    'core/platform'
+    'core/inline-style/inline-style'
   ],
   function (
     $,
@@ -25,8 +24,7 @@ define(
     styleLock,
     constants,
     viewport,
-    inlineStyle,
-    platform
+    inlineStyle
   ) {
 
   'use strict';
@@ -236,7 +234,7 @@ define(
       // Strange bug, don't really understand it, but visible elements nested in hidden elements don't show up as
       // expected when the original body has overflowY set to scroll (reproduces on Desire To Learn)
       bodyStyle.visibility               = getComputedStyle(originalBody).overflowY === 'scroll' ? '' : 'hidden';
-      bodyStyle[platform.transformProperty] = 'none';
+      bodyStyle.transform                = 'none';
       bodyStyle.pointerEvents            = '';
       bodyStyle.position                 = 'absolute';
       bodyStyle.top                      = 0;

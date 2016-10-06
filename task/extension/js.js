@@ -70,7 +70,7 @@ function getCompileFunctionMap() {
 function generateTemplatedCode() {
   return new Promise(function(resolve, reject) {
     var handlebarsOptions = {};
-    gulp.src(config.extensionSourceDir + '/js/templated-code/data-map.hbs.js')
+    return gulp.src(config.extensionSourceDir + '/js/templated-code/data-map.hbs.js')
       .pipe(handlebars({dataModules: amdConfig.dataModules}, handlebarsOptions))
       .pipe(rename( 'data-map.js' ))
       .pipe(gulp.dest(config.tmpDir))

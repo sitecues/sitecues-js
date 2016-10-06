@@ -393,9 +393,9 @@ define(
       isRepaintNeeded = true;
     }
     else {
-      inlineStyle.override(document.documentElement, [platform.transformProperty, 'translateY(0.01px)']);
+      inlineStyle.override(document.documentElement, ['transform', 'translateY(0.01px)']);
       nativeFn.setTimeout(function () {
-        inlineStyle.restore(document.documentElement, platform.transformProperty);
+        inlineStyle.restore(document.documentElement, 'transform');
       }, REPAINT_MS);
     }
   }

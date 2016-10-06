@@ -12,6 +12,13 @@ All notable changes to this project will be documented here.
 ### Fixed
  -
 
+## [4.2.15] - 2016-09-28
+### Fixed
+ - data-sc-pick="disable" works correctly. The picker won't pick any ancestor of something marked as such
+ - Css can use the following code to enable sitecues badge callouts that only show up when Siteces is loaded and visible:
+  some_selector { visibility: hidden; }
+  html[data-sitecues-active="desktop"] { some_selector: visibility: visible; }
+
 ## [4.2.12] - 2016-09-22
 ### Fixed
  - Lens is more stable and performant
