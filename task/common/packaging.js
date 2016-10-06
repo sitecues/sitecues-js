@@ -14,12 +14,16 @@ function createPackage(callback) {
 }
 
 function useDelivr() {
-  return delivr.prepare({ bucket: 'sitecues-js' })
-    .then(function(build) {
-      return gulp.src(config.buildDir + '/**/*')
+  return delivr.prepare({ bucket : 'sitecues-js' }).then((build) => {
+    return new Promise((resolve, reject) => {
+      gulp.src(config.buildDir + '/**/*')
         .pipe(gulp.dest(build.path))
-        .on('end', build.finalize);
+        .on('error', reject)
+        .on('end', () => {
+          build.finalize().then(resolve, reject);
+        });
     });
+  });
 }
 
 // Create a copy of sitecues.js in the buildDir with a name in the format sitecues-[VERSION_NAME].js
