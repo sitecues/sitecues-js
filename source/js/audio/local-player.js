@@ -3,11 +3,11 @@
 define(
   [
     'Promise',
-    'mini-core/native-functions'
+    'mini-core/native-global'
   ],
   function (
     Promise,
-    nativeFn
+    nativeGlobal
   ) {
   'use strict';
 
@@ -32,7 +32,7 @@ define(
         }
 
         // Don't wait forever for a voice.
-        var voicesTimeout = nativeFn.setTimeout(onTimeout, 3000);
+        var voicesTimeout = nativeGlobal.setTimeout(onTimeout, 3000);
 
         // At least one voice has loaded asynchronously. We don't know if/when
         // any more will come in, so it is best to consider the job done here.

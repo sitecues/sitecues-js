@@ -286,7 +286,7 @@ var requirejs, require, define;
   // ----- BEGIN SITECUES CUSTOM BLOCK -----
   function cacheNativeFnReferences() {
     hasOwn     = Object.prototype.hasOwnProperty;
-    setTimeout = sitecues._shared.nativeFn.setTimeout;
+    setTimeout = sitecues._shared.nativeGlobal.setTimeout;
     slice      = Array.prototype.slice;
   }
   // ----- END SITECUES CUSTOM BLOCK -----

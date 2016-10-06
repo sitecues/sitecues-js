@@ -18,7 +18,7 @@ define(
     'page/positioner/util/element-map',
     'page/positioner/constants',
     'core/constants',
-    'mini-core/native-functions',
+    'mini-core/native-global',
     'core/inline-style/inline-style'
   ],
   function (
@@ -31,7 +31,7 @@ define(
     elementMap,
     constants,
     coreConstants,
-    nativeFn,
+    nativeGlobal,
     inlineStyle
   ) {
   'use strict';
@@ -142,7 +142,7 @@ define(
 
               if (didChange) {
                 elementMap.setField(target, inlineKey, inlineValue);
-                nativeFn.setTimeout(evaluateProperty, 0, target, property);
+                nativeGlobal.setTimeout(evaluateProperty, 0, target, property);
               }
             }
             break;
@@ -159,8 +159,8 @@ define(
 
   function evaluateResolvedValue(element, opts) {
     var properties,
-      fromHandlers = new nativeFn.Map(),
-      toHandlers   = new nativeFn.Map(),
+      fromHandlers = new nativeGlobal.Map(),
+      toHandlers   = new nativeGlobal.Map(),
       style        = getComputedStyle(element);
 
     function runHandlers(directionHandlers) {
@@ -251,7 +251,7 @@ define(
     var mutationRecords = domObserver.takeRecords();
     // Handle the remaining queued mutation records
     if (mutationRecords.length) {
-      nativeFn.setTimeout(function (mutationRecords) {
+      nativeGlobal.setTimeout(function (mutationRecords) {
         onOriginalElementMutations(mutationRecords);
       }, 0, mutationRecords);
     }
@@ -313,7 +313,7 @@ define(
         observedProperties.push(property);
       }
 
-      nativeFn.setTimeout(function () {
+      nativeGlobal.setTimeout(function () {
         resolvedElementsMap[key] = getElementsWithResolvedValue(declaration);
         if (!isPropertyObserved) {
           listenForDynamicStyling(property);

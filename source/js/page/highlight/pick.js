@@ -34,7 +34,7 @@ define(
     'page/highlight/traitcache',
     'page/highlight/traits',
     'page/highlight/judge',
-    'mini-core/native-functions',
+    'mini-core/native-global',
     'core/inline-style/inline-style',
     'core/platform'
   ],
@@ -46,7 +46,7 @@ define(
     traitcache,
     traits,
     judge,
-    nativeFn,
+    nativeGlobal,
     inlineStyle,
     platform
   ) {
@@ -352,7 +352,7 @@ define(
       if (secondBestIndex < 0) {
         var scores = scoreObjs.map(getNumericScore);
         if (SC_DEV && isVoteDebuggingOn) {
-          console.log('--> break no other competitors: ' + nativeFn.JSON.stringify(scores));
+          console.log('--> break no other competitors: ' + nativeGlobal.JSON.stringify(scores));
         }
         break;  // Only one valid candidate
       }
@@ -424,7 +424,7 @@ define(
           outline : (extraWork * 4) + 'px solid orange'
         });
       }
-      nativeFn.setTimeout(function () {
+      nativeGlobal.setTimeout(function () {
         inlineStyle.set(candidates[origBestIndex], {
           outline : ''
         });

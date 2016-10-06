@@ -8,13 +8,13 @@ define(
     'core/inline-style/inline-style',
     'bp-expanded/view/transform-util',
     'core/platform',
-    'mini-core/native-functions'
+    'mini-core/native-global'
   ],
   function (
     inlineStyle,
     transformUtil,
     platform,
-    nativeFn
+    nativeGlobal
   ) {
   'use strict';
 
@@ -154,7 +154,7 @@ define(
         if (elements[index]) {
           toTransform = toTransforms[index];
           if (doTweak) {
-            toTransform = nativeFn.JSON.parse(nativeFn.JSON.stringify(toTransform));
+            toTransform = nativeGlobal.JSON.parse(nativeGlobal.JSON.stringify(toTransform));
             toTransform.translateY = (toTransform.translateY || 0) + 0.001;
           }
           transformUtil.setElemTransform(elements[index], toTransform);

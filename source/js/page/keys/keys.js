@@ -6,7 +6,7 @@ define(
     'core/events',
     'page/highlight/constants',
     'core/constants',
-    'mini-core/native-functions'
+    'mini-core/native-global'
   ],
   function (
     elemClassifier,
@@ -15,7 +15,7 @@ define(
     events,
     HIGHLIGHT_CONST,
     CORE_CONST,
-    nativeFn
+    nativeGlobal
   ) {
   'use strict';
 
@@ -286,7 +286,7 @@ define(
     }
 
     clearTimeout(fakeKeyRepeatTimer);
-    fakeKeyRepeatTimer = nativeFn.setTimeout(function() {
+    fakeKeyRepeatTimer = nativeGlobal.setTimeout(function() {
       // If the next key is the same and occurs quickly after the last keyup, it will be considered a key repeat,
       // because some configurations on Windows seem to fire multiple keyups and keydowns for key repeats
       // Once this timer fires, we clear a flag that allows even the same key to be fired as a new metric

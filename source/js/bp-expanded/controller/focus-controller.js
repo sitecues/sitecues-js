@@ -8,7 +8,7 @@ define(
     'core/bp/view/view',
     'core/events',
     'core/constants',
-    'mini-core/native-functions',
+    'mini-core/native-global',
     'core/inline-style/inline-style'
   ],
   function (
@@ -19,7 +19,7 @@ define(
     view,
     events,
     CORE_CONST,
-    nativeFn,
+    nativeGlobal,
     inlineStyle
   ) {
   'use strict';
@@ -204,7 +204,7 @@ define(
 
   function focusFirstItem() {
     if (isKeyboardMode()) {
-      nativeFn.setTimeout(function() {
+      nativeGlobal.setTimeout(function() {
         navigateInDirection(1, true);
       }, 0);
     }

@@ -14,7 +14,7 @@ define(
     'core/platform',
     'core/has',
     'core/ab-test/ab-test',
-    'mini-core/native-functions'
+    'mini-core/native-global'
   ],
   function (
     conf,
@@ -28,7 +28,7 @@ define(
     platform,
     has,
     abTest,
-    nativeFn
+    nativeGlobal
   ) {
   'use strict';
 
@@ -45,7 +45,7 @@ define(
 
     function Metric(name, details) {
       if (doLogMetrics) {
-        console.log('Metric / %s', name + (details ? ' / ' + nativeFn.JSON.stringify(details) : ''));
+        console.log('Metric / %s', name + (details ? ' / ' + nativeGlobal.JSON.stringify(details) : ''));
       }
 
       this.sent = false;
@@ -115,7 +115,7 @@ define(
         var type = typeof value;
 
         if (value !== null && type !== 'boolean' && type !== 'number' && type !== 'string' && type !== 'undefined') {
-          data[propName] = nativeFn.JSON.stringify(data[propName]);
+          data[propName] = nativeGlobal.JSON.stringify(data[propName]);
         }
       });
     }

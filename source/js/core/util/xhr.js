@@ -3,10 +3,10 @@
 
 define(
   [
-    'mini-core/native-functions'
+    'mini-core/native-global'
   ],
   function (
-    nativeFn
+    nativeGlobal
   ) {
   'use strict';
 
@@ -48,7 +48,7 @@ define(
   // Gets the JSON text and returns a JS object
   function getJSON(requestObj) {
     initRequest(null, requestObj, 'application/json', function(jsonText) {
-      requestObj.success(nativeFn.JSON.parse(jsonText));
+      requestObj.success(nativeGlobal.JSON.parse(jsonText));
     });
   }
 
@@ -60,7 +60,7 @@ define(
     // Sending with text/plain instead of application/json avoids the extra CORS preflight requests
     // This is called a "Simple CORS Request" and has a number of requirements.
     // https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS#Simple_requests
-    initRequest(nativeFn.JSON.stringify(requestObj.data), requestObj, 'text/plain');
+    initRequest(nativeGlobal.JSON.stringify(requestObj.data), requestObj, 'text/plain');
   }
 
   return {

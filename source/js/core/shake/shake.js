@@ -11,13 +11,13 @@ define([
   'core/dom-events',
   'core/shake/constants',
   'core/platform',
-  'mini-core/native-functions'
+  'mini-core/native-global'
 ], function(metric,
             // events,
             domEvents,
             constants,
             platform,
-            nativeFn) {
+            nativeGlobal) {
 
   'use strict';
 
@@ -203,7 +203,7 @@ define([
       mousePositionsQueue = []; // Start from scratch
     }
 
-    nativeFn.setTimeout(function() {
+    nativeGlobal.setTimeout(function() {
       processMouseMove(x, y, t);
     }, 0);
   }
@@ -235,7 +235,7 @@ define([
     // Internal change event
     // TODO add back once we use it
     // if (!lastShakeTimeout) {
-      // lastShakeTimeout = nativeFn.setTimeout(function() {
+      // lastShakeTimeout = nativeGlobal.setTimeout(function() {
       //   fireShakeVigorChange(shakeVigorPercent);
       // }, constants.MS_BETWEEN_SHAKE_EVENTS);
     // }
@@ -250,7 +250,7 @@ define([
     // Fires only when it goes over the threshold, to limit network requests
     if (shakeVigorPercent >= METRIC_THRESHOLD_SHAKE_PERCENT_FIRE && canFireMetricAgain) {
       canFireMetricAgain = false;
-      nativeFn.setTimeout(function() {
+      nativeGlobal.setTimeout(function() {
         fireShakeVigorMetric(shakeVigorPercent);
       }, 0);
     }

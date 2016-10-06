@@ -3,12 +3,12 @@ define(
   [
     'core/inline-style/inline-style',
     'core/util/array-utility',
-    'mini-core/native-functions'
+    'mini-core/native-global'
   ],
   function (
     inlineStyle,
     arrayUtil,
-    nativeFn
+    nativeGlobal
   ) {
   'use strict';
 
@@ -46,7 +46,7 @@ define(
     var elements = arrayUtil.wrap(elmnts);
     elements.forEach(disableTransformTransition);
     inlineStyle.override(elements, ['transform', transform]);
-    nativeFn.setTimeout(function () {
+    nativeGlobal.setTimeout(function () {
       elements.forEach(restoreTransition);
     }, 0);
   }

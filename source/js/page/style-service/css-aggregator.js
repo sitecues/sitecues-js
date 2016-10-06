@@ -8,14 +8,14 @@ define(
     'page/style-service/user-agent-css',
     'core/conf/urls',
     'page/style-service/media-queries',
-    'mini-core/native-functions'
+    'mini-core/native-global'
   ],
   function (
     $,
     UA_CSS,
     urls,
     mediaQueries,
-    nativeFn
+    nativeGlobal
   ) {
   'use strict';
 
@@ -64,7 +64,7 @@ define(
         // otherwise the numPending will not return to 0 and we will never finish aggregating the CSS
         markReady(currentSheet);
       };
-      currentSheet.errorTimeout = nativeFn.setTimeout(function() {
+      currentSheet.errorTimeout = nativeGlobal.setTimeout(function() {
         markReady(currentSheet);
       }, TIMEOUT_MS);
       request.send();
@@ -73,7 +73,7 @@ define(
       // A <style> already has it's text --
       // as opposed to a <link href> which will be marked ready after it's loaded
       currentSheet.text = (text || '');
-      nativeFn.setTimeout(function () {
+      nativeGlobal.setTimeout(function () {
         // Use the setTimeout as a fake fetch that will simply provide the text we already have.
         // (We don't want to mark ready until all the sheets are added to the queue, otherwise we could finish too early)
         markReady(currentSheet);

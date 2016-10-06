@@ -6,14 +6,14 @@ define(
     'core/bp/constants',
     'core/bp/helper',
     'core/events',
-    'mini-core/native-functions',
+    'mini-core/native-global',
     'core/inline-style/inline-style'
   ],
   function (
     BP_CONST,
     helper,
     events,
-    nativeFn,
+    nativeGlobal,
     inlineStyle
   ) {
   'use strict';
@@ -76,7 +76,7 @@ define(
   }
 
   function pushTimeout(fn, howLongMs) {
-    animationTimers.push(nativeFn.setTimeout(fn, howLongMs));
+    animationTimers.push(nativeGlobal.setTimeout(fn, howLongMs));
   }
 
   // Reset demo page element back to original state
@@ -86,7 +86,7 @@ define(
       // Reset element back to normal position instantly (temporarily turn of animations)
       elem.setAttribute('data-demo', false);
       inlineStyle(elem).transitionDuration = '0s';
-      nativeFn.setTimeout(function () {
+      nativeGlobal.setTimeout(function () {
         inlineStyle(elem).transitionDuration = '';
       }, 20); // Wait at least one frame tick to turn animations back on
     }

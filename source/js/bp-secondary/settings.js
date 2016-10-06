@@ -9,7 +9,7 @@ define(
     'page/cursor/cursor',
     'core/events',
     'core/dom-events',
-    'mini-core/native-functions',
+    'mini-core/native-global',
     'core/inline-style/inline-style'
   ],
   function (
@@ -22,7 +22,7 @@ define(
     cursor,
     events,
     domEvents,
-    nativeFn,
+    nativeGlobal,
     inlineStyle
   ) {
   'use strict';
@@ -253,7 +253,7 @@ define(
     var currTime = + Date.now();
     if (currTime - lastDragUpdateTime > SLIDER_DRAG_UPDATE_MIN_INTERVAL) {
       lastDragUpdateTime = currTime;
-      nativeFn.setTimeout(function() { onSettingsNativeInputChange(evt);}, 0 );
+      nativeGlobal.setTimeout(function() { onSettingsNativeInputChange(evt);}, 0 );
     }
   }
 

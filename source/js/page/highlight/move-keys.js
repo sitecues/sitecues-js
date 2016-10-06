@@ -8,7 +8,7 @@ define(
     'page/util/geo',
     'core/events',
     'page/highlight/fixed-elements',
-    'mini-core/native-functions',
+    'mini-core/native-global',
     'core/inline-style/inline-style'
   ],
   function (
@@ -20,7 +20,7 @@ define(
     geo,
     events,
     fixedElements,
-    nativeFn,
+    nativeGlobal,
     inlineStyle
   ) {
   'use strict';
@@ -365,7 +365,7 @@ define(
         repeatDelay = isFirstRepeat ? HIGHLIGHT_MOVE_FIRST_REPEAT_DELAY_MS : HIGHLIGHT_MOVE_NEXT_REPEAT_DELAY_MS;
       // Repeat last command if key is still pressed down
       isKeyRepeating = true;
-      repeatDelayTimer = nativeFn.setTimeout(function() {
+      repeatDelayTimer = nativeGlobal.setTimeout(function() {
         onMovementCommand(lastMoveCommand);
       }, repeatDelay);
       return;

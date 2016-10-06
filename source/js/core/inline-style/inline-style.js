@@ -18,12 +18,12 @@
 * */
 define(
   [
-    'mini-core/native-functions',
+    'mini-core/native-global',
     'core/util/array-utility',
     'core/util/object-utility'
   ],
   function (
-    nativeFn,
+    nativeGlobal,
     arrayUtil,
     objectUtil
   ) {
@@ -172,7 +172,7 @@ define(
     });
 
     if (!updateTimer) {
-      updateTimer = nativeFn.setTimeout(function () {
+      updateTimer = nativeGlobal.setTimeout(function () {
         updateIntendedStyles();
       }, UPDATE_TIMEOUT);
     }
@@ -378,8 +378,8 @@ define(
         return;
       }
 
-      var boundGetter = nativeFn.bindFn.call(styleProxyGetter, element, property),
-          boundSetter = nativeFn.bindFn.call(styleProxySetter, element, property);
+      var boundGetter = nativeGlobal.bindFn.call(styleProxyGetter, element, property),
+          boundSetter = nativeGlobal.bindFn.call(styleProxySetter, element, property);
 
       proxiedProperties[property] = true;
 

@@ -13,7 +13,7 @@ define(
     'page/util/color',
     'theme/custom-site-theme',
     'core/events',
-    'mini-core/native-functions',
+    'mini-core/native-global',
     'core/inline-style/inline-style'
   ],
   function(
@@ -26,7 +26,7 @@ define(
     colorUtil,
     customTheme,
     events,
-    nativeFn,
+    nativeGlobal,
     inlineStyle
   ) {
   'use strict';
@@ -154,7 +154,7 @@ define(
       // Enable site-specific theme changes
       toggleBodyClasses();
 
-      finishThemeTimer = nativeFn.setTimeout(finalizeTheme, isFastTransition ? TRANSITION_MS_FAST : TRANSITION_MS_SLOW);
+      finishThemeTimer = nativeGlobal.setTimeout(finalizeTheme, isFastTransition ? TRANSITION_MS_FAST : TRANSITION_MS_SLOW);
     }
   }
 
@@ -394,7 +394,7 @@ define(
     }
     else {
       inlineStyle.override(document.documentElement, ['transform', 'translateY(0.01px)']);
-      nativeFn.setTimeout(function () {
+      nativeGlobal.setTimeout(function () {
         inlineStyle.restore(document.documentElement, 'transform');
       }, REPAINT_MS);
     }

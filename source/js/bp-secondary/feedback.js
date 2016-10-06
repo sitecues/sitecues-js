@@ -6,7 +6,7 @@ define(
     'core/metric/metric',
     'core/bp/view/view',
     'core/events',
-    'mini-core/native-functions',
+    'mini-core/native-global',
     'core/inline-style/inline-style'
   ],
   function (
@@ -16,7 +16,7 @@ define(
     metric,
     view,
     events,
-    nativeFn,
+    nativeGlobal,
     inlineStyle
   ) {
   'use strict';
@@ -137,7 +137,7 @@ define(
     // Prepend blank lines so that status is on next screen of mail message in order not to confuse the user.
     var NUM_NEWLINES = 99,
       STATUS_PREFIX = Array(NUM_NEWLINES).join('\n') + '---- User configuration: ----\n\n',
-      currentStatusText = nativeFn.JSON.stringify(currentStatus, null, '    ');
+      currentStatusText = nativeGlobal.JSON.stringify(currentStatus, null, '    ');
     return getFeedbackText() + STATUS_PREFIX + currentStatusText;
   }
 
@@ -179,7 +179,7 @@ define(
       var details = {
         feedbackText: getFeedbackTextToSend(),
         rating: currentRating,  // 0 = no rating, otherwise 1-5 stars
-        statusText: nativeFn.JSON.stringify(currentStatus)
+        statusText: nativeGlobal.JSON.stringify(currentStatus)
       };
 
       if (SC_DEV) {

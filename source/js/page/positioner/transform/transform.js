@@ -28,7 +28,7 @@ define(
     'page/viewport/scrollbars',
     'page/zoom/config/config',
     'core/events',
-    'mini-core/native-functions',
+    'mini-core/native-global',
     'core/inline-style/inline-style',
     'page/util/transition-util'
   ],
@@ -47,7 +47,7 @@ define(
     scrollbars,
     config,
     events,
-    nativeFn,
+    nativeGlobal,
     inlineStyle,
     transitionUtil
   ) {
@@ -354,7 +354,7 @@ define(
 
       function onResize() {
         clearTimeout(resizeTimer);
-        resizeTimer = nativeFn.setTimeout(function () {
+        resizeTimer = nativeGlobal.setTimeout(function () {
           targets.forEach(scaleTop);
           transformAllTargets({
             resetTranslation: true,
@@ -531,7 +531,7 @@ define(
     }
 
     function onZoom() {
-      nativeFn.setTimeout(function () {
+      nativeGlobal.setTimeout(function () {
         targets.forEach(scaleTop);
         refresh();
       }, 0);

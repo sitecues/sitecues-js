@@ -8,7 +8,7 @@ define(
     'core/bp/helper',
     'core/platform',
     'core/events',
-    'mini-core/native-functions',
+    'mini-core/native-global',
     'core/inline-style/inline-style'
   ],
   function (
@@ -17,7 +17,7 @@ define(
     helper,
     platform,
     events,
-    nativeFn,
+    nativeGlobal,
     inlineStyle
   ) {
   'use strict';
@@ -379,7 +379,7 @@ define(
   function getTargetSVGElementTransforms () {
 
     function copyObj (obj) {
-      return nativeFn.JSON.parse(nativeFn.JSON.stringify(obj));
+      return nativeGlobal.JSON.parse(nativeGlobal.JSON.stringify(obj));
     }
 
     var isPanelRequested = state.isPanelRequested(),

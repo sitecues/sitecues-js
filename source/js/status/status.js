@@ -4,14 +4,14 @@ define(
     'core/util/xhr',
     'core/conf/user/manager',
     'core/conf/site',
-    'mini-core/native-functions'
+    'mini-core/native-global'
   ],
   function (
     urls,
     xhr,
     conf,
     site,
-    nativeFn
+    nativeGlobal
   ) {
   'use strict';
 
@@ -22,8 +22,8 @@ define(
       var INDENTATION = '    ',
             result = object;
 
-      if (nativeFn.JSON && nativeFn.JSON.stringify) {
-        result = nativeFn.JSON.stringify(object, null, INDENTATION);
+      if (nativeGlobal.JSON && nativeGlobal.JSON.stringify) {
+        result = nativeGlobal.JSON.stringify(object, null, INDENTATION);
       }
 
       return result;

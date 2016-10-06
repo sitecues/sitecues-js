@@ -10,7 +10,7 @@ define(
     'core/bp/view/view',
     'core/events',
     'core/dom-events',
-    'mini-core/native-functions'
+    'mini-core/native-global'
   ],
   function (
     BP_CONST,
@@ -20,7 +20,7 @@ define(
     view,
     events,
     domEvents,
-    nativeFn
+    nativeGlobal
   ) {
   'use strict';
 
@@ -53,7 +53,7 @@ define(
     // We don't know anything about the mouse other than the fact that it left the window
     function winMouseLeave(evt) {
       if (helper.getEventTarget(evt).id === BP_CONST.BADGE_ID) {
-        mouseLeaveShrinkTimer = nativeFn.setTimeout(shrinkPanel, BP_CONST.MOUSELEAVE_DELAY_SHRINK_BP);
+        mouseLeaveShrinkTimer = nativeGlobal.setTimeout(shrinkPanel, BP_CONST.MOUSELEAVE_DELAY_SHRINK_BP);
       }
     }
 

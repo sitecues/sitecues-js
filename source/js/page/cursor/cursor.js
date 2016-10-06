@@ -14,7 +14,7 @@ define(
     'page/cursor/cursor-css',
     'core/platform',
     'core/events',
-    'mini-core/native-functions'
+    'mini-core/native-global'
   ],
   function (
     $,
@@ -23,7 +23,7 @@ define(
     cursorCss,
     platform,
     events,
-    nativeFn
+    nativeGlobal
   ) {
   'use strict';
 
@@ -258,7 +258,7 @@ define(
     // Refresh document cursor stylesheet if we're using one
     if (cursorStylesheetObject) {
       refreshCursorStyles(cursorStylesheetObject, cursorTypeUrls);
-      nativeFn.setTimeout(toggleZoomOptimization, REENABLE_CURSOR_MS);
+      nativeGlobal.setTimeout(toggleZoomOptimization, REENABLE_CURSOR_MS);
     }
 
     // Refresh BP cursor stylesheet

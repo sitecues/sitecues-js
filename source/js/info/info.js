@@ -9,7 +9,7 @@ define(
     'page/util/color',
     'core/events',
     'core/util/ids',
-    'mini-core/native-functions',
+    'mini-core/native-global',
     'core/inline-style/inline-style'
   ],
   function (
@@ -22,7 +22,7 @@ define(
     colorUtil,
     events,
     ids,
-    nativeFn,
+    nativeGlobal,
     inlineStyle
   ) {
   'use strict';
@@ -79,7 +79,7 @@ define(
 
   function close() {
     inlineStyle.set($iframe[0], INITIAL_CSS);
-    nativeFn.setTimeout(function() {
+    nativeGlobal.setTimeout(function() {
       $iframe.remove();
       $iframe = $();
       isModalOpen = false;
@@ -101,7 +101,7 @@ define(
 
   function onload() {
     // Try to focus iframe
-    nativeFn.setTimeout(function () {
+    nativeGlobal.setTimeout(function () {
       var iframe = $iframe[0];
       try {
         iframe.contentWindow.focus();
@@ -155,7 +155,7 @@ define(
 
     dimmer.dimBackgroundContent(DIMMER_SPEED, $iframe);
 
-    nativeFn.setTimeout(function () {
+    nativeGlobal.setTimeout(function () {
       inlineStyle.set($iframe[0], ENLARGED_CSS);
       var iframeEl = $iframe[0];
       if (iframeEl.contentWindow) {
@@ -166,7 +166,7 @@ define(
       }
     }, INITIAL_DELAY); // Waiting helps animation performance
 
-    addCloseButtonTimer = nativeFn.setTimeout(addCloseButton, INITIAL_DELAY + INFLATION_SPEED + 100);
+    addCloseButtonTimer = nativeGlobal.setTimeout(addCloseButton, INITIAL_DELAY + INFLATION_SPEED + 100);
 
     isModalOpen = true;
   }
@@ -194,7 +194,7 @@ define(
         .appendTo('html')
         .one('click', close);
 
-    addCloseButtonTimer = nativeFn.setTimeout(function () {
+    addCloseButtonTimer = nativeGlobal.setTimeout(function () {
       inlineStyle($closeButton[0]).opacity = '1';
     }, 100);
   }

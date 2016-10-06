@@ -13,7 +13,7 @@ define(
     'core/bp/view/view',
     'core/events',
     'core/dom-events',
-    'mini-core/native-functions'
+    'mini-core/native-global'
   ],
   function (
     BP_CONST,
@@ -26,7 +26,7 @@ define(
     view,
     events,
     domEvents,
-    nativeFn
+    nativeGlobal
   ) {
 
   // How long we wait before expanding BP
@@ -89,9 +89,9 @@ define(
     // Set timers to open the badge if the user stays inside of it
     // We use two timers so that if the user actually stops, the badge opens faster (more responsive feeling)
     // Hover if no move -- start a new timer every time mouse moves
-    hoverIfNoMoveTimer = nativeFn.setTimeout(changeModeToPanel, getHoverDelayNoMove());
+    hoverIfNoMoveTimer = nativeGlobal.setTimeout(changeModeToPanel, getHoverDelayNoMove());
     if (!hoverIfStayInsideTimer) {
-      hoverIfStayInsideTimer = nativeFn.setTimeout(changeModeToPanel, getHoverDelayStayInside());
+      hoverIfStayInsideTimer = nativeGlobal.setTimeout(changeModeToPanel, getHoverDelayStayInside());
     }
   }
 
@@ -210,7 +210,7 @@ define(
         badgeElem.focus();
 
         // Opened with click means opened with keyboard in screen reader
-        nativeFn.setTimeout(function() {
+        nativeGlobal.setTimeout(function() {
           changeModeToPanel(true);
           // Set screen reader flag for the life of this page view
           state.set('isOpenedWithScreenReader', true);

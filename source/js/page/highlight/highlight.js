@@ -19,7 +19,7 @@ define(
     'core/dom-events',
     'page/zoom/zoom',
     'page/zoom/util/body-geometry',
-    'mini-core/native-functions',
+    'mini-core/native-global',
     'core/inline-style/inline-style'
   ],
   function (
@@ -38,7 +38,7 @@ define(
     domEvents,
     zoomMod,
     bodyGeo,
-    nativeFn,
+    nativeGlobal,
     inlineStyle
   ) {
 /*jshint +W072 */
@@ -1360,7 +1360,7 @@ define(
       hide();
     }
 
-    pickFromMouseTimer = nativeFn.setTimeout(function () {
+    pickFromMouseTimer = nativeGlobal.setTimeout(function () {
       // In case doesn't move after fast velocity, check in a moment and update highlight if no movement
       pickFromMouseTimer = 0;
       pickFromMouse(event);

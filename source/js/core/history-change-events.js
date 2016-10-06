@@ -4,10 +4,10 @@
 
 define(
   [
-    'mini-core/native-functions'
+    'mini-core/native-global'
   ],
   function (
-    nativeFn
+    nativeGlobal
   ) {
   'use strict';
 
@@ -38,7 +38,7 @@ define(
   }
 
   function onClick() {
-    nativeFn.setTimeout(triggerIfPathChanged, 0);
+    nativeGlobal.setTimeout(triggerIfPathChanged, 0);
   }
 
   function on(fn) {

@@ -9,7 +9,7 @@ define(
     'page/zoom/constants',
     'page/zoom/util/body-geometry',
     'page/zoom/config/config',
-    'mini-core/native-functions',
+    'mini-core/native-global',
     'core/inline-style/inline-style',
     'page/zoom/combo-boxes',
     'page/util/transition-util'
@@ -21,7 +21,7 @@ define(
     constants,
     bodyGeo,
     config,
-    nativeFn,
+    nativeGlobal,
     inlineStyle,
     comboBoxes,
     transitionUtil
@@ -204,7 +204,7 @@ define(
     }
     var $anyBody = $('body'); // Make sure we get clone body as well, if present
     $anyBody.attr(CRISPING_ATTRIBUTE, '');
-    nativeFn.setTimeout(function() {
+    nativeGlobal.setTimeout(function() {
       $anyBody.removeAttr(CRISPING_ATTRIBUTE);
     }, REPAINT_FOR_CRISP_TEXT_DELAY);
 
@@ -225,7 +225,7 @@ define(
 
     $appendedDiv.appendTo('html');
 
-    nativeFn.setTimeout(function () {
+    nativeGlobal.setTimeout(function () {
       $appendedDiv.remove();
     }, 0);
   }

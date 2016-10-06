@@ -10,7 +10,7 @@ define(
     'core/platform',
     '$',
     'hlb/constants',
-    'mini-core/native-functions',
+    'mini-core/native-global',
     'core/inline-style/inline-style'
   ],
   function (
@@ -20,7 +20,7 @@ define(
     platform,
     $,
     constants,
-    nativeFn,
+    nativeGlobal,
     inlineStyle
   ) {
   'use strict';
@@ -105,7 +105,7 @@ define(
 
     // Allow the from CSS to register so that setting the toCss actually animates there
     // rather than just setting the toCss and ignoring the fromCss
-    nativeFn.setTimeout(function () {
+    nativeGlobal.setTimeout(function () {
       toCss.transition = 'transform ' + speed + 'ms ease-in-out';
       inlineStyle.set(hlbElement, toCss);
       hlbElement.addEventListener(platform.transitionEndEvent, onTransitionEnd);

@@ -25,7 +25,7 @@ define(
     'core/bp/model/classic-mode',
     'core/bp/view/badge/page-badge',
     'Promise',
-    'mini-core/native-functions',
+    'mini-core/native-global',
     'core/inline-style/inline-style'
   ],
   function (
@@ -38,7 +38,7 @@ define(
     classicMode,
     pageBadgeView,
     Promise,
-    nativeFn,
+    nativeGlobal,
     inlineStyle
   ) {
   'use strict';
@@ -166,7 +166,7 @@ define(
         if (document.body) {
           resolve();
         } else {
-          nativeFn.setTimeout(checkBody, CHECK_BODY_INTERVAL);
+          nativeGlobal.setTimeout(checkBody, CHECK_BODY_INTERVAL);
         }
       }
       checkBody();

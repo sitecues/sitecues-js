@@ -7,7 +7,7 @@ define(
     'core/conf/user/manager',
     'core/events',
     'core/platform',
-    'mini-core/native-functions',
+    'mini-core/native-global',
     'core/inline-style/inline-style'
   ],
   function (
@@ -18,7 +18,7 @@ define(
     conf,
     events,
     platform,
-    nativeFn,
+    nativeGlobal,
     inlineStyle
   ) {
   'use strict';
@@ -35,7 +35,7 @@ define(
     require(['audio/audio'], function(audio) {
       // We do a timeout here so that this occurs after any key handlers that stop speech
       // Otherwise, the same Enter/space press that starts speaking the cue could immediately silence the same cue
-      nativeFn.setTimeout(audio.toggleSpeech, 0);
+      nativeGlobal.setTimeout(audio.toggleSpeech, 0);
     });
   }
 
@@ -126,7 +126,7 @@ define(
 
     if (++ waveAnimationStepNum < opacityData[0].length) {
       // Not finished with animation, do it again
-      waveAnimationTimer = nativeFn.setTimeout(nextWaveAnimationStep, BP_CONST.ANIMATE_WAVES_STEP_DURATION);
+      waveAnimationTimer = nativeGlobal.setTimeout(nextWaveAnimationStep, BP_CONST.ANIMATE_WAVES_STEP_DURATION);
     }
     else {
       endWaveAnimation();
