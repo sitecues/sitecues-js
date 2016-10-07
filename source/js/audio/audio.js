@@ -13,7 +13,7 @@
 define(
   [
     'audio/constant',
-    'core/conf/user/manager',
+    'core/conf/preferences',
     'core/conf/site',
     '$',
     'audio/speech-builder',
@@ -26,7 +26,22 @@ define(
     'audio/local-player',
     'audio/network-player'
   ],
-  function(constant, conf, site, $, builder, locale, metric, urls, textSelect, dataMap, events, localPlayer, networkPlayer) {
+  function(
+    constant,
+    pref,
+    site,
+    $,
+    builder,
+    locale,
+    metric,
+    urls,
+    textSelect,
+    dataMap,
+    events,
+    localPlayer,
+    networkPlayer
+  ) {
+  'use strict';
 
   var ttsOn = false,
     lastPlayer,
@@ -274,7 +289,7 @@ define(
   function setSpeechState(isOn, doSuppressAudioCue) {
     if (ttsOn !== isOn) {
       ttsOn = isOn;
-      conf.set('ttsOn', ttsOn);
+      pref.set('ttsOn', ttsOn);
       events.emit('speech/did-change', ttsOn);
       if (!doSuppressAudioCue) {
         require(['audio-cues/audio-cues'], function(audioCues) {
@@ -492,7 +507,7 @@ define(
       };
     }
 
-    ttsOn = conf.get('ttsOn');
+    ttsOn = pref.get('ttsOn');
   }
 
   return {

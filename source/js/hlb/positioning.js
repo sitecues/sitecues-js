@@ -7,7 +7,7 @@
 define(
   [
     '$',
-    'core/conf/user/manager',
+    'core/conf/pref',
     'hlb/styling',
     'page/util/common',
     'page/util/element-classifier',
@@ -16,7 +16,7 @@ define(
   ],
   function (
     $,
-    conf,
+    pref,
     hlbStyling,
     common,
     elemClassifier,
@@ -598,7 +598,7 @@ define(
   }
 
   function getPageZoom() {
-    return conf.get('zoom') || 1;
+    return pref.get('zoom') || 1;
   }
 
   // HLB transform scale necessary to show HLB at same size as original highlighted content.

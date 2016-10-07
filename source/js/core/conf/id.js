@@ -1,12 +1,14 @@
-define([
-  'core/conf/manager'
-], function(
-  conf
-) {
+define(
+  [
+    'core/conf/manager'
+  ],
+  function(
+    conf
+  ) {
+  'use strict';
+
   var
     exports = {
-      sessionId: null,
-      pageViewId: null,
       init: init
     };
 
@@ -20,9 +22,10 @@ define([
 
   function init() {
     // Use session id and page view id from parent page if available
-    exports.sessionId  = getSessionId();
-    exports.pageViewId = getPageViewId();
-    exports.userId = conf.getUserId();
+    exports.session  = getSessionId();
+    exports.pageView = getPageViewId();
+    exports.user     = conf.getUserId();
+    exports.site     = null;
   }
 
   return exports;

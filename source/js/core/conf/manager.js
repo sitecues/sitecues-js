@@ -7,25 +7,21 @@ define(
   [
     'core/conf/user/storage',
     'core/conf/user/storage-backup',
-    'mini-core/native-global'
+    'mini-core/native-functions'
   ],
   function (
     storage,
     storageBackup,
-    nativeGlobal
+    nativeFn
   ) {
   'use strict';
-
-  // private variables
-  var handlers       = {},
-      listeners      = {};
 
   function getUserId() {
     return window.user.id;
   }
 
   function copyFields(obj) {
-    return nativeGlobal.JSON.parse(nativeGlobal.JSON.stringify(obj));
+    return nativeFn.JSON.parse(nativeFn.JSON.stringify(obj));
   }
 
   // get preferences value(s)

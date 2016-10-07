@@ -5,7 +5,7 @@
 define(
   [
     '$',
-    'core/conf/user/manager',
+    'core/conf/preferences',
     'page/highlight/pick',
     'page/highlight/traitcache',
     'page/highlight/highlight-position',
@@ -24,7 +24,7 @@ define(
   ],
   function (
     $,
-    conf,
+    pref,
     picker,
     traitcache,
     mhpos,
@@ -1739,7 +1739,7 @@ define(
     });
 
     // Darken highlight appearance when speech is enabled
-    conf.get('ttsOn', onSpeechChanged);
+    pref.bindListener('ttsOn', onSpeechChanged);
 
     testFocus(); // Set initial focus state
     if (document.readyState !== 'loading') {  // Focus is set again when document finishes loading

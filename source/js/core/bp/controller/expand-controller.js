@@ -8,7 +8,7 @@ define(
     'core/bp/helper',
     'core/metric/metric',
     'core/ab-test/ab-test',
-    'core/conf/user/manager',
+    'core/conf/preferences',
     'core/conf/site',
     'core/bp/view/view',
     'core/events',
@@ -21,13 +21,14 @@ define(
     helper,
     metric,
     abTest,
-    conf,
+    pref,
     site,
     view,
     events,
     domEvents,
     nativeGlobal
   ) {
+  'use strict';
 
   // How long we wait before expanding BP
   var hoverIfNoMoveTimer,  // If mouse stays still inside badge, open
@@ -143,8 +144,8 @@ define(
   }
   function ensureFutureRealSettings() {   // Use real settings on next page load
     // Save zoom level so that Sitecues does not see this as a first time user
-    if (!conf.has('zoom')) {
-      conf.set('zoom', 1);
+    if (!pref.has('zoom')) {
+      pref.set('zoom', 1);
     }
   }
 
@@ -279,7 +280,7 @@ define(
       events.on('speech/did-change', didChangeSpeech);
 
       // Turn on TTS button if the setting is on
-      if (conf.get('ttsOn')) {
+      if (pref.get('ttsOn')) {
         didChangeSpeech(true);
       }
 

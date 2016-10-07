@@ -8,7 +8,7 @@ define(
     'hlb/event-handlers',
     'hlb/positioning',
     'hlb/styling',
-    'core/conf/user/manager',
+    'core/conf/preferences',
     'core/platform',
     'page/util/element-classifier',
     'hlb/animation',
@@ -23,7 +23,7 @@ define(
     eventHandlers,
     hlbPositioning,
     hlbStyling,
-    conf,
+    pref,
     platform,
     elemClassifier,
     hlbAnimation,
@@ -405,7 +405,7 @@ define(
       }
 
       $hlbWrapper.appendTo('body');
-      inheritedZoom = conf.get('zoom') || 1;  // Zoom inherited from page
+      inheritedZoom = pref.get('zoom') || 1;  // Zoom inherited from page
 
     } else {
       $hlbWrapper.insertAfter('body');

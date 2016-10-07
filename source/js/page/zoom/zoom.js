@@ -5,7 +5,7 @@
 define(
   [
     '$',
-    'core/conf/user/manager',
+    'core/conf/preferences',
     'core/events',
     'core/modifier-key-state',
     'page/zoom/animation',
@@ -23,7 +23,7 @@ define(
   /*jshint -W072 */ //Currently there are too many dependencies, so we need to tell JSHint to ignore it for now
   function (
     $,
-    conf,
+    pref,
     events,
     modifierKeyState,
     animation,
@@ -193,8 +193,8 @@ define(
     body  = document.body;
     $origBody = $(body);
 
-    // Use conf module for sharing current zoom level value
-    conf.def('zoom', restrictZoom.toValidRange);
+    // Use pref module for sharing current zoom level value
+    pref.defineHandler('zoom', restrictZoom.toValidRange);
 
     // ATKratter wouldn't scroll when we listened to this on the window
     document.addEventListener('wheel', onMouseWheel);  // Ctrl+wheel = unpinch

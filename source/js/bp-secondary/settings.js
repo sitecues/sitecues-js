@@ -2,7 +2,7 @@ define(
   [
     'core/bp/constants',
     'core/bp/helper',
-    'core/conf/user/manager',
+    'core/conf/preferences',
     'core/bp/model/state',
     'core/metric/metric',
     'core/platform',
@@ -15,7 +15,7 @@ define(
   function (
     BP_CONST,
     helper,
-    conf,
+    pref,
     state,
     metric,
     platform,
@@ -95,22 +95,24 @@ define(
       allSettingNames[name] = 1;
     }
 
-    Object.keys(allSettingNames).forEach(function(name) {
-      conf.get(name, function(newValue) {
-        newValue = newValue || 'none';  // Will now be 'none', 'warm', 'bold' or 'dark'
-        var settingElems = settingsPanel.querySelectorAll('sc-button[data-setting-name="' + name + '"]'),
+    function themeListener(newValue) {
+      newValue = newValue || 'none';  // Will now be 'none', 'warm', 'bold' or 'dark'
+      var settingElems = settingsPanel.querySelectorAll('sc-button[data-setting-name="' + name + '"]'),
           index = settingElems.length,
           elem,
           currentButtonValue,
           isCurrentValue;
-        while (index -- ) {
-          elem = settingElems[index];
-          // This button is used for what theme? 'none', 'warm', 'bold' or 'dark'
-          currentButtonValue = elem.getAttribute('data-setting-value') || 'none';
-          isCurrentValue = newValue === currentButtonValue;
-          elem.setAttribute('aria-pressed', isCurrentValue);
-        }
-      });
+      while (index -- ) {
+        elem = settingElems[index];
+        // This button is used for what theme? 'none', 'warm', 'bold' or 'dark'
+        currentButtonValue = elem.getAttribute('data-setting-value') || 'none';
+        isCurrentValue = newValue === currentButtonValue;
+        elem.setAttribute('aria-pressed', isCurrentValue);
+      }
+    }
+
+    Object.keys(allSettingNames).forEach(function (name) {
+      pref.bindListener(name, themeListener);
     });
   }
 
@@ -127,7 +129,7 @@ define(
   }
 
   function initRangeListener(settingName, rangeElem) {
-    conf.get(settingName, function(val) {
+    pref.bindListener(settingName, function(val) {
       rangeElem.value = val;
     });
   }
@@ -143,26 +145,28 @@ define(
       settingName = rangeElem.getAttribute('data-setting-name');
       initRangeListener(settingName, rangeElem);
       domEvents.on(rangeElem, 'blur', fireInputRangeMetric);
-      rangeValueMap[settingName] = conf.get(settingName);
+      rangeValueMap[settingName] = pref.get(settingName);
       adjustRangeBackground(rangeElem);
     }
 
   }
 
-  function themeSlidersInit() {
-    conf.get('themeName', function (name) {
-      var isThemePowerEnabled = Boolean(name),
+  function themeNameListener(name) {
+    var isThemePowerEnabled = Boolean(name),
         isThemeTextHueEnabled = name === 'dark';
-      getThemePowerGroup().setAttribute('data-show', isThemePowerEnabled);
-      getThemeTextHueGroup().setAttribute('data-show', isThemeTextHueEnabled);
-    });
+    getThemePowerGroup().setAttribute('data-show', isThemePowerEnabled);
+    getThemeTextHueGroup().setAttribute('data-show', isThemeTextHueEnabled);
+  }
+
+  function themeSlidersInit() {
+    pref.bindListener('themeName', themeNameListener);
   }
 
   function mouseSlidersInit() {
     var size = cursor.getSize(),
       MIN_BP_CURSOR_SIZE = 1.9;
 
-    if (!conf.get('mouseSize')) {
+    if (!pref.get('mouseSize')) {
       // No setting, so start from current cursor size means using the BP cursor size as a minimum
       size = Math.max(size, MIN_BP_CURSOR_SIZE);
     }
@@ -184,7 +188,7 @@ define(
     if (target && !isNativeInput(target)) {
       settingName = target.getAttribute('data-setting-name');
       if (settingName) {
-        conf.set(settingName, target.getAttribute('data-setting-value'));
+        pref.set(settingName, target.getAttribute('data-setting-value'));
       }
     }
   }
@@ -194,7 +198,7 @@ define(
       id = target.id,
       settingName = target.getAttribute('data-setting-name'),
       oldValue = rangeValueMap[settingName],
-      newValue = conf.get(settingName);
+      newValue = pref.get(settingName);
 
     if (oldValue !== newValue) { // Only fire on change
       rangeValueMap[settingName] = newValue;
@@ -215,7 +219,7 @@ define(
       var settingName = target.getAttribute('data-setting-name'),
         newValue = + target.value;
       if (settingName) {
-        conf.set(settingName, newValue);
+        pref.set(settingName, newValue);
       }
     }
   }

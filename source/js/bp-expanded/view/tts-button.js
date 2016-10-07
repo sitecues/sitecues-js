@@ -4,7 +4,7 @@ define(
     'core/bp/helper',
     'core/bp/model/state',
     'core/locale',
-    'core/conf/user/manager',
+    'core/conf/preferences',
     'core/events',
     'core/platform',
     'mini-core/native-global',
@@ -15,7 +15,7 @@ define(
     helper,
     state,
     locale,
-    conf,
+    pref,
     events,
     platform,
     nativeGlobal,
@@ -28,7 +28,7 @@ define(
     waveAnimationStepNum,
     localizedSpeechString,
     isInitialized,
-    isSpeechEnabled = conf.get('ttsOn'),
+    isSpeechEnabled = pref.get('ttsOn'),
     isListeningToEvents;
 
   function toggleSpeech() {

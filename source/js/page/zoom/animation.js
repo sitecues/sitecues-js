@@ -2,7 +2,7 @@
 define(
   [
     '$',
-    'core/conf/user/manager',
+    'core/conf/preferences',
     'core/platform',
     'core/events',
     'core/metric/metric',
@@ -21,7 +21,7 @@ define(
   ],
   function (
     $,
-    conf,
+    pref,
     platform,
     events,
     metric,
@@ -433,7 +433,7 @@ define(
     events.emit('zoom', state.completedZoom);
 
     if (!state.isInitialLoadZoom) {
-      conf.set('zoom', state.completedZoom);
+      pref.set('zoom', state.completedZoom);
       if (!didUnzoom) {
         require(['audio-cues/audio-cues'], function (audioCues) {
           audioCues.playZoomCue(state.completedZoom);

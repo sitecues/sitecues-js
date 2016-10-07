@@ -3,7 +3,7 @@
  */
 define(
   [
-    'core/conf/user/manager',
+    'core/conf/preferences',
     'core/util/ids',
     'core/conf/site',
     'core/locale',
@@ -17,7 +17,7 @@ define(
     'mini-core/native-global'
   ],
   function (
-    conf,
+    pref,
     ids,
     site,
     locale,
@@ -59,8 +59,8 @@ define(
       // Common fields
       data.name = name;
       data.clientTimeMs = Number(new Date()); // Epoch time in milliseconds  when the event occurred
-      data.zoomLevel = conf.get('zoom') || 1;
-      data.ttsState = conf.get('ttsOn') || false;
+      data.zoomLevel = pref.get('zoom') || 1;
+      data.ttsState = pref.get('ttsOn') || false;
 
       // Platform data -- goes into details field for historical reason
       details = details || {};
@@ -160,13 +160,13 @@ define(
     }
 
     function isTester() {
-      if (conf.get('isTester')) {
+      if (pref.get('isTester')) {
         // Once a tester, always a tester
         return true;
       }
 
       if (site.get('isTester') || !urls.isProduction()) {
-        conf.set('isTester', true);  // Remember this tester
+        pref.set('isTester', true);  // Remember this tester
         return true;
       }
 
@@ -180,7 +180,7 @@ define(
 
     // Return settings we care about
     function getSettings() {
-      var settings = conf.get(),
+      var settings = pref.get(),
         BLACKLIST = {
           'firstHighZoom': 1, // Not interesting
           'firstSpeechOn': 1, // Not interesting

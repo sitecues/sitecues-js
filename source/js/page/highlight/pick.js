@@ -29,7 +29,7 @@ define(
   [
     '$',
     'page/util/common',
-    'core/conf/user/manager',
+    'core/conf/preferences',
     'core/conf/site',
     'page/highlight/traitcache',
     'page/highlight/traits',
@@ -41,7 +41,7 @@ define(
   function (
     $,
     common,
-    conf,
+    pref,
     site,
     traitcache,
     traits,
@@ -769,7 +769,7 @@ define(
       candidate,
       rect,
       style,
-      zoom = conf.get('zoom') || 1;
+      zoom = pref.get('zoom') || 1;
     for (; index < candidates.length; index ++) {
       candidate = candidates[index];
       if (lastPicked && $.contains(candidate, lastPicked)) {

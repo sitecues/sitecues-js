@@ -6,23 +6,32 @@
  * NOTE: currently we are not using/building this
  */
 
-define(['core/conf/user/manager', '$', 'core/events'], function(conf, $, events) {
+define(
+  [
+    'core/conf/preferences',
+    '$',
+    'core/events'
+  ],
+  function (
+    pref,
+    $,
+    events
+  ) {
+  'use strict';
 
-
-
-  var labSettings = $.extend({}, conf.get('labs'));
+  var labSettings = $.extend({}, pref.get('labs'));
 
   function isEnabled(labName) {
     return labSettings[labName];
   }
 
-  events.on('labs/get', function(labInfo) {
+  events.on('labs/get', function (labInfo) {
     $.extend(labInfo, labSettings);
   });
 
-  events.on('labs/set', function(labInfo) {
+  events.on('labs/set', function (labInfo) {
     labSettings = $.extend({}, labInfo);
-    conf.set('labs', labSettings);
+    pref.set('labs', labSettings);
   });
 
   return {

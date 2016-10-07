@@ -7,8 +7,8 @@
  */
 define(
   [
-    'core/conf/user/manager',
-    'core/util/ids',
+    'core/conf/preferences',
+    'core/conf/id',
     'core/locale',
     'core/metric',
     'core/platform',
@@ -24,8 +24,8 @@ define(
   ],
   /*jshint -W072 */ //Currently there are too many dependencies, so we need to tell JSHint to ignore it for now
   function (
-    conf,
-    ids,
+    pref,
+    id,
     locale,
     metric,
     platform,
@@ -175,7 +175,7 @@ function createPageCssHook() {
   function initPageFeatureListeners() {
     // -- Zoom --
     // Previously saved values
-    var initialZoom = conf.get('zoom');
+    var initialZoom = pref.get('zoom');
     if (initialZoom > 1) {
       performInitialLoadZoom(initialZoom);
     }
@@ -183,7 +183,7 @@ function createPageCssHook() {
     events.on('zoom', onZoomChange);
 
     // -- Speech --
-    conf.get('ttsOn', function(isOn) {
+    pref.bindListener('ttsOn', function (isOn) {
       isSpeechOn = isOn;
       onFeatureSettingChange();
       if (isOn && !isSpeechInitialized) {
@@ -194,7 +194,7 @@ function createPageCssHook() {
 
     // -- Themes --
     if (platform.featureSupport.themes) {
-      conf.get('themeName', function (themeName) {
+      pref.bindListener('themeName', function (themeName) {
         if (themeName) {
           initThemes();
         }
@@ -202,12 +202,13 @@ function createPageCssHook() {
     }
 
     // -- Mouse --
-    conf.get('mouseSize', function(mouseSize) {
+    pref.bindListener('mouseSize', function (mouseSize) {
       if (mouseSize) {   // If undefined we use the default as set by the zoom module
         initMouse();
       }
     });
-    conf.get('mouseHue', function(mouseHue) {
+
+    pref.bindListener('mouseHue', function (mouseHue) {
       if (mouseHue <= 1) {  // if undefined || > 1, mouse hue is ignored, and we keep the default mouse hue
         initMouse();
       }
@@ -299,7 +300,6 @@ function createPageCssHook() {
     ids.init();
     inlineStyle.init();
     platform.init();
-    nativeGlobal.init();
     domEvents.init();
     abTest.init();
     metric.init();

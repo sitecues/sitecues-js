@@ -8,7 +8,7 @@ define(
     'core/bp/view/svg',
     'core/bp/view/badge/placement',
     'core/bp/model/state',
-    'core/conf/user/manager',
+    'core/conf/preferences',
     'core/bp/view/size-animation',
     'core/locale',
     'core/conf/site',
@@ -25,7 +25,7 @@ define(
     bpSVG,
     placement,
     state,
-    conf,
+    pref,
     sizeAnimation,
     locale,
     site,
@@ -81,7 +81,7 @@ define(
 
   // If the settings are not undefined it means sitecues has been turned on before
   function hasSitecuesEverBeenOn() {
-    return conf.has('zoom') || conf.has('ttsOn');
+    return pref.has('zoom') || pref.has('ttsOn');
   }
 
   // Insert badge label into an element (using aria-label didn't work as NVDA cut off the label text at 100 characters)

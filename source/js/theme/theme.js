@@ -6,7 +6,7 @@ define(
   [
     '$',
     'Promise',
-    'core/conf/user/manager',
+    'core/conf/preferences',
     'page/style-service/style-service',
     'core/platform',
     'theme/color-choices',
@@ -19,7 +19,7 @@ define(
   function(
     $,
     Promise,
-    conf,
+    pref,
     styleService,
     platform,
     colorChoices,
@@ -89,9 +89,9 @@ define(
   function onThemeChange() {
 
     // Requested theme name
-    requestedThemeName = conf.get('themeName');
-    requestedThemePower = conf.get('themePower') || DEFAULT_INTENSITY;
-    requestedThemeTextHue = conf.get('themeTextHue');
+    requestedThemeName = pref.get('themeName');
+    requestedThemePower = pref.get('themePower') || DEFAULT_INTENSITY;
+    requestedThemeTextHue = pref.get('themeTextHue');
 
     if (!requestedThemeName && !currentThemeName) {
       return; // Still no theme -- power and hue changes do not matter
@@ -562,17 +562,17 @@ define(
     // TODO remove when no longer necessary
     shouldRepaintToEnsureFullCoverage = platform.browser.isChrome && platform.browser.version < 48;
 
-    conf.def('themeName', getSanitizedThemeName);
-    conf.def('themePower', getSanitizedThemePower);
-    conf.def('themeTextHue', getSanitizedHue);
-    conf.get('themeName', onThemeChange);
-    conf.get('themePower', onThemeChange);
-    conf.get('themeTextHue', onThemeChange);
-    if (typeof conf.get('themePower') === 'undefined') {
-      conf.set('themePower', DEFAULT_INTENSITY);
+    pref.defineHandler('themeName', getSanitizedThemeName);
+    pref.defineHandler('themePower', getSanitizedThemePower);
+    pref.defineHandler('themeTextHue', getSanitizedHue);
+    pref.bindListener('themeName', onThemeChange);
+    pref.bindListener('themePower', onThemeChange);
+    pref.bindListener('themeTextHue', onThemeChange);
+    if (typeof pref.get('themePower') === 'undefined') {
+      pref.set('themePower', DEFAULT_INTENSITY);
     }
-    if (typeof conf.get('themeTextHue') === 'undefined') {
-      conf.set('themeTextHue', MAX_USER_SPECIFIED_HUE); // Use white text by default
+    if (typeof pref.get('themeTextHue') === 'undefined') {
+      pref.set('themeTextHue', MAX_USER_SPECIFIED_HUE); // Use white text by default
     }
 
     customTheme.init();

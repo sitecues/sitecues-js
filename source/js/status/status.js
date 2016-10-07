@@ -2,14 +2,14 @@ define(
   [
     'core/conf/urls',
     'core/util/xhr',
-    'core/conf/user/manager',
+    'core/conf/preferences',
     'core/conf/site',
     'mini-core/native-global'
   ],
   function (
     urls,
     xhr,
-    conf,
+    pref,
     site,
     nativeGlobal
   ) {
@@ -50,7 +50,7 @@ define(
     function status(callback) {
 
       var html = document.documentElement,
-          prefData = conf.get(),
+          prefData = pref.get(),
           coordinates,
           ajaxUrls = {  // Set the server URLs for retrieving the status of our services (version info, etc.)
             ws : urls.getApiUrl('util/status')

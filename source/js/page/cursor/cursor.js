@@ -10,7 +10,7 @@ define(
   [
     '$',
     'page/style-service/style-service',
-    'core/conf/user/manager',
+    'core/conf/preferences',
     'page/cursor/cursor-css',
     'core/platform',
     'core/events',
@@ -19,7 +19,7 @@ define(
   function (
     $,
     styleService,
-    conf,
+    pref,
     cursorCss,
     platform,
     events,
@@ -338,7 +338,7 @@ define(
 
   // Get the auto size for the cursor at the supplied page zoom level, or at the current page zoom if none supplied
   function getSize(pageZoom) {
-    return userSpecifiedSize || cursorCss.getCursorZoom(pageZoom || conf.get('zoom') || 1);
+    return userSpecifiedSize || cursorCss.getCursorZoom(pageZoom || pref.get('zoom') || 1);
   }
 
   function onPageZoom(pageZoom) {
@@ -361,10 +361,10 @@ define(
     }
     isInitialized = true;
 
-    conf.def('mouseSize', sanitizeMouseSize);
-    conf.def('mouseHue', sanitizeMouseHue);
-    conf.get('mouseSize', onMouseSizeSetting);
-    conf.get('mouseHue', onMouseHueSetting);
+    pref.defineHandler('mouseSize', sanitizeMouseSize);
+    pref.defineHandler('mouseHue', sanitizeMouseHue);
+    pref.bindListener('mouseSize', onMouseSizeSetting);
+    pref.bindListener('mouseHue', onMouseHueSetting);
 
     events.on('zoom', onPageZoom);
 
