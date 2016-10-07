@@ -5,16 +5,16 @@
 
 define(
   [
+    'core/util/object-utility',
     'core/inline-style/inline-style',
     'bp-expanded/view/transform-util',
-    'core/platform',
-    'mini-core/native-global'
+    'core/platform'
   ],
   function (
+    objectUtil,
     inlineStyle,
     transformUtil,
-    platform,
-    nativeGlobal
+    platform
   ) {
   'use strict';
 
@@ -154,7 +154,7 @@ define(
         if (elements[index]) {
           toTransform = toTransforms[index];
           if (doTweak) {
-            toTransform = nativeGlobal.JSON.parse(nativeGlobal.JSON.stringify(toTransform));
+            toTransform = objectUtil.assign({}, toTransform);
             toTransform.translateY = (toTransform.translateY || 0) + 0.001;
           }
           transformUtil.setElemTransform(elements[index], toTransform);

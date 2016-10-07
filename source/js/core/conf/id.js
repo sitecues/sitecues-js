@@ -1,31 +1,28 @@
 define(
   [
-    'core/conf/manager'
+    'mini-core/user',
+    'mini-core/session',
+    'mini-core/page-view',
+    'mini-core/site'
   ],
   function(
-    conf
+    user,
+    session,
+    pageView,
+    site
   ) {
   'use strict';
 
-  var
-    exports = {
-      init: init
-    };
-
-  function getPageViewId() {
-    return sitecues.pageView.id;
-  }
-
-  function getSessionId() {
-    return sitecues.session.id;
-  }
+  var exports = { init: init };
 
   function init() {
-    // Use session id and page view id from parent page if available
-    exports.session  = getSessionId();
-    exports.pageView = getPageViewId();
-    exports.user     = conf.getUserId();
-    exports.site     = null;
+    return user.getId().then(function (userId) {
+      // Only the user id needs to be fetch asynchronously (it is retrieved from global storage)
+      exports.session  = session.getId();
+      exports.pageView = pageView.getId();
+      exports.user     = userId;
+      exports.site     = site.getId();
+    });
   }
 
   return exports;

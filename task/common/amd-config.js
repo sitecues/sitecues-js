@@ -3,7 +3,6 @@
 'use strict';
 
 var config = require('../build-config'),
-  amdclean = require('amdclean'),
   sourceConfig = require('../source-folders.json'),
   bundleFolders = sourceConfig.bundleFolders,
   dataFolders = sourceConfig.dataFolders,
@@ -12,12 +11,13 @@ var config = require('../build-config'),
   fs = require('fs'),
   JS_SOURCE_DIR = config.librarySourceDir + '/js',
   PATHS = {
-    'nativeFn' : 'empty:',
-    'iframeFactory': 'empty:',
+    'mini-core/native-global' : 'empty:',
+    'mini-core/user' : 'empty:',
+    'mini-core/page-view' : 'empty:',
+    'mini-core/session' : 'empty:',
+    'mini-core/site' : 'empty:',
     '$': 'empty:',
-    'Promise': 'empty:',   // In runtime config, via definePrim : 'Promise' to allow use of alameda's built-in Prim library
-    'core/conf/user/storage': 'empty:',  // Defined by minicore shared code
-    'core/conf/user/storage-backup': 'empty:'  // Defined by minicore shared code
+    'Promise': 'empty:'   // In runtime config, via definePrim : 'Promise' to allow use of alameda's built-in Prim library
   },
   AMD_BASE_CONFIG = {
     wrap: {
@@ -42,10 +42,8 @@ var config = require('../build-config'),
       },
       // Include alameda in core
       include: [
-        'core/alameda-custom',
-        'core/errors',
-        'core/prereq/iframe-factory',
-        'core/prereq/native-functions'
+        'core/prereq/alameda-custom',
+        'core/errors'
       ],
       // Make sure core initializes itself
       insertRequire: [ 'core/errors', 'core/core' ]
@@ -68,23 +66,10 @@ function buildCorePreamble() {
     return fs.readFileSync(getPrereqPath(fileName));
   }
 
-  function getUnwrappedPrereq(fileName) {
-    return amdclean.clean({
-      filePath : getPrereqPath(fileName),
-      wrap : {
-        start : '',
-        end : ''
-      }
-    });
-  }
-
   return [
     prefix,
     getPrereqContent('shared-modules.js'),
     getPrereqContent('custom-event-polyfill.js'),
-    getUnwrappedPrereq('iframe-factory.js'),
-    getUnwrappedPrereq('native-functions.js'),
-    getPrereqContent('global-assignments.js'),
     getPrereqContent('alameda-config.js')
   ].join('\n');
 }

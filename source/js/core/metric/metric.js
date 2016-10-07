@@ -4,7 +4,7 @@
 define(
   [
     'core/conf/preferences',
-    'core/util/ids',
+    'core/conf/id',
     'core/conf/site',
     'core/locale',
     'core/util/xhr',
@@ -18,7 +18,7 @@ define(
   ],
   function (
     pref,
-    ids,
+    id,
     site,
     locale,
     xhr,
@@ -243,10 +243,10 @@ define(
       sessionData = {
         scVersion: sitecues.getVersion(),
         metricVersion: METRICS_VERSION,
-        sessionId: ids.sessionId,
-        pageViewId: ids.pageViewId,
-        siteId: site.getSiteId(),
-        userId: ids.userId,
+        sessionId: id.session,
+        pageViewId: id.pageView,
+        siteId: id.site,
+        userId: id.user,
         abTest: abTest.get(),
         pageUrl: getPageUrl(source),
         browserUserAgent: navigator.userAgent,

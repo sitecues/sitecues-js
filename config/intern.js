@@ -47,8 +47,8 @@ define(
                 ],
                 map : {
                     '*' : {
-                        './native-functions' : 'mini-core/native-functions',
-                        './iframe-factory'   : 'mini-core/iframe-factory'
+                        './native-globals' : 'mini-core/native-globals',
+                        './hidden-iframe'  : 'mini-core/hidden-iframe'
                     }
                 }
             },

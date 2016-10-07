@@ -7,23 +7,24 @@
  */
 define(
   [
+    'Promise',
     'core/conf/preferences',
     'core/conf/id',
     'core/locale',
-    'core/metric',
+    'core/metric/metric',
     'core/platform',
     'core/bp/bp',
     'core/constants',
     'core/events',
     'core/dom-events',
     'core/modifier-key-state',
-    'mini-core/native-global',
     'core/ab-test/ab-test',
     'core/shake/shake',
     'core/inline-style/inline-style'
   ],
   /*jshint -W072 */ //Currently there are too many dependencies, so we need to tell JSHint to ignore it for now
   function (
+    Promise,
     pref,
     id,
     locale,
@@ -34,7 +35,6 @@ define(
     events,
     domEvents,
     modifierKeyState,
-    nativeGlobal,
     abTest,
     shake,
     inlineStyle
@@ -296,19 +296,22 @@ function createPageCssHook() {
     events.on('keys/did-init', onKeyHandlingInitialized);
     events.on('zoom/ready', onZoomInitialized);
 
-    // Synchronous initialization
-    ids.init();
-    inlineStyle.init();
-    platform.init();
-    domEvents.init();
-    abTest.init();
-    metric.init();
-
-    // Async initialization
-    locale.init()
-      .then(bp.init)
-      .then(metric.initViewInfo)
-      .then(initPageFeatureListeners);
+    Promise.all([
+      pref.init(),
+      id.init()
+    ]).then(function () {
+      // Synchronous initialization
+      inlineStyle.init();
+      platform.init();
+      domEvents.init();
+      abTest.init();
+      metric.init();
+    }).then(function () {
+      return locale.init()
+        .then(bp.init)
+        .then(metric.initViewInfo)
+        .then(initPageFeatureListeners);
+    });
   }
 
   return {
