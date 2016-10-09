@@ -38,6 +38,11 @@ define(
     return getApiUrl(proxyApi + '/?url=' + encodeURIComponent(absoluteUrl)); // If testing with production: .replace('//ws.dev', '//ws');
   }
 
+  function getCssProxyUrl(targetUrl) {
+    //return 'http://proxy.dev.sitecues.com:7000/page/' + targetUrl;
+    return 'http://localhost:9999/page/' + targetUrl;
+  }
+
   // URL string for sitecues.js
   // Enforces https so that all the resources we fetch and origin checking also uses https
   function getRawScriptUrl() {
@@ -210,6 +215,7 @@ define(
     init: init,
     getApiUrl: getApiUrl,
     getProxyApiUrl: getProxyApiUrl,
+    getCssProxyUrl: getCssProxyUrl,
     getScriptOrigin: getScriptOrigin,
     isValidLibraryUrl: isValidLibraryUrl,
     getRawScriptUrl: getRawScriptUrl,

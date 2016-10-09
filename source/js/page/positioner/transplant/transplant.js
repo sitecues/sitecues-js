@@ -26,7 +26,11 @@ define(
 
   'use strict';
 
-  var originalBody, elementQuerySelectorAll, documentQuerySelectorAll, getElementsByClassName,
+  var originalBody,
+    elementQuerySelectorAll,
+    documentQuerySelectorAll,
+    getElementsByClassName,
+    didInterceptDOMQueries,
     TRANSPLANT_STATE       = constants.TRANSPLANT_STATE,
     ORIGINAL_STYLESHEET_ID = 'sitecues-js-originals',
     ROOT_ATTR              = constants.ROOT_ATTR,
@@ -35,7 +39,12 @@ define(
   // When we transplant elements into the auxiliary body, we need to re-direct queries in the original body to include
   // the original element's new position in the DOM tree, and to exclude clone elements in the heredity tree
   // TODO: If we ever drop IE11, use a Proxy intercept to accomplish this
-  function rerouteDOMQueries() {
+  function interceptDOMQueries() {
+    if (didInterceptDOMQueries) {
+      return;
+    }
+    didInterceptDOMQueries = true;
+
     getElementsByClassName   = Document.prototype.getElementsByClassName;
     elementQuerySelectorAll  = Element.prototype.querySelectorAll;
     documentQuerySelectorAll = Document.prototype.querySelectorAll;
@@ -414,9 +423,7 @@ define(
     var flags = args.flags;
 
     if (flags.isTransplantAnchor) {
-      if (!elementQuerySelectorAll) {
-        rerouteDOMQueries();
-      }
+      interceptDOMQueries();
       anchors.add(element);
     }
     else if (flags.wasTransplantAnchor) {

@@ -19,7 +19,8 @@ define(
     'page/positioner/constants',
     'core/constants',
     'nativeFn',
-    'core/inline-style/inline-style'
+    'core/inline-style/inline-style',
+    'core/util/object-utility'
   ],
   function (
     queryManager,
@@ -32,7 +33,8 @@ define(
     constants,
     coreConstants,
     nativeFn,
-    inlineStyle
+    inlineStyle,
+    objectUtil
   ) {
   'use strict';
 
@@ -85,8 +87,6 @@ define(
       subtree           : true,
       attributeFilter   : observedAttributes
     };
-
-
 
     // This handler is run on mutated elements /intended/ to be in the original body, which is to say elements currently nested in the
     // original body and original elements currently nested in the clone body
@@ -265,6 +265,12 @@ define(
     });
 
     domObserver.observe(originalBody, observerOptions);
+
+    var docObserverOpts = objectUtil.assign({}, observerOptions);
+    delete docObserverOpts.subtree;
+    // We want to observe the document element because fixed selectors may rely on classes attached directly
+    // to the document element
+    domObserver.observe(docElem, docObserverOpts);
   }
 
   function listenForDynamicStyling(property) {
