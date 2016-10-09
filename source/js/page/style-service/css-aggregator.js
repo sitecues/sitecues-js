@@ -47,12 +47,14 @@ define(
     var currentSheet = this;
 
     if (url) {
+      console.log('request stylesheet', url);
       // We will need to retrieve this stylesheet over the network
       var request = createGetRequest(url);
       request.url = url;
 
       // Only apply the request if the response status < 400 (>=400 means error but onerror not called!)
       request.onload = function(evt) {
+        console.log('sheet loaded', url);
         var request = evt.target || this;
         if (request.status < 400) {
           currentSheet.text = request.responseText;

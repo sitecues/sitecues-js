@@ -140,13 +140,13 @@ define(
 
   // This is called() when all the CSS text of the document is available for processing
   function retrievalComplete(allCss) {
-    if (SC_DEV) {
-      debugTime.retrievalComplete = performance.now();
-    }
-
     createCombinedStylesheets(allCss, function(styleElems) {
       nativeFn.setTimeout(function () {
         getDOMStyleSheetObjects(styleElems, function() {
+          if (SC_DEV) {
+            debugTime.retrievalComplete = performance.now();
+            console.log('retrievalTime:', debugTime.retrievalComplete - debugTime.begin);
+          }
           isCssComplete = true;
           clearCallbacks();
 
