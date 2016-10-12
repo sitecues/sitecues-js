@@ -25,10 +25,10 @@ define([], function() {
     // - Main
     pre_zoom: 'Zoom ',
     post_zoom: 'x',
-    zoom_off: 'Zooma Av',
+    zoom_off: 'Zooma av',
     speech: 'Tal',
-    on: 'På',
-    off: 'Av',
+    on: 'på',
+    off: 'av',
     // - Secondary
     tips: 'Tips',                     
     settings: 'Inställningar',
