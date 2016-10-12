@@ -80,5 +80,4 @@ define(
     queue: queue,
     init: init
   };
-
 });

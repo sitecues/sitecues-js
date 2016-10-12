@@ -9,6 +9,8 @@
 * */
 define(
   [
+    'exports',
+    'Promise',
     'page/positioner/style-lock/style-listener/query-manager',
     'page/positioner/style-lock/style-listener/selector-map',
     'page/positioner/style-lock/style-listener/selectors',
@@ -19,9 +21,13 @@ define(
     'page/positioner/constants',
     'core/constants',
     'nativeFn',
-    'core/inline-style/inline-style'
+    'core/inline-style/inline-style',
+    'page/util/transition-util'
   ],
+  /*jshint -W072 */ //Currently there are too many dependencies, so we need to tell JSHint to ignore it for now
   function (
+    exports,
+    Promise,
     queryManager,
     selectorMap,
     selectors,
@@ -32,8 +38,10 @@ define(
     constants,
     coreConstants,
     nativeFn,
-    inlineStyle
+    inlineStyle,
+    transitionUtil
   ) {
+  /*jshint +W072 */
   'use strict';
 
   var domObserver, docElem,
@@ -87,7 +95,6 @@ define(
     };
 
 
-
     // This handler is run on mutated elements /intended/ to be in the original body, which is to say elements currently nested in the
     // original body and original elements currently nested in the clone body
     function onOriginalElementMutations(mutations) {
@@ -96,7 +103,7 @@ define(
         selectorsToRefresh = [];
 
       function evaluateProperty(target, property) {
-        evaluateResolvedValue(target, {
+        evaluateResolvedValues(target, {
           property: property
         });
       }
@@ -135,7 +142,7 @@ define(
             for (var j = 0, propertyCount = observedProperties.length; j < propertyCount; j++) {
               var
                 property       = observedProperties[j],
-                inlineKey      = property + '_inline_value',
+                inlineKey      = getInlineKey(property),
                 inlineValue    = inlineStyle(target)[property],
                 oldInlineValue = elementMap.getField(target, inlineKey),
                 didChange      = oldInlineValue !== inlineValue;
@@ -157,7 +164,11 @@ define(
       }
     }
 
-  function evaluateResolvedValue(element, opts) {
+  function getInlineKey(property) {
+    return property + '_inline_value';
+  }
+
+  function evaluateResolvedValues(element, opts) {
     var properties,
       fromHandlers = new nativeFn.Map(),
       toHandlers   = new nativeFn.Map(),
@@ -179,18 +190,35 @@ define(
       properties = [ opts.property ];
     }
 
+    if (!opts.ignoreTransitions) {
+      Promise.all(properties.map(function (property) {
+        var lockAttribute = LOCK_ATTR + property,
+            lockValue     = element.getAttribute(lockAttribute);
+
+        if (lockValue) {
+          // This attribute 'reinforces' the value this element previously resolved to by applying it with importance
+          // We need to remove it in order to compute the intended resolved value
+          element.setAttribute(lockAttribute, '');
+        }
+
+        return transitionUtil.getFinalStyleValue(element, property).then(function (value) {
+          // Evaluate if we should call style-listeners handlers when / if the property finishes transitioning
+          console.log('evaluatedResolvedValue:', element);
+          console.log('property:', property);
+          console.log('value:', value);
+          console.log('\n');
+          evaluateResolvedValues(element, {
+            property : property,
+            ignoreTransitions: true
+          });
+        });
+      }));
+    }
+
     properties.forEach(function (property) {
       var handlerKey,
         observedValues = observedPropertyToValues[property] || [],
-        lockAttribute  = LOCK_ATTR + property,
-        lockValue      = element.getAttribute(lockAttribute),
         cachedValue    = elementInfo.getCacheValue(element, property);
-
-      if (lockValue) {
-        // This attribute 'reinforces' the value this element previously resolved to by applying it with importance
-        // We need to remove it in order to compute the intended resolved value
-        element.setAttribute(lockAttribute, '');
-      }
 
       var
         resolvedValue    = style[property],
@@ -201,10 +229,6 @@ define(
           toValue   : resolvedValue,
           fromValue : cachedValue
         };
-
-      if (lockValue) {
-        element.setAttribute(lockAttribute, lockValue);
-      }
 
       if (propertyHandlers && cachedValue !== resolvedValue) {
         // These element handlers run when the element's resolved value for a given style property has mutated from its cached value
@@ -324,13 +348,18 @@ define(
   }
 
   // Runs the passed handler when @element's resolved style @property value has changed
-  function registerPropertyMutationHandler(element, declarationOrProperty, handler) {
+  function bindPropertyListener(element, declarationOrProperty, handler) {
     var
       declaration        = typeof declarationOrProperty === 'object' ? declarationOrProperty : { property: declarationOrProperty },
       property           = declaration.property,
       value              = declaration.value,
       isPropertyObserved = observedProperties.indexOf(property) !== -1,
-      handlers           = elementPropertyHandlerMap.get(element) || {};
+      handlers           = elementPropertyHandlerMap.get(element) || {},
+      inlineValue        = inlineStyle(element)[property];
+
+    // Cache the current inline value so that we can tell if it changes
+    elementMap.setField(element, getInlineKey(property), inlineValue);
+    addToResolvedElementsMap(element, property, value);
 
     // If we've already attached handlers to run when this element's resolved property value mutates,
     // we know that we're already listening for relevant document mutations
@@ -344,8 +373,17 @@ define(
         observedProperties.push(property);
       }
     }
-    addToResolvedElementsMap(element, property, value);
     elementPropertyHandlerMap.set(element, handlers);
+  }
+
+  function unbindPropertyListener(element, property, handler) {
+    var elementHandlers  = elementPropertyHandlerMap.get(element) || {},
+        propertyHandlers = elementHandlers[property] || [],
+        index            = propertyHandlers.indexOf(handler);
+    if (index >= 0) {
+      propertyHandlers.splice(index, 1);
+    }
+    elementPropertyHandlerMap.set(element, elementHandlers);
   }
 
   // This map caches elements we know have a given resolved value
@@ -440,7 +478,7 @@ define(
 
         selectors.init(function () {
           readyState = READY_STATE.COMPLETE;
-          queryManager.init(evaluateResolvedValue);
+          queryManager.init(evaluateResolvedValues);
           executeCallbacks();
         });
         anchors.registerNewAnchorHandler(onNewTransplantAnchor);
@@ -457,11 +495,10 @@ define(
     }
   }
 
-  return {
-    registerPropertyMutationHandler: registerPropertyMutationHandler,
-    registerToResolvedValueHandler: registerToResolvedValueHandler,
-    registerFromResolvedValueHandler: registerFromResolvedValueHandler,
-    getElementsWithResolvedValue: getElementsWithResolvedValue,
-    init: init
-  };
+  exports.bindPropertyListener = bindPropertyListener;
+  exports.unbindPropertyListener = unbindPropertyListener;
+  exports.registerToResolvedValueHandler = registerToResolvedValueHandler;
+  exports.registerFromResolvedValueHandler = registerFromResolvedValueHandler;
+  exports.getElementsWithResolvedValue = getElementsWithResolvedValue;
+  exports.init = init;
 });

@@ -100,7 +100,7 @@ define(
       }
       elementHandlerMap.set(element, elementHandlers);
       lockStyle(element, property, currentValue);
-      styleListener.registerPropertyMutationHandler(element, declaration, onPropertyMutation);
+      styleListener.bindPropertyListener(element, declaration, onPropertyMutation);
     });
   }
 
@@ -191,6 +191,7 @@ define(
         var elements = styleListener.getElementsWithResolvedValue(declaration);
 
         function runHandler(element) {
+          console.log('runHandler:', element);
           toHandler.call(element, { toValue: value, property: property });
         }
 

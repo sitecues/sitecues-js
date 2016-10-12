@@ -126,20 +126,20 @@ define(
     }
 
     styleLock.init(function () {
-      styleListener.registerPropertyMutationHandler(element, 'top', function () {
+      styleListener.bindPropertyListener(element, 'top', function () {
         clearCache.call(this);
         handler.call(this);
       });
 
       // We don't want to lock width or height because they are styles that a commonly animated, so a lock is impractical
-      styleListener.registerPropertyMutationHandler(element, 'width', function () {
+      styleListener.bindPropertyListener(element, 'width', function () {
         /*jshint validthis: true */
         clearCache.call(this);
         handler.call(this);
         /*jshint validthis: false */
       });
 
-      styleListener.registerPropertyMutationHandler(element, 'height', function () {
+      styleListener.bindPropertyListener(element, 'height', function () {
         /*jshint validthis: true */
         clearCache.call(this);
         handler.call(this);
@@ -154,7 +154,7 @@ define(
       // This listener is a hacky way to detect if jQuery.fadeIn / fadeOut has been called on an element
       // We need to unlock display in this case, otherwise we see a flicker when opacity is removed but before
       // the display style lock is removed. This is an issue on TICC.com
-      styleListener.registerPropertyMutationHandler(element, 'opacity', function () {
+      styleListener.bindPropertyListener(element, 'opacity', function () {
         /*jshint validthis: true */
         styleLock.unlockStyle(this, 'display');
         /*jshint validthis: false */

@@ -50,6 +50,10 @@ define(
     elementMap.setField(element, 'cache_' + property, value);
   }
 
+  function clearCacheValue(element, property) {
+    elementMap.setField(element, 'cache_' + property, undefined);
+  }
+
   function addSubroots(element, newSubroots) {
     elementMap.setField(element, 'subroots', getSubroots(element).concat(newSubroots));
   }
@@ -217,6 +221,7 @@ define(
     setScale            : setScale,
     getCacheValue       : getCacheValue,
     setCacheValue       : setCacheValue,
+    clearCacheValue     : clearCacheValue,
     getPosition         : getPosition,
     setPosition         : setPosition,
     getHostBody         : getHostBody,
