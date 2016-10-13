@@ -203,10 +203,6 @@ define(
 
         return transitionUtil.getFinalStyleValue(element, property).then(function (value) {
           // Evaluate if we should call style-listeners handlers when / if the property finishes transitioning
-          console.log('evaluatedResolvedValue:', element);
-          console.log('property:', property);
-          console.log('value:', value);
-          console.log('\n');
           evaluateResolvedValues(element, {
             property : property,
             ignoreTransitions: true

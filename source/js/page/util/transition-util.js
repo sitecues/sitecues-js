@@ -18,29 +18,33 @@ define(
   var transitionListener = new WeakMap();
 
   function disableTransformTransition(element) {
+    disableStyleTransition(element, 'transform');
+  }
+  
+  function disableStyleTransition(element, property) {
     var style  = getComputedStyle(element),
-        property = style.transitionProperty,
+        transitionProperty = style.transitionProperty,
         delay    = style.transitionDelay.split(',').some(function (dly) {
           return parseFloat(dly);
         }),
         duration;
-
+  
     if (!delay) {
       duration = style.transitionDuration.split(',').some(function (drtn) {
         return parseFloat(drtn);
       });
     }
-
+  
     if (!delay && !duration) {
       return;
     }
-
-    if (property.indexOf('all') >= 0 || property.indexOf('transform') >= 0) {
+  
+    if (transitionProperty.indexOf('all') >= 0 || transitionProperty.indexOf(property) >= 0) {
       var transitionValue = inlineStyle(element).transition;
       if (transitionValue) {
         transitionValue += ', ';
       }
-      transitionValue += 'transform 0s';
+      transitionValue += property + ' 0s';
       inlineStyle.override(element, {
         transition : transitionValue
       });
@@ -51,6 +55,17 @@ define(
     var elements = arrayUtil.wrap(elmnts);
     elements.forEach(disableTransformTransition);
     inlineStyle.override(elements, ['transform', transform]);
+    nativeFn.setTimeout(function () {
+      elements.forEach(restoreTransition);
+    }, 0);
+  }
+    
+  function applyInstantStyle(elmnts, property, value) {
+    var elements = arrayUtil.wrap(elmnts);
+    elements.forEach(function (element) {
+      disableStyleTransition(element, property);
+    });
+    inlineStyle.override(elements, [property, value]);
     nativeFn.setTimeout(function () {
       elements.forEach(restoreTransition);
     }, 0);
@@ -167,7 +182,9 @@ define(
 
   return {
     applyInstantTransform      : applyInstantTransform,
+    applyInstantStyle          : applyInstantStyle,
     disableTransformTransition : disableTransformTransition,
+    disableStyleTransition     : disableStyleTransition,
     restoreTransition          : restoreTransition,
     getFinalStyleValue         : getFinalStyleValue
   };

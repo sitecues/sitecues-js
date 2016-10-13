@@ -14,6 +14,7 @@
 /*jshint -W072 */
 define(
   [
+    'Promise',
     'page/positioner/util/element-map',
     'page/zoom/util/body-geometry',
     'page/zoom/state',
@@ -33,6 +34,7 @@ define(
     'page/util/transition-util'
   ],
   function (
+    Promise,
     elementMap,
     bodyGeo,
     state,
@@ -71,10 +73,15 @@ define(
       MARGIN_FROM_EDGE       = 15,
       isTransformingOnResize = false,
       // If we're using the toolbar, we need to transform fixed elements immediately or they may cover the toolbar / be covered
-      isTransformingOnScroll = false;
+      isTransformingOnScroll = false,
+      scalingTopMap          = new WeakMap();
 
     // This function scales and translates fixed elements as needed, e.g. if we've zoomed and the body is wider than the element
     function transformFixedElement(element, opts) {
+      if (scalingTopMap.get(element)) {
+        // This element is currently fixing its top value, we'll transform it once that has completed
+        return;
+      }
 
       function getRectLeft(left, width, scale) {
         // Since transform origin 50 0 splits the scaled width evenly between the left and right sides, we need to subtract
@@ -355,12 +362,14 @@ define(
       function onResize() {
         clearTimeout(resizeTimer);
         resizeTimer = nativeFn.setTimeout(function () {
-          targets.forEach(scaleTop);
-          transformAllTargets({
-            resetTranslation: true,
-            onResize: true
+          // This will be Promise.all and then transformAll
+          Promise.all(targets.get().map(scaleTop)).then(function () {
+            transformAllTargets({
+              resetTranslation: true,
+              onResize: true
+            });
+            refreshScrollListener();
           });
-          refreshScrollListener();
         }, 200);
       }
 
@@ -399,25 +408,28 @@ define(
 
     function scaleTop(element) {
       restoreTop(element);
-
-      // Absolute elements return the used top value if there isn't one specified. Setting the position to static ensures
-      // that only specified top values are returned with the computed style
-      // EXCEPTION: IE returns the used value for both
-      if (!platform.browser.isIE) {
-        inlineStyle.override(element, ['position', 'static', 'important']);
-      }
-
-      var
-        specifiedTop   = getComputedStyle(element).top,
-        specifiedValue = parseFloat(specifiedTop);
-
-      if (!isNaN(specifiedValue) && specifiedTop.indexOf('px') >= 0) {
-        inlineStyle.override(element, {
-          top : (specifiedValue * state.fixedZoom) + 'px'
-        });
-      }
-
-      inlineStyle.restoreLast(element, 'position');
+      scalingTopMap.set(element, true);
+  
+      return transitionUtil.getFinalStyleValue(element, 'top').then(function () {
+        // Absolute elements return the used top value if there isn't one specified. Setting the position to static ensures
+        // that only specified top values are returned with the computed style
+        // EXCEPTION: IE returns the used value for both
+        if (!platform.browser.isIE) {
+          inlineStyle.override(element, ['position', 'static', 'important']);
+        }
+  
+        var
+          specifiedTop   = getComputedStyle(element).top,
+          specifiedValue = parseFloat(specifiedTop),
+          newValue       = (specifiedValue * state.fixedZoom) + 'px';
+  
+        if (!isNaN(specifiedValue) && specifiedTop.indexOf('px') >= 0) {
+          transitionUtil.applyInstantStyle(element, 'top', newValue);
+        }
+  
+        inlineStyle.restoreLast(element, 'position');
+        scalingTopMap.set(element, undefined);
+      });
     }
 
     function restoreTop(element) {
@@ -430,9 +442,10 @@ define(
       rectCache.listenForMutatedRect(element, function () {
         /*jshint validthis: true */
         if (targets.has(this)) {
-          scaleTop(element);
-          fixZIndex(element);
-          refreshElementTransform(this);
+          scaleTop(element).then(function () {
+            fixZIndex(element);
+            refreshElementTransform(element);
+          });
         }
         /*jshint validthis: false */
       });
@@ -532,8 +545,9 @@ define(
 
     function onZoom() {
       nativeFn.setTimeout(function () {
-        targets.forEach(scaleTop);
-        refresh();
+        Promise.all(targets.get().map(scaleTop)).then(function () {
+          refresh();
+        });
       }, 0);
     }
 

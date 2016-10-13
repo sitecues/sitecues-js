@@ -126,11 +126,6 @@ define(
     }
 
     styleLock.init(function () {
-      styleListener.bindPropertyListener(element, 'top', function () {
-        clearCache.call(this);
-        handler.call(this);
-      });
-
       // We don't want to lock width or height because they are styles that a commonly animated, so a lock is impractical
       styleListener.bindPropertyListener(element, 'width', function () {
         /*jshint validthis: true */

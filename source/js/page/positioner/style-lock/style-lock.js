@@ -191,7 +191,6 @@ define(
         var elements = styleListener.getElementsWithResolvedValue(declaration);
 
         function runHandler(element) {
-          console.log('runHandler:', element);
           toHandler.call(element, { toValue: value, property: property });
         }
 
