@@ -145,9 +145,10 @@ define(
                 inlineKey      = getInlineKey(property),
                 inlineValue    = inlineStyle(target)[property],
                 oldInlineValue = elementMap.getField(target, inlineKey),
-                didChange      = oldInlineValue !== inlineValue;
+                didChange      = oldInlineValue !== inlineValue,
+                isIntended     = inlineStyle.getIntendedStyle(target, property) === inlineValue;
 
-              if (didChange) {
+              if (didChange && isIntended) {
                 elementMap.setField(target, inlineKey, inlineValue);
                 nativeFn.setTimeout(evaluateProperty, 0, target, property);
               }
@@ -201,7 +202,7 @@ define(
           element.setAttribute(lockAttribute, '');
         }
 
-        return transitionUtil.getFinalStyleValue(element, property).then(function (value) {
+        return transitionUtil.getFinalStyleValue(element, property).then(function () {
           // Evaluate if we should call style-listeners handlers when / if the property finishes transitioning
           evaluateResolvedValues(element, {
             property : property,
@@ -221,6 +222,7 @@ define(
         elementHandlers  = elementPropertyHandlerMap.get(element),
         propertyHandlers = elementHandlers && elementHandlers[property],
         opts             = {
+          element   : element,
           property  : property,
           toValue   : resolvedValue,
           fromValue : cachedValue
