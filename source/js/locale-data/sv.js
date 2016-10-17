@@ -31,8 +31,8 @@ define([], function() {
     off: 'av',
     // - Secondary
     tips: 'Tips',                     
-    settings: 'Inställningar',
-    rate_us: 'Recensera oss',
+    settings: 'Inställn',
+    rate_us: 'Tyck till',
     rate_us_prompt: 'Vi skulle bli jätteglada om du hör av dig till oss!',
     rate_us_suggest: 'Har du frågor, kommentarer eller förslag?',
     about: 'Om',
