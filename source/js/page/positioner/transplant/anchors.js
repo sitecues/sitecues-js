@@ -1,15 +1,11 @@
 define(
   [
     'exports',
-    'page/positioner/constants',
-    'page/positioner/style-lock/style-listener/style-listener',
-    'page/positioner/transplant/clone',
-    'core/inline-style/inline-style'
+    'page/positioner/constants'
   ],
   function (
     exports,
-    constants,
-    styleListener
+    constants
   ) {
   'use strict';
 
@@ -19,7 +15,6 @@ define(
     anchorElements = [],
     ANCHOR_STYLESHEET_ID = 'sitecues-js-anchors',
     ANCHOR_ATTR = constants.ANCHOR_ATTR,
-    HIDDEN  = constants.HIDDEN,
     VISIBLE = constants.VISIBLE,
     HIDDEN_ANCHOR_SELECTOR  = constants.HIDDEN_ANCHOR_SELECTOR,
     VISIBLE_ANCHOR_SELECTOR = constants.VISIBLE_ANCHOR_SELECTOR;
@@ -74,43 +69,19 @@ define(
     document.head.insertBefore(sheet, document.head.firstChild);
   }
 
-  function onOpacityChange(opts) {
-    /*jshint validthis: true */
-    applyAnchorAttribute(this, opts);
-    /*jshint validthis: false */
-  }
-
   // The anchor attribute is responsible for making it and its subtree visible, if its intended styling makes it visible
   function applyAnchorAttribute(element) {
-    var isVisible;
-
-    // If an anchor attribute is defined, this element is inheriting styles that will override
-    // its intended visibility. For now we will remove it
-    element.removeAttribute(ANCHOR_ATTR);
-
-    var computedStyle = getComputedStyle(element);
-    // We don't care if the element is display: none. The main reason that we need to apply visibility: hidden
-    // anchors is to prevent it from intercepting click events
-    isVisible = computedStyle.opacity !== '0';
-
-    if (isVisible) {
-      element.setAttribute(ANCHOR_ATTR, VISIBLE);
-    }
-    else {
-      element.setAttribute(ANCHOR_ATTR, HIDDEN);
-    }
+    element.setAttribute(ANCHOR_ATTR, VISIBLE);
   }
 
   function onAddedAnchor() {
     /*jshint validthis: true */
-    styleListener.bindPropertyListener(this, 'opacity', onOpacityChange);
     applyAnchorAttribute(this);
     /*jshint validthis: false */
   }
 
   function onRemovedAnchor() {
     /*jshint validthis: true */
-    styleListener.unbindPropertyListener(this, 'opacity', onOpacityChange);
     this.removeAttribute(ANCHOR_ATTR);
     /*jshint validthis: false */
   }

@@ -20,7 +20,6 @@ define([], function () {
           return value;
         }
       }
-      return undefined;
     };
 
   var findIndexPolyfill = Array.prototype.findIndex || function (predicate) {

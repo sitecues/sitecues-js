@@ -293,9 +293,6 @@ define(
 
           newYTranslation = correctedYTranslation;
         }
-        else if (topOutOfView) {
-          newYTranslation += toolbarHeight - top;
-        }
         else if (bottomOutOfView) {
           newYTranslation += viewportHeight - bottom;
         }

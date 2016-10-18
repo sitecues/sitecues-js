@@ -172,7 +172,16 @@ define(
   }
 
   function isSitecuesElement(element) {
-    return isBPElement(element) || isHLBElement(element);
+    return element.localName === 'sc' ||
+      hasSitecuesClass(element) ||
+      isBPElement(element) ||
+      isHLBElement(element);
+  }
+
+  function hasSitecuesClass(element) {
+    return arrayUtil.from(element.classList).some(function (className) {
+      return className.indexOf('sc-') === 0;
+    });
   }
 
   function isTransplantRoot(element, value) {

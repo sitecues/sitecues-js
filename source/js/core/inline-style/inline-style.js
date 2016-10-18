@@ -119,12 +119,19 @@ define(
   function getIntendedStyle(element, property) {
     updateIntendedStyles();
     var intendedStyle = intendedStyleMap.get(element);
-    if (property && intendedStyle) {
-      return intendedStyle[property].value;
-    }
-    else {
+
+    if (!property) {
+      // Return the cached intended styles, or undefined
       return intendedStyle;
     }
+
+    if (!intendedStyle) {
+      // If we haven't cached an inline value, return the current value
+      return getStyle(element)[property];
+    }
+
+    var propObj = intendedStyle[property];
+    return propObj ? propObj.value : '';
   }
 
   function getCurrentStyles(element) {
@@ -237,7 +244,7 @@ define(
         intendedStyle[property] = objectUtil.assign({}, declaration);
         // We don't want a reversion to the `last styles`, the inline values of an element cached before its latest override, to clobber
         // dynamic updates to its intended styles.
-        lastStyles[property]     = objectUtil.assign({}, declaration);
+        lastStyles[property]    = objectUtil.assign({}, declaration);
       });
 
       intendedStyleMap.set(element, intendedStyle);

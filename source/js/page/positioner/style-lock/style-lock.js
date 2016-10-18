@@ -12,6 +12,7 @@
 * */
 define(
   [
+    'exports',
     'page/positioner/style-lock/style-listener/style-listener',
     'page/positioner/constants',
     'core/constants',
@@ -19,6 +20,7 @@ define(
     'nativeFn'
   ],
   function (
+    exports,
     styleListener,
     constants,
     coreConstants,
@@ -44,8 +46,7 @@ define(
     var
       args = Array.prototype.slice.call(arguments, 0),
       arg1 = args[0];
-    // Three arguments means an element is meant to be locked
-    if (typeof arg1 === null || arg1.nodeType === Node.ELEMENT_NODE) {
+    if (arg1.nodeType === Node.ELEMENT_NODE) {
       lockElementProperty.apply(null, args);
     }
     else {
@@ -57,7 +58,6 @@ define(
   function lockElementProperty(element, property, handlers) {
     handlers = handlers || {};
     styleListener.init(function () {
-
       function onPropertyMutation(opts) {
         /*jshint validthis: true */
         var
@@ -81,16 +81,16 @@ define(
       }
 
       var
-        before           = handlers.before || noop,
-        after            = handlers.after  || noop,
+        before           = handlers.before ? [handlers.before] : [],
+        after            = handlers.after ? [handlers.after] : [],
         currentValue     = getComputedStyle(element)[property],
         declaration      = { property: property, value: currentValue },
         elementHandlers  = elementHandlerMap.get(element) || {},
         propertyHandlers = elementHandlers[property];
 
       if (propertyHandlers) {
-        propertyHandlers.before.push(before);
-        propertyHandlers.after.push(after);
+        propertyHandlers.before.concat(before);
+        propertyHandlers.after.concat(after);
       }
       else {
         elementHandlers[property] = {
@@ -98,6 +98,7 @@ define(
           before : [before]
         };
       }
+
       elementHandlerMap.set(element, elementHandlers);
       lockStyle(element, property, currentValue);
       styleListener.bindPropertyListener(element, declaration, onPropertyMutation);
@@ -259,6 +260,11 @@ define(
     }
   }
 
+  function isLocked(element, property) {
+    var handlerMap = elementHandlerMap.get(element);
+    return handlerMap && handlerMap[property];
+  }
+
   function insertStylesheet(css) {
     stylesheet = document.createElement('style');
     stylesheet.id = stylesheetId;
@@ -303,8 +309,8 @@ define(
     }
   }
 
-  lock.init        = init;
-  lock.unlockStyle = unlockStyle;
-
-  return lock;
+  exports.isLocked    = isLocked;
+  exports.unlockStyle = unlockStyle;
+  exports.lock        = lock;
+  exports.init        = init;
 });

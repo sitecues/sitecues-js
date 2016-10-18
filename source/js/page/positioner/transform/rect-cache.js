@@ -148,7 +148,7 @@ define(
         /*jshint validthis: false */
       });
 
-      styleLock(element, 'display', {
+      styleLock.lock(element, 'display', {
         before: clearCache,
         after: handler
       });
@@ -162,7 +162,7 @@ define(
         /*jshint validthis: false */
       });
 
-      styleLock(element, 'position', {
+      styleLock.lock(element, 'position', {
         before: clearCache
         // Position is a special case, we already run handlers when elements change their position
       });
