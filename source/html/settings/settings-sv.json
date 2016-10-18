@@ -1,22 +1,22 @@
 {
   "theme": {
-    "None": "Ingen: ",
-    "Warm": "Varm: ",
-    "Bold": "Fet: ",
-    "Dark": "Mörk: ",
-    "intensity": "styrka: ",
+    "None": "Ingen",
+    "Warm": "Varm",
+    "Bold": "Fet",
+    "Dark": "Mörk",
+    "intensity": "styrka",
     "text_color": "textfärg"
   },
 
   "mouse": {
-    "size": "storlek: ",
+    "size": "storlek",
     "color": "färg"
   },
 
-  "title": "Inställningar: ",
+  "title": "Inställningar",
 
   "cards": {
-    "Colors": "Färger: ",
+    "Colors": "Färger",
     "Mouse": "Mus"
   }
 }
