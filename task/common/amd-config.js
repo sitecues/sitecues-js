@@ -7,6 +7,7 @@ var config = require('../build-config'),
   bundleFolders = sourceConfig.bundleFolders,
   dataFolders = sourceConfig.dataFolders,
   sourceFolders = bundleFolders.concat(dataFolders),
+  path = require('path'),
   extend = require('extend'),
   fs = require('fs'),
   JS_SOURCE_DIR = config.librarySourceDir + '/js',
@@ -57,7 +58,7 @@ function buildCorePreamble() {
     '"use strict";';
 
   function getPrereqPath(fileName) {
-    return JS_SOURCE_DIR + '/run/prereq/' + fileName;
+    return path.join(JS_SOURCE_DIR, 'run', 'prereq', fileName);
   }
 
   function getPrereqContent(fileName) {
@@ -87,7 +88,7 @@ function getDataFolderConfig(amdConfig, sourceFolder) {
   // Where to find locale-data
   amdConfig.baseUrl = JS_SOURCE_DIR + '/' + sourceFolder;
   // Where to put locale-data
-  amdConfig.dir = config.buildDir + '/js/' + sourceFolder;
+  amdConfig.dir = path.join(global.build.path, 'js', sourceFolder);
 
   return amdConfig;
 }
@@ -96,7 +97,7 @@ function getDataFolderConfig(amdConfig, sourceFolder) {
 function getBundleConfig(amdConfig, bundleName) {
   amdConfig.name = bundleName;
   amdConfig.create = true;
-  amdConfig.out = amdConfig.out || (config.buildDir + '/js/' + bundleName + '.js');
+  amdConfig.out = amdConfig.out || path.join(global.build.path, 'js', bundleName + '.js');
   amdConfig.baseUrl = JS_SOURCE_DIR + '/';
   amdConfig.fileExclusionRegExp = new RegExp('^' + bundleName + '$');
   includeMainModule(amdConfig, bundleName);

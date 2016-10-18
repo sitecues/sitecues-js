@@ -22,43 +22,46 @@ var gulp = require('gulp'),
   absoluteSourceFolderStringLength,
   JS_SOURCE_DIR = config.librarySourceDir + '/js',
   compileFunctionMap = getCompileFunctionMap(),
-  isMin = config.isMinifying,
-  uglifyOptions = {
+  isMin = config.isMinifying;
+
+function getUglifyOptions() {
+  return {
     compress: {
-      dead_code     : true,  // Remove dead code whether minifying or not
-      sequences     : isMin, // join consecutive statements with the “comma operator”
-      properties    : isMin, // optimize property access: a["foo"] → a.foo
-      drop_debugger : isMin, // discard “debugger” statements
-      unsafe        : false, // some unsafe optimizations (see below)
-      conditionals  : false, // optimize if-s and conditional expressions
-      comparisons   : isMin, // optimize comparisons
-      evaluate      : true,  // evaluate constant expressions
-      booleans      : isMin, // optimize boolean expressions
-      loops         : isMin, // optimize loops
-      unused        : true,  // drop unused variables/functions
-      hoist_funs    : isMin, // hoist function declarations
-      hoist_vars    : false, // hoist variable declarations
-      if_return     : isMin, // optimize if-s followed by return/continue
-      join_vars     : isMin, // join var declarations
-      cascade       : isMin, // try to cascade `right` into `left` in sequences
-      side_effects  : true,  // drop side-effect-free statements
-      screw_ie8     : true,
+      dead_code: true,  // Remove dead code whether minifying or not
+      sequences: isMin, // join consecutive statements with the “comma operator”
+      properties: isMin, // optimize property access: a["foo"] → a.foo
+      drop_debugger: isMin, // discard “debugger” statements
+      unsafe: false, // some unsafe optimizations (see below)
+      conditionals: false, // optimize if-s and conditional expressions
+      comparisons: isMin, // optimize comparisons
+      evaluate: true,  // evaluate constant expressions
+      booleans: isMin, // optimize boolean expressions
+      loops: isMin, // optimize loops
+      unused: true,  // drop unused variables/functions
+      hoist_funs: isMin, // hoist function declarations
+      hoist_vars: false, // hoist variable declarations
+      if_return: isMin, // optimize if-s followed by return/continue
+      join_vars: isMin, // join var declarations
+      cascade: isMin, // try to cascade `right` into `left` in sequences
+      side_effects: true,  // drop side-effect-free statements
+      screw_ie8: true,
       global_defs: config.globalDefs
-      },
+    },
     output: {
       beautify: !isMin,
       comments: !isMin,
       bracketize: !isMin,
       indent_level: 2
-      },
+    },
     mangle: isMin,
     global_defs: {
       SC_EXTENSION: false,
-      SC_RESOURCE_FOLDER_NAME: config.buildDir,
+      SC_RESOURCE_FOLDER_NAME: global.build.path,
       SC_LOCAL: config.isLocal,
       SC_DEV: config.isDebugOn
-      }
-    };
+    }
+  };
+}
 
 
 // Convert to relative paths and remove .js extension
@@ -125,7 +128,7 @@ function getCompileFunctionMap() {
   var functionMap = {};
   amdConfigs.sourceFolders.forEach(function(sourceFolder) {
     var fn = function () {
-      var amdConfig = amdConfigs.getAmdConfig(sourceFolder, uglifyOptions);
+      var amdConfig = amdConfigs.getAmdConfig(sourceFolder, getUglifyOptions());
       amdConfig.onModuleBundleComplete = onModuleBundleComplete;
       return optimize(amdConfig);
     };
@@ -146,7 +149,7 @@ function prepareValidation() {
 }
 
 function showSizes() {
-  return gulp.src(config.buildDir + '/**/*.js')
+  return gulp.src(global.build.path + '/**/*.js')
     .pipe(size({ pretty: true, gzip: true, showFiles: true }));
 }
 

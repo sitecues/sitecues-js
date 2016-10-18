@@ -32,7 +32,7 @@ function readTemplate(templateName) {
 
     function compileTemplateForLang(langFileName) {
       var data = getLanguageData(templateName, langFileName),
-        targetFileName = targetDir + templateName + '/' + langFileName.split('.')[0] + '.html',
+        targetFileName = path.join(targetDir, templateName, langFileName.split('.')[0] + '.html'),
         templatedHtml = template(data),
         cleanedHtml = htmlClean(templatedHtml);
 
@@ -45,7 +45,7 @@ function readTemplate(templateName) {
       });
     }
 
-    mkdirp(targetDir + templateName, {}, function() {
+    mkdirp(path.join(targetDir,templateName), {}, function() {
       langFileNames.forEach(compileTemplateForLang);
     });
   }
@@ -61,7 +61,7 @@ function getLangsForTemplate(name) {
     return !!name.match(/.*\.json$/);
   }
 
-  var files = fs.readdirSync(config.librarySourceDir + '/html/' + name);
+  var files = fs.readdirSync(path.join(config.librarySourceDir, 'html', name));
 
   return files.filter(isLanguageFile);
 }
@@ -74,12 +74,12 @@ function getRawLanguageData(fileName) {
 }
 
 function getLanguageData(templateName, langFileName) {
-  var langDataDir =  config.librarySourceDir + '/html/' + templateName + '/',
+  var langDataDir = path.join(config.librarySourceDir, 'html', templateName),
     COUNTRY_REGEX = /^(.*-[a-z][a-z])(?:-[a-z][a-z]\.json$)/,
     langCountrySplitter =  langFileName.match(COUNTRY_REGEX);
 
 
-  var langData = getRawLanguageData(langDataDir + langFileName);
+  var langData = getRawLanguageData(path.join(langDataDir, langFileName));
 
   if (langCountrySplitter) {
     // Is country-specific file:
@@ -96,7 +96,7 @@ function getLanguageData(templateName, langFileName) {
       }
       else if (value.substring(0,2) === '@@') {
         // Include content from another file
-        obj[key] = fs.readFileSync(langDataDir + value.substring(2), 'utf8');
+        obj[key] = fs.readFileSync(path.join(langDataDir, value.substring(2)), 'utf8');
       }
     });
   }
@@ -106,13 +106,13 @@ function getLanguageData(templateName, langFileName) {
 }
 
 function getCountryData(countryData, dir, baseLangFileName) {
-  var baseLangData = getRawLanguageData(dir + baseLangFileName);
+  var baseLangData = getRawLanguageData(path.join(dir, baseLangFileName));
 
   return extend(true, {}, baseLangData, countryData);
 }
 
 function begin(callback) {
-  targetDir = config.buildDir + '/html/';
+  targetDir = path.join(global.build.path, 'html');
   sources.forEach(readTemplate);
   callback();
 }

@@ -1,7 +1,7 @@
 /* Extension config */
 'use strict';
 
-var extend = require('extend'),
+const extend = require('extend'),
   EXTENSION_SOURCE_DIR = 'extension/source';
 
 function getConfig(baseConfig) {
@@ -20,7 +20,7 @@ function getConfig(baseConfig) {
     return EXTENSION_SOURCE_DIR + '/' + suffix;
   }
 
-  var config = extend(true, {}, baseConfig, {
+  const config = extend(true, {}, baseConfig, {
     isExtension: true,
     extensionSourceDir: EXTENSION_SOURCE_DIR,
     tmpDir: require('os').tmpdir(),
