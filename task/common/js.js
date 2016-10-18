@@ -54,7 +54,7 @@ var gulp = require('gulp'),
     mangle: isMin,
     global_defs: {
       SC_EXTENSION: false,
-      SC_RESOURCE_FOLDER_NAME: config.resourceFolderName,
+      SC_RESOURCE_FOLDER_NAME: config.buildDir,
       SC_LOCAL: config.isLocal,
       SC_DEV: config.isDebugOn
       }

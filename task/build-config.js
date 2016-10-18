@@ -25,7 +25,6 @@ var baseConfig = {
   buildType: buildType,
   baseBuildDir: baseBuildDir,
   buildDir: baseBuildDir + '/' + buildType,
-  resourceFolderName: '.',
   postBuildCommand: process.env.POST_BUILD_COMMAND,  // Optional post build shell command to run
   isLintingOn: process.env.LINT !== 'off', // Default to true
   // Three types of cleaning
@@ -45,10 +44,8 @@ var baseConfig = {
 
 // Add additional convenience properties
 function finalizeConfig(config) {
-  config.resourceDir = config.buildDir + '/' + config.resourceFolderName;
   config.globalDefs = {
     SC_EXTENSION: config.isExtension,
-    SC_RESOURCE_FOLDER_NAME: config.resourceFolderName,
     SC_LOCAL: config.isLocal,
     SC_DEV: config.isDebugOn,
     SC_AUTO_SPEECH: config.autoSpeechStrategy,

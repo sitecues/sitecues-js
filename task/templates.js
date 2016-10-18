@@ -112,7 +112,7 @@ function getCountryData(countryData, dir, baseLangFileName) {
 }
 
 function begin(callback) {
-  targetDir = config.resourceDir + '/html/';
+  targetDir = config.buildDir + '/html/';
   sources.forEach(readTemplate);
   callback();
 }

@@ -7,7 +7,7 @@ var exec = require('child_process').exec,
 // Currently no metadata for extension
 function prepare() {
   return gulp.src(config.metaDataGlob)
-    .pipe(gulp.dest(config.resourceDir));
+    .pipe(gulp.dest(config.buildDir));
 }
 
 function finalize(callback) {

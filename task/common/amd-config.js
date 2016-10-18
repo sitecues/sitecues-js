@@ -87,7 +87,7 @@ function getDataFolderConfig(amdConfig, sourceFolder) {
   // Where to find locale-data
   amdConfig.baseUrl = JS_SOURCE_DIR + '/' + sourceFolder;
   // Where to put locale-data
-  amdConfig.dir = config.resourceDir + '/js/' + sourceFolder;
+  amdConfig.dir = config.buildDir + '/js/' + sourceFolder;
 
   return amdConfig;
 }
@@ -96,7 +96,7 @@ function getDataFolderConfig(amdConfig, sourceFolder) {
 function getBundleConfig(amdConfig, bundleName) {
   amdConfig.name = bundleName;
   amdConfig.create = true;
-  amdConfig.out = amdConfig.out || (config.resourceDir + '/js/' + bundleName + '.js');
+  amdConfig.out = amdConfig.out || (config.buildDir + '/js/' + bundleName + '.js');
   amdConfig.baseUrl = JS_SOURCE_DIR + '/';
   amdConfig.fileExclusionRegExp = new RegExp('^' + bundleName + '$');
   includeMainModule(amdConfig, bundleName);

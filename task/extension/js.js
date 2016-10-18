@@ -144,7 +144,7 @@ function noop(callback) {
 function copyScripts(glob) {
   return gulp.src(glob)
     .pipe(uglify(uglifyOptions))
-    .pipe(gulp.dest(config.resourceDir + '/js'));
+    .pipe(gulp.dest(config.buildDir + '/js'));
 }
 
 function copyExtensionScripts() {
