@@ -172,13 +172,6 @@ define(
       ' ... email support@sitecues.com for more information.');
   }
   else {
-    // Do not allow the sitecues object to be wiped out or changed to something else,
-    // but allow properties to be added to it, e.g. sitecues.$ = Zepto
-    // TODO should this stuff move to the minicore?
-    Object.defineProperty(window, 'sitecues', { writable: false });
-    Object.defineProperty(sitecues, 'config', { writable: false }); // Do not allow reassignment, e.g. sitecues.config = {};
-    Object.freeze(sitecues.config); // Do not allow properties of sitecues.config to be changed, e.g. sitecues.config.siteId = 's-xxxx';
-
     //Set sitecues state flag to initializing
     sitecues.readyState = state.INITIALIZING;
     // Run sitecues
