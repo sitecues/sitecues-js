@@ -3,11 +3,11 @@
  */
 define(
   [
-    'core/bp/constants',
-    'core/bp/helper',
-    'core/events',
+    'run/bp/constants',
+    'run/bp/helper',
+    'run/events',
     'mini-core/native-global',
-    'core/inline-style/inline-style'
+    'run/inline-style/inline-style'
   ],
   function (
     BP_CONST,

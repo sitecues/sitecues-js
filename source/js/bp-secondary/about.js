@@ -1,4 +1,4 @@
-define(['core/bp/constants', 'core/bp/helper', 'core/conf/urls'], function (BP_CONST, helper, urls) {
+define(['run/bp/constants', 'run/bp/helper', 'run/conf/urls'], function (BP_CONST, helper, urls) {
   var byId = helper.byId,
     isInitialized;
 

@@ -6,15 +6,15 @@ define(
   [
     '$',
     'Promise',
-    'core/conf/preferences',
+    'run/conf/preferences',
     'page/style-service/style-service',
-    'core/platform',
+    'run/platform',
     'theme/color-choices',
     'page/util/color',
     'theme/custom-site-theme',
-    'core/events',
+    'run/events',
     'mini-core/native-global',
-    'core/inline-style/inline-style'
+    'run/inline-style/inline-style'
   ],
   function(
     $,

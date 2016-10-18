@@ -33,20 +33,18 @@ var config = require('../build-config'),
   },
   AMD_SPECIAL_CONFIGS = {
     // Core module special treatment
-    core: {
-      // Rename core.js to sitecues.js
-      out: config.resourceDir + '/js/core.js',
+    run: {
       // sitecues.js gets version number
       wrap: {
         start: buildCorePreamble()
       },
       // Include alameda in core
       include: [
-        'core/prereq/alameda-custom',
-        'core/errors'
+        'run/prereq/alameda-custom',
+        'run/errors'
       ],
       // Make sure core initializes itself
-      insertRequire: [ 'core/errors', 'core/core' ]
+      insertRequire: [ 'run/errors', 'run/run' ]
     },
     page: {
       include: [ 'page/jquery/jquery' ]
@@ -59,7 +57,7 @@ function buildCorePreamble() {
     '"use strict";';
 
   function getPrereqPath(fileName) {
-    return JS_SOURCE_DIR + '/core/prereq/' + fileName;
+    return JS_SOURCE_DIR + '/run/prereq/' + fileName;
   }
 
   function getPrereqContent(fileName) {

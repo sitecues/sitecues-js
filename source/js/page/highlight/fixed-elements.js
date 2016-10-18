@@ -3,7 +3,7 @@ define(
   [
     'page/positioner/constants',
     'page/positioner/style-lock/style-listener/style-listener',
-    'core/util/array-utility',
+    'run/util/array-utility',
     'mini-core/native-global'
   ],
   function (

@@ -22,11 +22,6 @@ function useDelivr() {
     });
 }
 
-// Create a copy of sitecues.js in the buildDir with a name in the format sitecues-[VERSION_NAME].js
-function createVersionedSitecuesJsCopy(callback) {
-  exec('cp ' + config.buildDir + '/js/core.js ' + config.buildDir + '/core-' + config.version + '.js', callback);
-}
-
 function saveVersionTxt(callback) {
   mkdirp(config.buildDir, {}, function() {
     fs.writeFile(config.buildDir + '/VERSION.TXT', config.version, callback);
@@ -41,10 +36,8 @@ function saveBuildTxt(callback) {
 }
 
 function metaDataTxtFiles(callback) {
-  createVersionedSitecuesJsCopy(function () {
-    saveVersionTxt(function () {
-      saveBuildTxt(callback);
-    });
+  saveVersionTxt(function () {
+    saveBuildTxt(callback);
   });
 }
 

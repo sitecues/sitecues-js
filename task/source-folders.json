@@ -1,6 +1,6 @@
 {
   "bundleFolders": [
-    "core",
+    "run",
     "bp-expanded",
     "bp-secondary",
     "bp-toolbar-badge",

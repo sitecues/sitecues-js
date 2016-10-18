@@ -13,13 +13,13 @@ define(
     'page/positioner/style-lock/style-listener/selector-map',
     'page/positioner/style-lock/style-listener/selectors',
     'page/positioner/transplant/anchors',
-    'core/util/array-utility',
+    'run/util/array-utility',
     'page/positioner/util/element-info',
     'page/positioner/util/element-map',
     'page/positioner/constants',
-    'core/constants',
+    'run/constants',
     'mini-core/native-global',
-    'core/inline-style/inline-style'
+    'run/inline-style/inline-style'
   ],
   function (
     queryManager,

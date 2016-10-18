@@ -1,10 +1,10 @@
 define(
   [
-    'core/events',
+    'run/events',
     'page/zoom/state',
-    'core/inline-style/inline-style',
-    'core/util/array-utility',
-    'core/platform',
+    'run/inline-style/inline-style',
+    'run/util/array-utility',
+    'run/platform',
     'mini-core/native-global'
   ],
   function (

@@ -6,15 +6,15 @@
 
 define(
   [
-    'core/bp/constants',
-    'core/bp/helper',
+    'run/bp/constants',
+    'run/bp/helper',
     'bp-expanded/view/transform-util',
     'bp-expanded/view/transform-animate',
     'bp-expanded/view/transform-hovers',
-    'core/bp/model/state',
-    'core/events',
-    'core/inline-style/inline-style',
-    'core/ab-test/ab-test',
+    'run/bp/model/state',
+    'run/events',
+    'run/inline-style/inline-style',
+    'run/ab-test/ab-test',
     'mini-core/native-global'
   ],
   function (

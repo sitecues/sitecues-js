@@ -1,15 +1,15 @@
 /* Focus Controller */
 define(
   [
-    'core/bp/constants',
-    'core/bp/model/state',
-    'core/bp/helper',
-    'core/metric/metric',
-    'core/bp/view/view',
-    'core/events',
-    'core/constants',
+    'run/bp/constants',
+    'run/bp/model/state',
+    'run/bp/helper',
+    'run/metric/metric',
+    'run/bp/view/view',
+    'run/events',
+    'run/constants',
     'mini-core/native-global',
-    'core/inline-style/inline-style'
+    'run/inline-style/inline-style'
   ],
   function (
     BP_CONST,

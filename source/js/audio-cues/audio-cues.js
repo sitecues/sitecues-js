@@ -5,7 +5,7 @@
 
 define(
   [
-    'core/conf/preferences',
+    'run/conf/preferences',
     'audio/audio'
   ],
   function (

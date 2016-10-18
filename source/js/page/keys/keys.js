@@ -2,10 +2,10 @@ define(
   [
     'page/util/element-classifier',
     'page/keys/commands',
-    'core/metric/metric',
-    'core/events',
+    'run/metric/metric',
+    'run/events',
     'page/highlight/constants',
-    'core/constants',
+    'run/constants',
     'mini-core/native-global'
   ],
   function (

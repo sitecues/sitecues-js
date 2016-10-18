@@ -8,15 +8,15 @@ define(
     'hlb/event-handlers',
     'hlb/positioning',
     'hlb/styling',
-    'core/conf/preferences',
-    'core/platform',
+    'run/conf/preferences',
+    'run/platform',
     'page/util/element-classifier',
     'hlb/animation',
     'page/util/geo',
-    'core/metric/metric',
+    'run/metric/metric',
     'hlb/constants',
-    'core/events',
-    'core/inline-style/inline-style'
+    'run/events',
+    'run/inline-style/inline-style'
   ],
   function (
     $,

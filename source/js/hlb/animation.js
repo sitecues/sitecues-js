@@ -7,11 +7,11 @@ define(
     'hlb/dimmer',
     'page/util/common',
     'hlb/positioning',
-    'core/platform',
+    'run/platform',
     '$',
     'hlb/constants',
     'mini-core/native-global',
-    'core/inline-style/inline-style'
+    'run/inline-style/inline-style'
   ],
   function (
     dimmer,

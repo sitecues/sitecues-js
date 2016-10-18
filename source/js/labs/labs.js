@@ -8,9 +8,9 @@
 
 define(
   [
-    'core/conf/preferences',
+    'run/conf/preferences',
     '$',
-    'core/events'
+    'run/events'
   ],
   function (
     pref,

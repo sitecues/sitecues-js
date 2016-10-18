@@ -1,6 +1,6 @@
 define(
   [
-    'core/dom-events'
+    'run/dom-events'
   ],
   function (
     domEvents

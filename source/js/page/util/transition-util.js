@@ -1,8 +1,8 @@
 // This module assists with transforming elements with transition styles
 define(
   [
-    'core/inline-style/inline-style',
-    'core/util/array-utility',
+    'run/inline-style/inline-style',
+    'run/util/array-utility',
     'mini-core/native-global'
   ],
   function (

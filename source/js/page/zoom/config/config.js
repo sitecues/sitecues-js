@@ -1,4 +1,4 @@
-define(['$', 'core/conf/site'], function ($, site) {
+define(['$', 'run/conf/site'], function ($, site) {
 
   'use strict';
 

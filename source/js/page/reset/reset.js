@@ -3,7 +3,7 @@
 define(
   [
     'page/zoom/zoom',
-    'core/conf/preferences'
+    'run/conf/preferences'
   ],
   function (
     zoomMod,

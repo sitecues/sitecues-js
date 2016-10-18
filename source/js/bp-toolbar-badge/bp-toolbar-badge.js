@@ -7,11 +7,11 @@
 define(
   [
     'Promise',
-    'core/bp/constants',
-    'core/bp/model/state',
-    'core/bp/helper',
-    'core/bp/view/palette',
-    'core/bp/view/view'
+    'run/bp/constants',
+    'run/bp/model/state',
+    'run/bp/helper',
+    'run/bp/view/palette',
+    'run/bp/view/view'
   ],
   function (
     Promise,

@@ -10,7 +10,7 @@ define(
     'page/zoom/zoom',
     'page/highlight/traitcache',
     'mini-core/native-global',
-    'core/inline-style/inline-style'
+    'run/inline-style/inline-style'
   ],
   function (
     $,
