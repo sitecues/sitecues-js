@@ -328,7 +328,7 @@ function createPageCssHook() {
       domEvents.init();    // Support for passive dom event listeners
     })
     .then(function () {
-      return locale.init()
+      return locale.init()  // TODO try to put this as part of earlier Promise.all
         .then(bp.init)
         .then(metric.initViewInfo)
         .then(initPageFeatureListeners);
