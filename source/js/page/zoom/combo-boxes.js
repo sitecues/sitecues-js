@@ -36,12 +36,12 @@ define(
   function fixSelectElement(element, zoom) {
     var appearance;
 
-    if (platform.browser.isWebKit) {
-      appearance = '-webkit-appearance';
-    }
-    else {
-      appearance = '';
-    }
+    //if (platform.browser.isWebKit) {
+    //  appearance = '-webkit-appearance';
+    //}
+    //else {
+    //  appearance = '';
+    //}
 
     inlineStyle.override(element, ['transition', 'all 0s']);
     inlineStyle.restore(element, ['font-size', 'width', 'height', 'transform', 'transform-origin', appearance]);
