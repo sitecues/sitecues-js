@@ -264,7 +264,6 @@ define(
    *   5. Missing badge and document complete (causes toolbar)
    */
   function init() {
-    debugger;
     docElem = document.documentElement;
 
     // Get whether the BP will run in classic mode (still needed for MS Edge)
