@@ -2,7 +2,6 @@
 // run once we've scaled the page for the first time.
 define(
   [
-    '$',
     'page/positioner/util/element-map',
     'page/positioner/transplant/clone',
     'page/positioner/constants',
@@ -13,7 +12,6 @@ define(
     'page/positioner/transplant/mutation-relay'
   ],
   function (
-    $,
     elementMap,
     clone,
     constants,
@@ -23,7 +21,6 @@ define(
     anchors,
     mutationRelay
   ) {
-
   'use strict';
 
   var originalBody,
@@ -31,10 +28,9 @@ define(
     documentQuerySelectorAll,
     getElementsByClassName,
     didInterceptDOMQueries,
-    TRANSPLANT_STATE       = constants.TRANSPLANT_STATE,
-    ORIGINAL_STYLESHEET_ID = 'sitecues-js-originals',
-    ROOT_ATTR              = constants.ROOT_ATTR,
-    ROOT_SELECTOR          = constants.ROOT_SELECTOR;
+    TRANSPLANT_STATE = constants.TRANSPLANT_STATE,
+    ROOT_ATTR        = constants.ROOT_ATTR,
+    ROOT_SELECTOR    = constants.ROOT_SELECTOR;
 
   // When we transplant elements into the auxiliary body, we need to re-direct queries in the original body to include
   // the original element's new position in the DOM tree, and to exclude clone elements in the heredity tree
@@ -431,7 +427,7 @@ define(
     }
 
     if (flags.isTransplantRoot) {
-      element.setAttribute(ROOT_ATTR, 'root');
+      element.setAttribute(ROOT_ATTR, true);
       elementInfo.isTransplantRoot(element, true);
     }
     else if (flags.wasTransplantRoot) {
@@ -440,20 +436,9 @@ define(
     }
   }
 
-  function insertStylesheet() {
-    var $style,
-      rootDeclarationBlock = ' { visibility: visible; }\n';
-
-    $style = $('<style>');
-    $style
-      .attr('id', ORIGINAL_STYLESHEET_ID)
-      .text( ROOT_SELECTOR + rootDeclarationBlock )
-      .insertBefore(document.head.firstChild);
-  }
-
   function init() {
     originalBody = document.body;
-    insertStylesheet();
+    anchors.init();
     clone.init();
     mutationRelay.init();
     graft.init();

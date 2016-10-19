@@ -3,14 +3,14 @@ define([], function () {
   'use strict';
 
   var findPolyfill = Array.prototype.find || function (predicate) {
-      if (this == null) {
+      if (!this) {
         throw new TypeError('Array.prototype.find called on null or undefined');
       }
       if (typeof predicate !== 'function') {
         throw new TypeError('predicate must be a function');
       }
       var list = Object(this);
-      var length = list.length >>> 0;
+      var length = list.length;
       var thisArg = arguments[1];
       var value;
 
@@ -20,11 +20,35 @@ define([], function () {
           return value;
         }
       }
-      return undefined;
+    };
+
+  var findIndexPolyfill = Array.prototype.findIndex || function (predicate) {
+      if (!this) {
+        throw new TypeError('Array.prototype.findIndex called on null or undefined');
+      }
+      if (typeof predicate !== 'function') {
+        throw new TypeError('predicate must be a function');
+      }
+      var list = Object(this);
+      var length = list.length;
+      var thisArg = arguments[1];
+      var value;
+
+      for (var i = 0; i < length; i++) {
+        value = list[i];
+        if (predicate.call(thisArg, value, i, list)) {
+          return i;
+        }
+      }
+      return -1;
     };
 
   function find(arrayLike, fn, thisArg) {
     return findPolyfill.call(from(arrayLike), fn, thisArg);
+  }
+
+  function findIndex(arrayLike, fn, thisArg) {
+    return findIndexPolyfill.call(from(arrayLike), fn, thisArg);
   }
 
   // Return an array with the members of arr1 that aren't in arr2, and the members of arr2 that aren't in arr1
@@ -158,6 +182,7 @@ define([], function () {
     fromSet : fromSet,
     from    : from,
     wrap    : wrap,
-    find    : find
+    find    : find,
+    findIndex : findIndex
   };
 });
