@@ -20,7 +20,7 @@ define([], function() {
 
   // Get the site configuration property
   function get(key) {
-    return everywhereConfig[key] || providedSiteConfig[key];
+    return getEverywhereConfig()[key] || getProvidedSiteConfig()[key];
   }
 
   // Names with underscores deprecated.
