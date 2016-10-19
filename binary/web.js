@@ -369,8 +369,8 @@ if (useHttps) {
 
     // Start the HTTPS server on port 443.
     https.createServer({
-        key  : fs.readFileSync('binary/cert/localhost.key'),
-        cert : fs.readFileSync('binary/cert/localhost.cert')
+        key  : fs.readFileSync('binary/key/localhost.key'),
+        cert : fs.readFileSync('binary/cert/localhost-chain.cert')
     }, app).listen(443, (err) => {
         if (err) {
             throw err;
