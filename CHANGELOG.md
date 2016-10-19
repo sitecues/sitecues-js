@@ -12,7 +12,7 @@ All notable changes to this project will be documented here.
 ### Fixed
  -
 
-## [4.2.17]
+## [4.2.17] - 2016-10-19
 ### Fixed
  - Fixed elements are now vertically positioned outside of the viewport if that is their intended position
 
