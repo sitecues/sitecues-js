@@ -10,7 +10,7 @@ sitecues._require = {
   },
   waitSeconds: 30,
   baseUrl: (function(config) {
-    return config.appUrl.split('/').slice(0, -3).join('/') + '/' + SC_VERSION + '/js/';
+    return config.appUrl.split('/').slice(0, -3).join('/') + '/' + sitecues.version + '/js/';
   })(sitecues.everywhereConfig || sitecues.config),
   map: {
     '*': {

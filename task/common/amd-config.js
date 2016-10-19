@@ -19,8 +19,10 @@ var config = require('../build-config'),
     'mini-core/site' : 'empty:',
     '$': 'empty:',
     'Promise': 'empty:'   // In runtime config, via definePrim : 'Promise' to allow use of alameda's built-in Prim library
-  },
-  AMD_BASE_CONFIG = {
+  };
+
+function getAmdBaseConfig() {
+  return {
     wrap: {
       start: '"use strict";\n'
     },
@@ -31,8 +33,11 @@ var config = require('../build-config'),
     optimize: 'uglify2',
     namespace: 'sitecues',
     useStrict: true
-  },
-  AMD_SPECIAL_CONFIGS = {
+  };
+}
+
+function getAmdSpecialConfigs() {
+  return {
     // Core module special treatment
     run: {
       // sitecues.js gets version number
@@ -46,12 +51,13 @@ var config = require('../build-config'),
         'run/errors'
       ],
       // Make sure core initializes itself
-      insertRequire: [ 'run/errors', 'run/run' ]
+      insertRequire: ['run/errors', 'run/run']
     },
     page: {
-      include: [ 'page/jquery/jquery' ]
+      include: ['page/jquery/jquery']
     }
   };
+}
 
 function buildCorePreamble() {
   const prefix = 'Object.defineProperty(sitecues, "version", { value: "' + global.buildVersion + '", writable: false });\n' +
@@ -117,7 +123,7 @@ function getBundleConfig(amdConfig, bundleName) {
 // Configuration for a source folder, whether a bundle or data
 function getAmdConfig(sourceFolderName, uglifyOptions) {
 
-  var amdConfig = extend(true, { uglify2: uglifyOptions }, AMD_BASE_CONFIG, AMD_SPECIAL_CONFIGS[sourceFolderName]);
+  var amdConfig = extend(true, { uglify2: uglifyOptions }, getAmdBaseConfig(), getAmdSpecialConfigs()[sourceFolderName]);
 
   if (isDataFolder(sourceFolderName)) {
     return getDataFolderConfig(amdConfig, sourceFolderName);

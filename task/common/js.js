@@ -47,9 +47,7 @@ function getUglifyOptions() {
       cascade: isMin, // try to cascade `right` into `left` in sequences
       side_effects: true,  // drop side-effect-free statements
       screw_ie8: true,
-      global_defs: extend(config.globalDefs, {
-        SC_VERSION: global.buildVersion
-      })
+      global_defs: config.globalDefs
     },
     output: {
       beautify: !isMin,
