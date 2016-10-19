@@ -12,6 +12,10 @@ All notable changes to this project will be documented here.
 ### Fixed
  -
 
+## [4.2.17] - 2016-10-19
+### Fixed
+ - Fixed elements are now vertically positioned outside of the viewport if that is their intended position
+
 ## [4.2.15] - 2016-09-28
 ### Fixed
  - data-sc-pick="disable" works correctly. The picker won't pick any ancestor of something marked as such
