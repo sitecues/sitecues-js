@@ -332,8 +332,5 @@ function createPageCssHook() {
     });
   }
 
-  return {
-    isOn : isOn,
-    init : init
-  };
+  init(); // DO EET NOW !!
 });
