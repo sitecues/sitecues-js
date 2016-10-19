@@ -4,7 +4,7 @@
  */
 // Going sloppy because loader plugin execs may depend on non-strict execution.
 /*jslint sloppy: true, nomen: true, regexp: true */
-/*global document, navigator, importScripts, Promise, setTimeout */
+/*global document, navigator, importScripts, Promise */
 
 // Supports IE 11, Edge, Safari 9+, modern Chrome, modern Firefox
 // Only uses prim for IE11
@@ -26,6 +26,10 @@ var requirejs, require, define;
     var event = new CustomEvent('SitecuesUnhandledRejection', {detail: error});
     window.dispatchEvent(event);
   }
+  // Cache native function references
+  var hasOwn     = Object.prototype.hasOwnProperty,
+    setTimeout = sitecues._shared.nativeGlobal.setTimeout,
+    slice      = Array.prototype.slice;
   // ----- END SITECUES CUSTOM BLOCK -----
 
   if (!Promise) {
@@ -268,7 +272,7 @@ var requirejs, require, define;
 
   }
 
-  var topReq, setTimeout, slice, hasOwn,
+  var topReq,
     bootstrapConfig = requirejs || require,
     contexts = {},
     queue = [],
@@ -282,14 +286,6 @@ var requirejs, require, define;
   if (typeof requirejs === 'function') {
     return;
   }
-
-  // ----- BEGIN SITECUES CUSTOM BLOCK -----
-  function cacheNativeFnReferences() {
-    hasOwn     = Object.prototype.hasOwnProperty;
-    setTimeout = sitecues._shared.nativeGlobal.setTimeout;
-    slice      = Array.prototype.slice;
-  }
-  // ----- END SITECUES CUSTOM BLOCK -----
 
   // Could match something like ')//comment', do not lose the prefix to comment.
   function commentReplace(match, multi, multiText, singlePrefix) {
@@ -1436,10 +1432,6 @@ var requirejs, require, define;
 
     return req;
   }
-
-  // ----- BEGIN SITECUES CUSTOM BLOCK -----
-  cacheNativeFnReferences();
-  // ----- END SITECUES CUSTOM BLOCK -----
 
   requirejs = topReq = newContext('_');
 

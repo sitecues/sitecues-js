@@ -14,6 +14,7 @@ var gulp = require('gulp'),
   bundleIncludesSourcesMap = {}, // Store the array of source files used in each bundle
   requirejs = require('requirejs'),
   config = require('../build-config'),
+  extend = require('extend'),
   size = config.isShowingSizes && require('gulp-size'),
   path = require('path'),
   pkgDir = require('pkg-dir'),
@@ -45,7 +46,7 @@ function getUglifyOptions() {
       cascade: isMin, // try to cascade `right` into `left` in sequences
       side_effects: true,  // drop side-effect-free statements
       screw_ie8: true,
-      global_defs: config.globalDefs
+      global_defs: extend(config.globalDefs, { SC_RESOURCE_FOLDER_NAME: global.build.path })
     },
     output: {
       beautify: !isMin,
@@ -53,13 +54,7 @@ function getUglifyOptions() {
       bracketize: !isMin,
       indent_level: 2
     },
-    mangle: isMin,
-    global_defs: {
-      SC_EXTENSION: false,
-      SC_RESOURCE_FOLDER_NAME: global.build.path,
-      SC_LOCAL: config.isLocal,
-      SC_DEV: config.isDebugOn
-    }
+    mangle: isMin
   };
 }
 
