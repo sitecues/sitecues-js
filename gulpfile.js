@@ -31,8 +31,12 @@ function prepare() {
 }
 
 
-function finalize() {
-  return global.build.finalize();
+function finalize(callback) {
+  return global.build.finalize()
+    .then(() => {
+      const cmd = 'ln -sf ' + global.buildBranch + ' build/~latest-branch~';
+      exec(cmd, callback);
+    });
 }
 
 function cleanAll() {
@@ -104,7 +108,7 @@ gulp.task(function watch() {
     path : 'latest-build'
   };
   global.buildVersion = 'latest';
-  global.buildBranch = 'latest';
+  global.buildBranch = '~latest-branch~';
 
   // JS
   var sourceFolders = Object.keys(js.compileFunctionMap);
