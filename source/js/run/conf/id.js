@@ -2,8 +2,7 @@ define(
   [
     'mini-core/user',
     'mini-core/session',
-    'mini-core/page-view',
-    'mini-core/site'
+    'mini-core/page-view'
   ],
   function(
     user,
