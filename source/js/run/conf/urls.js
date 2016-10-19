@@ -41,7 +41,7 @@ define(
   // URL string for sitecues.js
   // Enforces https so that all the resources we fetch and origin checking also uses https
   function getRawScriptUrl() {
-    return enforceHttps(site.get('scriptUrl') || site.get('script_url'));
+    return enforceHttps(site.get('appUrl'));
   }
 
   // Parsed URL object for sitecues.js

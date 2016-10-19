@@ -17,11 +17,19 @@ var gulp = require('gulp'),
   del = require('del'); // If we want to do clean
 
 function prepare() {
-  return delivr.prepare({ bucket })
-    .then(function(build) {
+  var getBuildData = require('build-data');
+  return getBuildData()
+    .then((buildData) => {
+      // Will use buildData to generate resource url
+      global.buildBranch = buildData.branch;
+      global.buildVersion = buildData.version;
+      return delivr.prepare({bucket});
+    })
+    .then((build) => {
       global.build = build;
     });
 }
+
 
 function finalize() {
   return global.build.finalize();

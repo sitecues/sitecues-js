@@ -54,8 +54,7 @@ var config = require('../build-config'),
   };
 
 function buildCorePreamble() {
-  const prefix = 'if (sitecues && sitecues.exists) throw new Error("The sitecues library already exists on this page.");\n' +
-    'Object.defineProperty(sitecues, "version", { value: "' + config.version + '", writable: false });\n' +
+  const prefix = 'Object.defineProperty(sitecues, "version", { value: "' + global.buildVersion + '", writable: false });\n' +
     '"use strict";';
 
   function getPrereqPath(fileName) {

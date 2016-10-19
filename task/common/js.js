@@ -26,6 +26,7 @@ var gulp = require('gulp'),
   isMin = config.isMinifying;
 
 function getUglifyOptions() {
+
   return {
     compress: {
       dead_code: true,  // Remove dead code whether minifying or not
@@ -46,7 +47,9 @@ function getUglifyOptions() {
       cascade: isMin, // try to cascade `right` into `left` in sequences
       side_effects: true,  // drop side-effect-free statements
       screw_ie8: true,
-      global_defs: extend(config.globalDefs, { SC_RESOURCE_FOLDER_NAME: global.build.path })
+      global_defs: extend(config.globalDefs, {
+        SC_VERSION: global.buildVersion
+      })
     },
     output: {
       beautify: !isMin,

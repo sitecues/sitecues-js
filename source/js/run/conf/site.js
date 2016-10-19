@@ -1,12 +1,12 @@
 /**
  * This module is responsible for handling site configuration. This configuration can be supplied in
  * two ways:
- *   1) The 'window.sitecues.config' object:
- *         This object is required and must have at least the 'siteId' and 'scriptUrl' properties. This
- *         requirement is validated by core.js
+ *   1) The 'window.sitecues.config' object
+ *         This object is required and must have at least the 'siteId' and 'appUrl' properties.
+ *         This requirement is validated by sitecues-core.
  *   2) The web services server
- *         This configuration is currently not required, and inability to fetch these setting should be handled
- *         gracefully by the library (e.g., disable TTS, do not crash the web page).
+ *         This configuration is currently not supported, but could be again in the future.
+ *         The TTS library does use this infrastructure to determine whether TTS is enabled (see network-player.js)
  *
  *   All properties provided in 'window.sitecues.config' currently take precedence over the server configuration.
  *   However, in the future this will be updated so that a customer can not, for example, override the TTS provider

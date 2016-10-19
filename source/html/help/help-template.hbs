@@ -13,7 +13,8 @@
             siteUrl = getParam(2, 'siteUrl'),
             sessionId = getParam(3, 'sessionId'),
             pageViewId = getParam(4, 'pageViewId'),
-            prefs = getParam(5, 'prefs');
+            prefs = getParam(5, 'prefs'),
+            appUrl = getParam(6, 'appUrl');
 
     // Site config
     window.sitecues = {
@@ -41,6 +42,7 @@
         var script = document.createElement('script'),
                 first = document.getElementsByTagName('script')[0];
         sitecues.config.scriptUrl=scriptUrl;
+        sitecues.config.appUrl = appUrl;
         script.src=sitecues.config.scriptUrl;
         script.type = 'text/javascript';
         script.async = true;

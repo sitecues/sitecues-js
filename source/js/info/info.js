@@ -132,7 +132,8 @@ define(
           siteUrl: hostUrl.protocol + '//' + hostUrl.hostname + ':' + hostUrl.port,
           sessionId: ids.sessionId,
           pageViewId: ids.pageViewId,
-          prefs: window.localStorage.sitecues
+          prefs: window.localStorage.sitecues,
+          appUrl: site.get('appUrl')
         });
 
     events.emit('info/did-show');

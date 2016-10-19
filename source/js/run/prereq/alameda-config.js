@@ -1,7 +1,7 @@
 // Alameda configuration
 // Must be inserted before alameda by the build process
 
-/* globals SC_RESOURCE_FOLDER_NAME  */
+/* globals SC_VERSION  */
 
 sitecues._require = {
   defaultErrback: function(error) {
@@ -10,13 +10,7 @@ sitecues._require = {
   },
   waitSeconds: 30,
   baseUrl: (function(config) {
-    var resourceFolderName = SC_RESOURCE_FOLDER_NAME,
-      scriptUrl = config.scriptUrl || config.script_url, // Old load script sometimes used underscore names, which is deprecated but still supported
-      folderOnly = scriptUrl.substring(0, scriptUrl.lastIndexOf('/js/')),
-      withVersionName = folderOnly + '/' + resourceFolderName + '/js/',
-      withLatestReplaced = withVersionName.replace('/latest/', '/' + resourceFolderName + '/');  // The /latest/ means the current version
-
-    return withLatestReplaced;  // Includes version name so that cached resources are only used with the appropriately matching sitecues.js
+    return config.appUrl.split('/').slice(0, -3).join('/') + '/' + SC_VERSION + '/js/';
   })(sitecues.everywhereConfig || sitecues.config),
   map: {
     '*': {
