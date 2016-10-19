@@ -91,6 +91,9 @@ gulp.task('package', gulp.series('default', packaging ));
 
 // Watcher tasks
 gulp.task(function watch() {
+
+  global.build = { path : 'latest-build' };
+
   // JS
   var sourceFolders = Object.keys(js.compileFunctionMap);
   sourceFolders.forEach(function(sourceFolder) {

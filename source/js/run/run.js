@@ -296,6 +296,10 @@ function createPageCssHook() {
   }
 
   function init() {
+    if (SC_DEV) {
+      console.log('Initializing Sitecues');
+    }
+
     startSitecuesLoad = getCurrentTime();
 
     // When keyboard listening is ready
