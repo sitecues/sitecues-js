@@ -44,8 +44,7 @@ define(
     }
 
     var fontSize,
-      styles        = {},
-      computedStyle = getComputedStyle(element);
+      styles = {};
 
     if (platform.browser.isFirefox) {
       // setting the em font size to the scale factor seems to work well
