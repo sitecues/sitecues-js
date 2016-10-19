@@ -1,10 +1,10 @@
 define(
   [
-    'mini-core/user',
+  //  'mini-core/user',
     'run/util/object-utility'
   ],
   function (
-    user,
+//    user,
     objectUtil
   ) {
   'use strict';
