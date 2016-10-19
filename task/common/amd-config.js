@@ -67,9 +67,9 @@ function buildCorePreamble() {
 
   return [
     prefix,
-    getPrereqContent('shared-modules.js'),
     getPrereqContent('custom-event-polyfill.js'),
-    getPrereqContent('alameda-config.js')
+    getPrereqContent('alameda-config.js'),
+    getPrereqContent('shared-modules.js'),
   ].join('\n');
 }
 
