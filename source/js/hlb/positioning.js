@@ -7,7 +7,7 @@
 define(
   [
     '$',
-    'run/conf/pref',
+    'run/conf/preferences',
     'hlb/styling',
     'page/util/common',
     'page/util/element-classifier',
