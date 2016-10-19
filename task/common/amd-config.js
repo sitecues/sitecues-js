@@ -41,6 +41,8 @@ var config = require('../build-config'),
       },
       // Include alameda in core
       include: [
+        'run/prereq/alameda-custom',
+        'run/prereq/shared-modules',
         'run/errors'
       ],
       // Make sure core initializes itself
@@ -67,9 +69,7 @@ function buildCorePreamble() {
   return [
     prefix,
     getPrereqContent('custom-event-polyfill.js'),
-    getPrereqContent('alameda-config.js'),
-    getPrereqContent('alameda-custom.js'),
-    getPrereqContent('shared-modules.js'),
+    getPrereqContent('alameda-config.js')
   ].join('\n');
 }
 
