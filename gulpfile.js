@@ -100,7 +100,11 @@ gulp.task('package', gulp.series('default', packaging ));
 // Watcher tasks
 gulp.task(function watch() {
 
-  global.build = { path : 'latest-build' };
+  global.build = {
+    path : 'latest-build'
+  };
+  global.buildVersion = 'latest';
+  global.buildBranch = 'latest';
 
   // JS
   var sourceFolders = Object.keys(js.compileFunctionMap);

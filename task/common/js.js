@@ -14,7 +14,6 @@ var gulp = require('gulp'),
   bundleIncludesSourcesMap = {}, // Store the array of source files used in each bundle
   requirejs = require('requirejs'),
   config = require('../build-config'),
-  extend = require('extend'),
   size = config.isShowingSizes && require('gulp-size'),
   path = require('path'),
   pkgDir = require('pkg-dir'),

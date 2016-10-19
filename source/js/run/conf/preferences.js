@@ -1,10 +1,10 @@
 define(
   [
-  //  'mini-core/user',
+    'mini-core/user',
     'run/util/object-utility'
   ],
   function (
-//    user,
+    user,
     objectUtil
   ) {
   'use strict';
@@ -56,15 +56,21 @@ define(
     }
 
     if (listeners[key]) {
-      listeners.forEach(function (listener) {
+      listeners[key].forEach(function (listener) {
         listener(safeValue);
       });
     }
 
     cachedPrefs[key] = safeValue;
 
-    // TODO re-add once prefs are implemented in mini-core
-    //user.setPref(cachedPrefs);
+    if (typeof safeValue === 'undefined') {
+      user.clearPref(key);
+    }
+    else {
+      var setObj = {};
+      setObj[key] = safeValue;
+      user.setPref(setObj);
+    }
   }
 
   function unset(key) {
@@ -86,10 +92,9 @@ define(
   }
 
   function init() {
-    cachedPrefs = {}; // TODO re-add once prefs are implemented in mini-core
-    // return user.getPref().then(function (prefs) {
-    //   cachedPrefs = prefs;
-    // });
+    return user.getAllPref().then(function (prefs) {
+      cachedPrefs = prefs;
+    });
   }
 
   return {
