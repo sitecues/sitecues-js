@@ -63,7 +63,8 @@ define(
 
     cachedPrefs[key] = safeValue;
 
-    user.setPref(cachedPrefs);
+    // TODO re-add once prefs are implemented in mini-core
+    //user.setPref(cachedPrefs);
   }
 
   function unset(key) {
@@ -85,9 +86,10 @@ define(
   }
 
   function init() {
-    return user.getPref().then(function (prefs) {
-      cachedPrefs = prefs;
-    });
+    cachedPrefs = {}; // TODO re-add once prefs are implemented in mini-core
+    // return user.getPref().then(function (prefs) {
+    //   cachedPrefs = prefs;
+    // });
   }
 
   return {
