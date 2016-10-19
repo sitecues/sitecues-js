@@ -310,21 +310,24 @@ function createPageCssHook() {
     sitecues.readyState = state.INITIALIZING;
 
     // Early synchronous initialization
-    site.init();  // Initialize configuration module
-    urls.init();  // Initialize API and services URLs
-    exports.init(isOn);
+    site.init();         // Site configuration module
+    urls.init();         // API and services URLs
+    platform.init();     // Info about current platform, init now in case we need for error metric
+    exports.init(isOn);  // Sitecues exports
 
     Promise.all([
-      pref.init(),
-      id.init()
-    ]).then(function () {
+      // TODO how can these be init'd at the same time if they both need the global storage iframe?
+      id.init(),
+      pref.init()
+    ])
+    .then(function () {
       // Synchronous initialization
-      inlineStyle.init();
-      platform.init();
-      domEvents.init();
       abTest.init();
       metric.init();
-    }).then(function () {
+      inlineStyle.init();  // Inline style utility
+      domEvents.init();    // Support for passive dom event listeners
+    })
+    .then(function () {
       return locale.init()
         .then(bp.init)
         .then(metric.initViewInfo)

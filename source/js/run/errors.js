@@ -61,9 +61,9 @@ define(['run/metric/metric', 'run/conf/urls'], function(metric, urls) {
   function onRequireFailure(event) {
     var detail = event.detail;
     logError({
-      type: 'require error',
+      type: 'AMD error',
       stack: detail.stack,
-      message: 'Could not find module: ' + detail.requireModules
+      message: 'Could not find module or error in module init: ' + detail.requireModules
     });
   }
 

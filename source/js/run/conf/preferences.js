@@ -80,6 +80,10 @@ define(
     return Boolean(cachedPrefs[key]);
   }
 
+  function isValid() {
+    return Boolean(cachedPrefs);
+  }
+
   function init() {
     return user.getPref().then(function (prefs) {
       cachedPrefs = prefs;
@@ -93,6 +97,7 @@ define(
     reset         : resetPrefs,
     defineHandler : defineHandler,
     bindListener  : bindListener,
+    isValid       : isValid,
     init          : init
   };
 });

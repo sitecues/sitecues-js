@@ -8,8 +8,7 @@ define(
   function(
     user,
     session,
-    pageView,
-    site
+    pageView
   ) {
   'use strict';
 
@@ -21,7 +20,8 @@ define(
       exports.session  = session.getId();
       exports.pageView = pageView.getId();
       exports.user     = userId;
-      exports.site     = site.getId();
+      exports.isValid  = exports.session && exports.pageView && exports.user && exports.site;
+      console.log(exports);
     });
   }
 

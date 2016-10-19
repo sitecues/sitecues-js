@@ -59,8 +59,13 @@ define(
       // Common fields
       data.name = name;
       data.clientTimeMs = Number(new Date()); // Epoch time in milliseconds  when the event occurred
-      data.zoomLevel = pref.get('zoom') || 1;
-      data.ttsState = pref.get('ttsOn') || false;
+      if (pref.isValid()) {
+        data.zoomLevel = pref.get('zoom') || 1;
+        data.ttsState = pref.get('ttsOn') || false;
+      }
+      else {
+        data.hasInvalidPrefs = true;
+      }
 
       // Platform data -- goes into details field for historical reason
       details = details || {};
@@ -160,17 +165,19 @@ define(
     }
 
     function isTester() {
-      if (pref.get('isTester')) {
-        // Once a tester, always a tester
-        return true;
-      }
+      if (pref.isValid()) {
+        if (pref.get('isTester')) {
+          // Once a tester, always a tester
+          return true;
+        }
 
-      if (site.get('isTester') || !urls.isProduction()) {
-        pref.set('isTester', true);  // Remember this tester
-        return true;
-      }
+        if (site.get('isTester') || !urls.isProduction()) {
+          pref.set('isTester', true);  // Remember this tester
+          return true;
+        }
 
-      return false;
+        return false;
+      }
     }
 
     // TODO Should go away once we go to the new extension which is entirely in a content script
@@ -180,7 +187,7 @@ define(
 
     // Return settings we care about
     function getSettings() {
-      var settings = pref.get(),
+      var settings = pref.isValid() ? pref.get() : {},
         BLACKLIST = {
           'firstHighZoom': 1, // Not interesting
           'firstSpeechOn': 1, // Not interesting
@@ -245,7 +252,7 @@ define(
         metricVersion: METRICS_VERSION,
         sessionId: id.session,
         pageViewId: id.pageView,
-        siteId: id.site,
+        siteId: site.getSiteId(),
         userId: id.user,
         abTest: abTest.get(),
         pageUrl: getPageUrl(source),
