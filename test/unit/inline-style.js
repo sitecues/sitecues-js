@@ -262,6 +262,18 @@ define(
                 assert.strictEqual(element.style[propertyA], overrideValueA1, 'Style value must be restored to its last value');
             });
 
+            test('Override shorthand style, restore style', function () {
+              var element       = document.createElement('div'),
+                  property      = 'transition',
+                  overrideValue = 'transform 0s',
+                  intendedValue = '';
+              inlineStyle.override(element, [property, overrideValue]);
+              assert.strictEqual(element.style.cssText, 'transition: transform 0s;', 'Shorthand property should be assigned to');
+              inlineStyle.restore(element, property);
+              assert.strictEqual(element.style.transition, intendedValue, 'Style value must match its intended value');
+              assert.strictEqual(element.style.cssText, '', 'Element\'s css text must be empty');
+            });
+
           after(function () {
               delete window.SC_EXTENSION;
           });

@@ -36,6 +36,18 @@ define([], function () {
     target.removeEventListener(type, fn, getThirdParam(opts));
   }
 
+  function once(target, type, fn, opts) {
+    var finalOpts = getThirdParam(opts);
+    // TODO: Remove this and rename cb to listener when native "once" option gets better support.
+    // https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener
+    var listener = function (evt) {
+      evt.currentTarget.removeEventListener(evt.type, listener, finalOpts);
+      fn(evt);
+    };
+
+    target.addEventListener(type, fn, finalOpts);
+  }
+
   function init() {
     try {
       var opts = Object.defineProperty({}, 'passive', {
@@ -49,8 +61,8 @@ define([], function () {
 
   return {
     on   : on,   // Note: use { passive: false } if you ever need to cancel the event!
+    once : once,
     off  : off,
     init: init
   };
-
 });

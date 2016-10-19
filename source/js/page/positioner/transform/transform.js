@@ -293,9 +293,6 @@ define(
 
           newYTranslation = correctedYTranslation;
         }
-        else if (topOutOfView) {
-          newYTranslation += toolbarHeight - top;
-        }
         else if (bottomOutOfView) {
           newYTranslation += viewportHeight - bottom;
         }
@@ -355,7 +352,7 @@ define(
       function onResize() {
         clearTimeout(resizeTimer);
         resizeTimer = nativeFn.setTimeout(function () {
-          targets.forEach(scaleTop);
+          targets.forEach(scaleTopInstant);
           transformAllTargets({
             resetTranslation: true,
             onResize: true
@@ -397,9 +394,9 @@ define(
       }
     }
 
-    function scaleTop(element) {
+    function scaleTopInstant(element) {
+      transitionUtil.disableStyleTransition(element, 'top');
       restoreTop(element);
-
       // Absolute elements return the used top value if there isn't one specified. Setting the position to static ensures
       // that only specified top values are returned with the computed style
       // EXCEPTION: IE returns the used value for both
@@ -409,15 +406,15 @@ define(
 
       var
         specifiedTop   = getComputedStyle(element).top,
-        specifiedValue = parseFloat(specifiedTop);
+        specifiedValue = parseFloat(specifiedTop),
+        newValue       = (specifiedValue * state.fixedZoom) + 'px';
 
-      if (!isNaN(specifiedValue) && specifiedTop.indexOf('px') >= 0) {
-        inlineStyle.override(element, {
-          top : (specifiedValue * state.fixedZoom) + 'px'
-        });
+      if (newValue !== specifiedValue && !isNaN(specifiedValue) && specifiedTop.indexOf('px') >= 0) {
+        inlineStyle.override(element, ['top', newValue]);
       }
 
       inlineStyle.restoreLast(element, 'position');
+      inlineStyle.restoreLast(element, 'transition');
     }
 
     function restoreTop(element) {
@@ -430,14 +427,12 @@ define(
       rectCache.listenForMutatedRect(element, function () {
         /*jshint validthis: true */
         if (targets.has(this)) {
-          scaleTop(element);
+          scaleTopAndTransform(element);
           fixZIndex(element);
-          refreshElementTransform(this);
         }
         /*jshint validthis: false */
       });
       rectCache.listenForMutatedRect(originalBody);
-      refreshElementTransform(element);
     }
 
     function onTargetRemoved(element) {
@@ -450,6 +445,12 @@ define(
       ]);
       refreshResizeListener();
       refreshScrollListener(element);
+    }
+
+    function scaleTopAndTransform(opts) {
+      var element = opts.element || opts;
+      scaleTopInstant(element);
+      refreshElementTransform(element);
     }
 
     function onScroll() {
@@ -532,7 +533,7 @@ define(
 
     function onZoom() {
       nativeFn.setTimeout(function () {
-        targets.forEach(scaleTop);
+        targets.forEach(scaleTopInstant);
         refresh();
       }, 0);
     }
