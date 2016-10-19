@@ -34,17 +34,8 @@ define(
   }
 
   function fixSelectElement(element, zoom) {
-    var appearance;
-
-    //if (platform.browser.isWebKit) {
-    //  appearance = '-webkit-appearance';
-    //}
-    //else {
-    //  appearance = '';
-    //}
-
     inlineStyle.override(element, ['transition', 'all 0s']);
-    inlineStyle.restore(element, ['font-size', 'width', 'height', 'transform', 'transform-origin', appearance]);
+    inlineStyle.restore(element, ['font-size', 'width', 'height', 'transform', 'transform-origin']);
 
     if (zoom === 1) {
       inlineStyle.restore(element, 'transition');
@@ -80,11 +71,6 @@ define(
     styles.height   = 'initial';
     styles.width    = 'initial';
     styles.fontSize = fontSize + 'em';
-
-    if (computedStyle[appearance] === 'menulist') {
-      // Menulist styles prevent certain css styles from taking effect, in this case width and height
-      styles[appearance] = 'menulist-button';
-    }
 
     inlineStyle.override(element, styles);
     nativeFn.setTimeout(function () {
