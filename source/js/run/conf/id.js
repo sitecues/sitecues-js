@@ -20,7 +20,6 @@ define(
       exports.pageView = pageView.getId();
       exports.user     = userId;
       exports.isValid  = exports.session && exports.pageView && exports.user;
-      console.log(exports);
     });
   }
 
