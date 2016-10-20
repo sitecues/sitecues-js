@@ -42,21 +42,21 @@ define(
 
   // This function is the entry point for the module. Depending on the arguments passed to the function, it will either
   // lock a single element's resolved property value, or lock all elements in the document matching a given resolved declaration
-  function lock() {
-    var
-      args = Array.prototype.slice.call(arguments, 0),
-      arg1 = args[0];
-    if (arg1.nodeType === Node.ELEMENT_NODE) {
-      lockElementProperty.apply(null, args);
+  function lock(target, opts) {
+    // Target can be either an element or a declaration
+    if (target.nodeType === Node.ELEMENT_NODE) {
+      lockElementProperty(target, opts);
     }
     else {
-      lockResolvedDeclaration.apply(null, args);
+      lockResolvedDeclaration(target, opts);
     }
   }
 
   // The handlers are run before and after the property's resolved value mutates
-  function lockElementProperty(element, property, handlers) {
-    handlers = handlers || {};
+  function lockElementProperty(element, opts) {
+    var handlers = opts.handlers || {},
+        property = opts.property;
+
     styleListener.init(function () {
       function onPropertyMutation(opts) {
         /*jshint validthis: true */
@@ -64,7 +64,7 @@ define(
           value            = opts.toValue,
           results          = [],
           elementHandlers  = elementHandlerMap.get(this),
-          propertyHandlers = elementHandlers[opts.property],
+          propertyHandlers = elementHandlers[property],
           beforeHandlers   = propertyHandlers.before,
           afterHandlers    = propertyHandlers.after;
 
@@ -82,9 +82,8 @@ define(
 
       var
         before           = handlers.before ? [handlers.before] : [],
-        after            = handlers.after ? [handlers.after] : [],
+        after            = handlers.after  ? [handlers.after]  : [],
         currentValue     = getComputedStyle(element)[property],
-        declaration      = { property: property, value: currentValue },
         elementHandlers  = elementHandlerMap.get(element) || {},
         propertyHandlers = elementHandlers[property];
 
@@ -94,14 +93,14 @@ define(
       }
       else {
         elementHandlers[property] = {
-          after  : [after],
-          before : [before]
+          after  : after,
+          before : before
         };
       }
 
       elementHandlerMap.set(element, elementHandlers);
       lockStyle(element, property, currentValue);
-      styleListener.bindPropertyListener(element, declaration, onPropertyMutation);
+      styleListener.bindPropertyListener(element, property, onPropertyMutation);
     });
   }
 
