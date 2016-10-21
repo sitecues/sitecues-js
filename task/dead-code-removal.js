@@ -58,7 +58,7 @@ function removeAllDeadCode(callback) {
     });
   }
 
-  glob(path.join(global.build.path, 'js', '**', '*.js'), onJsListingRetrieved);
+  glob(path.join(global.build.path + '/js/**/*.js'), onJsListingRetrieved);
 }
 
 removeAllDeadCode.displayName = 'remove-all-dead-code';

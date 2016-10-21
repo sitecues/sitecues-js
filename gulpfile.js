@@ -20,10 +20,11 @@ function prepare() {
   var getBuildData = require('build-data');
   return getBuildData()
     .then((buildData) => {
+      const config = Object.assign({}, buildData, { bucket });
       // Will use buildData to generate resource url
       global.buildBranch = buildData.branch;
       global.buildVersion = buildData.version;
-      return delivr.prepare({bucket});
+      return delivr.prepare(config);
     })
     .then((build) => {
       global.build = build;
@@ -31,12 +32,8 @@ function prepare() {
 }
 
 
-function finalize(callback) {
-  return global.build.finalize()
-    .then(() => {
-      const cmd = 'ln -sf ' + global.buildBranch + ' build/~latest-branch~';
-      exec(cmd, callback);
-    });
+function finalize() {
+  return global.build.finalize();
 }
 
 function cleanAll() {
