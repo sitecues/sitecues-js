@@ -12,6 +12,7 @@
 * */
 define(
   [
+    'exports',
     'page/positioner/style-lock/style-listener/style-listener',
     'page/positioner/constants',
     'run/constants',
@@ -19,6 +20,7 @@ define(
     'mini-core/native-global'
   ],
   function (
+    exports,
     styleListener,
     constants,
     coreConstants,
@@ -40,31 +42,29 @@ define(
 
   // This function is the entry point for the module. Depending on the arguments passed to the function, it will either
   // lock a single element's resolved property value, or lock all elements in the document matching a given resolved declaration
-  function lock() {
-    var
-      args = Array.prototype.slice.call(arguments, 0),
-      arg1 = args[0];
-    // Three arguments means an element is meant to be locked
-    if (typeof arg1 === null || arg1.nodeType === Node.ELEMENT_NODE) {
-      lockElementProperty.apply(null, args);
+  function lock(target, opts) {
+    // Target can be either an element or a declaration
+    if (target.nodeType === Node.ELEMENT_NODE) {
+      lockElementProperty(target, opts);
     }
     else {
-      lockResolvedDeclaration.apply(null, args);
+      lockResolvedDeclaration(target, opts);
     }
   }
 
   // The handlers are run before and after the property's resolved value mutates
-  function lockElementProperty(element, property, handlers) {
-    handlers = handlers || {};
-    styleListener.init(function () {
+  function lockElementProperty(element, opts) {
+    var handlers = opts.handlers || {},
+        property = opts.property;
 
+    styleListener.init(function () {
       function onPropertyMutation(opts) {
         /*jshint validthis: true */
         var
           value            = opts.toValue,
           results          = [],
           elementHandlers  = elementHandlerMap.get(this),
-          propertyHandlers = elementHandlers[opts.property],
+          propertyHandlers = elementHandlers[property],
           beforeHandlers   = propertyHandlers.before,
           afterHandlers    = propertyHandlers.after;
 
@@ -81,26 +81,26 @@ define(
       }
 
       var
-        before           = handlers.before || noop,
-        after            = handlers.after  || noop,
+        before           = handlers.before ? [handlers.before] : [],
+        after            = handlers.after  ? [handlers.after]  : [],
         currentValue     = getComputedStyle(element)[property],
-        declaration      = { property: property, value: currentValue },
         elementHandlers  = elementHandlerMap.get(element) || {},
         propertyHandlers = elementHandlers[property];
 
       if (propertyHandlers) {
-        propertyHandlers.before.push(before);
-        propertyHandlers.after.push(after);
+        propertyHandlers.before.concat(before);
+        propertyHandlers.after.concat(after);
       }
       else {
         elementHandlers[property] = {
-          after  : [after],
-          before : [before]
+          after  : after,
+          before : before
         };
       }
+
       elementHandlerMap.set(element, elementHandlers);
       lockStyle(element, property, currentValue);
-      styleListener.registerPropertyMutationHandler(element, declaration, onPropertyMutation);
+      styleListener.bindPropertyListener(element, property, onPropertyMutation);
     });
   }
 
@@ -259,6 +259,11 @@ define(
     }
   }
 
+  function isLocked(element, property) {
+    var handlerMap = elementHandlerMap.get(element);
+    return handlerMap && handlerMap[property];
+  }
+
   function insertStylesheet(css) {
     stylesheet = document.createElement('style');
     stylesheet.id = stylesheetId;
@@ -303,8 +308,8 @@ define(
     }
   }
 
-  lock.init        = init;
-  lock.unlockStyle = unlockStyle;
-
-  return lock;
+  exports.isLocked    = isLocked;
+  exports.unlockStyle = unlockStyle;
+  exports.lock        = lock;
+  exports.init        = init;
 });

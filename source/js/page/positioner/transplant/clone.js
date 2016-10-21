@@ -209,8 +209,9 @@ define(
       $sitecuesCloneSet.attr('id', '').attr('class', '');
     }
 
-    // We don't want clone elements to be visible
+    // Remove attributes tied to styles we're applying to anchor elements
     clone.removeAttribute(constants.ROOT_ATTR);
+    clone.removeAttribute(constants.ANCHOR_ATTR);
     // Remove all the style-locks from the clone element
     styleLock.unlockStyle(clone);
 

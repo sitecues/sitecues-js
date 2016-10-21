@@ -95,7 +95,7 @@ define(
   }
 
   function initFixedPositionListener() {
-    styleLock({
+    styleLock.lock({
         property : 'position',
         value    : 'fixed'
       }, {
@@ -266,9 +266,9 @@ define(
       return;
     }
 
-    init(function() {
+    init(function () {
       transform.init(toolbarHeight);
-      styleLock.init(function() {
+      styleLock.init(function () {
         // The toolbar may overlap with fixed elements so we'll need to transform them immediately
         // Fixed position elements are located and their position locked, so that we can run handlers before
         // and after the element's position changes.

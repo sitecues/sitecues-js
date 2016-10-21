@@ -116,9 +116,22 @@ define(
     return memoizedValue;
   }
 
-  function getIntendedStyles(element) {
+  function getIntendedStyle(element, property) {
     updateIntendedStyles();
-    return intendedStyleMap.get(element);
+    var intendedStyle = intendedStyleMap.get(element);
+
+    if (!property) {
+      // Return the cached intended styles, or undefined
+      return intendedStyle;
+    }
+
+    if (!intendedStyle) {
+      // If we haven't cached an inline value, return the current value
+      return getStyle(element)[property];
+    }
+
+    var propObj = intendedStyle[property];
+    return propObj ? propObj.value : '';
   }
 
   function getCurrentStyles(element) {
@@ -215,7 +228,7 @@ define(
         styleInfo        = record.styleInfo,
         // cssText was assigned in this case
         isCssOverwritten = typeof styleInfo === 'string',
-        intendedStyles   = isCssOverwritten ? {} : intendedStyleMap.get(element) || {},
+        intendedStyle    = isCssOverwritten ? {} : intendedStyleMap.get(element) || {},
         lastStyles       = isCssOverwritten ? {} : lastStyleMap.get(element) || {};
 
       if (isCssOverwritten) {
@@ -228,13 +241,13 @@ define(
 
       Object.keys(cssObject).forEach(function (property) {
         var declaration = cssObject[property];
-        intendedStyles[property] = objectUtil.assign({}, declaration);
+        intendedStyle[property] = objectUtil.assign({}, declaration);
         // We don't want a reversion to the `last styles`, the inline values of an element cached before its latest override, to clobber
         // dynamic updates to its intended styles.
-        lastStyles[property]     = objectUtil.assign({}, declaration);
+        lastStyles[property]    = objectUtil.assign({}, declaration);
       });
 
-      intendedStyleMap.set(element, intendedStyles);
+      intendedStyleMap.set(element, intendedStyle);
       lastStyleMap.set(element, lastStyles);
     });
 
@@ -290,23 +303,23 @@ define(
   function restore(element, props) {
     var properties,
       style          = getStyle(element),
-      intendedStyles = getIntendedStyles(element);
+      intendedStyle = getIntendedStyle(element);
 
     // Styles only need to be restored if we have overridden them.
-    if (!intendedStyles) {
+    if (!intendedStyle) {
       return;
     }
 
     if (props) {
       properties = arrayUtil.wrap(props).map(toKebabCase);
       properties.forEach(function (property) {
-        restoreStyleValue(style, property, intendedStyles);
+        restoreStyleValue(style, property, intendedStyle);
       });
       // Only restore the specified properties
       return;
     }
 
-    var cssText = stringifyCss(intendedStyles);
+    var cssText = stringifyCss(intendedStyle);
 
     if (cssText) {
       style.cssText = cssText;
@@ -471,6 +484,7 @@ define(
   getStyle.restoreLast    = restoreLast;
   getStyle.removeProperty = removeProperty;
   getStyle.clear          = clearStyle;
+  getStyle.getIntendedStyle = getIntendedStyle;
   getStyle.init           = init;
 
   return getStyle;
