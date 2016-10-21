@@ -20,7 +20,6 @@ define(
     'core/constants',
     'nativeFn',
     'core/inline-style/inline-style',
-    'core/util/object-utility',
     'page/util/transition-util',
     'page/positioner/style-lock/style-lock'
   ],
@@ -36,8 +35,7 @@ define(
     elementMap,
     coreConstants,
     nativeFn,
-    inlineStyle,    
-    objectUtil,
+    inlineStyle,
     transitionUtil,
     styleLock
   ) {
@@ -187,20 +185,33 @@ define(
         return;
       }
 
-      unresolvedProperties.add(property);
-
-      var isLocked = styleLock.isLocked(element, property);
+      var transitionInfo = transitionUtil.getTransitionInfo(element),
+          isLocked = styleLock.isLocked(element, property);
 
       if (isLocked) {
-        // We need to remove the style lock in order to compute the intended resolved value
         styleLock.unlockStyle(element, property);
       }
-      // We also restore the inline property to its intended value
-      inlineStyle.restore(element, property);
-      transitionUtil.getFinalStyleValue(element, property).then(function (value) {
+
+      if (!transitionUtil.canPropertyTransition({ transitionInfo : transitionInfo, property : property })) {
+        var value = getComputedStyle(element)[property];
+
         if (isLocked) {
           styleLock.lock(element, property);
         }
+
+        // If this style can't transition, we can compute its resolved value synchronously and run the relevant property handlers
+        runPropertyHandlers(element, {
+          property : property,
+          value : value
+        });
+        return;
+      }
+
+      unresolvedProperties.add(property);
+
+      // We also restore the inline property to its intended value
+      inlineStyle.restore(element, property);
+      transitionUtil.getFinalStyleValue(element, { property : property, transitionInfo : transitionInfo }).then(function (value) {
         // The inline value is restored to its previous (potentially overridden by us) value
         inlineStyle.restoreLast(element, property);
         unresolvedProperties.delete(property);
@@ -211,7 +222,7 @@ define(
         });
       });
     });
-      }
+  }
 
   function runPropertyHandlers(element, opts) {
     var handlerKey,
@@ -229,24 +240,24 @@ define(
           toValue   : value,
           fromValue : cachedValue
         };
-
+    
     function runHandlers(directionHandlers) {
-      directionHandlers.forEach(function (handlerOpts, propertyHandlers) {
+      directionHandlers.forEach(function (propertyHandlers) {
         for (var i = 0, handlerCount = propertyHandlers.length; i < handlerCount; i++) {
           propertyHandlers[i].call(element, handlerOpts);
         }
       });
-      }
+    }
 
     if (propertyHandlers && cachedValue !== value) {
-        // These element handlers run when the element's resolved value for a given style property has mutated from its cached value
-        propertyHandlers.forEach(function (fn) {
+      // These element handlers run when the element's resolved value for a given style property has mutated from its cached value
+      propertyHandlers.forEach(function (fn) {
         fn.call(element, handlerOpts);
-        });
-      }
-
-      for (var i = 0, valueCount = observedValues.length; i < valueCount; i++) {
-        var handlers,
+      });
+    }
+  
+    for (var i = 0, valueCount = observedValues.length; i < valueCount; i++) {
+      var handlers,
           // Style value we're listening for, e.g. 'fixed' or 'absolute'
           observedValue    = observedValues[i],
           declarationKey   = property + '_' + observedValue,
@@ -254,24 +265,24 @@ define(
           isMatching       = value === observedValue,
           elementIndex     = resolvedElements.indexOf(element),
           wasMatching      = elementIndex !== -1;
-
-        if (isMatching && !wasMatching) {
-          handlerKey = 'to_' + declarationKey;
-          handlers = handlerMap[handlerKey];
-          if (handlers) {
-          toHandlers.set(handlers, handlerOpts);
-          }
-          resolvedElements.push(element);
+    
+      if (isMatching && !wasMatching) {
+        handlerKey = 'to_' + declarationKey;
+        handlers = handlerMap[handlerKey];
+        if (handlers) {
+          toHandlers.push(handlers);
         }
-        else if (!isMatching && wasMatching) {
-          handlerKey = 'from_' + declarationKey;
-          handlers = handlerMap[handlerKey];
-          if (handlers) {
-          fromHandlers.set(handlers, handlerOpts);
-          }
-          resolvedElements.splice(elementIndex, 1);
-        }
+        resolvedElements.push(element);
       }
+      else if (!isMatching && wasMatching) {
+        handlerKey = 'from_' + declarationKey;
+        handlers = handlerMap[handlerKey];
+        if (handlers) {
+          fromHandlers.push(handlers);
+        }
+        resolvedElements.splice(elementIndex, 1);
+      }
+    }
 
     elementInfo.setCacheValue(element, property, value);
     runHandlers(fromHandlers);
@@ -296,12 +307,6 @@ define(
     });
 
     domObserver.observe(originalBody, observerOptions);
-
-    var docObserverOpts = objectUtil.assign({}, observerOptions);
-    delete docObserverOpts.subtree;
-    // We want to observe the document element because fixed selectors may rely on classes attached directly
-    // to the document element
-    domObserver.observe(docElem, docObserverOpts);
   }
 
   function listenForDynamicStyling(property) {
@@ -361,18 +366,17 @@ define(
   }
 
   // Runs the passed handler when @element's resolved style @property value has changed
-  function bindPropertyListener(element, declarationOrProperty, handler) {
+  function bindPropertyListener(element, property, handler) {
     var
-      declaration        = typeof declarationOrProperty === 'object' ? declarationOrProperty : { property: declarationOrProperty },
-      property           = declaration.property,
-      value              = declaration.value,
+      resolvedValue      = getComputedStyle(element)[property],
       isPropertyObserved = observedProperties.indexOf(property) !== -1,
       handlers           = elementPropertyHandlerMap.get(element) || {},
       inlineValue        = inlineStyle.getIntendedStyle(element, property);
 
     // Cache the current inline value so that we can tell if it changes
     elementMap.setField(element, getInlineKey(property), inlineValue);
-    addToResolvedElementsMap(element, property, value);
+
+    addToResolvedElementsMap(element, property, resolvedValue);
 
     // If we've already attached handlers to run when this element's resolved property value mutates,
     // we know that we're already listening for relevant document mutations

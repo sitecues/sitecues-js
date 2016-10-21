@@ -397,6 +397,12 @@ define(
     function scaleTopInstant(element) {
       transitionUtil.disableStyleTransition(element, 'top');
       restoreTop(element);
+
+      if (state.completedZoom === 1) {
+        // We don't need to scale the top if we aren't zooming
+        return;
+      }
+
       // Absolute elements return the used top value if there isn't one specified. Setting the position to static ensures
       // that only specified top values are returned with the computed style
       // EXCEPTION: IE returns the used value for both
@@ -433,6 +439,8 @@ define(
         /*jshint validthis: false */
       });
       rectCache.listenForMutatedRect(originalBody);
+      scaleTopAndTransform(element);
+      fixZIndex(element);
     }
 
     function onTargetRemoved(element) {
@@ -447,8 +455,7 @@ define(
       refreshScrollListener(element);
     }
 
-    function scaleTopAndTransform(opts) {
-      var element = opts.element || opts;
+    function scaleTopAndTransform(element) {
       scaleTopInstant(element);
       refreshElementTransform(element);
     }

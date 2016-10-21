@@ -148,9 +148,21 @@ define(
         /*jshint validthis: false */
       });
 
-      styleLock.lock(element, 'display', {
-        before: clearCache,
-        after: handler
+      styleLock.lock(element, {
+        property : 'display',
+        handlers : {
+          before : clearCache,
+          after  : handler
+        }
+      });
+
+      styleLock.lock(element, {
+        property : 'position',
+        handlers : {
+          before: clearCache
+          // We don't need to bind another handler for resolving to a new position value, because the positioner
+          // takes care of element transformation
+        }
       });
 
       // This listener is a hacky way to detect if jQuery.fadeIn / fadeOut has been called on an element
@@ -160,11 +172,6 @@ define(
         /*jshint validthis: true */
         styleLock.unlockStyle(this, 'display');
         /*jshint validthis: false */
-      });
-
-      styleLock.lock(element, 'position', {
-        before: clearCache
-        // Position is a special case, we already run handlers when elements change their position
       });
 
       observedElementMap.set(element, true);

@@ -94,8 +94,7 @@ define(
     var rule,
       ruleValue,
       cssStyleDeclaration,
-      styleResults = [],
-      index = 0;
+      styleResults = [];
 
     function getMediaTypeFromCssText(rule) {
       // Change @media MEDIA_QUERY_RULES { to just MEDIA_QUERY_RULES
