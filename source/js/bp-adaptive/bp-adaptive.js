@@ -10,9 +10,9 @@
  */
 define(
   [
-    'core/bp/model/state',
-    'core/bp/view/view',
-    'core/bp/constants',
+    'run/bp/model/state',
+    'run/bp/view/view',
+    'run/bp/constants',
     'mini-core/native-global'
   ],
   function (

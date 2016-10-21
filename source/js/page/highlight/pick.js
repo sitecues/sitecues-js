@@ -29,14 +29,14 @@ define(
   [
     '$',
     'page/util/common',
-    'core/conf/preferences',
-    'core/conf/site',
+    'run/conf/preferences',
+    'run/conf/site',
     'page/highlight/traitcache',
     'page/highlight/traits',
     'page/highlight/judge',
     'mini-core/native-global',
-    'core/inline-style/inline-style',
-    'core/platform'
+    'run/inline-style/inline-style',
+    'run/platform'
   ],
   function (
     $,

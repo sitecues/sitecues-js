@@ -2,7 +2,7 @@
 define(
   [
     '$',
-    'core/conf/preferences'
+    'run/conf/preferences'
   ],
   function (
     $,

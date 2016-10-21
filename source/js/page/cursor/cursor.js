@@ -10,10 +10,10 @@ define(
   [
     '$',
     'page/style-service/style-service',
-    'core/conf/preferences',
+    'run/conf/preferences',
     'page/cursor/cursor-css',
-    'core/platform',
-    'core/events',
+    'run/platform',
+    'run/events',
     'mini-core/native-global'
   ],
   function (
@@ -99,7 +99,7 @@ define(
       pendingRules: [ rule ]
     };
 
-    require(['core/util/xhr'], function (xhr) {
+    require(['run/util/xhr'], function (xhr) {
       xhr.get({
         url: url,
         crossDomain: true,

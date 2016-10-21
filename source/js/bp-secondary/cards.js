@@ -3,15 +3,15 @@
  */
 define(
   [
-    'core/bp/constants',
-    'core/bp/helper',
-    'core/locale',
-    'core/bp/model/state',
-    'core/util/xhr',
-    'core/conf/urls',
-    'core/events',
-    'core/platform',
-    'core/inline-style/inline-style'
+    'run/bp/constants',
+    'run/bp/helper',
+    'run/locale',
+    'run/bp/model/state',
+    'run/util/xhr',
+    'run/conf/urls',
+    'run/events',
+    'run/platform',
+    'run/inline-style/inline-style'
   ],
   function (
     BP_CONST,

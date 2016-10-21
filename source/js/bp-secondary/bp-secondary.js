@@ -3,19 +3,19 @@
  */
 define(
   [
-    'core/bp/constants',
-    'core/bp/model/state',
-    'core/bp/view/view',
-    'core/bp/helper',
+    'run/bp/constants',
+    'run/bp/model/state',
+    'run/bp/view/view',
+    'run/bp/helper',
     'bp-expanded/view/transform-animate',
     'bp-expanded/view/transform-util',
-    'core/locale',
-    'core/platform',
+    'run/locale',
+    'run/platform',
     'bp-secondary/insert-secondary-markup',
     'bp-secondary/bp-secondary-features',
-    'core/events',
+    'run/events',
     'mini-core/native-global',
-    'core/inline-style/inline-style'
+    'run/inline-style/inline-style'
   ],
   function (
     BP_CONST,

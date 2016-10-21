@@ -2,9 +2,8 @@
  * Use closure compiler to remove dead code -- it does a much better job than uglify
  */
 
-var closureCompiler = require('closure-compiler'),
+const closureCompiler = require('closure-compiler'),
   fs = require('fs'),
-  config = require('./build-config'),
   glob = require('glob'),
   closureOptions = {
     // DON'T USE 'ADVANCED':
@@ -24,7 +23,7 @@ function removeDeadCode(jsFileName, onErrorCallback, onWriteComplete) {
     }
   }
 
-  var sitecuesJsFileName = jsFileName;
+  const sitecuesJsFileName = jsFileName;
 
   function beginCompile(err, sourceBuffer) {
     if (err) {
@@ -37,7 +36,7 @@ function removeDeadCode(jsFileName, onErrorCallback, onWriteComplete) {
 }
 
 function removeAllDeadCode(callback) {
-  var numFilesRemaining;
+  let numFilesRemaining;
 
   function onWriteComplete(err) {
     if (err) {
@@ -58,7 +57,7 @@ function removeAllDeadCode(callback) {
     });
   }
 
-  glob(config.buildDir + '/js/**/*.js', onJsListingRetrieved);
+  glob(global.build.path + '/js/**/*.js', onJsListingRetrieved);
 }
 
 removeAllDeadCode.displayName = 'remove-all-dead-code';

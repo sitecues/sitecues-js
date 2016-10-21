@@ -12,8 +12,8 @@ define(
   [
     '$',
     'page/util/color',
-    'core/conf/site',
-    'core/conf/urls',
+    'run/conf/site',
+    'run/conf/urls',
     'inverter/invert-url',
     'inverter/orig-bg-info',
     'mini-core/native-global'

@@ -13,16 +13,16 @@
 define(
   [
     'audio/constant',
-    'core/conf/preferences',
-    'core/conf/site',
+    'run/conf/preferences',
+    'run/conf/site',
     '$',
     'audio/speech-builder',
-    'core/locale',
-    'core/metric/metric',
-    'core/conf/urls',
+    'run/locale',
+    'run/metric/metric',
+    'run/conf/urls',
     'audio/text-select',
-    'core/data-map',
-    'core/events',
+    'run/data-map',
+    'run/events',
     'audio/local-player',
     'audio/network-player'
   ],

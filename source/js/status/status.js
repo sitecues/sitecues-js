@@ -1,9 +1,9 @@
 define(
   [
-    'core/conf/urls',
-    'core/util/xhr',
-    'core/conf/preferences',
-    'core/conf/site',
+    'run/conf/urls',
+    'run/util/xhr',
+    'run/conf/preferences',
+    'run/conf/site',
     'mini-core/native-global'
   ],
   function (

@@ -6,10 +6,10 @@ define(
     'page/highlight/pick',
     'page/zoom/util/body-geometry',
     'page/util/geo',
-    'core/events',
+    'run/events',
     'page/highlight/fixed-elements',
     'mini-core/native-global',
-    'core/inline-style/inline-style'
+    'run/inline-style/inline-style'
   ],
   function (
     $,

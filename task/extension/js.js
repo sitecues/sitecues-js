@@ -122,7 +122,7 @@ function compressLibrary() {
     .pipe(replace('platform.browser.isChrome', 'true'))
     .pipe(replace('platform.browser.isWebKit', 'true'))
     .pipe(uglify(uglifyOptions))
-    .pipe(gulp.dest(config.buildDir + '/js'));
+    .pipe(gulp.dest(global.build.path + '/js'));
 }
 
 function compileLibrary() {
@@ -133,7 +133,7 @@ function compileLibrary() {
 }
 
 function showSizes() {
-  return gulp.src(config.buildDir + '/**/*.js')
+  return gulp.src(global.build.path + '/**/*.js')
     .pipe(size({ pretty: true, gzip: true, showFiles: true }));
 }
 
@@ -144,7 +144,7 @@ function noop(callback) {
 function copyScripts(glob) {
   return gulp.src(glob)
     .pipe(uglify(uglifyOptions))
-    .pipe(gulp.dest(config.resourceDir + '/js'));
+    .pipe(gulp.dest(global.build.path + '/js'));
 }
 
 function copyExtensionScripts() {

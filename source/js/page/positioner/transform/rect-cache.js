@@ -1,11 +1,11 @@
 define(
   [
     '$',
-    'core/bp/helper',
+    'run/bp/helper',
     'page/positioner/style-lock/style-lock',
     'page/positioner/style-lock/style-listener/style-listener',
-    'core/events',
-    'core/dom-events',
+    'run/events',
+    'run/dom-events',
     'page/viewport/viewport'
   ],
   function (

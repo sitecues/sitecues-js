@@ -1,16 +1,16 @@
 define(
   [
     '$',
-    'core/conf/site',
-    'core/conf/urls',
+    'run/conf/site',
+    'run/conf/urls',
     'hlb/dimmer',
-    'core/platform',
-    'core/locale',
+    'run/platform',
+    'run/locale',
     'page/util/color',
-    'core/events',
-    'core/util/ids',
+    'run/events',
+    'run/util/ids',
     'mini-core/native-global',
-    'core/inline-style/inline-style'
+    'run/inline-style/inline-style'
   ],
   function (
     $,
@@ -132,7 +132,8 @@ define(
           siteUrl: hostUrl.protocol + '//' + hostUrl.hostname + ':' + hostUrl.port,
           sessionId: ids.sessionId,
           pageViewId: ids.pageViewId,
-          prefs: window.localStorage.sitecues
+          prefs: window.localStorage.sitecues,
+          appUrl: site.get('appUrl')
         });
 
     events.emit('info/did-show');

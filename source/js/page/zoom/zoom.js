@@ -5,9 +5,9 @@
 define(
   [
     '$',
-    'core/conf/preferences',
-    'core/events',
-    'core/modifier-key-state',
+    'run/conf/preferences',
+    'run/events',
+    'run/modifier-key-state',
     'page/zoom/animation',
     'page/zoom/util/body-geometry',
     'page/zoom/state',
@@ -18,7 +18,7 @@ define(
     'page/viewport/scrollbars',
     'mini-core/native-global',
     'page/zoom/flash',
-    'core/inline-style/inline-style'
+    'run/inline-style/inline-style'
   ],
   /*jshint -W072 */ //Currently there are too many dependencies, so we need to tell JSHint to ignore it for now
   function (

@@ -14,7 +14,7 @@ define(
   [
     'page/positioner/style-lock/style-listener/style-listener',
     'page/positioner/constants',
-    'core/constants',
+    'run/constants',
     'page/positioner/util/element-info',
     'mini-core/native-global'
   ],

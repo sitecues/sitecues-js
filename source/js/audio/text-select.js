@@ -5,7 +5,7 @@
 define(
   [
     '$',
-    'core/events',
+    'run/events',
     'audio/constant',
     'mini-core/native-global'
   ],

@@ -25,14 +25,14 @@ var config = require('../build-config.js'),
       // In runtime config, via definePrim : 'Promise' to allow use of alameda's built-in Prim library
       'Promise': 'empty:',
       // DIFFERENT in the extension
-      'core/conf/user/storage': '../../extension/source/js/overrides/storage',
-      'core/conf/user/storage-backup': '../../extension/source/js/overrides/storage-backup',
+      'run/conf/user/storage': '../../extension/source/js/overrides/storage',
+      'run/conf/user/storage-backup': '../../extension/source/js/overrides/storage-backup',
       'nativeFn': '../../extension/source/js/overrides/native-functions',
-      'core/data-map': config.tmpDir + '/data-map',
+      'run/data-map': config.tmpDir + '/data-map',
       // UNUSED in the extension
-      'core/errors': 'empty:',
-      'core/bp/badge/page-badge': 'empty:',
-      'core/bp/badge/palette': 'empty:',
+      'run/errors': 'empty:',
+      'run/bp/badge/page-badge': 'empty:',
+      'run/bp/badge/palette': 'empty:',
       'bp-img-placeholder/bp-img-placeholder/': 'empty:',
       'bp-adaptive/bp-adaptive': 'empty:',
       'network-player/network-player': 'empty:'
@@ -42,7 +42,7 @@ var config = require('../build-config.js'),
         '$': 'empty:'  // Extension always uses jQuery in order to be compatible with pages that use Prototype.js
       }
     },
-    insertRequire: [ 'core/core' ]
+    insertRequire: [ 'core/run' ]
   };
 
 // Get a list of data modules, which are any .js files in data folders listed in source-folders.json

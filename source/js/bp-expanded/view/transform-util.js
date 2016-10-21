@@ -7,8 +7,8 @@
 
 define(
   [
-    'core/inline-style/inline-style',
-    'core/platform'
+    'run/inline-style/inline-style',
+    'run/platform'
   ],
   function (
     inlineStyle,

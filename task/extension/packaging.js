@@ -1,14 +1,7 @@
 'use strict';
 
 var exec = require('child_process').exec,
-  config = require('../build-config'),
-  gulp = require('gulp');
-
-// Currently no metadata for extension
-function prepare() {
-  return gulp.src(config.metaDataGlob)
-    .pipe(gulp.dest(config.resourceDir));
-}
+  config = require('../build-config');
 
 function finalize(callback) {
   var fileName = 'sitecues-everywhere-' + config.version + '.zip',
@@ -16,7 +9,4 @@ function finalize(callback) {
   exec(zipCommand, { cwd: config.baseBuildDir }, callback);
 }
 
-module.exports = {
-  prepare: prepare,
-  finalize: finalize
-};
+module.exports = finalize;

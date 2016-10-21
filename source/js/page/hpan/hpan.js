@@ -1,9 +1,9 @@
 define(
   [
     'page/zoom/util/body-geometry',
-    'core/events',
+    'run/events',
     'page/viewport/viewport',
-    'core/dom-events',
+    'run/dom-events',
     'page/zoom/zoom'
   ],
   function (
