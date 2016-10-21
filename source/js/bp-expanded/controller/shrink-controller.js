@@ -3,13 +3,13 @@
  */
 define(
   [
-    'core/bp/constants',
-    'core/bp/model/state',
-    'core/bp/helper',
-    'core/metric/metric',
-    'core/bp/view/view',
-    'core/events',
-    'core/dom-events',
+    'run/bp/constants',
+    'run/bp/model/state',
+    'run/bp/helper',
+    'run/metric/metric',
+    'run/bp/view/view',
+    'run/events',
+    'run/dom-events',
     'mini-core/native-global'
   ],
   function (

@@ -12,7 +12,7 @@ var gulp = require('gulp'),
 function css() {
   var source = gulp.src(config.cssGlob),
     processedSource = config.isMinifying ? source.pipe(minifyCss()) : source;
-  return processedSource.pipe(gulp.dest(config.resourceDir + '/css'));
+  return processedSource.pipe(gulp.dest(global.build.path + '/css'));
 }
 
 // HTML -- minify (only plain .html files, not from html we create via templates)
@@ -20,7 +20,7 @@ function html() {
   var source = gulp.src(config.htmlGlob),
     processedSource = config.isMinifying ? source.pipe(cleanHtml()) : source;
   return processedSource
-    .pipe(gulp.dest(config.resourceDir + '/html'));
+    .pipe(gulp.dest(global.build.path + '/html'));
 }
 
 // Images that are SVG -- minify them
@@ -28,19 +28,19 @@ function svg() {
   var source = gulp.src(config.svgGlob),
     processedSource = config.isMinifying ? source.pipe(cleanHtml()) : source;
   return processedSource
-    .pipe(gulp.dest(config.resourceDir + '/images'));
+    .pipe(gulp.dest(path.join(global.build.path, 'images')));
 }
 
 // Images that are not SVG -- just copy them
 function raster() {
   return gulp.src(config.rasterGlob)
-    .pipe(gulp.dest(config.resourceDir + '/images'));
+    .pipe(gulp.dest(path.join(global.build.path, 'images')));
 }
 
 // Earcons only get copied (in the future we may choose to auto-convert them to the different file types we need -- mp3 and ogg)
 function earcons() {
   return gulp.src(config.earconsGlob)
-    .pipe(gulp.dest(config.resourceDir + '/earcons'));
+    .pipe(gulp.dest(path.join(global.build.path, 'earcons')));
 }
 
 function writeSimplifiedVersionMap(sourceVersionMap) {
@@ -81,7 +81,7 @@ function writeSimplifiedVersionMap(sourceVersionMap) {
         stringBuilder += '\n' + siteId + '|' + getFinalVersion(version) + '|' + friendlyName;
       }
     }
-    const outputFileName = path.join(config.buildDir, 'version-map.bsv');
+    const outputFileName = path.join(global.build.path, 'version-map.bsv');
     fs.writeFile(outputFileName, stringBuilder, (err) => {
       if (err) {
         throw err;

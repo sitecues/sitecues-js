@@ -6,7 +6,7 @@ define(
   [
     '$',
     'page/style-service/user-agent-css',
-    'core/conf/urls',
+    'run/conf/urls',
     'page/style-service/media-queries',
     'mini-core/native-global'
   ],

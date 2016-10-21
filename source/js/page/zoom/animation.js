@@ -2,11 +2,11 @@
 define(
   [
     '$',
-    'core/conf/preferences',
-    'core/platform',
-    'core/events',
-    'core/metric/metric',
-    'core/errors',
+    'run/conf/preferences',
+    'run/platform',
+    'run/events',
+    'run/metric/metric',
+    'run/errors',
     'page/util/common',
     'page/zoom/state',
     'page/zoom/constants',
@@ -17,7 +17,7 @@ define(
     'page/zoom/style',
     'page/viewport/scrollbars',
     'mini-core/native-global',
-    'core/inline-style/inline-style'
+    'run/inline-style/inline-style'
   ],
   function (
     $,

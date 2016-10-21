@@ -8,11 +8,11 @@
 
 define(
   [
-    'core/platform',
+    'run/platform',
     'page/viewport/viewport',
     'mini-core/native-global',
     'page/zoom/util/body-geometry',
-    'core/inline-style/inline-style'
+    'run/inline-style/inline-style'
   ],
   function (
     platform,

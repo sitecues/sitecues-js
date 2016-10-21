@@ -5,10 +5,10 @@
 
 define(
   [
-    'core/util/object-utility',
-    'core/inline-style/inline-style',
+    'run/util/object-utility',
+    'run/inline-style/inline-style',
     'bp-expanded/view/transform-util',
-    'core/platform'
+    'run/platform'
   ],
   function (
     objectUtil,

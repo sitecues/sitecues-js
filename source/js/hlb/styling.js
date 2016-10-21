@@ -7,10 +7,10 @@ define(
   [
     '$',
     'page/util/common',
-    'core/conf/preferences',
+    'run/conf/preferences',
     'hlb/constants',
-    'core/inline-style/inline-style',
-    'core/util/array-utility'
+    'run/inline-style/inline-style',
+    'run/util/array-utility'
   ],
   function (
     $,

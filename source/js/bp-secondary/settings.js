@@ -1,16 +1,16 @@
 define(
   [
-    'core/bp/constants',
-    'core/bp/helper',
-    'core/conf/preferences',
-    'core/bp/model/state',
-    'core/metric/metric',
-    'core/platform',
+    'run/bp/constants',
+    'run/bp/helper',
+    'run/conf/preferences',
+    'run/bp/model/state',
+    'run/metric/metric',
+    'run/platform',
     'page/cursor/cursor',
-    'core/events',
-    'core/dom-events',
+    'run/events',
+    'run/dom-events',
     'mini-core/native-global',
-    'core/inline-style/inline-style'
+    'run/inline-style/inline-style'
   ],
   function (
     BP_CONST,

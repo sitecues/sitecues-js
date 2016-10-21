@@ -5,7 +5,7 @@
 define(
   [
     '$',
-    'core/conf/preferences',
+    'run/conf/preferences',
     'page/highlight/pick',
     'page/highlight/traitcache',
     'page/highlight/highlight-position',
@@ -13,14 +13,14 @@ define(
     'page/util/color',
     'page/util/geo',
     'page/util/element-classifier',
-    'core/platform',
+    'run/platform',
     'page/highlight/constants',
-    'core/events',
-    'core/dom-events',
+    'run/events',
+    'run/dom-events',
     'page/zoom/zoom',
     'page/zoom/util/body-geometry',
     'mini-core/native-global',
-    'core/inline-style/inline-style'
+    'run/inline-style/inline-style'
   ],
   function (
     $,

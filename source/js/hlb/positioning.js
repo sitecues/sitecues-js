@@ -7,12 +7,12 @@
 define(
   [
     '$',
-    'core/conf/pref',
+    'run/conf/preferences',
     'hlb/styling',
     'page/util/common',
     'page/util/element-classifier',
     'hlb/safe-area',
-    'core/inline-style/inline-style'
+    'run/inline-style/inline-style'
   ],
   function (
     $,

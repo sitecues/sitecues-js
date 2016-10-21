@@ -1,4 +1,4 @@
-define(['core/platform', 'page/zoom/constants', 'page/util/color', 'core/conf/urls'], function (platform, ZOOM_CONST, colorUtil, urls) {
+define(['run/platform', 'page/zoom/constants', 'page/util/color', 'run/conf/urls'], function (platform, ZOOM_CONST, colorUtil, urls) {
   // Viewbox coordinates are multiplied by 10 so that we can remove coordinates from our decimal places
   // Also, viewbox left side begins at -10px (-100) so that the left side of the thumb shows up in the hand cursor on Windows
   var PREFIX = '<svg xmlns="http://www.w3.org/2000/svg" width="SIDE" height="SIDE" viewBox="-100,0,SIDE0,SIDE0"><defs><filter id="d" width="200%" height="200%"><feOffset result="offOut" in="SourceAlpha" dx="2.5" dy="5" /><feGaussianBlur result="blurOut" in="offOut" stdDeviation="5" /><feBlend in="SourceGraphic" in2="blurOut" mode="normal" /></filter></defs><g transform="scale(SIZE)" filter="url(#d)">',

@@ -1,9 +1,13 @@
 'use strict';
 
+const delivr = require('delivr'),
+  buildType = process.env.TYPE || 'common',
+  bucket = buildType === 'common' ? 'sitecues-js' : 'sitecues-' + buildType; // Special case, common -> sitecues-js
+
 var gulp = require('gulp'),
   lint = require('./task/lint'), // Include compileJs task
   config = require('./task/build-config'),
-  targetTaskFolder = './task/' + config.buildType,
+  targetTaskFolder = './task/' + buildType,
   js = require(targetTaskFolder + '/js'),
   packaging = require(targetTaskFolder + '/packaging'),
   templates = require('./task/templates'),
@@ -12,19 +16,35 @@ var gulp = require('gulp'),
   exec = require('child_process').exec,
   del = require('del'); // If we want to do clean
 
-function cleanAll() {
-  return del(config.baseBuildDir);
+function prepare() {
+  var getBuildData = require('build-data');
+  return getBuildData()
+    .then((buildData) => {
+      const config = Object.assign({}, buildData, { bucket });
+      // Will use buildData to generate resource url
+      global.buildBranch = buildData.branch;
+      global.buildVersion = buildData.version;
+      return delivr.prepare(config);
+    })
+    .then((build) => {
+      global.build = build;
+    });
 }
 
-function cleanTarget() {
-  return del(config.baseBuildDir + '/' + config.buildType);
+
+function finalize() {
+  return global.build.finalize();
+}
+
+function cleanAll() {
+  return del('build');
 }
 
 function noop(callback) {
   callback();
 }
 
-var clean = config.isCleaningAll ? cleanAll : (config.isCleaningTarget ? cleanTarget : noop);
+var clean = config.isCleaningAll ? cleanAll : noop;
 
 // Report build configuration information, including versions
 function reportConfig(callback) {
@@ -71,16 +91,22 @@ var build =
     'js'
   );
 gulp.task(cleanAll);
-gulp.task(cleanTarget);
 gulp.task('build', build);
 gulp.task(reportConfig);
-var defaultSeries = [reportConfig, clean, 'build', packaging.prepare ]
+var defaultSeries = [ prepare, reportConfig, clean, 'build', finalize ]
   .concat(config.postBuildCommand ? runPostBuildCommand : []);
 gulp.task('default', gulp.series.apply(gulp, defaultSeries));
-gulp.task('package', gulp.series('default', packaging.finalize));
+gulp.task('package', gulp.series('default', packaging ));
 
 // Watcher tasks
 gulp.task(function watch() {
+
+  global.build = {
+    path : 'latest-build'
+  };
+  global.buildVersion = 'latest';
+  global.buildBranch = '~latest-branch~';
+
   // JS
   var sourceFolders = Object.keys(js.compileFunctionMap);
   sourceFolders.forEach(function(sourceFolder) {

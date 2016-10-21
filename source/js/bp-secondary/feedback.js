@@ -1,13 +1,13 @@
 define(
   [
-    'core/bp/constants',
-    'core/bp/helper',
-    'core/bp/model/state',
-    'core/metric/metric',
-    'core/bp/view/view',
-    'core/events',
+    'run/bp/constants',
+    'run/bp/helper',
+    'run/bp/model/state',
+    'run/metric/metric',
+    'run/bp/view/view',
+    'run/events',
     'mini-core/native-global',
-    'core/inline-style/inline-style'
+    'run/inline-style/inline-style'
   ],
   function (
     BP_CONST,

@@ -4,7 +4,7 @@
 
 var closureCompiler = require('closure-compiler'),
   fs = require('fs'),
-  config = require('./build-config'),
+  path = require('path'),
   glob = require('glob'),
   closureOptions = {
     // DON'T USE 'ADVANCED':
@@ -58,7 +58,7 @@ function removeAllDeadCode(callback) {
     });
   }
 
-  glob(config.buildDir + '/js/**/*.js', onJsListingRetrieved);
+  glob(path.join(global.build.path + '/js/**/*.js'), onJsListingRetrieved);
 }
 
 removeAllDeadCode.displayName = 'remove-all-dead-code';

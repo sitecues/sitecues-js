@@ -2,16 +2,16 @@
  Slider Controller
  */
 define([
-  'core/bp/constants',
+  'run/bp/constants',
   'page/zoom/constants',
-  'core/bp/helper',
-  'core/platform',
-  'core/bp/model/state',
+  'run/bp/helper',
+  'run/platform',
+  'run/bp/model/state',
   'bp-expanded/view/slider',
   'page/zoom/zoom',
   'page/zoom/animation',
-  'core/events',
-  'core/dom-events'
+  'run/events',
+  'run/dom-events'
 ],
   function (BP_CONST,
             ZOOM_CONST,

@@ -5,7 +5,7 @@
    */
 define(
   [
-    'core/platform',
+    'run/platform',
     'page/positioner/transplant/transplant',
     'page/positioner/transform/transform',
     'page/positioner/transform/targets',
@@ -14,7 +14,7 @@ define(
     'page/positioner/util/element-info',
     'page/positioner/constants',
     'page/zoom/util/body-geometry',
-    'core/events',
+    'run/events',
     'mini-core/native-global'
   ],
   function (

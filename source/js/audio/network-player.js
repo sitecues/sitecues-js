@@ -2,7 +2,7 @@
  * This is the audio player we use for remote speech and anything
  * that is not speech.
  */
-define(['$', 'core/conf/urls', 'core/conf/site', 'Promise' ], function ($, urls, site, Promise) {
+define(['$', 'run/conf/urls', 'run/conf/site', 'Promise' ], function ($, urls, site, Promise) {
 
   var audioElementsToPlay = [],
     ERR_NO_NETWORK_TTS = 'Sitecues network speech is not available on this website.';
@@ -131,7 +131,7 @@ define(['$', 'core/conf/urls', 'core/conf/site', 'Promise' ], function ($, urls,
   }
 
   function fetchNetworkSpeechConfig(callbackFn) {
-    require(['core/util/xhr'], function(xhr) {
+    require(['run/util/xhr'], function(xhr) {
       xhr.getJSON({
         // The 'provided.siteId' parameter must exist, or else core would have aborted the loading of modules.
         url: urls.getApiUrl('2/site/' + site.getSiteId() + '/config'),
