@@ -97,7 +97,7 @@ gulp.task(reportConfig);
 var defaultSeries = [ prepare, reportConfig, clean, 'build', finalize ]
   .concat(config.postBuildCommand ? runPostBuildCommand : []);
 gulp.task('default', gulp.series.apply(gulp, defaultSeries));
-gulp.task('package', gulp.series('default', packaging ));
+gulp.task('package', gulp.series('default', packaging )); // Not needed anymore
 
 function getCurrentBranch() {
   return childProcess.execSync('git symbolic-ref --short HEAD').toString('utf8').trimRight();
