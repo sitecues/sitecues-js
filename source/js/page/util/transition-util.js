@@ -73,8 +73,14 @@ define(
         initialTransition = computedStyle.transition,
         transitionInfo    = opts.transitionInfo || getTransitionInfo(element);
 
-    var propertyTransition = findPropertyTransition(property, transitionInfo),
-        delay    = propertyTransition.delay,
+    var propertyTransition = findPropertyTransition(property, transitionInfo);
+
+    if (!propertyTransition) {
+      // No relevant transition styles apply to this property, so we can return it's current resolved value
+      return Promise.resolve(computedStyle[property]);
+    }
+
+    var delay    = propertyTransition.delay,
         duration = propertyTransition.duration;
 
     function setTransitionTimeout(resolve) {
