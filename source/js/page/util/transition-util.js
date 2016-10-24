@@ -97,7 +97,9 @@ define(
           // The `transitionend` event didn't fire because the transition value changed in the interim, interrupting the transition
           // since we can't guarantee that between that time and now a new target property value hasn't been assigned, add another
           // getFinalStyleValue promise to the chain
-          resolveValue = getFinalStyleValue(element, property);
+          resolveValue = getFinalStyleValue(element, {
+            property : property
+          });
         }
         else {
           var boundingRect = element.getBoundingClientRect();
