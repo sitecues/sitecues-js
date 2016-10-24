@@ -60,7 +60,8 @@ function getAmdSpecialConfigs() {
 }
 
 function buildCorePreamble() {
-  const prefix = 'Object.defineProperty(sitecues, "version", { value: "' + global.buildVersion + '", writable: false });\n' +
+  const prefix = 'Object.defineProperty(sitecues, "version", ' +
+    '{ value: "' + global.buildBranch + '/' + global.buildVersion + '", writable: false });\n' +
     '"use strict";';
 
   function getPrereqPath(fileName) {

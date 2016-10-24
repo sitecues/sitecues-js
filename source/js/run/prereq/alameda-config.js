@@ -7,8 +7,8 @@ sitecues._require = {
     window.dispatchEvent(event);
   },
   waitSeconds: 30,
-  baseUrl: (function(config, version) {
-    return config.appUrl.split('/').slice(0, -3).join('/') + '/' + version + '/js/';
+  baseUrl: (function(config, version) { // Version is in format BRANCH_NAME/SPECIFIC_VERSION
+    return config.appUrl.split('/').slice(0, -4).join('/') + '/' + version + '/js/';
   })(sitecues.config, sitecues.version),
   map: {
     '*': {
