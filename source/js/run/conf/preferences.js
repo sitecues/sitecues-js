@@ -65,7 +65,7 @@ define(
 
     var setObj = {};
     setObj[key] = safeValue;
-    user.setPref(setObj);
+    user.prefs.assign(setObj);
   }
 
   function unset(key) {
@@ -87,7 +87,7 @@ define(
   }
 
   function init() {
-    return user.getAllPref().then(function (prefs) {
+    return user.prefs.getAll().then(function (prefs) {
       cachedPrefs = prefs;
     });
   }
