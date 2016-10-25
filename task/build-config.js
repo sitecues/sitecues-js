@@ -5,6 +5,7 @@
 // CLEAN_DEPS = 'on' (refresh node_modules dependencies)
 // LINT = 'on' or 'off' (force linting on or off, otherwise use resources for the target)
 // MINIFY = 'on' or 'off' (force minification on or off, otherwise use default for the target)
+// CUES = 'on' or 'off' (allow building of audio cues, only valid for common builds, defaults to 'on')
 
 'use strict';
 
@@ -29,7 +30,7 @@ const baseConfig = {
   // CLEAN=all -- clean everything
   isCleaningAll: process.env.CLEAN === 'all', // Default to false
   isMinifying: process.env.MINIFY === 'on', // Default to false
-  isDebugOn: isDebugOn,  // Default to false
+   isDebugOn: isDebugOn,  // Default to false
   nodeVersion: NODE_VERSION,
   isShowingSizes: NODE_VERSION >= 4 && process.env.SHOW_SIZES !== 'off', // Don't show sizes for old versions of node that don't support gulp-size
   isGeneratingSourceMaps: process.env.SOURCEMAPS ? (process.env.SOURCEMAPS === 'on') : isDebugOn, // Default to same as debug state

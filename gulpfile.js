@@ -88,6 +88,7 @@ var build =
     resources.svg,
     resources.raster,
     resources.earcons,
+    resources.cues,
     resources.versionMap,
     'js'
   );

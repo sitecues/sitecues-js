@@ -6,7 +6,10 @@ var gulp = require('gulp'),
   config = require('./build-config'),
   yaml = require('node-yaml'),
   path = require('path'),
-  fs = require('fs');
+  fs = require('fs'),
+  got = require('got'),
+  mkdirp = require('mkdirp'),
+  requireDir = require('require-dir');
 
 // CSS -- minify
 function css() {
@@ -41,6 +44,66 @@ function raster() {
 function earcons() {
   return gulp.src(config.earconsGlob)
     .pipe(gulp.dest(path.join(global.build.path, 'earcons')));
+}
+
+function convertToAudioFile(lang, cueName, cueText, type) {
+  // Puts in delimiters on both sides of the parameter -- ? before and & after
+  // locale is a required parameter
+  function getLocaleParameter(locale) {
+    return '?l=' + locale + '&';
+  }
+
+  // URL string for API calls
+  function getApiUrl(restOfUrl) {
+    return 'https://ws.sitecues.com/sitecues/api/' + restOfUrl;
+  }
+
+  function getTTSUrl(text, locale, type) {
+    const SITE_ID = 's-00000005',
+      restOfUrl = 'tts/site/' + SITE_ID + '/tts.' + type + getLocaleParameter(locale) + 't=' + encodeURIComponent(text);
+    return getApiUrl(restOfUrl);
+  }
+
+  const ttsUrl = getTTSUrl(cueText, lang, type),
+    outputFolder = path.join(global.build.path, 'cue', lang);
+  return new Promise((resolve) => {
+    mkdirp(outputFolder, {}, () => {
+      return got.stream(ttsUrl)
+        .on('error', (err) => {
+          console.log(err);
+          console.log(ttsUrl);
+          throw err;
+        })
+        .pipe(fs.createWriteStream(path.join(outputFolder, cueName + '.' + type)))
+        .on('error', (err) => {
+          console.log(err);
+          console.log(ttsUrl);
+          throw err;
+        })
+        .on('finish', () => {
+          resolve();
+        });
+    });
+  });
+}
+
+function cues() {
+  if (!config.audioCueDir) {
+    return Promise.resolve();
+  }
+
+  const allCueLangs = requireDir(path.join('..', config.audioCueDir)),
+    conversionPromises = [];
+
+  for (let lang of Object.keys(allCueLangs)) {
+    const allCuesForLang = allCueLangs[lang];
+    console.log('Fetching cues for lang: ' + lang);
+    for (let cue of Object.keys(allCuesForLang)) {
+      conversionPromises.push(convertToAudioFile(lang, cue, allCuesForLang[cue], 'ogg'));
+      conversionPromises.push(convertToAudioFile(lang, cue, allCuesForLang[cue], 'mp3'));
+    }
+  }
+  return Promise.all(conversionPromises);
 }
 
 function writeSimplifiedVersionMap(sourceVersionMap) {
@@ -97,10 +160,11 @@ function versionMap() {
 }
 
 module.exports = {
-  css: css,
-  html: html,
-  svg: svg,
-  raster: raster,
-  earcons: earcons,
-  versionMap: versionMap
+  css,
+  html,
+  svg,
+  raster,
+  earcons,
+  cues,
+  versionMap
 };

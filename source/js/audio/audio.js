@@ -265,10 +265,8 @@ define(
     return '?l=' + locale + '&';
   }
 
-  function getCueUrl(name, locale) {  // TODO why does an audio cue need the site id?
-    var restOfUrl = 'cue/site/' + site.getSiteId() + '/' +
-      name + '.' + getMediaTypeForNetworkAudio() + getLocaleParameter(locale);
-    return urls.getApiUrl(restOfUrl);
+  function getCueUrl(name, locale) {
+    return urls.resolveResourceUrl('cue/' + locale + '/' + name + '.' + getMediaTypeForNetworkAudio());
   }
 
   /**
@@ -410,7 +408,7 @@ define(
   // What audio format will we use for prerecorded audio?
   function getMediaTypeForNetworkAudio() {
     if (!getMediaTypeForNetworkAudio.cached) {
-      getMediaTypeForNetworkAudio.cached = getBrowserSupportedTypeFromList(['mp3','ogg']);
+      getMediaTypeForNetworkAudio.cached = getBrowserSupportedTypeFromList(['ogg', 'mp3']); // TODO ogg should be preferred, correct?
     }
     return getMediaTypeForNetworkAudio.cached;
   }
