@@ -88,6 +88,14 @@ function convertToAudioFile(lang, cueName, cueText, type, waitMs) {
   });
 }
 
+function copyCueTextFile(cueFilePath, outputFolder) {
+  return new Promise((resolve) => {
+    gulp.src(cueFilePath)
+      .pipe(gulp.dest(outputFolder))
+      .on('finish', resolve);
+  });
+}
+
 function getFileDate(path) {
   try {
     return fs.statSync(path).mtime;
@@ -117,7 +125,7 @@ function cues() {
     // Fetch cues from server only if their cue JSON file has changed since the last cues were fetched
     const allCuesDir = config.audioCueDir,
       jsonCueFiles = fs.readdirSync(allCuesDir),
-      conversionPromises = [];
+      cueWorkQueue = [];
     let waitMs = 0;
     for (let cueFile of jsonCueFiles) {
       const lang = cueFile.split('.')[0],
@@ -131,18 +139,20 @@ function cues() {
         console.log('Fetching cues for ' + lang);
         const allCuesForLang = require(path.join('..', cueFilePath));
         for (let cue of Object.keys(allCuesForLang)) {
-          conversionPromises.push(convertToAudioFile(lang, cue, allCuesForLang[cue], 'ogg', waitMs));
+          cueWorkQueue.push(convertToAudioFile(lang, cue, allCuesForLang[cue], 'ogg', waitMs));
           waitMs += 100;
-          conversionPromises.push(convertToAudioFile(lang, cue, allCuesForLang[cue], 'mp3', waitMs));
+          cueWorkQueue.push(convertToAudioFile(lang, cue, allCuesForLang[cue], 'mp3', waitMs));
           waitMs += 100;
         }
       }
       else {
         console.log('Keeping cues for ' + lang);
       }
+
+      cueWorkQueue.push(copyCueTextFile(cueFilePath, outputFolder));
     }
 
-    return Promise.all(conversionPromises);
+    return Promise.all(cueWorkQueue);
   };
 
   return copyPreviouslyComputedCues()

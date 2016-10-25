@@ -16,12 +16,12 @@ define(
     'run/conf/preferences',
     'run/conf/site',
     '$',
+    'run/util/xhr',
     'audio/speech-builder',
     'run/locale',
     'run/metric/metric',
     'run/conf/urls',
     'audio/text-select',
-    'run/data-map',
     'run/events',
     'audio/local-player',
     'audio/network-player'
@@ -31,12 +31,12 @@ define(
     pref,
     site,
     $,
+    xhr,
     builder,
     locale,
     metric,
     urls,
     textSelect,
-    dataMap,
     events,
     localPlayer,
     networkPlayer
@@ -238,13 +238,26 @@ define(
     return toPreferredRegion(locale.getPageLocale());
   }
 
-  function getAudioCueTextAsync(cueName, cueTextLocale, callback) {
-    var
-      AUDIO_CUE_DATA_PREFIX = 'locale-data/cue/',
-      cueModuleName = AUDIO_CUE_DATA_PREFIX + cueTextLocale;
+  function getCueText(cueName, cueTextLocale, callback) {
+    var cache = getCueText.cache;
+    if (!cache) {
+      getCueText.cache = cache = {};
+    }
 
-    dataMap.get(cueModuleName, function(data) {
-      callback(data[cueName] || '');
+    if (typeof cache[cueName] === 'string') {
+      callback(cache[cueName]);
+      return;
+    }
+
+    var cueFileName = urls.resolveResourceUrl('cue/' + cueTextLocale + '/' + cueTextLocale + '.json');
+
+    // TODO what about Chrome extension?
+    xhr.getJSON({
+      url: cueFileName,
+      success: function(data) {
+        cache[cueName] = data[cueName] || '';
+        callback(cache[cueName]);
+      }
     });
   }
 
@@ -316,7 +329,7 @@ define(
       if (cueTextLocale && isLocalSpeechAllowed()) {
         lastPlayer = localPlayer;
         fireBusyEvent();
-        getAudioCueTextAsync(name, cueTextLocale, function (cueText) {
+        getCueText(name, cueTextLocale, function (cueText) {
           if (cueText) {
             localPlayer
               .speak({
