@@ -46,7 +46,7 @@ function earcons() {
     .pipe(gulp.dest(path.join(global.build.path, 'earcons')));
 }
 
-function convertToAudioFile(lang, cueName, cueText, type) {
+function convertToAudioFile(lang, cueName, cueText, type, waitMs) {
   // Puts in delimiters on both sides of the parameter -- ? before and & after
   // locale is a required parameter
   function getLocaleParameter(locale) {
@@ -67,23 +67,25 @@ function convertToAudioFile(lang, cueName, cueText, type) {
   const ttsUrl = getTTSUrl(cueText, lang, type),
     outputFolder = path.join(global.build.path, 'cue', lang);
   return new Promise((resolve) => {
-    mkdirp(outputFolder, {}, () => {
-      return got.stream(ttsUrl)
-        .on('error', (err) => {
-          console.log(err);
-          console.log(ttsUrl);
-          throw err;
-        })
-        .pipe(fs.createWriteStream(path.join(outputFolder, cueName + '.' + type)))
-        .on('error', (err) => {
-          console.log(err);
-          console.log(ttsUrl);
-          throw err;
-        })
-        .on('finish', () => {
-          resolve();
-        });
-    });
+    setTimeout(() => {
+      mkdirp(outputFolder, {}, () => {
+        return got.stream(ttsUrl)
+          .on('error', (err) => {
+            console.log(err);
+            console.log(ttsUrl);
+            throw err;
+          })
+          .pipe(fs.createWriteStream(path.join(outputFolder, cueName + '.' + type)))
+          .on('error', (err) => {
+            console.log(err);
+            console.log(ttsUrl);
+            throw err;
+          })
+          .on('finish', () => {
+            resolve();
+          });
+      });
+    }, waitMs);
   });
 }
 
@@ -95,12 +97,15 @@ function cues() {
   const allCueLangs = requireDir(path.join('..', config.audioCueDir)),
     conversionPromises = [];
 
+  let counter = 0;  // TODO remove this once we figure out why 500 errors keep occurring
+
   for (let lang of Object.keys(allCueLangs)) {
     const allCuesForLang = allCueLangs[lang];
     console.log('Fetching cues for lang: ' + lang);
     for (let cue of Object.keys(allCuesForLang)) {
-      conversionPromises.push(convertToAudioFile(lang, cue, allCuesForLang[cue], 'ogg'));
-      conversionPromises.push(convertToAudioFile(lang, cue, allCuesForLang[cue], 'mp3'));
+      ++counter;
+      conversionPromises.push(convertToAudioFile(lang, cue, allCuesForLang[cue], 'ogg', counter * 100));
+      conversionPromises.push(convertToAudioFile(lang, cue, allCuesForLang[cue], 'mp3', counter * 100 + 50));
     }
   }
   return Promise.all(conversionPromises);
