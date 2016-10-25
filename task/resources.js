@@ -8,8 +8,7 @@ var gulp = require('gulp'),
   path = require('path'),
   fs = require('fs'),
   got = require('got'),
-  mkdirp = require('mkdirp'),
-  requireDir = require('require-dir');
+  mkdirp = require('mkdirp');
 
 // CSS -- minify
 function css() {
@@ -89,26 +88,65 @@ function convertToAudioFile(lang, cueName, cueText, type, waitMs) {
   });
 }
 
+function getFileDate(path) {
+  try {
+    return fs.statSync(path).mtime;
+  }
+  catch(ex) {
+  }
+  return 0;
+}
+
 function cues() {
   if (!config.audioCueDir) {
+    // No cues to compute
     return Promise.resolve();
   }
 
-  const allCueLangs = requireDir(path.join('..', config.audioCueDir)),
-    conversionPromises = [];
+  const copyPreviouslyComputedCues = () => {
+    // First copy over previously computed cues
+    return new Promise((resolve) => {
+      gulp.src('latest-build/cue/**/*')
+        .pipe(gulp.dest(path.join(global.build.path, 'cue')))
+        // Then recompute changed cues
+        .on('end', resolve);
+    });
+  };
 
-  let counter = 0;  // TODO remove this once we figure out why 500 errors keep occurring
+  const fetchChangedCues = () => {
+    // Fetch cues from server only if their cue JSON file has changed since the last cues were fetched
+    const allCuesDir = config.audioCueDir,
+      jsonCueFiles = fs.readdirSync(allCuesDir),
+      conversionPromises = [];
+    let waitMs = 0;
+    for (let cueFile of jsonCueFiles) {
+      const lang = cueFile.split('.')[0],
+        cueFilePath = path.join(config.audioCueDir, cueFile),
+        sourceDate = getFileDate(cueFilePath),
+        outputFolder = path.join(global.build.path, 'cue', lang),
+        sampleDestOutputFilePath = path.join(outputFolder, 'verbalCueSpeechOn.ogg'),
+        destDate = getFileDate(sampleDestOutputFilePath);  // Get date for one output cue
 
-  for (let lang of Object.keys(allCueLangs)) {
-    const allCuesForLang = allCueLangs[lang];
-    console.log('Fetching cues for lang: ' + lang);
-    for (let cue of Object.keys(allCuesForLang)) {
-      ++counter;
-      conversionPromises.push(convertToAudioFile(lang, cue, allCuesForLang[cue], 'ogg', counter * 100));
-      conversionPromises.push(convertToAudioFile(lang, cue, allCuesForLang[cue], 'mp3', counter * 100 + 50));
+      if (sourceDate > destDate) {
+        console.log('Fetching cues for ' + lang);
+        const allCuesForLang = require(path.join('..', cueFilePath));
+        for (let cue of Object.keys(allCuesForLang)) {
+          conversionPromises.push(convertToAudioFile(lang, cue, allCuesForLang[cue], 'ogg', waitMs));
+          waitMs += 100;
+          conversionPromises.push(convertToAudioFile(lang, cue, allCuesForLang[cue], 'mp3', waitMs));
+          waitMs += 100;
+        }
+      }
+      else {
+        console.log('Keeping cues for ' + lang);
+      }
     }
-  }
-  return Promise.all(conversionPromises);
+
+    return Promise.all(conversionPromises);
+  };
+
+  return copyPreviouslyComputedCues()
+    .then(fetchChangedCues);
 }
 
 function writeSimplifiedVersionMap(sourceVersionMap) {
