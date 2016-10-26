@@ -5,6 +5,7 @@
 // CLEAN_DEPS = 'on' (refresh node_modules dependencies)
 // LINT = 'on' or 'off' (force linting on or off, otherwise use resources for the target)
 // MINIFY = 'on' or 'off' (force minification on or off, otherwise use default for the target)
+// CUES = 'on' or 'off' (allow building of audio cues, only valid for common builds, defaults to 'on')
 
 'use strict';
 
