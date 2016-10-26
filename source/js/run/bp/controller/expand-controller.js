@@ -227,8 +227,8 @@ define(
   function processBadgeActivationKeys(evt) {
     var ENTER = 13, SPACE = 32;
     if (state.isBadge() &&
-      (evt.keyCode === ENTER || evt.keyCode === SPACE)) {
-
+      (evt.keyCode === ENTER || evt.keyCode === SPACE) &&
+      evt.target === getBadgeElement()) {
       evt.preventDefault();
       changeModeToPanel(true); // Opened with keyboard
     }

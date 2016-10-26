@@ -108,8 +108,19 @@ define(
     showMoreButton(false);
   }
 
+  function activate() {
+    getHelpOrSecondaryPanel(true);
+  }
+
   function showMoreButtonInstantly() {
     showMoreButton(true);
+  }
+
+  function show(callback) {
+    showMoreButtonSlowly();
+    if (callback) {
+      nativeFn.setTimeout(callback, BUTTON_ENTER_ANIMATION_DURATION);
+    }
   }
 
   function hideHelpButton () {
@@ -190,6 +201,8 @@ define(
   }
 
   return {
-    init: init
+    init: init,
+    show: show,
+    activate: activate
   };
 });

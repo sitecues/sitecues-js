@@ -24,7 +24,7 @@
  * TODO make this work for extension again -- we probably don't really need separate storage and storage-backup here
  */
 define(
-  'core/conf/user/storage',
+  'run/conf/user/storage',
   [
   ],
   function (

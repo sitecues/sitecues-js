@@ -128,9 +128,6 @@ define(
         return (event.keyCode === keyCode.END && !hasAnyModifier(event)) ||
           event.keyCode === keyCode.NUMPAD_1 ||
           (event.keyCode === keyCode.DOWN && event.metaKey);
-      },
-      'f8': function(event) {
-        return event.keyCode === keyCode.F8 && !hasAnyModifier(event);
       }
     },
     // define keys map used to bind actions to hotkeys

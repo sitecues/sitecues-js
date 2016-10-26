@@ -82,6 +82,10 @@ define(
     return Boolean(cachedPrefs[key]);
   }
 
+  function isSitecuesUser() {
+    return hasPref('zoom') || hasPref('ttsOn');
+  }
+
   function isValid() {
     return Boolean(cachedPrefs);
   }
@@ -96,6 +100,7 @@ define(
     get           : getPref,
     set           : setPref,
     has           : hasPref,
+    isSitecuesUser: isSitecuesUser,
     reset         : resetPrefs,
     defineHandler : defineHandler,
     bindListener  : bindListener,

@@ -25,10 +25,15 @@ var config = require('../build-config.js'),
       // In runtime config, via definePrim : 'Promise' to allow use of alameda's built-in Prim library
       'Promise': 'empty:',
       // DIFFERENT in the extension
-      'run/conf/user/storage': '../../extension/source/js/overrides/storage',
-      'run/conf/user/storage-backup': '../../extension/source/js/overrides/storage-backup',
-      'nativeFn': '../../extension/source/js/overrides/native-functions',
+      'run/ab-test/ab-test': '../../extension/source/js/overrides/ab-test',
+      'mini-core/user': '../../extension/source/js/overrides/user',
+      'mini-core/native-global': '../../extension/source/js/overrides/native-globals',
       'run/data-map': config.tmpDir + '/data-map',
+// sitecues.define('mini-core/native-global', [], function () { return sitecues._shared.nativeGlobal; });
+// sitecues.define('mini-core/page-view', [], function () { return sitecues._shared.pageView; });
+// sitecues.define('mini-core/session', [], function () { return sitecues._shared.session; });
+// sitecues.define('mini-core/site', [], function () { return sitecues._shared.site; });
+// sitecues.define('mini-core/user', [], function () { return sitecues._shared.user; });
       // UNUSED in the extension
       'run/errors': 'empty:',
       'run/bp/badge/page-badge': 'empty:',
