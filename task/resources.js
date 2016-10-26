@@ -73,7 +73,7 @@ function convertToAudioFile(lang, cueName, cueText, type) {
     convertToAudioFile.waitMs = convertToAudioFile.waitMs ? convertToAudioFile.waitMs + 100 : 1;
     setTimeout(() => {
       mkdirp(outputFolder, {}, () => {
-        got.stream(ttsUrl)
+        got.stream(ttsUrl, { retries : 20 }) // High amount of retries because of rate limiting
           .on('error', (err) => {
             console.log(err);
             console.log(ttsUrl);
