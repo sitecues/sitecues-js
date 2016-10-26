@@ -1,3 +1,7 @@
+process.on('unhandledRejection', (err) => {
+    throw err;
+});
+
 const { exec }  = require('child_process');
 const babel     = require('babel-core');
 const fs        = require('fs');
