@@ -6,3 +6,6 @@ deployment:
     branch: /.*/
     commands:
       - npm run build
+test:
+  pre:
+    - git clone https://github.com/sitecues/sitecues-core
