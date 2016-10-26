@@ -9,3 +9,5 @@ deployment:
 test:
   pre:
     - git clone https://github.com/sitecues/sitecues-core ../sitecues-core/
+  override:
+    - npm run test-ci
