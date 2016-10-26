@@ -70,6 +70,4 @@ const buildCoreModules = () => {
     });
 };
 
-buildCoreModules().then(() => {
-    exec('./test/run.sh');
-});
+buildCoreModules();

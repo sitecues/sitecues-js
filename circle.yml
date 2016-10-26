@@ -8,4 +8,4 @@ deployment:
       - npm run build
 test:
   pre:
-    - git clone https://github.com/sitecues/sitecues-core
+    - git clone https://github.com/sitecues/sitecues-core ../sitecues-core/

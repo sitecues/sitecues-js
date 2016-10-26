@@ -14,9 +14,9 @@
   },
   "bin": "binary/web.js",
   "scripts": {
-    "test": "node ./test/run-tests",
-    "test-cloud": "intern run --webdriver --config=config/intern-cloud.js",
-    "test-ci": "intern run --webdriver --config=config/intern-ci.js",
+    "test": "node ./test/build-core && intern run --webdriver --config=config/intern.js",
+    "test-cloud": "node ./test/build-core && intern run --webdriver --config=config/intern-cloud.js",
+    "test-ci": "node ./test/build-core && intern run --webdriver --config=config/intern-ci.js",
     "build": "make package"
   },
   "dependencies": {
