@@ -2,13 +2,13 @@ define(
     [
         'intern!tdd',
         'intern/chai!assert',
-        'mini-core/native-functions',
-        'core/inline-style/inline-style'
+        'mini-core/native-global',
+        'run/inline-style/inline-style'
     ],
     function (
         tdd,
         assert,
-        nativeFn,
+        nativeGlobal,
         inlineStyle
     ) {
         'use strict';
@@ -21,7 +21,7 @@ define(
         suite('Inline Style', function () {
             before(function () {
                 window.SC_EXTENSION = false;
-                nativeFn.init();
+                nativeGlobal.init();
                 inlineStyle.init();
             });
 

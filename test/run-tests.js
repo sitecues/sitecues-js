@@ -7,9 +7,9 @@ const del       = require('del');
 const corePath  = '../sitecues-core/lib/js/';
 const buildPath = path.resolve('test/mini-core');
 
-const readCoreFile = (fileName) => {
+const readCoreFile = (fileName, pathComponents) => {
     return new Promise((resolve, reject) => {
-        const filePath = path.resolve(corePath, fileName);
+        const filePath = path.resolve(corePath, ...pathComponents, fileName);
         fs.readFile(filePath, 'utf8', (err, content) => {
             if (err) {
                 reject(err);
@@ -20,31 +20,48 @@ const readCoreFile = (fileName) => {
     });
 };
 
-const transpileCoreModule = (fileName) => {
-    return readCoreFile(fileName).then(module => {
-        fs.writeFileSync(path.resolve(buildPath, fileName), babel.transform(module, {
-            plugins : [
-                'add-module-exports',
-                'transform-es2015-modules-amd'
-            ],
-            presets : ['es2015']
-        }).code);
-    });
+const transpileCoreModule = (pathComponents) => {
+    const fileName = pathComponents.pop() + '.js';
+    return constructModulePath(pathComponents)
+        .then(() => {
+            return readCoreFile(fileName, pathComponents);
+        })
+        .then(module => {
+            fs.writeFileSync(path.resolve(buildPath, ...pathComponents, fileName), babel.transform(module, {
+                plugins : [
+                    'add-module-exports',
+                    'transform-es2015-modules-amd'
+                ],
+                presets : ['es2015']
+            }).code);
+        });
 };
 
-const createEmptyDirectory = (dirPath) => {
+const constructModulePath = (pathComponents) => {
+    return fsAtomic.mkdir(path.resolve(buildPath, ...pathComponents));
+};
+
+const cleanBuildDirectory = (dirPath) => {
     return del(dirPath, {
         force : true
-    }).then(() => {
-        return fsAtomic.mkdir(dirPath);
     });
 };
 
 const buildCoreModules = () => {
-    return createEmptyDirectory(buildPath).then(() => {
+    return cleanBuildDirectory(buildPath).then(() => {
         return Promise.all([
-            'native-functions.js',
-            'iframe-factory.js'
+            ['native-global'],
+            ['hidden-iframe'],
+            ['app-url'],
+            ['dom-event'],
+            ['url'],
+            ['meta'],
+            ['uuid'],
+            ['conf', 'user'],
+            ['conf', 'site'],
+            ['storage', 'permanent'],
+            ['storage', 'global'],
+            ['storage', 'local']
         ].map(transpileCoreModule))
     });
 };
