@@ -54,7 +54,8 @@ define([], function () {
   function isEditable(element) {
     if (element.localName === 'input') {
       var type = element.getAttribute('type');
-      return !type || EDITABLE_INPUT_TYPES.indexOf(type) >= 0;
+      // A non-specified type attribute defaults to 'text', an editable element
+      return !type || EDITABLE_INPUT_TYPES.indexOf(type.toLowerCase()) >= 0;
     }
     return document.designMode === 'on' ||
       element.localName === 'textarea' ||
@@ -67,5 +68,4 @@ define([], function () {
     isSpacebarConsumer: isSpacebarConsumer,
     isEditable: isEditable
   };
-
 });
