@@ -21,7 +21,7 @@ define(
         config.reporters = [
             // Log to the console for debugging.
             { id : 'Runner' },
-            // Inform Bamboo of the results.
+            // Output file for CI to parse.
             { id : 'JUnit', filename : 'report/test/junit.xml' }
         ];
 
