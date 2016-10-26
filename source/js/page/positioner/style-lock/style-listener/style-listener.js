@@ -178,7 +178,13 @@ define(
     }
 
     properties.forEach(function (property) {
-      var unresolvedProperties = elementsToUnresolvedPropertyMap.get(element) || new Set();
+      var lockVal,
+        unresolvedProperties = elementsToUnresolvedPropertyMap.get(element);
+
+      if (!unresolvedProperties) {
+        unresolvedProperties = new Set();
+        elementsToUnresolvedPropertyMap.set(element, unresolvedProperties);
+      }
 
       if (unresolvedProperties.has(property)) {
         // We're already waiting to get this resolved value
@@ -189,14 +195,17 @@ define(
           isLocked = styleLock.isLocked(element, property);
 
       if (isLocked) {
-        styleLock.unlockStyle(element, property);
+        lockVal = styleLock.unlockStyle(element, property);
       }
 
       if (!transitionUtil.canPropertyTransition({ transitionInfo : transitionInfo, property : property })) {
         var value = getComputedStyle(element)[property];
 
         if (isLocked) {
-          styleLock.lock(element, property);
+          styleLock.lock(element, {
+            property  : lockVal,
+            lockValue : lockVal
+          });
         }
 
         // If this style can't transition, we can compute its resolved value synchronously and run the relevant property handlers

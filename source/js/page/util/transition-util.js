@@ -73,8 +73,14 @@ define(
         initialTransition = computedStyle.transition,
         transitionInfo    = opts.transitionInfo || getTransitionInfo(element);
 
-    var propertyTransition = findPropertyTransition(property, transitionInfo),
-        delay    = propertyTransition.delay,
+    var propertyTransition = findPropertyTransition(property, transitionInfo);
+
+    if (!propertyTransition) {
+      // No relevant transition styles apply to this property, so we can return it's current resolved value
+      return Promise.resolve(computedStyle[property]);
+    }
+
+    var delay    = propertyTransition.delay,
         duration = propertyTransition.duration;
 
     function setTransitionTimeout(resolve) {
@@ -97,7 +103,9 @@ define(
           // The `transitionend` event didn't fire because the transition value changed in the interim, interrupting the transition
           // since we can't guarantee that between that time and now a new target property value hasn't been assigned, add another
           // getFinalStyleValue promise to the chain
-          resolveValue = getFinalStyleValue(element, property);
+          resolveValue = getFinalStyleValue(element, {
+            property : property
+          });
         }
         else {
           var boundingRect = element.getBoundingClientRect();
