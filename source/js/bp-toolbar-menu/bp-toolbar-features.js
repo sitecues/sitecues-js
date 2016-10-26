@@ -3,19 +3,19 @@
  */
 
 define([
-    'core/metric',
-    'core/constants',
+    'run/metric',
+    'run/constants',
     'bp-toolbar-menu/bp-toolbar-view',
-    'core/events',
-    'core/dom-events',
-    'core/native-functions'
+    'run/events',
+    'run/dom-events',
+    'mini-core/native-global'
   ],
   function(metric,
            constants,
            bpToolbarView,
            events,
            domEvents,
-           nativeFn) {
+           nativeGlobal) {
 
     function hideMenu() {
       require(['bp-toolbar-menu-button/bp-toolbar-menu-button'], function(bpToolbarMenuButton) {
@@ -30,7 +30,7 @@ define([
       function showTips() {
         events.off('bp/did-open-subpanel', showTips);
         require(['bp-secondary/bp-secondary'], function (bpSecondary) {
-          nativeFn.setTimeout(function() {
+          nativeGlobal.setTimeout(function() {
             bpSecondary.toggleFeature('tips');
           }, EXTRA_DELAY_BETWEEN_VIEWS);
         });
@@ -41,7 +41,7 @@ define([
         require(['bp-expanded/view/more-button'], function(moreButton) {
           moreButton.init();
           moreButton.show(function() {
-            nativeFn.setTimeout(moreButton.activate, EXTRA_DELAY_BETWEEN_VIEWS);
+            nativeGlobal.setTimeout(moreButton.activate, EXTRA_DELAY_BETWEEN_VIEWS);
           });
           events.on('bp/did-open-subpanel', showTips);
         });
@@ -54,7 +54,7 @@ define([
 
       function expandPanel() {
         hideMenu();
-        require(['core/bp/controller/expand-controller'],
+        require(['run/bp/controller/expand-controller'],
           function (expandController) {
             expandController.init();
             expandController.expandPanel();

@@ -3,9 +3,9 @@
  */
 
 define([
-    'core/native-functions'
+    'mini-core/native-global'
   ],
-  function(nativeFn) {
+  function(nativeGlobal) {
 
     var menuElement,
       origClasses,
@@ -86,7 +86,7 @@ define([
       fixScreenPosition();
       animateToTargetSize();
       enableKeyboard();
-      nativeFn.setTimeout(onAnimationComplete, BLURB_ANIMATION_MS);
+      nativeGlobal.setTimeout(onAnimationComplete, BLURB_ANIMATION_MS);
     }
 
     function enableFocus(isFocusEnabled) {

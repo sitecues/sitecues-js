@@ -7,6 +7,7 @@ var config = require('../build-config.js'),
   glob = require('glob'),
   dataFolders = sourceFoldersConfig.dataFolders,
   dataModules = getDataModules(),
+  OVERRIDES_DIR = '../../extension/source/js/overrides/',
   amdConfig = {
     include: getIncludes(dataModules),
     wrap: {
@@ -25,17 +26,16 @@ var config = require('../build-config.js'),
       // In runtime config, via definePrim : 'Promise' to allow use of alameda's built-in Prim library
       'Promise': 'empty:',
       // DIFFERENT in the extension
-      'run/ab-test/ab-test': '../../extension/source/js/overrides/ab-test',
-      'mini-core/user': '../../extension/source/js/overrides/user',
-      'mini-core/native-global': '../../extension/source/js/overrides/native-globals',
+      'mini-core/user': OVERRIDES_DIR + 'user',
+      'mini-core/native-global': OVERRIDES_DIR + 'native-global',
+      'mini-core/page-view': OVERRIDES_DIR + 'page-view',
+      'mini-core/session': OVERRIDES_DIR + 'session',
+      'mini-core/site': OVERRIDES_DIR + 'site',
       'run/data-map': config.tmpDir + '/data-map',
-// sitecues.define('mini-core/native-global', [], function () { return sitecues._shared.nativeGlobal; });
-// sitecues.define('mini-core/page-view', [], function () { return sitecues._shared.pageView; });
-// sitecues.define('mini-core/session', [], function () { return sitecues._shared.session; });
-// sitecues.define('mini-core/site', [], function () { return sitecues._shared.site; });
-// sitecues.define('mini-core/user', [], function () { return sitecues._shared.user; });
-      // UNUSED in the extension
-      'run/errors': 'empty:',
+      // UNUSED in the extension (stubbed methods)
+      'run/ab-test/ab-test': OVERRIDES_DIR + 'ab-test',
+      'run/errors': OVERRIDES_DIR + 'errors',
+      // UNUSED and EMPTY in the extension
       'run/bp/badge/page-badge': 'empty:',
       'run/bp/badge/palette': 'empty:',
       'bp-img-placeholder/bp-img-placeholder/': 'empty:',

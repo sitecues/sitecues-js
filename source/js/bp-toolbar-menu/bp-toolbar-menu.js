@@ -5,14 +5,14 @@
 define([
     'bp-toolbar-menu/bp-toolbar-features',
     'bp-toolbar-menu/bp-toolbar-view',
-    'core/locale',
-    'core/conf/urls',
-    'core/util/xhr',
-    'core/constants',
-    'core/metric',
-    'core/events',
-    'core/dom-events',
-    'core/native-functions'
+    'run/locale',
+    'run/conf/urls',
+    'run/util/xhr',
+    'run/constants',
+    'run/metric',
+    'run/events',
+    'run/dom-events',
+    'mini-core/native-global'
   ],
   function(bpToolbarFeatures,
            bpToolbarView,
@@ -23,7 +23,7 @@ define([
            metric,
            events,
            domEvents,
-           nativeFn) {
+           nativeGlobal) {
 
     var menuButtonElement,
       menuElement,
@@ -39,7 +39,7 @@ define([
         }
         var doFocusMenuItem = doOpen && isMenuButtonFocused();
         if (doFocusMenuItem) {
-          nativeFn.setTimeout(function() {
+          nativeGlobal.setTimeout(function() {
             menuElement.firstElementChild.focus();
           }, 0);
         }

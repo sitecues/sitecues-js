@@ -1,5 +1,5 @@
 /**
- * Overrides core/errors implementation with noop
+ * Overrides run/ab-test/ab-test implementation with noop
  */
 define('run/ab-test/ab-test', [], function() {
   function noop() {

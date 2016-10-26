@@ -3,19 +3,19 @@
  */
 
 define([
-  'core/conf/urls',
-  'core/dom-events',
-  'core/locale',
-  'core/constants',
+  'run/conf/urls',
+  'run/dom-events',
+  'run/locale',
+  'run/constants',
   'Promise',
-  'core/native-functions'
+  'mini-core/native-global'
   ],
   function(urls,
            domEvents,
            locale,
            CORE_CONST,
            Promise,
-           nativeFn) {
+           nativeGlobal) {
 
   var menuButtonElement,
     hideTimeout,
@@ -130,13 +130,13 @@ define([
         // You have to leave the toolbar itself in order to close the menu
         // (We tried just putting mouseleave on the button, but the menu would close too easily while moving from the button to the menu)
         clearTimeout(hideTimeout);
-        hideTimeout = nativeFn.setTimeout(function () {
+        hideTimeout = nativeGlobal.setTimeout(function () {
           requestOpen(false);
         }, WAIT_BEFORE_CLOSE_MS);
       }
     });
     domEvents.on(menuButtonElement, 'blur', function() {
-      nativeFn.setTimeout(onBlur, 0);  // Wait so that document.activeElement is properly updated
+      nativeGlobal.setTimeout(onBlur, 0);  // Wait so that document.activeElement is properly updated
     });
     domEvents.on(menuButtonElement, 'keydown', function(event) {
       if (event.target === menuButtonElement) {

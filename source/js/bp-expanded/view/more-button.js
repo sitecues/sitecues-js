@@ -119,7 +119,7 @@ define(
   function show(callback) {
     showMoreButtonSlowly();
     if (callback) {
-      nativeFn.setTimeout(callback, BUTTON_ENTER_ANIMATION_DURATION);
+      nativeGlobal.setTimeout(callback, BUTTON_ENTER_ANIMATION_DURATION);
     }
   }
 

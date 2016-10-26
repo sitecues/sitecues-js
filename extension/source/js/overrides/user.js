@@ -1,5 +1,5 @@
 /**
- * Overrides core/conf/user/storage implementation
+ * mini-core/user implementation
  * Implements same API but uses chrome.storage.local for the backup storage.
  * Note: we could use chrome.storage.sync if we really wanted settings to be saved across devices,
  * but we probably don't since devices can have very different screen sizes and uses.
@@ -24,7 +24,7 @@
  * TODO make this work for extension again -- we probably don't really need separate storage and storage-backup here
  */
 define(
-  'run/conf/user/storage',
+  'mini-core/user',
   [
   ],
   function (
