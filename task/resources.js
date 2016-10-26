@@ -68,7 +68,7 @@ function convertToAudioFile(lang, cueName, cueText, type, waitMs) {
   return new Promise((resolve) => {
     setTimeout(() => {
       mkdirp(outputFolder, {}, () => {
-        return got.stream(ttsUrl)
+        got.stream(ttsUrl)
           .on('error', (err) => {
             console.log(err);
             console.log(ttsUrl);
@@ -92,10 +92,14 @@ function copyCueTextFile(cueFilePath, outputFolder) {
   return new Promise((resolve) => {
     gulp.src(cueFilePath)
       .pipe(gulp.dest(outputFolder))
+      .on('error', (err) => {
+        throw err;
+      })
       .on('finish', resolve);
   });
 }
 
+// Return the date of a file or 0 if it doesn't exist
 function getFileDate(path) {
   try {
     return fs.statSync(path).mtime;
@@ -135,9 +139,10 @@ function cues() {
         sampleDestOutputFilePath = path.join(outputFolder, 'verbalCueSpeechOn.ogg'),
         destDate = getFileDate(sampleDestOutputFilePath);  // Get date for one output cue
 
+      // If source is newer than dest, or if dest doesn't exist (destDate is 0), will fetch cues
       if (sourceDate > destDate) {
         console.log('Fetching cues for ' + lang);
-        const allCuesForLang = require(path.join('..', cueFilePath));
+        const allCuesForLang = require('..' + '/' + cueFilePath);
         for (let cue of Object.keys(allCuesForLang)) {
           cueWorkQueue.push(convertToAudioFile(lang, cue, allCuesForLang[cue], 'ogg', waitMs));
           waitMs += 100;
