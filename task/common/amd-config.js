@@ -16,7 +16,6 @@ var config = require('../build-config'),
     'mini-core/user' : 'empty:',
     'mini-core/page-view' : 'empty:',
     'mini-core/session' : 'empty:',
-    'mini-core/site' : 'empty:',
     '$': 'empty:',
     'Promise': 'empty:'   // In runtime config, via definePrim : 'Promise' to allow use of alameda's built-in Prim library
   };

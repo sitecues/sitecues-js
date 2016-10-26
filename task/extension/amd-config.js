@@ -30,7 +30,6 @@ var config = require('../build-config.js'),
       'mini-core/native-global': OVERRIDES_DIR + 'native-global',
       'mini-core/page-view': OVERRIDES_DIR + 'page-view',
       'mini-core/session': OVERRIDES_DIR + 'session',
-      'mini-core/site': OVERRIDES_DIR + 'site',
       'run/data-map': config.tmpDir + '/data-map',
       // UNUSED in the extension (stubbed methods)
       'run/ab-test/ab-test': OVERRIDES_DIR + 'ab-test',
