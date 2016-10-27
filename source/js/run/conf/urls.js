@@ -13,10 +13,9 @@ define(
     BASE_RESOURCE_URL;
 
   function getBaseResourceUrl() {
-    var basis = SC_EXTENSION ? getRawScriptUrl() : sitecues.require.toUrl(''),
-      insecureBaseUrl = basis.substring(0, basis.lastIndexOf('/js/') + 1);
+    var basis = getRawScriptUrl();
 
-    return SC_EXTENSION ? insecureBaseUrl : enforceHttps(insecureBaseUrl);
+    return basis.substring(0, basis.lastIndexOf('/js/') + 1);
   }
 
   // Change http:// or protocol-relative (just //) urls to use https
@@ -42,7 +41,7 @@ define(
   // URL string for sitecues.js
   // Enforces https so that all the resources we fetch and origin checking also uses https
   function getRawScriptUrl() {
-    var insecureBaseUrl = enforceHttps(site.get('appUrl'));
+    var insecureBaseUrl = site.get('appUrl');
     return SC_EXTENSION ? insecureBaseUrl : enforceHttps(insecureBaseUrl);
   }
 
