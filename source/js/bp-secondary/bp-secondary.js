@@ -3,19 +3,19 @@
  */
 define(
   [
-    'core/bp/constants',
-    'core/bp/model/state',
-    'core/bp/view/view',
-    'core/bp/helper',
+    'run/bp/constants',
+    'run/bp/model/state',
+    'run/bp/view/view',
+    'run/bp/helper',
     'bp-expanded/view/transform-animate',
     'bp-expanded/view/transform-util',
-    'core/locale',
-    'core/platform',
+    'run/locale',
+    'run/platform',
     'bp-secondary/insert-secondary-markup',
     'bp-secondary/bp-secondary-features',
-    'core/events',
-    'nativeFn',
-    'core/inline-style/inline-style'
+    'run/events',
+    'mini-core/native-global',
+    'run/inline-style/inline-style'
   ],
   function (
     BP_CONST,
@@ -29,7 +29,7 @@ define(
     markup,
     secondaryFeatures,
     events,
-    nativeFn,
+    nativeGlobal,
     inlineStyle
   ) {
   'use strict';
@@ -119,7 +119,7 @@ define(
 
   // Create an animation and store it in runningAnimations so we can cancel it if need be
   function createAnimation(elems, values, duration, onFinishFn) {
-    nativeFn.setTimeout(function() {
+    nativeGlobal.setTimeout(function() {
       var newAnimation = animate.animateTransforms(elems, values, duration, onFinishFn);
       runningAnimations.push(newAnimation);
   }, 18); // Wait one frame, for Firefox
@@ -227,7 +227,7 @@ define(
       animationsCompleteMs = Math.max(openFeatureDuration, heightAnimationDelay + heightAnimationDuration);  // When is feature fully visible
 
     function fadeInTextContentWhenLargeEnough() {
-      fadeInTimer = nativeFn.setTimeout(function () {
+      fadeInTimer = nativeGlobal.setTimeout(function () {
         state.set('isSecondaryExpanding', false);
         view.update();
       }, heightAnimationDelay + heightAnimationDuration * 0.7);
@@ -307,9 +307,9 @@ define(
     openFeatureAnimation();
 
     // Animate the height at the right time
-    animateHeightTimer = nativeFn.setTimeout(animateHeight, heightAnimationDelay);
+    animateHeightTimer = nativeGlobal.setTimeout(animateHeight, heightAnimationDelay);
 
-    animationsCompleteTimer = nativeFn.setTimeout(onAnimationsComplete, animationsCompleteMs);
+    animationsCompleteTimer = nativeGlobal.setTimeout(onAnimationsComplete, animationsCompleteMs);
 
     fadeInTextContentWhenLargeEnough();
 
@@ -366,7 +366,7 @@ define(
   }
 
   function updateMoreButtonLabel(doPointToMainPanel) {
-    nativeFn.setTimeout(function() {
+    nativeGlobal.setTimeout(function() {
       var labelName = doPointToMainPanel ? 'sitecues_main_panel' : 'more_features',
         localizedLabel = locale.translate(labelName);
       byId(BP_CONST.MORE_BUTTON_GROUP_ID).setAttribute('aria-label', localizedLabel);

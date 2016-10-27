@@ -6,13 +6,13 @@ define(
   [
     '$',
     'Promise',
-    'core/platform',
+    'run/platform',
     'page/style-service/style-service',
     'inverter/invert-url',
     'inverter/bg-image-classifier',
     'inverter/img-classifier',
     'inverter/orig-bg-info',
-    'core/inline-style/inline-style'
+    'run/inline-style/inline-style'
   ],
   function (
     $,

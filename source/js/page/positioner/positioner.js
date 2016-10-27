@@ -5,7 +5,7 @@
    */
 define(
   [
-    'core/platform',
+    'run/platform',
     'page/positioner/transplant/transplant',
     'page/positioner/transform/transform',
     'page/positioner/transform/targets',
@@ -14,8 +14,8 @@ define(
     'page/positioner/util/element-info',
     'page/positioner/constants',
     'page/zoom/util/body-geometry',
-    'core/events',
-    'nativeFn'
+    'run/events',
+    'mini-core/native-global'
   ],
   function (
     platform,
@@ -28,7 +28,7 @@ define(
     constants,
     bodyGeo,
     events,
-    nativeFn
+    nativeGlobal
   ) {
   'use strict';
 
@@ -84,7 +84,7 @@ define(
   function processTransplantCandidates() {
     unprocessedTransplantCandidates.forEach(function (candidate) {
       // TODO: order these initial position handlers by distance from body, closest distance runs first
-      nativeFn.setTimeout(function (candidate) {
+      nativeGlobal.setTimeout(function (candidate) {
         var position = getComputedStyle(candidate).position;
         if (position === 'fixed') {
           toPositionHandler.call(candidate, { toValue : position });
@@ -286,7 +286,7 @@ define(
     init(function () {
       transform.init();
       // We only need to use the transplant algorithm once we've applied a transformation on the body, i.e. when we've zoomed
-      nativeFn.setTimeout(onZoom, 0, state.completedZoom);
+      nativeGlobal.setTimeout(onZoom, 0, state.completedZoom);
     });
   }
 

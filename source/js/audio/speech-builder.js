@@ -7,7 +7,7 @@
 define(
   [
     '$',
-    'core/conf/urls'
+    'run/conf/urls'
   ],
   function (
     $,

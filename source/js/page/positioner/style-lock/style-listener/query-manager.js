@@ -8,13 +8,13 @@
 define(
   [
     'page/positioner/style-lock/style-listener/selector-map',
-    'core/util/array-utility',
-    'nativeFn'
+    'run/util/array-utility',
+    'mini-core/native-global'
   ],
   function (
     selectorMap,
     arrayUtil,
-    nativeFn
+    nativeGlobal
   ) {
   'use strict';
 
@@ -37,7 +37,7 @@ define(
 
   function triggerQuery() {
     if (!refreshTimer) {
-      refreshTimer = nativeFn.setTimeout(function () {
+      refreshTimer = nativeGlobal.setTimeout(function () {
         selectorsToRefresh.forEach(function (selector) {
           if (selector) {
             processQuery(selector);
@@ -67,7 +67,7 @@ define(
     }
 
     for (var i = 0, elementCount = elementsToEvaluate.length; i < elementCount; i++) {
-      nativeFn.setTimeout(handleResults, 0, elementsToEvaluate[i]);
+      nativeGlobal.setTimeout(handleResults, 0, elementsToEvaluate[i]);
     }
   }
 

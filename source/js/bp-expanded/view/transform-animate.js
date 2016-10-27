@@ -5,16 +5,16 @@
 
 define(
   [
-    'core/inline-style/inline-style',
+    'run/util/object-utility',
+    'run/inline-style/inline-style',
     'bp-expanded/view/transform-util',
-    'core/platform',
-    'nativeFn'
+    'run/platform'
   ],
   function (
+    objectUtil,
     inlineStyle,
     transformUtil,
-    platform,
-    nativeFn
+    platform
   ) {
   'use strict';
 
@@ -154,7 +154,7 @@ define(
         if (elements[index]) {
           toTransform = toTransforms[index];
           if (doTweak) {
-            toTransform = nativeFn.JSON.parse(nativeFn.JSON.stringify(toTransform));
+            toTransform = objectUtil.assign({}, toTransform);
             toTransform.translateY = (toTransform.translateY || 0) + 0.001;
           }
           transformUtil.setElemTransform(elements[index], toTransform);

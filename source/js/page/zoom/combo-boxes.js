@@ -1,11 +1,11 @@
 define(
   [
-    'core/events',
+    'run/events',
     'page/zoom/state',
-    'core/inline-style/inline-style',
-    'core/util/array-utility',
-    'core/platform',
-    'nativeFn'
+    'run/inline-style/inline-style',
+    'run/util/array-utility',
+    'run/platform',
+    'mini-core/native-global'
   ],
   function (
     events,
@@ -13,7 +13,7 @@ define(
     inlineStyle,
     arrayUtil,
     platform,
-    nativeFn
+    nativeGlobal
   ) {
   'use strict';
 
@@ -72,7 +72,7 @@ define(
     styles.fontSize = fontSize + 'em';
 
     inlineStyle.override(element, styles);
-    nativeFn.setTimeout(function () {
+    nativeGlobal.setTimeout(function () {
       // If we reapply the transition style in the same synchronous block, it animates our changes
       inlineStyle.restore(element, 'transition');
     }, 0);
@@ -97,7 +97,7 @@ define(
     zoomStyleSheet = document.createElement('style');
     fixAllSelectElements();
     events.on('zoom', function () {
-      nativeFn.setTimeout(function () {
+      nativeGlobal.setTimeout(function () {
         fixAllSelectElements();
       }, 0);
     });

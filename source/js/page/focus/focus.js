@@ -1,5 +1,14 @@
 // focus enhancement (make focus easier to see)
-define(['$', 'core/conf/user/manager', 'page/util/color'], function($, conf) {
+define(
+  [
+    '$',
+    'run/conf/preferences'
+  ],
+  function (
+    $,
+    pref
+  ) {
+  'use strict';
 
   var MIN_ZOOM = 1.4,   // minimum zoom at which focus enhancement appears
     FOCUS_RING_COLOR_ON_LIGHT = 'rgba(82,168,236,.8)',    // color of focus enhancement on normal/warm/bold theme
@@ -69,11 +78,11 @@ define(['$', 'core/conf/user/manager', 'page/util/color'], function($, conf) {
   function init() {
     // subscribe to zoom changes and update
     // enhancement state with each change
-    conf.get('zoom', function (currZoom) {
+    pref.bindListener('zoom', function (currZoom) {
       refresh(currZoom, isDark);
     });
 
-    conf.get('themeName', function(themeName) {
+    pref.bindListener('themeName', function (themeName) {
       refresh(zoomLevel, themeName === 'dark');
     });
   }

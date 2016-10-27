@@ -7,9 +7,9 @@ var gulp = require('gulp'),
   ES5_LINT_GLOB = [
     'source/js/**/*.js',
     '!source/js/**/jquery.js',
-    '!source/js/core/alameda-custom.js',
-    '!source/js/core/native-functions',
-    '!source/js/core/prereq/global-assignments.js'
+    '!source/js/run/prereq/alameda-custom.js',
+    '!source/js/run/native-functions',
+    '!source/js/run/prereq/global-assignments.js'
   ],
   ES6_LINT_GLOB = [
     'extension/source/js/**/*.js', '!extension/source/js/templated-code/**/*',

@@ -8,22 +8,22 @@ define(
     'hlb/event-handlers',
     'hlb/positioning',
     'hlb/styling',
-    'core/conf/user/manager',
-    'core/platform',
+    'run/conf/preferences',
+    'run/platform',
     'page/util/element-classifier',
     'hlb/animation',
     'page/util/geo',
-    'core/metric/metric',
+    'run/metric/metric',
     'hlb/constants',
-    'core/events',
-    'core/inline-style/inline-style'
+    'run/events',
+    'run/inline-style/inline-style'
   ],
   function (
     $,
     eventHandlers,
     hlbPositioning,
     hlbStyling,
-    conf,
+    pref,
     platform,
     elemClassifier,
     hlbAnimation,
@@ -405,7 +405,7 @@ define(
       }
 
       $hlbWrapper.appendTo('body');
-      inheritedZoom = conf.get('zoom') || 1;  // Zoom inherited from page
+      inheritedZoom = pref.get('zoom') || 1;  // Zoom inherited from page
 
     } else {
       $hlbWrapper.insertAfter('body');

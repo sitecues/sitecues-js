@@ -7,11 +7,11 @@ define(
     'hlb/dimmer',
     'page/util/common',
     'hlb/positioning',
-    'core/platform',
+    'run/platform',
     '$',
     'hlb/constants',
-    'nativeFn',
-    'core/inline-style/inline-style'
+    'mini-core/native-global',
+    'run/inline-style/inline-style'
   ],
   function (
     dimmer,
@@ -20,7 +20,7 @@ define(
     platform,
     $,
     constants,
-    nativeFn,
+    nativeGlobal,
     inlineStyle
   ) {
   'use strict';
@@ -105,7 +105,7 @@ define(
 
     // Allow the from CSS to register so that setting the toCss actually animates there
     // rather than just setting the toCss and ignoring the fromCss
-    nativeFn.setTimeout(function () {
+    nativeGlobal.setTimeout(function () {
       toCss.transition = 'transform ' + speed + 'ms ease-in-out';
       inlineStyle.set(hlbElement, toCss);
       hlbElement.addEventListener(platform.transitionEndEvent, onTransitionEnd);

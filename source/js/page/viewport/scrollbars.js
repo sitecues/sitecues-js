@@ -8,16 +8,16 @@
 
 define(
   [
-    'core/platform',
+    'run/platform',
     'page/viewport/viewport',
-    'nativeFn',
+    'mini-core/native-global',
     'page/zoom/util/body-geometry',
-    'core/inline-style/inline-style'
+    'run/inline-style/inline-style'
   ],
   function (
     platform,
     viewport,
-    nativeFn,
+    nativeGlobal,
     bodyGeo,
     inlineStyle
   ) {
@@ -119,7 +119,7 @@ define(
         // MS browsers need to reset first, otherwise causes SC-3722
         setOverflow('hidden', 'hidden');
       }
-      finalizeScrollbarsTimer = nativeFn.setTimeout(function() {
+      finalizeScrollbarsTimer = nativeGlobal.setTimeout(function() {
         setOverflow(newOverflowX, newOverflowY);
       }, 0);
     }

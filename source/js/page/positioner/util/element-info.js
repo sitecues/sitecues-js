@@ -2,9 +2,9 @@ define(
   [
     'page/positioner/util/element-map',
     'page/zoom/state',
-    'core/platform',
-    'core/events',
-    'core/util/array-utility',
+    'run/platform',
+    'run/events',
+    'run/util/array-utility',
     'hlb/hlb'
   ],
   function (

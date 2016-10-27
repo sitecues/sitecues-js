@@ -1,5 +1,5 @@
 // We do not want the mouse wheel to scroll the document when it's over the BP
-define(['core/events', 'core/bp/helper', 'core/bp/constants'], function(events, helper, BP_CONST) {
+define(['run/events', 'run/bp/helper', 'run/bp/constants'], function(events, helper, BP_CONST) {
 
   var isInitialized;
 

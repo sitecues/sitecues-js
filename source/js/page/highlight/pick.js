@@ -29,24 +29,24 @@ define(
   [
     '$',
     'page/util/common',
-    'core/conf/user/manager',
-    'core/conf/site',
+    'run/conf/preferences',
+    'run/conf/site',
     'page/highlight/traitcache',
     'page/highlight/traits',
     'page/highlight/judge',
-    'nativeFn',
-    'core/inline-style/inline-style',
-    'core/platform'
+    'mini-core/native-global',
+    'run/inline-style/inline-style',
+    'run/platform'
   ],
   function (
     $,
     common,
-    conf,
+    pref,
     site,
     traitcache,
     traits,
     judge,
-    nativeFn,
+    nativeGlobal,
     inlineStyle,
     platform
   ) {
@@ -352,7 +352,7 @@ define(
       if (secondBestIndex < 0) {
         var scores = scoreObjs.map(getNumericScore);
         if (SC_DEV && isVoteDebuggingOn) {
-          console.log('--> break no other competitors: ' + nativeFn.JSON.stringify(scores));
+          console.log('--> break no other competitors: ' + nativeGlobal.JSON.stringify(scores));
         }
         break;  // Only one valid candidate
       }
@@ -424,7 +424,7 @@ define(
           outline : (extraWork * 4) + 'px solid orange'
         });
       }
-      nativeFn.setTimeout(function () {
+      nativeGlobal.setTimeout(function () {
         inlineStyle.set(candidates[origBestIndex], {
           outline : ''
         });
@@ -769,7 +769,7 @@ define(
       candidate,
       rect,
       style,
-      zoom = conf.get('zoom') || 1;
+      zoom = pref.get('zoom') || 1;
     for (; index < candidates.length; index ++) {
       candidate = candidates[index];
       if (lastPicked && $.contains(candidate, lastPicked)) {

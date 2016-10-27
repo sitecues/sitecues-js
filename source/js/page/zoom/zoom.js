@@ -5,9 +5,9 @@
 define(
   [
     '$',
-    'core/conf/user/manager',
-    'core/events',
-    'core/modifier-key-state',
+    'run/conf/preferences',
+    'run/events',
+    'run/modifier-key-state',
     'page/zoom/animation',
     'page/zoom/util/body-geometry',
     'page/zoom/state',
@@ -16,14 +16,14 @@ define(
     'page/zoom/util/restrict-zoom',
     'page/zoom/style',
     'page/viewport/scrollbars',
-    'nativeFn',
+    'mini-core/native-global',
     'page/zoom/flash',
-    'core/inline-style/inline-style'
+    'run/inline-style/inline-style'
   ],
   /*jshint -W072 */ //Currently there are too many dependencies, so we need to tell JSHint to ignore it for now
   function (
     $,
-    conf,
+    pref,
     events,
     modifierKeyState,
     animation,
@@ -34,7 +34,7 @@ define(
     restrictZoom,
     style,
     scrollbars,
-    nativeFn,
+    nativeGlobal,
     flash,
     inlineStyle
   ) {
@@ -118,7 +118,7 @@ define(
       targetZoom = animation.isZoomOperationRunning() ? state.currentTargetZoom + delta : state.completedZoom + delta;
 
     clearTimeout(unpinchEndTimer);
-    unpinchEndTimer = nativeFn.setTimeout(animation.finishZoomOperation, UNPINCH_END_DELAY);
+    unpinchEndTimer = nativeGlobal.setTimeout(animation.finishZoomOperation, UNPINCH_END_DELAY);
     if (!animation.isZoomOperationRunning()) {
       // 1st call -- we will glide to it, it may be far away from previous zoom value
       animation.beginZoomOperation(targetZoom, getWheelEventInputInfo()); // Get ready for more slider updates
@@ -193,8 +193,8 @@ define(
     body  = document.body;
     $origBody = $(body);
 
-    // Use conf module for sharing current zoom level value
-    conf.def('zoom', restrictZoom.toValidRange);
+    // Use pref module for sharing current zoom level value
+    pref.defineHandler('zoom', restrictZoom.toValidRange);
 
     // ATKratter wouldn't scroll when we listened to this on the window
     document.addEventListener('wheel', onMouseWheel);  // Ctrl+wheel = unpinch

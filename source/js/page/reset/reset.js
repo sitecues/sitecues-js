@@ -1,7 +1,15 @@
 // Functionality for resetting Sitecues or turning it off
 
-define(['page/zoom/zoom', 'core/conf/user/manager'],
-  function(zoomMod, conf) {
+define(
+  [
+    'page/zoom/zoom',
+    'run/conf/preferences'
+  ],
+  function (
+    zoomMod,
+    pref
+  ) {
+  'use strict';
 
     function resetZoom() {
       zoomMod.resetZoom();
@@ -19,7 +27,7 @@ define(['page/zoom/zoom', 'core/conf/user/manager'],
     }
 
     function resetMinorSettings() {
-      conf.reset();
+      pref.reset();
     }
 
     function resetAll() {

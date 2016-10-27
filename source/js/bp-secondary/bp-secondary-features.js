@@ -1,5 +1,5 @@
 define([
-  'core/bp/constants',
+  'run/bp/constants',
   'bp-secondary/tips',
   'bp-secondary/settings',
   'bp-secondary/feedback',

@@ -2,11 +2,11 @@
 define(
   [
     '$',
-    'core/conf/user/manager',
-    'core/platform',
-    'core/events',
-    'core/metric/metric',
-    'core/errors',
+    'run/conf/preferences',
+    'run/platform',
+    'run/events',
+    'run/metric/metric',
+    'run/errors',
     'page/util/common',
     'page/zoom/state',
     'page/zoom/constants',
@@ -16,12 +16,12 @@ define(
     'page/zoom/util/restrict-zoom',
     'page/zoom/style',
     'page/viewport/scrollbars',
-    'nativeFn',
-    'core/inline-style/inline-style'
+    'mini-core/native-global',
+    'run/inline-style/inline-style'
   ],
   function (
     $,
-    conf,
+    pref,
     platform,
     events,
     metric,
@@ -35,7 +35,7 @@ define(
     restrictZoom,
     style,
     scrollbars,
-    nativeFn,
+    nativeGlobal,
     inlineStyle
   ) {
 /*jshint +W072 */
@@ -167,7 +167,7 @@ define(
       // The timer will keep resetting as long as key repeat is active. The zoom glide
       // will end shortly after the last keydown event.
       clearTimeout(edgeKeyGlideTimer);
-      edgeKeyGlideTimer = nativeFn.setTimeout(finishGlideIfEnough, EDGE_CONTINUE_KEY_GLIDE_WAIT_MS);
+      edgeKeyGlideTimer = nativeGlobal.setTimeout(finishGlideIfEnough, EDGE_CONTINUE_KEY_GLIDE_WAIT_MS);
     }
 
     function beginGlideAnimation() {
@@ -176,7 +176,7 @@ define(
         // Button/key was already released, zoom only for long enough to get minimum zoom
         var delta = MIN_ZOOM_PER_CLICK * (state.completedZoom < targetZoom ? 1 : -1);
         state.currentTargetZoom = restrictZoom.toValidRange(state.completedZoom + delta);
-        minZoomChangeTimer = nativeFn.setTimeout(finishZoomOperation, MIN_ZOOM_PER_CLICK * getMsPerXZoom());
+        minZoomChangeTimer = nativeGlobal.setTimeout(finishZoomOperation, MIN_ZOOM_PER_CLICK * getMsPerXZoom());
       }
 
       if (shouldUseElementDotAnimate) {
@@ -425,7 +425,7 @@ define(
     });
 
     // Indicate that zooming has finished -- this is used by the sitecues-zoom-form-fix stylesheet
-    nativeFn.setTimeout(function() {
+    nativeGlobal.setTimeout(function() {
       $('body').removeAttr('data-sc-zooming');
     }, 0);
 
@@ -433,13 +433,13 @@ define(
     events.emit('zoom', state.completedZoom);
 
     if (!state.isInitialLoadZoom) {
-      conf.set('zoom', state.completedZoom);
+      pref.set('zoom', state.completedZoom);
       if (!didUnzoom) {
         require(['audio-cues/audio-cues'], function (audioCues) {
           audioCues.playZoomCue(state.completedZoom);
         });
       }
-      if (nativeFn.JSON.stringify(state.zoomInput) === '{}') {
+      if (nativeGlobal.JSON.stringify(state.zoomInput) === '{}') {
         errors.report(new Error('zoom metric empty details'));
       }
       new metric.ZoomChange(state.zoomInput).send();
@@ -456,7 +456,7 @@ define(
 
     // Get next forward/backward glide animations ready.
     // Doing it now helps with performance, because stylesheet will be parsed and ready for next zoom.
-    nativeFn.setTimeout(style.setupNextZoomStyleSheet, 0, null, shouldUseKeyFramesAnimation());
+    nativeGlobal.setTimeout(style.setupNextZoomStyleSheet, 0, null, shouldUseKeyFramesAnimation());
 
     style.restoreBodyTransitions();
 
@@ -507,7 +507,7 @@ define(
 
     state.zoomInput.isLongGlide = timeRemaining === 0;
 
-    minZoomChangeTimer = nativeFn.setTimeout(finishGlideEarly, timeRemaining);
+    minZoomChangeTimer = nativeGlobal.setTimeout(finishGlideEarly, timeRemaining);
   }
 
   function freezeZoom() {

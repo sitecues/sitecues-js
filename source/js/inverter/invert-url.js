@@ -3,7 +3,7 @@
  */
 
 define([
-  'core/conf/urls',
+  'run/conf/urls',
   'Promise'
 ],
   function(urls,

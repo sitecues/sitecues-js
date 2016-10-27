@@ -1,17 +1,17 @@
 define(
   [
-    'core/conf/urls',
-    'core/util/xhr',
-    'core/conf/user/manager',
-    'core/conf/site',
-    'nativeFn'
+    'run/conf/urls',
+    'run/util/xhr',
+    'run/conf/preferences',
+    'run/conf/site',
+    'mini-core/native-global'
   ],
   function (
     urls,
     xhr,
-    conf,
+    pref,
     site,
-    nativeFn
+    nativeGlobal
   ) {
   'use strict';
 
@@ -22,8 +22,8 @@ define(
       var INDENTATION = '    ',
             result = object;
 
-      if (nativeFn.JSON && nativeFn.JSON.stringify) {
-        result = nativeFn.JSON.stringify(object, null, INDENTATION);
+      if (nativeGlobal.JSON && nativeGlobal.JSON.stringify) {
+        result = nativeGlobal.JSON.stringify(object, null, INDENTATION);
       }
 
       return result;
@@ -50,7 +50,7 @@ define(
     function status(callback) {
 
       var html = document.documentElement,
-          prefData = conf.get(),
+          prefData = pref.get(),
           coordinates,
           ajaxUrls = {  // Set the server URLs for retrieving the status of our services (version info, etc.)
             ws : urls.getApiUrl('util/status')

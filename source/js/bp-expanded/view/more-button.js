@@ -6,16 +6,16 @@
 
 define(
   [
-    'core/bp/constants',
-    'core/bp/helper',
+    'run/bp/constants',
+    'run/bp/helper',
     'bp-expanded/view/transform-util',
     'bp-expanded/view/transform-animate',
     'bp-expanded/view/transform-hovers',
-    'core/bp/model/state',
-    'core/events',
-    'core/inline-style/inline-style',
-    'core/ab-test/ab-test',
-    'nativeFn'
+    'run/bp/model/state',
+    'run/events',
+    'run/inline-style/inline-style',
+    'run/ab-test/ab-test',
+    'mini-core/native-global'
   ],
   function (
     BP_CONST,
@@ -27,7 +27,7 @@ define(
     events,
     inlineStyle,
     abTest,
-    nativeFn
+    nativeGlobal
   ) {
   'use strict';
 
@@ -88,7 +88,7 @@ define(
       setSize(0.5);
       // Delay to fix Chrome animation bug
       // TODO WTF? We need to wait 30 ms? Tried requestAnimationFrame() and only 50% success rate
-      nativeFn.setTimeout(function () {
+      nativeGlobal.setTimeout(function () {
         getComputedStyle(moreButtonContainer); // Force layout update
         animate.animateTransformLinear(moreButtonContainer, {scale: 1},
           useInstantTransition ? BUTTON_ENTER_ANIMATION_DURATION_INSTANT : BUTTON_ENTER_ANIMATION_DURATION);
@@ -155,7 +155,7 @@ define(
     // After NO_INPUT_TIMEOUT, we will be able to determine if the user has
     // pressed their mouse button.  If they have not, show the additional button.
     var noInputTimeoutMs = abTest.get('moreButtonTimerV2', NO_INPUT_TIMEOUT_DEFAULT);
-    userInputTimeoutId = nativeFn.setTimeout(showButtonIfNoUserInput, noInputTimeoutMs);
+    userInputTimeoutId = nativeGlobal.setTimeout(showButtonIfNoUserInput, noInputTimeoutMs);
   }
 
   function init() {

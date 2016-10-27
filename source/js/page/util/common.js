@@ -4,7 +4,7 @@
 define(
   [
     'page/util/element-classifier',
-    'core/inline-style/inline-style'
+    'run/inline-style/inline-style'
   ],
   function (
     elemClassifier,

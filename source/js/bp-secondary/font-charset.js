@@ -1,6 +1,6 @@
 // Return the extended font charset name, e.g. 'latin-ext'
 
-define(['core/locale'], function(locale) {
+define(['run/locale'], function(locale) {
   /**
    * Return 'latin-ext' if latin-ext font needed, etc.
    * @returns {*}

@@ -2,16 +2,16 @@
 define(
   [
     'Promise',
-    'core/inline-style/inline-style',
-    'core/util/array-utility',
-    'nativeFn',
-    'core/dom-events'
+    'run/inline-style/inline-style',
+    'run/util/array-utility',
+    'mini-core/native-global',
+    'run/dom-events'
   ],
   function (
     Promise,
     inlineStyle,
     arrayUtil,
-    nativeFn,
+    nativeGlobal,
     domEvents
   ) {
   'use strict';
@@ -37,7 +37,7 @@ define(
     var elements = arrayUtil.wrap(elmnts);
     elements.forEach(disableTransformTransition);
     inlineStyle.override(elements, ['transform', transform]);
-    nativeFn.setTimeout(function () {
+    nativeGlobal.setTimeout(function () {
       elements.forEach(restoreTransition);
     }, 0);
   }
@@ -48,7 +48,7 @@ define(
       disableStyleTransition(element, property);
     });
     inlineStyle.override(elements, [property, value]);
-    nativeFn.setTimeout(function () {
+    nativeGlobal.setTimeout(function () {
       elements.forEach(restoreTransition);
     }, 0);
   }
@@ -89,7 +89,7 @@ define(
       // discrepancy between the explicit timeout and the practical timeout
       var timeoutLength = Math.ceil((duration + delay) * 1.2);
 
-      return nativeFn.setTimeout(function () {
+      return nativeGlobal.setTimeout(function () {
         // It's important that we update the current style value after the time out
         var resolveValue,
             currentValue      = computedStyle[property],

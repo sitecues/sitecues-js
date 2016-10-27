@@ -2,7 +2,7 @@ define(
     [
         'intern!tdd',
         'intern/chai!assert',
-        'core/events'
+        'run/events'
     ],
     function (tdd, assert, events) {
 

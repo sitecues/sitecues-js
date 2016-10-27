@@ -7,15 +7,15 @@ define(
     '$',
     'page/style-service/css-aggregator',
     'page/style-service/media-queries',
-    'core/platform',
-    'nativeFn'
+    'run/platform',
+    'mini-core/native-global'
   ],
   function (
     $,
     cssAggregator,
     mediaQueries,
     platform,
-    nativeFn
+    nativeGlobal
   ) {
   'use strict';
 
@@ -116,7 +116,7 @@ define(
       elems[index] = $newSheet[0];
       if (++ index < numChunks) {
         // We must wait before creating the next stylesheet otherwise we overload IE11 and cause it to lockup
-        nativeFn.setTimeout(createNext, 0);
+        nativeGlobal.setTimeout(createNext, 0);
       }
       else {
         callback(elems);
@@ -145,7 +145,7 @@ define(
     }
 
     createCombinedStylesheets(allCss, function(styleElems) {
-      nativeFn.setTimeout(function () {
+      nativeGlobal.setTimeout(function () {
         getDOMStyleSheetObjects(styleElems, function() {
           isCssComplete = true;
           clearCallbacks();
@@ -299,7 +299,7 @@ define(
 
       if (++ tries <= MAX_TRIES) {
         if (SC_DEV) { console.log('Could not find stylesheet ' + id); }
-        nativeFn.setTimeout(getStyleSheet, TRY_INTERVAL_MS);
+        nativeGlobal.setTimeout(getStyleSheet, TRY_INTERVAL_MS);
       }
     }
 

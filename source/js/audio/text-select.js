@@ -5,15 +5,15 @@
 define(
   [
     '$',
-    'core/events',
+    'run/events',
     'audio/constant',
-    'nativeFn'
+    'mini-core/native-global'
   ],
   function (
     $,
     events,
     constant,
-    nativeFn
+    nativeGlobal
   ) {
   'use strict';
 
@@ -22,7 +22,7 @@ define(
   // Speaking on a delay after mouseup avoids speaking the same thing twice
   function speakSelectedTextOnDelay(event) {
     if (!isInPanel(event.target)) {
-      nativeFn.setTimeout(speakSelectedText, 0);
+      nativeGlobal.setTimeout(speakSelectedText, 0);
     }
   }
 
