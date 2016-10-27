@@ -14,6 +14,7 @@ function getConfig(baseConfig) {
     // Production versions have resources in a folder named by the version
     resourceFolderName: baseConfig.isDebugOn ? '.' : baseConfig.version,
     isLocal: process.env.LOCAL === 'on',  // Common library -- default is non-local
+    isBuildingVersionMap: true,
     autoSpeechStrategy: process.env.AUTO_SPEECH || 'preferNetwork',
     allowBrowserNetworkSpeech: process.env.BROWSER_NETWORK_SPEECH === 'on', // Allow window.speechSynthesis via network -- off by default
     audioCueDir: process.env.CUES === 'off' ? null : path.join(baseConfig.librarySourceDir, 'js', 'locale-data', 'cue'),

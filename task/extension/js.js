@@ -95,7 +95,7 @@ function optimizeLibrary() {
 function cleanLibrary() {
   return new Promise(
     function(resolve, reject) {
-      console.log('Cleaning intermediaate js file at ' + intermediateSitecuesJs);
+      console.log('Cleaning intermediate js file at ' + intermediateSitecuesJs);
       var cleanedCode = amdClean.clean({
         filePath: intermediateSitecuesJs
       });
@@ -123,7 +123,7 @@ function compressLibrary() {
     .pipe(replace('platform.browser.isChrome', 'true'))
     .pipe(replace('platform.browser.isWebKit', 'true'))
     .pipe(uglify(uglifyOptions))
-    .pipe(gulp.dest(global.build.path + '/js'));
+    .pipe(gulp.dest(global.buildDir + '/js'));
 }
 
 function compileLibrary() {
@@ -134,7 +134,7 @@ function compileLibrary() {
 }
 
 function showSizes() {
-  return gulp.src(global.build.path + '/**/*.js')
+  return gulp.src(global.buildDir + '/**/*.js')
     .pipe(size({ pretty: true, gzip: true, showFiles: true }));
 }
 
@@ -145,7 +145,7 @@ function noop(callback) {
 function copyScripts(glob) {
   return gulp.src(glob)
     .pipe(uglify(uglifyOptions))
-    .pipe(gulp.dest(global.build.path + '/js'));
+    .pipe(gulp.dest(global.buildDir + '/js'));
 }
 
 function copyExtensionScripts() {

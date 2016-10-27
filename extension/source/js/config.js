@@ -10,6 +10,9 @@ window.sitecues = {
     uiMode: 'toolbar',
     hasOptionsMenu: true,
     alwaysRealSettings: true
-  }
+  },
+  _shared: {
+    nativeGlobal: window  // Make our custom jQuery happy
+  } 
 };
 

@@ -144,7 +144,7 @@ function prepareValidation() {
 }
 
 function showSizes() {
-  return gulp.src(global.build.path + '/**/*.js')
+  return gulp.src(global.buildDir + '/**/*.js')
     .pipe(size({ pretty: true, gzip: true, showFiles: true }));
 }
 

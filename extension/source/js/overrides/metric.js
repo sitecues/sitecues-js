@@ -1,4 +1,4 @@
-define('run/metric', [], function() {
+define('run/metric/metric', [], function() {
   "use strict";
 
   function noop() {}

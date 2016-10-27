@@ -1,0 +1,60 @@
+/* ------------- Textarea placeholder ------------ */
+
+#scp-feedback-textarea::-moz-placeholder {
+  position: relative !important;
+  font-size: 24px !important;
+  left: 20px !important;
+  top: 35px !important;
+  color: #777 !important;
+}
+
+#scp-feedback-textarea:focus::-moz-placeholder {
+  color: transparent !important;
+}
+
+/* --------------- Input ranges ---------------- */
+
+.scp-normal-range {
+  width: 442px;
+  height: 26px;
+  border: 0 !important;
+  border-radius: 1px !important;
+  background-color: #e2e2e2 !important;
+  margin: 0;
+  outline: 0;
+  box-sizing: content-box !important;
+}
+
+.scp-hue-range {
+  width: 442px;
+  height: 26px;
+  margin: 0;
+  padding: 1px 0;
+  border-radius: 3px;
+  outline: 0;
+  background-image: linear-gradient(to right, #f66 0, #ff6 16%, #6f6 32%, #6ff 48%, #66f 64%, #f6f 80%, #f66 96%, #fff 96.2%, #fff 100%) !important;
+  border: 1px solid #777 !important;
+  box-sizing: border-box !important;
+}
+
+.scp-normal-range::-moz-range-thumb, .scp-hue-range::-moz-range-thumb {
+  position: relative;
+  width: 19px;
+  height: 51px;
+  background: url('../images/settings/slider-thumb.svg') no-repeat;
+  background-position: 0 6px;
+  border: 0;
+  outline: 0;
+}
+
+.scp-hue-range::-moz-range-thumb {
+  background-image: url('../images/settings/slider-thumb-with-hole.svg');
+}
+
+#scp-bp-container input[type="range"]::-moz-range-track {
+  border: 0;
+  background: transparent;
+}
+#scp-bp-container input[type=range]::-moz-focus-outer {
+  border: 0;
+}

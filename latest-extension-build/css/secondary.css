@@ -1,0 +1,656 @@
+/** Open Sans **/
+/* latin normal woff2 */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Open Sans'), local('OpenSans'), url(https://fonts.gstatic.com/s/opensans/v13/cJZKeOuBrn4kERxqtaUH3ZBw1xU1rKptJj_0jans920.woff2) format('woff2');
+  src: url(https://fonts.gstatic.com/s/opensans/v13/cJZKeOuBrn4kERxqtaUH3T8E0i7KZn-EPnyo3HZu7kw.woff) format('woff');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
+}
+/* latin semibold woff2 */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 600;
+  src: local('Open Sans Semibold'), local('OpenSans-Semibold'), url(https://fonts.gstatic.com/s/opensans/v13/MTP_ySUJH_bn48VBG8sNShampu5_7CjHW5spxoeN3Vs.woff2) format('woff2');
+  src: url(https://fonts.gstatic.com/s/opensans/v13/MTP_ySUJH_bn48VBG8sNSnhCUOGz7vYGh680lGh-uXM.woff) format('woff');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
+}
+
+/******************* Style pollution ***********************/
+
+.scp-link,.scp-link:visited,.scp-link:focus,.scp-link:hover {
+  color: #447AC4 !important; /* Same as #scp-wave3 */
+  font-size: 20px !important;
+}
+
+.scp-button-link,.scp-button-link:visited,.scp-button-link:focus,.scp-button-link:hover {
+  color: #fff !important;
+  text-decoration: none !important;
+  width: 100%;
+  height: 100%;
+  display: inline-block;
+  padding: 9px 0;
+  font-size: 20px !important;
+
+}
+
+/******************* Secondary content *********************/
+
+.scp-want-secondary #scp-secondary, .scp-is-secondary #scp-secondary {
+  display: block;
+}
+
+/** Enable secondary panel **/
+.scp-secondary-feature {
+  /* On ticc.com the secondary panel menu items failed to appear unless we added !important to this style rule,
+  TODO: Go back and figure out why this works everywhere else. This selector has lower specificity, and since secondary.css
+  is an external stylesheet it should have lower precedence. Mysterious*/
+  display: block !important;
+}
+
+/* Secondary panel has it's own stretchable outline */
+#scp-main-outline {
+  transition: opacity .2s;
+}
+
+.scp-is-secondary.scp-want-secondary #scp-main-outline {
+  opacity: 0 !important;
+}
+
+/* Don't show main content under secondary panel, it confuses Window-Eyes even though it's hidden underneath */
+.scp-is-secondary.scp-want-secondary #scp-main {
+  display: none
+}
+
+/** Custom elements to help avoid page pollution **/
+
+sc,sc-cards,sc-card {
+  display: block;
+  font-family: 'Open Sans',Arial,serif;
+  font-size: 20px;
+  margin: 0;
+  color: #000;
+  line-height: normal;
+}
+sc-h1 {
+  display: block;
+  margin: 24px 0;
+  font-size: 40px;
+}
+sc-h2 {
+  display: block;
+  margin: 15px 0;
+  font-size: 21px;
+  font-weight: 600;
+}
+sc-center {
+  text-align: center;
+  display: block;
+}
+sc-p {
+  display: block;
+  margin: 12px 0;
+}
+sc-menu {
+  display: block;
+  margin: 21px 16px;
+}
+sc-link,sc-menuitem {
+  text-decoration: none;
+  color: #447AC4;
+}
+sc-menuitem {
+  display: list-item;
+  list-style-position: inside;
+  list-style-type: decimal;
+  margin: 10px 32px;
+  font-size: 22px;
+}
+sc-kbd {
+  display: inline-block;
+  white-space: nowrap;
+  position: relative;
+  top: -3px;
+  font-size: 18px;
+  min-width: 30px;
+  padding: .04em;
+  text-align: center;
+  border-radius: 3px;
+  border: 0;
+  background-image: linear-gradient(to top, #EEE, #FFF);
+  color: #333;
+  margin: 0 4px;
+  text-shadow: 0 0 2px #FFF;
+  box-shadow: inset 0 0 1px #FFF, inset 0 0 .4em #CCC, 0 .1em 0 #888, 0 .11em 0 rgba(0, 0, 0, .4), 0 .1em .11em rgba(0, 0, 0, .9);
+  transition: transform .5s, box-shadow .5s;
+}
+sc-kbd.scp-space {
+  padding-left: 1.5em;
+  padding-right: 1.5em;
+}
+sc-span {
+  display: inline-block;
+}
+sc-button {
+  display: inline-block;
+  font-weight: 600;
+  background-color: #447AC4;
+  color: white;
+  border: 2px solid beige;
+  border-radius: 5px;
+  padding: 9px;
+  margin-right: 10px;
+  transition: transform .5s;
+  position: relative;
+}
+
+sc-button[aria-disabled="true"] {
+  background-color: #999;
+  transform: scale(1) !important;
+}
+
+sc-button:hover {
+  transform: scale(1.2);
+}
+
+/*************** Screen readers only *********************/
+
+.scp-only-screenreaders {
+  text-indent: -9999px;
+}
+
+/*************** Common card elements *********************/
+
+.scp-card-header {
+  position: absolute;
+  top: 0;
+  margin-top: 16px;
+  margin-left: 95px;
+  font-family: 'Open Sans',Arial,serif;
+  font-size: 41px;
+  width: 256px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* Card chooser */
+.scp-card-chooser {
+  position: absolute;
+  top: 99px;
+  left: 30px;
+  width: 440px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.scp-card-chooser > sc-link {
+  text-align: center;
+  font-size: 19px;
+}
+
+#scp-settings .scp-card-chooser > sc-link {
+  font-size: 23px;  /* TODO larger text in settings chooser, where we currently only have 2 cards */
+}
+
+.scp-card-chooser > sc-link[aria-selected="true"] {
+  font-weight: 600;
+}
+
+.scp-card-indicator {
+  background-image: url('../images/card-indicator.svg');
+  position: absolute;
+  top: 133px;
+  left: 30px;
+  width: 440px;
+  height: 18px;
+}
+
+/*************** Secondary panel **************************/
+
+.scp-is-secondary > svg {
+  height: 1200px !important;
+}
+.scp-arrow {
+  fill: #447AC4;
+}
+.scp-arrow[aria-disabled]>g {
+  pointer-events: none;
+  visibility: hidden;
+  opacity: 0;
+}
+.scp-if-tips, .scp-if-settings, .scp-if-feedback, .scp-if-about {
+  pointer-events: none;
+  visibility: hidden;
+  opacity: 0;
+}
+.scp-panel-button-menu #scp-button-menu > g[role="button"] {
+  pointer-events: all;
+  visibility: visible;
+  opacity: 1;
+}
+.scp-panel-settings .scp-if-settings {
+  pointer-events: all;
+  visibility: visible;
+  opacity: 1;
+}
+.scp-panel-tips .scp-if-tips {
+  pointer-events: all;
+  visibility: visible;
+  opacity: 1;
+}
+.scp-panel-feedback .scp-if-feedback {
+  pointer-events: all;
+  visibility: visible;
+  opacity: 1;
+}
+.scp-panel-about .scp-if-about {
+  pointer-events: all;
+  visibility: visible;
+  opacity: 1;
+}
+.scp-want-badge .scp-secondary-feature {
+  display: none !important;
+}
+.scp-is-secondary .scp-secondary-only {
+  opacity: 1 !important;
+}
+.scp-secondary-feature-only {
+  display: none;
+  opacity: 0;
+  transition: opacity .5s;
+}
+
+.scp-is-secondary:not(.scp-panel-button-menu) .scp-secondary-feature-only {
+  display: block;
+  opacity: 1;
+}
+
+
+.scp-is-secondary > svg > #scp-main > * {
+  pointer-events: none;
+}
+.scp-panel-tips #scp-tips-label, .scp-panel-settings #scp-settings-label, .scp-panel-feedback #scp-feedback-label, .scp-panel-about #scp-about-label {
+  fill: #447AC4;
+}
+sc-cards {
+  z-index: 999;
+}
+sc-card {
+  position: absolute;
+  top: 150px;
+  left: 30px;
+  visibility: hidden;
+  pointer-events: none;
+  opacity: 0;
+  width: 442px;
+  transition: opacity .5s;
+}
+sc-card > * {
+  pointer-events: all;
+}
+.scp-panel-tips:not(.scp-secondary-expanding) .scp-if-tips > .scp-active, .scp-panel-settings:not(.scp-secondary-expanding) .scp-if-settings > .scp-active {
+  visibility: visible;
+  opacity: 1;
+}
+.scp-secondary-expanding .scp-secondary-feature {
+  pointer-events: none;
+  visibility: hidden;
+  opacity: 0;
+}
+#scp-demo-page {
+  position: absolute;
+  font-size: 16px;
+  top: 340px;
+  left: 30px;
+  width: 390px;
+  height: 130px;
+  border: 1px solid #C0BFBF;
+  border-radius: 2px;
+  background-color: #f8f8f8;
+  padding: 20px 20px 5px 30px;
+  overflow: hidden;
+}
+#scp-demo-page-contents {
+  transition: transform 2.2s linear;
+  transform-origin: 0 0;
+}
+#scp-demo-para {
+  position: relative;
+  top: -4px;
+  left: -4px;
+  padding: 2px;
+  border: 2px solid transparent;
+  border-radius: 4px;
+  transform-origin: 30% 50%;
+  transition: transform .4s, box-shadow .2s;
+}
+.scp-icon-menuitem {
+  margin-top: 38px;
+  width: 90%;
+  font-size: 26px;
+}
+.scp-icon-menuitem>sc-button {
+  border: 0;
+  width: 51px;
+  margin-right: 20px;
+  background-size: 100% auto;
+  float: left;
+  background-color: transparent;
+  background-repeat: no-repeat;
+}
+#scp-demo-slider {
+  position: relative;
+  width: 180px;
+  height: 51px;
+  text-align: left;
+}
+#scp-demo-slider>* {
+  background: none;
+  position: absolute;
+  width: 180px;
+  height: 51px;
+}
+#scp-use-slider-heading {
+  font-size: 24px;
+  margin-top: 24px;
+}
+
+.scp-active #scp-demo-slider-bar {
+  background: url('../images/tips/slider-bar-demo.svg') no-repeat;
+}
+
+.scp-active #scp-demo-slider-thumb {
+  background: url('../images/tips/slider-thumb-demo.svg') no-repeat;
+}
+.scp-active #scp-demo-slider-thumb[data-demo="true"] {
+  transform: translateX(90px) scale(1.6);
+}
+#scp-demo-page-contents[data-demo="true"] {
+  transform: scale(1.6);
+}
+sc-kbd[data-demo="true"] {
+  transform: translate(4px,4px);
+  box-shadow: inset 0 0 1px #FFF, inset 0 0 .4em #CCC, 0 1px 0 #888, 0 1px 0 rgba(0, 0, 0, .4), 0 1px 1px rgba(0, 0, 0, .9);
+}
+#scp-demo-mouse {
+  background: url('../images/tips/cursor-demo.svg') no-repeat;
+  position: absolute;
+  height: 40px;
+  width: 30px;
+  left: 157px;
+  top: 36px;
+  transition: transform 2s;
+  z-index: 1;
+  display: none;
+}
+.scp-demo-highlight #scp-demo-mouse,.scp-demo-lens #scp-demo-mouse {
+  display: block;
+}
+.scp-demo-highlight #scp-demo-mouse[data-demo="true"],.scp-demo-lens #scp-demo-mouse {
+  transform: translate(-65px, -3px);
+}
+.scp-demo-highlight #scp-demo-para[data-demo="true"],.scp-demo-lens #scp-demo-para {
+  background-color: rgba(240, 240, 180, 0.3);
+  border-color: #222;
+}
+.scp-demo-lens #scp-demo-para[data-demo="true"] {
+  background-color: white;
+  transform: scale(1.6);
+  box-shadow: 0 0 0 999px rgba(0,0,0,.3);
+}
+
+#scp-demo-page[data-hasdemo="false"] {
+  display: none;
+}
+
+#scp-demo-slider-thumb {
+  transition: transform 2s linear;
+}
+
+#scp-speech-button-demo {
+  background: url('../images/tips/speech-button-demo.svg') 100% 100% no-repeat;
+  position: relative;
+  top: 2px;
+  width: 39px;
+  height: 26px;
+}
+
+#scp-full-guide-card {
+  top: 168px;
+  left: 65px;
+}
+
+#scp-guide-icon {
+  background-image: url('../images/tips/full-guide-icon.svg');
+  height: 46px;
+  margin-top: 14px;
+}
+
+#scp-kbd-icon {
+  background-image: url('../images/tips/keyboard-icon.svg');
+  height: 26px;
+  margin-top: 14px;
+}
+
+/** Settings **/
+
+.scp-range-group {
+  margin-top: -20px;
+  padding: 17px 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1s;
+  overflow: hidden;
+}
+
+.scp-range-group > input {
+  opacity: inherit;  /* Make sure also opacity: 0 when hidden so that it doesn't get focused */
+  padding: 0 !important; /* Avoid style pollution from Twitter bootstrap */
+}
+
+.scp-color-theme-group {
+  margin-bottom: 36px;
+  /* Need a table so that we can vertically align contents in the buttons */
+  display: flex;
+  justify-content: space-between;
+}
+
+sc-button[data-setting-name="themeName"] {
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 96px;
+  height: 96px;
+  font-size: 18px;
+  border-radius: 6px;
+  text-align: center;
+  color: #000;
+  border: 2px solid #000;
+  background-color: #fff;
+  font-weight: 100;
+  box-sizing: border-box !important;
+}
+sc-button[data-setting-name="themeName"]:not([data-setting-value]) {
+  color: #222;
+  border-width: 2px;
+}
+sc-button[data-setting-name="themeName"][data-setting-value="bold"] {
+  font-weight: 700;
+  text-shadow: .4px .2px;
+  border-width: 4px;
+}
+sc-button[data-setting-name="themeName"][data-setting-value="warm"] {
+  color: #777;
+  border-color: #777;
+  background-color: #fffdde;
+  border-width: 1px;
+}
+sc-button[data-setting-name="themeName"][data-setting-value="dark"] {
+  color: #fff;
+  background-color: #000;
+}
+/* ----------- Current theme indicator ---------------*/
+
+sc-button[data-setting-name="themeName"][aria-pressed="true"]:after {
+  content: "";
+  position: absolute;
+  left: calc(50% - 10px);
+  background-image: url('../images/settings/theme-indicator.svg');
+  top: 85px;
+  height: 20px !important;
+  width: 24px !important;
+  pointer-events: none;
+}
+
+.scp-range-group[data-show="true"] {
+  pointer-events: all;
+  opacity: 1;
+}
+
+#scp-mouse-settings-group {
+  margin-top: 60px;
+}
+#scp-mouse-settings-group>sc-p {
+  margin-top: 20px;
+}
+#scp-mouse-size-label,#scp-mouse-hue-label {
+  font-size: 26px;
+  margin-top: 5px;
+}
+.scp-lens-size-group {
+  padding-top: 14px;
+}
+#scp-feedback-header {
+  opacity: 0;
+  width: 0; /* Use width: 0 instead of display:none because IE wouldn't refresh the styles after sending feedback, clicking about, and coming back to feedback */
+}
+.scp-panel-feedback #scp-feedback-header {
+  transition: opacity .5s; /* Fade in after the animation is finished */
+  opacity: 1;
+  width: 256px;
+}
+.scp-secondary-expanding #scp-feedback-header {
+  opacity: 0;
+  width: 256px;
+}
+
+.scp-feedback-sent .scp-if-feedback.scp-secondary-feature {
+  pointer-events: none;
+  visibility: hidden;
+  opacity: 0;
+}
+
+#scp-feedback-send-button {
+  position: absolute;
+  top: 453px;
+  left: 354px;
+  width: 120px;
+  text-align: center;
+  padding: 0;
+}
+
+.scp-feedback-sent .scp-if-feedback [role],
+.scp-feedback-sent .scp-if-feedback textarea
+{
+  opacity: 0;  /* Make sure controls not focusable by hiding them */
+}
+
+.scp-if-feedback-sent {
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  top: 62px;
+  left: 20px;
+  width: 460px;
+  text-align: center;
+}
+.scp-panel-feedback.scp-feedback-sent .scp-if-feedback-sent {
+  pointer-events: all;
+  visibility: visible;
+  opacity: 1;
+}
+
+#scp-feedback-prompt {
+  position: absolute !important;
+  top: 90px !important;
+  left: 29px !important;
+  font-size: 20px !important;
+  width: 446px;
+}
+#scp-feedback-textarea {
+  position: absolute !important;
+  top: 200px !important;
+  left: 29px !important;
+  font-size: 22px !important;
+  font-family: 'Open Sans',Arial,serif !important;
+  color: #000 !important;
+  padding: 10px 60px 10px 10px !important;
+  border: 0 !important;
+  resize: none !important;
+  outline: 0 !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  box-sizing: border-box !important;
+  max-width: none !important;
+  max-width: none !important;
+}
+#scp-feedback-textarea:focus {
+  box-shadow: none !important;
+}
+.scp-rating-star {
+  fill: #ccc;
+  stroke: #333;
+  stroke-width: 1px;
+}
+.scp-rating-star[aria-pressed="true"] {
+  fill: #e4be62;
+}
+#scp-rating:hover > .scp-rating-star {
+  fill: #e4be62;
+}
+.scp-rating-star:hover ~ .scp-rating-star {
+  fill: #aaa !important;
+}
+#scp-feedback-thanks {
+  margin-top: 100px;
+}
+
+/***** About *****/
+
+#scp-logo-text {
+  display: none;
+}
+.scp-is-panel #scp-logo-text {
+  display: block;
+}
+.scp-about-teaser {
+  position: absolute;
+  z-index: 9999;
+  left: 24px;
+  width: 445px;
+  top: 120px;
+  font-size: 22px;
+  text-align: center;
+}
+
+.scp-about-teaser > sc-p > sc-span {
+  display: inline;
+}
+
+.scp-about-teaser > sc-p > a {
+  text-decoration: underline;
+}
+
+#scp-about-rate-footer {
+  margin-top: 40px;
+}
+
+#scp-about-rate-button {
+  margin-top: 15px;
+  padding: 4px 23px;
+  font-weight: 100;
+}

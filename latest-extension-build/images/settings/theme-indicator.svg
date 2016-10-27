@@ -1,0 +1,4 @@
+<!-- Arrow that points to the chosen theme -->
+<svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 19">
+  <path fill="#80A9F8" stroke="#80A9F8" stroke-width="4" stroke-linejoin="round" d="M3 17L21 17L12 2Z"/>
+</svg>

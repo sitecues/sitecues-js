@@ -57,7 +57,7 @@ function removeAllDeadCode(callback) {
     });
   }
 
-  glob(global.build.path + '/js/**/*.js', onJsListingRetrieved);
+  glob(global.buildDir + '/js/**/*.js', onJsListingRetrieved);
 }
 
 removeAllDeadCode.displayName = 'remove-all-dead-code';

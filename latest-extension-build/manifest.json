@@ -1,0 +1,58 @@
+{
+  "manifest_version" : 2,
+
+  "name"             : "Sitecues Everywhere",
+  "short_name"       : "Sitecues",
+  "description"      : "Sitecues zoom and speech for any website",
+  "version"          : "0.0.30",
+  "homepage_url"     : "http://sitecues.com/",
+
+  "icons" : {
+    "128" : "images/icon128.png",
+    "48"  : "images/icon48.png",
+    "16"  : "images/icon16.png"
+  },
+
+  "browser_action" : {
+    "default_icon"  : "images/icon16.png",
+    "default_title" : "Sitecues settings",
+    "default_popup" : "html/popup.html"
+  },
+
+  "web_accessible_resources": [
+    "html/*.html",
+    "css/*.css",
+    "earcons/*.ogg",
+    "images/*.png",
+    "images/*.svg"
+  ],
+
+  "content_scripts" : [
+    {
+      "matches" : ["<all_urls>"],
+      "exclude_globs" : [
+        "*.google.com/maps/*",
+        "https://docs.google.com/*",
+        "proxy.sitecues.com/*",
+        "proxy.dev.sitecues.com/*"
+      ],
+      "js"      : [
+        "js/config.js",
+        "js/jquery.js",
+        "js/contentscript.js",
+        "js/sitecues.js"
+      ],
+      "css"     : [
+        "css/default.css"
+      ],
+      "run_at"  : "document_start"
+    }
+  ],
+
+  "content_security_policy": "script-src 'none'; object-src 'none'; child-src 'self'; form-action 'none';",
+
+  "permissions": [
+    "tabs",
+    "storage"
+  ]
+}

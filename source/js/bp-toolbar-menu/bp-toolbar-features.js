@@ -3,7 +3,7 @@
  */
 
 define([
-    'run/metric',
+    'run/metric/metric',
     'run/constants',
     'bp-toolbar-menu/bp-toolbar-view',
     'run/events',

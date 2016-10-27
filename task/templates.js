@@ -113,7 +113,7 @@ function getCountryData(countryData, dir, baseLangFileName) {
 }
 
 function begin(callback) {
-  targetDir = path.join(global.build.path, 'html');
+  targetDir = path.join(global.buildDir, 'html');
   sources.forEach(readTemplate);
   callback();
 }

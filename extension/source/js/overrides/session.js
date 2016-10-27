@@ -1,4 +1,4 @@
-define('run/session', [], function() {
+define('mini-core/session', [], function() {
   "use strict";
 
   return {

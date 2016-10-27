@@ -9,7 +9,7 @@ define([
     'run/conf/urls',
     'run/util/xhr',
     'run/constants',
-    'run/metric',
+    'run/metric/metric',
     'run/events',
     'run/dom-events',
     'mini-core/native-global'
