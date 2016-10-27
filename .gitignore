@@ -1,6 +1,7 @@
 target
 build
 latest-build
+latest-extension-build
 tmp
 var
 sitecues-load-script.js
