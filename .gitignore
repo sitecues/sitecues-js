@@ -43,3 +43,4 @@ config/.env
 # Cursors that should be in the IE version should be copied to the source/images/cursors directory.
 tools/site/generate-cursors/cursor_output/
 
+/test/mini-core

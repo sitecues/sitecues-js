@@ -33,7 +33,7 @@ define(
             // { os: 'Windows', os_version: '10',         browser: 'edge',    browser_version: '13.0' },
             { os: 'Windows', os_version: '10',         browser: 'firefox', browser_version: '49.0' },
             { os: 'Windows', os_version: '10',         browser: 'chrome',  browser_version: '54.0' },
-            // { os: 'OS X',    os_version: 'Sierra',     browser: 'safari',  browser_version: '10.0' },
+             { os: 'OS X',    os_version: 'Sierra',     browser: 'safari',  browser_version: '10.0' },
             { os: 'OS X',    os_version: 'El Capitan', browser: 'firefox', browser_version: '49.0' },
             { os: 'OS X',    os_version: 'El Capitan', browser: 'chrome',  browser_version: '54.0' }
             // SauceLabs-style...

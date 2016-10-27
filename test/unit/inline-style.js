@@ -113,13 +113,11 @@ define(
 
             test('Override cssText and restore intended styles', function () {
                 var element = document.createElement('div');
-                var intendedValue = 'height: 100px; width: 100px; z-index: 99;';
-                var overrideValue = 'left: 10px; opacity: 0.5; min-width: 800px;';
+                var intendedValue = 'width: 100px; height: 100px; z-index: 99;';
+                var overrideValue = 'left: 10px; min-width: 800px; opacity: 0.5; height: 90px;';
 
                 element.style.cssText = intendedValue;
                 inlineStyle.override(element, overrideValue);
-
-                assert.strictEqual(element.style.cssText, overrideValue, 'The cssText must be overridden');
 
                 inlineStyle.restore(element, 'height');
                 assert.strictEqual(element.style.height, '100px', 'The intended height must be restored');
@@ -127,8 +125,11 @@ define(
                 inlineStyle.restore(element, 'left');
                 assert.strictEqual(element.style.left, '', 'The intended left value must be restored');
 
-                inlineStyle.restore(element);
-                assert.strictEqual(element.style.cssText, intendedValue, 'The intended css text must be restored');
+                inlineStyle.restore(element, 'minWidth');
+                assert.strictEqual(element.style.minWidth, '', 'The intended min-width value must be restored');
+
+                inlineStyle.restore(element, 'zIndex');
+                assert.strictEqual(element.style.zIndex, '99', 'The intended z-index value must be restored');
             });
 
             test('Proxy an element\'s style field when a style value is overridden', function () {
@@ -268,7 +269,8 @@ define(
                   overrideValue = 'transform 0s',
                   intendedValue = '';
               inlineStyle.override(element, [property, overrideValue]);
-              assert.strictEqual(element.style.cssText, 'transition: transform 0s;', 'Shorthand property should be assigned to');
+              // Note in Edge, assigning 'transform 0s' to `transition` is changed to 'transform'
+              // In Firefox, assigning 'transform 0s' to `transition` is changed to 'transform 0s ease 0s'
               inlineStyle.restore(element, property);
               assert.strictEqual(element.style.transition, intendedValue, 'Style value must match its intended value');
               assert.strictEqual(element.style.cssText, '', 'Element\'s css text must be empty');
