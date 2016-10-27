@@ -1,8 +1,11 @@
 define('run/metric/metric', [], function() {
   "use strict";
 
-  function noop() {}
-  noop.send = function() {};
+  function noop() {
+    return {
+      send: function() {}
+    };
+  }
 
   return {
     init: noop,

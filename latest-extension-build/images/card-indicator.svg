@@ -1,4 +1,0 @@
-<!-- Line with arrow that points to the chosen card -->
-<svg xmlns="http://www.w3.org/2000/svg" width="900" height="18">
-  <path fill="transparent" stroke="#AAA" stroke-width="1.5" d="M0 16h430l12 -15l12 15h430"/>
-</svg>
