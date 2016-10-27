@@ -1,11 +1,19 @@
 define(
   [
     'exports',
-    'page/positioner/constants'
+    'page/positioner/constants',
+    'page/positioner/transplant/clone',
+    'core/inline-style/inline-style',
+    'page/positioner/util/element-info',
+    'core/util/array-utility'
   ],
   function (
     exports,
-    constants
+    constants,
+    clone,
+    inlineStyle,
+    elementInfo,
+    arrayUtil
   ) {
   'use strict';
 
@@ -16,7 +24,6 @@ define(
     ANCHOR_STYLESHEET_ID = 'sitecues-js-anchors',
     ANCHOR_ATTR = constants.ANCHOR_ATTR,
     VISIBLE = constants.VISIBLE,
-    HIDDEN_ANCHOR_SELECTOR  = constants.HIDDEN_ANCHOR_SELECTOR,
     VISIBLE_ANCHOR_SELECTOR = constants.VISIBLE_ANCHOR_SELECTOR;
 
   function get() {
@@ -58,15 +65,40 @@ define(
 
   function insertStylesheet() {
     var visibleDeclarationBlock = ' { visibility: visible; }\n',
-        hiddenDeclarationBlock  = ' { visibility: hidden; }\n',
-        styleText =
-          HIDDEN_ANCHOR_SELECTOR  + hiddenDeclarationBlock +
-          VISIBLE_ANCHOR_SELECTOR + visibleDeclarationBlock;
+        styleText = VISIBLE_ANCHOR_SELECTOR + visibleDeclarationBlock;
 
     var sheet = document.createElement('style');
     sheet.id = ANCHOR_STYLESHEET_ID;
     sheet.innerText = styleText;
     document.head.insertBefore(sheet, document.head.firstChild);
+  }
+
+  function propagateVisibilityMutation(placeholders) {
+    var anchors = placeholders.map(function (placeholder) {
+      return elementInfo.getPlaceholderOwner(placeholder);
+    });
+    revealVisibleAnchors(anchors);
+  }
+
+  function revealVisibleAnchors(anchors) {
+    anchors = arrayUtil.wrap(anchors);
+
+    var cloneBody = clone.getAuxiliaryBody(),
+        bodyStyle = inlineStyle(cloneBody);
+
+    // We need to clear the visibility styling on the clone body so that we can compute the intended style of the anchor
+    bodyStyle.visibility = '';
+
+    anchors.forEach(function (anchor) {
+      anchor.removeAttribute(ANCHOR_ATTR);
+      var visibility = getComputedStyle(anchor).visibility;
+      if (visibility === 'visible') {
+        applyAnchorAttribute(anchor);
+      }
+    });
+
+    // Restore the clone body's hidden visibility
+    bodyStyle.visibility = 'hidden';
   }
 
   // The anchor attribute is responsible for making it and its subtree visible, if its intended styling makes it visible
@@ -76,7 +108,7 @@ define(
 
   function onAddedAnchor() {
     /*jshint validthis: true */
-    applyAnchorAttribute(this);
+    revealVisibleAnchors(this);
     /*jshint validthis: false */
   }
 
@@ -98,5 +130,6 @@ define(
   exports.remove = remove;
   exports.registerNewAnchorHandler = registerNewAnchorHandler;
   exports.registerRemovedAnchorHandler =  registerRemovedAnchorHandler;
+  exports.propagateVisibilityMutation = propagateVisibilityMutation;
   exports.init = init;
 });
