@@ -117,7 +117,8 @@ function getFileDate(path) {
 function cues() {
   if (!config.audioCueDir) {
     // No cues to compute
-    return Promise.resolve();
+    return gulp.src(config.cuesGlob)
+      .pipe(gulp.dest(global.buildDir));
   }
 
   const copyPreviouslyComputedCues = () => {
@@ -156,7 +157,7 @@ function cues() {
         console.log('Keeping cues for ' + lang);
       }
 
-      cueDataSaved.push(copyCueTextFile(cueFilePath, outputFolder));
+      cueDataSaved.push(copyCueTextFile(cueFilePath, path.join(global.buildDir, 'cue')));
     }
 
     return Promise.all(cueDataSaved);

@@ -249,7 +249,7 @@ define(
       return;
     }
 
-    var cueFileName = urls.resolveResourceUrl('cue/' + cueTextLocale + '/' + cueTextLocale + '.json');
+    var cueFileName = urls.resolveResourceUrl('cue/' + cueTextLocale + '.json');
 
     // TODO what about Chrome extension?
     xhr.getJSON({

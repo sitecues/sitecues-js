@@ -31,6 +31,7 @@ function getConfig(baseConfig) {
     rasterGlob: getGlob('images/**/*.png'),
     svgGlob: getGlob('images/**/*.svg'),
     earconsGlob: getGlob('earcons/**/*.ogg'),
+    cuesGlob: getGlob('js/locale-data/**/*.json'),
     htmlGlob: getGlob('html/**/*.html')
       .concat('!' + getLibraryGlob('html/prefs.html')), // Do not use iframe for prefs -- extension has better storage-backup module
     templateGlob: [
