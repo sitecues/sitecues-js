@@ -95,6 +95,7 @@ function optimizeLibrary() {
 function cleanLibrary() {
   return new Promise(
     function(resolve, reject) {
+      console.log('Cleaning intermediaate js file at ' + intermediateSitecuesJs);
       var cleanedCode = amdClean.clean({
         filePath: intermediateSitecuesJs
       });

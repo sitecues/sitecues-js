@@ -24,8 +24,8 @@ define(
     'use strict';
 
     function assign(data) {
-      return new Promise((resolve, reject) => {
-        chrome.storage.local.set(data, () => {
+      return new Promise(function(resolve, reject) {
+        chrome.storage.local.set(data, function() {
           if (chrome.runtime.lastError) {
             reject(chrome.runtime.lastError);
           }
@@ -37,9 +37,9 @@ define(
     }
 
     function getAll() {
-      return new Promise((resolve, reject) => {
+      return new Promise(function(resolve, reject) {
         // Passing in null gets the entire contents of storage
-        chrome.storage.local.get(null, (storage) => {
+        chrome.storage.local.get(null, function (storage) {
           if (chrome.runtime.lastError) {
             reject(chrome.runtime.lastError);
           }
@@ -56,9 +56,9 @@ define(
 
     return {
       prefs: {
-        assign,
-        getAll
+        assign: assign,
+        getAll: getAll
       },
-      getId
+      getId: getId
     };
   });

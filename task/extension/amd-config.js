@@ -33,6 +33,7 @@ var config = require('../build-config.js'),
       'run/data-map': config.tmpDir + '/data-map',
       // UNUSED in the extension (stubbed methods)
       'run/ab-test/ab-test': OVERRIDES_DIR + 'ab-test',
+      'run/metric/metric': OVERRIDES_DIR + 'metric',
       'run/errors': OVERRIDES_DIR + 'errors',
       // UNUSED and EMPTY in the extension
       'run/bp/badge/page-badge': 'empty:',
