@@ -1,6 +1,6 @@
 /* Move <body> down by height of the toolbar */
 /* This is redundant with code in the sitecues JS client but it acts faster so that content doesn't need to jump down after the fact */
-html[data-sitecues-everywhere] {
+html[data-sitecues-everywhere="on"] {
   padding-top: 41px;
 }
 

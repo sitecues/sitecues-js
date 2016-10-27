@@ -15,6 +15,7 @@
  * }
  *
  */
+
 define(
   'mini-core/user',
   [
@@ -23,7 +24,7 @@ define(
   ) {
     'use strict';
 
-    function assign(data) {
+    function assignPrefs(data) {
       return new Promise(function(resolve, reject) {
         chrome.storage.local.set(data, function() {
           if (chrome.runtime.lastError) {
@@ -36,7 +37,7 @@ define(
       });
     }
 
-    function getAll() {
+    function getAllPrefs() {
       return new Promise(function(resolve, reject) {
         // Passing in null gets the entire contents of storage
         chrome.storage.local.get(null, function (storage) {
@@ -56,8 +57,8 @@ define(
 
     return {
       prefs: {
-        assign: assign,
-        getAll: getAll
+        assign: assignPrefs,
+        getAll: getAllPrefs
       },
       getId: getId
     };

@@ -17,6 +17,8 @@ define([
            domEvents,
            nativeGlobal) {
 
+    "use strict";
+
     function hideMenu() {
       require(['bp-toolbar-menu-button/bp-toolbar-menu-button'], function(bpToolbarMenuButton) {
         bpToolbarMenuButton.toggle();
@@ -81,42 +83,21 @@ define([
 
     // Hide Sitecues
     function hide() {
-      var sitecuesToolbar = document.getElementById('sitecues-badge');
+      require(['run/run'], function(run) {
+        run.setDisabledForPage(true);
 
-      function checkF8(event) {
-        if (event.keyCode === constants.KEY_CODE.F8) {
-          // Reenable Sitecues
-          unhide();
+        function unhide() {
+          run.setDisabledForPage(false);
+          var currentFocus = document.activeElement;
+          if (currentFocus.localName === 'sc-blurb') {
+            currentFocus.blur();
+          }
         }
-      }
 
-      function unhide() {
-        // Unhide Sitecues:
-        // User has pressed F8 or clicked unhide option (after initially hiding Sitecues)
-        document.removeEventListener('keydown', checkF8);
-        localStorage.removeItem('sitecues-disabled');
-        sitecuesToolbar.style.top = '';
-        var currentFocus = document.activeElement;
-        if (currentFocus.localName === 'sc-blurb') {
-          currentFocus.blur();
-        }
-      }
-
-      // Animate hiding of Sitecues toolbar
-      sitecuesToolbar.style.transition = 'top 500ms linear';
-      requestAnimationFrame(function() {
-        sitecuesToolbar.style.top = '-40px';
+        // Show new blurb on how to unhide
+        bpToolbarView.showBlurb('unhide');
+        enableBlurbItem('scp-blurb-unhide', unhide);
       });
-
-      // Disable for next time, on this site
-      localStorage.setItem('sitecues-disabled', true);
-
-      // F8 can reenable
-      document.addEventListener('keydown', checkF8);
-
-      // Show new blurb on how to unhide
-      bpToolbarView.showBlurb('unhide');
-      enableBlurbItem('scp-blurb-unhide', unhide);
     }
 
     function enableBlurbItem(id, activateFn) {
