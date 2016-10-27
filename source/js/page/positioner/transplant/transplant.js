@@ -9,7 +9,8 @@ define(
     'page/positioner/util/element-info',
     'page/positioner/transplant/graft',
     'page/positioner/transplant/anchors',
-    'page/positioner/transplant/mutation-relay'
+    'page/positioner/transplant/mutation-relay',
+    'page/positioner/style-lock/style-listener/style-listener'
   ],
   function (
     elementMap,
@@ -19,7 +20,8 @@ define(
     elementInfo,
     graft,
     anchors,
-    mutationRelay
+    mutationRelay,
+    styleListener
   ) {
   'use strict';
 
@@ -32,9 +34,6 @@ define(
   // the original element's new position in the DOM tree, and to exclude clone elements in the heredity tree
   // TODO: If we ever drop IE11, use a Proxy intercept to accomplish this
   function rerouteDOMQueries() {
-    getElementsByClassName   = Document.prototype.getElementsByClassName;
-    elementQuerySelectorAll  = Element.prototype.querySelectorAll;
-    documentQuerySelectorAll = Document.prototype.querySelectorAll;
 
     function scElementQuerySelectorAll(selector) {
       /*jshint validthis: true */
@@ -57,7 +56,7 @@ define(
 
     // NOTE: this will break scripts that rely on getElementsByClassName to be a live list!
     function scGetElementsByClassName(selector) {
-      var elements  = Array.prototype.slice.call(getElementsByClassName.call(document, selector), 0);
+      var elements = Array.prototype.slice.call(getElementsByClassName.call(document, selector), 0);
       return elements.filter(elementInfo.isOriginal);
     }
 
@@ -105,7 +104,7 @@ define(
 
   function evaluateTransplantState(element) {
     var
-      hasDescendantPlaceholders = element.querySelectorAll('.placeholder').length > 0,
+      hasDescendantPlaceholders = elementQuerySelectorAll.call(element, '.placeholder').length > 0,
       isCloned                  = Boolean(clone.get(element)),
       isTransplantRoot          = elementInfo.isTransplantRoot(element),
       isNested                  = Boolean(getClosestRoot(element));
@@ -321,7 +320,7 @@ define(
   // Elements in the original body may have placeholder elements in their subtree
   // Before we transplant @element, we need to return the transplanted subroots to @element's subtree
   function unifyMixedSubtree(element) {
-    var nestedPlaceholders = element.querySelectorAll('.placeholder');
+    var nestedPlaceholders = elementQuerySelectorAll.call(element, '.placeholder');
     for (var i = 0, placeholderCount = nestedPlaceholders.length; i < placeholderCount; i++) {
       var
         placeholder      = nestedPlaceholders[i],
@@ -430,11 +429,31 @@ define(
   }
 
   function init() {
+    getElementsByClassName   = Document.prototype.getElementsByClassName;
+    elementQuerySelectorAll  = Element.prototype.querySelectorAll;
+    documentQuerySelectorAll = Document.prototype.querySelectorAll;
     originalBody = document.body;
     anchors.init();
     clone.init();
     mutationRelay.init();
     graft.init();
+    // We need to propagate visibility mutations to transplanted anchors
+    // The reason we need to override the visibility of transplant anchors is that the clone body
+    // has a `visibility: hidden` style applied to it, so that we don't see the rest of the heredity structure.
+    // If the anchor is intended to be hidden we don't have to override the style, but if it or an ancestor's
+    // visibility value mutates after the transplant has taken place we need to update its visibility accordingly
+    styleListener.init(function () {
+      var declaration = { property : 'visibility', value : 'hidden' };
+
+      function onMutatedVisibility(opts) {
+        var target             = opts.element,
+            nestedPlaceholders = arrayUtil.from(elementQuerySelectorAll.call(target, '.placeholder'));
+        anchors.propagateVisibilityMutation(nestedPlaceholders);
+      }
+
+      styleListener.registerToResolvedValueHandler(declaration, onMutatedVisibility);
+      styleListener.registerFromResolvedValueHandler(declaration, onMutatedVisibility);
+    });
   }
 
   return {
