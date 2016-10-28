@@ -4,6 +4,7 @@ latest-build
 tmp
 var
 sitecues-load-script.js
+latest-extension-build
 *.iml
 *.ipr
 *.iws
