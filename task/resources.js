@@ -114,13 +114,14 @@ function getFileDate(path) {
   return 0;
 }
 
-function cues() {
-  if (!config.audioCueDir) {
-    // No cues to compute
-    return gulp.src(config.cuesGlob)
-      .pipe(gulp.dest(global.buildDir));
-  }
+function copyCueTextOnly() {
+  // Don't fetch audio cue media files, just copy cue text data for cues based on local speech
+  return gulp.src(config.cuesGlob)
+    .pipe(gulp.dest(global.buildDir));
 
+}
+
+function fetchAudioCueMediaFiles() {
   const copyPreviouslyComputedCues = () => {
     // First copy over previously computed cues
     return new Promise((resolve) => {
@@ -133,12 +134,12 @@ function cues() {
 
   const fetchChangedCues = () => {
     // Fetch cues from server only if their cue JSON file has changed since the last cues were fetched
-    const allCuesDir = config.audioCueDir,
+    const allCuesDir = config.audioCueSourceDir,
       jsonCueFiles = fs.readdirSync(allCuesDir),
       cueDataSaved = [];
     for (let cueFile of jsonCueFiles) {
       const lang = cueFile.split('.')[0],
-        cueFilePath = path.join(config.audioCueDir, cueFile),
+        cueFilePath = path.join(config.audioCueSourceDir, cueFile),
         sourceDate = getFileDate(cueFilePath),
         outputFolder = path.join(global.buildDir, 'cue', lang),
         sampleDestOutputFilePath = path.join(outputFolder, 'verbalCueSpeechOn.ogg'),
@@ -165,6 +166,15 @@ function cues() {
 
   return copyPreviouslyComputedCues()
     .then(fetchChangedCues);
+}
+
+function cues() {
+  if (config.isFetchingAudioCues) {
+    return fetchAudioCueMediaFiles();
+  }
+  else {
+    return copyCueTextOnly();
+  }
 }
 
 function metadata() {
