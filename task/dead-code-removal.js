@@ -14,7 +14,7 @@ const closureCompiler = require('closure-compiler'),
     // https://developers.google.com/closure/compiler/docs/api-tutorial3?hl=en
     //compilation_level: 'ADVANCED'
   },
-  MAX_CONCURRENT_COMPILE_JOBS = 8,
+  MAX_CONCURRENT_COMPILE_JOBS = 10,
   pLimit = require('p-limit'),
   limit = pLimit(MAX_CONCURRENT_COMPILE_JOBS);
 
