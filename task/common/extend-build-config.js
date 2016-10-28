@@ -2,8 +2,7 @@
 
 'use strict';
 
-var extend = require('extend'),
-  path = require('path');
+var extend = require('extend');
 
 function getConfig(baseConfig) {
   function getGlob(suffix) {
@@ -16,7 +15,7 @@ function getConfig(baseConfig) {
     isLocal: process.env.LOCAL === 'on',  // Common library -- default is non-local
     autoSpeechStrategy: process.env.AUTO_SPEECH || 'preferNetwork',
     allowBrowserNetworkSpeech: process.env.BROWSER_NETWORK_SPEECH === 'on', // Allow window.speechSynthesis via network -- off by default
-    audioCueDir: process.env.CUES === 'off' ? null : path.join(baseConfig.librarySourceDir, 'js', 'locale-data', 'cue'),
+    audioCueDir: null, //process.env.CUES === 'off' ? null : path.join(baseConfig.librarySourceDir, 'js', 'locale-data', 'cue'),
     jsGlob: getGlob('js/**/*.js'),
     rasterGlob: [ getGlob('images/**/*.png'), getGlob('images/**/*.cur') ],
     svgGlob: getGlob('images/**/*.svg'),
