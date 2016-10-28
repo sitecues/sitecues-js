@@ -23,10 +23,10 @@ define(['core/metric/metric', 'core/conf/urls'], function(metric, urls) {
     var error = event.error,
       filename = event.filename;
 
-    /*if (!error || !filename || !isSitecuesError(filename)) {
+    if (!error || !filename || !isSitecuesError(filename)) {
       // We only care about Sitecues errors
       return;
-    }*/
+    }
 
     logError({
       type: 'exception',

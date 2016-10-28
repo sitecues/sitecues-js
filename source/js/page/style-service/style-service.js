@@ -7,14 +7,12 @@ define(
     '$',
     'page/style-service/sheet-aggregator',
     'page/style-service/media-queries',
-    'core/platform',
     'nativeFn'
   ],
   function (
     $,
     sheetAggregator,
     mediaQueries,
-    platform,
     nativeFn
   ) {
   'use strict';

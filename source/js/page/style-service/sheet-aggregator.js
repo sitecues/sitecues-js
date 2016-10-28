@@ -7,7 +7,6 @@ define(
     'Promise',
     'page/style-service/user-agent-css',
     'core/conf/urls',
-    'page/style-service/media-queries',
     'nativeFn',
     'core/util/array-utility',
     'core/inline-style/inline-style'
@@ -16,7 +15,6 @@ define(
     Promise,
     UA_CSS,
     urls,
-    mediaQueries,
     nativeFn,
     arrayUtil,
     inlineStyle
