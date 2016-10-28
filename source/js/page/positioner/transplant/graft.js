@@ -53,7 +53,7 @@ define(
             cloneSibling = newSibling && clone.get(newSibling);
           
           if (!inAuxBody && newParent && !cloneParent) {
-            var insertionGroup = clone(node, {
+            var insertionGroup = clone.create(node, {
               heredityStructure: true,
               excludeTarget: true,
               getNearestAncestorClone: true,

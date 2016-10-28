@@ -21,7 +21,8 @@ define(
     'mini-core/native-global',
     'run/inline-style/inline-style',
     'page/util/transition-util',
-    'page/positioner/style-lock/style-lock'
+    'page/positioner/style-lock/style-lock',
+    'page/positioner/transplant/mutation-relay'
   ],
   /*jshint -W072 */ //Currently there are too many dependencies, so we need to tell JSHint to ignore it for now
   function (
@@ -37,7 +38,8 @@ define(
     nativeGlobal,
     inlineStyle,
     transitionUtil,
-    styleLock
+    styleLock,
+    mutationRelay
   ) {
   /*jshint +W072 */
   'use strict';
@@ -95,9 +97,8 @@ define(
     // This handler is run on mutated elements /intended/ to be in the original body, which is to say elements currently nested in the
     // original body and original elements currently nested in the clone body
     function onOriginalElementMutations(mutations) {
-      var
-        len = mutations.length,
-        selectorsToRefresh = [];
+      var selectorsToRefresh = [],
+          mutationCount      = mutations.length;
 
       function evaluateProperty(target, property) {
         evaluateResolvedValues(target, {
@@ -105,7 +106,7 @@ define(
         });
       }
 
-      for (var i = 0; i < len; i++) {
+      for (var i = 0; i < mutationCount; i++) {
         var
           mutation  = mutations[i],
           target    = mutation.target,
@@ -117,6 +118,9 @@ define(
           // We don't bother listening to sitecues element changes
           continue;
         }
+
+        // Relay the original element's mutation to its clone
+        mutationRelay(mutation);
 
         // This switch evaluates attribute mutations for their styling impact
         switch (attribute) {
@@ -203,7 +207,7 @@ define(
 
         if (isLocked) {
           styleLock.lock(element, {
-            property  : lockVal,
+            property  : property,
             lockValue : lockVal
           });
         }
@@ -497,6 +501,7 @@ define(
       case READY_STATE.UNINITIALIZED:
         callbacks.push(callback);
         elementInfo.init();
+        mutationRelay.init();
         readyState   = READY_STATE.INITIALIZING;
         docElem      = document.documentElement;
         originalBody = document.body;
@@ -521,10 +526,10 @@ define(
     }
   }
 
-  exports.bindPropertyListener = bindPropertyListener;
-  exports.unbindPropertyListener = unbindPropertyListener;
-  exports.registerToResolvedValueHandler = registerToResolvedValueHandler;
+  exports.bindPropertyListener             = bindPropertyListener;
+  exports.unbindPropertyListener           = unbindPropertyListener;
+  exports.registerToResolvedValueHandler   = registerToResolvedValueHandler;
   exports.registerFromResolvedValueHandler = registerFromResolvedValueHandler;
-  exports.getElementsWithResolvedValue = getElementsWithResolvedValue;
-  exports.init = init;
+  exports.getElementsWithResolvedValue     = getElementsWithResolvedValue;
+  exports.init                             = init;
 });

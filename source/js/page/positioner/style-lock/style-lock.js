@@ -183,9 +183,9 @@ define(
       }
       else {
         declarationHandlerMap[key] = {
-          before: [before],
-          after: [after],
-          initial: [initial]
+          before  : [before],
+          after   : [after],
+          initial : [initial]
         };
         styleListener.registerToResolvedValueHandler(declaration, toHandler);
         styleListener.registerFromResolvedValueHandler(declaration, fromHandler);
