@@ -2,61 +2,64 @@
  * Mutation Relay
  *
  * This module is responsible for copying attribute changes from original elements to clone elements.
- * NOTE: This module currently only copies class mutations, other mutations can be monitored for and copied over as necessary
  * */
 define(
   [
-    'page/positioner/util/element-info',
-    'page/positioner/transplant/clone'
+    'page/positioner/transplant/clone',
+    'core/inline-style/inline-style'
   ],
   function (
-    elementInfo,
-    clone
+    clone,
+    inlineStyle
   ) {
+  'use strict';
 
-  var domObserver,
-      originalBody;
+  var originalBody;
 
-  function copyClassToComplement(mutation) {
+  function copyMutationToClone(mutation) {
     var target     = mutation.target,
-        complement = clone.get(target);
+        complement = clone.get(target),
+        attribute  = mutation.attributeName;
 
-    if (complement) {
-      complement.className = target.className;
+    if (!complement) {
+      // If the target hasn't been cloned, we don't need to worry about relaying the mutation
+      return;
+    }
+
+    switch (attribute) {
+      case 'class':
+        var targetClass = target.className;
+        if (complement.className !== targetClass) {
+          complement.className = targetClass;
+        }
+        break;
+
+      case 'style':
+        if (target === originalBody) {
+          // We override styles on the clone body that we don't want to lose
+          // In the future if we have to we can be smarter about relaying specific styles
+          return;
+        }
+        var complementStyle = inlineStyle(complement),
+            targetCss       = inlineStyle(target).cssText;
+        if (complementStyle.cssText !== targetCss) {
+          complementStyle.cssText = targetCss;
+        }
+        break;
+
+      case 'id':
+        var targetId = target.id;
+        if (complement.id !== targetId) {
+          complement.id = targetId;
+        }
+        break;
     }
   }
 
   function init() {
     originalBody = document.body;
-
-    domObserver = new MutationObserver(function (mutations) {
-      var len = mutations.length;
-
-      for (var i = 0; i < len; i++) {
-        var
-          mutation   = mutations[i],
-          target     = mutation.target;
-
-        // Don't bother looking for a complement to Sitecues elements, they have been removed
-        if (elementInfo.isSitecuesElement(target)) {
-          continue;
-        }
-
-        copyClassToComplement(mutation);
-      }
-    });
-
-    domObserver.observe(originalBody, {
-      attributes: true,
-      attributeOldValue: true,
-      subtree: true,
-      // For now we only need to copy classes over, it's the simplest case. Copying inline styles over is more complicated
-      // and will need to be more thoroughly thought through
-      attributeFilter: ['class']
-    });
   }
 
-  return {
-    init: init
-  };
+  copyMutationToClone.init = init;
+  return copyMutationToClone;
 });

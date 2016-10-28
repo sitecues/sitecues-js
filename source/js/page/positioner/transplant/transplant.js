@@ -9,7 +9,8 @@ define(
     'page/positioner/util/element-info',
     'page/positioner/transplant/graft',
     'page/positioner/transplant/anchors',
-    'page/positioner/transplant/mutation-relay'
+    'page/positioner/transplant/mutation-relay',
+    'page/positioner/style-lock/style-listener/style-listener'
   ],
   function (
     elementMap,
@@ -19,7 +20,8 @@ define(
     elementInfo,
     graft,
     anchors,
-    mutationRelay
+    mutationRelay,
+    styleListener
   ) {
   'use strict';
 
@@ -27,7 +29,7 @@ define(
     elementQuerySelectorAll,
     documentQuerySelectorAll,
     getElementsByClassName,
-    didInterceptDOMQueries,
+    areQueriesFiltered = false,
     TRANSPLANT_STATE = constants.TRANSPLANT_STATE,
     ROOT_ATTR        = constants.ROOT_ATTR,
     ROOT_SELECTOR    = constants.ROOT_SELECTOR;
@@ -35,15 +37,8 @@ define(
   // When we transplant elements into the auxiliary body, we need to re-direct queries in the original body to include
   // the original element's new position in the DOM tree, and to exclude clone elements in the heredity tree
   // TODO: If we ever drop IE11, use a Proxy intercept to accomplish this
-  function interceptDOMQueries() {
-    if (didInterceptDOMQueries) {
-      return;
-    }
-    didInterceptDOMQueries = true;
-
-    getElementsByClassName   = Document.prototype.getElementsByClassName;
-    elementQuerySelectorAll  = Element.prototype.querySelectorAll;
-    documentQuerySelectorAll = Document.prototype.querySelectorAll;
+  function filterDOMQueries() {
+    areQueriesFiltered = true;
 
     function scElementQuerySelectorAll(selector) {
       /*jshint validthis: true */
@@ -66,7 +61,7 @@ define(
 
     // NOTE: this will break scripts that rely on getElementsByClassName to be a live list!
     function scGetElementsByClassName(selector) {
-      var elements  = Array.prototype.slice.call(getElementsByClassName.call(document, selector), 0);
+      var elements = Array.prototype.slice.call(getElementsByClassName.call(document, selector), 0);
       return elements.filter(elementInfo.isOriginal);
     }
 
@@ -114,7 +109,7 @@ define(
 
   function evaluateTransplantState(element) {
     var
-      hasDescendantPlaceholders = element.querySelectorAll('.placeholder').length > 0,
+      hasDescendantPlaceholders = elementQuerySelectorAll.call(element, '.placeholder').length > 0,
       isCloned                  = Boolean(clone.get(element)),
       isTransplantRoot          = elementInfo.isTransplantRoot(element),
       isNested                  = Boolean(getClosestRoot(element));
@@ -185,7 +180,7 @@ define(
     var
       parent  = element.parentElement,
       sibling = element.nextSibling,
-      insertionGroup  = clone(element, {
+      insertionGroup  = clone.create(element, {
         // The inheritance tree for an element is all of the children of each of its ancestors up to and including the body's children.
         // Each child's subtree is not cloned. Its likely that part of this element's inheritance tree has already been cloned and
         // inserted into the auxiliary body, in which case we clone the remainder of the tree and insert it in the appropriate place
@@ -239,7 +234,7 @@ define(
       // It's important that we clone the root if it hasn't already been cloned, otherwise nested roots might not find a cloned original ancestor
       // in the auxiliary body. We can then insert the heredity trees of each of the nested roots into this clone, and then finally insert this clone
       // into its complement's position in the auxiliary body.
-      rootClone       = clone.get(root) || clone(root);
+      rootClone       = clone.get(root) || clone.create(root);
 
     for (var i = 0, subrootCount = subroots.length; i < subrootCount; i++) {
       var
@@ -260,7 +255,7 @@ define(
         });
       }
       else {
-        var insertionGroup = clone(subroot, {
+        var insertionGroup = clone.create(subroot, {
           heredityStructure: true,
           excludeTarget: true,
           getNearestAncestorClone: true,
@@ -330,7 +325,7 @@ define(
   // Elements in the original body may have placeholder elements in their subtree
   // Before we transplant @element, we need to return the transplanted subroots to @element's subtree
   function unifyMixedSubtree(element) {
-    var nestedPlaceholders = element.querySelectorAll('.placeholder');
+    var nestedPlaceholders = elementQuerySelectorAll.call(element, '.placeholder');
     for (var i = 0, placeholderCount = nestedPlaceholders.length; i < placeholderCount; i++) {
       var
         placeholder      = nestedPlaceholders[i],
@@ -339,7 +334,7 @@ define(
         cloneSibling     = transplantedRoot.nextSibling,
         originalParent   = placeholder.parentElement,
         originalSibling  = placeholder.nextSibling,
-        cloneRoot        = clone.get(transplantedRoot) || clone(transplantedRoot);
+        cloneRoot        = clone.get(transplantedRoot) || clone.create(transplantedRoot);
 
       transplantedRoot.remove();
       placeholder.remove();
@@ -419,7 +414,9 @@ define(
     var flags = args.flags;
 
     if (flags.isTransplantAnchor) {
-      interceptDOMQueries();
+      if (!areQueriesFiltered) {
+        filterDOMQueries();
+      }
       anchors.add(element);
     }
     else if (flags.wasTransplantAnchor) {
@@ -437,11 +434,31 @@ define(
   }
 
   function init() {
+    getElementsByClassName   = Document.prototype.getElementsByClassName;
+    elementQuerySelectorAll  = Element.prototype.querySelectorAll;
+    documentQuerySelectorAll = Document.prototype.querySelectorAll;
     originalBody = document.body;
     anchors.init();
     clone.init();
     mutationRelay.init();
     graft.init();
+    // We need to propagate visibility mutations to transplanted anchors
+    // The reason we need to override the visibility of transplant anchors is that the clone body
+    // has a `visibility: hidden` style applied to it, so that we don't see the rest of the heredity structure.
+    // If the anchor is intended to be hidden we don't have to override the style, but if it or an ancestor's
+    // visibility value mutates after the transplant has taken place we need to update its visibility accordingly
+    styleListener.init(function () {
+      var declaration = { property : 'visibility', value : 'hidden' };
+
+      function onMutatedVisibility(opts) {
+        var target             = opts.element,
+            nestedPlaceholders = arrayUtil.from(elementQuerySelectorAll.call(target, '.placeholder'));
+        anchors.propagateVisibilityMutation(nestedPlaceholders);
+      }
+
+      styleListener.registerToResolvedValueHandler(declaration, onMutatedVisibility);
+      styleListener.registerFromResolvedValueHandler(declaration, onMutatedVisibility);
+    });
   }
 
   return {

@@ -80,6 +80,13 @@ define(
         /*jshint validthis: false */
       }
 
+      if (opts.lockValue) {
+        // We're re-locking a previously applied lock, so we don't need
+        // to worry about re-binding a new listener
+        lockStyle(element, property, opts.lockValue);
+        return;
+      }
+
       var
         before           = handlers.before ? [handlers.before] : [],
         after            = handlers.after  ? [handlers.after]  : [],
@@ -108,7 +115,6 @@ define(
   // to or from the declaration
   // The initial handler will run when we identify elements with a resolved value matching the declaration
   function lockResolvedDeclaration(declaration, handlers) {
-    handlers = handlers || {};
     styleListener.init(function () {
       var
         initial  = handlers.initial || noop,
@@ -177,9 +183,9 @@ define(
       }
       else {
         declarationHandlerMap[key] = {
-          before: [before],
-          after: [after],
-          initial: [initial]
+          before  : [before],
+          after   : [after],
+          initial : [initial]
         };
         styleListener.registerToResolvedValueHandler(declaration, toHandler);
         styleListener.registerFromResolvedValueHandler(declaration, fromHandler);
@@ -228,7 +234,9 @@ define(
   function unlockStyle(element, property) {
 
     function removeLock(element, attribute) {
+      var lockVal = element.getAttribute(attribute);
       element.removeAttribute(attribute);
+      return lockVal;
     }
 
     // Remove all of the style locks for @element
@@ -245,8 +253,7 @@ define(
 
     // If @element and @property are defined, remove the property lock from @element
     if (element && element.nodeType === Node.ELEMENT_NODE) {
-      removeLock(element, lockAttribute);
-      return;
+      return removeLock(element, lockAttribute);
     }
 
     // If @element is undefined, unlock all elements with @property locks
@@ -261,7 +268,7 @@ define(
 
   function isLocked(element, property) {
     var handlerMap = elementHandlerMap.get(element);
-    return handlerMap && handlerMap[property];
+    return Boolean(handlerMap && handlerMap[property]);
   }
 
   function insertStylesheet(css) {
