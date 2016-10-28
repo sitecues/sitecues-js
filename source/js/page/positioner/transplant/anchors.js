@@ -87,6 +87,7 @@ define(
         bodyStyle = inlineStyle(cloneBody);
 
     // We need to clear the visibility styling on the clone body so that we can compute the intended style of the anchor
+    var bodyVisibility = bodyStyle.visibility;
     bodyStyle.visibility = '';
 
     anchors.forEach(function (anchor) {
@@ -98,7 +99,7 @@ define(
     });
 
     // Restore the clone body's hidden visibility
-    bodyStyle.visibility = 'hidden';
+    bodyStyle.visibility = bodyVisibility;
   }
 
   // The anchor attribute is responsible for making it and its subtree visible, if its intended styling makes it visible

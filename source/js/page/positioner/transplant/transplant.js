@@ -26,6 +26,7 @@ define(
   'use strict';
 
   var originalBody, elementQuerySelectorAll, documentQuerySelectorAll, getElementsByClassName,
+    areQueriesFiltered = false,
     TRANSPLANT_STATE = constants.TRANSPLANT_STATE,
     ROOT_ATTR        = constants.ROOT_ATTR,
     ROOT_SELECTOR    = constants.ROOT_SELECTOR;
@@ -33,7 +34,8 @@ define(
   // When we transplant elements into the auxiliary body, we need to re-direct queries in the original body to include
   // the original element's new position in the DOM tree, and to exclude clone elements in the heredity tree
   // TODO: If we ever drop IE11, use a Proxy intercept to accomplish this
-  function rerouteDOMQueries() {
+  function filterDOMQueries() {
+    areQueriesFiltered = true;
 
     function scElementQuerySelectorAll(selector) {
       /*jshint validthis: true */
@@ -175,7 +177,7 @@ define(
     var
       parent  = element.parentElement,
       sibling = element.nextSibling,
-      insertionGroup  = clone(element, {
+      insertionGroup  = clone.create(element, {
         // The inheritance tree for an element is all of the children of each of its ancestors up to and including the body's children.
         // Each child's subtree is not cloned. Its likely that part of this element's inheritance tree has already been cloned and
         // inserted into the auxiliary body, in which case we clone the remainder of the tree and insert it in the appropriate place
@@ -229,7 +231,7 @@ define(
       // It's important that we clone the root if it hasn't already been cloned, otherwise nested roots might not find a cloned original ancestor
       // in the auxiliary body. We can then insert the heredity trees of each of the nested roots into this clone, and then finally insert this clone
       // into its complement's position in the auxiliary body.
-      rootClone       = clone.get(root) || clone(root);
+      rootClone       = clone.get(root) || clone.create(root);
 
     for (var i = 0, subrootCount = subroots.length; i < subrootCount; i++) {
       var
@@ -250,7 +252,7 @@ define(
         });
       }
       else {
-        var insertionGroup = clone(subroot, {
+        var insertionGroup = clone.create(subroot, {
           heredityStructure: true,
           excludeTarget: true,
           getNearestAncestorClone: true,
@@ -329,7 +331,7 @@ define(
         cloneSibling     = transplantedRoot.nextSibling,
         originalParent   = placeholder.parentElement,
         originalSibling  = placeholder.nextSibling,
-        cloneRoot        = clone.get(transplantedRoot) || clone(transplantedRoot);
+        cloneRoot        = clone.get(transplantedRoot) || clone.create(transplantedRoot);
 
       transplantedRoot.remove();
       placeholder.remove();
@@ -409,8 +411,8 @@ define(
     var flags = args.flags;
 
     if (flags.isTransplantAnchor) {
-      if (!elementQuerySelectorAll) {
-        rerouteDOMQueries();
+      if (!areQueriesFiltered) {
+        filterDOMQueries();
       }
       anchors.add(element);
     }
