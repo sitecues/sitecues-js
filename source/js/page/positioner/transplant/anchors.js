@@ -3,9 +3,9 @@ define(
     'exports',
     'page/positioner/constants',
     'page/positioner/transplant/clone',
-    'core/inline-style/inline-style',
+    'run/inline-style/inline-style',
     'page/positioner/util/element-info',
-    'core/util/array-utility'
+    'run/util/array-utility'
   ],
   function (
     exports,
@@ -87,18 +87,30 @@ define(
         bodyStyle = inlineStyle(cloneBody);
 
     // We need to clear the visibility styling on the clone body so that we can compute the intended style of the anchor
-    bodyStyle.visibility = '';
+    var bodyVisibility = bodyStyle.visibility;
+    bodyStyle.visibility = 'visible';
 
     anchors.forEach(function (anchor) {
       anchor.removeAttribute(ANCHOR_ATTR);
-      var visibility = getComputedStyle(anchor).visibility;
+      var computedStyle = getComputedStyle(anchor),
+          display       = computedStyle.display;
+
+      if (display === 'none') {
+        // Unrendered elements don't pick up new inherited styles until they've either been rendered
+        // or had their styles directly mutated. That was a fun one to figure out.
+        inlineStyle.override(anchor, ['display', 'block', 'important']);
+      }
+
+      var visibility = computedStyle.visibility;
       if (visibility === 'visible') {
         applyAnchorAttribute(anchor);
       }
+
+      inlineStyle.restoreLast(anchor, 'display');
     });
 
     // Restore the clone body's hidden visibility
-    bodyStyle.visibility = 'hidden';
+    bodyStyle.visibility = bodyVisibility;
   }
 
   // The anchor attribute is responsible for making it and its subtree visible, if its intended styling makes it visible

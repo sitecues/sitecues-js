@@ -207,7 +207,7 @@ define(
 
         if (isLocked) {
           styleLock.lock(element, {
-            property  : lockVal,
+            property  : property,
             lockValue : lockVal
           });
         }
