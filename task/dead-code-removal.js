@@ -2,6 +2,8 @@
  * Use closure compiler to remove dead code -- it does a much better job than uglify
  */
 
+'use strict';
+
 const closureCompiler = require('closure-compiler'),
   fs = require('fs'),
   glob = require('glob'),
@@ -11,53 +13,47 @@ const closureCompiler = require('closure-compiler'),
     // If we want to try this, we must protect ourselves from bad optimizations. More info here:
     // https://developers.google.com/closure/compiler/docs/api-tutorial3?hl=en
     //compilation_level: 'ADVANCED'
-  };
+  },
+  MAX_CONCURRENT_COMPILE_JOBS = 5,
+  pLimit = require('p-limit'),
+  limit = pLimit(MAX_CONCURRENT_COMPILE_JOBS);
 
-function removeDeadCode(jsFileName, onErrorCallback, onWriteComplete) {
-  function onCompileComplete(errCode, compiledJsText, errorMessage) {
-    if (errCode) {
-      onErrorCallback(errorMessage);
+function removeDeadCode(jsFileName) {
+  return new Promise((resolve) => {
+    function onCompileComplete(err, compiledJsText) {
+      if (err) {
+        throw err;
+      }
+      fs.writeFile(jsFileName, compiledJsText, resolve);
     }
-    else {
-      fs.writeFile(jsFileName, compiledJsText, onWriteComplete);
+
+    function beginCompile(err, sourceBuffer) {
+      if (err) {
+        throw err;
+      }
+      console.log('Removing dead code for ' + jsFileName);
+      closureCompiler.compile(sourceBuffer, closureOptions, onCompileComplete);
     }
-  }
 
-  const sitecuesJsFileName = jsFileName;
-
-  function beginCompile(err, sourceBuffer) {
-    if (err) {
-      throw err;
-    }
-    closureCompiler.compile(sourceBuffer, closureOptions, onCompileComplete);
-  }
-
-  fs.readFile(sitecuesJsFileName, beginCompile);
+    fs.readFile(jsFileName, beginCompile);
+  });
 }
 
-function removeAllDeadCode(callback) {
-  let numFilesRemaining;
-
-  function onWriteComplete(err) {
-    if (err) {
-      throw err;
-    }
-    if (-- numFilesRemaining === 0) {
-      callback(); // All complete
-    }
-  }
-
-  function onJsListingRetrieved(err, jsFileNames) {
-    if (err) {
-      throw err;
-    }
-    numFilesRemaining = jsFileNames.length;
-    jsFileNames.forEach(function(jsFile) {
-      removeDeadCode(jsFile, callback, onWriteComplete);
+function removeAllDeadCode() {
+  return new Promise((resolve) => {
+    glob(global.build.path + '/js/**/*.js', (err, jsFileNames) => {
+      if (err) {
+        throw err;
+      }
+      resolve(jsFileNames);
     });
-  }
-
-  glob(global.build.path + '/js/**/*.js', onJsListingRetrieved);
+  })
+  .then((jsFileNames) => {
+    const conversionJobs = jsFileNames.map((jsFileName) => {
+      return limit(() => removeDeadCode(jsFileName));
+    });
+    return Promise.all(conversionJobs);
+  });
 }
 
 removeAllDeadCode.displayName = 'remove-all-dead-code';

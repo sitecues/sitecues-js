@@ -29,8 +29,8 @@ const baseConfig = {
   // CLEAN=off -- no cleaning
   // CLEAN=all -- clean everything
   isCleaningAll: process.env.CLEAN === 'all', // Default to false
-  isMinifying: process.env.MINIFY === 'on', // Default to false
-  isRemovingDeadCode: false, // process.env.MINIFY === 'on'
+  isMinifying: process.env.MINIFY === 'on' || process.env.MINIFY === 'keep-dead', // Default to false
+  isRemovingDeadCode: process.env.MINIFY === 'on',
   isDebugOn: isDebugOn,  // Default to false
   nodeVersion: NODE_VERSION,
   isShowingSizes: NODE_VERSION >= 4 && process.env.SHOW_SIZES !== 'off', // Don't show sizes for old versions of node that don't support gulp-size
