@@ -6,7 +6,7 @@
 define(
   [
     'page/positioner/transplant/clone',
-    'core/inline-style/inline-style'
+    'run/inline-style/inline-style'
   ],
   function (
     clone,
