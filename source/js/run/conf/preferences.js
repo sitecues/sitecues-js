@@ -63,9 +63,7 @@ define(
 
     cachedPrefs[key] = safeValue;
 
-    var setObj = {};
-    setObj[key] = safeValue;
-    user.prefs.assign(setObj);
+    user.prefs.setAll(cachedPrefs);
   }
 
   function unset(key) {
