@@ -27,7 +27,10 @@ define(
     }
 
     function resetMinorSettings() {
-      pref.reset();
+      // Don't reset zoom or TTS on as those were done first
+      // Don't reset isTester as that must remain as it was
+      var BLACKLIST = new Set([ 'isTester', 'zoom', 'ttsOn' ]);
+      pref.reset(BLACKLIST);
     }
 
     function resetAll() {
