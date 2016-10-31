@@ -2,7 +2,7 @@ define(
     [
         'intern!tdd',
         'intern/chai!assert',
-        'core/platform'
+        'run/platform'
     ],
     function (tdd, assert, platform) {
 

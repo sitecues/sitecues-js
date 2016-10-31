@@ -22,13 +22,13 @@ define(
   
   function disableStyleTransition(element, property) {
     if (canPropertyTransition({ element : element, property : property })) {
-      var transitionValue = inlineStyle(element).transition;
+      var transitionValue   = inlineStyle(element).transition,
+          disableTransition = property + ' 0s';
       if (transitionValue) {
-        transitionValue += ', ';
+        disableTransition += ', ' + transitionValue;
       }
-      transitionValue += property + ' 0s';
       inlineStyle.override(element, {
-        transition : transitionValue
+        transition : disableTransition
       });
     }
   }

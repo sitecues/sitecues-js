@@ -64,12 +64,16 @@ define(
 
   function arrayAssignment(element, styleInfo, styleField) {
     var property = toKebabCase(styleInfo[0]);
+    // It's important in Safari that we remove the existing style, because setProperty doesn't override styles
+    // if a style with greater priority is already assigned
+    element[styleField].removeProperty(property);
     element[styleField].setProperty(property, fixUnits(property, styleInfo[1]), styleInfo[2] || '');
   }
 
   function objectAssignment(element, styleInfo, styleField) {
     Object.keys(styleInfo).forEach(function (prop) {
       var property = toKebabCase(prop);
+      element[styleField].removeProperty(property);
       element[styleField].setProperty(property, fixUnits(property, styleInfo[prop]));
     });
   }
@@ -277,13 +281,11 @@ define(
   function restoreStyleValue(style, property, cachedStyles) {
     var value, priority,
       declaration = cachedStyles[property];
+    style.removeProperty(property);
     if (declaration && declaration.value) {
       value    = declaration.value;
       priority = declaration.priority;
       style.setProperty(property, value, priority);
-    }
-    else {
-      style.removeProperty(property);
     }
   }
 
@@ -302,7 +304,7 @@ define(
   * */
   function restore(element, props) {
     var properties,
-      style          = getStyle(element),
+      style         = getStyle(element),
       intendedStyle = getIntendedStyle(element);
 
     // Styles only need to be restored if we have overridden them.
@@ -440,7 +442,6 @@ define(
         value    = propertyData;
         priority = '';
       }
-
       styleParser.setProperty(property, value, priority);
     });
 

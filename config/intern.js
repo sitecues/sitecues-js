@@ -44,13 +44,7 @@ define(
                     { name : FUNC_PKG,      location: testDir + 'functional' },
                     { name : 'page-object', location: testDir + 'page-object', main : 'index' },
                     { name : 'utility',     location: testDir + 'util',        main : 'index' }
-                ],
-                map : {
-                    '*' : {
-                        './native-globals' : 'mini-core/native-globals',
-                        './hidden-iframe'  : 'mini-core/hidden-iframe'
-                    }
-                }
+                ]
             },
 
             // The provider for a WebDriver server.

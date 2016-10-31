@@ -1,7 +1,7 @@
 define(
     [
       './Base',
-      'core/bp/constants'
+      'run/bp/constants'
     ],
     function (Base, constant) {
 
