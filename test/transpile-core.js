@@ -23,16 +23,17 @@ const readCoreFile = (fileName, pathComponents) => {
     });
 };
 
-const transpileCoreModule = (pathComponents) => {
-    const fileName = pathComponents.pop() + '.js';
+const transpileCoreModule = (modulePath) => {
+    const pathComponents = modulePath.split('/');
+    const fileName       = pathComponents.pop() + '.js';
     return Promise.all([
         constructModulePath(pathComponents),
         readCoreFile(fileName, pathComponents)
     ])
     .then(results => {
-        var module = results[1];
+        var [,moduleSource] = results;
         console.log('Writing transpiled module:', fileName);
-        return fs.writeFileSync(path.resolve(buildPath, ...pathComponents, fileName), babel.transform(module, {
+        return fs.writeFileSync(path.resolve(buildPath, ...pathComponents, fileName), babel.transform(moduleSource, {
             plugins : [
               'add-module-exports',
               'transform-es2015-modules-amd'
@@ -57,18 +58,18 @@ const buildCoreModules = () => {
     return cleanBuildDirectory(buildPath).then(() => {
         console.log('Begin transpiling core modules:');
         return Promise.all([
-              ['native-global'],
-              ['hidden-iframe'],
-              ['app-url'],
-              ['dom-event'],
-              ['url'],
-              ['meta'],
-              ['uuid'],
-              ['conf', 'user'],
-              ['conf', 'site'],
-              ['storage', 'permanent'],
-              ['storage', 'global'],
-              ['storage', 'local']
+              'native-global',
+              'hidden-iframe',
+              'app-url',
+              'dom-event',
+              'url',
+              'meta',
+              'uuid',
+              'conf/user',
+              'conf/site',
+              'storage/permanent',
+              'storage/global',
+              'storage/local'
           ].map(transpileCoreModule))
     });
 };
