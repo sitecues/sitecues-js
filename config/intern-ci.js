@@ -18,20 +18,10 @@ define(
             /^.+?(?=\s)/, 'CI'
         );
 
-        if (typeof process === 'object' && process.env) {
-
-            config.tunnelOptions = config.tunnelOptions || {};
-
-            config.tunnelOptions.username = process.env.bamboo_BROWSERSTACK_USERNAME;
-            // Note that currently the only way to obfuscate an environment variable
-            // within Bamboo's logs is to add 'PASSWORD' as a suffix.
-            config.tunnelOptions.accessKey = process.env.bamboo_BROWSERSTACK_PASSWORD;
-        }
-
         config.reporters = [
             // Log to the console for debugging.
             { id : 'Runner' },
-            // Inform Bamboo of the results.
+            // Output file for CI to parse.
             { id : 'JUnit', filename : 'report/test/junit.xml' }
         ];
 

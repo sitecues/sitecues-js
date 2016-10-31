@@ -4,10 +4,10 @@ define(
         'intern/chai!assert',
         // These are disabled because they trigger an exception,
         // which we are not prepared to fix just yet.
-        //'core/conf/user/manager',
-        //'core/conf/user/storage-backup',
-        'core/conf/urls',
-        'core/conf/site'
+        //'run/conf/user/manager',
+        //'run/conf/user/storage-backup',
+        'run/conf/urls',
+        'run/conf/site'
     ],
     function (tdd, assert, manager, storageBackup, urls, site) {
 
