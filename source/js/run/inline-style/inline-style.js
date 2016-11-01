@@ -56,25 +56,36 @@ define(
         "zoom"                      : true
       };
 
+  function setProperty(elementStyle, declaration) {
+    var property = toKebabCase(declaration.property),
+        value    = fixUnits(property, declaration.value),
+        priority = declaration.priority || '';
+    elementStyle.removeProperty(property); // We need to remove the existing style declaration because in Safari we aren't able to override declarations with higher priority
+    if (value !== undefined) {
+      elementStyle.setProperty(property, value, priority);
+    }
+  }
 
   // This function replicates jQuery's coercion of numeric style values to unit strings when appropriate
+  // Important: property must be in kebab-case
   function fixUnits(property, value) {
     return typeof value === 'number' && value !== 0 && !cssNumbers[property] ? value + 'px' : value;
   }
 
   function arrayAssignment(element, styleInfo, styleField) {
-    var property = toKebabCase(styleInfo[0]);
-    // It's important in Safari that we remove the existing style, because setProperty doesn't override styles
-    // if a style with greater priority is already assigned
-    element[styleField].removeProperty(property);
-    element[styleField].setProperty(property, fixUnits(property, styleInfo[1]), styleInfo[2] || '');
+    setProperty(element[styleField], {
+      property : styleInfo[0],
+      value    : styleInfo[1],
+      priority : styleInfo[2]
+    });
   }
 
   function objectAssignment(element, styleInfo, styleField) {
-    Object.keys(styleInfo).forEach(function (prop) {
-      var property = toKebabCase(prop);
-      element[styleField].removeProperty(property);
-      element[styleField].setProperty(property, fixUnits(property, styleInfo[prop]));
+    Object.keys(styleInfo).forEach(function (property) {
+      setProperty(element[styleField], {
+        property : property,
+        value    : styleInfo[property]
+      });
     });
   }
 
@@ -125,9 +136,12 @@ define(
     var intendedStyle = intendedStyleMap.get(element);
 
     if (!property) {
-      // Return the cached intended styles, or undefined
+      // Return the cached intended styles, or undefined if none have been cached
+      // It's important that if we haven't cached styles this returns false
       return intendedStyle;
     }
+
+    property = toKebabCase(property);
 
     if (!intendedStyle) {
       // If we haven't cached an inline value, return the current value
@@ -164,10 +178,6 @@ define(
     });
   }
 
-  function removeProperty(element, property) {
-    getStyle(element).removeProperty(toKebabCase(property));
-  }
-
   function clearStyle(element) {
     element.removeAttribute('style');
   }
@@ -196,16 +206,16 @@ define(
   }
 
   // when we override a proxied element, we need to update the last style cache
-  // for element, saving the current field values before the overriding values are assigned
+  // for the element, saving the current field values before the overriding values are assigned
   // Fields that are untouched by this new override retain their existing last value
   function updateLastStyles(element, styleInfo, currentStyles) {
-    var lastStyles = getLastStyles(element),
-        styleType  = getStyleType(styleInfo),
-        styleObj   = getStyle(element);
+    var lastStyles   = getLastStyles(element),
+        styleType    = getStyleType(styleInfo),
+        elementStyle = getStyle(element);
 
     function updateProperty(prop) {
       var property = toKebabCase(prop);
-      saveStyleValue(styleObj, property, lastStyles);
+      saveStyleValue(elementStyle, property, lastStyles);
     }
 
     switch (styleType) {
@@ -218,6 +228,8 @@ define(
         break;
 
       case 'string':
+        // If we're overriding cssText, we just save all the current styles as 'last styles', because
+        // we don't try to distinguish between what has changed and what hasn't
         lastStyles = currentStyles;
         break;
     }
@@ -278,15 +290,10 @@ define(
   }
 
   // @param property must be kebab case in order to look up the cached styles
-  function restoreStyleValue(style, property, cachedStyles) {
-    var value, priority,
-      declaration = cachedStyles[property];
-    style.removeProperty(property);
-    if (declaration && declaration.value) {
-      value    = declaration.value;
-      priority = declaration.priority;
-      style.setProperty(property, value, priority);
-    }
+  function restoreStyleValue(elementStyle, property, cachedStyles) {
+    var declaration = objectUtil.assign({}, cachedStyles[property]);
+    declaration.property = property;
+    setProperty(elementStyle, declaration);
   }
 
   // @param property must be kebab case in order to look up the cached styles
@@ -442,6 +449,7 @@ define(
         value    = propertyData;
         priority = '';
       }
+
       styleParser.setProperty(property, value, priority);
     });
 
@@ -461,6 +469,11 @@ define(
 
     return cssObj;
   }
+  
+  // Exported for convenience, not used internally
+  function removeProperty(element, property) {
+    getStyle(element).removeProperty(toKebabCase(property));
+  }
 
   function init() {
     // element -> intended css object
@@ -472,9 +485,9 @@ define(
     assignmentRecords    = [];
     styleParser          = document.createElement('div').style;
     assignmentDictionary = {
-      'array'  : arrayAssignment,
-      'object' : objectAssignment,
-      'string' : stringAssignment
+      array  : arrayAssignment,
+      object : objectAssignment,
+      string : stringAssignment
     };
     kebabCaseCache = {};
   }
