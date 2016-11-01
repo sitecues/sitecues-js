@@ -84,7 +84,7 @@ gulp.task('js-compile-lint', gulp.parallel.apply(gulp, jsCompileAndLint));
 gulp.task('js-validate', gulp.series(js.prepareValidation, js.validate));
 gulp.task('js-show-sizes', js.showSizes);
 var jsDoAll = [ 'js-compile-lint' ]
-  .concat(config.isMinifying ? removeAllDeadCode : [])
+  .concat(config.isRemovingDeadCode ? removeAllDeadCode : [])
   .concat('js-validate')
   .concat(config.isShowingSizes ? 'js-show-sizes': []);
 gulp.task('js', gulp.series.apply(gulp, jsDoAll));

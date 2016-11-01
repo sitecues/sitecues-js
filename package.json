@@ -1,6 +1,6 @@
 {
   "name": "sitecues",
-  "version": "4.2.9",
+  "version": "4.2.18",
   "description": "A web app to enable sites with zoom and speech.",
   "repository": {
     "type": "git",
@@ -14,9 +14,9 @@
   },
   "bin": "binary/web.js",
   "scripts": {
-    "test": "node ./test/run-tests",
-    "test-cloud": "intern run --webdriver --config=config/intern-cloud.js",
-    "test-ci": "intern run --webdriver --config=config/intern-ci.js",
+    "test": "node ./test/transpile-core && intern run --webdriver --config=config/intern.js",
+    "test-cloud": "node ./test/transpile-core && intern run --webdriver --config=config/intern-cloud.js",
+    "test-ci": "node ./test/transpile-core && intern run --webdriver --config=config/intern-ci.js",
     "build": "make package"
   },
   "dependencies": {
@@ -26,6 +26,7 @@
     "got": "^6.5.0",
     "hogan.js": "^3.0.2",
     "mime": "^1.3.4",
+    "p-limit": "^1.0.0",
     "pkg-dir": "^1.0.0",
     "tail": "^0.4.0"
   },

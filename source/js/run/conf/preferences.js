@@ -63,9 +63,7 @@ define(
 
     cachedPrefs[key] = safeValue;
 
-    var setObj = {};
-    setObj[key] = safeValue;
-    user.prefs.assign(setObj);
+    user.prefs.setAll(cachedPrefs);
   }
 
   function unset(key) {
@@ -73,9 +71,13 @@ define(
   }
 
   // Reset all settings as if it is a new user
-  function resetPrefs() {
+  function resetPrefs(blackListSet) {
+    function isNotBlackListed(key) {
+      return !blackListSet.has(key);
+    }
+
     // Undefine all settings and call setting notification callbacks
-    Object.keys(cachedPrefs).forEach(unset);
+    Object.keys(cachedPrefs).filter(isNotBlackListed).forEach(unset);
   }
 
   function hasPref(key) {
