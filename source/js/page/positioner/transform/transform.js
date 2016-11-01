@@ -405,8 +405,8 @@ define(
 
       // Absolute elements return the used top value if there isn't one specified. Setting the position to static ensures
       // that only specified top values are returned with the computed style
-      // EXCEPTION: IE returns the used value for both
-      if (!platform.browser.isIE) {
+      // EXCEPTION: IE and Edge return the specified value for positioned elements
+      if (!platform.browser.isIE && !platform.browser.isEdge) {
         inlineStyle.override(element, ['position', 'static', 'important']);
       }
 
