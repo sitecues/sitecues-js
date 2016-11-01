@@ -1,6 +1,6 @@
 'use strict';
 
-const delivr = require('delivr'),
+const
   buildType = process.env.TYPE || 'common';
 
 var gulp = require('gulp'),
@@ -32,7 +32,7 @@ function prepare() {
         // Will use buildData to generate resource url
         global.buildBranch = buildData.branch;
         global.buildVersion = buildData.version;
-        return delivr.prepare(config);
+        return require('delivr').prepare(config);
       })
       .then((build) => {
         global.build = build;
