@@ -251,7 +251,6 @@ define(
 
     var cueFileName = urls.resolveResourceUrl('cue/' + cueTextLocale + '.json');
 
-    // TODO what about Chrome extension?
     xhr.getJSON({
       url: cueFileName,
       success: function(data) {
