@@ -9,6 +9,7 @@
 
 define(
   [
+    'exports',
     '$',
     'page/positioner/util/element-map',
     'page/positioner/util/element-info',
@@ -18,6 +19,7 @@ define(
     'core/inline-style/inline-style'
   ],
   function (
+    exports,
     $,
     elementMap,
     elementInfo,
@@ -34,7 +36,7 @@ define(
     originalBody,
     auxiliaryBody;
 
-  function clone(target, opts) {
+  function create(target, opts) {
     opts = opts || {};
     var
       resultWrapper = {},
@@ -250,10 +252,9 @@ define(
     docElem      = document.documentElement;
     originalBody = document.body;
   }
-
-  clone.init             = init;
-  clone.get              = getComplement;
-  clone.getAuxiliaryBody = getAuxiliaryBody;
-
-  return clone;
+  
+  exports.init             = init;
+  exports.get              = getComplement;
+  exports.getAuxiliaryBody = getAuxiliaryBody;
+  exports.create           = create;
 });

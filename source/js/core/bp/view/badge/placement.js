@@ -95,7 +95,7 @@ define(
   // Also, position and size the bpContainer and set height and width of the SVG
   function switchToBadgeParent() {
     var styles = {
-      tranform: ''
+      transform: ''
     };
     // Remove transform/translate so that badge is fully returned to origin state
     inlineStyle.set(bpElement, styles);
