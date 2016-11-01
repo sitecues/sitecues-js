@@ -25,10 +25,12 @@ function togglePaused() {
   return getPaused()
     .then(function(wasPaused) {
       var isPaused = !wasPaused;
+      // Refresh button label
       refreshPauseButtonLabel(isPaused);
+      // Close popup
+      window.close();
       // Refresh tabs with new state
       var message = {action: 'setPaused', isPaused: isPaused };
-      window.close();
       chrome.tabs.query({}, function (tabs) {
         var index = tabs.length;
         while (index --) {
