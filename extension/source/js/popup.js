@@ -42,9 +42,12 @@ function togglePaused() {
 
 document.addEventListener(
   'DOMContentLoaded', function () {
-    document.getElementById('onoff').addEventListener('click', togglePaused);
+    // Button click handler
+    document.getElementById('onoff')
+      .addEventListener('click', togglePaused);
+    // Button label update
+    getPaused()
+      .then(refreshPauseButtonLabel);
   }
 );
 
-getPaused()
-  .then(refreshPauseButtonLabel);
