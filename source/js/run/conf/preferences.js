@@ -55,15 +55,14 @@ define(
       safeValue = value;
     }
 
+    cachedPrefs[key] = safeValue;
+    user.prefs.setAll(cachedPrefs);
+
     if (listeners[key]) {
       listeners[key].forEach(function (listener) {
         listener(safeValue);
       });
     }
-
-    cachedPrefs[key] = safeValue;
-
-    user.prefs.setAll(cachedPrefs);
   }
 
   function unset(key) {
