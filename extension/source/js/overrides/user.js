@@ -24,7 +24,7 @@ define(
   ) {
     'use strict';
 
-    function assignPrefs(data) {
+    function setAll(data) {
       return new Promise(function(resolve, reject) {
         chrome.storage.local.set(data, function() {
           if (chrome.runtime.lastError) {
@@ -57,7 +57,7 @@ define(
 
     return {
       prefs: {
-        assign: assignPrefs,
+        setAll: setAll,
         getAll: getAllPrefs
       },
       getId: getId

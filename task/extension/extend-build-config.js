@@ -22,6 +22,7 @@ function getConfig(baseConfig) {
 
   const config = extend(true, {}, baseConfig, {
     isExtension: true,
+    isCleaningAll: true, // Always clean because we're overwriting the same directory
     extensionSourceDir: EXTENSION_SOURCE_DIR,
     tmpDir: require('os').tmpdir(),
     isLocal: process.env.LOCAL !== 'off', // Extension: default is local because of Google security requirements
