@@ -438,7 +438,7 @@ define(
     pref.init()
       .then(function() {
         if (SC_EXTENSION) {
-          window.setDisabledGlobally = setDisabledGlobally; // Make available to other extension scripts
+          window.sitecues.setDisabledGlobally = setDisabledGlobally; // Make available to other extension scripts
           setDisabledGlobally(pref.get('isDisabledGlobally'));
         }
         setDisabledForPage(window.localStorage.getItem('sitecues-disabled'));

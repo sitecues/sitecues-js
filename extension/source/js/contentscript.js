@@ -24,7 +24,7 @@ chrome.runtime.onMessage.addListener(
   function (request, sender, sendResponse) {
     if (request.action === 'setPaused') {
       var isPaused = request.isPaused;
-      window.setDisabledGlobally(isPaused);
+      window.sitecues.setDisabledGlobally(isPaused);
     }
   }
 );
