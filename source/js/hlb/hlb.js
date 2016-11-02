@@ -217,7 +217,7 @@ define(
 
     // Focus input or textarea
     if (elemClassifier.isEditable($hlb[0])) {
-      $hlb.focus();
+      $hlb[0].focus();
     }
 
     // Let the rest of the application know that the hlb is ready
@@ -449,8 +449,8 @@ define(
 
     // We need to copy over each key stroke from hlb input fields so that when event handlers run on 'enter' the
     // original input field has the correct value
-    $hlb.find('input[type="text"]').each(function (index, hlbInput) {
-      hlbInput.addEventListener('keydown', function () {
+    $hlb.find('input').each(function (index, hlbInput) {
+      function eventHandler(event) {
         var cloneAttribute = 'data-sc-cloned',
             cloneIndex     = hlbInput.getAttribute(cloneAttribute),
             cloneSelector  = '[' + cloneAttribute + '="' + cloneIndex + '"]';
@@ -460,10 +460,18 @@ define(
             return hlbInput !== element;
           });
           if (originalElement) {
+            if (!platform.browser.isIE) {
+              // new Event() is not supported in IE11
+              var cloneEvent = new event.constructor(event.type, event);
+              originalElement.dispatchEvent(cloneEvent);
+              hlbInput.focus();
+            }
             originalElement.value = hlbInput.value;
           }
         }
-      });
+      }
+      hlbInput.addEventListener('keydown', eventHandler);
+      hlbInput.addEventListener('click', eventHandler);
     });
 
     // Clone styles of HLB and children of HLB, so layout is preserved
@@ -683,7 +691,7 @@ define(
   }
 
   function onClick(event) {
-    if ($hlb && !isElementInsideHlb(event.target)) {
+    if ($hlb && !isElementInsideHlb(event.target) && event.isTrusted) {
       // If click is outside of HLB, close it
       // (Need to doublecheck this because HLB can sometimes be inside of <body>)
       toggleHLB();
