@@ -1,7 +1,7 @@
 'use strict';
 
 var SITE_ID = 's-1596260c',
-  url = 'chrome-extension://' + chrome.runtime.id + '/js/sitecues.js';
+  url = chrome.extension.getURL("js/sitecues.js");
 
 window.sitecues = {
   config: {

@@ -40,7 +40,13 @@ define(
     };
 
     // Send it!
-    xhr.send(postData);
+    console.log(requestObj.url);
+    if (postData) {
+      xhr.send(postData);
+    }
+    else {
+      xhr.send();
+    }
   }
 
   // -- PUBLIC ---
