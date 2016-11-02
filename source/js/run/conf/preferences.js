@@ -48,6 +48,7 @@ define(
   function setPref(key, value) {
     var safeValue;
 
+    // Get the valid, corrected value (e.g. zoom=undefined ==> zoom=1, zoom=4 ==> zoom=3)
     if (handlers[key]) {
       safeValue = handlers[key](value);
     }
@@ -55,9 +56,16 @@ define(
       safeValue = value;
     }
 
+    // Save to the cachedPrefs which is also used to retrieve prefs quickly
     cachedPrefs[key] = safeValue;
+
+    // Save to persistent storage.
+    // We don't listen to the Promise returned by user.prefs.setAll,
+    // because we don't actually care about the success or timing of saving to persistant storage.
+    // Any client code that gets a pref will retrieve it from cachedPrefs, which is altered synchronosuly.
     user.prefs.setAll(cachedPrefs);
 
+    // Call listeners
     if (listeners[key]) {
       listeners[key].forEach(function (listener) {
         listener(safeValue);
