@@ -80,18 +80,15 @@ define(
   // @param node -- an element that contains visible content, or a text node
   function getContentsRangeRect(node) {
     var range = document.createRange(),
-      parent,
       // ********** Some browsers are fine **********
       isElement = node.nodeType === Node.ELEMENT_NODE;
 
     if (isElement && !hasUnrenderedDescendants(node)) {
       // Case 1: element -- get the rect for the element's descendant contents
-      parent = node;
       range.selectNodeContents(node);
     }
     else {
       // Case 2: text node -- get the rect for the text
-      parent = node.parentNode;
       range.selectNode(node);
     }
 
@@ -160,7 +157,16 @@ define(
   }
 
   function isTextIndentUsedToHide(style) {
-    return parseInt(style.textIndent) < MAX_TEXT_INDENT_USED_TO_HIDE;
+    var indent = parseInt(style.textIndent),
+        unit   = style.textIndent.slice(String(indent).length);
+    switch (unit) {
+      case '%':
+        return indent >= 100 || indent <= -100;
+      case 'px':
+        return indent < MAX_TEXT_INDENT_USED_TO_HIDE;
+      default:
+        return false;
+    }
   }
 
   function getSpriteRect(element, style) {
