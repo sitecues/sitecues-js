@@ -18,10 +18,7 @@ define(
   ) {
   'use strict';
 
-  var requestFrameFn = window.requestAnimationFrame,
-      cancelFrameFn  = window.cancelAnimationFrame,
-
-      // https://gist.github.com/gre/1650294
+  var // https://gist.github.com/gre/1650294
       timingFunctions = {
         'ease-out': function (t) {
           return (--t) * t * t + 1;
@@ -102,7 +99,7 @@ define(
       }
 
       if (time < 1) {
-        currAnimation.animationId = requestFrameFn(tick);
+        currAnimation.animationId = window.requestAnimationFrame(tick);
       }
       else {
         currAnimation.isRunning = false;
@@ -122,7 +119,7 @@ define(
       if (this.onFinish) {
         this.onFinish();
       }
-      cancelFrameFn(this.animationId);
+      window.cancelAnimationFrame(this.animationId);
       this.isRunning = false;
     }
   };

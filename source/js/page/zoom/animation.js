@@ -53,9 +53,6 @@ define(
     thumbChangeListener,    // Supports a single listener that is called back as animation proceeds
     glideChangeTimer,       // Timer used for callbacks
 
-    // Function to call for requesting an animation frame
-    requestFrame = window.requestAnimationFrame,
-
     // State to help with animation optimizations and will-change
     zoomBeginTimer, // Timer before zoom can actually begin (waiting for browser to create composite layer)
 
@@ -201,7 +198,7 @@ define(
   // This matches our updates with screen refreshes.
   // Unfortunately, it causes issues in some older versions of Firefox on Mac + Retina.
   function performContinualZoomUpdates() {
-    zoomAnimator = requestFrame(performContinualZoomUpdates);
+    zoomAnimator = window.requestAnimationFrame(performContinualZoomUpdates);
     performInstantZoomOperation();
     state.completedZoom = state.currentTargetZoom;
   }
@@ -242,14 +239,14 @@ define(
       var midAnimationZoom = getMidAnimationZoom();
       inlineStyle.override($origBody[0], style.getZoomCss(midAnimationZoom));
       if (midAnimationZoom === state.currentTargetZoom && !isSliderActive()) {
-        zoomAnimator = requestFrame(finishZoomOperation);
+        zoomAnimator = window.requestAnimationFrame(finishZoomOperation);
       }
       else {
-        zoomAnimator = requestFrame(jsZoomStep);
+        zoomAnimator = window.requestAnimationFrame(jsZoomStep);
       }
     }
 
-    zoomAnimator = requestFrame(jsZoomStep);
+    zoomAnimator = window.requestAnimationFrame(jsZoomStep);
   }
 
   // This is used for the following types of zoom:
@@ -524,11 +521,11 @@ define(
     // We have to stop it like this so that we keep the current amount of zoom in the style attribute,
     // while the animation player is stopped so that it doesn't block future style attribute changes
     // from taking affect (e.g. via the slider)
-    requestFrame(function() {
+    window.requestAnimationFrame(function() {
       if (elementDotAnimatePlayer) {
         elementDotAnimatePlayer.pause();
       }
-      requestFrame(freezeZoom);
+      window.requestAnimationFrame(freezeZoom);
     });
   }
 
@@ -550,13 +547,13 @@ define(
     }
 
     // Stop key frames or element.animate
-    zoomAnimator = requestFrame(function () {
+    zoomAnimator = window.requestAnimationFrame(function () {
       // Stop the key-frame animation at the current zoom level
       // Yes, it's crazy, but this sequence helps the zoom stop where it is supposed to, and not jump back a little
       inlineStyle.override($origBody[0], {
         animationPlayState: 'paused'
       });
-      zoomAnimator = requestFrame(function() {
+      zoomAnimator = window.requestAnimationFrame(function() {
         state.currentTargetZoom = getActualZoom();
         onGlideStopped();
       });
@@ -575,7 +572,7 @@ define(
   }
 
   function chooseZoomStrategy() {
-    zoomAnimator = requestFrame(performContinualZoomUpdates);
+    zoomAnimator = window.requestAnimationFrame(performContinualZoomUpdates);
   }
 
   // Allow one listener for all zoom updates, even mid-animation.

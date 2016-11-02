@@ -21,9 +21,7 @@ define(
   var DIMMER_ID = 'sitecues-background-dimmer',
 
       DIMMER_MIN_OPACITY = 0,
-      DIMMER_MAX_OPACITY = 0.65,
-
-      requestFrameFn = window.requestAnimationFrame;
+      DIMMER_MAX_OPACITY = 0.65;
 
   //////////////////////////////
   // PUBLIC FUNCTIONS
@@ -81,7 +79,7 @@ define(
       inlineStyle(dimmerElement).opacity = currentOpacity;
 
       if (percentComplete < 1) {
-        requestFrameFn(nextFrame);
+        window.requestAnimationFrame(nextFrame);
       }
       else if (onCompleteFn) {
         onCompleteFn();

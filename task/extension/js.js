@@ -114,12 +114,8 @@ function compressLibrary() {
   return gulp.src(intermediateSitecuesJs)
     // Check before IIFE so that no init code runs if page disabled -- only does this replacement once
     // These replacements allow uglify to remove a lot of dead code -- these replacements are global
-    .pipe(replace('platform.browser.isIE9', 'false'))
     .pipe(replace('platform.browser.isIE', 'false'))
-    .pipe(replace('platform.browser.isFirefox', 'false'))
     .pipe(replace('platform.browser.isSafari', 'false'))
-    .pipe(replace('platform.browser.isChrome', 'true'))
-    .pipe(replace('platform.browser.isWebKit', 'true'))
     .pipe(uglify(uglifyOptions))
     .pipe(gulp.dest(global.buildDir + '/js'));
 }

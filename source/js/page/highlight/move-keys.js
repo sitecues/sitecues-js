@@ -58,8 +58,6 @@ define(
     navQueue = [],
     // Approximate amount of time for one animation frame
     ONE_ANIMATION_FRAME_MS = 16,  // 16ms is about 60fps
-    // Method for animation
-    requestFrame = window.requestAnimationFrame,
     isNavigationEnabled = true,// labs.isEnabled('arrowKeyNav'), // We no longer use labs here, it is on by default
     SAFE_ZONE = 30; // Begin scrolling when we get this close to window edge
 
@@ -251,7 +249,7 @@ define(
         }
       }
       else {
-        requestFrame(smoothScroll);
+        window.requestAnimationFrame(smoothScroll);
       }
     }
 
@@ -568,7 +566,7 @@ define(
       }
 
       // Continue panning
-      requestFrame(panInDirection);
+      window.requestAnimationFrame(panInDirection);
     }
 
     // Go quickly through visible possibilities

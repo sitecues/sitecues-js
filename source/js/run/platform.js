@@ -54,8 +54,6 @@ define([], function() {
         isFirefox: browserStr === 'Firefox',
         //Evaluates true for Internet Explorer and Edge (there is a lot of overlap in browser specific logic)
         isMS: isMS, // Includes Edge
-        isIE: isMS && version < 12,  // Does not include Edge
-        isEdge: isMS && version >= 12,
         isChrome: browserStr === 'Chrome',
         isOpera: browserStr === 'Opera',
         isSafari: browserStr === 'Safari',

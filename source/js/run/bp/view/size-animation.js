@@ -22,9 +22,7 @@ define(
   ) {
   'use strict';
 
-  var requestFrameFn = window.requestAnimationFrame,
-      cancelFrameFn  = window.cancelAnimationFrame,
-      expandEasingFn   = function (t) { return (--t)*t*t+1;}, // https://gist.github.com/gre/1650294
+  var expandEasingFn   = function (t) { return (--t)*t*t+1;}, // https://gist.github.com/gre/1650294
       collapseEasingFn = function (t) { return t; },          // Linear looks better for collapse animation
       animationStartTime,
       animationId,
@@ -697,7 +695,7 @@ define(
         return;
       }
 
-      animationId = requestFrameFn(animationTick);
+      animationId = window.requestAnimationFrame(animationTick);
 
     }
 
@@ -732,7 +730,7 @@ define(
     // The animation start time will be NOW minus how long the previous animation duration.
     animationStartTime = Date.now() - percentAnimationComplete * fullAnimationDuration;
 
-    animationId = requestFrameFn(animationTick);
+    animationId = window.requestAnimationFrame(animationTick);
 
   }
 
@@ -756,7 +754,7 @@ define(
   }
 
   function cancelAnimation() {
-    cancelFrameFn(animationId);
+    window.cancelAnimationFrame(animationId);
   }
 
   function onZoomChange(zoomLevel) {

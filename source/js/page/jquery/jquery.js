@@ -64,22 +64,11 @@
 // enough that all such attempts are guarded in a try block.
   "use strict";
 
-  function cacheSetTimeoutReference() {
-    return sitecues._shared.nativeGlobal.setTimeout;
-  }
-
-  function cacheJSONReference() {
-    return sitecues._shared.nativeGlobal.JSON;
-  }
-
   var arr = [];
 
   var document = window.document;
 
-  var setTimeout = cacheSetTimeoutReference();
-
-  var JSON = cacheJSONReference();
-
+  var JSON = sitecues._shared.nativeGlobal.JSON;
   var getProto = Object.getPrototypeOf;
 
   var slice = arr.slice;
@@ -541,7 +530,7 @@
 // three lines.
   /* jshint ignore: start */
   if ( typeof Symbol === "function" ) {
-    jQuery.fn[ Symbol.iterator ] = arr[ Symbol.iterator ];
+      jQuery.fn[ Symbol.iterator ] = arr[ Symbol.iterator ];
   }
   /* jshint ignore: end */
 
@@ -4634,7 +4623,7 @@
 
       // Prevent errors from freezing future callback execution (gh-1823)
       // Not backwards-compatible as this does not execute sync
-      setTimeout( function() {
+      sitecues._shared.nativeGlobal.setTimeout( function() {
         fn.call( document, jQuery );
       } );
     };
@@ -4717,7 +4706,7 @@
     ( document.readyState !== "loading" && !document.documentElement.doScroll ) ) {
 
     // Handle it asynchronously to allow scripts the opportunity to delay ready
-    setTimeout( jQuery.ready );
+    sitecues._shared.nativeGlobal.setTimeout( jQuery.ready );
 
   } else {
 
