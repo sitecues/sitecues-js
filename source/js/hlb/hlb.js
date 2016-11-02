@@ -105,13 +105,13 @@ define(
       fromInputType = $currentFromInput.prop('type');
       cloneIndex = $currentToInput[0].getAttribute('data-sc-cloned');
 
-      //If we're closing the HLB, and the current form element is part of a cloned foundation
+      // If we're closing the HLB, and the current form element is part of a cloned foundation
       if (isHLBClosing && cloneIndex) {
-        //Remove the index property from the HLB element
+        // Remove the index property from the HLB element
         $currentFromInput[0].removeAttribute('data-sc-cloned');
-        //Query the DOM for the original form element, so we can copy the HLB form value back into the appropriate field
+        // Query the DOM for the original form element, so we can copy the HLB form value back into the appropriate field
         $currentToInput = $('[data-sc-cloned="' + cloneIndex + '"]');
-        //Remove the index from the original form element
+        // Remove the index from the original form element
         $currentToInput[0].removeAttribute('data-sc-cloned');
       }
 
@@ -288,9 +288,9 @@ define(
     // It MUST be called before getFoundation().
     events.emit('mh/pause');
 
-    //Set data attributes on each of the form input elements
-    //This allows us to query the DOM for the original elements
-    //when we want to give them the values entered into the HLB
+    // Set data attributes on each of the form input elements
+    // This allows us to query the DOM for the original elements
+    // when we want to give them the values entered into the HLB
     setCloneIndexOnFormDescendants($picked);
 
     // Sanitize the input, by accounting for "lonely" elements.
@@ -450,7 +450,7 @@ define(
     // We need to copy over each key stroke from hlb input fields so that when event handlers run on 'enter' the
     // original input field has the correct value
     $hlb.find('input').each(function (index, hlbInput) {
-      function eventHandler(event) {
+      function handleEvents(event) {
         var cloneAttribute = 'data-sc-cloned',
             cloneIndex     = hlbInput.getAttribute(cloneAttribute),
             cloneSelector  = '[' + cloneAttribute + '="' + cloneIndex + '"]';
@@ -470,8 +470,8 @@ define(
           }
         }
       }
-      hlbInput.addEventListener('keydown', eventHandler);
-      hlbInput.addEventListener('click', eventHandler);
+      hlbInput.addEventListener('keydown', handleEvents);
+      hlbInput.addEventListener('click', handleEvents);
     });
 
     // Clone styles of HLB and children of HLB, so layout is preserved
