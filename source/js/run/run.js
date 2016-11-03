@@ -345,6 +345,15 @@ define(
       }
     }
 
+    // Desired behavior:
+    // Extension:
+    //   - if either is disabled (paused), Sitecues Everywhere will not run
+    // Page script:
+    //   - if page is disabled, page script will not run
+    //   - if extension is disabled (paused), page script can still run if not disabled for page
+    //     In that case both scripts are running, and the page script cannot even see
+    //     isDisabledGlobally (will always be false in that script).
+    //     Basically, the page script cannot be disabled globally.
     function isDisabled() {
       return Boolean(isDisabledForPage || isDisabledGlobally);
     }
