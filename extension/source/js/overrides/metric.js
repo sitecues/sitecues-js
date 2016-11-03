@@ -29,7 +29,7 @@ define('run/metric/metric', [], function() {
     PanelClick: noop,
     PanelClose: noop,
     PanelFocusMove: noop,
-    SitecuesReady: noop,
+    PageVisit: noop,
     SliderSettingChange: noop,
     TtsRequest: noop,
     ZoomChange: noop
