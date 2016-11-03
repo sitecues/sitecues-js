@@ -158,7 +158,7 @@ define(
 
   function isTextIndentUsedToHide(style) {
     var indent = parseInt(style.textIndent),
-        unit   = style.textIndent.slice(String(indent).length);
+        unit   = typeof indent === 'number' ? style.textIndent.slice(String(indent).length) : '';
     switch (unit) {
       case '%':
         return indent >= 100 || indent <= -100;

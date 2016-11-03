@@ -50,7 +50,7 @@ define(
   var EXTRA_HIGHLIGHT_PADDING = 2, // TODO: Figure out why this is needed and compute it.
       MOUSE_SAFETY_ZONE       = 50, // Number of pixels the mouse is allowed to go outside the HLB, before it closes.
       FORMS_SELECTOR          = 'input, textarea, select',
-
+      INPUT_SELECTOR          = FORMS_SELECTOR + ', button',
       $picked,         // The object chosen by the picker.
       $foundation,     // The sanitized input, used as the basis for creating an $hlb.
       $hlb,            // The cloned object, based on the $foundation.
@@ -449,7 +449,7 @@ define(
 
     // We need to copy over each key stroke from hlb input fields so that when event handlers run on 'enter' the
     // original input field has the correct value
-    $hlb.find('input').each(function (index, hlbInput) {
+    $hlb.find(INPUT_SELECTOR).addBack(INPUT_SELECTOR).each(function (index, hlbInput) {
       function handleEvents(event) {
         var cloneAttribute = 'data-sc-cloned',
             cloneIndex     = hlbInput.getAttribute(cloneAttribute),
@@ -594,8 +594,8 @@ define(
 
   function setCloneIndexOnFormDescendants($picked) {
     var i,
-      $formDescendants = $picked.find(FORMS_SELECTOR)
-        .addBack(FORMS_SELECTOR);
+      $formDescendants = $picked.find(INPUT_SELECTOR)
+        .addBack(INPUT_SELECTOR);
 
     for (i = 0; i < $formDescendants.length; i++) {
       $formDescendants[i].setAttribute('data-sc-cloned', i + 1);
