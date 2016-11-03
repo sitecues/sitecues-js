@@ -10,7 +10,8 @@ All notable changes to this project will be documented here.
 
 ## Unreleased
 ### Fixed
- -
+ - Buttons and forms in the lens can now be interacted with
+ - Live update of text fields in the lens allow `enter` to work correctly when intended
 
 ## [4.2.18] - 2016-11-1
 ### Fixed
