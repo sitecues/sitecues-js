@@ -106,7 +106,7 @@ define(
 
   function getHoverDelayStayInside() {
     // First interaction is most sensitive
-    if (abTest.get('extraSensitiveBadgeNewUser') && isFirstInteraction()) {
+    if (isFirstInteraction()) {
       return BP_CONST.HOVER_DELAY_STAY_INSIDE_FIRST_TIME;
     }
 
