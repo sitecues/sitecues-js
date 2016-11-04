@@ -7,7 +7,6 @@ define(
     'run/bp/model/state',
     'run/bp/helper',
     'run/metric/metric',
-    'run/ab-test/ab-test',
     'run/conf/preferences',
     'run/conf/site',
     'run/bp/view/view',
@@ -20,7 +19,6 @@ define(
     state,
     helper,
     metric,
-    abTest,
     pref,
     site,
     view,
@@ -106,7 +104,7 @@ define(
 
   function getHoverDelayStayInside() {
     // First interaction is most sensitive
-    if (abTest.get('extraSensitiveBadgeNewUser') && isFirstInteraction()) {
+    if (isFirstInteraction()) {
       return BP_CONST.HOVER_DELAY_STAY_INSIDE_FIRST_TIME;
     }
 

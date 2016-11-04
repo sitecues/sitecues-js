@@ -13,7 +13,7 @@ define([], function () {
 
   var globalAbConfig = {
     NONE: {  // Special value meaning no A/B test is occurring
-      weight: 3
+      weight: 1
     },
     // Commented but kept in source as an example of what's possible
     // 'iconTest': {
@@ -33,12 +33,8 @@ define([], function () {
     //     }
     //   }
     // },
-    'extraSensitiveBadgeNewUser': {
-      // Test Marc's idea to have an extra sensitive badge for first time users
-      weight: 1
-    },
     'moreButtonTimerV2': {
-      weight: 1,
+      weight: 4,
       values: [
         0,
         1000,
