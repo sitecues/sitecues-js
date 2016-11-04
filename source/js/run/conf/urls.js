@@ -1,3 +1,4 @@
+// TODO this really needs a look over
 define(
   [
     'run/conf/site'
@@ -12,10 +13,9 @@ define(
     BASE_RESOURCE_URL;
 
   function getBaseResourceUrl() {
-    var basis = SC_EXTENSION ? getRawScriptUrl() : sitecues.require.toUrl(''),
-      unsecureBaseUrl = basis.substring(0, basis.lastIndexOf('/js/') + 1);
+    var basis = getRawScriptUrl();
 
-    return enforceHttps(unsecureBaseUrl);
+    return basis.substring(0, basis.lastIndexOf('/js/') + 1);
   }
 
   // Change http:// or protocol-relative (just //) urls to use https
@@ -41,7 +41,8 @@ define(
   // URL string for sitecues.js
   // Enforces https so that all the resources we fetch and origin checking also uses https
   function getRawScriptUrl() {
-    return enforceHttps(site.get('appUrl'));
+    var insecureBaseUrl = site.get('appUrl');
+    return SC_EXTENSION ? insecureBaseUrl : enforceHttps(insecureBaseUrl);
   }
 
   // Parsed URL object for sitecues.js

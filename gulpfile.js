@@ -1,14 +1,15 @@
 'use strict';
 
-const delivr = require('delivr'),
-  buildType = process.env.TYPE || 'common',
-  bucket = buildType === 'common' ? 'sitecues-js' : 'sitecues-' + buildType; // Special case, common -> sitecues-js
+const
+  buildType = process.env.TYPE || 'common';
 
 var gulp = require('gulp'),
   lint = require('./task/lint'), // Include compileJs task
   config = require('./task/build-config'),
   targetTaskFolder = './task/' + buildType,
   js = require(targetTaskFolder + '/js'),
+  path = require('path'),
+  mkdirp = require('mkdirp'),
   packaging = require(targetTaskFolder + '/packaging'),
   templates = require('./task/templates'),
   resources = require('./task/resources'),
@@ -18,23 +19,38 @@ var gulp = require('gulp'),
   del = require('del'); // If we want to do clean
 
 function prepare() {
-  var getBuildData = require('build-data');
-  return getBuildData()
-    .then((buildData) => {
-      const config = Object.assign({}, buildData, { bucket });
-      // Will use buildData to generate resource url
-      global.buildBranch = buildData.branch;
-      global.buildVersion = buildData.version;
-      return delivr.prepare(config);
-    })
-    .then((build) => {
-      global.build = build;
-    });
+  if (buildType === 'extension') {
+    global.buildDir = path.join('latest-extension-build');
+    mkdirp.sync(global.buildDir);
+    return Promise.resolve();
+  }
+  else {
+    var getBuildData = require('build-data');
+    return getBuildData()
+      .then((buildData) => {
+        const config = Object.assign({}, buildData, {bucket: 'sitecues-js'});
+        // Will use buildData to generate resource url
+        global.buildBranch = buildData.branch;
+        global.buildVersion = buildData.version;
+        return require('delivr').prepare(config);
+      })
+      .then((build) => {
+        global.build = build;
+        global.buildDir = build.path;
+      });
+  }
 }
 
 
 function finalize() {
-  return global.build.finalize();
+  if (global.build) {
+    // common
+    return global.build.finalize();
+  }
+  else {
+    // extension
+    return Promise.resolve();
+  }
 }
 
 function cleanAll() {
@@ -89,6 +105,7 @@ var build =
     resources.raster,
     resources.earcons,
     resources.cues,
+    resources.metadata,
     resources.versionMap,
     'js'
   );
@@ -113,6 +130,7 @@ gulp.task(function watch() {
   };
   global.buildVersion = 'latest';
   global.buildBranch = branchName;
+  global.buildDir = global.build.path;
 
   // JS
   var sourceFolders = Object.keys(js.compileFunctionMap);

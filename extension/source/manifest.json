@@ -24,7 +24,8 @@
     "css/*.css",
     "earcons/*.ogg",
     "images/*.png",
-    "images/*.svg"
+    "images/*.svg",
+    "cue/*.json"
   ],
 
   "content_scripts" : [

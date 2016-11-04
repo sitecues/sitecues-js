@@ -14,7 +14,7 @@ var gulp = require('gulp'),
 function css() {
   var source = gulp.src(config.cssGlob),
     processedSource = config.isMinifying ? source.pipe(minifyCss()) : source;
-  return processedSource.pipe(gulp.dest(global.build.path + '/css'));
+  return processedSource.pipe(gulp.dest(global.buildDir + '/css'));
 }
 
 // HTML -- minify (only plain .html files, not from html we create via templates)
@@ -22,7 +22,7 @@ function html() {
   var source = gulp.src(config.htmlGlob),
     processedSource = config.isMinifying ? source.pipe(cleanHtml()) : source;
   return processedSource
-    .pipe(gulp.dest(global.build.path + '/html'));
+    .pipe(gulp.dest(global.buildDir + '/html'));
 }
 
 // Images that are SVG -- minify them
@@ -30,19 +30,19 @@ function svg() {
   var source = gulp.src(config.svgGlob),
     processedSource = config.isMinifying ? source.pipe(cleanHtml()) : source;
   return processedSource
-    .pipe(gulp.dest(path.join(global.build.path, 'images')));
+    .pipe(gulp.dest(path.join(global.buildDir, 'images')));
 }
 
 // Images that are not SVG -- just copy them
 function raster() {
   return gulp.src(config.rasterGlob)
-    .pipe(gulp.dest(path.join(global.build.path, 'images')));
+    .pipe(gulp.dest(path.join(global.buildDir, 'images')));
 }
 
 // Earcons only get copied (in the future we may choose to auto-convert them to the different file types we need -- mp3 and ogg)
 function earcons() {
   return gulp.src(config.earconsGlob)
-    .pipe(gulp.dest(path.join(global.build.path, 'earcons')));
+    .pipe(gulp.dest(path.join(global.buildDir, 'earcons')));
 }
 
 function convertToAudioFile(lang, cueName, cueText, type) {
@@ -64,7 +64,7 @@ function convertToAudioFile(lang, cueName, cueText, type) {
   }
 
   const ttsUrl = getTTSUrl(cueText, lang, type),
-    outputFolder = path.join(global.build.path, 'cue', lang);
+    outputFolder = path.join(global.buildDir, 'cue', lang);
 
   return new Promise((resolve) => {
     // Wait longer and long with each request
@@ -114,17 +114,19 @@ function getFileDate(path) {
   return 0;
 }
 
-function cues() {
-  if (!config.audioCueDir) {
-    // No cues to compute
-    return Promise.resolve();
-  }
+function copyCueTextOnly() {
+  // Don't fetch audio cue media files, just copy cue text data for cues based on local speech
+  return gulp.src(config.cuesGlob)
+    .pipe(gulp.dest(global.buildDir));
 
+}
+
+function fetchAudioCueMediaFiles() {
   const copyPreviouslyComputedCues = () => {
     // First copy over previously computed cues
     return new Promise((resolve) => {
       gulp.src('latest-build/cue/**/*')
-        .pipe(gulp.dest(path.join(global.build.path, 'cue')))
+        .pipe(gulp.dest(path.join(global.buildDir, 'cue')))
         // Then recompute changed cues
         .on('end', resolve);
     });
@@ -132,14 +134,14 @@ function cues() {
 
   const fetchChangedCues = () => {
     // Fetch cues from server only if their cue JSON file has changed since the last cues were fetched
-    const allCuesDir = config.audioCueDir,
+    const allCuesDir = config.audioCueSourceDir,
       jsonCueFiles = fs.readdirSync(allCuesDir),
       cueDataSaved = [];
     for (let cueFile of jsonCueFiles) {
       const lang = cueFile.split('.')[0],
-        cueFilePath = path.join(config.audioCueDir, cueFile),
+        cueFilePath = path.join(config.audioCueSourceDir, cueFile),
         sourceDate = getFileDate(cueFilePath),
-        outputFolder = path.join(global.build.path, 'cue', lang),
+        outputFolder = path.join(global.buildDir, 'cue', lang),
         sampleDestOutputFilePath = path.join(outputFolder, 'verbalCueSpeechOn.ogg'),
         destDate = getFileDate(sampleDestOutputFilePath);  // Get date for one output cue
 
@@ -156,7 +158,7 @@ function cues() {
         console.log('Keeping cues for ' + lang);
       }
 
-      cueDataSaved.push(copyCueTextFile(cueFilePath, outputFolder));
+      cueDataSaved.push(copyCueTextFile(cueFilePath, path.join(global.buildDir, 'cue')));
     }
 
     return Promise.all(cueDataSaved);
@@ -164,6 +166,25 @@ function cues() {
 
   return copyPreviouslyComputedCues()
     .then(fetchChangedCues);
+}
+
+function cues() {
+  if (config.isFetchingAudioCues) {
+    return fetchAudioCueMediaFiles();
+  }
+  else {
+    return copyCueTextOnly();
+  }
+}
+
+function metadata() {
+  if (config.metaDataGlob) {
+    return gulp.src(config.metaDataGlob)
+      .pipe(gulp.dest(global.buildDir));
+  }
+  else {
+    return Promise.resolve();
+  }
 }
 
 function writeSimplifiedVersionMap(sourceVersionMap) {
@@ -204,7 +225,7 @@ function writeSimplifiedVersionMap(sourceVersionMap) {
         stringBuilder += '\n' + siteId + '|' + getFinalVersion(version) + '|' + friendlyName;
       }
     }
-    const outputFileName = path.join(global.build.path, 'version-map.bsv');
+    const outputFileName = path.join(global.buildDir, 'version-map.bsv');
     fs.writeFile(outputFileName, stringBuilder, (err) => {
       if (err) {
         throw err;
@@ -215,8 +236,13 @@ function writeSimplifiedVersionMap(sourceVersionMap) {
 }
 
 function versionMap() {
-  return yaml.read(path.join('..', 'version-map.yml'))
-    .then(writeSimplifiedVersionMap);
+  if (config.isBuildingVersionMap) {
+    return yaml.read(path.join('..', 'version-map.yml'))
+      .then(writeSimplifiedVersionMap);
+  }
+  else {
+    return Promise.resolve();
+  }
 }
 
 module.exports = {
@@ -226,5 +252,6 @@ module.exports = {
   raster,
   earcons,
   cues,
+  metadata,
   versionMap
 };

@@ -28,7 +28,7 @@ define(
     waveAnimationStepNum,
     localizedSpeechString,
     isInitialized,
-    isSpeechEnabled = pref.get('ttsOn'),
+    isSpeechEnabled,
     isListeningToEvents;
 
   function toggleSpeech() {
@@ -201,6 +201,8 @@ define(
     }
 
     isInitialized = true;
+
+    isSpeechEnabled = pref.get('ttsOn');
 
     localizedSpeechString = locale.translate('speech');
 
