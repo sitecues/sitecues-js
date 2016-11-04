@@ -155,7 +155,10 @@ define(
     }
 
     state.isInitialLoadZoom = true;
-    animation.beginGlide(targetZoom);
+    // TODO: This is only for CNIB, remove once we're done with Seth's presentation
+    nativeGlobal.setTimeout(function () {
+      animation.beginGlide(targetZoom);
+    }, 750);
   }
 
   /**
