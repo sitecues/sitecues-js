@@ -16,8 +16,8 @@ define(
     'run/metric/metric',
     'hlb/constants',
     'run/events',
-    'run/inline-style/inline-style'
-    'core/util/array-utility'
+    'run/inline-style/inline-style',
+    'run/util/array-utility'
   ],
   /*jshint -W072 */
   function (
