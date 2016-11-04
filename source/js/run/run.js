@@ -151,7 +151,7 @@ define(
           isStorageUnsupported: platform.isStorageUnsupported   // E.g. Safari private browsing
         };
 
-      new metric.SitecuesReady(initDetails).send();
+      new metric.PageVisit(initDetails).send();
     }
 
     function getCurrentTime() {
@@ -425,12 +425,12 @@ define(
         .then(function () {
           // Synchronous initialization
           abTest.init();
-          metric.init();
           inlineStyle.init();  // Inline style utility
           domEvents.init();    // Support for passive dom event listeners
         })
         .then(function () {
           return locale.init()  // TODO try to put this as part of earlier Promise.all
+            .then(metric.init)  // Must come after locale.init, so that clientLanguage is set
             .then(bp.init)
             .then(metric.initViewInfo)
             .then(initPageFeatureListeners);
