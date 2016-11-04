@@ -3,14 +3,14 @@ define(
   [
     'page/positioner/constants',
     'page/positioner/style-lock/style-listener/style-listener',
-    'core/util/array-utility',
-    'nativeFn'
+    'run/util/array-utility',
+    'mini-core/native-global'
   ],
   function (
     constants,
     styleListener,
     arrayUtil,
-    nativeFn
+    nativeGlobal
   ) {
   'use strict';
 
@@ -85,7 +85,7 @@ define(
     styleListener.init(function () {
       styleListener.registerToResolvedValueHandler(declaration, add);
       styleListener.registerFromResolvedValueHandler(declaration, remove);
-      nativeFn.setTimeout(function () {
+      nativeGlobal.setTimeout(function () {
         add.call(styleListener.getElementsWithResolvedValue(declaration));
       }, 0);
     });

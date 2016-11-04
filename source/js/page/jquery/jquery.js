@@ -65,11 +65,11 @@
   "use strict";
 
   function cacheSetTimeoutReference() {
-    return sitecues._nativeFn.setTimeout;
+    return sitecues._shared.nativeGlobal.setTimeout;
   }
 
   function cacheJSONReference() {
-    return sitecues._nativeFn.JSON;
+    return sitecues._shared.nativeGlobal.JSON;
   }
 
   var arr = [];

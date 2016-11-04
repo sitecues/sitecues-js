@@ -29,7 +29,7 @@ lint=on
 port=8000
 
 # Default clean option is only clean the target/foo folder being built
-clean=build_target
+clean=off
 
 # Default type (other type is extension)
 type=common

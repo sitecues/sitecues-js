@@ -7,9 +7,9 @@ define(
     'page/zoom/state',
     'page/zoom/util/restrict-zoom',
     'page/viewport/viewport',
-    'core/dom-events',
-    'core/events',
-    'core/inline-style/inline-style'
+    'run/dom-events',
+    'run/events',
+    'run/inline-style/inline-style'
   ],
   function (
     $,

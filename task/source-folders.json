@@ -1,9 +1,11 @@
 {
   "bundleFolders": [
-    "core",
+    "run",
     "bp-expanded",
     "bp-secondary",
     "bp-toolbar-badge",
+    "bp-toolbar-menu-button",
+    "bp-toolbar-menu",
     "bp-img-placeholder",
     "bp-adaptive",
     "page",
@@ -14,7 +16,6 @@
     "status",
     "info",
     "pick-debug",
-    "labs",
     "inverter"
   ],
   "dataFolders": [

@@ -10,16 +10,16 @@
  */
 define(
   [
-    'core/bp/model/state',
-    'core/bp/view/view',
-    'core/bp/constants',
-    'nativeFn'
+    'run/bp/model/state',
+    'run/bp/view/view',
+    'run/bp/constants',
+    'mini-core/native-global'
   ],
   function (
     state,
     bpView,
     BP_CONST,
-    nativeFn
+    nativeGlobal
   ) {
   'use strict';
 
@@ -73,7 +73,7 @@ define(
   // Input event has occurred that may trigger a theme change produced from the website code
   // (as opposed to sitecues-based themes). For example, harpo.com, cnib.ca, lloydsbank have their own themes.
   function onPossibleWebpageThemeChange() {
-    nativeFn.setTimeout(function () {
+    nativeGlobal.setTimeout(function () {
       checkBackgroundColorChange(bpView.update);
     }, 0);
   }

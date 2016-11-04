@@ -7,15 +7,15 @@ define(
   [
     '$',
     'page/util/common',
-    'core/conf/user/manager',
+    'run/conf/preferences',
     'hlb/constants',
-    'core/inline-style/inline-style',
-    'core/util/array-utility'
+    'run/inline-style/inline-style',
+    'run/util/array-utility'
   ],
   function (
     $,
     common,
-    conf,
+    pref,
     constants,
     inlineStyle,
     arrayUtil
@@ -461,7 +461,7 @@ define(
         childTopPadding         = parseFloat($child.css('paddingTop')),
         childBottomPadding      = parseFloat($child.css('paddingBottom')),
         paddingStyles           = {},
-        zoom                    = conf.get('zoom') || 1;
+        zoom                    = pref.get('zoom') || 1;
 
     if ((childBoundingClientRect.left < initialHLBRect.left && childLeftPadding > 0)) {
       paddingStyles.paddingLeft = childLeftPadding - (initialHLBRect.left - childBoundingClientRect.left) / zoom;

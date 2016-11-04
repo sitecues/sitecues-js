@@ -1,13 +1,13 @@
 define(
   [
-    'core/bp/constants',
-    'core/bp/helper',
-    'core/bp/model/state',
-    'core/metric/metric',
-    'core/bp/view/view',
-    'core/events',
-    'nativeFn',
-    'core/inline-style/inline-style'
+    'run/bp/constants',
+    'run/bp/helper',
+    'run/bp/model/state',
+    'run/metric/metric',
+    'run/bp/view/view',
+    'run/events',
+    'mini-core/native-global',
+    'run/inline-style/inline-style'
   ],
   function (
     BP_CONST,
@@ -16,7 +16,7 @@ define(
     metric,
     view,
     events,
-    nativeFn,
+    nativeGlobal,
     inlineStyle
   ) {
   'use strict';
@@ -137,7 +137,7 @@ define(
     // Prepend blank lines so that status is on next screen of mail message in order not to confuse the user.
     var NUM_NEWLINES = 99,
       STATUS_PREFIX = Array(NUM_NEWLINES).join('\n') + '---- User configuration: ----\n\n',
-      currentStatusText = nativeFn.JSON.stringify(currentStatus, null, '    ');
+      currentStatusText = nativeGlobal.JSON.stringify(currentStatus, null, '    ');
     return getFeedbackText() + STATUS_PREFIX + currentStatusText;
   }
 
@@ -179,7 +179,7 @@ define(
       var details = {
         feedbackText: getFeedbackTextToSend(),
         rating: currentRating,  // 0 = no rating, otherwise 1-5 stars
-        statusText: nativeFn.JSON.stringify(currentStatus)
+        statusText: nativeGlobal.JSON.stringify(currentStatus)
       };
 
       if (SC_DEV) {

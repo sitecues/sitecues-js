@@ -1,9 +1,9 @@
 define(
   [
     'page/zoom/util/body-geometry',
-    'core/events',
+    'run/events',
     'page/viewport/viewport',
-    'core/dom-events',
+    'run/dom-events',
     'page/zoom/zoom'
   ],
   function (
@@ -15,7 +15,7 @@ define(
   ) {
   var isOn = false,
     isHlbOn = false,
-    isPanelOpen = false,
+    isSitecuesUIOpen = false,
     isZooming = false,
     MIN_EDGE_PORTION = 0.1,
     MAX_EDGE_PORTION = 0.25,
@@ -131,7 +131,7 @@ define(
 
     // Turn on if zoom is > 1 and content overflows window more than a tiny amount
     var zoom = getZoom(),
-      doTurnOn = zoom > 1 && bodyGeo.getBodyRight() / viewport.getInnerWidth() > 1.02 && !isHlbOn && !isPanelOpen && !isZooming;
+      doTurnOn = zoom > 1 && bodyGeo.getBodyRight() / viewport.getInnerWidth() > 1.02 && !isHlbOn && !isSitecuesUIOpen && !isZooming;
 
     if (doTurnOn !== isOn) {
       if (doTurnOn) {
@@ -160,13 +160,18 @@ define(
 
     // Dont pan while the bp is expanded.
     events.on('bp/will-expand', function () {
-      isPanelOpen = true;
+      isSitecuesUIOpen = true;
       refresh();
     });
 
     // Allow panning while the bp is shrunk.
     events.on('bp/did-shrink', function () {
-      isPanelOpen = false;
+      isSitecuesUIOpen = false;
+      refresh();
+    });
+
+    events.on('bp/did-toggle-menu', function(isOpen) {
+      isSitecuesUIOpen = isOpen;
       refresh();
     });
 

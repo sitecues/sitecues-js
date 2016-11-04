@@ -3,9 +3,9 @@ define(
     'exports',
     'page/positioner/constants',
     'page/positioner/transplant/clone',
-    'core/inline-style/inline-style',
+    'run/inline-style/inline-style',
     'page/positioner/util/element-info',
-    'core/util/array-utility'
+    'run/util/array-utility'
   ],
   function (
     exports,

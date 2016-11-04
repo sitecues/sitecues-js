@@ -8,16 +8,16 @@ define(
     'hlb/event-handlers',
     'hlb/positioning',
     'hlb/styling',
-    'core/conf/user/manager',
-    'core/platform',
+    'run/conf/preferences',
+    'run/platform',
     'page/util/element-classifier',
     'hlb/animation',
     'page/util/geo',
-    'core/metric/metric',
+    'run/metric/metric',
     'hlb/constants',
-    'core/events',
-    'core/inline-style/inline-style',
-    'core/util/array-utility'
+    'run/events',
+    'run/inline-style/inline-style',
+    'run/util/array-utility'
   ],
   /*jshint -W072 */
   function (
@@ -25,7 +25,7 @@ define(
     eventHandlers,
     hlbPositioning,
     hlbStyling,
-    conf,
+    pref,
     platform,
     elemClassifier,
     hlbAnimation,
@@ -37,7 +37,7 @@ define(
     arrayUtil
   ) {
   /*jshint +W072 */
-    'use strict';
+  'use strict';
 
   /////////////////////////
   // PRIVATE VARIABLES
@@ -410,7 +410,7 @@ define(
       }
 
       $hlbWrapper.appendTo('body');
-      inheritedZoom = conf.get('zoom') || 1;  // Zoom inherited from page
+      inheritedZoom = pref.get('zoom') || 1;  // Zoom inherited from page
 
     } else {
       $hlbWrapper.insertAfter('body');

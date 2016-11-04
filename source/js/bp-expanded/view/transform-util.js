@@ -7,19 +7,14 @@
 
 define(
   [
-    'core/inline-style/inline-style',
-    'core/platform'
+    'run/inline-style/inline-style',
+    'run/platform'
   ],
   function (
     inlineStyle,
     platform
   ) {
   'use strict';
-
-  var SHOULD_USE_CSS_TRANSFORM_IN_SVG =
-    !platform.browser.isMS &&       // MS does not support CSS in SVG
-    !platform.browser.isSafari &&   // Safari CSS animations are actually slower
-    !platform.browser.isFirefox;    // FF breaks getBoundingClientRect() when CSS transform is used
 
   // Skips past non-numeric characters and get the next number as type 'number'
   // It will include a negative sign and decimal point if it exists in the string
@@ -28,7 +23,14 @@ define(
   }
 
   function shouldUseCss(elem) {
-    return SHOULD_USE_CSS_TRANSFORM_IN_SVG || !(elem instanceof SVGElement);
+    return shouldUseCssTransformInSvg() || !(elem instanceof SVGElement);
+  }
+
+  function shouldUseCssTransformInSvg() {
+    // MS does not support CSS in SVG
+    // Safari CSS animations are actually slower
+    // FF breaks getBoundingClientRect() when CSS transform is used
+    return platform.browser.isChrome;
   }
 
   // Set @transform or CSS transform as appropriate

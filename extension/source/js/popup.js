@@ -1,56 +1,53 @@
-(function () {
+'use strict';
 
-  'use strict';
-
-  function refreshDisabledState() {
-    chrome.tabs.sendMessage(
-      window.currentTabId,
-      {
-        action :'isDisabled'
-      },
-      function (response) {
-        var r = response || {};
-        document.getElementById('onoff').innerText = r.isDisabled ? 'Enable for site' : 'Disable for site';
+function getPaused() {
+  return new Promise(function(resolve, reject) {
+    // Passing in null gets the entire contents of storage
+    var KEY = 'isDisabledGlobally';
+    chrome.storage.local.get(KEY, function (storage) {
+      if (chrome.runtime.lastError) {
+        reject(chrome.runtime.lastError);
       }
-    );
+      else {
+        resolve(storage[KEY] || false);
+      }
+    });
+  });
+}
+
+function refreshPauseButtonLabel(isPaused) {
+  var labelSuffix = ' across all sites';
+  document.getElementById('onoff').innerText =
+    (isPaused ? 'Unpause' : 'Pause') + labelSuffix;
+}
+
+function togglePaused() {
+  return getPaused()
+    .then(function(wasPaused) {
+      var isPaused = !wasPaused;
+      // Refresh button label
+      refreshPauseButtonLabel(isPaused);
+      // Close popup
+      window.close();
+      // Refresh tabs with new state
+      var message = {action: 'setPaused', isPaused: isPaused };
+      chrome.tabs.query({}, function (tabs) {
+        var index = tabs.length;
+        while (index --) {
+          chrome.tabs.sendMessage(tabs[index].id, message);
+        }
+      });
+    });
+}
+
+document.addEventListener(
+  'DOMContentLoaded', function () {
+    // Button click handler
+    document.getElementById('onoff')
+      .addEventListener('click', togglePaused);
+    // Button label update
+    getPaused()
+      .then(refreshPauseButtonLabel);
   }
+);
 
-  function toggleEnabled() {
-    chrome.tabs.sendMessage(
-      window.currentTabId,
-      {
-        action : 'toggleDisabled'
-      }
-    );
-  }
-
-  chrome.runtime.onMessage.addListener(
-    function (request) {
-      if (request.action === 'refreshDisabledState') {
-        refreshDisabledState();
-      }
-    }
-  );
-
-  chrome.tabs.query(
-    {
-      currentWindow : true,  // currently focused window
-      active        : true   // selected tab
-    },
-    function (foundTabs) {
-      if (foundTabs.length > 0) {
-        var link = document.createElement('a');
-        link.href = foundTabs[0].url;
-        window.currentHostName = link.hostname;
-        window.currentTabId = foundTabs[0].id;
-        refreshDisabledState();
-      }
-    }
-  );
-
-  document.addEventListener(
-    'DOMContentLoaded', function () {
-      document.getElementById('onoff').addEventListener('click', toggleEnabled);
-    }
-  );
-}());

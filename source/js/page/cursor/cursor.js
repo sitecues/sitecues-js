@@ -10,20 +10,20 @@ define(
   [
     '$',
     'page/style-service/style-service',
-    'core/conf/user/manager',
+    'run/conf/preferences',
     'page/cursor/cursor-css',
-    'core/platform',
-    'core/events',
-    'nativeFn'
+    'run/platform',
+    'run/events',
+    'mini-core/native-global'
   ],
   function (
     $,
     styleService,
-    conf,
+    pref,
     cursorCss,
     platform,
     events,
-    nativeFn
+    nativeGlobal
   ) {
   'use strict';
 
@@ -99,7 +99,7 @@ define(
       pendingRules: [ rule ]
     };
 
-    require(['core/util/xhr'], function (xhr) {
+    require(['run/util/xhr'], function (xhr) {
       xhr.get({
         url: url,
         crossDomain: true,
@@ -258,7 +258,7 @@ define(
     // Refresh document cursor stylesheet if we're using one
     if (cursorStylesheetObject) {
       refreshCursorStyles(cursorStylesheetObject, cursorTypeUrls);
-      nativeFn.setTimeout(toggleZoomOptimization, REENABLE_CURSOR_MS);
+      nativeGlobal.setTimeout(toggleZoomOptimization, REENABLE_CURSOR_MS);
     }
 
     // Refresh BP cursor stylesheet
@@ -338,7 +338,7 @@ define(
 
   // Get the auto size for the cursor at the supplied page zoom level, or at the current page zoom if none supplied
   function getSize(pageZoom) {
-    return userSpecifiedSize || cursorCss.getCursorZoom(pageZoom || conf.get('zoom') || 1);
+    return userSpecifiedSize || cursorCss.getCursorZoom(pageZoom || pref.get('zoom') || 1);
   }
 
   function onPageZoom(pageZoom) {
@@ -361,10 +361,10 @@ define(
     }
     isInitialized = true;
 
-    conf.def('mouseSize', sanitizeMouseSize);
-    conf.def('mouseHue', sanitizeMouseHue);
-    conf.get('mouseSize', onMouseSizeSetting);
-    conf.get('mouseHue', onMouseHueSetting);
+    pref.defineHandler('mouseSize', sanitizeMouseSize);
+    pref.defineHandler('mouseHue', sanitizeMouseHue);
+    pref.bindListener('mouseSize', onMouseSizeSetting);
+    pref.bindListener('mouseHue', onMouseHueSetting);
 
     events.on('zoom', onPageZoom);
 

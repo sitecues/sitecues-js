@@ -9,8 +9,8 @@ define(
     'page/util/element-classifier',
     'page/zoom/zoom',
     'page/highlight/traitcache',
-    'nativeFn',
-    'core/inline-style/inline-style'
+    'mini-core/native-global',
+    'run/inline-style/inline-style'
   ],
   function (
     $,
@@ -18,7 +18,7 @@ define(
     elemClassifier,
     zoomMod,
     traitcache,
-    nativeFn,
+    nativeGlobal,
     inlineStyle
   ) {
   'use strict';
@@ -459,7 +459,7 @@ define(
       // Get what the rect would have been
       comboRect = comboElem.getBoundingClientRect();
       // Restore CSS
-      nativeFn.setTimeout(function () {
+      nativeGlobal.setTimeout(function () {
         // Do this on a timeout otherwise it may animate our return changes
         inlineStyle.restore(comboElem, 'transition-property');
       }, 0);

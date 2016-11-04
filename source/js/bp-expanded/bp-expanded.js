@@ -6,9 +6,9 @@ define([
     'bp-expanded/view/tts-button',
     'bp-expanded/view/more-button',
     'bp-expanded/view/transform-util',
-    'core/bp/helper',
-    'core/bp/constants',
-    'core/bp/model/state'
+    'run/bp/helper',
+    'run/bp/constants',
+    'run/bp/model/state'
   ],
   function (sliderController,
             shrinkController,

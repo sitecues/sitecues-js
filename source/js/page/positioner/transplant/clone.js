@@ -16,7 +16,7 @@ define(
     'page/positioner/style-lock/style-lock',
     'page/positioner/constants',
     'page/viewport/viewport',
-    'core/inline-style/inline-style'
+    'run/inline-style/inline-style'
   ],
   function (
     exports,

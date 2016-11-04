@@ -1,6 +1,6 @@
 define(
   [
-    'core/conf/urls',
+    'run/conf/urls',
     'inverter/orig-bg-info',
     'inverter/img-classifier'
   ],

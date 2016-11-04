@@ -2,7 +2,8 @@
 
 'use strict';
 
-var extend = require('extend');
+var extend = require('extend'),
+  path = require('path');
 
 function getConfig(baseConfig) {
   function getGlob(suffix) {
@@ -13,8 +14,11 @@ function getConfig(baseConfig) {
     // Production versions have resources in a folder named by the version
     resourceFolderName: baseConfig.isDebugOn ? '.' : baseConfig.version,
     isLocal: process.env.LOCAL === 'on',  // Common library -- default is non-local
+    isBuildingVersionMap: true,
     autoSpeechStrategy: process.env.AUTO_SPEECH || 'preferNetwork',
     allowBrowserNetworkSpeech: process.env.BROWSER_NETWORK_SPEECH === 'on', // Allow window.speechSynthesis via network -- off by default
+    isFetchingAudioCues: process.env.FETCH_CUES !== 'off',
+    audioCueSourceDir: path.join(baseConfig.librarySourceDir, 'js', 'locale-data', 'cue'),
     jsGlob: getGlob('js/**/*.js'),
     rasterGlob: [ getGlob('images/**/*.png'), getGlob('images/**/*.cur') ],
     svgGlob: getGlob('images/**/*.svg'),
