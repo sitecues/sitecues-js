@@ -156,7 +156,7 @@ define(
 
     state.isInitialLoadZoom = true;
     // TODO: This is only for CNIB, remove once we're done with Seth's presentation
-    nativeFn.setTimeout(function () {
+    nativeGlobal.setTimeout(function () {
       animation.beginGlide(targetZoom);
     }, 750);
   }
