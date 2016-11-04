@@ -11,7 +11,7 @@ define(
     'run/conf/id',
     'run/conf/site',
     'run/conf/urls',
-    'run/exports',
+    'run/sitecues-exports',
     'run/locale',
     'run/metric/metric',
     'run/platform',
@@ -30,7 +30,7 @@ define(
     id,
     site,
     urls,
-    exports,
+    scExports,
     locale,
     metric,
     platform,
@@ -419,7 +419,7 @@ define(
       site.init();         // Site configuration module
       urls.init();         // API and services URLs
       platform.init();     // Info about current platform, init now in case we need for error metric
-      exports.init(isOn);  // Sitecues exports
+      scExports.init(isOn);  // Sitecues exports
 
       id.init()
         .then(function () {
