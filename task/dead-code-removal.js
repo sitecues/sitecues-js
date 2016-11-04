@@ -41,7 +41,7 @@ function removeDeadCode(jsFileName) {
 
 function removeAllDeadCode() {
   return new Promise((resolve) => {
-    glob(global.build.path + '/js/**/*.js', (err, jsFileNames) => {
+    glob(global.buildDir + '/js/**/*.js', (err, jsFileNames) => {
       if (err) {
         throw err;
       }

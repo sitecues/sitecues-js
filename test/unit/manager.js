@@ -127,25 +127,43 @@ define(
 
             test('.has() returns false when value is undefined', function () {
 
-              assert.isFalse(
-                manager.has('shoes'),
-                'has() should return false when the value is not set'
-              );
+                assert.isFalse(
+                    manager.has('shoes'),
+                    'has() should return false when the value is not set'
+                );
             });
 
-          test('.has() returns true when value is defined', function () {
+            test('.has() returns true when value is defined', function () {
 
-            manager.set('shoes', 2);
+                manager.set('shoes', 2);
 
-            var has = manager.has('shoes');
+                var has = manager.has('shoes');
 
-            assert.isTrue(
-              has,
-              'has() should return true when the value is defined'
-            );
-          });
+                assert.isTrue(
+                    has,
+                    'has() should return true when the value is defined'
+                );
+            });
 
-          test('.get() callback is called the first time value is set', function () {
+            test('.isSitecuesUser() returns false when zoom is not defined', function () {
+
+                assert.isFalse(
+                    manager.isSitecuesUser(),
+                    'isSitecuesUser() should return false when zoom is not defined'
+                );
+            });
+
+            test('.isSitecuesUser() returns true when zoom is defined', function () {
+
+                manager.set('zoom', 2);
+
+                assert.isTrue(
+                    manager.isSitecuesUser(),
+                    'isSitecuesUser() should return true when zoom is defined'
+                );
+            });
+
+            test('.get() callback is called the first time value is set', function () {
 
                 var VALUE = 2,
                     numCalls = 0;

@@ -288,6 +288,8 @@ define(
       KeyCommand: wrap(name.KEY_COMMAND),
       LensOpen: wrap(name.LENS_OPEN),
       MouseShake: wrap(name.MOUSE_SHAKE),
+      OptionMenuOpen: wrap(name.OPTION_MENU_OPEN),
+      OptionMenuItemSelection: wrap(name.OPTION_MENUITEM_SELECTION),
       PageClickFirst: wrap(name.PAGE_CLICK_FIRST),
       PageScrollFirst: wrap(name.PAGE_SCROLL_FIRST),
       PageUnload: wrap(name.PAGE_UNLOAD),

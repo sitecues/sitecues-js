@@ -8,7 +8,7 @@ define(
     'run/locale',
     'page/util/color',
     'run/events',
-    'run/util/ids',
+    'run/conf/id',
     'mini-core/native-global',
     'run/inline-style/inline-style'
   ],

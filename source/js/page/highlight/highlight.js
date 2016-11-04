@@ -127,7 +127,7 @@ define(
   isAppropriateFocus,
   isWindowFocused = document.hasFocus(),
   isSticky,
-  isBPOpen,
+  isSitecuesUIOpen,
   isSpeechEnabled = false,
   isLensEnabled,
   isColorDebuggingOn,
@@ -1486,7 +1486,7 @@ define(
     var wasAppropriateFocus = isAppropriateFocus;
     // don't show highlight if current active isn't body
     var target = document.activeElement;
-    isAppropriateFocus = isBPOpen || (!target || !elementClassifier.isSpacebarConsumer(target)) && isWindowActive();
+    isAppropriateFocus = isSitecuesUIOpen || (!target || !elementClassifier.isSpacebarConsumer(target)) && isWindowActive();
     if (!isSticky) {
       if (wasAppropriateFocus && !isAppropriateFocus) {
         hide();
@@ -1498,12 +1498,17 @@ define(
   }
 
   function willExpand() {
-    isBPOpen = true;
+    isSitecuesUIOpen = true;
     testFocus();
   }
 
   function didShrink() {
-    isBPOpen = false;
+    isSitecuesUIOpen = false;
+    testFocus();
+  }
+
+  function didToggleBpMenu(isOpen) {
+    isSitecuesUIOpen = isOpen;
     testFocus();
   }
 
@@ -1728,6 +1733,7 @@ define(
     // Mouse highlighting not available while BP is open
     events.on('bp/will-expand', willExpand);
     events.on('bp/did-shrink', didShrink);
+    events.on('bp/did-toggle-menu', didToggleBpMenu);
 
     events.on('speech/did-change', function(isOn) {
       isSpeechEnabled = isOn;

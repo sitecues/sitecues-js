@@ -185,6 +185,12 @@ define(['run/bp/helper', 'run/platform', 'run/conf/site'],
         'margin': '0 !important'  // Prevent page style pollution
       },
 
+      /* Subtle, but helps the badge appear vertically centered */
+      '.scp-toolbar > #scp-bp-container > #scp-svg': {
+        'position': 'absolute',
+        'top': '-1px'
+      },
+
       // Move the body down by the height of the toolbar
       'html[data-sitecues-toolbar]': {
         'padding-top': '38px !important'

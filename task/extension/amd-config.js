@@ -7,6 +7,7 @@ var config = require('../build-config.js'),
   glob = require('glob'),
   dataFolders = sourceFoldersConfig.dataFolders,
   dataModules = getDataModules(),
+  OVERRIDES_DIR = '../../extension/source/js/overrides/',
   amdConfig = {
     include: getIncludes(dataModules),
     wrap: {
@@ -25,12 +26,16 @@ var config = require('../build-config.js'),
       // In runtime config, via definePrim : 'Promise' to allow use of alameda's built-in Prim library
       'Promise': 'empty:',
       // DIFFERENT in the extension
-      'run/conf/user/storage': '../../extension/source/js/overrides/storage',
-      'run/conf/user/storage-backup': '../../extension/source/js/overrides/storage-backup',
-      'nativeFn': '../../extension/source/js/overrides/native-functions',
+      'mini-core/user': OVERRIDES_DIR + 'user',
+      'mini-core/native-global': OVERRIDES_DIR + 'native-global',
+      'mini-core/page-view': OVERRIDES_DIR + 'page-view',
+      'mini-core/session': OVERRIDES_DIR + 'session',
       'run/data-map': config.tmpDir + '/data-map',
-      // UNUSED in the extension
-      'run/errors': 'empty:',
+      // UNUSED in the extension (stubbed methods)
+      'run/ab-test/ab-test': OVERRIDES_DIR + 'ab-test',
+      'run/metric/metric': OVERRIDES_DIR + 'metric',
+      'run/errors': OVERRIDES_DIR + 'errors',
+      // UNUSED and EMPTY in the extension
       'run/bp/badge/page-badge': 'empty:',
       'run/bp/badge/palette': 'empty:',
       'bp-img-placeholder/bp-img-placeholder/': 'empty:',
