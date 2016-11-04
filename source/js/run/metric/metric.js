@@ -248,6 +248,7 @@ define(
       var source = getSource();
 
       sessionData = {
+        appName: 'desktop',
         scVersion: sitecues.getVersion(),
         metricVersion: METRICS_VERSION,
         sessionId: id.session,
@@ -258,7 +259,7 @@ define(
         pageUrl: getPageUrl(source),
         browserUserAgent: navigator.userAgent,
         isClassicMode: classicMode(),
-        clientLanguage: locale.getBrowserLang(),
+        clientLanguage: locale.getBrowserLocale(),
         source: source,
         isTester: isTester()
       };
@@ -296,7 +297,7 @@ define(
       PanelClick: wrap(name.PANEL_CLICK),
       PanelClose: wrap(name.PANEL_CLOSE),
       PanelFocusMove: wrap(name.PANEL_FOCUS_MOVE),
-      SitecuesReady: wrap(name.SITECUES_READY),
+      PageVisit: wrap(name.PAGE_VISIT),
       SliderSettingChange: wrap(name.SLIDER_SETTING_CHANGE),
       TtsRequest: wrap(name.TTS_REQUEST),
       ZoomChange: wrap(name.ZOOM_CHANGE)
