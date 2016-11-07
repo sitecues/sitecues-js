@@ -22,7 +22,8 @@ define(
     'run/inline-style/inline-style',
     'page/util/transition-util',
     'page/positioner/style-lock/style-lock',
-    'page/positioner/transplant/mutation-relay'
+    'page/positioner/transplant/mutation-relay',
+    'run/util/object-utility'
   ],
   /*jshint -W072 */ //Currently there are too many dependencies, so we need to tell JSHint to ignore it for now
   function (
@@ -39,7 +40,8 @@ define(
     inlineStyle,
     transitionUtil,
     styleLock,
-    mutationRelay
+    mutationRelay,
+    objectUtil
   ) {
   /*jshint +W072 */
   'use strict';
@@ -315,11 +317,14 @@ define(
   }
 
   function observeOriginalElements() {
+    var opts = objectUtil.assign({}, observerOptions);
     anchors.forEach(function (element) {
-      domObserver.observe(element, observerOptions);
+      domObserver.observe(element, opts);
     });
 
-    domObserver.observe(originalBody, observerOptions);
+    domObserver.observe(originalBody, opts);
+    delete opts.subtree;
+    domObserver.observe(docElem, opts);
   }
 
   function listenForDynamicStyling(property) {

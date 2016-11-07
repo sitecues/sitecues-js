@@ -40,7 +40,8 @@ define(
 
   function getCssProxyUrl(targetUrl) {
     //return 'http://proxy.dev.sitecues.com:7000/page/' + targetUrl;
-    return 'http://localhost:9999/page/' + targetUrl;
+    console.log('getCssProxyUrl:', targetUrl);
+    return 'https://localhost:3002/' + targetUrl;
   }
 
   // URL string for sitecues.js
