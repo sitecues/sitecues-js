@@ -8,7 +8,7 @@ define(
     'run/bp/helper',
     'run/platform',
     'run/events',
-    'mini-core/native-global',
+    'core/native-global',
     'run/inline-style/inline-style'
   ],
   function (

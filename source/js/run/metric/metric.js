@@ -14,7 +14,7 @@ define(
     'run/platform',
     'run/has',
     'run/ab-test/ab-test',
-    'mini-core/native-global'
+    'core/native-global'
   ],
   function (
     pref,

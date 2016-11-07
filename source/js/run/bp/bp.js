@@ -25,7 +25,7 @@ define(
     'run/bp/model/classic-mode',
     'run/bp/view/badge/page-badge',
     'Promise',
-    'mini-core/native-global',
+    'core/native-global',
     'run/inline-style/inline-style'
   ],
   function (

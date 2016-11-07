@@ -34,7 +34,7 @@ define(
     'page/highlight/traitcache',
     'page/highlight/traits',
     'page/highlight/judge',
-    'mini-core/native-global',
+    'core/native-global',
     'run/inline-style/inline-style',
     'run/platform'
   ],

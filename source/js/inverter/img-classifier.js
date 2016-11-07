@@ -16,7 +16,7 @@ define(
     'run/conf/urls',
     'inverter/invert-url',
     'inverter/orig-bg-info',
-    'mini-core/native-global'
+    'core/native-global'
   ],
   function (
     $,

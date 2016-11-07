@@ -5,7 +5,7 @@ define(
     'run/inline-style/inline-style',
     'run/util/array-utility',
     'run/platform',
-    'mini-core/native-global'
+    'core/native-global'
   ],
   function (
     events,

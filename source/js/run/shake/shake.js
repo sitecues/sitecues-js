@@ -11,7 +11,7 @@ define([
   'run/dom-events',
   'run/shake/constants',
   'run/platform',
-  'mini-core/native-global'
+  'core/native-global'
 ], function(metric,
             // events,
             domEvents,

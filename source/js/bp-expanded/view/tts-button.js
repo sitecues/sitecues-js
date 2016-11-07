@@ -7,7 +7,7 @@ define(
     'run/conf/preferences',
     'run/events',
     'run/platform',
-    'mini-core/native-global',
+    'core/native-global',
     'run/inline-style/inline-style'
   ],
   function (

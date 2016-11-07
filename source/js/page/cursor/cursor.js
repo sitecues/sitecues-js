@@ -14,7 +14,7 @@ define(
     'page/cursor/cursor-css',
     'run/platform',
     'run/events',
-    'mini-core/native-global'
+    'core/native-global'
   ],
   function (
     $,

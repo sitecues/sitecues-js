@@ -6,7 +6,7 @@ define(
     'run/metric/metric',
     'run/bp/view/view',
     'run/events',
-    'mini-core/native-global',
+    'core/native-global',
     'run/inline-style/inline-style'
   ],
   function (
