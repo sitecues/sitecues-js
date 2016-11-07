@@ -5,6 +5,13 @@ html[data-sitecues-everywhere="on"] {
   padding-top: 41px;
 }
 
+/* Prevent bleeding of page's CSS rules into our HTML elements -- these are the only ones we use */
+/* All of our other elements inside of the BP are custom elements prefixed with <sc-..> and aren't influenced by page CSS */
+/* TODO if IE11 dies we should use this for all of Sitecues */
+.scp-input, .scp-link, .scp-textarea, .scp-svg, .scp-input {
+  all: unset
+}
+
 /* Make sure we don't print the toolbar or zoom effects on the page */ 
 @media print {
   .scp-toolbar {
