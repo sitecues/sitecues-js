@@ -10,7 +10,13 @@ All notable changes to this project will be documented here.
 
 ## Unreleased
 ### Fixed
- -
+ - Buttons and forms in the lens can now be interacted with
+ - Live update of text fields in the lens allow `enter` to work correctly when intended
+
+## [4.2.18] - 2016-11-1
+### Fixed
+ - Hidden fixed elements now maintain their intended visibility when transplanted
+ - Input elements are more reliably recognized by the lens
 
 ## [4.2.17] - 2016-10-19
 ### Fixed
@@ -35,7 +41,7 @@ All notable changes to this project will be documented here.
 ### Fixed
  - Improved support for Google Translate.
  - Improved support for dropdown menus in Firefox.
- - Improved support for sites that use transtions.
+ - Improved support for sites that use transitions.
 
 ## [4.2.7] - 2016-09-13
 ### Fixed

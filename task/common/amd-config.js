@@ -3,21 +3,25 @@
 'use strict';
 
 var config = require('../build-config'),
-  amdclean = require('amdclean'),
   sourceConfig = require('../source-folders.json'),
   bundleFolders = sourceConfig.bundleFolders,
   dataFolders = sourceConfig.dataFolders,
   sourceFolders = bundleFolders.concat(dataFolders),
+  path = require('path'),
   extend = require('extend'),
   fs = require('fs'),
   JS_SOURCE_DIR = config.librarySourceDir + '/js',
   PATHS = {
-    'nativeFn' : 'empty:',
-    'iframeFactory': 'empty:',
+    'mini-core/native-global' : 'empty:',
+    'mini-core/user' : 'empty:',
+    'mini-core/page-view' : 'empty:',
+    'mini-core/session' : 'empty:',
     '$': 'empty:',
     'Promise': 'empty:'   // In runtime config, via definePrim : 'Promise' to allow use of alameda's built-in Prim library
-  },
-  AMD_BASE_CONFIG = {
+  };
+
+function getAmdBaseConfig() {
+  return {
     wrap: {
       start: '"use strict";\n'
     },
@@ -28,60 +32,48 @@ var config = require('../build-config'),
     optimize: 'uglify2',
     namespace: 'sitecues',
     useStrict: true
-  },
-  AMD_SPECIAL_CONFIGS = {
+  };
+}
+
+function getAmdSpecialConfigs() {
+  return {
     // Core module special treatment
-    core: {
-      // Rename core.js to sitecues.js
-      out: config.buildDir + '/js/sitecues.js',
+    run: {
       // sitecues.js gets version number
       wrap: {
         start: buildCorePreamble()
       },
       // Include alameda in core
       include: [
-        'core/alameda-custom',
-        'core/errors',
-        'core/prereq/iframe-factory',
-        'core/prereq/native-functions'
+        'run/prereq/alameda-custom',
+        'run/prereq/shared-modules',
+        'run/errors'
       ],
       // Make sure core initializes itself
-      insertRequire: [ 'core/errors', 'core/core' ]
+      insertRequire: ['run/errors', 'run/run']
     },
     page: {
-      include: [ 'page/jquery/jquery' ]
+      include: ['page/jquery/jquery']
     }
   };
+}
 
 function buildCorePreamble() {
-  const prefix = 'if (sitecues && sitecues.exists) throw new Error("The sitecues library already exists on this page.");\n' +
-    'Object.defineProperty(sitecues, "version", { value: "' + config.version + '", writable: false });\n' +
+  const prefix = 'Object.defineProperty(sitecues, "version", ' +
+    '{ value: "' + global.buildBranch + '/' + global.buildVersion + '", writable: false });\n' +
     '"use strict";';
 
   function getPrereqPath(fileName) {
-    return JS_SOURCE_DIR + '/core/prereq/' + fileName;
+    return path.join(JS_SOURCE_DIR, 'run', 'prereq', fileName);
   }
 
   function getPrereqContent(fileName) {
     return fs.readFileSync(getPrereqPath(fileName));
   }
 
-  function getUnwrappedPrereq(fileName) {
-    return amdclean.clean({
-      filePath : getPrereqPath(fileName),
-      wrap : {
-        start : '',
-        end : ''
-      }
-    });
-  }
-
   return [
     prefix,
     getPrereqContent('custom-event-polyfill.js'),
-    getUnwrappedPrereq('iframe-factory.js'),
-    getUnwrappedPrereq('native-functions.js'),
-    getPrereqContent('global-assignments.js'),
     getPrereqContent('alameda-config.js')
   ].join('\n');
 }
@@ -101,7 +93,7 @@ function getDataFolderConfig(amdConfig, sourceFolder) {
   // Where to find locale-data
   amdConfig.baseUrl = JS_SOURCE_DIR + '/' + sourceFolder;
   // Where to put locale-data
-  amdConfig.dir = config.resourceDir + '/js/' + sourceFolder;
+  amdConfig.dir = path.join(global.buildDir, 'js', sourceFolder);
 
   return amdConfig;
 }
@@ -110,7 +102,7 @@ function getDataFolderConfig(amdConfig, sourceFolder) {
 function getBundleConfig(amdConfig, bundleName) {
   amdConfig.name = bundleName;
   amdConfig.create = true;
-  amdConfig.out = amdConfig.out || (config.resourceDir + '/js/' + bundleName + '.js');
+  amdConfig.out = amdConfig.out || path.join(global.buildDir, 'js', bundleName + '.js');
   amdConfig.baseUrl = JS_SOURCE_DIR + '/';
   amdConfig.fileExclusionRegExp = new RegExp('^' + bundleName + '$');
   includeMainModule(amdConfig, bundleName);
@@ -131,7 +123,7 @@ function getBundleConfig(amdConfig, bundleName) {
 // Configuration for a source folder, whether a bundle or data
 function getAmdConfig(sourceFolderName, uglifyOptions) {
 
-  var amdConfig = extend(true, { uglify2: uglifyOptions }, AMD_BASE_CONFIG, AMD_SPECIAL_CONFIGS[sourceFolderName]);
+  var amdConfig = extend(true, { uglify2: uglifyOptions }, getAmdBaseConfig(), getAmdSpecialConfigs()[sourceFolderName]);
 
   if (isDataFolder(sourceFolderName)) {
     return getDataFolderConfig(amdConfig, sourceFolderName);

@@ -5,7 +5,7 @@ define(
         'utility/Poll',
         'utility/Events',
         'utility/math',
-        'core/constants'
+        'run/constants'
     ],
     function (Base, BrowserUtil, Poll, EventUtil, math, constant) {
 

@@ -5,7 +5,7 @@
 define(
   [
     '$',
-    'core/conf/user/manager',
+    'run/conf/preferences',
     'page/highlight/pick',
     'page/highlight/traitcache',
     'page/highlight/highlight-position',
@@ -13,18 +13,18 @@ define(
     'page/util/color',
     'page/util/geo',
     'page/util/element-classifier',
-    'core/platform',
+    'run/platform',
     'page/highlight/constants',
-    'core/events',
-    'core/dom-events',
+    'run/events',
+    'run/dom-events',
     'page/zoom/zoom',
     'page/zoom/util/body-geometry',
-    'nativeFn',
-    'core/inline-style/inline-style'
+    'mini-core/native-global',
+    'run/inline-style/inline-style'
   ],
   function (
     $,
-    conf,
+    pref,
     picker,
     traitcache,
     mhpos,
@@ -38,7 +38,7 @@ define(
     domEvents,
     zoomMod,
     bodyGeo,
-    nativeFn,
+    nativeGlobal,
     inlineStyle
   ) {
 /*jshint +W072 */
@@ -127,7 +127,7 @@ define(
   isAppropriateFocus,
   isWindowFocused = document.hasFocus(),
   isSticky,
-  isBPOpen,
+  isSitecuesUIOpen,
   isSpeechEnabled = false,
   isLensEnabled,
   isColorDebuggingOn,
@@ -1360,7 +1360,7 @@ define(
       hide();
     }
 
-    pickFromMouseTimer = nativeFn.setTimeout(function () {
+    pickFromMouseTimer = nativeGlobal.setTimeout(function () {
       // In case doesn't move after fast velocity, check in a moment and update highlight if no movement
       pickFromMouseTimer = 0;
       pickFromMouse(event);
@@ -1486,7 +1486,7 @@ define(
     var wasAppropriateFocus = isAppropriateFocus;
     // don't show highlight if current active isn't body
     var target = document.activeElement;
-    isAppropriateFocus = isBPOpen || (!target || !elementClassifier.isSpacebarConsumer(target)) && isWindowActive();
+    isAppropriateFocus = isSitecuesUIOpen || (!target || !elementClassifier.isSpacebarConsumer(target)) && isWindowActive();
     if (!isSticky) {
       if (wasAppropriateFocus && !isAppropriateFocus) {
         hide();
@@ -1498,12 +1498,17 @@ define(
   }
 
   function willExpand() {
-    isBPOpen = true;
+    isSitecuesUIOpen = true;
     testFocus();
   }
 
   function didShrink() {
-    isBPOpen = false;
+    isSitecuesUIOpen = false;
+    testFocus();
+  }
+
+  function didToggleBpMenu(isOpen) {
+    isSitecuesUIOpen = isOpen;
     testFocus();
   }
 
@@ -1728,6 +1733,7 @@ define(
     // Mouse highlighting not available while BP is open
     events.on('bp/will-expand', willExpand);
     events.on('bp/did-shrink', didShrink);
+    events.on('bp/did-toggle-menu', didToggleBpMenu);
 
     events.on('speech/did-change', function(isOn) {
       isSpeechEnabled = isOn;
@@ -1739,7 +1745,7 @@ define(
     });
 
     // Darken highlight appearance when speech is enabled
-    conf.get('ttsOn', onSpeechChanged);
+    pref.bindListener('ttsOn', onSpeechChanged);
 
     testFocus(); // Set initial focus state
     if (document.readyState !== 'loading') {  // Focus is set again when document finishes loading

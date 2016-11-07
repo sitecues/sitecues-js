@@ -2,11 +2,11 @@ define(
   [
     'page/util/element-classifier',
     'page/keys/commands',
-    'core/metric/metric',
-    'core/events',
+    'run/metric/metric',
+    'run/events',
     'page/highlight/constants',
-    'core/constants',
-    'nativeFn'
+    'run/constants',
+    'mini-core/native-global'
   ],
   function (
     elemClassifier,
@@ -15,7 +15,7 @@ define(
     events,
     HIGHLIGHT_CONST,
     CORE_CONST,
-    nativeFn
+    nativeGlobal
   ) {
   'use strict';
 
@@ -128,9 +128,6 @@ define(
         return (event.keyCode === keyCode.END && !hasAnyModifier(event)) ||
           event.keyCode === keyCode.NUMPAD_1 ||
           (event.keyCode === keyCode.DOWN && event.metaKey);
-      },
-      'f8': function(event) {
-        return event.keyCode === keyCode.F8 && !hasAnyModifier(event);
       }
     },
     // define keys map used to bind actions to hotkeys
@@ -286,7 +283,7 @@ define(
     }
 
     clearTimeout(fakeKeyRepeatTimer);
-    fakeKeyRepeatTimer = nativeFn.setTimeout(function() {
+    fakeKeyRepeatTimer = nativeGlobal.setTimeout(function() {
       // If the next key is the same and occurs quickly after the last keyup, it will be considered a key repeat,
       // because some configurations on Windows seem to fire multiple keyups and keydowns for key repeats
       // Once this timer fires, we clear a flag that allows even the same key to be fired as a new metric

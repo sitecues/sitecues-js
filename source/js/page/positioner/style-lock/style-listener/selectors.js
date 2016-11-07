@@ -9,7 +9,7 @@ define(
   [
     'page/style-service/style-service',
     'page/positioner/constants',
-    'core/util/array-utility'
+    'run/util/array-utility'
   ],
   function (
     styleService,

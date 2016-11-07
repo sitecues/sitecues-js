@@ -6,7 +6,7 @@
 * */
 define(
   [
-    'core/util/array-utility'
+    'run/util/array-utility'
   ],
   function (
     arrayUtil

@@ -8,22 +8,24 @@ define(
     'hlb/event-handlers',
     'hlb/positioning',
     'hlb/styling',
-    'core/conf/user/manager',
-    'core/platform',
+    'run/conf/preferences',
+    'run/platform',
     'page/util/element-classifier',
     'hlb/animation',
     'page/util/geo',
-    'core/metric/metric',
+    'run/metric/metric',
     'hlb/constants',
-    'core/events',
-    'core/inline-style/inline-style'
+    'run/events',
+    'run/inline-style/inline-style',
+    'run/util/array-utility'
   ],
+  /*jshint -W072 */
   function (
     $,
     eventHandlers,
     hlbPositioning,
     hlbStyling,
-    conf,
+    pref,
     platform,
     elemClassifier,
     hlbAnimation,
@@ -31,8 +33,10 @@ define(
     metric,
     constants,
     events,
-    inlineStyle
+    inlineStyle,
+    arrayUtil
   ) {
+  /*jshint +W072 */
   'use strict';
 
   /////////////////////////
@@ -46,7 +50,7 @@ define(
   var EXTRA_HIGHLIGHT_PADDING = 2, // TODO: Figure out why this is needed and compute it.
       MOUSE_SAFETY_ZONE       = 50, // Number of pixels the mouse is allowed to go outside the HLB, before it closes.
       FORMS_SELECTOR          = 'input, textarea, select',
-
+      INPUT_SELECTOR          = FORMS_SELECTOR + ', button',
       $picked,         // The object chosen by the picker.
       $foundation,     // The sanitized input, used as the basis for creating an $hlb.
       $hlb,            // The cloned object, based on the $foundation.
@@ -101,13 +105,13 @@ define(
       fromInputType = $currentFromInput.prop('type');
       cloneIndex = $currentToInput[0].getAttribute('data-sc-cloned');
 
-      //If we're closing the HLB, and the current form element is part of a cloned foundation
+      // If we're closing the HLB, and the current form element is part of a cloned foundation
       if (isHLBClosing && cloneIndex) {
-        //Remove the index property from the HLB element
+        // Remove the index property from the HLB element
         $currentFromInput[0].removeAttribute('data-sc-cloned');
-        //Query the DOM for the original form element, so we can copy the HLB form value back into the appropriate field
+        // Query the DOM for the original form element, so we can copy the HLB form value back into the appropriate field
         $currentToInput = $('[data-sc-cloned="' + cloneIndex + '"]');
-        //Remove the index from the original form element
+        // Remove the index from the original form element
         $currentToInput[0].removeAttribute('data-sc-cloned');
       }
 
@@ -213,7 +217,7 @@ define(
 
     // Focus input or textarea
     if (elemClassifier.isEditable($hlb[0])) {
-      $hlb.focus();
+      $hlb[0].focus();
     }
 
     // Let the rest of the application know that the hlb is ready
@@ -266,7 +270,6 @@ define(
   }
 
   function targetHLB(highlight, isRetargeting) {
-
     state.highlight = highlight;
 
     if (!highlight.fixedContentRect) {
@@ -284,6 +287,11 @@ define(
     // Disable mouse highlighting so we don't copy over the highlighting styles from the picked element.
     // It MUST be called before getFoundation().
     events.emit('mh/pause');
+
+    // Set data attributes on each of the form input elements
+    // This allows us to query the DOM for the original elements
+    // when we want to give them the values entered into the HLB
+    setCloneIndexOnFormDescendants($picked);
 
     // Sanitize the input, by accounting for "lonely" elements.
     $foundation = getFoundation($picked);
@@ -330,7 +338,6 @@ define(
    * @return {[Object]}   [Dimensions and position]
    */
   function getInitialHLBRect(highlight) {
-
     return geo.expandOrContractRect(highlight.fixedContentRect, EXTRA_HIGHLIGHT_PADDING);
   }
 
@@ -340,7 +347,6 @@ define(
    * @param isRetargeting -- true if HLB is moving from one place to another, false if brand new HLB mode
    */
   function createHLB(highlight, isRetargeting) {
-
     // clone, style, filter, emit hlb/did-create,
     // prevent mousemove deflation, disable scroll wheel
     initializeHLB(highlight);
@@ -392,7 +398,6 @@ define(
    * HLB with default styles and computed styles.]
    */
   function initializeHLB(highlight) {
-
     // Create and append the HLB and DIMMER wrapper element to the DOM
     $hlbWrapper = getOrCreateHLBWrapper();
 
@@ -405,7 +410,7 @@ define(
       }
 
       $hlbWrapper.appendTo('body');
-      inheritedZoom = conf.get('zoom') || 1;  // Zoom inherited from page
+      inheritedZoom = pref.get('zoom') || 1;  // Zoom inherited from page
 
     } else {
       $hlbWrapper.insertAfter('body');
@@ -429,7 +434,6 @@ define(
    * [cloneHLB clones elements and styles from the foundation to the HLB.]
    */
   function cloneHLB(highlight) {
-
     var hlbStyles;
 
     // The cloned element (HLB)
@@ -442,6 +446,33 @@ define(
     // .setTimeout(function() {
     mapForm($foundation, $hlb);
     // }, 0);
+
+    // We need to copy over each key stroke from hlb input fields so that when event handlers run on 'enter' the
+    // original input field has the correct value
+    $hlb.find(INPUT_SELECTOR).addBack(INPUT_SELECTOR).each(function (index, hlbInput) {
+      function handleEvents(event) {
+        var cloneAttribute = 'data-sc-cloned',
+            cloneIndex     = hlbInput.getAttribute(cloneAttribute),
+            cloneSelector  = '[' + cloneAttribute + '="' + cloneIndex + '"]';
+
+        if (cloneIndex) {
+          var originalElement = arrayUtil.find(document.querySelectorAll(cloneSelector), function (element) {
+            return hlbInput !== element;
+          });
+          if (originalElement) {
+            if (!platform.browser.isIE) {
+              // new Event() is not supported in IE11
+              var cloneEvent = new event.constructor(event.type, event);
+              originalElement.dispatchEvent(cloneEvent);
+              hlbInput.focus();
+            }
+            originalElement.value = hlbInput.value;
+          }
+        }
+      }
+      hlbInput.addEventListener('keydown', handleEvents);
+      hlbInput.addEventListener('click', handleEvents);
+    });
 
     // Clone styles of HLB and children of HLB, so layout is preserved
     hlbStyling.initializeStyles($foundation, $hlb, initialHLBRect, highlight.hiddenElements);
@@ -563,8 +594,8 @@ define(
 
   function setCloneIndexOnFormDescendants($picked) {
     var i,
-      $formDescendants = $picked.find(FORMS_SELECTOR)
-        .addBack(FORMS_SELECTOR);
+      $formDescendants = $picked.find(INPUT_SELECTOR)
+        .addBack(INPUT_SELECTOR);
 
     for (i = 0; i < $formDescendants.length; i++) {
       $formDescendants[i].setAttribute('data-sc-cloned', i + 1);
@@ -577,11 +608,6 @@ define(
     var i,
       pickedElement              = $picked[0],
       pickedElementsBoundingBox  = pickedElement.getBoundingClientRect();
-
-    //Set data attributes on each of the form input elements
-    //This allows us to query the DOM for the original elements
-    //when we want to give them the values entered into the HLB
-    setCloneIndexOnFormDescendants($picked);
 
     var pickedElementClone       = pickedElement.cloneNode(true),
       $pickedAndDescendants      = $picked.find('*').addBack(),
@@ -665,7 +691,7 @@ define(
   }
 
   function onClick(event) {
-    if ($hlb && !isElementInsideHlb(event.target)) {
+    if ($hlb && !isElementInsideHlb(event.target) && event.isTrusted) {
       // If click is outside of HLB, close it
       // (Need to doublecheck this because HLB can sometimes be inside of <body>)
       toggleHLB();

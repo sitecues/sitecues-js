@@ -1,6 +1,6 @@
 {
   "name": "sitecues",
-  "version": "4.2.9",
+  "version": "4.2.19",
   "description": "A web app to enable sites with zoom and speech.",
   "repository": {
     "type": "git",
@@ -14,27 +14,32 @@
   },
   "bin": "binary/web.js",
   "scripts": {
-    "test": "intern run --webdriver --config=config/intern.js",
-    "test-cloud": "intern run --webdriver --config=config/intern-cloud.js",
-    "test-ci": "intern run --webdriver --config=config/intern-ci.js",
+    "test": "node ./test/transpile-core && intern run --webdriver --config=config/intern.js",
+    "test-cloud": "node ./test/transpile-core && intern run --webdriver --config=config/intern-cloud.js",
+    "test-ci": "node ./test/transpile-core && intern run --webdriver --config=config/intern-ci.js",
     "build": "make package"
   },
   "dependencies": {
     "bg-runner": "https://s3.amazonaws.com/npm.sitecues.com/bg-runner-0.0.2.tgz",
     "express": "^3.21.2",
     "fs-extra": "^0.24.0",
+    "got": "^6.5.0",
     "hogan.js": "^3.0.2",
     "mime": "^1.3.4",
+    "p-limit": "^1.0.0",
     "pkg-dir": "^1.0.0",
     "tail": "^0.4.0"
   },
   "devDependencies": {
     "amdclean": "^2.7.0",
+    "babel-core": "^6.14.0",
+    "babel-plugin-add-module-exports": "^0.2.1",
+    "babel-preset-es2015": "^6.16.0",
     "chai": "^3.5.0",
     "clean-css": "^3.4.9",
     "closure-compiler": "^0.2.12",
     "dateformat": "^1.0.12",
-    "del": "^2.2.0",
+    "del": "^2.2.2",
     "delivr": "^0.4.0",
     "extend": "^3.0.0",
     "glob": "^7.0.6",

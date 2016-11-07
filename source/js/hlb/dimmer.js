@@ -5,7 +5,7 @@ define(
   [
     '$',
     'hlb/constants',
-    'core/inline-style/inline-style'
+    'run/inline-style/inline-style'
   ],
   function (
     $,

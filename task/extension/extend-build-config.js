@@ -1,7 +1,7 @@
 /* Extension config */
 'use strict';
 
-var extend = require('extend'),
+const extend = require('extend'),
   EXTENSION_SOURCE_DIR = 'extension/source';
 
 function getConfig(baseConfig) {
@@ -20,8 +20,9 @@ function getConfig(baseConfig) {
     return EXTENSION_SOURCE_DIR + '/' + suffix;
   }
 
-  var config = extend(true, {}, baseConfig, {
+  const config = extend(true, {}, baseConfig, {
     isExtension: true,
+    isCleaningAll: true, // Always clean because we're overwriting the same directory
     extensionSourceDir: EXTENSION_SOURCE_DIR,
     tmpDir: require('os').tmpdir(),
     isLocal: process.env.LOCAL !== 'off', // Extension: default is local because of Google security requirements
@@ -31,6 +32,7 @@ function getConfig(baseConfig) {
     rasterGlob: getGlob('images/**/*.png'),
     svgGlob: getGlob('images/**/*.svg'),
     earconsGlob: getGlob('earcons/**/*.ogg'),
+    cuesGlob: getGlob('js/locale-data/**/*.json'),
     htmlGlob: getGlob('html/**/*.html')
       .concat('!' + getLibraryGlob('html/prefs.html')), // Do not use iframe for prefs -- extension has better storage-backup module
     templateGlob: [

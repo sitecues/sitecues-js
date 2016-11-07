@@ -21,7 +21,6 @@ var gulp = require('gulp'),
   amdClean = require('amdclean'),
   size = config.isShowingSizes && require('gulp-size'),
   replace = require('gulp-replace'),
-  PAGE_DISABLED_CHECK = 'if (window.localStorage.getItem("sitecues-disabled") !== "true") (function() {',
   isMin = config.isMinifying,
   uglify = require('gulp-uglify'),
   uglifyOptions = {
@@ -95,6 +94,7 @@ function optimizeLibrary() {
 function cleanLibrary() {
   return new Promise(
     function(resolve, reject) {
+      console.log('AMD clean on temp intermediate sitecues.js file: ' + intermediateSitecuesJs);
       var cleanedCode = amdClean.clean({
         filePath: intermediateSitecuesJs
       });
@@ -113,7 +113,6 @@ function cleanLibrary() {
 function compressLibrary() {
   return gulp.src(intermediateSitecuesJs)
     // Check before IIFE so that no init code runs if page disabled -- only does this replacement once
-    .pipe(replace(/^\;\(function\(\) \{/, PAGE_DISABLED_CHECK))
     // These replacements allow uglify to remove a lot of dead code -- these replacements are global
     .pipe(replace('platform.browser.isIE9', 'false'))
     .pipe(replace('platform.browser.isIE', 'false'))
@@ -122,7 +121,7 @@ function compressLibrary() {
     .pipe(replace('platform.browser.isChrome', 'true'))
     .pipe(replace('platform.browser.isWebKit', 'true'))
     .pipe(uglify(uglifyOptions))
-    .pipe(gulp.dest(config.buildDir + '/js'));
+    .pipe(gulp.dest(global.buildDir + '/js'));
 }
 
 function compileLibrary() {
@@ -133,7 +132,7 @@ function compileLibrary() {
 }
 
 function showSizes() {
-  return gulp.src(config.buildDir + '/**/*.js')
+  return gulp.src(global.buildDir + '/**/*.js')
     .pipe(size({ pretty: true, gzip: true, showFiles: true }));
 }
 
@@ -144,7 +143,7 @@ function noop(callback) {
 function copyScripts(glob) {
   return gulp.src(glob)
     .pipe(uglify(uglifyOptions))
-    .pipe(gulp.dest(config.resourceDir + '/js'));
+    .pipe(gulp.dest(global.buildDir + '/js'));
 }
 
 function copyExtensionScripts() {

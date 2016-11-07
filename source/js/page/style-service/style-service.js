@@ -7,13 +7,15 @@ define(
     '$',
     'page/style-service/sheet-aggregator',
     'page/style-service/media-queries',
-    'nativeFn'
+    'run/platform',
+    'mini-core/native-global'
   ],
   function (
     $,
     sheetAggregator,
     mediaQueries,
-    nativeFn
+    platform,
+    nativeGlobal
   ) {
   'use strict';
 
@@ -176,7 +178,7 @@ define(
 
       if (++ tries <= MAX_TRIES) {
         if (SC_DEV) { console.log('Could not find stylesheet ' + id); }
-        nativeFn.setTimeout(getStyleSheet, TRY_INTERVAL_MS);
+        nativeGlobal.setTimeout(getStyleSheet, TRY_INTERVAL_MS);
       }
     }
 

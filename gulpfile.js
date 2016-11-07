@@ -1,30 +1,67 @@
 'use strict';
 
+const
+  buildType = process.env.TYPE || 'common';
+
 var gulp = require('gulp'),
   lint = require('./task/lint'), // Include compileJs task
   config = require('./task/build-config'),
-  targetTaskFolder = './task/' + config.buildType,
+  targetTaskFolder = './task/' + buildType,
   js = require(targetTaskFolder + '/js'),
+  path = require('path'),
+  mkdirp = require('mkdirp'),
   packaging = require(targetTaskFolder + '/packaging'),
   templates = require('./task/templates'),
   resources = require('./task/resources'),
   removeAllDeadCode = require('./task/dead-code-removal'),
-  exec = require('child_process').exec,
+  childProcess = require('child_process'),
+  exec = childProcess.exec,
   del = require('del'); // If we want to do clean
 
-function cleanAll() {
-  return del(config.baseBuildDir);
+function prepare() {
+  if (buildType === 'extension') {
+    global.buildDir = path.join('latest-extension-build');
+    mkdirp.sync(global.buildDir);
+    return Promise.resolve();
+  }
+  else {
+    var getBuildData = require('build-data');
+    return getBuildData()
+      .then((buildData) => {
+        const config = Object.assign({}, buildData, {bucket: 'sitecues-js'});
+        // Will use buildData to generate resource url
+        global.buildBranch = buildData.branch;
+        global.buildVersion = buildData.version;
+        return require('delivr').prepare(config);
+      })
+      .then((build) => {
+        global.build = build;
+        global.buildDir = build.path;
+      });
+  }
 }
 
-function cleanTarget() {
-  return del(config.baseBuildDir + '/' + config.buildType);
+
+function finalize() {
+  if (global.build) {
+    // common
+    return global.build.finalize();
+  }
+  else {
+    // extension
+    return Promise.resolve();
+  }
+}
+
+function cleanAll() {
+  return del('build');
 }
 
 function noop(callback) {
   callback();
 }
 
-var clean = config.isCleaningAll ? cleanAll : (config.isCleaningTarget ? cleanTarget : noop);
+var clean = config.isCleaningAll ? cleanAll : noop;
 
 // Report build configuration information, including versions
 function reportConfig(callback) {
@@ -47,7 +84,7 @@ gulp.task('js-compile-lint', gulp.parallel.apply(gulp, jsCompileAndLint));
 gulp.task('js-validate', gulp.series(js.prepareValidation, js.validate));
 gulp.task('js-show-sizes', js.showSizes);
 var jsDoAll = [ 'js-compile-lint' ]
-  .concat(config.isMinifying ? removeAllDeadCode : [])
+  .concat(config.isRemovingDeadCode ? removeAllDeadCode : [])
   .concat('js-validate')
   .concat(config.isShowingSizes ? 'js-show-sizes': []);
 gulp.task('js', gulp.series.apply(gulp, jsDoAll));
@@ -67,20 +104,34 @@ var build =
     resources.svg,
     resources.raster,
     resources.earcons,
+    resources.cues,
+    resources.metadata,
     resources.versionMap,
     'js'
   );
 gulp.task(cleanAll);
-gulp.task(cleanTarget);
 gulp.task('build', build);
 gulp.task(reportConfig);
-var defaultSeries = [reportConfig, clean, 'build', packaging.prepare ]
+var defaultSeries = [ prepare, reportConfig, clean, 'build', finalize ]
   .concat(config.postBuildCommand ? runPostBuildCommand : []);
 gulp.task('default', gulp.series.apply(gulp, defaultSeries));
-gulp.task('package', gulp.series('default', packaging.finalize));
+gulp.task('package', gulp.series('default', packaging )); // Not needed anymore
+
+function getCurrentBranch() {
+  return childProcess.execSync('git symbolic-ref --short HEAD').toString('utf8').trimRight();
+}
 
 // Watcher tasks
 gulp.task(function watch() {
+
+  const branchName = getCurrentBranch();
+  global.build = {
+    path : 'latest-build'
+  };
+  global.buildVersion = 'latest';
+  global.buildBranch = branchName;
+  global.buildDir = global.build.path;
+
   // JS
   var sourceFolders = Object.keys(js.compileFunctionMap);
   sourceFolders.forEach(function(sourceFolder) {

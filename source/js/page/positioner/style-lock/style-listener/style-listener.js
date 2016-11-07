@@ -14,12 +14,12 @@ define(
     'page/positioner/style-lock/style-listener/selector-map',
     'page/positioner/style-lock/style-listener/selectors',
     'page/positioner/transplant/anchors',
-    'core/util/array-utility',
+    'run/util/array-utility',
     'page/positioner/util/element-info',
     'page/positioner/util/element-map',
-    'core/constants',
-    'nativeFn',
-    'core/inline-style/inline-style',
+    'run/constants',
+    'mini-core/native-global',
+    'run/inline-style/inline-style',
     'page/util/transition-util',
     'page/positioner/style-lock/style-lock',
     'page/positioner/transplant/mutation-relay'
@@ -35,7 +35,7 @@ define(
     elementInfo,
     elementMap,
     coreConstants,
-    nativeFn,
+    nativeGlobal,
     inlineStyle,
     transitionUtil,
     styleLock,
@@ -151,7 +151,7 @@ define(
 
               if (didChange && isIntended) {
                 elementMap.setField(target, inlineKey, inlineValue);
-                nativeFn.setTimeout(evaluateProperty, 0, target, property);
+                nativeGlobal.setTimeout(evaluateProperty, 0, target, property);
               }
             }
             break;
@@ -306,7 +306,7 @@ define(
     var mutationRecords = domObserver.takeRecords();
     // Handle the remaining queued mutation records
     if (mutationRecords.length) {
-      nativeFn.setTimeout(function (mutationRecords) {
+      nativeGlobal.setTimeout(function (mutationRecords) {
         onOriginalElementMutations(mutationRecords);
       }, 0, mutationRecords);
     }
@@ -368,7 +368,7 @@ define(
         observedProperties.push(property);
       }
 
-      nativeFn.setTimeout(function () {
+      nativeGlobal.setTimeout(function () {
         resolvedElementsMap[key] = getElementsWithResolvedValue(declaration);
         if (!isPropertyObserved) {
           listenForDynamicStyling(property);

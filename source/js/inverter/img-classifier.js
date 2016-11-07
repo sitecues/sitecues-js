@@ -12,11 +12,11 @@ define(
   [
     '$',
     'page/util/color',
-    'core/conf/site',
-    'core/conf/urls',
+    'run/conf/site',
+    'run/conf/urls',
     'inverter/invert-url',
     'inverter/orig-bg-info',
-    'nativeFn'
+    'mini-core/native-global'
   ],
   function (
     $,
@@ -25,7 +25,7 @@ define(
     urls,
     invertUrl,
     origBgInfo,
-    nativeFn
+    nativeGlobal
   ) {
   'use strict';
 
@@ -400,8 +400,8 @@ define(
 
       // Image has full color information
       if (SC_DEV && isDebuggingOn && img) {
-        $(img).attr('data-sc-pixel-info', nativeFn.JSON.stringify(pixelInfo));
-        $(img).attr('data-sc-pixel-score-breakdown', nativeFn.JSON.stringify(analysis));
+        $(img).attr('data-sc-pixel-info', nativeGlobal.JSON.stringify(pixelInfo));
+        $(img).attr('data-sc-pixel-score-breakdown', nativeGlobal.JSON.stringify(analysis));
         $(img).attr('data-sc-pixel-score', score);
       }
 
@@ -474,7 +474,7 @@ define(
     }
     else if (img.complete) {
       //Image is loaded and ready for processing -- after slight delay
-      nativeFn.setTimeout(classifyLoadedImage, 0);
+      nativeGlobal.setTimeout(classifyLoadedImage, 0);
     }
     else {
       // Too early to tell anything

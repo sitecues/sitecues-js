@@ -20,16 +20,16 @@ define(
     'page/positioner/transform/targets',
     'page/viewport/viewport',
     'page/positioner/util/element-info',
-    'core/platform',
+    'run/platform',
     'page/positioner/transform/rect-cache',
-    'core/dom-events',
-    'core/util/array-utility',
+    'run/dom-events',
+    'run/util/array-utility',
     'page/zoom/style',
     'page/viewport/scrollbars',
     'page/zoom/config/config',
-    'core/events',
-    'nativeFn',
-    'core/inline-style/inline-style',
+    'run/events',
+    'mini-core/native-global',
+    'run/inline-style/inline-style',
     'page/util/transition-util'
   ],
   function (
@@ -47,7 +47,7 @@ define(
     scrollbars,
     config,
     events,
-    nativeFn,
+    nativeGlobal,
     inlineStyle,
     transitionUtil
   ) {
@@ -110,8 +110,8 @@ define(
 
       var
         newScale        = getRestrictedScale(unscaledRect, opts.onResize),
-        newXTranslation = currentXTranslation,
-        newYTranslation = currentYTranslation;
+        newXTranslation,
+        newYTranslation;
       elementInfo.setScale(element, newScale);
 
       if (!unscaledRect.width || !unscaledRect.height) {
@@ -351,7 +351,7 @@ define(
 
       function onResize() {
         clearTimeout(resizeTimer);
-        resizeTimer = nativeFn.setTimeout(function () {
+        resizeTimer = nativeGlobal.setTimeout(function () {
           targets.forEach(scaleTopInstant);
           transformAllTargets({
             resetTranslation: true,
@@ -405,8 +405,8 @@ define(
 
       // Absolute elements return the used top value if there isn't one specified. Setting the position to static ensures
       // that only specified top values are returned with the computed style
-      // EXCEPTION: IE returns the used value for both
-      if (!platform.browser.isIE) {
+      // EXCEPTION: IE and Edge return the specified value for positioned elements
+      if (!platform.browser.isIE && !platform.browser.isEdge) {
         inlineStyle.override(element, ['position', 'static', 'important']);
       }
 
@@ -539,7 +539,7 @@ define(
     }
 
     function onZoom() {
-      nativeFn.setTimeout(function () {
+      nativeGlobal.setTimeout(function () {
         targets.forEach(scaleTopInstant);
         refresh();
       }, 0);

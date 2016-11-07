@@ -1,7 +1,15 @@
 // Functionality for resetting Sitecues or turning it off
 
-define(['page/zoom/zoom', 'core/conf/user/manager'],
-  function(zoomMod, conf) {
+define(
+  [
+    'page/zoom/zoom',
+    'run/conf/preferences'
+  ],
+  function (
+    zoomMod,
+    pref
+  ) {
+  'use strict';
 
     function resetZoom() {
       zoomMod.resetZoom();
@@ -19,7 +27,10 @@ define(['page/zoom/zoom', 'core/conf/user/manager'],
     }
 
     function resetMinorSettings() {
-      conf.reset();
+      // Don't reset zoom or TTS on as those were done first
+      // Don't reset isTester as that must remain as it was
+      var BLACKLIST = new Set([ 'isTester', 'zoom', 'ttsOn' ]);
+      pref.reset(BLACKLIST);
     }
 
     function resetAll() {

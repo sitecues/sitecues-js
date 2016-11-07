@@ -1,12 +1,12 @@
 // Markup for the secondary panel
 define(
   [
-    'core/bp/view/markup-finalizer',
-    'core/bp/helper',
-    'core/platform',
+    'run/bp/view/markup-finalizer',
+    'run/bp/helper',
+    'run/platform',
     'bp-secondary/font-charset',
-    'core/conf/urls',
-    'core/events'
+    'run/conf/urls',
+    'run/events'
   ],
   function (
     finalizer,

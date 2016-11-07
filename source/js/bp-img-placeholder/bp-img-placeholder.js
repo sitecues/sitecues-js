@@ -16,9 +16,9 @@
 
 define(
   [
-    'core/bp/constants',
-    'core/bp/helper',
-    'core/inline-style/inline-style'
+    'run/bp/constants',
+    'run/bp/helper',
+    'run/inline-style/inline-style'
   ],
   function (
     BP_CONST,

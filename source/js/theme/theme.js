@@ -6,27 +6,27 @@ define(
   [
     '$',
     'Promise',
-    'core/conf/user/manager',
+    'run/conf/preferences',
     'page/style-service/style-service',
-    'core/platform',
+    'run/platform',
     'theme/color-choices',
     'page/util/color',
     'theme/custom-site-theme',
-    'core/events',
-    'nativeFn',
-    'core/inline-style/inline-style'
+    'run/events',
+    'mini-core/native-global',
+    'run/inline-style/inline-style'
   ],
   function(
     $,
     Promise,
-    conf,
+    pref,
     styleService,
     platform,
     colorChoices,
     colorUtil,
     customTheme,
     events,
-    nativeFn,
+    nativeGlobal,
     inlineStyle
   ) {
   'use strict';
@@ -89,9 +89,9 @@ define(
   function onThemeChange() {
 
     // Requested theme name
-    requestedThemeName = conf.get('themeName');
-    requestedThemePower = conf.get('themePower') || DEFAULT_INTENSITY;
-    requestedThemeTextHue = conf.get('themeTextHue');
+    requestedThemeName = pref.get('themeName');
+    requestedThemePower = pref.get('themePower') || DEFAULT_INTENSITY;
+    requestedThemeTextHue = pref.get('themeTextHue');
 
     if (!requestedThemeName && !currentThemeName) {
       return; // Still no theme -- power and hue changes do not matter
@@ -154,7 +154,7 @@ define(
       // Enable site-specific theme changes
       toggleBodyClasses();
 
-      finishThemeTimer = nativeFn.setTimeout(finalizeTheme, isFastTransition ? TRANSITION_MS_FAST : TRANSITION_MS_SLOW);
+      finishThemeTimer = nativeGlobal.setTimeout(finalizeTheme, isFastTransition ? TRANSITION_MS_FAST : TRANSITION_MS_SLOW);
     }
   }
 
@@ -394,7 +394,7 @@ define(
     }
     else {
       inlineStyle.override(document.documentElement, ['transform', 'translateY(0.01px)']);
-      nativeFn.setTimeout(function () {
+      nativeGlobal.setTimeout(function () {
         inlineStyle.restore(document.documentElement, 'transform');
       }, REPAINT_MS);
     }
@@ -562,17 +562,17 @@ define(
     // TODO remove when no longer necessary
     shouldRepaintToEnsureFullCoverage = platform.browser.isChrome && platform.browser.version < 48;
 
-    conf.def('themeName', getSanitizedThemeName);
-    conf.def('themePower', getSanitizedThemePower);
-    conf.def('themeTextHue', getSanitizedHue);
-    conf.get('themeName', onThemeChange);
-    conf.get('themePower', onThemeChange);
-    conf.get('themeTextHue', onThemeChange);
-    if (typeof conf.get('themePower') === 'undefined') {
-      conf.set('themePower', DEFAULT_INTENSITY);
+    pref.defineHandler('themeName', getSanitizedThemeName);
+    pref.defineHandler('themePower', getSanitizedThemePower);
+    pref.defineHandler('themeTextHue', getSanitizedHue);
+    pref.bindListener('themeName', onThemeChange);
+    pref.bindListener('themePower', onThemeChange);
+    pref.bindListener('themeTextHue', onThemeChange);
+    if (typeof pref.get('themePower') === 'undefined') {
+      pref.set('themePower', DEFAULT_INTENSITY);
     }
-    if (typeof conf.get('themeTextHue') === 'undefined') {
-      conf.set('themeTextHue', MAX_USER_SPECIFIED_HUE); // Use white text by default
+    if (typeof pref.get('themeTextHue') === 'undefined') {
+      pref.set('themeTextHue', MAX_USER_SPECIFIED_HUE); // Use white text by default
     }
 
     customTheme.init();

@@ -1,10 +1,10 @@
 define(
   [
-    'core/events',
+    'run/events',
     'page/zoom/state',
-    'core/conf/urls',
-    'core/util/array-utility',
-    'core/inline-style/inline-style'
+    'run/conf/urls',
+    'run/util/array-utility',
+    'run/inline-style/inline-style'
   ],
   function (
     events,
@@ -64,6 +64,11 @@ define(
     }
 
     elements.forEach(function (element) {
+      // We have no recourse if the immediate parent of the flash element is the body
+      if (element.parentElement === document.body) {
+        return;
+      }
+
       var
         zoomReciprocal = 1 / state.completedZoom,
         ancestor       = element.parentElement;
@@ -71,6 +76,7 @@ define(
       while(!isTransformable(ancestor)) {
         ancestor = ancestor.parentElement;
       }
+
       var styles = {};
       styles.transform       = 'scale(' + zoomReciprocal + ')';
       styles.transformOrigin = '0 0';
@@ -80,8 +86,10 @@ define(
         originalDimensions = dimensionsMap.get(element) || {},
         originalWidth  = originalDimensions.width,
         originalHeight = originalDimensions.height,
-        width          = element.getAttribute('width'),
-        height         = element.getAttribute('height'),
+        width          = element.getAttribute('width') || element.style.width || '',
+        height         = element.getAttribute('height') || element.style.height || '';
+
+      var
         widthMatch     = width.match(/[^0-9\.]+/),
         heightMatch    = height.match(/[^0-9\.]+/),
         widthUnit      = widthMatch  ? widthMatch[0]  : '',

@@ -3,8 +3,8 @@ define(
         'intern!tdd',
         'intern/chai!assert',
         'page/util/common',
-        'core/platform',
-        'core/inline-style/inline-style'
+        'run/platform',
+        'run/inline-style/inline-style'
     ],
     function (tdd, assert, common, platform, inlineStyle) {
         'use strict';

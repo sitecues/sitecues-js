@@ -15,9 +15,9 @@ define(
     'exports',
     'page/positioner/style-lock/style-listener/style-listener',
     'page/positioner/constants',
-    'core/constants',
+    'run/constants',
     'page/positioner/util/element-info',
-    'nativeFn'
+    'mini-core/native-global'
   ],
   function (
     exports,
@@ -25,7 +25,7 @@ define(
     constants,
     coreConstants,
     elementInfo,
-    nativeFn
+    nativeGlobal
   ) {
   'use strict';
 
@@ -193,7 +193,7 @@ define(
 
       // We run this asynchronously because it is an expensive operation
       // and we want to allow the browser to run other events before we begin it
-      nativeFn.setTimeout(function () {
+      nativeGlobal.setTimeout(function () {
         var elements = styleListener.getElementsWithResolvedValue(declaration);
 
         function runHandler(element) {
@@ -203,7 +203,7 @@ define(
         for (var i = 0, elementCount = elements.length; i < elementCount; i++) {
           if (initial !== noop) {
             // Likewise each initial handler call is potentially expensive if we have to transplant the target
-            nativeFn.setTimeout(runHandler, 0, elements[i]);
+            nativeGlobal.setTimeout(runHandler, 0, elements[i]);
           }
           else {
             lockStyle(elements[i], property, value);

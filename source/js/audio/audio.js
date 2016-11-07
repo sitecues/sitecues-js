@@ -13,20 +13,35 @@
 define(
   [
     'audio/constant',
-    'core/conf/user/manager',
-    'core/conf/site',
+    'run/conf/preferences',
+    'run/conf/site',
     '$',
+    'run/util/xhr',
     'audio/speech-builder',
-    'core/locale',
-    'core/metric/metric',
-    'core/conf/urls',
+    'run/locale',
+    'run/metric/metric',
+    'run/conf/urls',
     'audio/text-select',
-    'core/data-map',
-    'core/events',
+    'run/events',
     'audio/local-player',
     'audio/network-player'
   ],
-  function(constant, conf, site, $, builder, locale, metric, urls, textSelect, dataMap, events, localPlayer, networkPlayer) {
+  function(
+    constant,
+    pref,
+    site,
+    $,
+    xhr,
+    builder,
+    locale,
+    metric,
+    urls,
+    textSelect,
+    events,
+    localPlayer,
+    networkPlayer
+  ) {
+  'use strict';
 
   var ttsOn = false,
     lastPlayer,
@@ -223,13 +238,25 @@ define(
     return toPreferredRegion(locale.getPageLocale());
   }
 
-  function getAudioCueTextAsync(cueName, cueTextLocale, callback) {
-    var
-      AUDIO_CUE_DATA_PREFIX = 'locale-data/cue/',
-      cueModuleName = AUDIO_CUE_DATA_PREFIX + cueTextLocale;
+  function getCueText(cueName, cueTextLocale, callback) {
+    var cache = getCueText.cache;
+    if (!cache) {
+      getCueText.cache = cache = {};
+    }
 
-    dataMap.get(cueModuleName, function(data) {
-      callback(data[cueName] || '');
+    if (typeof cache[cueName] === 'string') {
+      callback(cache[cueName]);
+      return;
+    }
+
+    var cueFileName = urls.resolveResourceUrl('cue/' + cueTextLocale + '.json');
+
+    xhr.getJSON({
+      url: cueFileName,
+      success: function(data) {
+        cache[cueName] = data[cueName] || '';
+        callback(cache[cueName]);
+      }
     });
   }
 
@@ -250,10 +277,8 @@ define(
     return '?l=' + locale + '&';
   }
 
-  function getCueUrl(name, locale) {  // TODO why does an audio cue need the site id?
-    var restOfUrl = 'cue/site/' + site.getSiteId() + '/' +
-      name + '.' + getMediaTypeForNetworkAudio() + getLocaleParameter(locale);
-    return urls.getApiUrl(restOfUrl);
+  function getCueUrl(name, locale) {
+    return urls.resolveResourceUrl('cue/' + locale + '/' + name + '.' + getMediaTypeForNetworkAudio());
   }
 
   /**
@@ -274,7 +299,7 @@ define(
   function setSpeechState(isOn, doSuppressAudioCue) {
     if (ttsOn !== isOn) {
       ttsOn = isOn;
-      conf.set('ttsOn', ttsOn);
+      pref.set('ttsOn', ttsOn);
       events.emit('speech/did-change', ttsOn);
       if (!doSuppressAudioCue) {
         require(['audio-cues/audio-cues'], function(audioCues) {
@@ -303,7 +328,7 @@ define(
       if (cueTextLocale && isLocalSpeechAllowed()) {
         lastPlayer = localPlayer;
         fireBusyEvent();
-        getAudioCueTextAsync(name, cueTextLocale, function (cueText) {
+        getCueText(name, cueTextLocale, function (cueText) {
           if (cueText) {
             localPlayer
               .speak({
@@ -395,7 +420,7 @@ define(
   // What audio format will we use for prerecorded audio?
   function getMediaTypeForNetworkAudio() {
     if (!getMediaTypeForNetworkAudio.cached) {
-      getMediaTypeForNetworkAudio.cached = getBrowserSupportedTypeFromList(['mp3','ogg']);
+      getMediaTypeForNetworkAudio.cached = getBrowserSupportedTypeFromList(['ogg', 'mp3']); // TODO ogg should be preferred, correct?
     }
     return getMediaTypeForNetworkAudio.cached;
   }
@@ -492,7 +517,7 @@ define(
       };
     }
 
-    ttsOn = conf.get('ttsOn');
+    ttsOn = pref.get('ttsOn');
   }
 
   return {

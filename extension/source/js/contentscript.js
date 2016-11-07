@@ -16,36 +16,17 @@
 // jshint -W098
 var $ = sitecues.$;
 
-if (!window.localStorage.getItem('sitecues-disabled')) {
-  document.documentElement.setAttribute('data-sitecues-everywhere', '');
-}
-
-chrome.extension.sendMessage(
-  {
-    action: 'closeSitecuesPopup'
-  }
-);
-
-chrome.runtime.sendMessage(
-  {
-    action: 'refreshDisabledState',
-    isDisabled: window.isDisabled
-  }
-);
+// Signal to the in-page script that Sitecues Everywhere is present
+// This attribute will be set to 'on' if Sitecues Everywhere is not disabled for this page
+document.documentElement.setAttribute('data-sitecues-everywhere', '');
 
 chrome.runtime.onMessage.addListener(
   function (request, sender, sendResponse) {
-    if (request.action === 'isDisabled') {
-      sendResponse(
-        {
-          isDisabled: window.isDisabled
-        }
-      );
-    }
-    else if (request.action === 'toggleDisabled') {
-      window.isDisabled = !window.isDisabled;
-      window.localStorage.setItem('sitecues-disabled', window.isDisabled ? 'true' : 'false');
-      window.location.reload();
+    if (request.action === 'setPaused') {
+      var isPaused = request.isPaused;
+      window.sitecues.setDisabledGlobally(isPaused);
     }
   }
 );
+
+
