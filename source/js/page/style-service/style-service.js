@@ -7,14 +7,12 @@ define(
     '$',
     'page/style-service/sheet-aggregator',
     'page/style-service/media-queries',
-    'run/platform',
     'mini-core/native-global'
   ],
   function (
     $,
     sheetAggregator,
     mediaQueries,
-    platform,
     nativeGlobal
   ) {
   'use strict';

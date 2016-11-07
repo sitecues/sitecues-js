@@ -6,16 +6,16 @@ define(
   [
     'Promise',
     'page/style-service/user-agent-css',
-    'core/conf/urls',
-    'nativeFn',
-    'core/util/array-utility',
-    'core/inline-style/inline-style'
+    'run/conf/urls',
+    'mini-core/native-global',
+    'run/util/array-utility',
+    'run/inline-style/inline-style'
   ],
   function (
     Promise,
     UA_CSS,
     urls,
-    nativeFn,
+    nativeGlobal,
     arrayUtil,
     inlineStyle
   ) {
@@ -109,7 +109,7 @@ define(
       resolveSheetRequest(resolveOpts);
     });
 
-    nativeFn.setTimeout(function () {
+    nativeGlobal.setTimeout(function () {
       if (!futureSheet.resolved) {
         if (SC_DEV) {
           console.log('Sheet request timed-out:', futureSheet);
