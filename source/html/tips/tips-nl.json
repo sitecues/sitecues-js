@@ -1,0 +1,52 @@
+{
+  "spacebar": "spatiebalk",
+
+  "slider": {
+    "howto": "Gebruik de vergroting"
+  },
+  "zoomkeys": {
+    "long_press": "Houd toetsen langer ingedrukt om geleidelijk te vergroten of te verkleinen.",
+    "howto": "Druk op de – of + toets om de pagina te vergroten of te verkleinen"
+  },
+  "highlight": {
+    "purpose": "De marketing selecteert de gedeeltes die voorgelezen worden.",
+    "step1": "1. Selecteer de tekst die u wilt laten voorlezen.",
+    "step2": "2. Beweeg de muis over de tekst om deze te markeren.",
+    "keys": "Of, gebruik de spatietoets voor het markeren, de pijltoetsen om de markering te verplaatsen, en de Escape toets om de markering op te heffen."
+  },
+  "lens": {
+    "purpose": "De lens vergroot.",
+    "step1": "1. Markeer iets interessants",
+    "step2": "2. Druk op"
+  },
+  "speech": {
+    "purpose": "De spraak functie leest teksten voor.",
+    "step1": "1. Klik de spraak toets aan",
+    "step2": "2. Markeer &amp; druk op"
+  },
+  "guide": {
+    "full": {
+      "label": "Gebruikershandleiding",
+      "action": "Sitecues gebruiken"
+    },
+    "keyboard": {
+      "label": "Hulp voor bediening met de toetsenbord",
+      "action": "Ga direct naar de uitleg"
+    }
+  },
+
+  "title": "Uitleg",
+
+  "cards": {
+    "Zoom": "Vergroting",
+    "Highlight": "Markering",
+    "Lens": "Lens",
+    "Speech": "Spraak",
+    "More": "Meer"
+  },
+
+  "demopage": {
+    "welcome": "Welkom!",
+    "blurb": "Sitecues leest de website voor."
+  }
+}
