@@ -8,7 +8,7 @@ define(
     'page/util/geo',
     'run/events',
     'page/highlight/fixed-elements',
-    'mini-core/native-global',
+    'core/native-global',
     'run/inline-style/inline-style'
   ],
   function (

@@ -3,7 +3,7 @@
  */
 
 define([
-    'mini-core/native-global'
+    'core/native-global'
   ],
   function(nativeGlobal) {
 

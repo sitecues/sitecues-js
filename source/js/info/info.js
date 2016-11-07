@@ -9,7 +9,7 @@ define(
     'page/util/color',
     'run/events',
     'run/conf/id',
-    'mini-core/native-global',
+    'core/native-global',
     'run/inline-style/inline-style'
   ],
   function (

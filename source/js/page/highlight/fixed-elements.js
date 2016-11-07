@@ -4,7 +4,7 @@ define(
     'page/positioner/constants',
     'page/positioner/style-lock/style-listener/style-listener',
     'run/util/array-utility',
-    'mini-core/native-global'
+    'core/native-global'
   ],
   function (
     constants,

@@ -16,7 +16,7 @@ define(
     'page/zoom/util/restrict-zoom',
     'page/zoom/style',
     'page/viewport/scrollbars',
-    'mini-core/native-global',
+    'core/native-global',
     'run/inline-style/inline-style'
   ],
   function (

@@ -8,7 +8,7 @@ define(
     'page/style-service/css-aggregator',
     'page/style-service/media-queries',
     'run/platform',
-    'mini-core/native-global'
+    'core/native-global'
   ],
   function (
     $,

@@ -8,7 +8,7 @@ define([
   'run/locale',
   'run/constants',
   'Promise',
-  'mini-core/native-global'
+  'core/native-global'
   ],
   function(urls,
            domEvents,

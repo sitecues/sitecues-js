@@ -4,7 +4,7 @@
  * sitecues._getHelperFrame must also be defined by the minicore
  * Also needs to go into task/extension/amd-config and be overridden by extension
  */
-sitecues.define('mini-core/native-global', [], function () { return sitecues._shared.nativeGlobal; });
-sitecues.define('mini-core/page-view', [], function () { return sitecues._shared.pageView; });
-sitecues.define('mini-core/session', [], function () { return sitecues._shared.session; });
-sitecues.define('mini-core/user', [], function () { return sitecues._shared.user; });
+sitecues.define('core/native-global', [], function () { return sitecues._shared.nativeGlobal; });
+sitecues.define('core/page-view', [], function () { return sitecues._shared.pageView; });
+sitecues.define('core/session', [], function () { return sitecues._shared.session; });
+sitecues.define('core/user', [], function () { return sitecues._shared.user; });

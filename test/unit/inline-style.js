@@ -2,7 +2,7 @@ define(
     [
         'intern!tdd',
         'intern/chai!assert',
-        'mini-core/native-global',
+        'core/native-global',
         'run/inline-style/inline-style'
     ],
     function (

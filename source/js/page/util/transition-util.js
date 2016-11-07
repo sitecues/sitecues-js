@@ -4,7 +4,7 @@ define(
     'Promise',
     'run/inline-style/inline-style',
     'run/util/array-utility',
-    'mini-core/native-global',
+    'core/native-global',
     'run/dom-events'
   ],
   function (

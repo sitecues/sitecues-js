@@ -1,8 +1,8 @@
 define(
   [
-    'mini-core/user',
-    'mini-core/session',
-    'mini-core/page-view'
+    'core/user',
+    'core/session',
+    'core/page-view'
   ],
   function(
     user,

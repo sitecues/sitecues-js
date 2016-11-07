@@ -1,6 +1,6 @@
 define(
   [
-    'mini-core/user',
+    'core/user',
     'run/util/object-utility'
   ],
   function (

@@ -9,7 +9,7 @@ define(
     'page/cursor/cursor',
     'run/events',
     'run/dom-events',
-    'mini-core/native-global',
+    'core/native-global',
     'run/inline-style/inline-style'
   ],
   function (

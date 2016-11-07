@@ -12,10 +12,10 @@ var config = require('../build-config'),
   fs = require('fs'),
   JS_SOURCE_DIR = config.librarySourceDir + '/js',
   PATHS = {
-    'mini-core/native-global' : 'empty:',
-    'mini-core/user' : 'empty:',
-    'mini-core/page-view' : 'empty:',
-    'mini-core/session' : 'empty:',
+    'core/native-global' : 'empty:',
+    'core/user' : 'empty:',
+    'core/page-view' : 'empty:',
+    'core/session' : 'empty:',
     '$': 'empty:',
     'Promise': 'empty:'   // In runtime config, via definePrim : 'Promise' to allow use of alameda's built-in Prim library
   };

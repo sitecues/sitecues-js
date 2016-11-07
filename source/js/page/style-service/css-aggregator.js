@@ -8,7 +8,7 @@ define(
     'page/style-service/user-agent-css',
     'run/conf/urls',
     'page/style-service/media-queries',
-    'mini-core/native-global'
+    'core/native-global'
   ],
   function (
     $,

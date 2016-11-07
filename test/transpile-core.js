@@ -8,7 +8,7 @@ const fsAtomic  = require('fs-atomic');
 const path      = require('path');
 const del       = require('del');
 const corePath  = '../sitecues-core/lib/js/';
-const buildPath = path.resolve('test/mini-core');
+const buildPath = path.resolve('test/core');
 
 const readCoreFile = (fileName, pathComponents) => {
     return new Promise((resolve, reject) => {

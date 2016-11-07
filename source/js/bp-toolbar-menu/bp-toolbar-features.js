@@ -8,7 +8,7 @@ define([
     'bp-toolbar-menu/bp-toolbar-view',
     'run/events',
     'run/dom-events',
-    'mini-core/native-global'
+    'core/native-global'
   ],
   function(metric,
            constants,

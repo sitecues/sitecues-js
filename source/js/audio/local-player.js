@@ -3,7 +3,7 @@
 define(
   [
     'Promise',
-    'mini-core/native-global'
+    'core/native-global'
   ],
   function (
     Promise,

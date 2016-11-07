@@ -4,7 +4,7 @@ define(
     'run/util/xhr',
     'run/conf/preferences',
     'run/conf/site',
-    'mini-core/native-global'
+    'core/native-global'
   ],
   function (
     urls,
