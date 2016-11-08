@@ -18,7 +18,7 @@ define(
     return {
       TRIGGER_TYPES: TRIGGER_TYPES,
       REROUTE_NETWORK_SPEECH_KEY : '-sc-reroute-network-tts-',
-      AVAILABLE_CUES : { 'ar': 1, 'de': 1, 'en': 1, 'es': 1, 'fr': 1, 'pl': 1, 'sv': 1 },
+      AVAILABLE_CUES : { 'ar': 1, 'de': 1, 'en': 1, 'en-US': 1, 'es': 1, 'fr': 1, 'pl': 1, 'sv': 1 },
       speechStrategy : speechStrategy,
       // jshint -W117
       autoStrategy : SC_AUTO_SPEECH || speechStrategy.PREFER_NETWORK
