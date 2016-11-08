@@ -79,9 +79,9 @@ define(
       .replace(/<sc-link /g, '<sc-link role="button"' + INTERACTIVE+ '" ')
       .replace(/<sc-tab /g, '<sc-link role="tab" aria-selected="false"' + INTERACTIVE+ '" ')
       .replace(/<\/sc-tab/g, '</sc-link')
-      .replace(/<sc-normal-range /g, '<input type="range"' + INTERACTIVE + ' scp-normal-range" ')
+      .replace(/<sc-normal-range /g, '<input type="range"' + INTERACTIVE + ' scp-input scp-normal-range" ')
       .replace(/<\/sc-normal-range>/g, '</input>')
-      .replace(/<sc-hue-range /g, '<input type="range"' + INTERACTIVE + ' scp-hue-range" ')
+      .replace(/<sc-hue-range /g, '<input type="range"' + INTERACTIVE + ' scp-input scp-hue-range" ')
       .replace(/<\/sc-hue-range>/g, '</input>');
   }
 

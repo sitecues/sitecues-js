@@ -118,7 +118,7 @@ htmlSecondary =
 '<sc-h1 id="scp-feedback-header" class="scp-card-header scp-secondary-feature">{{rate_us}}</sc-h1>\
 <sc class="scp-secondary-feature scp-transition-opacity scp-if-feedback" role="group" aria-labelledby="scp-feedback-header">\
   <sc-p id="scp-feedback-prompt">{{rate_us_suggest}} {{rate_us_prompt}}</sc-p>\
-  <textarea id="scp-feedback-textarea" class="scp-hand-cursor" data-allow-scroll="true" \
+  <textarea id="scp-feedback-textarea" class="scp-hand-cursor scp-textarea" data-allow-scroll="true" \
     aria-describedby="scp-feedback-prompt" data-visible-focus-on="scp-feedback-input-rect" placeholder="{{tell_us_something}}"></textarea>\
   <sc-button id="scp-feedback-send-button" aria-disabled="true"><a class="scp-button-link scp-hand-cursor" id="scp-feedback-send-link" class="scp-hand-cursor" data-mailto="mailto:support@sitecues.com">{{send}}</a></sc-button>.\
 </sc>\
