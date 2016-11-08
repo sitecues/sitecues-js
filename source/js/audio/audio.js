@@ -260,12 +260,11 @@ define(
     });
   }
 
-  function toCueLocale(cueAudioLocale) {
-    var locale = cueAudioLocale.toLowerCase(),
-      lang = locale.split('-')[0];
+  function toCueLocale(locale) {
+    var lang = locale.split('-')[0];
 
     function useIfAvailable(tryLocale) {
-      return constant.AVAILABLE_CUES[tryLocale] && tryLocale;
+      return constant.AVAILABLE_CUES.has(tryLocale) && tryLocale;
     }
 
     return useIfAvailable(locale) || useIfAvailable(lang);
