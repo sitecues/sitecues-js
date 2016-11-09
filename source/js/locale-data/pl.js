@@ -21,6 +21,9 @@ define([], function() {
     rating_4: '4 gwiazdki',
     rating_5: '5 gwiazdek',
 
+    // Toolbar
+    options_menu: 'Menu opcji Sitecues',
+
     // Visible labels
     // - Main
     pre_zoom: 'Powiększenie ',
