@@ -400,6 +400,7 @@ define(
 
       if (state.completedZoom === 1) {
         // We don't need to scale the top if we aren't zooming
+        inlineStyle.restoreLast(element, 'transition');
         return;
       }
 

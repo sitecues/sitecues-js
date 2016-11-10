@@ -57,11 +57,21 @@ define(
       };
 
   function setProperty(elementStyle, declaration) {
-    var property = toKebabCase(declaration.property),
-        value    = fixUnits(property, declaration.value),
-        priority = declaration.priority || '';
+    var property  = toKebabCase(declaration.property),
+        value     = fixUnits(property, declaration.value),
+        safeValue = value === null || value === undefined ? '' : value,
+        priority  = declaration.priority || '',
+        currentPriority = elementStyle.getPropertyPriority(property),
+        currentValue    = elementStyle.getPropertyValue(property);
+
+    if (currentPriority === priority && currentValue === safeValue) {
+      // This declaration is already assigned
+      return;
+    }
+
     elementStyle.removeProperty(property); // We need to remove the existing style declaration because in Safari we aren't able to override declarations with higher priority
     if (value !== undefined) {
+      // If value is undefined, don't bother setting the style
       elementStyle.setProperty(property, value, priority);
     }
   }

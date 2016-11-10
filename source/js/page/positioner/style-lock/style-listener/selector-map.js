@@ -7,10 +7,12 @@
 * */
 define(
   [
-    'page/positioner/util/element-info'
+    'page/positioner/util/element-info',
+    'run/util/array-utility'
   ],
   function (
-    elementInfo
+    elementInfo,
+    arrayUtil
 ) {
 
   'use strict';
@@ -26,7 +28,7 @@ define(
     // example from chicagolighthouse.org :
     // input[type=\"number\"]::-webkit-inner-spin-button, input[type=\"number\"]::-webkit-outer-spin-button"
     try {
-      results = Array.prototype.slice.call(document.querySelectorAll(selector), 0)
+      results = arrayUtil.from(document.querySelectorAll(selector))
         .filter(elementInfo.isOriginal); // Only original elements are considered for processing
       return results;
     }
@@ -52,8 +54,8 @@ define(
   }
 
   return {
-    cacheInitialQueries: cacheInitialQueries,
-    makeNewQuery: makeNewQuery,
-    getCachedQuery: getCachedQuery
+    cacheInitialQueries : cacheInitialQueries,
+    makeNewQuery        : makeNewQuery,
+    getCachedQuery      : getCachedQuery
   };
 });

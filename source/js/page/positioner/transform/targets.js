@@ -38,7 +38,7 @@ define(
   }
 
   function getTargets() {
-    return arrayUtil.fromSet(fixedTargets);
+    return arrayUtil.from(fixedTargets);
   }
 
   function getCount() {
