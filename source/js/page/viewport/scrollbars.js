@@ -10,7 +10,7 @@ define(
   [
     'run/platform',
     'page/viewport/viewport',
-    'mini-core/native-global',
+    'core/native-global',
     'page/zoom/util/body-geometry',
     'run/inline-style/inline-style'
   ],

@@ -6,7 +6,7 @@ define(
     'run/bp/constants',
     'run/bp/helper',
     'run/events',
-    'mini-core/native-global',
+    'core/native-global',
     'run/inline-style/inline-style'
   ],
   function (

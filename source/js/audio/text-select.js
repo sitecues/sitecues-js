@@ -7,7 +7,7 @@ define(
     '$',
     'run/events',
     'audio/constant',
-    'mini-core/native-global'
+    'core/native-global'
   ],
   function (
     $,

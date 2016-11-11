@@ -12,7 +12,7 @@ define([
     'run/metric/metric',
     'run/events',
     'run/dom-events',
-    'mini-core/native-global'
+    'core/native-global'
   ],
   function(bpToolbarFeatures,
            bpToolbarView,

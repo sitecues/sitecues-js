@@ -28,7 +28,7 @@ define(
     'page/viewport/scrollbars',
     'page/zoom/config/config',
     'run/events',
-    'mini-core/native-global',
+    'core/native-global',
     'run/inline-style/inline-style',
     'page/util/transition-util'
   ],

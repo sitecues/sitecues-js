@@ -10,7 +10,7 @@ define(
     'run/platform',
     '$',
     'hlb/constants',
-    'mini-core/native-global',
+    'core/native-global',
     'run/inline-style/inline-style'
   ],
   function (

@@ -26,10 +26,10 @@ var config = require('../build-config.js'),
       // In runtime config, via definePrim : 'Promise' to allow use of alameda's built-in Prim library
       'Promise': 'empty:',
       // DIFFERENT in the extension
-      'mini-core/user': OVERRIDES_DIR + 'user',
-      'mini-core/native-global': OVERRIDES_DIR + 'native-global',
-      'mini-core/page-view': OVERRIDES_DIR + 'page-view',
-      'mini-core/session': OVERRIDES_DIR + 'session',
+      'core/user': OVERRIDES_DIR + 'user',
+      'core/native-global': OVERRIDES_DIR + 'native-global',
+      'core/page-view': OVERRIDES_DIR + 'page-view',
+      'core/session': OVERRIDES_DIR + 'session',
       'run/data-map': config.tmpDir + '/data-map',
       // UNUSED in the extension (stubbed methods)
       'run/ab-test/ab-test': OVERRIDES_DIR + 'ab-test',

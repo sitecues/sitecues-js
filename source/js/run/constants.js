@@ -23,7 +23,7 @@ define([], function () {
     PANEL_CLICK: 'panel-clicked',
     PANEL_CLOSE: 'panel-closed',
     PANEL_FOCUS_MOVE: 'panel-focus-moved',
-    SITECUES_READY: 'sc-ready',
+    PAGE_VISIT: 'page-visited',
     SLIDER_SETTING_CHANGE: 'slider-setting-changed',
     TTS_REQUEST: 'tts-requested',
     ZOOM_CHANGE: 'zoom-changed'

@@ -1,4 +1,4 @@
-define('mini-core/page-view', [], function() {
+define('core/page-view', [], function() {
   "use strict";
 
   return {

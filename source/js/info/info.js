@@ -9,7 +9,7 @@ define(
     'page/util/color',
     'run/events',
     'run/conf/id',
-    'mini-core/native-global',
+    'core/native-global',
     'run/inline-style/inline-style'
   ],
   function (
@@ -123,7 +123,7 @@ define(
 
     var
       localizedPageName = pageName + '-' + locale.getUiLocale(),
-      sitecuesJsUrl = urls.getRawScriptUrl(),
+      sitecuesJsUrl = sitecues.config.scriptUrl,
       hostUrl = window.location,
       pageUrl = urls.resolveResourceUrl('html/help/' + localizedPageName + '.html',
         {
@@ -133,7 +133,7 @@ define(
           sessionId: ids.sessionId,
           pageViewId: ids.pageViewId,
           prefs: window.localStorage.sitecues,
-          appUrl: site.get('appUrl')
+          versionInfo: sitecues.version
         });
 
     events.emit('info/did-show');

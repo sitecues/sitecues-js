@@ -19,7 +19,10 @@ define([], function() {
     rating_2: '2 étoiles ',
     rating_3: '3 étoiles ',
     rating_4: '4 étoiles',
-    rating_5: ' étoiles',
+    rating_5: '5 étoiles',
+
+    // Toolbar
+    options_menu: 'Menu d’options de Sitecues',
 
     // Visible labels
     // - Main

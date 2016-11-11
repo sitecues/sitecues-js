@@ -15,7 +15,7 @@ define(
     'run/events',
     'run/inline-style/inline-style',
     'run/ab-test/ab-test',
-    'mini-core/native-global'
+    'core/native-global'
   ],
   function (
     BP_CONST,

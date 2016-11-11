@@ -1,0 +1,17 @@
+{
+  "what_is_this":          "Qu’est-ce que c’est?",
+  "turn_off":              "Désactiver",
+  "turn_off_this_site":    "Désactiver pour ce site internet",
+  "hide":                  "Masquer",
+  "quick_description":     "Le zoom et l’interface vocale de Sitecues rendent internet plus facile à lire, à écouter et à utiliser.",
+  "slider_alt":            "Visualisation du curseur de zoom de Sitecues",
+  "slider_instructions":   "Essayez d’utiliser le curseur de zoom pour agrandir cette page web.",
+  "more_tips":             "Basculez vers plus d’astuces Sitecues",
+  "blurb_reset_done":      "Les options du zoom et de l’interface vocale de Sitecues sont désactivées.",
+  "blurb_can_hide":        "Vous pouvez également masquer la barre d’outils Sitecues pour cette page web.",
+  "hide_button":           "Masquer Sitecues",
+  "bye_for_now":           "À bientôt ...",
+  "restore_button":        "Restaurer Sitecues",
+  "restore_via_f8_part1":  "Vous pouvez également appuyer sur",
+  "restore_via_f8_part2":  "à tout moment pour restaurer Sitecues."
+}

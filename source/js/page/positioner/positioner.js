@@ -15,7 +15,7 @@ define(
     'page/positioner/constants',
     'page/zoom/util/body-geometry',
     'run/events',
-    'mini-core/native-global'
+    'core/native-global'
   ],
   function (
     platform,

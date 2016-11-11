@@ -214,7 +214,7 @@ define([ 'run/data-map', 'Promise' ], function(dataMap, Promise) {
 
   return {
     getLang: getLang,
-    getBrowserLang: getBrowserLocale,
+    getBrowserLocale: getBrowserLocale,
     getPageLocale: getPageLocale,
     getUiLocale: getUiLocale,
     getTranslationLocale: getTranslationLocale,
