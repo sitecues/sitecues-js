@@ -260,12 +260,11 @@ define(
     });
   }
 
-  function toCueTextLocale(cueAudioLocale) {
-    var locale = cueAudioLocale.toLowerCase(),
-      lang = locale.split('-')[0];
+  function toCueLocale(locale) {
+    var lang = locale.split('-')[0];
 
     function useIfAvailable(tryLocale) {
-      return constant.AVAILABLE_CUES[tryLocale] && tryLocale;
+      return constant.AVAILABLE_CUES.has(tryLocale) && tryLocale;
     }
 
     return useIfAvailable(locale) || useIfAvailable(lang);
@@ -319,21 +318,20 @@ define(
   function speakCueByName(name) {
     stopAudio();  // Stop any currently playing audio
 
-    var cueAudioLocale = getAudioLocale(); // Use document language for cue voice, e.g. en-US or en
+    var cueLocale = toCueLocale(getAudioLocale()); // Use document language for cue voice, e.g. en-US or en
     addStopAudioHandlers();
 
     function speakLocally(onUnavailable) {
-      var onUnavailableFn = onUnavailable || fireNotBusyEvent,
-        cueTextLocale = toCueTextLocale(cueAudioLocale);  // Locale for text (likely just the 2-letter lang prefix)
-      if (cueTextLocale && isLocalSpeechAllowed()) {
+      var onUnavailableFn = onUnavailable || fireNotBusyEvent;
+      if (cueLocale && isLocalSpeechAllowed()) {
         lastPlayer = localPlayer;
         fireBusyEvent();
-        getCueText(name, cueTextLocale, function (cueText) {
+        getCueText(name, cueLocale, function (cueText) {
           if (cueText) {
             localPlayer
               .speak({
                 text: cueText,
-                locale: cueAudioLocale
+                locale: cueLocale
               })
               .then(fireNotBusyEvent)
               .catch(function() {
@@ -349,10 +347,10 @@ define(
 
     function speakViaNetwork(onUnavailable) {
       var onUnavailableFn = onUnavailable || fireNotBusyEvent;
-      if (isNetworkSpeechAllowed(cueAudioLocale)) {
+      if (isNetworkSpeechAllowed(cueLocale)) {
         lastPlayer = networkPlayer;
         fireBusyEvent();
-        var url = getCueUrl(name, cueAudioLocale);
+        var url = getCueUrl(name, cueLocale);
         networkPlayer
           .play({
             isSpeech: true,

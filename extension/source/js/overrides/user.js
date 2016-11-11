@@ -1,5 +1,5 @@
 /**
- * Partial mini-core/user implementation (the subset we need)
+ * Partial core/user implementation (the subset we need)
  * Implements same API but uses chrome.storage.local for the storage, which will persist across sites.
  * Note: we could use chrome.storage.sync if we actually wanted settings to be saved across devices,
  * but we probably don't since devices can have very different screen sizes and uses.
@@ -17,7 +17,7 @@
  */
 
 define(
-  'mini-core/user',
+  'core/user',
   [
   ],
   function (

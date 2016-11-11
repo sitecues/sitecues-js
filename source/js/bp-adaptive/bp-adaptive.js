@@ -13,7 +13,7 @@ define(
     'run/bp/model/state',
     'run/bp/view/view',
     'run/bp/constants',
-    'mini-core/native-global'
+    'core/native-global'
   ],
   function (
     state,

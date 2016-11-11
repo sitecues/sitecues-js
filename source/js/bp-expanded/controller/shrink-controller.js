@@ -10,7 +10,7 @@ define(
     'run/bp/view/view',
     'run/events',
     'run/dom-events',
-    'mini-core/native-global'
+    'core/native-global'
   ],
   function (
     BP_CONST,

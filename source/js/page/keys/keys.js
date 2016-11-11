@@ -6,7 +6,7 @@ define(
     'run/events',
     'page/highlight/constants',
     'run/constants',
-    'mini-core/native-global'
+    'core/native-global'
   ],
   function (
     elemClassifier,

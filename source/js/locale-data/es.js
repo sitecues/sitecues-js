@@ -21,6 +21,9 @@ define([], function() {
     rating_4: '4 estrellas',
     rating_5: '5 estrellas',
 
+    // Toolbar
+    options_menu: 'Menú de Opciones Sitescues',
+
     // Visible labels
     // - Main
     pre_zoom: 'Acercamiento ',

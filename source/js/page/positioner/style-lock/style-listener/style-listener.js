@@ -18,7 +18,7 @@ define(
     'page/positioner/util/element-info',
     'page/positioner/util/element-map',
     'run/constants',
-    'mini-core/native-global',
+    'core/native-global',
     'run/inline-style/inline-style',
     'page/util/transition-util',
     'page/positioner/style-lock/style-lock',

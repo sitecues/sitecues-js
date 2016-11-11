@@ -1,0 +1,17 @@
+{
+  "what_is_this":          "Co to jest?",
+  "turn_off":              "Wyłącz",
+  "turn_off_this_site":    "Wyłącz dla tej strony",
+  "hide":                  "Ukryj",
+  "quick_description":     "Powiększanie i mowa Sitecues powoduje, że internet jest łatwiejszy do odczytu, odsłuchu i użycia.",
+  "slider_alt":            "Obraz suwaka powiększenia Sitecues",
+  "slider_instructions":   "Spróbuj użyć suwak powiększenia w celu łatwiejszego odczytu strony internetowej.",
+  "more_tips":             "Idź do dalszych porad Sitecues",
+  "blurb_reset_done":      "Funkcje powiększania i mowy Sitecues są wyłączone.",
+  "blurb_can_hide":        "Możesz też ukryć pasek narzędzi Sitecues na tej stronie.",
+  "hide_button":           "Ukryj Sitecues",
+  "bye_for_now":           "Do zobaczenia ...",
+  "restore_button":        "Przywróć Sitecues",
+  "restore_via_f8_part1":  "Możesz też wcisnąć",
+  "restore_via_f8_part2":  "aby przywrócić Sitecues w dowolnym momencie."
+}

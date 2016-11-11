@@ -9,7 +9,7 @@ define(
   [
     'page/positioner/style-lock/style-listener/selector-map',
     'run/util/array-utility',
-    'mini-core/native-global'
+    'core/native-global'
   ],
   function (
     selectorMap,

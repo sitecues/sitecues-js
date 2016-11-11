@@ -8,7 +8,7 @@ define(
     'run/bp/view/view',
     'run/events',
     'run/constants',
-    'mini-core/native-global',
+    'core/native-global',
     'run/inline-style/inline-style'
   ],
   function (

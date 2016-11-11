@@ -38,7 +38,7 @@ define(
             loaderOptions : {
                 baseUrl : 'source/js',
                 packages : [
-                    { name : 'mini-core',   location: testDir + 'mini-core'},
+                    { name : 'core',        location: testDir + 'core'},
                     { name : 'test',        location: testDir },
                     { name : UNIT_PKG,      location: testDir + 'unit' },
                     { name : FUNC_PKG,      location: testDir + 'functional' },

@@ -14,7 +14,7 @@ define(
     'bp-secondary/insert-secondary-markup',
     'bp-secondary/bp-secondary-features',
     'run/events',
-    'mini-core/native-global',
+    'core/native-global',
     'run/inline-style/inline-style'
   ],
   function (

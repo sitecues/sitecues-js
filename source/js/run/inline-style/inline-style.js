@@ -18,7 +18,7 @@
 * */
 define(
   [
-    'mini-core/native-global',
+    'core/native-global',
     'run/util/array-utility',
     'run/util/object-utility'
   ],
