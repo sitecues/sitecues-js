@@ -18,7 +18,7 @@ define(
   'run/util/array-utility',
   'page/positioner/util/element-info',
   'run/constants',
-  'mini-core/native-global',
+  'core/native-global',
   'run/inline-style/inline-style',
   'page/positioner/transplant/mutation-relay',
   'run/util/object-utility',
@@ -188,7 +188,6 @@ function (
           }
 
           if (isHandled) {
-            console.log('run handlers:', handlerOpts);
             elementHandlers.run(handlerOpts);
             declarationHandlers.run(handlerOpts);
           }

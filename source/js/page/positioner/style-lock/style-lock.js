@@ -17,7 +17,7 @@ define(
     'page/positioner/constants',
     'run/constants',
     'page/positioner/util/element-info',
-    'mini-core/native-global',
+    'core/native-global',
     'page/positioner/style-lock/style-cache'
   ],
   function (

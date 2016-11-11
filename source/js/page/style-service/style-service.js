@@ -7,7 +7,7 @@ define(
     '$',
     'page/style-service/sheet-aggregator',
     'page/style-service/media-queries',
-    'mini-core/native-global'
+    'core/native-global'
   ],
   function (
     $,

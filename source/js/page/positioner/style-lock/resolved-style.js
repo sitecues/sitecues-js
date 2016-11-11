@@ -11,7 +11,7 @@ define(
   'page/positioner/style-lock/style-lock',
   'run/inline-style/inline-style',
   'page/positioner/transplant/anchors',
-  'mini-core/native-global',
+  'core/native-global',
   'run/dom-events',
   'run/util/array-utility'
 ],
@@ -63,7 +63,7 @@ function (
   //
   //}
 
-  // This is a heuristic that looks at the number of digits after the decimal, and if that number is greater than 4
+  // This is a heuristic that looks at the number of digits after the decimal, and if that number is greater than 2
   // we guess that it's likely being animated by a script, e.g. if the opacity value is `0.04345` it's probably
   // being animated via keyframes.
   function isValueAnimating(value) {

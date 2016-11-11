@@ -7,7 +7,7 @@ define(
     'Promise',
     'page/style-service/user-agent-css',
     'run/conf/urls',
-    'mini-core/native-global',
+    'core/native-global',
     'run/util/array-utility',
     'run/inline-style/inline-style'
   ],
