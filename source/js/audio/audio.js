@@ -318,7 +318,8 @@ define(
   function speakCueByName(name) {
     stopAudio();  // Stop any currently playing audio
 
-    var cueLocale = toCueLocale(getAudioLocale()); // Use document language for cue voice, e.g. en-US or en
+    // Use document language for cue voice, e.g. en-US or en
+    var cueLocale = toCueLocale(getAudioLocale()) || toCueLocale(locale.getUiLocale()) || 'en';
     addStopAudioHandlers();
 
     function speakLocally(onUnavailable) {
