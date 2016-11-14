@@ -21,6 +21,9 @@ define([], function() {
     rating_4: '4 Stern',
     rating_5: '5 Stern',
 
+    // Toolbar
+    options_menu: 'Sitecues Optionen',
+
     // Visible labels
     // - Main
     pre_zoom: '',

@@ -1,0 +1,17 @@
+{
+  "what_is_this":          "Was ist das?",
+  "turn_off":              "Deaktivieren",
+  "turn_off_this_site":    "Für diese Webseite deaktivieren",
+  "hide":                  "Verbergen",
+  "quick_description":     "Mit Sitecues sind Ihre Webseiten jetzt besser zu sehen und sogar zu hören.",
+  "slider_alt":            "Sitecues Schieber zum Vergössern",
+  "slider_instructions":   "Verwenden Sie den Sitecues Schieber um diese Webseite zu vergrössern.",
+  "more_tips":             "Mehr Sitecues Tips",
+  "blurb_reset_done":      "Sitecues Zoom & Sprachfunktionen sind jetzt deaktiviert.",
+  "blurb_can_hide":        "Sie können die Sitecues Menüleiste auf dieser Seite verbergen.",
+  "hide_button":           " Sitecues verbergen",
+  "bye_for_now":           "Bis bald ...",
+  "restore_button":        "Sitecues wiederherstellen",
+  "restore_via_f8_part1":  "Drücken Sie",
+  "restore_via_f8_part2":  "um Sitecues wiederherzustellen."
+}
