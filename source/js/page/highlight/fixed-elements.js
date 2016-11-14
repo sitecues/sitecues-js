@@ -4,13 +4,13 @@ define(
     'page/positioner/constants',
     'page/positioner/style-lock/style-listener/style-listener',
     'run/util/array-utility',
-    'core/native-global'
+    'page/positioner/style-lock/style-cache'
   ],
   function (
     constants,
     styleListener,
     arrayUtil,
-    nativeGlobal
+    styleCache
   ) {
   'use strict';
 
@@ -38,7 +38,7 @@ define(
   }
 
   function get() {
-    return arrayUtil.fromSet(fixedElements);
+    return arrayUtil.from(fixedElements);
   }
 
   function has(element) {
@@ -83,11 +83,12 @@ define(
     fixedElements = new Set();
     insertStylesheet();
     styleListener.init(function () {
-      styleListener.registerToResolvedValueHandler(declaration, add);
-      styleListener.registerFromResolvedValueHandler(declaration, remove);
-      nativeGlobal.setTimeout(function () {
-        add.call(styleListener.getElementsWithResolvedValue(declaration));
-      }, 0);
+      styleListener.bindDeclarationListener(declaration, {
+        toHandler : add,
+        fromHandler : remove
+      }).then(function () {
+        add.call(styleCache.getResolvedElements(declaration));
+      });
     });
   }
 

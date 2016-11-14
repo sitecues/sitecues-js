@@ -1,18 +1,14 @@
 // This module assists with transforming elements with transition styles
 define(
   [
-    'Promise',
     'run/inline-style/inline-style',
     'run/util/array-utility',
-    'core/native-global',
-    'run/dom-events'
+    'core/native-global'
   ],
   function (
-    Promise,
     inlineStyle,
     arrayUtil,
-    nativeGlobal,
-    domEvents
+    nativeGlobal
   ) {
   'use strict';
 
@@ -48,6 +44,7 @@ define(
       disableStyleTransition(element, property);
     });
     inlineStyle.override(elements, [property, value]);
+    // We need to restore the transition styles asynchronously, otherwise they will animate the override
     nativeGlobal.setTimeout(function () {
       elements.forEach(restoreTransition);
     }, 0);
@@ -63,86 +60,16 @@ define(
     return value * (unit === 's' ? 1000 : 1);
   }
 
-  // Returns a promise for the computed value of the property once the style has finished
-  // transitioning, if it currently is transitioning
-  function getFinalStyleValue(element, opts) {
-    var transitionTimer,
-        property          = opts.property,
-        computedStyle     = getComputedStyle(element),
-        initialValue      = computedStyle[property],
-        initialTransition = computedStyle.transition,
-        transitionInfo    = opts.transitionInfo || getTransitionInfo(element);
-
-    var propertyTransition = findPropertyTransition(property, transitionInfo);
-
-    if (!propertyTransition) {
-      // No relevant transition styles apply to this property, so we can return it's current resolved value
-      return Promise.resolve(computedStyle[property]);
-    }
-
-    var delay    = propertyTransition.delay,
-        duration = propertyTransition.duration;
-
-    function setTransitionTimeout(resolve) {
-      // setTimeout takes it time parameter in milliseconds
-      // A 20% buffer time is added because there is typically a slight
-      // discrepancy between the explicit timeout and the practical timeout
-      var timeoutLength = Math.ceil((duration + delay) * 1.2);
-
-      return nativeGlobal.setTimeout(function () {
-        // It's important that we update the current style value after the time out
-        var resolveValue,
-            currentValue      = computedStyle[property],
-            currentTransition = computedStyle.transition;
-
-        if (currentValue === initialValue) {
-          // If the style value hasn't changed, a transition has not taken place
-          resolveValue = currentValue;
-        }
-        else if (initialTransition !== currentTransition) {
-          // The `transitionend` event didn't fire because the transition value changed in the interim, interrupting the transition
-          // since we can't guarantee that between that time and now a new target property value hasn't been assigned, add another
-          // getFinalStyleValue promise to the chain
-          resolveValue = getFinalStyleValue(element, {
-            property : property
-          });
-        }
-        else {
-          var boundingRect = element.getBoundingClientRect();
-          if (!boundingRect.height || !boundingRect.width) {
-            // If an element has been unrendered, its transitions are interrupted
-            resolveValue = currentValue;
-          }
-          else {
-            // If the element is still rendered, its current value is different than its initial value, and it still
-            // has the same transition, a new value has been assigned to its target property and we should set a new
-            // timeout.
-            initialValue    = currentValue;
-            transitionTimer = setTransitionTimeout(resolve);
-            return;
-          }
-        }
-
-        resolve(resolveValue);
-      }, timeoutLength);
-    }
-
-    return new Promise(function (resolve) {
-      domEvents.on(element, 'transitionend', function onTransition(evt) {
-        if (evt.propertyName === property) {
-          clearTimeout(transitionTimer);
-          domEvents.off(element, 'transitionend', onTransition);
-          resolve(computedStyle[property]);
-        }
-      });
-      transitionTimer = setTransitionTimeout(resolve);
-    });
-  }
-
   function getTransitionInfo(element) {
     var computedStyle        = getComputedStyle(element),
-        transitionProperties = computedStyle.transitionProperty.split(','),
-        transitionDurations  = computedStyle.transitionDuration.split(','),
+        transitionProperties = computedStyle.transitionProperty.split(',');
+
+    // This value can be an empty string if the element isn't inserted into the DOM
+    if (!transitionProperties.length) {
+      return [];
+    }
+
+    var transitionDurations  = computedStyle.transitionDuration.split(','),
         durationCount        = transitionDurations.length,
         transitionDelays     = computedStyle.transitionDelay.split(',');
 
@@ -162,13 +89,22 @@ define(
   }
 
   function canPropertyTransition(opts) {
-    var element        = opts.element,
-        property       = opts.property,
-        transitionInfo = opts.transitionInfo || getTransitionInfo(element);
+    var propertyTransition = opts.propertyTransition,
+        element            = opts.element,
+        height             = element.getBoundingClientRect().height;
 
-    var propertyInfo = findPropertyTransition(property, transitionInfo);
+    if (!height) {
+      // Unrendered elements can't transition
+      return false;
+    }
 
-    return Boolean(propertyInfo && propertyInfo.duration);
+    if (!propertyTransition) {
+      var property = opts.property,
+          transitionInfo = opts.transitionInfo || getTransitionInfo(element);
+      propertyTransition = findPropertyTransition(property, transitionInfo);
+    }
+
+    return Boolean(propertyTransition && propertyTransition.duration);
   }
 
   function findPropertyTransition(property, transitionInfo) {
@@ -188,7 +124,7 @@ define(
     disableTransformTransition : disableTransformTransition,
     disableStyleTransition     : disableStyleTransition,
     restoreTransition          : restoreTransition,
-    getFinalStyleValue         : getFinalStyleValue,
+    findPropertyTransition     : findPropertyTransition,
     canPropertyTransition      : canPropertyTransition,
     getTransitionInfo          : getTransitionInfo
   };

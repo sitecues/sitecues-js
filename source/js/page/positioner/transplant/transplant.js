@@ -456,8 +456,10 @@ define(
         anchors.propagateVisibilityMutation(nestedPlaceholders);
       }
 
-      styleListener.registerToResolvedValueHandler(declaration, onMutatedVisibility);
-      styleListener.registerFromResolvedValueHandler(declaration, onMutatedVisibility);
+      styleListener.bindDeclarationListener(declaration, {
+        toHandler   : onMutatedVisibility,
+        fromHandler : onMutatedVisibility
+      });
     });
   }
 

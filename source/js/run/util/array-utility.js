@@ -43,6 +43,27 @@ define([], function () {
       return -1;
     };
 
+  function fromSet(set) {
+    var arr = [];
+    set.forEach(function (member) {
+      arr.push(member);
+    });
+    return arr;
+  }
+
+  // This isn't from MDN, it's just providing the functionality used within the project. Don't expect it to do everything that
+  // Array.from is capable of. The MDN polyfill actually doesn't support Sets D:
+  var fromPolyfill = Array.from || function (arrayLike) {
+    if (Object.getPrototypeOf(arrayLike) === Set.prototype) {
+      return fromSet(arrayLike);
+    }
+    return Array.prototype.slice.call(arrayLike, 0);
+  };
+
+  function from(arrayLike) {
+    return fromPolyfill(arrayLike);
+  }
+
   function find(arrayLike, fn, thisArg) {
     return findPolyfill.call(from(arrayLike), fn, thisArg);
   }
@@ -155,18 +176,6 @@ define([], function () {
     return array;
   }
 
-  function fromSet(set) {
-    var arr = [];
-    set.forEach(function (member) {
-      arr.push(member);
-    });
-    return arr;
-  }
-
-  function from(arrayLike) {
-    return Array.prototype.slice.call(arrayLike, 0);
-  }
-
   function wrap(data) {
     return Array.isArray(data) ? data : [data];
   }
@@ -179,7 +188,6 @@ define([], function () {
     difference : difference,
     union   : union,
     intersection : intersection,
-    fromSet : fromSet,
     from    : from,
     wrap    : wrap,
     find    : find,

@@ -75,7 +75,9 @@ define(['run/metric/metric', 'run/conf/urls'], function(metric, urls) {
     });
   }
 
-  window.addEventListener('error', onError);   // May get both JS and resource errors
+  if (!SC_DEV) {
+    window.addEventListener('error', onError);   // May get both JS and resource errors
+  }
   window.addEventListener('SitecuesUnhandledRejection', onPrimRejection);   // Thrown from prim library
   window.addEventListener('unhandledrejection', onNativeRejection);
   window.addEventListener('rejectionhandled', onNativeRejection);
