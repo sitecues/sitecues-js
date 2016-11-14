@@ -127,7 +127,7 @@ define(
           case 'class':
             var
               // SVG elements in IE11 do not define classList
-              newClasses     = target.classList ? Array.prototype.slice.call(target.classList, 0) : target.className.baseVal.split(' '),
+              newClasses     = elementInfo.getClasses(target),
               oldClasses     = oldValue ? oldValue.split(' ') : [],
               changedClasses = arrayUtil.symmetricDifference(newClasses, oldClasses);
             if (changedClasses.length) {

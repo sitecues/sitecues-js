@@ -179,8 +179,8 @@ define(
   }
 
   function hasSitecuesClass(element) {
-    return arrayUtil.from(element.classList).some(function (className) {
-      return className.indexOf('sc-') === 0;
+    return getClasses(element).some(function (className) {
+      return className.indexOf('sc-') === 0 || className.indexOf('scp-') === 0;
     });
   }
 
@@ -201,6 +201,14 @@ define(
 
   function isInOriginalBody(element) {
     return getHostBody(element) === originalBody;
+  }
+
+  function isSVG(element) {
+    return (element.ownerSVGElement || element).localName === 'svg';
+  }
+
+  function getClasses(element) {
+    return isSVG(element) ? element.className.baseVal.split(' ') : arrayUtil.from(element.classList);
   }
 
   function getOrSet(element, field, value) {
@@ -253,6 +261,7 @@ define(
     isTransplantRoot    : isTransplantRoot,
     isTransplantAnchor  : isTransplantAnchor,
     isInOriginalBody    : isInOriginalBody,
+    getClasses          : getClasses,
     init                : init
   };
 });
