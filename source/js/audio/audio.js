@@ -320,6 +320,8 @@ define(
 
     // Use document language for cue voice, e.g. en-US or en
     var cueLocale = toCueLocale(getAudioLocale()) || toCueLocale(locale.getUiLocale()) || 'en';
+    // TODO Remove this console.log
+    console.log('Sitecues speaking audio cues for language ' + cueLocale);
     addStopAudioHandlers();
 
     function speakLocally(onUnavailable) {
