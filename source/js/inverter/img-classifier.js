@@ -65,7 +65,7 @@ define(
     // - Will run into cross-origin restrictions because URL is from different origin
     // This is not an issue with the extension, because the content script doesn't have cross-origin restrictions
     var url = src || img.getAttribute('src'),
-      isSafeRequest = urls.isSameOrigin(url),
+      isSafeRequest = SC_EXTENSION || urls.isSameOrigin(url),
       safeUrl;
 
     function returnImageWhenComplete(loadableImg, isInverted) {
@@ -90,6 +90,11 @@ define(
       // Create an <img> with the same url so we can apply it to the canvas
       safeUrl = url;
       returnImageWhenComplete(createSafeImage(safeUrl));
+    }
+
+    if (SC_EXTENSION) {
+      // How did we used to do these ?
+      return;
     }
 
     // Uses inverted image for analysis so that if we need to display it, it's already in users cache.

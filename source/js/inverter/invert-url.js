@@ -84,6 +84,10 @@ define([
         return getInvertedDataUrl(url, origElem);
       }
 
+      if (SC_EXTENSION) {
+        throw new Error('Cannot use image/invert service from extension');
+      }
+
       var newUrl = urls.getProxyApiUrl('image/invert', url);
 
       return Promise.resolve(newUrl);

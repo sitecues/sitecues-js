@@ -211,9 +211,9 @@ define(
 
     // Not initialized yet
 
-    // The filter value doesn't work in IE, and is *extremely* slow in Safari
+    // The filter value doesn't work in IE, and is *extremely* slow in Safari <= 9
     // It does work well in Edge, Chrome and Firefox
-    SHOULD_USE_PROXY = platform.browser.isIE || platform.browser.isSafari;
+    SHOULD_USE_PROXY = platform.browser.isIE || (platform.browser.isSafari && platform.browser.version <= 9);
     filterProperty = getFilterProperty();
 
     function classifyBgImages() {
