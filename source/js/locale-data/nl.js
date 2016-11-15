@@ -22,7 +22,7 @@ define([], function() {
     rating_5: '5 sterren',
 
     // Toolbar
-    options_menu: 'Sitecues options menu',
+    options_menu: 'Sitecues menu van opties',
 
     // Visible labels
     // - Main
