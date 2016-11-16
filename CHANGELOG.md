@@ -9,12 +9,18 @@ All notable changes to this project will be documented here.
  - **Removed**    : Disabled or deleted within the source code.
 
 ## Unreleased
+### Fixed
+ -
+
+## [5.0.1] - 2016-11-16
+### Fixed
+ - Versioning for release.
 
 ## [5.0.0] - 2016-11-16
 ### Added
  - Toolbar menu can be turned on with config setting hasOptionsMenu: true
  - Dutch localization and Swedish verbal cues
-### Changed  
+### Changed
  - Loaded by new Sitecues core, repo hosted on github, built in circleci
  - Extra sensitive badge turned on for first time users
  - Expanded more button timer A/B test
