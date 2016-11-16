@@ -9,6 +9,18 @@ All notable changes to this project will be documented here.
  - **Removed**    : Disabled or deleted within the source code.
 
 ## Unreleased
+
+## [5.0.0] - 2016-11-16
+### Added
+ - Toolbar menu can be turned on with config setting hasOptionsMenu: true
+ - Dutch localization and Swedish verbal cues
+### Changed  
+ - Loaded by new Sitecues core, repo hosted on github, built in circleci
+ - Extra sensitive badge turned on for first time users
+ - Expanded more button timer A/B test
+ - Verbal cues now built from text in sitecues-js client source, served from js.sitecues.com
+
+## [4.2.19] - 2016-11-3
 ### Fixed
  - Buttons and forms in the lens can now be interacted with
  - Live update of text fields in the lens allow `enter` to work correctly when intended
