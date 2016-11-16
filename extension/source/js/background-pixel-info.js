@@ -3,6 +3,10 @@
  * Runs at a higher level of permission and can analyze CSS/pixel data without running
  * into cross-origin conflicts
  * NOTE: this is almost an exact duplicate of pixel-info.js -- haven't figured out how to make it DRY
+ * Differences:
+ * - includes color util functions getFastLuminance() and
+ * - getReadableImage() is different
+ * - Removes isInverted logic since it never is
  **/
 
 'use strict';
@@ -13,73 +17,70 @@
 
 (function() {
 
+  // Copied from color.js
+  function getFastLuminance(rgb) {
+    var DIVISOR = 2550; // 255 * (2 + 7 + 1)
+    return (rgb.r*2 + rgb.g*7 + rgb.b) / DIVISOR;
+  }
+
+  // Copied from color.js
+  function rgbToHsl(r, g, b) {
+    r /= 255; g /= 255; b /= 255;
+    var max = Math.max(r, g, b), min = Math.min(r, g, b);
+    var h, s, l = (max + min) / 2;
+
+    if (max === min) {
+      h = s = 0; // achromatic
+    } else {
+      var d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      switch (max) {
+        case r:
+          h = (g - b) / d + (g < b ? 6 : 0);
+          break;
+        case g:
+          h = (b - r) / d + 2;
+          break;
+        case b:
+          h = (r - g) / d + 4;
+          break;
+      }
+      h /= 6;
+    }
+
+    return {
+      h: h,
+      s: s,
+      l: l
+    };
+  }
+
   // Get <img> that can have its pixel data read --
   // 1. Must be completely loaded
   // 2. We have permission (either we're in the extension, the img is not cross-origin, or we can load it through the proxy)
   // Either pass img or src, but not both
-  function getReadableImage(imgOrSrc, isSameOrigin) {
+  function getReadableImage(url) {
     // Unsafe cross-origin request
     // - Will run into cross-origin restrictions because URL is from different origin
     // This is not an issue with the extension, because the content script doesn't have cross-origin restrictions
     return new Promise(function(resolve, reject) {
-      var
-        isImage = typeof imgOrSrc !== 'string',
-        url = isImage ? imgOrSrc.getAttribute('src') : imgOrSrc,
-        safeUrl;
-
-      function returnImageWhenComplete(loadableImg, isInverted) {
-        if (loadableImg.complete) {
-          resolve({
-            element: loadableImg,
-            isInverted: isInverted
-          }); // Already loaded
-        }
-        else {
-          $(loadableImg)
-            .on('load', function () {
-              resolve({
-                element: loadableImg,
-                isInverted: isInverted
-              });
-            })
-            .on('error', function() {
-              reject(new Error('Error evaluating ' + loadableImg.src));
-            });
-        }
-      }
-
-      if (isSameOrigin) {
-        if (isImage && imgOrSrc.localName === 'img') {
-          resolve(imgOrSrc); // The <img> in the DOM can have its pixels queried
-          return;
-        }
-        // Element we want to read is not an <img> -- for example, <input type="image">
-        // Create an <img> with the same url so we can apply it to the canvas
-        safeUrl = url;
-        returnImageWhenComplete(createSafeImage(safeUrl));
-      }
-
-      // Uses inverted image for analysis so that if we need to display it, it's already in users cache.
-      // The inverted image will show the same number of brightness values in the histogram so this won't effect classification
-      invertUrl.getInvertUrl(url, isImage && imgOrSrc)
-        .then(function (newUrl) {
-          returnImageWhenComplete(createSafeImage(newUrl, true));
+      var img = document.createElement('img');
+      img.addEventListener('load', function () {
+        resolve({
+          element: img
         });
+      });
+      img.addEventListener('error', function () {
+        reject(new Error('Error evaluating ' + img.src));
+      });
+      img.crossOrigin = 'anonymous';
+      // Set after crossorigin is set! The order matters.
+      // See http://stackoverflow.com/questions/23123237/drawing-images-to-canvas-with-img-crossorigin-anonymous-doesnt-work
+      img.src = url;
     });
   }
 
-  function createSafeImage(url) {
-    var $safeImg = $('<img>')
-    // Allows use of cross-origin image data
-      .attr('crossorigin', 'anonymous')
-      // Set after crossorigin is set! The order matters.
-      // See http://stackoverflow.com/questions/23123237/drawing-images-to-canvas-with-img-crossorigin-anonymous-doesnt-work
-      .attr('src', url);
-
-    return $safeImg[0];
-  }
-
-  // Either pass img or src, but not both
+  // Copied from pixel-info.js
   function getImageData(imgElement, rect) {
     var canvas = document.createElement('canvas'),
       ctx,
@@ -105,6 +106,7 @@
     });
   }
 
+  // Copied from pixel-info.js
   function getPixelInfo(imgInfo, rect) {
     //
     // Compute Image Features (if we can...)
@@ -173,7 +175,7 @@
         rgba.b = 255 - rgba.b;
       }
 
-      grayscaleVal = colorUtil.getFastLuminance(rgba);
+      grayscaleVal = getFastLuminance(rgba);
       luminanceTotal += grayscaleVal;
       if (grayscaleVal > maxLuminance) {
         maxLuminance = grayscaleVal;
@@ -194,7 +196,7 @@
         ++numDifferentGrayscaleVals;
       }
 
-      hueIndex = Math.floor(colorUtil.rgbToHsl(rgba.r, rgba.g, rgba.b).h * HUE_HISTOGRAM_SIZE);
+      hueIndex = Math.floor(rgbToHsl(rgba.r, rgba.g, rgba.b).h * HUE_HISTOGRAM_SIZE);
       if (hueHistogram[hueIndex] > 0) {
         ++hueHistogram[hueIndex];
       }
@@ -221,16 +223,19 @@
   }
 
   chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
-      if (message.action === 'getPixelInfo') {
-        getReadableImage(message.url)
-          .then(function (readableImgInfo) {
-            if (readableImgInfo.element) {
-              return getPixelInfo(readableImgInfo, message.rect);
-            }
-          })
-          .then(function(pixelInfo) {
-            sendResponse(pixelInfo);
-          });
+    if (message.action === 'getPixelInfo') {
+      getReadableImage(message.url)
+        .then(function (readableImgInfo) {
+          console.log('#1');
+          console.log(readableImgInfo);
+          if (readableImgInfo.element) {
+            return getPixelInfo(readableImgInfo, message.rect);
+          }
+        })
+        .then(function(pixelInfo) {
+          console.log('#2');
+          sendResponse(pixelInfo);
+        });
       }
     }
   );

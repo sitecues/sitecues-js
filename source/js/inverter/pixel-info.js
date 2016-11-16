@@ -85,7 +85,7 @@ define(
     return $safeImg[0];
   }
 
-  // Either pass img or src, but not both
+  // Get the pixels for an image element
   function getImageData(imgElement, rect) {
     var canvas = document.createElement('canvas'),
       ctx,
@@ -233,18 +233,18 @@ define(
 
     if (SC_EXTENSION && !isSameOrigin) {
       return new Promise(function(resolve) {
-        // jshint -W117
         // We're in a content script, but we need to ask the background script to read
         // these cross-origin pixels
-        chrome.tabs.getCurrent(function() {
-          var message = {
-            action: 'getPixelInfo',
-            url: url,
-            rect: rect
-          };
-          chrome.runtime.sendMessage(message, function (response) {
-            resolve(response);
-          });
+        var message = {
+          action: 'getPixelInfo',
+          url: url,
+          rect: rect
+        };
+        // jshint -W117
+        chrome.runtime.sendMessage(message, function (response) {
+          console.log('Whoa dude');
+          console.log(response);
+          resolve(response);
         });
         // jshint +W117
       });
