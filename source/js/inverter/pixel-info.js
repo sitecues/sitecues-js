@@ -92,8 +92,7 @@ define(
       top = rect.top || 0,
       left = rect.left || 0,
       width = rect.width,
-      height = rect.height,
-      imageData;
+      height = rect.height;
     canvas.width = width;
     canvas.height = height;
 
@@ -102,13 +101,12 @@ define(
       ctx.drawImage(imgElement, top, left, width, height);
     }
     catch(ex) {
-      return Promise.reject(ex); // No data -- probably a broken image
+      if (SC_DEV) {
+        console.error(ex);
+      }
+      return; // No data -- probably a broken image
     }
-    imageData = ctx.getImageData(0, 0, width, height).data;
-
-    return Promise.resolve({
-      data: imageData
-    });
+    return ctx.getImageData(0, 0, width, height).data;
   }
 
   function getPixelInfo(imgInfo, rect) {
@@ -117,7 +115,12 @@ define(
     // We may not be able to if the image is not from the same origin.
     //
     var
-      data = getImageData(imgInfo.element, rect),
+      data = getImageData(imgInfo.element, rect);
+    if (!data) {
+      return;
+    }
+
+    var
       isInverted = imgInfo.isInverted,
       grayscaleHistogram = [],
       GRAYSCALE_HISTOGRAM_SIZE = 500,
@@ -231,7 +234,7 @@ define(
       url = isImage ? imgOrSrc.getAttribute('src') : imgOrSrc,
       isSameOrigin = urls.isSameOrigin(url);
 
-    if (SC_EXTENSION /* && !isSameOrigin */) {
+    if (SC_EXTENSION && !isSameOrigin) {
       return new Promise(function(resolve) {
         // We're in a content script, but we need to ask the background script to read
         // these cross-origin pixels
@@ -242,11 +245,7 @@ define(
           rect: rect
         };
         // jshint -W117
-        chrome.runtime.sendMessage(message, function (response) {
-          console.log('Whoa dude');
-          console.log(response);
-          resolve(response);
-        });
+        chrome.runtime.sendMessage(message, resolve);
         // jshint +W117
       });
     }

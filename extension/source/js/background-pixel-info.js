@@ -17,6 +17,8 @@
 
 (function() {
 
+  var SC_DEV = true; // Show error messages
+
   // Copied from color.js
   function getFastLuminance(rgb) {
     var DIVISOR = 2550; // 255 * (2 + 7 + 1)
@@ -73,9 +75,6 @@
       img.addEventListener('error', function () {
         reject(new Error('Error evaluating ' + img.src));
       });
-      img.crossOrigin = 'anonymous';
-      // Set after crossorigin is set! The order matters.
-      // See http://stackoverflow.com/questions/23123237/drawing-images-to-canvas-with-img-crossorigin-anonymous-doesnt-work
       img.src = url;
     });
   }
@@ -87,8 +86,7 @@
       top = rect.top || 0,
       left = rect.left || 0,
       width = rect.width,
-      height = rect.height,
-      imageData;
+      height = rect.height;
     canvas.width = width;
     canvas.height = height;
 
@@ -97,24 +95,27 @@
       ctx.drawImage(imgElement, top, left, width, height);
     }
     catch(ex) {
-      return Promise.reject(ex); // No data -- probably a broken image
+      if (SC_DEV) {
+        console.error(ex);
+      }
+      return; // No data -- probably a broken image
     }
-    imageData = ctx.getImageData(0, 0, width, height).data;
-
-    return Promise.resolve({
-      data: imageData
-    });
+    return ctx.getImageData(0, 0, width, height).data;
   }
 
   // Copied from pixel-info.js
   function getPixelInfo(imgInfo, rect) {
-    console.log(JSON.stringify(rect));
     //
     // Compute Image Features (if we can...)
     // We may not be able to if the image is not from the same origin.
     //
     var
-      data = getImageData(imgInfo.element, rect),
+      data = getImageData(imgInfo.element, rect);
+    if (!data) {
+      return;
+    }
+
+    var
       isInverted = imgInfo.isInverted,
       grayscaleHistogram = [],
       GRAYSCALE_HISTOGRAM_SIZE = 500,
@@ -227,15 +228,15 @@
     if (message.action === 'getPixelInfo') {
       getReadableImage(message.url)
         .then(function (readableImgInfo) {
-          if (readableImgInfo.element) {
-            return getPixelInfo(readableImgInfo, message.rect);
-          }
-        })
-        .then(function(pixelInfo) {
-          console.log(pixelInfo);
+          var pixelInfo = getPixelInfo(readableImgInfo, message.rect);
           sendResponse(pixelInfo);
+        })
+        .catch(function() {
+          console.warn('Pixel info unavailable for ', message.url);
+          sendResponse(); // Pixel info unavailable
         });
       }
+      return true;
     }
   );
 
