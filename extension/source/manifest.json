@@ -50,10 +50,16 @@
     }
   ],
 
+  "background": {
+    "scripts": ["background-pixel-info.js"]
+  },
+
   "content_security_policy": "script-src 'none'; object-src 'none'; child-src 'self'; form-action 'none';",
 
   "permissions": [
     "tabs",
+    "http://*/",
+    "https://*/",
     "storage"
   ]
 }

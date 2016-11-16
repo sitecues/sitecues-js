@@ -11,20 +11,18 @@
 define(
   [
     '$',
-    'page/util/color',
     'run/conf/site',
     'run/conf/urls',
-    'inverter/invert-url',
     'inverter/orig-bg-info',
+    'inverter/pixel-info',
     'core/native-global'
   ],
   function (
     $,
-    colorUtil,
     site,
     urls,
-    invertUrl,
     origBgInfo,
+    pixelInfo,
     nativeGlobal
   ) {
   'use strict';
@@ -54,207 +52,6 @@ define(
   function isSVGSource(src) {
     var ext = urls.extname(src);
     return ext === '.svg';
-  }
-
-  // Get <img> that can have its pixel data read --
-  // 1. Must be completely loaded
-  // 2. We have permission (either we're in the extension, the img is not cross-origin, or we can load it through the proxy)
-  // Either pass img or src, but not both
-  function getReadableImage(img, src, onReadableImageAvailable, onReadableImageError) {
-    // Unsafe cross-origin request
-    // - Will run into cross-origin restrictions because URL is from different origin
-    // This is not an issue with the extension, because the content script doesn't have cross-origin restrictions
-    var url = src || img.getAttribute('src'),
-      isSafeRequest = SC_EXTENSION || urls.isSameOrigin(url),
-      safeUrl;
-
-    function returnImageWhenComplete(loadableImg, isInverted) {
-      if (loadableImg.complete) {
-        onReadableImageAvailable(loadableImg, isInverted); // Already loaded
-      }
-      else {
-        $(loadableImg)
-          .on('load', function() {
-            onReadableImageAvailable(loadableImg, isInverted);
-          })
-          .on('error', onReadableImageError);
-      }
-    }
-
-    if (isSafeRequest) {
-      if (img && img.localName === 'img') {
-        returnImageWhenComplete(img); // The <img> in the DOM can have its pixels queried
-        return;
-      }
-      // Element we want to read is not an <img> -- for example, <input type="image">
-      // Create an <img> with the same url so we can apply it to the canvas
-      safeUrl = url;
-      returnImageWhenComplete(createSafeImage(safeUrl));
-    }
-
-    if (SC_EXTENSION) {
-      // How did we used to do these ?
-      return;
-    }
-
-    // Uses inverted image for analysis so that if we need to display it, it's already in users cache.
-    // The inverted image will show the same number of brightness values in the histogram so this won't effect classification
-    invertUrl.getInvertUrl(url, img)
-      .then(function(newUrl) {
-        returnImageWhenComplete(createSafeImage(newUrl, true));
-      });
-  }
-
-  function createSafeImage(url) {
-    var $safeImg = $('<img>')
-      // Allows use of cross-origin image data
-      .attr('crossorigin', 'anonymous')
-      // Set after crossorigin is set! The order matters.
-      // See http://stackoverflow.com/questions/23123237/drawing-images-to-canvas-with-img-crossorigin-anonymous-doesnt-work
-      .attr('src', url);
-
-    return $safeImg[0];
-  }
-
-  // Either pass img or src, but not both
-  function getImageData(img, src, rect, processImageData) {
-    var canvas = document.createElement('canvas'),
-      ctx,
-      top = rect.top || 0,
-      left = rect.left || 0,
-      width = rect.width,
-      height = rect.height,
-      imageData;
-    canvas.width = width;
-    canvas.height = height;
-
-    function onReadableImageAvailable(readableImg, isInverted) {
-      ctx = canvas.getContext('2d');
-      try {
-        ctx.drawImage(readableImg, top, left, width, height);
-      }
-      catch(ex) {
-        processImageData(); // No data -- probably a broken image
-        return;
-      }
-      imageData = ctx.getImageData(0, 0, width, height).data;
-      processImageData(imageData, isInverted);
-    }
-
-    function onImageError() {
-      processImageData(); // No data
-    }
-
-    getReadableImage(img, src, onReadableImageAvailable, onImageError);
-  }
-
-  // Either pass img or src, but not both
-  function getPixelInfo(img, src, rect, processPixelInfo) {
-    getImageData(img, src, rect, function(data, isInverted) {
-      processPixelInfo(data && getPixelInfoImpl(data, rect.width, rect.height, isInverted));
-    });
-  }
-
-  function getPixelInfoImpl(data, width, height, isInverted) {
-    //
-    // Compute Image Features (if we can...)
-    // We may not be able to if the image is not from the same origin.
-    //
-    var grayscaleHistogram = [],
-      GRAYSCALE_HISTOGRAM_SIZE = 500,
-      grayscaleVal,
-      hueHistogram = [],
-      HUE_HISTOGRAM_SIZE = 100,
-      hueIndex,
-      byteIndex = 0,
-      hasTransparentPixels = false,
-      DWORD_SIZE = 4,
-      numBytes = width * height * DWORD_SIZE,
-      numDifferentGrayscaleVals = 0,
-      numMultiUseGrayscaleVals = 0,
-      numWithSameGrayscale,
-      numDifferentHues = 0,
-      maxSameGrayscale = 0,
-      MAX_PIXELS_TO_TEST = 523,
-      area = height * width,
-      stepSize = Math.floor(area / Math.min(area, MAX_PIXELS_TO_TEST)),
-      MIN_TRANSPARENCY_FOR_VALID_PIXEL = 0.3,
-      numPixelsToCheck = Math.floor(area / stepSize),
-      // Greater of: 6 pixels or 5% of total pixels checked
-      numSameBeforeConsideredMultiUse = Math.max(Math.ceil(numPixelsToCheck * 0.05), 6),
-      numPixelsChecked = 0,
-      histogramIndex,
-      luminanceTotal = 0,
-      maxLuminance = 0;
-
-    for(; byteIndex < numBytes; byteIndex += DWORD_SIZE * stepSize) {
-      var
-        rgba = {
-          r: data[byteIndex],
-          g: data[byteIndex + 1],
-          b: data[byteIndex + 2],
-          a: data[byteIndex + 3]
-        },
-        isSemiTransparent = rgba.a < 255;
-
-      if (isSemiTransparent) {  // Alpha channel
-        hasTransparentPixels = true;
-        if (rgba.a < MIN_TRANSPARENCY_FOR_VALID_PIXEL) {
-          continue;  // Don't use pixels that are mostly transparent for histogram or brighness measurements
-        }
-      }
-
-      ++ numPixelsChecked;
-
-      if (isInverted) {
-        // Used inverted image to get around cross-origin issues
-        // We use this instead of passthrough option because it puts the image into the cache in case we need it
-        // However, we need to evaluate the brightness as if it's not inverted
-        rgba.r = 255 - rgba.r;
-        rgba.g = 255 - rgba.g;
-        rgba.b = 255 - rgba.b;
-      }
-
-      grayscaleVal = colorUtil.getFastLuminance(rgba);
-      luminanceTotal += grayscaleVal;
-      if (grayscaleVal > maxLuminance) {
-        maxLuminance = grayscaleVal;
-      }
-      histogramIndex = Math.floor(grayscaleVal * GRAYSCALE_HISTOGRAM_SIZE);
-
-      if (grayscaleHistogram[histogramIndex] > 0)  {
-        numWithSameGrayscale = ++ grayscaleHistogram[histogramIndex];
-        if (numWithSameGrayscale === numSameBeforeConsideredMultiUse) {
-          ++numMultiUseGrayscaleVals;
-        }
-        if (numWithSameGrayscale > maxSameGrayscale) {
-          maxSameGrayscale = numWithSameGrayscale;
-        }
-      }
-      else {
-        grayscaleHistogram[histogramIndex] = 1;
-        ++ numDifferentGrayscaleVals;
-      }
-
-      hueIndex = Math.floor(colorUtil.rgbToHsl(rgba.r, rgba.g, rgba.b).h * HUE_HISTOGRAM_SIZE);
-      if (hueHistogram[hueIndex] > 0) {
-        ++ hueHistogram[hueIndex];
-      }
-      else {
-        hueHistogram[hueIndex] = 1;
-        ++ numDifferentHues;
-      }
-    }
-
-    return {
-      hasTransparentPixels: hasTransparentPixels,
-      numDifferentGrayscaleVals: numDifferentGrayscaleVals,
-      numMultiUseGrayscaleVals: numMultiUseGrayscaleVals,
-      percentWithSameGrayscale: numPixelsChecked ? maxSameGrayscale / numPixelsChecked : 0.5,
-      numDifferentHues: numDifferentHues,
-      averageLuminance: numPixelsChecked ? luminanceTotal / numPixelsChecked : 0.5,
-      maxLuminance: maxLuminance
-    };
   }
 
   function getImageSize(img) {
@@ -327,91 +124,98 @@ define(
 
     // The magic values in here are taken from the original machine-learned algorithms
     // from Jeff Bigham's work, and have been tweaked a bit.
-    getPixelInfo(img, src, rect, function(pixelInfo) {
-      if (!pixelInfo) {
+    pixelInfo.get(img || src, rect)
+      .catch(function(err) {
+        if (SC_DEV) {
+          console.log(err);
+        }
+        onPixelScoreAvailable(0);
+      })
+      .then(function(pixelInfo) {
+        if (!pixelInfo) {
+          if (SC_DEV && isDebuggingOn && img) {
+            $(img).attr('data-sc-pixel-score', 'invalid');
+          }
+          onPixelScoreAvailable(0, true);  // true -> this was an expensive operation so we should cache the result
+          return;
+        }
+
+        var score,
+          BASE_SCORE = 130,
+          DARK_LUMINANCE_THRESHOLD = 0.40,
+          DARK_LUMINANCE_MAX_THRESHOLD = 0.35,
+          BRIGHT_LUMINANCE_THRESHOLD = 0.60,
+          analysis = {
+            manyValuesScore: 0,
+            manyReusedValuesScore: 0,
+            oneValueReusedOftenScore: 0,
+            numHuesScore: 0,
+            transparentPixelsScore: 0,
+            darkNonTransparencyScore: 0,
+            brightWithTransparencyScore: 0
+          };
+
+        // Low score -> NO invert (probably photo)
+        // High score -> YES invert (probably logo, icon or image of text)
+
+        // Transparent pixels -> more likely icon that needs inversion
+        // No transparent pixels -> rectangular shape that usually won't be problematic over any background
+        analysis.transparentPixelsScore = pixelInfo.hasTransparentPixels * 100;
+
+        // More values -> more likely to be photo
+        analysis.manyValuesScore = -1.5 * Math.min(200, pixelInfo.numDifferentGrayscaleVals);
+
+        // Values reused -> less likely to be a photo
+        analysis.manyReusedValuesScore = 15 * Math.min(20, pixelInfo.numMultiUseGrayscaleVals);
+
+        // One large swath of color -> less likely to be a photo. For example 30% -> +60 points
+        analysis.oneValueReusedOftenScore = Math.min(50, pixelInfo.percentWithSameGrayscale * 200);
+
+        if (pixelInfo.hasTransparentPixels) {
+          if (pixelInfo.averageLuminance > BRIGHT_LUMINANCE_THRESHOLD) {
+            // This is already looks like bright text or a bright icon
+            // Don't revert, because it will most likely end up as dark on dark
+            analysis.brightWithTransparencyScore = -1500 * (pixelInfo.averageLuminance - BRIGHT_LUMINANCE_THRESHOLD);
+          }
+        }
+        else if (pixelInfo.averageLuminance < DARK_LUMINANCE_THRESHOLD) {
+          // This is already a very dark image, so inverting it will make it bright -- unlikely the right thing to do
+          // We don't do this for images with transparent pixels, because it is likely a dark drawing on a light background,
+          // which needs to be inverted
+          analysis.darkNonTransparencyScore = -1000 * (DARK_LUMINANCE_THRESHOLD - pixelInfo.averageLuminance) - 50;
+          if (pixelInfo.maxLuminance < DARK_LUMINANCE_MAX_THRESHOLD) {
+            analysis.darkNonTransparencyScore *= 2; // Really dark -- there is nothing bright in this image at all
+          }
+        }
+
+        // Many hues -> more likely to be a photo -- experimentation showed that 8 hues seemed to work as a threshold
+        if (pixelInfo.numDifferentHues < 8) {
+          // Few hues: probably not a photo -- YES invert
+          analysis.numHuesScore =  Math.pow(pixelInfo.numDifferentHues - 8, 2) * 1.5;
+        }
+        else if (pixelInfo.numDifferentHues > 35) {
+          // Many hues: probably a photo -- NO invert
+          analysis.numHuesScore =  pixelInfo.numDifferentHues * -2;
+        }
+
+        score = BASE_SCORE +
+          analysis.transparentPixelsScore +
+          analysis.manyValuesScore +
+          analysis.manyReusedValuesScore +
+          analysis.oneValueReusedOftenScore +
+          analysis.brightWithTransparencyScore +
+          analysis.darkNonTransparencyScore +
+          analysis.numHuesScore;
+
+        // Image has full color information
         if (SC_DEV && isDebuggingOn && img) {
-          $(img).attr('data-sc-pixel-score', 'invalid');
+          $(img).attr('data-sc-pixel-info', nativeGlobal.JSON.stringify(pixelInfo));
+          $(img).attr('data-sc-pixel-score-breakdown', nativeGlobal.JSON.stringify(analysis));
+          $(img).attr('data-sc-pixel-score', score);
         }
-        onPixelScoreAvailable(0, true);  // true -> this was an expensive operation so we should cache the result
-        return;
-      }
 
-      var score,
-        BASE_SCORE = 130,
-        DARK_LUMINANCE_THRESHOLD = 0.40,
-        DARK_LUMINANCE_MAX_THRESHOLD = 0.35,
-        BRIGHT_LUMINANCE_THRESHOLD = 0.60,
-        analysis = {
-          manyValuesScore: 0,
-          manyReusedValuesScore: 0,
-          oneValueReusedOftenScore: 0,
-          numHuesScore: 0,
-          transparentPixelsScore: 0,
-          darkNonTransparencyScore: 0,
-          brightWithTransparencyScore: 0
-        };
-
-      // Low score -> NO invert (probably photo)
-      // High score -> YES invert (probably logo, icon or image of text)
-
-      // Transparent pixels -> more likely icon that needs inversion
-      // No transparent pixels -> rectangular shape that usually won't be problematic over any background
-      analysis.transparentPixelsScore = pixelInfo.hasTransparentPixels * 100;
-
-      // More values -> more likely to be photo
-      analysis.manyValuesScore = -1.5 * Math.min(200, pixelInfo.numDifferentGrayscaleVals);
-
-      // Values reused -> less likely to be a photo
-      analysis.manyReusedValuesScore = 15 * Math.min(20, pixelInfo.numMultiUseGrayscaleVals);
-
-      // One large swath of color -> less likely to be a photo. For example 30% -> +60 points
-      analysis.oneValueReusedOftenScore = Math.min(50, pixelInfo.percentWithSameGrayscale * 200);
-
-      if (pixelInfo.hasTransparentPixels) {
-        if (pixelInfo.averageLuminance > BRIGHT_LUMINANCE_THRESHOLD) {
-          // This is already looks like bright text or a bright icon
-          // Don't revert, because it will most likely end up as dark on dark
-          analysis.brightWithTransparencyScore = -1500 * (pixelInfo.averageLuminance - BRIGHT_LUMINANCE_THRESHOLD);
-        }
-      }
-      else if (pixelInfo.averageLuminance < DARK_LUMINANCE_THRESHOLD) {
-        // This is already a very dark image, so inverting it will make it bright -- unlikely the right thing to do
-        // We don't do this for images with transparent pixels, because it is likely a dark drawing on a light background,
-        // which needs to be inverted
-        analysis.darkNonTransparencyScore = -1000 * (DARK_LUMINANCE_THRESHOLD - pixelInfo.averageLuminance) - 50;
-        if (pixelInfo.maxLuminance < DARK_LUMINANCE_MAX_THRESHOLD) {
-          analysis.darkNonTransparencyScore *= 2; // Really dark -- there is nothing bright in this image at all
-        }
-      }
-
-      // Many hues -> more likely to be a photo -- experimentation showed that 8 hues seemed to work as a threshold
-      if (pixelInfo.numDifferentHues < 8) {
-        // Few hues: probably not a photo -- YES invert
-        analysis.numHuesScore =  Math.pow(pixelInfo.numDifferentHues - 8, 2) * 1.5;
-      }
-      else if (pixelInfo.numDifferentHues > 35) {
-        // Many hues: probably a photo -- NO invert
-        analysis.numHuesScore =  pixelInfo.numDifferentHues * -2;
-      }
-
-      score = BASE_SCORE +
-        analysis.transparentPixelsScore +
-        analysis.manyValuesScore +
-        analysis.manyReusedValuesScore +
-        analysis.oneValueReusedOftenScore +
-        analysis.brightWithTransparencyScore +
-        analysis.darkNonTransparencyScore +
-        analysis.numHuesScore;
-
-      // Image has full color information
-      if (SC_DEV && isDebuggingOn && img) {
-        $(img).attr('data-sc-pixel-info', nativeGlobal.JSON.stringify(pixelInfo));
-        $(img).attr('data-sc-pixel-score-breakdown', nativeGlobal.JSON.stringify(analysis));
-        $(img).attr('data-sc-pixel-score', score);
-      }
-
-      onPixelScoreAvailable(score, true);  // true -> this was an expensive operation so we should cache the result
-    });
+        onPixelScoreAvailable(score, true);  // true -> this was an expensive operation so we should cache the result
+      });
   }
 
   function getElementTypeScore(img) {
