@@ -58,8 +58,6 @@
 
   "permissions": [
     "tabs",
-    "http://*/",
-    "https://*/",
     "storage"
   ]
 }
