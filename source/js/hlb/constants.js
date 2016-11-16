@@ -8,6 +8,8 @@ define([], function() {
     constants.HLB_ID                   = 'sitecues-hlb';         // ID for $hlb
     constants.HLB_READY                = 'hlb/ready';            //Event fired when HLB is created
 
+    // Other
+    constants.MAX_ZINDEX               = 2147483647;
 
     return constants;
 });

@@ -1,11 +1,19 @@
 define(
   [
-    'core/conf/urls',
-    'core/util/xhr',
-    'core/conf/user/manager',
-    'core/conf/site'
+    'run/conf/urls',
+    'run/util/xhr',
+    'run/conf/preferences',
+    'run/conf/site',
+    'core/native-global'
   ],
-  function (urls, xhr, conf, site) {
+  function (
+    urls,
+    xhr,
+    pref,
+    site,
+    nativeGlobal
+  ) {
+  'use strict';
 
     function format(object) {
 
@@ -14,8 +22,8 @@ define(
       var INDENTATION = '    ',
             result = object;
 
-      if (JSON && JSON.stringify) {
-        result = JSON.stringify(object, null, INDENTATION);
+      if (nativeGlobal.JSON && nativeGlobal.JSON.stringify) {
+        result = nativeGlobal.JSON.stringify(object, null, INDENTATION);
       }
 
       return result;
@@ -42,7 +50,7 @@ define(
     function status(callback) {
 
       var html = document.documentElement,
-          prefData = conf.get(),
+          prefData = pref.get(),
           coordinates,
           ajaxUrls = {  // Set the server URLs for retrieving the status of our services (version info, etc.)
             ws : urls.getApiUrl('util/status')
@@ -136,7 +144,7 @@ define(
         });
       }
 
-      return 'Fetching sitecues status...';
+      return 'Fetching Sitecues status...';
     }
 
     return status;

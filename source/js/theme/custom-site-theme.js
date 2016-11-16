@@ -2,7 +2,7 @@
  *  Support alterations to themes for specific websites
  */
 
-define(['core/conf/site', 'core/conf/urls'], function(site, urls) {
+define(['run/conf/site', 'run/conf/urls'], function(site, urls) {
   // TODO build system could create this variable based on the available themes
   // var SITES_WITH_CUSTOM_THEMES = '__SITES_WITH_CUSTOM_THEMES__';
 
@@ -13,6 +13,7 @@ define(['core/conf/site', 'core/conf/urls'], function(site, urls) {
       's-167ff09a': 1,
       's-190630d2': 1,
       's-2158b12a': 1,
+      's-252baed8': 1,
       's-25cecd79': 1,
       's-389f76da': 1,
       's-4bfe60ab': 1,

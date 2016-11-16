@@ -2,10 +2,29 @@
  * This is module for common positioning utilities that might need to be used across all of the different modules.
  * See more info on https://equinox.atlassian.net/wiki/display/EN/positioning+utility
  */
-define(['$', 'page/util/common', 'page/util/element-classifier', 'page/zoom/zoom', 'core/platform', 'page/highlight/traitcache'],
-  function ($, common, elemClassifier, zoomMod, platform, traitcache) {
+define(
+  [
+    '$',
+    'page/util/common',
+    'page/util/element-classifier',
+    'page/zoom/zoom',
+    'page/highlight/traitcache',
+    'core/native-global',
+    'run/inline-style/inline-style'
+  ],
+  function (
+    $,
+    common,
+    elemClassifier,
+    zoomMod,
+    traitcache,
+    nativeGlobal,
+    inlineStyle
+  ) {
+  'use strict';
 
-  var MIN_RECT_SIDE = 4;
+  var MIN_RECT_SIDE = 4,
+    MAX_TEXT_INDENT_USED_TO_HIDE = -499; // text-indent less than this we consider as something used to hide alternative text for bg image sprites
 
   /**
    * Get the fixed position rectangles for the target's actual rendered content.
@@ -30,7 +49,7 @@ define(['$', 'page/util/common', 'page/util/element-classifier', 'page/zoom/zoom
     var
       accumulatedPositionInfo = {
         allRects: [],
-        hiddenElements: []
+        hiddenElements: new WeakMap()
       },
       $selector = $(selector);
 
@@ -51,30 +70,31 @@ define(['$', 'page/util/common', 'page/util/element-classifier', 'page/zoom/zoom
     return zoomMod.getCompletedZoom();
   }
 
+  function hasUnrenderedDescendants(node) {
+    // Select elements have `option` descendants that don't have rendered dimensions until the dropdown menu is opened
+    var tagNames = ['select'];
+    return tagNames.indexOf(node.localName) !== -1;
+  }
+
   // Get the rect for the contents of a node (text node or contents inside element node)
   // @param node -- an element that contains visible content, or a text node
   function getContentsRangeRect(node) {
     var range = document.createRange(),
-      parent,
       // ********** Some browsers are fine **********
-      doIECorrections = platform.browser.isIE && platform.browser.version < 11,
-      isElement = node.nodeType === 1;
+      isElement = node.nodeType === Node.ELEMENT_NODE;
 
-    if (isElement) {
+    if (isElement && !hasUnrenderedDescendants(node)) {
       // Case 1: element -- get the rect for the element's descendant contents
-      parent = node;
       range.selectNodeContents(node);
     }
     else {
       // Case 2: text node -- get the rect for the text
-      parent = node.parentNode;
       range.selectNode(node);
     }
 
     var contentsRangeRect = $.extend({}, range.getBoundingClientRect());
-
-    if (doIECorrections) {
-      contentsRangeRect = getOldIECorrectionsToRangeRect(contentsRangeRect);
+    if (!contentsRangeRect.width || !contentsRangeRect.height) {
+      return;
     }
 
     if (!isElement) {
@@ -93,17 +113,6 @@ define(['$', 'page/util/common', 'page/util/element-classifier', 'page/zoom/zoom
     return contentsRangeRect;
   }
 
-  function getOldIECorrectionsToRangeRect(origRangeRect) {
-    // Factor in IE native browser zoom
-    var nativeZoom = screen.deviceXDPI / screen.logicalXDPI;
-    origRangeRect.top /= nativeZoom;
-    origRangeRect.left /= nativeZoom;
-    origRangeRect.width /= nativeZoom;
-    origRangeRect.height /= nativeZoom;
-
-    return normalizeRect(origRangeRect);
-  }
-
   function getRectMinusPadding(rect, style) {
     // Reduce by padding amount -- useful for images such as Google Logo
     // which have a ginormous amount of padding on one side
@@ -118,8 +127,8 @@ define(['$', 'page/util/common', 'page/util/element-classifier', 'page/zoom/zoom
       left: rect.left + paddingLeft,
       width: rect.width - paddingLeft - paddingRight,
       height: rect.height - paddingTop - paddingBottom,
-      right: rect.top + rect.height - paddingRight,   // In case rect.right not set
-      bottom: rect.left + rect.width - paddingBottom  // In case rect.bottom not set
+      bottom: rect.top + rect.height - paddingBottom,   // In case rect.right not set
+      right: rect.left + rect.width - paddingRight  // In case rect.bottom not set
     };
   }
 
@@ -147,6 +156,19 @@ define(['$', 'page/util/common', 'page/util/element-classifier', 'page/zoom/zoom
     };
   }
 
+  function isTextIndentUsedToHide(style) {
+    var indent = parseInt(style.textIndent),
+        unit   = typeof indent === 'number' ? style.textIndent.slice(String(indent).length) : '';
+    switch (unit) {
+      case '%':
+        return indent >= 100 || indent <= -100;
+      case 'px':
+        return indent < MAX_TEXT_INDENT_USED_TO_HIDE;
+      default:
+        return false;
+    }
+  }
+
   function getSpriteRect(element, style) {
     // Check special case for sprites, often used for fake bullets
     // The following cases are unlikely to be sprites:
@@ -155,7 +177,7 @@ define(['$', 'page/util/common', 'page/util/element-classifier', 'page/zoom/zoom
 
     // Check for elements with only a background-image
     var rect = $.extend({}, traitcache.getScreenRect(element, true));
-    if ($(element).is(':empty') || style.textIndent !== '0px') {
+    if ($(element).is(':empty') || isTextIndentUsedToHide(style)) {
       // Empty elements have no other purpose than to show background sprites
       // Also, background image elements with text-indent are used to make accessible images
       // (the text is offscreen -- screen readers see it but the eye doesn't)
@@ -186,7 +208,7 @@ define(['$', 'page/util/common', 'page/util/element-classifier', 'page/zoom/zoom
   }
 
   function getOverflowRect(element, style) {
-    if (element === document.body) {
+    if (element.localName === 'body') {
       return; // The <body> element is generally reporting a different scroll width than client width
     }
     var clientHeight = element.clientHeight;
@@ -288,11 +310,11 @@ define(['$', 'page/util/common', 'page/util/element-classifier', 'page/zoom/zoom
       viewPos = traitcache.getCachedViewPosition();
 
     $selector.each(function () {
-      var isElement = this.nodeType === 1;
+      var isElement = this.nodeType === Node.ELEMENT_NODE;
 
       // --- Leaf nodes ---
       if (!isElement) {
-        if (this.nodeType === 3 && this.data.trim() !== '') { /* Non-empty text node */
+        if (this.nodeType === Node.TEXT_NODE && this.data.trim() !== '') { /* Non-empty text node */
           // ----------------------------------------------------------------------------------------------------
           // --- FAST PATH -- REMOVED BECAUSE SOME CHILD ELEMENTS MAY USING CLIPPING! SC-2047 --
           // Fast path for text containers:
@@ -328,7 +350,7 @@ define(['$', 'page/util/common', 'page/util/element-classifier', 'page/zoom/zoom
 
       // --- Invisible elements ---
       if (isInvisible(style)) {
-        hiddenElements.push(this);
+        hiddenElements.set(this, true);
         return;
       }
 
@@ -341,13 +363,13 @@ define(['$', 'page/util/common', 'page/util/element-classifier', 'page/zoom/zoom
       if (thisRect.right < -viewPos.x || thisRect.bottom < -viewPos.y) {
         // Hidden off the page
         // This is a technique used to hide contents offscreen without hiding it from screen readers
-        hiddenElements.push(this);
+        hiddenElements.set(this, true);
         return;
       }
 
       // -- Out of flow and is not the top element --
       if (!isTop && isOutOfFlow(this, style, thisRect)) {
-        hiddenElements.push(this);
+        hiddenElements.set(this, true);
         return;
       }
 
@@ -358,9 +380,16 @@ define(['$', 'page/util/common', 'page/util/element-classifier', 'page/zoom/zoom
         return;
       }
 
-      // --- Visible border or form controls ---
-      if (common.isVisualRegion(this, style, traitcache.getStyle(this.parentNode)) ||
-        elemClassifier.isFormControl(this)) {
+      // --- Form controls ---
+      if (elemClassifier.isFormControl(this)) {
+        if ($(this).is('select[size="1"],select:not([size])')) {
+          addRect(allRects, getComboboxRect(this, thisRect));
+          return; // Don't walk into options
+        }
+        addRect(allRects, thisRect); // Make it all visible, including padding and border
+      }
+      // --- Visible border ---
+      else if (common.isVisualRegion(this, style, traitcache.getStyle(this.parentNode))) {
         addRect(allRects, thisRect); // Make it all visible, including padding and border
         // Keep iterating: there may be some content outside
       }
@@ -374,7 +403,9 @@ define(['$', 'page/util/common', 'page/util/element-classifier', 'page/zoom/zoom
       }
 
       // --- Elements with children ---
-      if (this.hasChildNodes()) {
+      // Ignore children when text-indent is negative, as this indicates hidden offscreen content,
+      // most commonly a background image sprite with a text child being used as alternative text.
+      if (this.hasChildNodes() && !isTextIndentUsedToHide(style)) {
         // Use bounds of visible descendants
         getHighlightInfoRecursive($(this.childNodes), accumulatedResults, doStretchForSprites, doIgnoreFloats);  // Recursion
         return;
@@ -413,6 +444,29 @@ define(['$', 'page/util/common', 'page/util/element-classifier', 'page/zoom/zoom
       }
       return clipInfo;
     }
+  }
+
+  // Our hacky zoom combobox fixes can mess up highlight rects -- this corrects for that case
+  function getComboboxRect(comboElem, comboRect) {
+    var isHackedCombobox = traitcache.getStyleProp(comboElem, 'zoom') > 1;
+    if (isHackedCombobox) {
+      // Turn off zoom CSS hacks for comboboxes
+      comboElem.setAttribute('data-sc-dropdown-fix-off', '');
+      // Turn off transition temporarily if it's there, otherwise it prevents us from getting the correct rect
+      inlineStyle.override(comboElem, {
+        transitionProperty : 'none'
+      });
+      // Get what the rect would have been
+      comboRect = comboElem.getBoundingClientRect();
+      // Restore CSS
+      nativeGlobal.setTimeout(function () {
+        // Do this on a timeout otherwise it may animate our return changes
+        inlineStyle.restore(comboElem, 'transition-property');
+      }, 0);
+      comboElem.removeAttribute('data-sc-dropdown-fix');
+    }
+
+    return comboRect;
   }
 
   /**

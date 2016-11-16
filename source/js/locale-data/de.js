@@ -5,8 +5,8 @@ define([], function() {
   return {
     // ARIA labels
     // - Main
-    sitecues_main_panel: 'sitecues dialog',
-    badge_label: 'sitecues Vergrößerungs und Sprachausgabe Steuerung. sitecues unterstützt Menschen, die kein eigenes Bildschirmausleseprogramm oder Vergrößerungssoftware haben.',
+    sitecues_main_panel: 'Sitecues dialog',
+    badge_label: 'Sitecues Vergrößerungs und Sprachausgabe Steuerung. Sitecues unterstützt Menschen, die kein eigenes Bildschirmausleseprogramm oder Vergrößerungssoftware haben.',
     zoom_in: 'Grösser',
     zoom_out: 'Kleiner',
     // - Secondary
@@ -21,6 +21,9 @@ define([], function() {
     rating_4: '4 Stern',
     rating_5: '5 Stern',
 
+    // Toolbar
+    options_menu: 'Sitecues Optionen',
+
     // Visible labels
     // - Main
     pre_zoom: '',
@@ -33,8 +36,8 @@ define([], function() {
     tips: 'Tipps',
     settings: 'Einstellen',
     rate_us: 'Bewerten',
-    rate_us_prompt: 'Wir würden uns über Rückmeldungen sehr freuen!',  /* new */
-    rate_us_suggest: 'Haben Sie Fragen, Anmerkungen oder Vorschläge?', /* new */
+    rate_us_prompt: 'Wir würden uns über Rückmeldungen sehr freuen!',
+    rate_us_suggest: 'Haben Sie Fragen, Anmerkungen oder Vorschläge?',
     about: 'Über uns',
     // - Feedback
     send: 'Senden',
@@ -42,7 +45,7 @@ define([], function() {
     thank_you: 'Danke',
     // - About
     about_preamble: 'Diese Seite verwendet sirecues um Ihnen den Zugang zu erleichtern. Sie können die Inhalte vergrößern oder sogar vorlesen lassen. Weitere Informationen finden Sie unter ',
-    about_rate_us: 'Wir freuen uns über Rückmeldung Ihrer Erfahrungen mit sitecues.',
+    about_rate_us: 'Wir freuen uns über Rückmeldung Ihrer Erfahrungen mit Sitecues.',
     zoom_and_speech: 'Vergrösserung &amp; Sprache'
   };
 });

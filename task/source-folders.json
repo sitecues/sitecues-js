@@ -1,9 +1,11 @@
 {
   "bundleFolders": [
-    "core",
+    "run",
     "bp-expanded",
     "bp-secondary",
     "bp-toolbar-badge",
+    "bp-toolbar-menu-button",
+    "bp-toolbar-menu",
     "bp-img-placeholder",
     "bp-adaptive",
     "page",
@@ -11,14 +13,10 @@
     "theme",
     "audio",
     "audio-cues",
-    "network-player",
-    "local-player",
     "status",
     "info",
     "pick-debug",
-    "labs",
-    "inverse-theme",
-    "zoom-forms"
+    "inverter"
   ],
   "dataFolders": [
     "locale-data"

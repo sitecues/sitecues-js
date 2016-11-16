@@ -1,6 +1,23 @@
-define(['page/util/element-classifier', 'page/keys/commands', 'core/metric', 'core/events', 'page/highlight/constants',
-        'core/constants'],
-  function(elemClassifier, commands, metric, events, HIGHLIGHT_CONST, CORE_CONST) {
+define(
+  [
+    'page/util/element-classifier',
+    'page/keys/commands',
+    'run/metric/metric',
+    'run/events',
+    'page/highlight/constants',
+    'run/constants',
+    'core/native-global'
+  ],
+  function (
+    elemClassifier,
+    commands,
+    metric,
+    events,
+    HIGHLIGHT_CONST,
+    CORE_CONST,
+    nativeGlobal
+  ) {
+  'use strict';
 
   var
     // KEY_TESTS defines keys used to bind actions to hotkeys.
@@ -21,13 +38,16 @@ define(['page/util/element-classifier', 'page/keys/commands', 'core/metric', 'co
     ZOOM_IN_CODES = CORE_CONST.ZOOM_IN_CODES,
     ZOOM_OUT_CODES = CORE_CONST.ZOOM_OUT_CODES,
     HIGHLIGHT_TOGGLE_EVENT = HIGHLIGHT_CONST.HIGHLIGHT_TOGGLE_EVENT,
-    isShiftKeyDown,
-    isAnyNonShiftKeyDown,
+    wasOnlyShiftKeyDown,
+    isStopSpeechKey,
     isHighlightVisible,
     isLensVisible,
     isSitecuesOn = true,  // Init called when sitecues turned on for the first time
-    lastKeyInfo,
+    isAudioPlaying,
+    lastKeyInfo = {},
     isInitialized,
+    didFireLastKeyInfoMetric,
+    fakeKeyRepeatTimer,
 
     KEY_TESTS = {
       'space': function(event) {
@@ -108,9 +128,6 @@ define(['page/util/element-classifier', 'page/keys/commands', 'core/metric', 'co
         return (event.keyCode === keyCode.END && !hasAnyModifier(event)) ||
           event.keyCode === keyCode.NUMPAD_1 ||
           (event.keyCode === keyCode.DOWN && event.metaKey);
-      },
-      'f8': function(event) {
-        return event.keyCode === keyCode.F8 && !hasAnyModifier(event);
       }
     },
     // define keys map used to bind actions to hotkeys
@@ -187,10 +204,12 @@ define(['page/util/element-classifier', 'page/keys/commands', 'core/metric', 'co
     // Emit event defined for key
     commands[commandName](event, keyName);
 
-    if (lastKeyInfo && lastKeyInfo.keyName === keyName) {
-      ++ lastKeyInfo.repeatCount;
-    }
-    else {
+    // Ready metric info to be fired during keyup
+    var isDifferentKey = lastKeyInfo.keyName !== keyName;
+
+    if (isDifferentKey) {
+      // Different key from last time -- fire no matter what
+      didFireLastKeyInfoMetric = false;
       lastKeyInfo = {
         keyName: keyName,
         shiftKey: event.shiftKey,
@@ -199,6 +218,10 @@ define(['page/util/element-classifier', 'page/keys/commands', 'core/metric', 'co
         ctrlKey: event.ctrlKey,
         repeatCount: 0
       };
+    }
+    else {
+      // Same key
+      ++ lastKeyInfo.repeatCount;
     }
   }
 
@@ -236,16 +259,16 @@ define(['page/util/element-classifier', 'page/keys/commands', 'core/metric', 'co
   function onKeyUp(event) {
     notifySitecuesKeyDown(true);
     if (event.keyCode === keyCode.SHIFT) {
-      if (isOnlyShift()) {
-        commands.speakHighlight(false, true);
+      if (isBeginSpeechCommand()) {
+        commands.speakHighlight();
       }
     }
 
-    isShiftKeyDown = false;
     // Once the shift key is up, we clear the any key down flag.
     // This is a simple approach that handles all except very weird key behavior
     // such as shift up down up all while another key is pressed.
-    isAnyNonShiftKeyDown = false;
+    isStopSpeechKey = false;
+    wasOnlyShiftKeyDown = false;
 
     emitOnlyShiftStatus();
 
@@ -253,35 +276,41 @@ define(['page/util/element-classifier', 'page/keys/commands', 'core/metric', 'co
   }
 
   function fireLastCommandMetric() {
-    if (lastKeyInfo) {
-      // Clear queue -- we do this here so that we don't repeat key events with key repeat presses
+    if (!didFireLastKeyInfoMetric && lastKeyInfo.keyName) {
+      // Fire key metric, but only if it wasn't fired for this key yet (we don't fire multiple events for key repeats)
       new metric.KeyCommand(lastKeyInfo).send();
-      lastKeyInfo = null;
+      didFireLastKeyInfoMetric = true;
     }
+
+    clearTimeout(fakeKeyRepeatTimer);
+    fakeKeyRepeatTimer = nativeGlobal.setTimeout(function() {
+      // If the next key is the same and occurs quickly after the last keyup, it will be considered a key repeat,
+      // because some configurations on Windows seem to fire multiple keyups and keydowns for key repeats
+      // Once this timer fires, we clear a flag that allows even the same key to be fired as a new metric
+      didFireLastKeyInfoMetric = false;
+      lastKeyInfo = {}; // Force key info to be updated on next keydown
+    }, CORE_CONST.MIN_TIME_BETWEEN_KEYS);
   }
 
   // Track to find out whether the shift key is pressed by itself
   function emitOnlyShiftStatus() {
-    events.emit('key/only-shift', isOnlyShift());
+    events.emit('key/only-shift', wasOnlyShiftKeyDown);
   }
 
-  function isOnlyShift() {
-    return isShiftKeyDown && !isAnyNonShiftKeyDown;
+  function isBeginSpeechCommand() {
+    return wasOnlyShiftKeyDown && !isStopSpeechKey;
   }
 
   // If shift key down, process it
   function preProcessKeyDown(event) {
     var isShift = event.keyCode === keyCode.SHIFT;
-    if (!isShift || !isShiftKeyDown) {
+    if (!isShift || isAudioPlaying) {
       // Key down stops speech/audio
       // Exception is repeated shift key, which also starts speech when shift is held down
-      events.emit('keys/non-shift-key-pressed');
+      commands.stopAudio();
+      isStopSpeechKey = true;
     }
-
-    if (!isShift) {
-      isAnyNonShiftKeyDown = true;
-    }
-    isShiftKeyDown = isShift;
+    wasOnlyShiftKeyDown = isShift;
     emitOnlyShiftStatus();
   }
 
@@ -320,6 +349,10 @@ define(['page/util/element-classifier', 'page/keys/commands', 'core/metric', 'co
 
     events.on('sitecues/did-toggle', function(isOn) {
       isSitecuesOn = isOn;
+    });
+
+    events.on('audio/did-toggle', function(isOn) {
+      isAudioPlaying = isOn;
     });
 
     if (keyEvent) {

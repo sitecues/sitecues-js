@@ -1,12 +1,9 @@
-// Herein lies the base configuration for the testing framework.
-// Other files can use this as an AMD module.
+// This is the base configuration for the testing framework.
+// You can import and extend it for special use cases.
 
 define(
-    [   // dependencies...
-        '../test/all-unit',
-        '../test/all-functional'
-    ],
-    function (allUnit, allFunctional) {
+    [],
+    function () {
 
         'use strict';
 
@@ -25,49 +22,48 @@ define(
 
             // Places where unit and/or functional tests will be run.
             environments : [
-                { browserName : 'firefox' },
+                // { browserName : 'firefox' },
                 // { browserName : 'safari' },
                 { browserName : 'chrome' }
             ],
 
-            maxConcurrency : 1,  // how many browsers may be open at once
+            // How many browsers may be open at once.
+            maxConcurrency : 1,
 
-            // Specify which AMD module loader to use...
+            // Use a custom AMD module loader.
             // loaders : {
             //
             // },
-            // Options to pass to the AMD module loader...
+            // Configure the AMD module loader.
             loaderOptions : {
                 baseUrl : 'source/js',
                 packages : [
-                    { name: 'test', location: testDir },
-                    { name: UNIT_PKG, location: testDir + 'unit' },
-                    { name: FUNC_PKG, location: testDir + 'functional' },
-                    { name: 'page-object', location: testDir + 'page-object', main: 'index' },
-                    { name: 'utility', location: testDir + 'util', main: 'index' }
+                    { name : 'core',        location: testDir + 'core'},
+                    { name : 'test',        location: testDir },
+                    { name : UNIT_PKG,      location: testDir + 'unit' },
+                    { name : FUNC_PKG,      location: testDir + 'functional' },
+                    { name : 'page-object', location: testDir + 'page-object', main : 'index' },
+                    { name : 'utility',     location: testDir + 'util',        main : 'index' }
                 ]
             },
 
-            // Each cloud testing service has their own weird quirks and different APIs,
-            // so load up the necessary configuration to talk to them...
-            tunnel : 'NullTunnel',         // no tunnel (default, if none provided)
-            // tunnel : 'BrowserStackTunnel', // BrowserStack
-            // tunnel : 'SauceLabsTunnel',    // SauceLabs
-            // tunnel : 'TestingBotTunnel',   // TestingBot
-            tunnelOptions : {
-                host : 'localhost:4447'  // custom location to find the selenium server
-                // verbose : true           // more logging, only supported by BrowserStack
-            },
+            // The provider for a WebDriver server.
+            tunnel : 'SeleniumTunnel',
+
+            // tunnelOptions : {
+            //     host : 'localhost:4447'  // custom location to find the selenium server
+            // },
 
             // Which unit test suite files to load. These check our APIs.
-            suites : allUnit.map(function (suite) {
-                return UNIT_PKG + '/' + suite;
-            }),
+            suites : [
+                UNIT_PKG + '/**/*.js'
+            ],
             // Which functional test suite files to load. These check our
             // user-facing behavior.
-            functionalSuites : allFunctional.map(function (suite) {
-                return FUNC_PKG + '/' + suite;
-            }),
+            // TODO: Fix and re-enable functional tests.
+            // functionalSuites : [
+            //     FUNC_PKG + '/**/*.js'
+            // ],
 
             // Test whitelist regex. Only test IDs ('suite name - test name')
             // that match this pattern will run, all others will be skipped.

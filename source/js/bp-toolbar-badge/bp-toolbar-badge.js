@@ -4,60 +4,71 @@
  */
 // TODO add a close button
 
-define([
-  'core/bp/constants',
-  'core/bp/model/state',
-  'core/bp/helper',
-  'core/bp/view/palette',
-  'core/bp/view/view'
-],
-  function(BP_CONST,
-           state,
-           helper,
-           palette,
-           baseView) {
-  var isInitialized,
-    TOOLBAR_HEIGHT = 38;
+define(
+  [
+    'Promise',
+    'run/conf/site',
+    'run/bp/constants',
+    'run/bp/model/state',
+    'run/bp/helper',
+    'run/bp/view/palette',
+    'run/bp/view/view'
+  ],
+  function (
+    Promise,
+    site,
+    BP_CONST,
+    state,
+    helper,
+    palette,
+    baseView
+  ) {
+  'use strict';
+
+  var TOOLBAR_HEIGHT = 38;
 
   function adjustFixedElementsBelowToolbar() {
-    // TODO Make this work better:
-    // - it doesn't work that well across sites
-    // - it's heavy in the page
-    // - it causes us to load the page-features module just because we have a toolbar
-    require(['page/zoom/fixed-position-fixer'], function(fixer) {
-      // However, in the case of the toolbar, we must always move fixed position elements
-      // down. As this process requires the style-service, when the toolbar is inserted,
-      // we will initialize the style service immediately.
-      document.body.style.position = 'relative';
-      fixer.init(TOOLBAR_HEIGHT);
+    return new Promise(function (resolve) {
+      require(['page/positioner/positioner', 'page/viewport/scrollbars'], function (positioner, scrollbars) {
+        // In the case of the toolbar, we must always move fixed position elements
+        // down, so that they are not obscured by our toolbar.
+        scrollbars.init();
+        positioner.initFromToolbar(resolve, TOOLBAR_HEIGHT);
+      });
     });
   }
 
-  function init(onComplete) {
-    if (isInitialized) {
-      return;
-    }
-    isInitialized = true;
-
+  function init() {
     var toolbarElement = document.createElement('sc'),
       docElem = document.documentElement;
 
+    function insertOptionsMenu() {
+      if (site.get('hasOptionsMenu')) {
+        // Can do this async -- no need to hold up the rest of our initialization
+        require(['bp-toolbar-menu-button/bp-toolbar-menu-button'], function (bpToolbarMenuButton) {
+          bpToolbarMenuButton.init(toolbarElement);
+        });
+      }
+    }
+
     docElem.setAttribute('data-sitecues-toolbar', ''); // Enable default.css rules
-    docElem.insertBefore(toolbarElement, docElem.childNodes[0]);
+    docElem.appendChild(toolbarElement);
 
     helper.setAttributes(toolbarElement, BP_CONST.DEFAULT_TOOLBAR_ATTRS);
 
     state.set('isPageBadge', false);
     state.set('isToolbarBadge', true);
 
-    adjustFixedElementsBelowToolbar();
-
-    palette.init(null, function() {
-      baseView.init(toolbarElement, onComplete);
-    });
+    return palette.init(null)
+      .then(function() {
+        baseView.init(toolbarElement);
+      })
+      .then(adjustFixedElementsBelowToolbar)
+      .then(insertOptionsMenu);
   }
 
   return {
     init: init
   };
+
 });

@@ -3,8 +3,24 @@
 //   sets background, sets default styles, computes some styles,
 //   and cloned child styles from the original element to the HLB.
 //  */
-define(['$', 'core/platform', 'page/util/common', 'core/conf/user/manager'],
-  function ($, platform, common, conf) {
+define(
+  [
+    '$',
+    'page/util/common',
+    'run/conf/preferences',
+    'hlb/constants',
+    'run/inline-style/inline-style',
+    'run/util/array-utility'
+  ],
+  function (
+    $,
+    common,
+    pref,
+    constants,
+    inlineStyle,
+    arrayUtil
+  ) {
+  'use strict';
 
   ///////////////////////////
   // PUBLIC PROPERTIES
@@ -17,17 +33,16 @@ define(['$', 'core/platform', 'page/util/common', 'core/conf/user/manager'],
   // Transition property used for hlb animation (-webkit, -moz)
   // This is used to transition the transform property for HLB
   // inflation/deflation animation
-  var transitionProperty = platform.cssPrefix + 'transform ';
+  var transitionProperty = 'transform ';
 
   ///////////////////////////
   // PRIVATE VARIABLES
   ///////////////////////////
 
-  var HLB_Z_INDEX = 2147483644,
-
+  var
       // How many ancestors do we move up the chain until we find a background image
       // to use for the $hlb background image.
-      BACKGROUND_IMAGE_ANCESTOR_TRAVERSAL_COUNT = 0,
+      BACKGROUND_IMAGE_ANCESTOR_TRAVERSAL_COUNT = 3,
 
       // Default background color for HLB, if HLB is NOT an image.
       HLB_DEFAULT_BACKGROUND_COLOR = '#fff',
@@ -46,6 +61,7 @@ define(['$', 'core/platform', 'page/util/common', 'core/conf/user/manager'],
         'top',
         'right',
         'bottom',
+        'box-shadow',
         'transform',
         '-webkit-transform',
         '-moz-transform',
@@ -80,7 +96,7 @@ define(['$', 'core/platform', 'page/util/common', 'core/conf/user/manager'],
       // Default css styles for HLB
       defaultHLBStyles  = {
         'position'         : 'absolute',   // Doesn't interfere with document flow
-        'zIndex'           : HLB_Z_INDEX,  // Max z-index for HLB overlay
+        'zIndex'           : constants.MAX_ZINDEX,  // Max z-index for HLB overlay
         'border'           : defaultBorder + 'px solid #000',
         'padding'          : defaultPadding,
         'margin'           : 0,            // Margin isn't necessary and only adds complexity
@@ -112,50 +128,30 @@ define(['$', 'core/platform', 'page/util/common', 'core/conf/user/manager'],
    */
   function filterHiddenElements ($hlb, $picked, hiddenElements) {
 
-    var hiddenElementsLength    = hiddenElements.length,
-        hiddenElementsRemoved   = 0,
-        pickedElementIsListItem = $picked.is('li'),
-        $pickedDescendants      = $picked.find('*'),
-        $hlbDescendants         = pickedElementIsListItem ? $hlb.children().find('*') : $hlb.find('*'),
-        currentChild            = 0,
-        currentElementToRemove  = 0;
+    var pickedElementIsListItem = $picked.is('li'),
+        pickedDescendants      = $picked.find('*').get(),
+        hlbDescendants         = (pickedElementIsListItem ? $hlb.children().find('*') : $hlb.find('*')).get();
 
     if (SC_DEV) {
-      if ($pickedDescendants.length !== $hlbDescendants.length) {
+      if (pickedDescendants.length !== hlbDescendants.length) {
         console.warn('There is not a 1:1 mapping for filterHiddenElements!');
       }
-      if (hiddenElementsLength) {
-        console.log('%cSPECIAL CASE: Filtering hidden elements.',  'background:orange;');
-      }
     }
 
-    // I really dislike nested for loops...
-    // TODO it's not just about hidden children -- could be any descendant (e.g. grandchild)
-    // TODO let's not add them in the first place
-    if (hiddenElementsLength) {
-      for (; currentChild < $pickedDescendants.length; currentChild += 1) {
-        for (; currentElementToRemove < hiddenElementsLength; currentElementToRemove += 1) {
-          if ($pickedDescendants[currentChild] === hiddenElements[currentElementToRemove]) {
-            $($hlbDescendants[currentChild]).remove();
-            hiddenElementsRemoved += 1;
-            if (hiddenElementsRemoved === hiddenElementsLength) {
-              return;
-            }
-          }
-        }
-        currentElementToRemove = 0;
+    pickedDescendants.forEach(function (element, index) {
+      if (hiddenElements.get(element)) {
+        $(hlbDescendants[index]).remove();
       }
-    }
-
+    });
   }
 
   /**
    * [filterElements removes css styles in HLBCSSBlacklist from the HLB element, but not its children]
    * @param  {[DOM element]} $hlb [HLB element]
    */
-  function filterStyles ($hlb) {
+  function filterStyles($hlb) {
     for (var i = 0; i < HLBCSSBlacklist.length; i += 1) {
-      $hlb[0].style.removeProperty([HLBCSSBlacklist[i]]);
+      inlineStyle.removeProperty($hlb[0], HLBCSSBlacklist[i]);
     }
   }
 
@@ -163,7 +159,7 @@ define(['$', 'core/platform', 'page/util/common', 'core/conf/user/manager'],
    * [filterAttributes removes html attributes in HLBAttributeBlacklist]
    * @param  {[DOM element]} $hlb [HLB element]
   */
-  function filterAttributes ($hlb) {
+  function filterAttributes($hlb) {
     for (var i = 0; i < HLBAttributeBlacklist.length; i += 1) {
       $hlb.removeAttr(HLBAttributeBlacklist[i]);
     }
@@ -263,26 +259,26 @@ define(['$', 'core/platform', 'page/util/common', 'core/conf/user/manager'],
    * @return {[String]}                       [CSS background-image property]
    */
   function getNonEmptyBackgroundImage ($picked, ancestorCount) {
-
     var backgroundStyles = {},
         $parents = $picked.parents();
 
-    $parents.each(function (count) {
-      if (count > ancestorCount) {
+    $parents.each(function (index) {
+      if (index >= ancestorCount) {
         return false;
       }
-
-      if ($(this).css('backgroundImage') !== 'none') {
-        backgroundStyles.backgroundImage      = $(this).css('backgroundImage');
-        backgroundStyles.backgroundRepeat     = $(this).css('backgroundRepeat');
+  
+      var $ancestor = $(this);
+  
+      if ($ancestor.css('backgroundImage') !== 'none') {
+        backgroundStyles.backgroundImage      = $ancestor.css('backgroundImage');
+        backgroundStyles.backgroundRepeat     = $ancestor.css('backgroundRepeat');
         backgroundStyles.backgroundAttachment = 'local';
-        backgroundStyles.count                = count;
+        backgroundStyles.$ancestor            = $ancestor;
         return false;
       }
     });
 
     return backgroundStyles;
-
   }
 
   /**
@@ -358,7 +354,6 @@ define(['$', 'core/platform', 'page/util/common', 'core/conf/user/manager'],
    * @return {[String]}                          [The background image that will be used by the $hlbElement]
    */
   function getHLBBackgroundImage ($picked, elementComputedStyle) {
-
     var newBackgroundImage;
 
     // If the original element doesnt have a background image and the original element has a transparent background...
@@ -368,11 +363,8 @@ define(['$', 'core/platform', 'page/util/common', 'core/conf/user/manager'],
       newBackgroundImage = getNonEmptyBackgroundImage($picked, BACKGROUND_IMAGE_ANCESTOR_TRAVERSAL_COUNT);
 
       if (newBackgroundImage) {
-
         return newBackgroundImage;
-
       }
-
     }
 
     return {
@@ -380,7 +372,6 @@ define(['$', 'core/platform', 'page/util/common', 'core/conf/user/manager'],
       'backgroundRepeat'    : elementComputedStyle.backgroundRepeat,
       'backgroundAttachment': 'local'
     };
-
   }
 
   /**
@@ -470,7 +461,7 @@ define(['$', 'core/platform', 'page/util/common', 'core/conf/user/manager'],
         childTopPadding         = parseFloat($child.css('paddingTop')),
         childBottomPadding      = parseFloat($child.css('paddingBottom')),
         paddingStyles           = {},
-        zoom                    = conf.get('zoom') || 1;
+        zoom                    = pref.get('zoom') || 1;
 
     if ((childBoundingClientRect.left < initialHLBRect.left && childLeftPadding > 0)) {
       paddingStyles.paddingLeft = childLeftPadding - (initialHLBRect.left - childBoundingClientRect.left) / zoom;
@@ -499,9 +490,7 @@ define(['$', 'core/platform', 'page/util/common', 'core/conf/user/manager'],
    * @param  {[jQuery element]} $hlb      [The HLB element]
    */
   function initializeHLBElementStyles ($foundation, $hlb) {
-
-    $hlb[0].style.cssText = getComputedStyleCssText($foundation[0]);
-
+    inlineStyle($hlb[0]).cssText =  getComputedStyleCssText($foundation[0]);
   }
 
    /**
@@ -516,43 +505,50 @@ define(['$', 'core/platform', 'page/util/common', 'core/conf/user/manager'],
     * @param  {[jQuery element]} $hlb      [The HLB element]
     */
 
-  function initializeHLBDescendantStyles ($foundation, $hlb, initialHLBRect) {
+  function initializeHLBDescendantStyles ($foundation, $hlb, initialHLBRect, hiddenElements) {
 
-    var $foundationDescendants = $foundation.find('*'),
-        $hlbDescendants        = $hlb.find('*'),
-        $hlbDescendant,
-        hlbDescendant,
-        $foundationDescendant,
-        foundationDescendant,
+    var foundation = $foundation[0],
+        hlb        = $hlb[0],
         foundationDescendantStyle,
         computedChildStyles,
         removeMargins = true,
-        i = 0;
+        foundationNodes = [foundation],
+        hlbNodes        = [hlb];
 
-    for (; i < $foundationDescendants.length; i += 1) {
+    // Iterate through each node in the foundation, in document order, and exclude elements we've identified as hidden
+    // This is important because it's very expensive to call getComputedStyleCssText for each node in the tree in Firefox
+    while (foundationNodes.length) {
+      var foundationNode = foundationNodes.pop(),
+          hlbNode        = hlbNodes.pop();
+      
+      if (hiddenElements.get(foundationNode)) {
+        continue;
+      }
 
-      // Cache the HLB child.
-      hlbDescendant        = $hlbDescendants[i];
-      foundationDescendant = $foundationDescendants[i];
+      initializeCloneStyle(foundationNode, hlbNode);
 
-      $hlbDescendant        = $(hlbDescendant);
-      $foundationDescendant = $(foundationDescendant);
+      foundationNodes = foundationNodes.concat(arrayUtil.from(foundationNode.children));
+      hlbNodes        = hlbNodes.concat(arrayUtil.from(hlbNode.children));
+    }
 
+    function initializeCloneStyle(originalNode, cloneNode) {
+      var $original = $(originalNode),
+          $clone    = $(cloneNode);
       // Cache the HLB child computed style
-      foundationDescendantStyle = getComputedStyle(foundationDescendant);
+      foundationDescendantStyle = getComputedStyle(originalNode);
 
       // Copy the original elements child styles to the HLB elements child.
-      hlbDescendant.style.cssText = getComputedStyleCssText(foundationDescendant);
+      inlineStyle(cloneNode).cssText = getComputedStyleCssText(originalNode);
 
-      if (shouldRemovePadding($foundationDescendant, initialHLBRect)) {
-        $hlbDescendant.css(getChildPadding($foundationDescendant, initialHLBRect));
+      if (shouldRemovePadding($original, initialHLBRect)) {
+        inlineStyle.set(cloneNode, getChildPadding($original, initialHLBRect));
       }
 
       // Compute styles that are more complicated than copying cssText.
-      computedChildStyles = getDescendantStyles($hlbDescendant, foundationDescendantStyle);
+      computedChildStyles = getDescendantStyles($original, foundationDescendantStyle);
 
       // Added to fix HLB sizing when selecting last 2 paragraphs on http://www.ticc.com/
-      if (shouldRemoveHorizontalMargins($foundationDescendant, $foundation)) {
+      if (shouldRemoveHorizontalMargins($original, $foundation)) {
         if (SC_DEV) {
           console.log('%cSPECIAL CASE: Removing left and right margins.',  'background:orange;');
         }
@@ -563,12 +559,11 @@ define(['$', 'core/platform', 'page/util/common', 'core/conf/user/manager'],
       }
 
       // Set the childs css.
-      $hlbDescendant.css(computedChildStyles);
+      inlineStyle.set(cloneNode, computedChildStyles);
 
       // Ran into issues with children inheriting styles because of class and id CSS selectors.
       // Filtering children of these attributes solves the problem.
-      filterAttributes($hlbDescendant);
-
+      filterAttributes($clone);
     }
   }
 
@@ -677,7 +672,7 @@ define(['$', 'core/platform', 'page/util/common', 'core/conf/user/manager'],
         });
 
         if (forceTextColor) {
-          $(this).css('color', HLB_DEFAULT_TEXT_COLOR);
+          inlineStyle(this).color = HLB_DEFAULT_TEXT_COLOR;
         }
 
       }
@@ -699,7 +694,7 @@ define(['$', 'core/platform', 'page/util/common', 'core/conf/user/manager'],
         backgroundStyles      = getHLBBackgroundImage($picked, elementComputedStyle),
         backgroundColor       = getHLBBackgroundColor($picked, elementComputedStyle),
         calculatedHLBStyles   = {
-          'paddingLeft' : getHLBLeftPadding($foundation, elementComputedStyle),
+          'paddingLeft'  : getHLBLeftPadding($foundation, elementComputedStyle),
           'display'      : getHLBDisplay(elementComputedStyle),
           'left'         : originalElementRect.left + window.scrollLeft,
           'top'          : originalElementRect.top + window.scrollTop
@@ -708,10 +703,9 @@ define(['$', 'core/platform', 'page/util/common', 'core/conf/user/manager'],
           borderColor: highlight.hasDarkBackgroundColor ? highlight.highlightBorderColor : '#000'
         },
         animationOptimizationStyles = {
-          willChange: platform.transformPropertyCss,
+          willChange: 'transform',
           backfaceVisibility: 'hidden'
-        },
-        $parent;
+        };
 
     // If the background color is the same as the text color, use default text and background colors
     if (backgroundColor === $foundation.css('color')) {
@@ -725,29 +719,24 @@ define(['$', 'core/platform', 'page/util/common', 'core/conf/user/manager'],
     // This was implemented to fix SC-1830
     // If the background image repeats, there is no need to preserve the padding.
     if ($foundation.css('backgroundImage') !== 'none' && $foundation.css('backgroundRepeat') !== 'repeat') {
-
       calculatedHLBStyles.paddingLeft   = $foundation.css('paddingLeft');
       calculatedHLBStyles.paddingTop    = $foundation.css('paddingTop');
       calculatedHLBStyles.paddingBottom = $foundation.css('paddingBottom');
       calculatedHLBStyles.paddingRight  = $foundation.css('paddingRight');
-
-    } else if (backgroundStyles.count >= 0) {
-
-      $parent = $($(originalElement).parents()[backgroundStyles.count]);
+    } 
+    else if (backgroundStyles.$ancestor) {
+      var $ancestor = backgroundStyles.$ancestor;
 
       // If the background image repeats, there is no need to preserve the padding.
-      if ($parent.css('backgroundRepeat') !== 'repeat') {
-
-        calculatedHLBStyles.paddingLeft   = $parent.css('paddingLeft');
-        calculatedHLBStyles.paddingTop    = $parent.css('paddingTop');
-        calculatedHLBStyles.paddingBottom = $parent.css('paddingBottom');
-        calculatedHLBStyles.paddingRight  = $parent.css('paddingRight');
-
+      if ($ancestor.css('backgroundRepeat') !== 'repeat') {
+        calculatedHLBStyles.paddingLeft   = $ancestor.css('paddingLeft');
+        calculatedHLBStyles.paddingTop    = $ancestor.css('paddingTop');
+        calculatedHLBStyles.paddingBottom = $ancestor.css('paddingBottom');
+        calculatedHLBStyles.paddingRight  = $ancestor.css('paddingRight');
       }
-
     }
 
-    delete backgroundStyles.count;
+    delete backgroundStyles.$ancestor;
 
     return $.extend({},
       defaultHLBStyles,
@@ -756,7 +745,6 @@ define(['$', 'core/platform', 'page/util/common', 'core/conf/user/manager'],
       backgroundStyles,
       animationOptimizationStyles
     );
-
   }
 
   /**
@@ -780,11 +768,11 @@ define(['$', 'core/platform', 'page/util/common', 'core/conf/user/manager'],
    * @param  {[DOM element]} $foundation [sanitized picked element]
    * @param  {[DOM element]} $hlb [The HLB]
    */
-  function initializeStyles($foundation, $hlb, initialHLBRect) {
+  function initializeStyles($foundation, $hlb, initialHLBRect, hiddenElements) {
 
     initializeHLBElementStyles($foundation, $hlb);
 
-    initializeHLBDescendantStyles($foundation, $hlb, initialHLBRect);
+    initializeHLBDescendantStyles($foundation, $hlb, initialHLBRect, hiddenElements);
 
   }
 

@@ -5,12 +5,12 @@
 // CLEAN_DEPS = 'on' (refresh node_modules dependencies)
 // LINT = 'on' or 'off' (force linting on or off, otherwise use resources for the target)
 // MINIFY = 'on' or 'off' (force minification on or off, otherwise use default for the target)
+// CUES = 'on' or 'off' (allow building of audio cues, only valid for common builds, defaults to 'on')
 
 'use strict';
 
-var dateFormat = require('dateformat'),
+const dateFormat = require('dateformat'),
   buildType = process.env.TYPE || 'common',
-  baseBuildDir = 'target',
   extendBuildConfig = require('./' + buildType + '/extend-build-config'),
   userName = (process.env.VAGRANT_USER || process.env.SUDO_USER || process.env.USER || process.env.LOGNAME || 'UNKNOWN').toUpperCase(),
   today = new Date(),
@@ -20,21 +20,17 @@ var dateFormat = require('dateformat'),
   NODE_VERSION = parseFloat(process.versions.node),
   LIBRARY_SOURCE = 'source';
 
-var baseConfig = {
+const baseConfig = {
   version: version,
   buildType: buildType,
-  baseBuildDir: baseBuildDir,
-  buildDir: baseBuildDir + '/' + buildType,
-  resourceFolderName: '.',
   postBuildCommand: process.env.POST_BUILD_COMMAND,  // Optional post build shell command to run
   isLintingOn: process.env.LINT !== 'off', // Default to true
   // Three types of cleaning
   // CLEAN=off -- no cleaning
   // CLEAN=all -- clean everything
-  // CLEAN=build_target (default) -- clean specific target only (e.g. target/extension or target/common)
-  isCleaningTarget: process.env.CLEAN !== 'off', // Default to true
   isCleaningAll: process.env.CLEAN === 'all', // Default to false
-  isMinifying: process.env.MINIFY === 'on', // Default to false
+  isMinifying: process.env.MINIFY === 'on' || process.env.MINIFY === 'keep-dead', // Default to false
+  isRemovingDeadCode: process.env.MINIFY === 'on',
   isDebugOn: isDebugOn,  // Default to false
   nodeVersion: NODE_VERSION,
   isShowingSizes: NODE_VERSION >= 4 && process.env.SHOW_SIZES !== 'off', // Don't show sizes for old versions of node that don't support gulp-size
@@ -45,10 +41,8 @@ var baseConfig = {
 
 // Add additional convenience properties
 function finalizeConfig(config) {
-  config.resourceDir = config.buildDir + '/' + config.resourceFolderName;
   config.globalDefs = {
     SC_EXTENSION: config.isExtension,
-    SC_RESOURCE_FOLDER_NAME: config.resourceFolderName,
     SC_LOCAL: config.isLocal,
     SC_DEV: config.isDebugOn,
     SC_AUTO_SPEECH: config.autoSpeechStrategy,
@@ -58,7 +52,7 @@ function finalizeConfig(config) {
   return config;
 }
 
-var finalConfig = finalizeConfig(extendBuildConfig(baseConfig));
+const finalConfig = finalizeConfig(extendBuildConfig(baseConfig));
 
 module.exports = finalConfig;
 

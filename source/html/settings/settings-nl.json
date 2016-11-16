@@ -1,0 +1,22 @@
+{
+  "theme": {
+    "None": "Geen",
+    "Warm": "Warme tinten",
+    "Bold": "Vet gedrukt",
+    "Dark": "Donkere tinten",
+    "intensity": "intensiteit",
+    "text_color": "tekst kleur"
+  },
+
+  "mouse": {
+    "size": "grootte",
+    "color": "kleur"
+  },
+
+  "title": "Instellingen",
+
+  "cards": {
+    "Colors": "Kleuren",
+    "Mouse": "Muis"
+  }
+}

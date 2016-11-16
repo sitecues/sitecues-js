@@ -1,6 +1,29 @@
-define(['$', 'page/highlight/highlight', 'page/util/common',
-  'page/highlight/pick', 'page/zoom/zoom', 'page/util/geo', 'page/zoom/fixed-position-fixer', 'core/events'],
-  function($, mh, common, picker, zoomMod, geo, fixedFixer, events) {
+define(
+  [
+    '$',
+    'page/highlight/highlight',
+    'page/util/common',
+    'page/highlight/pick',
+    'page/zoom/util/body-geometry',
+    'page/util/geo',
+    'run/events',
+    'page/highlight/fixed-elements',
+    'core/native-global',
+    'run/inline-style/inline-style'
+  ],
+  function (
+    $,
+    mh,
+    common,
+    picker,
+    bodyGeo,
+    geo,
+    events,
+    fixedElements,
+    nativeGlobal,
+    inlineStyle
+  ) {
+  'use strict';
 
   var STEP_SIZE_VERT = 18,
     STEP_SIZE_HORIZ = 24,  // Different step sizes because content tends to be wider than tall (lines of text)
@@ -36,11 +59,7 @@ define(['$', 'page/highlight/highlight', 'page/util/common',
     // Approximate amount of time for one animation frame
     ONE_ANIMATION_FRAME_MS = 16,  // 16ms is about 60fps
     // Method for animation
-    requestFrame = window.requestAnimationFrame || window.msRequestAnimationFrame ||
-      function (fn) {
-        return setTimeout(fn, ONE_ANIMATION_FRAME_MS);
-      },
-    getHighlight = mh.getHighlight,
+    requestFrame = window.requestAnimationFrame,
     isNavigationEnabled = true,// labs.isEnabled('arrowKeyNav'), // We no longer use labs here, it is on by default
     SAFE_ZONE = 30; // Begin scrolling when we get this close to window edge
 
@@ -102,8 +121,8 @@ define(['$', 'page/highlight/highlight', 'page/util/common',
 
   function onMovementCommand(nextMove) {
     // Movement command
-    if (hlbElement && performHLBScroll(nextMove)) {
-      return; // HLB could scroll -- finish
+    if (hlbElement && !nextMove.shiftKey && performHLBScroll(nextMove)) {
+      return; // HLB could scroll -- finish (don't do this if shift pressed as we are exploring with speech)
     }
 
     if (isNavigationEnabled) {
@@ -246,7 +265,15 @@ define(['$', 'page/highlight/highlight', 'page/util/common',
     }
   }
 
+  function getHighlight() {
+    var highlight = mh.getHighlight();
+    return highlight && (highlight.isVisible || hlbElement) && highlight;
+  }
+
   function performMovement(nextMove) {
+    if (!getHighlight()) {
+      return;  // Sanity check
+    }
     prepareMovement();
 
     var type = nextMove.keyName,
@@ -277,9 +304,10 @@ define(['$', 'page/highlight/highlight', 'page/util/common',
   function prepareMovement() {
     // Hide current HLB so it doesn't interfere with getElementFromPoint
     if (hlbElement) {
-      hlbElement.style.display = 'none';
+      inlineStyle(hlbElement).display = 'none';
     }
-    fixedFixer.setAllowMouseEvents(false);
+
+    fixedElements.disableMouseEvents();
 
     // Pre-require audio
     require(['audio/audio'], function(audio) {
@@ -288,18 +316,16 @@ define(['$', 'page/highlight/highlight', 'page/util/common',
   }
 
   function fail(origPanX, origPanY) {
-    if (SC_DEV) { console.log('Fail'); }
-
     // Don't process the rest of the command queue
     navQueue = [];
 
     // Restore mouse events and highlighting
     mh.setScrollTracking(true);
-    fixedFixer.setAllowMouseEvents(true);
+    fixedElements.enableMouseEvents();
 
     // Make lens visible again
     if (hlbElement) {
-      hlbElement.style.display = 'block';
+      inlineStyle(hlbElement).display = 'block';
       // Scroll back to original position if the lens is now offscreen
       if (typeof origPanX === 'number') {
         var lensRect = hlbElement.getBoundingClientRect();
@@ -317,14 +343,12 @@ define(['$', 'page/highlight/highlight', 'page/util/common',
 
   function speakHighlight() {
     require(['page/keys/commands'], function(commands) {
-      commands.speakHighlight(true);
+      commands.speakHighlight();
     });
   }
 
   function succeed(doAllowRepeat, doSpeakText) {
-    if (SC_DEV) { console.log('Succeed'); }
-
-    fixedFixer.setAllowMouseEvents(true);
+    fixedElements.enableMouseEvents();
 
     if (doSpeakText) {
       speakHighlight();   // Shift+arrow
@@ -341,7 +365,7 @@ define(['$', 'page/highlight/highlight', 'page/util/common',
         repeatDelay = isFirstRepeat ? HIGHLIGHT_MOVE_FIRST_REPEAT_DELAY_MS : HIGHLIGHT_MOVE_NEXT_REPEAT_DELAY_MS;
       // Repeat last command if key is still pressed down
       isKeyRepeating = true;
-      repeatDelayTimer = setTimeout(function() {
+      repeatDelayTimer = nativeGlobal.setTimeout(function() {
         onMovementCommand(lastMoveCommand);
       }, repeatDelay);
       return;
@@ -364,8 +388,8 @@ define(['$', 'page/highlight/highlight', 'page/util/common',
       startPanTime,
       // Farthest panning could possibly go
       maxPanUp = 0,
-      maxPanLeft = zoomMod.getBodyLeft(),
-      maxPanRight = zoomMod.getBodyRight() - winRight,
+      maxPanLeft = bodyGeo.getBodyLeft(),
+      maxPanRight = bodyGeo.getBodyRight() - winRight,
       maxPanDown = document.documentElement.scrollHeight - winBottom,
       // Target end point for panning
       targetPanLeft,
@@ -631,17 +655,18 @@ define(['$', 'page/highlight/highlight', 'page/util/common',
     var target = document.elementFromPoint(x, y);
     if (SC_DEV && isShowingDebugPoints) {
       // Briefly display the points being tested
-      $('<div class="sc-debug-dots">')
-        .appendTo('html')
-        .css({
-          position: 'absolute',
-          left: (x + window.pageXOffset) + 'px',
-          top: (y + window.pageYOffset) + 'px',
-          width: '0px',
-          height: '0px',
-          outline: '3px solid ' + color,
-          zIndex: 999999
-        });
+      var debugDiv = $('<div class="sc-debug-dots">')
+        .appendTo('html');
+
+      inlineStyle.set(debugDiv[0], {
+        position: 'absolute',
+        left: (x + window.pageXOffset) + 'px',
+        top: (y + window.pageYOffset) + 'px',
+        width: '0px',
+        height: '0px',
+        outline: '3px solid ' + color,
+        zIndex: 999999
+      });
     }
 
     // Need to use something that's not a container of the last picked item
@@ -715,7 +740,8 @@ define(['$', 'page/highlight/highlight', 'page/util/common',
       // Search one more time, from beginning instead of mid-point.
       // Wraps to beginning/end of document depending on direction.
       // This doesn't happen often so code here is optimized for size rather than speed.
-      treeWalker.currentNode = isReverse ? treeWalker.currentNode = $('body').find('*').last()[0] : document.body;
+      // Don't try to use H command to navigate headings in the fixed areas.
+      treeWalker.currentNode = isReverse ? treeWalker.currentNode = $(document.body).find('*').last()[0] : document.body;
       if (!searchDocument()) {
         fail();
         return;
@@ -763,7 +789,7 @@ define(['$', 'page/highlight/highlight', 'page/util/common',
   }
 
   function onSpace(doSpeakText) {
-    if (hlbElement || getHighlight().isVisible) {
+    if (hlbElement || getHighlight()) {
       // Has an HLB or a highlight -- toggle HLB
       toggleHLB();
     }
@@ -793,13 +819,16 @@ define(['$', 'page/highlight/highlight', 'page/util/common',
       return;
     }
     isInitialized = true;
+
+    fixedElements.init();
+
     $(window).on('keyup', function () {
       clearTimeout(repeatDelayTimer);
       isKeyStillDown = false;
       isKeyRepeating = false;
     });
 
-    events.on('hlb/did-create', function($hlb) {
+    events.on('hlb/did-create', function ($hlb) {
       hlbElement = $hlb[0];
     });
 

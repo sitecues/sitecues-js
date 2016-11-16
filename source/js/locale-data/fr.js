@@ -5,8 +5,8 @@ define([], function() {
   return {
     // ARIA labels
     // - Main
-    sitecues_main_panel: 'Console d\'administration sitecues',
-    badge_label: 'Outils de zoom et diction sitecues. sitecues aide les utilisateurs qui ne possèdent pas leur propre lecteur d\'écran ou agrandisseur d\'écran.',
+    sitecues_main_panel: 'Console d\'administration Sitecues',
+    badge_label: 'Outils de zoom et diction Sitecues. Sitecues aide les utilisateurs qui ne possèdent pas leur propre lecteur d\'écran ou agrandisseur d\'écran.',
     zoom_in: 'agrandir',
     zoom_out: 'réduire',
     // - Secondary
@@ -19,7 +19,10 @@ define([], function() {
     rating_2: '2 étoiles ',
     rating_3: '3 étoiles ',
     rating_4: '4 étoiles',
-    rating_5: ' étoiles',
+    rating_5: '5 étoiles',
+
+    // Toolbar
+    options_menu: 'Menu d’options de Sitecues',
 
     // Visible labels
     // - Main

@@ -22,6 +22,7 @@
 
 .scp-link,.scp-link:visited,.scp-link:focus,.scp-link:hover {
   color: #447AC4 !important; /* Same as #scp-wave3 */
+  font-size: 20px !important;
 }
 
 .scp-button-link,.scp-button-link:visited,.scp-button-link:focus,.scp-button-link:hover {
@@ -31,6 +32,8 @@
   height: 100%;
   display: inline-block;
   padding: 9px 0;
+  font-size: 20px !important;
+
 }
 
 /******************* Secondary content *********************/
@@ -41,7 +44,10 @@
 
 /** Enable secondary panel **/
 .scp-secondary-feature {
-  display: block;
+  /* On ticc.com the secondary panel menu items failed to appear unless we added !important to this style rule,
+  TODO: Go back and figure out why this works everywhere else. This selector has lower specificity, and since secondary.css
+  is an external stylesheet it should have lower precedence. Mysterious*/
+  display: block !important;
 }
 
 /* Secondary panel has it's own stretchable outline */
@@ -142,6 +148,7 @@ sc-button {
 
 sc-button[aria-disabled="true"] {
   background-color: #999;
+  transform: scale(1) !important;
 }
 
 sc-button:hover {
@@ -174,11 +181,11 @@ sc-button:hover {
   top: 99px;
   left: 30px;
   width: 440px;
-  display: table;
+  display: flex;
+  justify-content: space-between;
 }
 
 .scp-card-chooser > sc-link {
-  display: table-cell;
   text-align: center;
   font-size: 19px;
 }
@@ -446,21 +453,19 @@ sc-kbd[data-demo="true"] {
 .scp-color-theme-group {
   margin-bottom: 36px;
   /* Need a table so that we can vertically align contents in the buttons */
-  display: table;
-  border-spacing: 18px;
-  /* The next two properties compensate for the 18px of cell padding on the left and right side of the table, which we don't want */
-  position: relative;
-  left: -18px;
-  width: calc(100% + 36px)
+  display: flex;
+  justify-content: space-between;
 }
+
 sc-button[data-setting-name="themeName"] {
   padding: 0;
-  display: table-cell;
-  vertical-align: middle;
-  width: 75px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 96px;
   height: 96px;
   font-size: 18px;
-  margin-right: 15px;
   border-radius: 6px;
   text-align: center;
   color: #000;
@@ -488,7 +493,20 @@ sc-button[data-setting-name="themeName"][data-setting-value="dark"] {
   color: #fff;
   background-color: #000;
 }
-.scp-ie9-false .scp-range-group[data-show="true"] {
+/* ----------- Current theme indicator ---------------*/
+
+sc-button[data-setting-name="themeName"][aria-pressed="true"]:after {
+  content: "";
+  position: absolute;
+  left: calc(50% - 10px);
+  background-image: url('../images/settings/theme-indicator.svg');
+  top: 85px;
+  height: 20px !important;
+  width: 24px !important;
+  pointer-events: none;
+}
+
+.scp-range-group[data-show="true"] {
   pointer-events: all;
   opacity: 1;
 }
@@ -577,6 +595,8 @@ sc-button[data-setting-name="themeName"][data-setting-value="dark"] {
   background-color: transparent !important;
   box-shadow: none !important;
   box-sizing: border-box !important;
+  max-width: none !important;
+  max-width: none !important;
 }
 #scp-feedback-textarea:focus {
   box-shadow: none !important;

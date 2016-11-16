@@ -1,20 +1,27 @@
-// Configuration for JSHint. These settings are used to ensure code quality during the build process.
-
 {
-  // Make use of another configuration file for default values.
-  "extends" : "../../.jshintrc",
+
+  // Configuration for JSHint. These settings are used to ensure code quality during the build process.
+
+  // Maximum number of rule violations to report before giving up.
+  "maxerr"        : 100,
 
   // List of variables to assume are already defined. Set to `true` to tolerate assigments to those variables.
   "globals": {
     // sitecues specific
-    "sitecues"           : false,
-    "sitecuesEverywhere" : false,
-    "SC_DEV"             : false,
-    "SC_LOCAL"           : false,
-    "SC_EXTENSION"       : false,
+    "sitecues"                  : false,
+    "sitecuesEverywhere"        : false,
+    "SC_DEV"                    : false,
+    "SC_LOCAL"                  : false,
     "SC_BROWSER_NETWORK_SPEECH" : false,
+    "SC_EXTENSION"              : false,
+    "SC_VERSION"                : false,
 
-    "console": false,
+    "console" : false,
+
+    // ES6
+    "Set"     : false,
+    "WeakMap" : false,
+    "Map"     : false,
 
     // AMD
     "require" : false,
@@ -35,16 +42,106 @@
     "outerWidth"          : false,
     "outerHeight"         : false,
     "screenX"             : false,
-    "screenY"             : false
+    "screenY"             : false,
+    "performance"         : false
   },
 
   // Enforcing - Rules that cause the linter to complain more.
 
+  // Whether to prohibit bitwise operators (&, |, ^, etc.), which are frequently typos.
+  "bitwise"       : true,
+  // Whether to demand {} for every new block or scope, because explicit is good.
+  "curly"         : true,
+  // Whether to demand triple equals (===) and disallow double equals, because type coercion is not user friendly.
+  "eqeqeq"        : true,
+  // Whether to demand filtering for..in loops with obj.hasOwnProperty() to avoid the prototype chain.
+  "forin"         : true,
+  // Whether to prohibit modifying the prototype of native objects.
+  "freeze"        : true,
+  // Whether to demand that variables are defined above where they are first used.
+  "latedef"       : "nofunc",
+  // Maximum cyclomatic complexity per function. Helps discourage overly complex code.
+  "maxcomplexity" : 15,
+  // Maximum depth of nested blocks (within functions). Helps discourage overly complex code.
+  "maxdepth"      : 7,
+  // Maximum number of formal params allowed per function. Helps discourage overly complex code.
+  "maxparams"     : 13,
+  // Maximum number of statements allowed per function. Helps discourage overly complex code.
+  "maxstatements" : 125,
+  // Whether to prohibit use of `arguments.caller` and `arguments.callee`, which is not in modern JS anymore.
+  "noarg"         : true,
+  // Whether to prohibit use of non-breaking spaces within code, which can break pages with certain character encodings.
+  "nonbsp"        : true,
+  // Whether to prohibit use of constructors for side-effects (without assignment).
+  "nonew"         : true,
+  // Whether to prohibit use of `++` & `--`, which are usually not well understood outside of basic loops.
+  "plusplus"      : false,
+  // Whether to prohibit use of `()` grouping where it is not necessary, which can obfuscate when it is really needed.
+  "singleGroups"  : false,
+  // Whether to demand that all functions are run in ES5 Strict Mode
+  "strict"        : false,
+  // Whether to prohibit usage of variables that are never defined.
+  "undef"         : true,
   // Whether to demand that all variables that are defined do eventually get used.
-  "unused" : true,
+  "unused"        : true,
+
+
+  // Relaxing - Rules that cause the linter to chill out and complain less.
+
+  // Whether to tolerate Automatic Semicolon Insertion (no semicolons), even though the rules are hard to remember.
+  "asi"           : false,
+  // Whether to tolerate assignments where comparisons would be expected.
+  "boss"          : false,
+  // Whether to tolerate debugger statements e.g. browser breakpoints, even though they are not fit for production.
+  "debug"         : false,
+  // Whether to tolerate use of `== null`, even though it does type coercion.
+  "eqnull"        : false,
+  // Whether to tolerate use of `eval` and `new Function()`, even though they can lead to security problems.
+  "evil"          : false,
+  // Whether to tolerate seemingly useless expressions, even though they are usually typos.
+  "expr"          : false,
+  // Whether to tolerate defining variables (with `var`) inside of blocks, even though that is not their scope.
+  "funcscope"     : false,
+  // Whether to tolerate global use strict (also enables strict), even though nested code might not conform.
+  "globalstrict"  : false,
+  // Whether to tolerate use of the `__iterator__` property.
+  "iterator"      : false,
+  // Whether to tolerate omitting a semicolon for the last statement of a one-line block.
+  "lastsemic"     : false,
+  // Whether to tolerate functions being defined in loops, even though it usually doesn't behave as first expected.
+  "loopfunc"      : false,
+  // Whether to tolerate Mozilla specific syntax (extends and overrides esnext features)
+  "moz"           : false,
+  // Whether to tolerate use of invalid return values from the `typeof` operator.
+  "notypeof"      : false,
+  // Whether to tolerate using the `__proto__` property, even though it is non-standard and may hurt performance.
+  "proto"         : false,
+  // Whether to tolerate script-targeted URLs.
+  "scripturl"     : false,
+  // Whether to tolerate re-defining variables, which is often a mistake. e.g. `var x=1; x=2;`
+  // TODO: MAYBE: "shadow" : "outer" to cause more complaints?
+  "shadow"        : false,
+  // Whether to tolerate `new function () { ... };` and `new Object;`, even though it probably doesn't do what you want.
+  "supernew"      : false,
+  // Whether to tolerate using `this` in a non-constructor function, where it typically points to the global object.
+  "validthis"     : false,
+  // Whether to tolerate use of the `with` statement, even though it causes potentially confusing behavior.
+  "withstmt"      : false,
+
 
   // Environments
 
-  "browser" : true,  // Web Browser (window, document, etc)
-  "node"    : false
+  "browser"       : true,     // Web Browser (window, document, etc)
+  "couch"         : false,    // CouchDB
+  "devel"         : false,    // Development/debugging (alert, confirm, etc)
+  "dojo"          : false,    // Dojo Toolkit
+  "jquery"        : false,    // jQuery
+  "mootools"      : false,    // MooTools
+  "node"          : false,    // Node.js
+  "nonstandard"   : false,    // Widely adopted globals (escape, unescape, etc)
+  "prototypejs"   : false,    // Prototype and Scriptaculous
+  "rhino"         : false,    // Rhino
+  "worker"        : false,    // Web Workers
+  "wsh"           : false,    // Windows Scripting Host
+  "yui"           : false     // Yahoo User Interface
 }

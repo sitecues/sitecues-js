@@ -5,21 +5,24 @@ define([], function() {
   return {
     // ARIA labels
     // - Main
-    sitecues_main_panel: 'sitecues main panel',
-    badge_label: 'sitecues zoom and speech tools; sitecues assists users who do not have their own screen reader or magnifier.',
+    sitecues_main_panel: 'Sitecues main panel',
+    badge_label: 'Sitecues zoom and speech tools; Sitecues assists users who do not have their own screen reader or magnifier.',
     zoom_in: 'zoom in',
     zoom_out: 'zoom out',
     // - Secondary
-    more_features: 'More features',   /* new */
-    previous: 'Previous',             /* new */
-    next: 'Next',                     /* new */
+    more_features: 'More features',
+    previous: 'Previous',
+    next: 'Next',
     // - Feedback
-    rating: 'Rating',                 /* new */
-    rating_1: '1 star',               /* new */
-    rating_2: '2 stars',              /* new */
-    rating_3: '3 stars',              /* new */
-    rating_4: '4 stars',              /* new */
-    rating_5: '5 stars',              /* new */
+    rating: 'Rating',
+    rating_1: '1 star',
+    rating_2: '2 stars',
+    rating_3: '3 stars',
+    rating_4: '4 stars',
+    rating_5: '5 stars',
+
+    // Toolbar
+    options_menu: 'Sitecues options menu',
 
     // Visible labels
     // - Main
@@ -30,19 +33,19 @@ define([], function() {
     on: 'On',
     off: 'Off',
     // - Secondary
-    tips: 'Tips',                     /* new */
-    settings: 'Settings',             /* new */
-    rate_us: 'Rate us',               /* new */
-    rate_us_prompt: 'We would love to hear from you!',  /* new */
-    rate_us_suggest: 'Have questions, comments or suggestions?', /* new */
-    about: 'About',                   /* new */
+    tips: 'Tips',
+    settings: 'Settings',
+    rate_us: 'Rate us',
+    rate_us_prompt: 'We would love to hear from you!',
+    rate_us_suggest: 'Have questions, comments or suggestions?',
+    about: 'About',
     // - Feedback
-    send: 'Send',                     /* new */
-    tell_us_something: 'Tell us something ...',      /* new */
-    thank_you: 'Thank you',                          /* new */
+    send: 'Send',
+    tell_us_something: 'Tell us something ...',
+    thank_you: 'Thank you',
     // - About
-    about_preamble: 'This website has added sitecues to make it easier to see, hear, and use. For more information, please visit ',
+    about_preamble: 'This website has added Sitecues to make it easier to see, hear, and use. For more information, please visit ',
     about_rate_us: 'We encourage you to provide feedback on your experience.',
-    zoom_and_speech: 'zoom &amp; speech'             /* new */
+    zoom_and_speech: 'zoom &amp; speech'
   };
 });

@@ -2,13 +2,39 @@
  *  Support color themes in page
  */
 
-define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core/platform',
-    'theme/color-choices', 'page/util/color', 'theme/custom-site-theme', 'core/events' ],
-  function($, conf, styleService, platform, colorChoices, colorUtil, customTheme, events) {
-  var $themeStyleSheet,
-    THEME_STYLESHEET_NAME = 'sitecues-js-theme',
+define(
+  [
+    '$',
+    'Promise',
+    'run/conf/preferences',
+    'page/style-service/style-service',
+    'run/platform',
+    'theme/color-choices',
+    'page/util/color',
+    'theme/custom-site-theme',
+    'run/events',
+    'core/native-global',
+    'run/inline-style/inline-style'
+  ],
+  function(
+    $,
+    Promise,
+    pref,
+    styleService,
+    platform,
+    colorChoices,
+    colorUtil,
+    customTheme,
+    events,
+    nativeGlobal,
+    inlineStyle
+  ) {
+  'use strict';
+
+  var THEME_STYLESHEET_ID = 'sitecues-js-theme',
+    TRANSITION_STYLESHEET_ID = 'sitecues-js-theme-transition',
     REPAINT_MS = 40,
-    themeStyles,
+    cachedStyleInfo,
     // TODO remove once no longer necessary -- should be soon
     shouldRepaintToEnsureFullCoverage,
     isPanelExpanded,
@@ -16,14 +42,21 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
     isInitialized,
     originalBodyBackgroundColor,
     isOriginalThemeDark,
-    isInverted,   // Is dark theme currently applied
-    isInverseBgInfoInitialized,
-    transitionTimer,
+    isCurrentlyInverted = false,   // Is dark theme currently applied
+    didInvertImages = false, // Are images currently inverted
+    finishThemeTimer,
+    requestedThemeName,
+    requestedThemePower,
+    requestedThemeTextHue,
     currentThemeName,  // one of the theme names from color-choices.js
     currentThemePower,  // .01 - 1
     currentThemeTextHue,  // 0 - 1
+    basicThemeSupportReady,  // Promise that style info is ready
+    imageInversionSupportReady, // Promise that image inversion service is ready
+    imageInverter,
     MAX_USER_SPECIFIED_HUE = 1.03,   // If > 1.0 then use white
-    TRANSITION_CLASS = 'sc-animate-theme',
+    TRANSITION_CLASS_FAST = 'sc-animate-theme-fast',
+    TRANSITION_CLASS_SLOW = 'sc-animate-theme-slow',
     TRANSITION_MS_FAST = 300,
     TRANSITION_MS_SLOW = 1400,
     DEFAULT_INTENSITY = 0.61,  // Must match default slider position in settings-template.hbs #scp-theme-power
@@ -33,89 +66,156 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
 
   // ---- PUBLIC ----
 
+  function finalizeTheme() {
+    if (shouldRepaintToEnsureFullCoverage) {
+      repaintPage();
+    }
+
+    // Only our color changes should use our transitions
+    $('html').removeClass(TRANSITION_CLASS_FAST + ' ' + TRANSITION_CLASS_SLOW);
+
+    if (!SC_EXTENSION) {
+      // Don't do this in extension -- there is no badge
+      require(['bp-adaptive/bp-adaptive'], function (bpAdaptive) {
+        bpAdaptive.adaptToSitecuesThemeChange(currentThemeName);
+      });
+    }
+  }
+
   /**
    * Apply the current theme to the current document
    * Uses currentThemeName, currentThemePower and currentThemeTextHue for theme settings
    */
   function onThemeChange() {
 
-    var
-      newThemeName = conf.get('themeName'),
-      newThemePower = conf.get('themePower'),
-      newThemeTextHue = conf.get('themeTextHue'),
-      colorMapFn,
-      willBeInverted;
+    // Requested theme name
+    requestedThemeName = pref.get('themeName');
+    requestedThemePower = pref.get('themePower') || DEFAULT_INTENSITY;
+    requestedThemeTextHue = pref.get('themeTextHue');
 
-    function applyThemeCss(inverseSpriteCss) {
-      var
-        themeCss = colorMapFn ? getThemeCssText(colorMapFn, currentThemePower, currentThemeTextHue) : '',
-        // We want to animate quickly between light themes, but slowly when performing a drastic change
-        // such as going from light to dark or vice-versa
-        transitionMs = isInverted !== willBeInverted ? TRANSITION_MS_SLOW : TRANSITION_MS_FAST,
-        transitionCss = initializeTransition(transitionMs);
+    if (!requestedThemeName && !currentThemeName) {
+      return; // Still no theme -- power and hue changes do not matter
+    }
 
-      getStyleSheet().text(transitionCss + themeCss + inverseSpriteCss);
+    // Relevant theme -- has it changed?
+    if (needToApplyRequestedTheme()) {
+      // New theme settings are different -- apply them!
+      applyRequestedTheme();
+    }
+  }
 
-      // Allow web pages to create CSS rules that respond to reverse themes
-      $('body').toggleClass('sitecues-reverse-theme', willBeInverted);
-      // Set class sitecues-[themename]-theme on <body> and clear other theme classes
-      Object.keys(colorChoices).forEach(function(checkName) {
-        $('body').toggleClass('sitecues-' + checkName + '-theme', currentThemeName === checkName);
+  function getColorFn(themeName) {
+    return colorChoices[themeName];
+  }
+
+  function toggleBodyClasses() {
+   // Set class sitecues-[themename]-theme on <body> and clear other theme classes
+   Object.keys(colorChoices).forEach(function (checkName) {
+     $('body').toggleClass('sitecues-' + checkName + '-theme', currentThemeName === checkName);
+   });
+  }
+
+  function needToApplyImageInversion() {
+    var requestedImageInversion = isDarkTheme(requestedThemeName);
+    return requestedImageInversion !== didInvertImages;
+  }
+
+  // Apply image inversion if still necessary
+  function applyImageInversion() {
+    var doInvertImages = isDarkTheme(requestedThemeName);
+    if (doInvertImages !== didInvertImages) {
+      imageInverter.toggle(doInvertImages);
+      didInvertImages = doInvertImages;
+    }
+  }
+
+  function applyColors() {
+    var colorMapFn = getColorFn(requestedThemeName);
+
+    if (needToApplyRequestedTheme()) {
+      var themeCss = colorMapFn ? getThemeCssText(colorMapFn, requestedThemePower, requestedThemeTextHue) : '',
+        isInversionRequested = isDarkTheme(requestedThemeName),
+        isFastTransition = isCurrentlyInverted === isInversionRequested;
+
+      // Apply new CSS
+      themeCss = '@media screen {\n' + themeCss + '\n}'; // Do not use in print!
+      styleService.updateSheet(THEME_STYLESHEET_ID, {text: themeCss});
+
+      currentThemeName = requestedThemeName;
+      currentThemePower = requestedThemePower || DEFAULT_INTENSITY;
+      currentThemeTextHue = requestedThemeTextHue;
+      isCurrentlyInverted = isInversionRequested;
+
+      // Turn on transitions
+      // We want to transition quickly between similar themes, but slowly when performing a drastic change
+      // such as going from light to dark or vice-versa
+      $('html').addClass(isFastTransition ? TRANSITION_CLASS_FAST : TRANSITION_CLASS_SLOW);
+
+      // Enable site-specific theme changes
+      toggleBodyClasses();
+
+      finishThemeTimer = nativeGlobal.setTimeout(finalizeTheme, isFastTransition ? TRANSITION_MS_FAST : TRANSITION_MS_SLOW);
+    }
+  }
+
+  function needToApplyRequestedTheme() {
+    return requestedThemeName !== currentThemeName ||
+      requestedThemePower !== currentThemePower ||
+      requestedThemeTextHue !== currentThemeTextHue;
+  }
+
+  // Apply colors and image inversion as necessary
+  function applyRequestedTheme() {
+
+    // Cancel previous theme application
+    clearTimeout(finishThemeTimer);
+
+    // Prepare style info
+    basicThemeSupportReady = basicThemeSupportReady || initThemeSupport();
+
+    // Apply image inversions if necessary (depending on most recently requested theme)
+    if (needToApplyImageInversion()) {
+      imageInversionSupportReady = imageInversionSupportReady || basicThemeSupportReady.then(initImageInversions);
+      imageInversionSupportReady.then(applyImageInversion);
+    }
+
+    // Apply the most recently requested new colors
+    var allRequestedThemeSupportReady = imageInversionSupportReady || basicThemeSupportReady;
+    allRequestedThemeSupportReady.then(applyColors);
+  }
+
+  function initThemeSupport() {
+    var bgStyles,
+      fgStyles,
+      bgImageStyles;
+
+    return new Promise(function(resolve) {
+      styleService.init(resolve);
+    }).then(function() {
+      bgStyles = styleService.getAllMatchingStylesCustom(getSignificantBgColor);
+    }).then(function() {
+      fgStyles = styleService.getAllMatchingStylesCustom(getFgColor);
+    }).then(function() {
+      bgImageStyles = styleService.getAllMatchingStylesCustom(getSignificantBgImageProperties);
+      cachedStyleInfo = bgStyles.concat(fgStyles).concat(bgImageStyles);
+    }).then(prepareTransitionCss);
+  }
+
+  function initImageInversions() {
+    return new Promise(function(resolve) {
+      require(['inverter/inverter'], function (inverter) {
+        imageInverter = inverter;
+        resolve();
       });
-
-      setTimeout(function () {
-        if (shouldRepaintToEnsureFullCoverage) {
-          repaintPage();
-        }
-        if (!SC_EXTENSION) {
-          // Don't do this in extension -- there is no badge
-          require(['bp-adaptive/bp-adaptive'], function (bpAdaptive) {
-            bpAdaptive.adaptToSitecuesThemeChange(currentThemeName);
-          });
-        }
-      }, transitionMs);
-
-      isInverted = willBeInverted;
-    }
-
-    if (newThemeName === currentThemeName && newThemePower === currentThemePower && newThemeTextHue === currentThemeTextHue) {
-      return; // No change
-    }
-
-    // New theme settings are different
-    currentThemeName = newThemeName;
-    currentThemePower = newThemePower || DEFAULT_INTENSITY;
-    currentThemeTextHue = newThemeTextHue;
-    colorMapFn = colorChoices[currentThemeName];
-    willBeInverted = isDarkTheme(colorMapFn);
-
-    // Init styles
-    styleService.init(function () {
-      collectRelevantStyles();
-      // Init inversion support only if necessary
-      if (willBeInverted || isInverted) {  // Need inversion support when page already is or will be inverted
-        require(['inverse-theme/inverse-theme'], function (inversionSupport) {
-          inversionSupport.init();
-          if (isInverted !== willBeInverted) {
-            // Inversion has changed, so set or clear sticky attributes that invert images
-            inversionSupport.inverter.toggle(willBeInverted);
-          }
-          if (willBeInverted) {
-            // We need bg image css
-            getInverseSpriteCss(themeStyles, inversionSupport, applyThemeCss);
-          }
-          else {
-            applyThemeCss('');
-          }
-        });
-      }
-      else {
-        applyThemeCss('');
-      }
+    })
+    .then(function() {
+      return imageInverter.init(cachedStyleInfo);
     });
   }
 
-  function isDarkTheme(colorMapFn) {
+  // Returns true even if not 'dark', but page themed itself dark already
+  function isDarkTheme(themeName) {
+    var colorMapFn = getColorFn(themeName);
     if (!colorMapFn) {
       return isOriginalThemeDark;
     }
@@ -127,34 +227,31 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
     return colorUtil.isDarkColor(themedBg);
   }
 
-  function initializeTransition(transitionMs) {
-    $('html').addClass(TRANSITION_CLASS);
-    clearTimeout(transitionTimer);
-    transitionTimer = setTimeout(function() {
-      $('html').removeClass(TRANSITION_CLASS);
-    }, transitionMs);
-
-    return getThemeTransitionCss(transitionMs);
-  }
-
-  function getThemeTransitionCss(transitionMs) {
-    var selectorBuilder = 'html.' + TRANSITION_CLASS +', html.' +
-          TRANSITION_CLASS + '> body',
+  function getThemeTransitionCss(transitionMs, className) {
+    var selectorBuilder = 'html.' + className +', html.' +
+          className + '> body',
       transitionCss = '{transition: background-color ' + transitionMs + 'ms;}\n\n';
 
     // Set the transition for every selector in the page that targets a background color
-    themeStyles.forEach(function(themeStyle) {
-      var type = themeStyle.rule.value,
+    cachedStyleInfo.forEach(function(themeStyle) {
+      var type = themeStyle.value.prop,
         selectors;
       if (type === 'background' || type === 'background-color') {
         selectors = themeStyle.rule.selectorText.split(',');
         selectors.forEach(function(bgSelector) {
-          selectorBuilder += ',.' + TRANSITION_CLASS + ' ' + bgSelector;
+          selectorBuilder += ',.' + className + ' ' + bgSelector;
         });
       }
     });
 
-    return selectorBuilder + transitionCss;
+    return '\n' + selectorBuilder + transitionCss;
+  }
+
+  function prepareTransitionCss() {
+    // Create or update transition stylesheet if needed
+    var css = getThemeTransitionCss(TRANSITION_MS_FAST, TRANSITION_CLASS_FAST) +
+        getThemeTransitionCss(TRANSITION_MS_SLOW, TRANSITION_CLASS_SLOW);
+    styleService.updateSheet(TRANSITION_STYLESHEET_ID, { text : css });
   }
 
   function createRule(prop, newValue, important) {
@@ -251,7 +348,7 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
     var styleSheetText = '';
 
     // Backgrounds
-    themeStyles.forEach(function(style) {
+    cachedStyleInfo.forEach(function(style) {
       var newRgba,
         newValue,
         selector = style.rule.selectorText,
@@ -273,7 +370,7 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
         if (isButtonRule(selector)) {
           // Don't alter buttons -- it will change it from a native button and the appearance will break
           // color, background-color
-          formFixes = 'border:1px outset ButtonFace;border-radius:4px';
+          formFixes = 'border:1px outset ButtonFace;border-radius:4px;';
         }
         if (newRgba.textShadow) {
           // Sometimes we want to darken, so we create a tiny text shadow of the same color as the text
@@ -296,23 +393,11 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
       isRepaintNeeded = true;
     }
     else {
-      document.documentElement.style.transform = 'translateY(0.01px)';
-      setTimeout(function () {
-        document.documentElement.style.transform = '';
+      inlineStyle.override(document.documentElement, ['transform', 'translateY(0.01px)']);
+      nativeGlobal.setTimeout(function () {
+        inlineStyle.restore(document.documentElement, 'transform');
       }, REPAINT_MS);
     }
-  }
-
-  /**
-   * Lazily get the style sheet to be used for applying the theme.
-   * @returns {jQuery}
-   */
-  function getStyleSheet() {
-    if (!$themeStyleSheet) {
-      $themeStyleSheet = $('<style>').appendTo('html')
-        .attr('id', THEME_STYLESHEET_NAME);
-    }
-    return $themeStyleSheet;
   }
 
   /**
@@ -328,9 +413,10 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
     }
     if (lastIndexRgb < 0) {
       // Color is not rgb() or rgba() -- may be a color name such as 'white'.
-      // Color name will be last.
+      // In most browsers, color name will be last.
+      // In Firefox, the color comes first
       var possibleColors = bgShorthand.split(' ');
-      return possibleColors[possibleColors.length - 1];
+      return possibleColors[platform.browser.isFirefox ? 0 : possibleColors.length - 1];
     }
     // Format = rgb(x,x,x) or rgba(x,x,x,x)
     return bgShorthand.substr(lastIndexRgb).split(')')[0] + ')';
@@ -439,49 +525,6 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
     }
   }
 
-  function collectRelevantStyles() {
-    if (!themeStyles) {
-      var bgStyles = styleService.getAllMatchingStylesCustom(getSignificantBgColor),
-        fgStyles = styleService.getAllMatchingStylesCustom(getFgColor),
-        bgImageStyles = styleService.getAllMatchingStylesCustom(getSignificantBgImageProperties);
-
-      themeStyles = bgStyles.concat(fgStyles).concat(bgImageStyles);
-    }
-  }
-
-  function getInverseSpriteCss(themeStyles, inversionSupport, callbackFn) {
-    function onBgInfoReady() {
-      var inverseSpriteCss = inversionSupport.inverter.getReverseSpriteCssText(themeStyles);
-      callbackFn(inverseSpriteCss);
-    }
-
-    if (isInverseBgInfoInitialized) {
-      // themeStyles has bg info ready
-      onBgInfoReady();
-      return;
-    }
-
-    // Update theme styles with bg info
-    var bgImageStyles = themeStyles.filter(isBgImageStyle),
-      numImagesRemainingToClassify = bgImageStyles.length;
-
-    function isBgImageStyle(info) {
-      return info.value.prop === 'background-image';
-    }
-
-    function nextImage() {
-      if (numImagesRemainingToClassify -- === 0) {
-        onBgInfoReady();
-      }
-    }
-
-    nextImage();  // In case we started with zero images
-
-    bgImageStyles.forEach(function(bgImageInfo) {
-      inversionSupport.bgImgClassifier.classifyBackgroundImage(bgImageInfo, nextImage);
-    });
-  }
-
   // Theme name must exist in colorChoices
   // Except for null, which means no theme
   function getSanitizedThemeName(name) {
@@ -519,17 +562,17 @@ define(['$', 'core/conf/user/manager', 'page/style-service/style-service', 'core
     // TODO remove when no longer necessary
     shouldRepaintToEnsureFullCoverage = platform.browser.isChrome && platform.browser.version < 48;
 
-    conf.def('themeName', getSanitizedThemeName);
-    conf.def('themePower', getSanitizedThemePower);
-    conf.def('themeTextHue', getSanitizedHue);
-    conf.get('themeName', onThemeChange);
-    conf.get('themePower', onThemeChange);
-    conf.get('themeTextHue', onThemeChange);
-    if (typeof conf.get('themePower') === 'undefined') {
-      conf.set('themePower', DEFAULT_INTENSITY);
+    pref.defineHandler('themeName', getSanitizedThemeName);
+    pref.defineHandler('themePower', getSanitizedThemePower);
+    pref.defineHandler('themeTextHue', getSanitizedHue);
+    pref.bindListener('themeName', onThemeChange);
+    pref.bindListener('themePower', onThemeChange);
+    pref.bindListener('themeTextHue', onThemeChange);
+    if (typeof pref.get('themePower') === 'undefined') {
+      pref.set('themePower', DEFAULT_INTENSITY);
     }
-    if (typeof conf.get('themeTextHue') === 'undefined') {
-      conf.set('themeTextHue', MAX_USER_SPECIFIED_HUE); // Use white text by default
+    if (typeof pref.get('themeTextHue') === 'undefined') {
+      pref.set('themeTextHue', MAX_USER_SPECIFIED_HUE); // Use white text by default
     }
 
     customTheme.init();

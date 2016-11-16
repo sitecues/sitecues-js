@@ -13,7 +13,8 @@
             siteUrl = getParam(2, 'siteUrl'),
             sessionId = getParam(3, 'sessionId'),
             pageViewId = getParam(4, 'pageViewId'),
-            prefs = getParam(5, 'prefs');
+            prefs = getParam(5, 'prefs'),
+            versionInfo = getParam(6, 'versionInfo').split('/');
 
     // Site config
     window.sitecues = {
@@ -23,10 +24,11 @@
         isFluid : 1,
         maxRewrapZoom: 3
       },
-      parentConfig: {
-        // Not in sitecues.config because we don't consider this normally configurable
-        sessionId: sessionId,
-        pageViewId: pageViewId
+      session: {
+        id: sessionId
+      },
+      pageView: {
+        id: pageViewId
       }
     };
 
@@ -40,6 +42,10 @@
         var script = document.createElement('script'),
                 first = document.getElementsByTagName('script')[0];
         sitecues.config.scriptUrl=scriptUrl;
+        sitecues.config.appUrl = {
+          branch: versionInfo[0],
+          version: versionInfo[1]
+        };
         script.src=sitecues.config.scriptUrl;
         script.type = 'text/javascript';
         script.async = true;

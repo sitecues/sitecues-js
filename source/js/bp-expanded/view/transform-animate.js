@@ -3,18 +3,23 @@
  * This file exposes an API for creating javascript animations.
  */
 
-define(['bp-expanded/view/transform-util', 'core/platform'], function (transformUtil, platform) {
+define(
+  [
+    'run/util/object-utility',
+    'run/inline-style/inline-style',
+    'bp-expanded/view/transform-util',
+    'run/platform'
+  ],
+  function (
+    objectUtil,
+    inlineStyle,
+    transformUtil,
+    platform
+  ) {
+  'use strict';
 
-  var requestFrameFn = window.requestAnimationFrame   ||
-                       window.msRequestAnimationFrame ||
-                       function (fn) {
-                         return setTimeout(fn, 16);
-                       },
-      cancelFrameFn  = window.cancelAnimationFrame   ||
-                       window.msCancelAnimationFrame ||
-                       function (fn) {
-                         clearTimeout(fn);
-                       },
+  var requestFrameFn = window.requestAnimationFrame,
+      cancelFrameFn  = window.cancelAnimationFrame,
 
       // https://gist.github.com/gre/1650294
       timingFunctions = {
@@ -128,10 +133,15 @@ define(['bp-expanded/view/transform-util', 'core/platform'], function (transform
     function initTransitionStyles(transition) {
       elements.forEach(function(elem) {
         if (elem) {
-          elem.style.transition = transition;
+          var css = {
+            transition : transition
+          };
+
           if (transition) {
-            elem.style.transitionTimingFunction = timingFunctionName;
+            css.transitionTimingFunction = timingFunctionName;
           }
+
+          inlineStyle.set(elem, css);
         }
       });
     }
@@ -144,7 +154,7 @@ define(['bp-expanded/view/transform-util', 'core/platform'], function (transform
         if (elements[index]) {
           toTransform = toTransforms[index];
           if (doTweak) {
-            toTransform = JSON.parse(JSON.stringify(toTransform));
+            toTransform = objectUtil.assign({}, toTransform);
             toTransform.translateY = (toTransform.translateY || 0) + 0.001;
           }
           transformUtil.setElemTransform(elements[index], toTransform);
@@ -182,8 +192,9 @@ define(['bp-expanded/view/transform-util', 'core/platform'], function (transform
 
     function beginTransition() {
       addTransitionEndListener();
-      initTransitionStyles(platform.transformPropertyCss + ' ' + duration + 'ms');
-      initTransforms();
+      initTransitionStyles('transform ' + duration + 'ms');
+      getComputedStyle(elements[0]);  // Force layout update
+      requestAnimationFrame(initTransforms);
     }
 
 

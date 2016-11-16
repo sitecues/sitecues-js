@@ -3,7 +3,16 @@
  * Not to be confused with earcons, which are just sounds.
  */
 
-define(['core/conf/user/manager', 'audio/audio'], function(conf, audio) {
+define(
+  [
+    'run/conf/preferences',
+    'audio/audio'
+  ],
+  function (
+    pref,
+    audio
+  ) {
+  'use strict';
 
   // The high zoom threshold for the zoom-based verbal cue
   var HIGH_ZOOM_THRESHOLD = 1.6,
@@ -25,7 +34,7 @@ define(['core/conf/user/manager', 'audio/audio'], function(conf, audio) {
    * @return {boolean}
    */
   function shouldPlayDescriptiveSpeechOnCue() {
-    var firstSpeechOn = conf.get(DESCRIPTIVE_SPEECH_ON_PARAM);
+    var firstSpeechOn = pref.get(DESCRIPTIVE_SPEECH_ON_PARAM);
     return !firstSpeechOn || firstSpeechOn + CUE_RESET_MS < Date.now();
   }
 
@@ -35,7 +44,7 @@ define(['core/conf/user/manager', 'audio/audio'], function(conf, audio) {
   function shouldPlayDescriptiveHighZoomCue(zoom) {
     // If zoom isn't high enough, or hasn't increased beyond initial setting, don't play cue
     if (zoom >= HIGH_ZOOM_THRESHOLD) {
-      var lastDescriptiveZoomCueTime = parseInt(conf.get(DESCRIPTIVE_HIGH_ZOOM_PARAM));
+      var lastDescriptiveZoomCueTime = parseInt(pref.get(DESCRIPTIVE_HIGH_ZOOM_PARAM));
       return !lastDescriptiveZoomCueTime || Date.now() - lastDescriptiveZoomCueTime > CUE_RESET_MS;
     }
   }
@@ -47,7 +56,7 @@ define(['core/conf/user/manager', 'audio/audio'], function(conf, audio) {
 
     if (!isEnabled) {
       // *** Speech off cue ***
-      audio.speakByKey(VERBAL_CUE_SPEECH_OFF);
+      audio.speakCueByName(VERBAL_CUE_SPEECH_OFF);
       return;
     }
 
@@ -57,11 +66,11 @@ define(['core/conf/user/manager', 'audio/audio'], function(conf, audio) {
     // 1) For the TTS-spacebar hint (currently given when TTS is turned on the first time):
     // Give the hint max three times, or until the user successfully uses the spacebar once with TTS on.
     if(!shouldPlayDescriptiveSpeechOnCue()) {
-      audio.speakByKey(VERBAL_CUE_SPEECH_ON);
+      audio.speakCueByName(VERBAL_CUE_SPEECH_ON);
     } else {
-      audio.speakByKey(VERBAL_CUE_SPEECH_ON_DESCRIPTIVE);
+      audio.speakCueByName(VERBAL_CUE_SPEECH_ON_DESCRIPTIVE);
       // Signals that the "descriptive speech on" cue has played
-      conf.set(DESCRIPTIVE_SPEECH_ON_PARAM, Date.now());
+      pref.set(DESCRIPTIVE_SPEECH_ON_PARAM, Date.now());
     }
   }
 
@@ -70,9 +79,9 @@ define(['core/conf/user/manager', 'audio/audio'], function(conf, audio) {
     // than we started, and we haven't already cued, then play an audio
     // cue to explain highlighting
     if (shouldPlayDescriptiveHighZoomCue(zoom)) {
-      audio.speakByKey('verbalCueHighZoom');
+      audio.speakCueByName('verbalCueHighZoom');
       // Signals that the "descriptive high zoom" cue has played.
-      conf.set(DESCRIPTIVE_HIGH_ZOOM_PARAM, Date.now());
+      pref.set(DESCRIPTIVE_HIGH_ZOOM_PARAM, Date.now());
     }
   }
 

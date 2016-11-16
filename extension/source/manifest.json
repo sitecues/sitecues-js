@@ -1,9 +1,9 @@
 {
   "manifest_version" : 2,
 
-  "name"             : "sitecues everywhere®",
-  "short_name"       : "sitecues everywhere®",
-  "description"      : "sitecues zoom and speech for any website",
+  "name"             : "Sitecues Everywhere",
+  "short_name"       : "Sitecues",
+  "description"      : "Sitecues zoom and speech for any website",
   "version"          : "0.0.30",
   "homepage_url"     : "http://sitecues.com/",
 
@@ -15,7 +15,7 @@
 
   "browser_action" : {
     "default_icon"  : "images/icon16.png",
-    "default_title" : "sitecues settings",
+    "default_title" : "Sitecues settings",
     "default_popup" : "html/popup.html"
   },
 
@@ -24,7 +24,8 @@
     "css/*.css",
     "earcons/*.ogg",
     "images/*.png",
-    "images/*.svg"
+    "images/*.svg",
+    "cue/*.json"
   ],
 
   "content_scripts" : [

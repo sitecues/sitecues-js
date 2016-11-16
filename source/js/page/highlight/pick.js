@@ -25,9 +25,32 @@
  * For more details see https://equinox.atlassian.net/wiki/display/EN/Picker+v2+Architecture
  */
 
-define(['$', 'page/util/common', 'core/conf/user/manager', 'core/conf/site',
-    'page/highlight/traitcache', 'page/highlight/traits', 'page/highlight/judge', 'core/platform'],
-  function($, common, conf, site, traitcache, traits, judge, platform) {
+define(
+  [
+    '$',
+    'page/util/common',
+    'run/conf/preferences',
+    'run/conf/site',
+    'page/highlight/traitcache',
+    'page/highlight/traits',
+    'page/highlight/judge',
+    'core/native-global',
+    'run/inline-style/inline-style',
+    'run/platform'
+  ],
+  function (
+    $,
+    common,
+    pref,
+    site,
+    traitcache,
+    traits,
+    judge,
+    nativeGlobal,
+    inlineStyle,
+    platform
+  ) {
+  'use strict';
 
   var UNUSABLE_SCORE = -99999,       // A score so low there is no chance of picking the item
     MAX_ANCESTORS_TO_ANALYZE = 14,   // Maximum ancestors to climb looking for start.
@@ -39,8 +62,9 @@ define(['$', 'page/util/common', 'core/conf/user/manager', 'core/conf/site',
     PICK_RULE_DISABLE = 'disable', // don't pick this anything -- not this item, any ancestor, or any descendant
     PICK_RULE_PREFER = 'prefer',   // pick this item
     PICK_RULE_IGNORE = 'ignore',   // don't pick this item
-    // Use hack to avoid Edge bugs where HLB on inputs caused crashes
-    SHOULD_AVOID_INPUTS = platform.browser.isIE && platform.browser.version > 11,
+    // Use hack to avoid IE bugs where HLB on inputs does not allow editing
+    GLOBAL_DISABLE_PICKER_SELECTOR =
+      '#sitecues-badge,iframe[name="google_conversion_frame"],[data-sc-pick="' + PICK_RULE_DISABLE + '"]', // Don't pick invisible Google Adwords iframe
 
     // The following weights are used to multiple each judgement of the same name, defined in judgements.js
     // The score is a sum of these weights * judgements
@@ -113,8 +137,28 @@ define(['$', 'page/util/common', 'core/conf/user/manager', 'core/conf/site',
     isDebuggingOn,
     isVoteDebuggingOn,
     isAutoPickDebuggingOn,
-    isVotingOn = !platform.browser.isIE || platform.browser.version >= 11,
+    isVotingOn = true,
     lastPicked;
+
+  function isValidStart(node) {
+    if (!node) {
+      return false;
+    }
+
+    switch (node.localName) {
+      case 'html':
+        return false;
+
+      case 'body':
+        return false;
+
+      case 'select':
+        // Firefox mispositions the dropdown menu of comboboxes with size 1 in the lens, so we don't allow them to be picked
+        return node.size >= 2 || !platform.browser.isFirefox;
+    }
+    
+    return !isInSitecuesUI(node);
+  }
 
   /*
    * ----------------------- PUBLIC -----------------------
@@ -134,7 +178,7 @@ define(['$', 'page/util/common', 'core/conf/user/manager', 'core/conf/site',
     }
 
     // 1. Don't pick anything in the sitecues UI
-    if (!startElement || $(startElement).is('html,body') || isInSitecuesUI(startElement)) {
+    if (!isValidStart(startElement)) {
       return null;
     }
 
@@ -179,10 +223,10 @@ define(['$', 'page/util/common', 'core/conf/user/manager', 'core/conf/site',
 
   function getCandidates(startElement) {
     var allAncestors = $(startElement).parentsUntil('body'),
-      visibleAncestors = getVisibleAncestors(allAncestors),
-      validAncestors = visibleAncestors.not(visibleAncestors.has('#sitecues-badge'));
+      validAncestors = getVisibleAncestors(allAncestors);
+
     if (validAncestors.length === 0) {
-      return null;
+      return [ startElement ]; // Always at least one valid candidate -- the startElement
     }
     if (lastPicked) {
       var isAncestorOfLastPicked = false;
@@ -243,10 +287,7 @@ define(['$', 'page/util/common', 'core/conf/user/manager', 'core/conf/site',
 
     function checkPickRuleForElement(item) {
       var pickRule = $(item).attr('data-sc-pick');
-      if (pickRule === PICK_RULE_DISABLE) {
-        picked = $(); // Don't pick anything in this chain
-      }
-      else if (pickRule === PICK_RULE_PREFER) {
+      if (pickRule === PICK_RULE_PREFER) {
         picked = $(item);
       }
       // Else keep going
@@ -263,11 +304,9 @@ define(['$', 'page/util/common', 'core/conf/user/manager', 'core/conf/site',
     var selector = customSelectors.disable ? customSelectors.disable.slice() : '';
     // TODO: Once HLB'd form controls no longer crashes MS Edge we can remove it, at least for those versions
     // For now: make sure we don't pick those controls by adding them to the custom disabled selector
-    if (SHOULD_AVOID_INPUTS) {
-      if (selector) {
-        selector += ',';
-      }
-      selector += 'input,textarea,select';
+    selector = (selector ? selector + ',' : '') + GLOBAL_DISABLE_PICKER_SELECTOR;
+    if (platform.isFirefox) {
+      selector += ',select[size="1"],select:not([size])';  // Lens causes issues for placement of select popup in Firefox
     }
     return selector;
   }
@@ -298,7 +337,10 @@ define(['$', 'page/util/common', 'core/conf/user/manager', 'core/conf/site',
 
   // --------- Heuristic results ---------
 
-  function performVote(scoreObjs, bestIndex, candidates, extraWork, origBestIndex) {
+  function performVote(scoreObjs, origBestIndex, candidates) {
+    var bestIndex = origBestIndex,
+      extraWork = 0;
+
     function getNumericScore(scoreObj) {
       return scoreObj.score;
     }
@@ -310,7 +352,7 @@ define(['$', 'page/util/common', 'core/conf/user/manager', 'core/conf/site',
       if (secondBestIndex < 0) {
         var scores = scoreObjs.map(getNumericScore);
         if (SC_DEV && isVoteDebuggingOn) {
-          console.log('--> break no other competitors: ' + JSON.stringify(scores));
+          console.log('--> break no other competitors: ' + nativeGlobal.JSON.stringify(scores));
         }
         break;  // Only one valid candidate
       }
@@ -369,16 +411,26 @@ define(['$', 'page/util/common', 'core/conf/user/manager', 'core/conf/site',
 
     if (SC_DEV && isVoteDebuggingOn) {
       if (origBestIndex !== bestIndex) {
-        candidates[origBestIndex].style.outline = '2px solid red';
-        candidates[bestIndex].style.outline = '2px solid green';
+        inlineStyle.set(candidates[origBestIndex], {
+          outline : '2px solid red'
+        });
+        inlineStyle.set(candidates[bestIndex], {
+          outline : '2px solid green'
+        });
       }
       else {
         console.log('Extra work ' + extraWork);
-        candidates[bestIndex].style.outline = (extraWork * 4) + 'px solid orange';
+        inlineStyle.set(candidates[bestIndex], {
+          outline : (extraWork * 4) + 'px solid orange'
+        });
       }
-      setTimeout(function () {
-        candidates[origBestIndex].style.outline = '';
-        candidates[bestIndex].style.outline = '';
+      nativeGlobal.setTimeout(function () {
+        inlineStyle.set(candidates[origBestIndex], {
+          outline : ''
+        });
+        inlineStyle.set(candidates[bestIndex], {
+          outline : ''
+        });
       }, 1000);
     }
     return bestIndex;
@@ -389,9 +441,9 @@ define(['$', 'page/util/common', 'core/conf/user/manager', 'core/conf/site',
     // 1. Get the best candidate (pre-voting)
     var
       scoreObjs = getScores(candidates),
-      bestIndex = getCandidateWithHighestScore(scoreObjs),
-      origBestIndex = bestIndex,
-      extraWork = 0;
+      pickingDisabledSelector = getPickingDisabledSelector(),
+      bestIndex,
+      votedBestIndex;
 
     function processResult(pickedIndex) {
       // Log the results if necessary for debugging
@@ -404,13 +456,37 @@ define(['$', 'page/util/common', 'core/conf/user/manager', 'core/conf/site',
       return pickedIndex < 0 ? null : candidates[pickedIndex];
     }
 
-    if (bestIndex < 0) {
-      return processResult(-1); // No valid candidate
+    function containsItemsDisabledForPicker(index) {
+      return $(candidates[index]).has(pickingDisabledSelector).length > 0;
     }
 
-    // 2. Get the second best candidate
+    // 2. Get the best candidate that's not disabled in the picker
+    while (true) {
+      bestIndex = getCandidateWithHighestScore(scoreObjs);
+
+      if (bestIndex < 0) {
+        return processResult(-1); // No valid candidate
+      }
+
+      if (!containsItemsDisabledForPicker(bestIndex)) {
+        // Does not contain picker-disabled item -- therefore this result is legal
+        // We know the candidate itself is not picker-disabled, because those are filtered out in an earlier stage,
+        // but here we did the more expensive check of looking at all descendants
+        break;
+      }
+
+      // Remove all of the candidates that include the disabled item, and then try again
+      candidates = candidates.slice(bestIndex + 1);
+      scoreObjs = scoreObjs.slice(bestIndex + 1);
+    }
+
+    // 3. Get the best candidate after voting by other nearby textnodes
     if (doAllowVoting) {
-      bestIndex = performVote(scoreObjs, bestIndex, candidates, extraWork, origBestIndex);
+      votedBestIndex = performVote(scoreObjs, bestIndex, candidates);
+      // If the voted best index is a container, we need to doublecheck that it's allowable (no picker-disabled items)
+      if (votedBestIndex >= bestIndex || !containsItemsDisabledForPicker(votedBestIndex)) {
+        bestIndex = votedBestIndex;
+      }
     }
 
     return processResult(bestIndex);
@@ -448,7 +524,7 @@ define(['$', 'page/util/common', 'core/conf/user/manager', 'core/conf/site',
 
     function isAcceptableTextLeaf(node) {
       // Logic to determine whether to accept, reject or skip node
-      if (common.isEmpty(node)) {
+      if (common.isWhitespaceOrPunct(node)) {
         return; // Only whitespace or punctuation
       }
       var element = node.parentNode;
@@ -693,7 +769,7 @@ define(['$', 'page/util/common', 'core/conf/user/manager', 'core/conf/site',
       candidate,
       rect,
       style,
-      zoom = conf.get('zoom') || 1;
+      zoom = pref.get('zoom') || 1;
     for (; index < candidates.length; index ++) {
       candidate = candidates[index];
       if (lastPicked && $.contains(candidate, lastPicked)) {
@@ -753,7 +829,7 @@ define(['$', 'page/util/common', 'core/conf/user/manager', 'core/conf/site',
       ancestorRect,
       isInWideContainer = 0,
       isInTallContainer = 0;
-    while (ancestor !== document.body) {
+    while (ancestor.localName !== 'body') {
       ancestorRect = traitcache.getScreenRect(ancestor);
       portionOfBodyWidth = ancestorRect.width / bodyWidth;
       portionOfBodyHeight = ancestorRect.height / bodyHeight;
@@ -817,10 +893,8 @@ define(['$', 'page/util/common', 'core/conf/user/manager', 'core/conf/site',
   // Return true if the element is part of the sitecues user interface
   // Everything inside the <body> other than the page-inserted badge
   function isInSitecuesUI(node) {
-    // Check for nodeType of 1, which is an element
-    // If not, use the parent of the node
-    var element = node.nodeType === 1 ? node : node.parentNode;
-    return ! $.contains(document.body, element) || // Is not in the <body>
+    var element = node.nodeType === Node.ELEMENT_NODE ? node : node.parentNode;
+    return ! $(element).closest('body').length ||  // Is not in the <body> (must also check clone body)
       $(element).closest('#sitecues-badge,#scp-bp-container').length;
   }
 
@@ -843,6 +917,7 @@ define(['$', 'page/util/common', 'core/conf/user/manager', 'core/conf/site',
       console.log('Auto pick debugging: ' + (isAutoPickDebuggingOn = !isAutoPickDebuggingOn));
     };
   }
+
   return {
     find: find,
     reset: reset,
@@ -850,5 +925,4 @@ define(['$', 'page/util/common', 'core/conf/user/manager', 'core/conf/site',
     provideCustomSelectors: provideCustomSelectors,
     provideCustomWeights: provideCustomWeights
   };
-
 });

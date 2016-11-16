@@ -17,15 +17,16 @@ var gulp = require('gulp'),
   size = config.isShowingSizes && require('gulp-size'),
   path = require('path'),
   pkgDir = require('pkg-dir'),
-  Promise_ = require('bluebird'),   // TODO update bamboo to use node 3+ and remove this polyfill dependency
   amdConfigs = require('./amd-config'),
   absoluteSourceFolder,
   absoluteSourceFolderStringLength,
   JS_SOURCE_DIR = config.librarySourceDir + '/js',
   compileFunctionMap = getCompileFunctionMap(),
-  uglify = require('gulp-uglify'),
-  isMin = config.isMinifying,
-  uglifyOptions = {
+  isMin = config.isMinifying;
+
+function getUglifyOptions() {
+
+  return {
     compress: {
       dead_code     : true,  // Remove dead code whether minifying or not
       sequences     : isMin, // join consecutive statements with the “comma operator”
@@ -45,22 +46,17 @@ var gulp = require('gulp'),
       cascade       : isMin, // try to cascade `right` into `left` in sequences
       side_effects  : true,  // drop side-effect-free statements
       screw_ie8     : true,
-      global_defs: config.globalDefs
-      },
+      global_defs   : config.globalDefs
+    },
     output: {
-      beautify: !isMin,
-      comments: !isMin,
-      bracketize: !isMin,
-      indent_level: 2
-      },
-    mangle: isMin,
-    global_defs: {
-      SC_EXTENSION: false,
-      SC_RESOURCE_FOLDER_NAME: config.resourceFolderName,
-      SC_LOCAL: config.isLocal,
-      SC_DEV: config.isDebugOn
-      }
-    };
+      beautify      : !isMin,
+      comments      : !isMin,
+      bracketize    : !isMin,
+      indent_level  : 2
+    },
+    mangle: isMin
+  };
+}
 
 
 // Convert to relative paths and remove .js extension
@@ -108,7 +104,7 @@ function validate(callback) {
 }
 
 function optimize(amdConfig) {
-  return new Promise_(
+  return new Promise(
     function(resolve, reject) {
       requirejs.optimize(
         amdConfig,
@@ -127,7 +123,7 @@ function getCompileFunctionMap() {
   var functionMap = {};
   amdConfigs.sourceFolders.forEach(function(sourceFolder) {
     var fn = function () {
-      var amdConfig = amdConfigs.getAmdConfig(sourceFolder, uglifyOptions);
+      var amdConfig = amdConfigs.getAmdConfig(sourceFolder, getUglifyOptions());
       amdConfig.onModuleBundleComplete = onModuleBundleComplete;
       return optimize(amdConfig);
     };
@@ -135,15 +131,7 @@ function getCompileFunctionMap() {
     functionMap[JS_SOURCE_DIR + '/' + sourceFolder] = fn;
   });
 
-  functionMap[JS_SOURCE_DIR + '/jquery.js'] = copyJQuery;
-
   return functionMap;
-}
-
-function copyJQuery() {
-  return gulp.src(JS_SOURCE_DIR + '/jquery.js')
-    .pipe(uglify(uglifyOptions))
-    .pipe(gulp.dest(config.resourceDir + '/js'));
 }
 
 function prepareValidation() {
@@ -156,7 +144,7 @@ function prepareValidation() {
 }
 
 function showSizes() {
-  return gulp.src(config.buildDir + '/**/*.js')
+  return gulp.src(global.buildDir + '/**/*.js')
     .pipe(size({ pretty: true, gzip: true, showFiles: true }));
 }
 

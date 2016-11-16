@@ -1,0 +1,22 @@
+<sc-toolbar-menu id="scp-toolbar-menu" role="menu">
+  <sc-toolbar-menuitem id="scp-toolbar-what-is" tabindex="-1">{{what_is_this}}</sc-toolbar-menuitem>
+  <sc-blurb id="scp-blurb-what-is">
+    {{quick_description}}<br><br>
+    <sc-blurb-image id="scp-blurb-slider-bar" aria-label="{{slider_alt}}"></sc-blurb-image><br><br>
+    {{slider_instructions}}<br><br>
+    <sc-blurb-button id="scp-blurb-tour-tips">{{more_tips}}</sc-blurb-button>
+  </sc-blurb>
+  <!-- Only one of the below #scp-toolbar-turn-off items will survive -- the other is removed (page vs. extension) -->
+  <sc-toolbar-menuitem id="scp-toolbar-turn-off" tabindex="-1" data-sitecues-type="page">{{turn_off}}</sc-toolbar-menuitem>
+  <sc-toolbar-menuitem id="scp-toolbar-turn-off" tabindex="-1" data-sitecues-type="extension">{{turn_off_this_site}}</sc-toolbar-menuitem>
+  <sc-blurb id="scp-blurb-hide">
+    {{blurb_reset_done}}<br><br>
+    {{blurb_can_hide}}<br><br>
+    <sc-blurb-button id="scp-blurb-hide-button">{{hide_button}}</sc-blurb-button>
+  </sc-blurb>
+  <sc-blurb id="scp-blurb-unhide">
+    {{bye_for_now}}<br><br>
+    <sc-blurb-button>{{restore_button}}</sc-blurb-button><br><br>
+    {{restore_via_f8_part1}}&nbsp;<sc-blurb-kbd>F8</sc-blurb-kbd>{{restore_via_f8_part2}}
+  </sc-blurb>
+</sc-toolbar-menu>

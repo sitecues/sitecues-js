@@ -2,7 +2,7 @@ define(
     [
         'intern!tdd',
         'intern/chai!assert',
-        'core/events'
+        'run/events'
     ],
     function (tdd, assert, events) {
 
@@ -12,7 +12,7 @@ define(
             test       = tdd.test,
             beforeEach = tdd.beforeEach;
 
-        suite('Events module', function () {
+        suite('Events', function () {
 
             beforeEach(function () {
                 events.off();

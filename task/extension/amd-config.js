@@ -7,9 +7,9 @@ var config = require('../build-config.js'),
   glob = require('glob'),
   dataFolders = sourceFoldersConfig.dataFolders,
   dataModules = getDataModules(),
+  OVERRIDES_DIR = '../../extension/source/js/overrides/',
   amdConfig = {
     include: getIncludes(dataModules),
-    exclude: [ 'page/zepto/zepto' ],  // Use jquery instead of zepto as it works in more cases (compatibility with pages that use Prototype.js)
     wrap: {
       start: 'sitecues.version="' + config.version + '";\n' +
         '"use strict";\n'
@@ -26,11 +26,18 @@ var config = require('../build-config.js'),
       // In runtime config, via definePrim : 'Promise' to allow use of alameda's built-in Prim library
       'Promise': 'empty:',
       // DIFFERENT in the extension
-      'core/conf/user/storage-backup': '../../extension/source/js/overrides/storage-backup',
-      'core/data-map': config.tmpDir + '/data-map',
-      // UNUSED in the extension
-      'core/bp/badge/page-badge': 'empty:',
-      'core/bp/badge/palette': 'empty:',
+      'core/user': OVERRIDES_DIR + 'user',
+      'core/native-global': OVERRIDES_DIR + 'native-global',
+      'core/page-view': OVERRIDES_DIR + 'page-view',
+      'core/session': OVERRIDES_DIR + 'session',
+      'run/data-map': config.tmpDir + '/data-map',
+      // UNUSED in the extension (stubbed methods)
+      'run/ab-test/ab-test': OVERRIDES_DIR + 'ab-test',
+      'run/metric/metric': OVERRIDES_DIR + 'metric',
+      'run/errors': OVERRIDES_DIR + 'errors',
+      // UNUSED and EMPTY in the extension
+      'run/bp/badge/page-badge': 'empty:',
+      'run/bp/badge/palette': 'empty:',
       'bp-img-placeholder/bp-img-placeholder/': 'empty:',
       'bp-adaptive/bp-adaptive': 'empty:',
       'network-player/network-player': 'empty:'
@@ -40,7 +47,7 @@ var config = require('../build-config.js'),
         '$': 'empty:'  // Extension always uses jQuery in order to be compatible with pages that use Prototype.js
       }
     },
-    insertRequire: [ 'core/core' ]
+    insertRequire: [ 'core/run' ]
   };
 
 // Get a list of data modules, which are any .js files in data folders listed in source-folders.json

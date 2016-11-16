@@ -6,8 +6,8 @@
       </sc-h2>
       <sc-p>
         <sc-span id="scp-demo-slider">
-          <sc-span id="scp-demo-slider-bar"></sc-span>
-          <sc-span id="scp-demo-slider-thumb"></sc-span>
+          <sc-span id="scp-demo-slider-bar" role="presentation"></sc-span>
+          <sc-span id="scp-demo-slider-thumb" role="presentation"></sc-span>
         </sc-span>
       </sc-p>
     </sc-center>
@@ -55,13 +55,13 @@
 
   <sc-card id="scp-full-guide-card" aria-labelledby="scp-full-guide-tab">
     <sc-h2 class="scp-icon-menuitem">
-      <sc-button id="scp-guide-icon" class="scp-hand-cursor" aria-labelledby="scp-guide-label" data-target="#"></sc-button>
-      <sc-link id="scp-guide-label" data-target="#">{{guide.full.label}}</sc-link>
+      <sc-button id="scp-guide-icon" role="presentation" class="scp-hand-cursor" aria-labelledby="scp-guide-label" data-target="#"></sc-button>
+      <sc-link id="scp-guide-label" role="presentation" data-target="#">{{guide.full.label}}</sc-link>
       <sc>{{guide.full.action}}</sc>
     </sc-h2>
     <sc-h2 class="scp-icon-menuitem">
-      <sc-button id="scp-kbd-icon" class="scp-hand-cursor" aria-labelledby="scp-kbd-label" data-target="##keyboard"></sc-button>
-      <sc-link id="scp-kbd-label" data-target="##keyboard">{{guide.keyboard.label}}</sc-link>
+      <sc-button id="scp-kbd-icon" role="presentation" class="scp-hand-cursor" aria-labelledby="scp-kbd-label" data-target="##keyboard"></sc-button>
+      <sc-link id="scp-kbd-label" role="presentation" data-target="##keyboard">{{guide.keyboard.label}}</sc-link>
       <sc>{{guide.keyboard.action}}</sc>
     </sc-h2>
   </sc-card>
@@ -81,9 +81,9 @@
 
   <!-- Fake demo page -->
   <sc id="scp-demo-page">
-    <sc id="scp-demo-page-contents">
-      <sc-p><sc-span id="scp-demo-para">{{demopage.welcome}}</sc-span></sc-p>
-      <sc-span id="scp-demo-mouse"></sc-span>
+    <sc id="scp-demo-page-contents" role="presentation">
+      <sc-p><sc-span id="scp-demo-para" role="presentation">{{demopage.welcome}}</sc-span></sc-p>
+      <sc-span id="scp-demo-mouse" role="presentation"></sc-span>
       <sc-p>{{demopage.blurb}}</sc-p>
     </sc>
   </sc>

@@ -2,32 +2,42 @@
  * This is the box that appears when the user asks to read the highlighted text in a page.
  * Documentation: https://equinox.atlassian.net/wiki/display/EN/HLB3
  */
-define([
+define(
+  [
     '$',
-    'core/conf/user/manager',
     'hlb/event-handlers',
     'hlb/positioning',
     'hlb/styling',
-    'core/platform',
+    'run/conf/preferences',
+    'run/platform',
     'page/util/element-classifier',
     'hlb/animation',
     'page/util/geo',
-    'core/metric',
+    'run/metric/metric',
     'hlb/constants',
-    'core/events'],
-  function(
+    'run/events',
+    'run/inline-style/inline-style',
+    'run/util/array-utility'
+  ],
+  /*jshint -W072 */
+  function (
     $,
-    conf,
     eventHandlers,
     hlbPositioning,
     hlbStyling,
+    pref,
     platform,
     elemClassifier,
     hlbAnimation,
     geo,
     metric,
     constants,
-    events) {
+    events,
+    inlineStyle,
+    arrayUtil
+  ) {
+  /*jshint +W072 */
+  'use strict';
 
   /////////////////////////
   // PRIVATE VARIABLES
@@ -40,7 +50,7 @@ define([
   var EXTRA_HIGHLIGHT_PADDING = 2, // TODO: Figure out why this is needed and compute it.
       MOUSE_SAFETY_ZONE       = 50, // Number of pixels the mouse is allowed to go outside the HLB, before it closes.
       FORMS_SELECTOR          = 'input, textarea, select',
-
+      INPUT_SELECTOR          = FORMS_SELECTOR + ', button',
       $picked,         // The object chosen by the picker.
       $foundation,     // The sanitized input, used as the basis for creating an $hlb.
       $hlb,            // The cloned object, based on the $foundation.
@@ -95,13 +105,13 @@ define([
       fromInputType = $currentFromInput.prop('type');
       cloneIndex = $currentToInput[0].getAttribute('data-sc-cloned');
 
-      //If we're closing the HLB, and the current form element is part of a cloned foundation
+      // If we're closing the HLB, and the current form element is part of a cloned foundation
       if (isHLBClosing && cloneIndex) {
-        //Remove the index property from the HLB element
+        // Remove the index property from the HLB element
         $currentFromInput[0].removeAttribute('data-sc-cloned');
-        //Query the DOM for the original form element, so we can copy the HLB form value back into the appropriate field
+        // Query the DOM for the original form element, so we can copy the HLB form value back into the appropriate field
         $currentToInput = $('[data-sc-cloned="' + cloneIndex + '"]');
-        //Remove the index from the original form element
+        // Remove the index from the original form element
         $currentToInput[0].removeAttribute('data-sc-cloned');
       }
 
@@ -128,8 +138,6 @@ define([
   // Return truthy value if a button is pressed on a mouse event.
   // There are three properties for mouse buttons, and they all work differently -- both
   // in terms of browsers and on mousemove events in particular.
-  // DANGER! Does not work in IE9 -- always returns falsey value.
-  // If we need it in IE9 we'll need to globally track mousedown and mouseup events.
   function isButtonDown(mouseEvent) {
     return typeof mouseEvent.buttons === 'undefined' ? mouseEvent.which : mouseEvent.buttons;
   }
@@ -209,7 +217,7 @@ define([
 
     // Focus input or textarea
     if (elemClassifier.isEditable($hlb[0])) {
-      $hlb.focus();
+      $hlb[0].focus();
     }
 
     // Let the rest of the application know that the hlb is ready
@@ -262,7 +270,6 @@ define([
   }
 
   function targetHLB(highlight, isRetargeting) {
-
     state.highlight = highlight;
 
     if (!highlight.fixedContentRect) {
@@ -280,6 +287,11 @@ define([
     // Disable mouse highlighting so we don't copy over the highlighting styles from the picked element.
     // It MUST be called before getFoundation().
     events.emit('mh/pause');
+
+    // Set data attributes on each of the form input elements
+    // This allows us to query the DOM for the original elements
+    // when we want to give them the values entered into the HLB
+    setCloneIndexOnFormDescendants($picked);
 
     // Sanitize the input, by accounting for "lonely" elements.
     $foundation = getFoundation($picked);
@@ -326,7 +338,6 @@ define([
    * @return {[Object]}   [Dimensions and position]
    */
   function getInitialHLBRect(highlight) {
-
     return geo.expandOrContractRect(highlight.fixedContentRect, EXTRA_HIGHLIGHT_PADDING);
   }
 
@@ -336,7 +347,6 @@ define([
    * @param isRetargeting -- true if HLB is moving from one place to another, false if brand new HLB mode
    */
   function createHLB(highlight, isRetargeting) {
-
     // clone, style, filter, emit hlb/did-create,
     // prevent mousemove deflation, disable scroll wheel
     initializeHLB(highlight);
@@ -362,12 +372,12 @@ define([
       'transitionProperty' : hlbStyling.transitionProperty
     };
 
-    // setTimeout MIGHT be necessary for the browser to complete the rendering and positioning
+    // .setTimeout MIGHT be necessary for the browser to complete the rendering and positioning
     // of the HLB.  Before we scale, it absolutely must be positioned correctly.
     // Note: Interestingly enough, this timeout is unnecessary if we comment out the
     // background dimmer in transitionInHLB(), because the operation took long enough
     // for the browser to update/render the DOM.  This is here for safety (until proven otherwise).
-    // If we use a setTimeout, we have to solve the problem of functions being added to the stack before
+    // If we use a .setTimeout, we have to solve the problem of functions being added to the stack before
     // the timeout completes...its a pain.
     hlbAnimation.transitionInHLB(isRetargeting, viewData);
   }
@@ -388,21 +398,19 @@ define([
    * HLB with default styles and computed styles.]
    */
   function initializeHLB(highlight) {
-
     // Create and append the HLB and DIMMER wrapper element to the DOM
     $hlbWrapper = getOrCreateHLBWrapper();
 
-    if ((platform.browser.isIE && getEditableItems().length) || platform.browser.isSafari) {
-      // TODO try to remove these hacks
-      // Hack#1: IE + text fields -- avoid bug where textfield was locked
-      // Hack#2: Safari -- avoid bug where HLB is blurry, at least on tired.com (SC-3185)
+    if (platform.browser.isIE && getEditableItems().length) {
+      // TODO try to remove this hack:
+      // IE + text fields -- avoid bug where textfield was locked
 
       if (SC_DEV && loggingEnabled) {
         console.log('SPECIAL CASE: HLB inside <body>');
       }
 
       $hlbWrapper.appendTo('body');
-      inheritedZoom = conf.get('zoom') || 1;  // Zoom inherited from page
+      inheritedZoom = pref.get('zoom') || 1;  // Zoom inherited from page
 
     } else {
       $hlbWrapper.insertAfter('body');
@@ -426,21 +434,48 @@ define([
    * [cloneHLB clones elements and styles from the foundation to the HLB.]
    */
   function cloneHLB(highlight) {
-
     var hlbStyles;
 
     // The cloned element (HLB)
     $hlb = $($foundation[0].cloneNode(true));
+    var hlb = $hlb[0];
 
     // Copies form values from the foundation to the HLB
     // Need to do this on a timeout in order to enable Safari input fix hack
-    // Commenting out setTimeout fixes problem on TexasAT
-    // setTimeout(function() {
+    // Commenting out .setTimeout fixes problem on TexasAT
+    // .setTimeout(function() {
     mapForm($foundation, $hlb);
     // }, 0);
 
+    // We need to copy over each key stroke from hlb input fields so that when event handlers run on 'enter' the
+    // original input field has the correct value
+    $hlb.find(INPUT_SELECTOR).addBack(INPUT_SELECTOR).each(function (index, hlbInput) {
+      function handleEvents(event) {
+        var cloneAttribute = 'data-sc-cloned',
+            cloneIndex     = hlbInput.getAttribute(cloneAttribute),
+            cloneSelector  = '[' + cloneAttribute + '="' + cloneIndex + '"]';
+
+        if (cloneIndex) {
+          var originalElement = arrayUtil.find(document.querySelectorAll(cloneSelector), function (element) {
+            return hlbInput !== element;
+          });
+          if (originalElement) {
+            if (!platform.browser.isIE) {
+              // new Event() is not supported in IE11
+              var cloneEvent = new event.constructor(event.type, event);
+              originalElement.dispatchEvent(cloneEvent);
+              hlbInput.focus();
+            }
+            originalElement.value = hlbInput.value;
+          }
+        }
+      }
+      hlbInput.addEventListener('keydown', handleEvents);
+      hlbInput.addEventListener('click', handleEvents);
+    });
+
     // Clone styles of HLB and children of HLB, so layout is preserved
-    hlbStyling.initializeStyles($foundation, $hlb, initialHLBRect);
+    hlbStyling.initializeStyles($foundation, $hlb, initialHLBRect, highlight.hiddenElements);
 
     // Remove any elements and styles we dont want on the cloned element (such as <script>, id, margin)
     // Filtering must happen after initializeStyles() because we map all children of the original element
@@ -454,15 +489,14 @@ define([
     hlbStyles = hlbStyling.getHLBStyles($picked, $foundation, highlight);
 
     // Set the styles for the HLB and append to the wrapping element
-    $hlb
-      .css(hlbStyles)
-      .appendTo($hlbWrapper);
+    inlineStyle.set(hlb, hlbStyles);
+    $hlb.appendTo($hlbWrapper);
 
     // Fixes problem with TexasAT home page when opening the top nav (Home, Sitemap, Contact Us) in HLB
     hlbStyling.setHLBChildTextColor($hlb);
 
     // Set the ID of the hlb.
-    $hlb[0].id = constants.HLB_ID;
+    hlb.id = constants.HLB_ID;
   }
 
   /**
@@ -497,23 +531,25 @@ define([
 
     // It is important to clone the styles of the parent <ul> of the original element, because it may
     // have important styles such as background images, etc.
-    $foundation[0].style.cssText = hlbStyling.getComputedStyleCssText($picked.parents('ul, ol')[0]);
+    inlineStyle($foundation[0]).cssText = hlbStyling.getComputedStyleCssText($picked.parents('ul, ol')[0]);
 
     // Create, position, and style this element so that it overlaps the element chosen by the picker.
-    $foundation.css({
-      'position'       : 'absolute',
-      'left'           : (pickedElementBoundingBox.left + window.pageXOffset) / inheritedZoom,
-      'top'            : (pickedElementBoundingBox.top  + window.pageYOffset) / inheritedZoom,
-      'opacity'        : 0,
-      'padding'        : 0,
-      'margin'         : 0,
-      'width'          : pickedElementBoundingBox.width / inheritedZoom,
-      'list-style-type': pickedElementComputedStyle.listStyleType || 'none'
-    }).insertAfter('body');
+    inlineStyle.set($foundation[0], {
+      'position'      : 'absolute',
+      'left'          : (pickedElementBoundingBox.left + window.pageXOffset) / inheritedZoom,
+      'top'           : (pickedElementBoundingBox.top  + window.pageYOffset) / inheritedZoom,
+      'opacity'       : 0,
+      'padding'       : 0,
+      'margin'        : 0,
+      'width'         : pickedElementBoundingBox.width / inheritedZoom,
+      'listStyleType' : pickedElementComputedStyle.listStyleType || 'none'
+    });
+
+    $foundation.insertAfter('body');
 
     // Map all picked elements children CSS to cloned children CSS
     for (i = 0; i < $pickedAndDescendants.length; i += 1) {
-      $pickedCloneAndDescendants[i].style.cssText = hlbStyling.getComputedStyleCssText($pickedAndDescendants[i]);
+      inlineStyle($pickedCloneAndDescendants[i]).cssText = hlbStyling.getComputedStyleCssText($pickedAndDescendants[i]);
     }
 
     return $foundation;
@@ -537,7 +573,7 @@ define([
     removeTemporaryFoundation = true;
 
     // Create, position, and style this element so that it overlaps the element chosen by the picker.
-    $foundation.css({
+    inlineStyle.set($foundation[0], {
       'position'       : 'absolute',
       'left'           : (pickedElementsBoundingBox.left + window.pageXOffset) / inheritedZoom,
       'top'            : (pickedElementsBoundingBox.top  + window.pageYOffset) / inheritedZoom,
@@ -545,11 +581,12 @@ define([
       'padding'        : 0,
       'margin'         : 0,
       'width'          : pickedElementsBoundingBox.width / inheritedZoom
-    }).insertAfter('body');
+    });
+    $foundation.insertAfter('body');
 
     // Map all picked elements children CSS to cloned children CSS
     for (i = 0; i < $pickedAndDescendants.length; i += 1) {
-      $pickedCloneAndDescendants[i].style.cssText = hlbStyling.getComputedStyleCssText($pickedAndDescendants[i]);
+      inlineStyle($pickedCloneAndDescendants[i]).cssText = hlbStyling.getComputedStyleCssText($pickedAndDescendants[i]);
     }
 
     return $foundation;
@@ -557,8 +594,8 @@ define([
 
   function setCloneIndexOnFormDescendants($picked) {
     var i,
-      $formDescendants = $picked.find(FORMS_SELECTOR)
-        .addBack(FORMS_SELECTOR);
+      $formDescendants = $picked.find(INPUT_SELECTOR)
+        .addBack(INPUT_SELECTOR);
 
     for (i = 0; i < $formDescendants.length; i++) {
       $formDescendants[i].setAttribute('data-sc-cloned', i + 1);
@@ -571,11 +608,6 @@ define([
     var i,
       pickedElement              = $picked[0],
       pickedElementsBoundingBox  = pickedElement.getBoundingClientRect();
-
-    //Set data attributes on each of the form input elements
-    //This allows us to query the DOM for the original elements
-    //when we want to give them the values entered into the HLB
-    setCloneIndexOnFormDescendants($picked);
 
     var pickedElementClone       = pickedElement.cloneNode(true),
       $pickedAndDescendants      = $picked.find('*').addBack(),
@@ -590,7 +622,7 @@ define([
     removeTemporaryFoundation = true;
 
     // Create, position, and style this element so that it overlaps the element chosen by the picker.
-    $foundation.css({
+    inlineStyle.set($foundation[0], {
       'position'       : 'absolute',
       'left'           : (pickedElementsBoundingBox.left + window.pageXOffset) / inheritedZoom,
       'top'            : (pickedElementsBoundingBox.top  + window.pageYOffset) / inheritedZoom,
@@ -598,11 +630,12 @@ define([
       'padding'        : 0,
       'margin'         : 0,
       'width'          : pickedElementsBoundingBox.width / inheritedZoom
-    }).insertAfter('body');
+    });
+    $foundation.insertAfter('body');
 
     // Map all picked elements children CSS to cloned children CSS
     for (i = 0; i < $pickedAndDescendants.length; i += 1) {
-      $pickedCloneAndDescendants[i].style.cssText = hlbStyling.getComputedStyleCssText($pickedAndDescendants[i]);
+      inlineStyle($pickedCloneAndDescendants[i]).cssText = hlbStyling.getComputedStyleCssText($pickedAndDescendants[i]);
     }
 
     return $foundation;
@@ -658,7 +691,7 @@ define([
   }
 
   function onClick(event) {
-    if ($hlb && !isElementInsideHlb(event.target)) {
+    if ($hlb && !isElementInsideHlb(event.target) && event.isTrusted) {
       // If click is outside of HLB, close it
       // (Need to doublecheck this because HLB can sometimes be inside of <body>)
       toggleHLB();
@@ -701,18 +734,19 @@ define([
    */
   function getOrCreateHLBWrapper() {
 
-    return $hlbWrapper ||
+    var $wrapper =  $hlbWrapper ||
             $('<sc>', {
               'id': constants.HLB_WRAPPER_ID
-            })
-            .css({
-              'padding' : 0,
-              'margin'  : 0,
-              'top'     : 0,
-              'left'    : 0,
-              'position': 'absolute',
-              'overflow': 'visible'
             });
+    inlineStyle.set($wrapper[0], {
+      'padding'  : 0,
+      'margin'   : 0,
+      'top'      : 0,
+      'left'     : 0,
+      'position' : 'absolute',
+      'overflow' : 'visible'
+    });
+    return $wrapper;
   }
 
   /**
@@ -757,16 +791,9 @@ define([
     };
   }
 
-//  TODO should we remove permanently or do we want to keep this?
-//  // Legal sizes == '-' (smaller), null (default), '+' (larger)
-//  conf.def('lensSize', function(size) {
-//    return size === '-' || size === '+' ? size : null;
-//  });
-//
   return {
     getElement: getElement,
     toggleHLB: toggleHLB,
     retargetHLB: retargetHLB
   };
-
 });

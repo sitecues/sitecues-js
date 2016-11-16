@@ -1,0 +1,17 @@
+{
+  "what_is_this":          "What is this?",
+  "turn_off":              "Turn off",
+  "turn_off_this_site":    "Turn off for this website",
+  "hide":                  "Hide",
+  "quick_description":     "Sitecues zoom and speech makes the web easier to see, hear and use.",
+  "slider_alt":            "Image of Sitecues zoom slider",
+  "slider_instructions":   "Try using the zoom slider to magnify this web page.",
+  "more_tips":             "Jump to more Sitecues tips",
+  "blurb_reset_done":      "Sitecues zoom & speech features are now turned off.",
+  "blurb_can_hide":        "You can also hide the Sitecues toolbar on this web page.",
+  "hide_button":           "Hide Sitecues",
+  "bye_for_now":           "Bye for now ...",
+  "restore_button":        "Restore Sitecues",
+  "restore_via_f8_part1":  "You can also press",
+  "restore_via_f8_part2":  "at any time to get Sitecues back."
+}

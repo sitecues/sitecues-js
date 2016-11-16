@@ -1,7 +1,22 @@
 /**
  * Tips cards, supporting demo animations
  */
-define(['core/bp/constants', 'core/bp/helper', 'core/events'], function (BP_CONST, helper, events) {
+define(
+  [
+    'run/bp/constants',
+    'run/bp/helper',
+    'run/events',
+    'core/native-global',
+    'run/inline-style/inline-style'
+  ],
+  function (
+    BP_CONST,
+    helper,
+    events,
+    nativeGlobal,
+    inlineStyle
+  ) {
+  'use strict';
 
   var byId = helper.byId,
     isInitialized,
@@ -61,7 +76,7 @@ define(['core/bp/constants', 'core/bp/helper', 'core/events'], function (BP_CONS
   }
 
   function pushTimeout(fn, howLongMs) {
-    animationTimers.push(setTimeout(fn, howLongMs));
+    animationTimers.push(nativeGlobal.setTimeout(fn, howLongMs));
   }
 
   // Reset demo page element back to original state
@@ -70,9 +85,9 @@ define(['core/bp/constants', 'core/bp/helper', 'core/events'], function (BP_CONS
     if (elem) {
       // Reset element back to normal position instantly (temporarily turn of animations)
       elem.setAttribute('data-demo', false);
-      elem.style.transitionDuration = '0s';
-      setTimeout(function () {
-        elem.style.transitionDuration = '';
+      inlineStyle(elem).transitionDuration = '0s';
+      nativeGlobal.setTimeout(function () {
+        inlineStyle(elem).transitionDuration = '';
       }, 20); // Wait at least one frame tick to turn animations back on
     }
   }

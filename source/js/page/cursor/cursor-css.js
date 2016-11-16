@@ -1,6 +1,7 @@
-define(['core/platform', 'page/zoom/zoom', 'page/util/color', 'core/conf/urls'], function (platform, zoomModule, colorUtil, urls) {
+define(['run/platform', 'page/zoom/constants', 'page/util/color', 'run/conf/urls'], function (platform, ZOOM_CONST, colorUtil, urls) {
   // Viewbox coordinates are multiplied by 10 so that we can remove coordinates from our decimal places
   // Also, viewbox left side begins at -10px (-100) so that the left side of the thumb shows up in the hand cursor on Windows
+  "use strict";
   var PREFIX = '<svg xmlns="http://www.w3.org/2000/svg" width="SIDE" height="SIDE" viewBox="-100,0,SIDE0,SIDE0"><defs><filter id="d" width="200%" height="200%"><feOffset result="offOut" in="SourceAlpha" dx="2.5" dy="5" /><feGaussianBlur result="blurOut" in="offOut" stdDeviation="5" /><feBlend in="SourceGraphic" in2="blurOut" mode="normal" /></filter></defs><g transform="scale(SIZE)" filter="url(#d)">',
     POSTFIX = '</g><defs/></svg>',
     CURSOR_SVG = {
@@ -30,7 +31,8 @@ define(['core/platform', 'page/zoom/zoom', 'page/util/color', 'core/conf/urls'],
       CURSOR_HUE_LIGHTNESS = 0.7,
       MAX_CURSOR_SIZE_DEFAULT = 128,
       MAX_CURSOR_PIXELS_WIN = 71,
-      CURSOR_ZOOM_MAX = platform.os.isWin? 3.15: 4,
+      CURSOR_ZOOM_MAX_WIN = 3.15,
+      CURSOR_ZOOM_MAX_MAC = 4,
       CURSOR_OFFSETS = {  // TODO do we need different values for each platform?
         _default : {x: 10,  y: 5, xStep: 0, yStep: 2.5},
         _pointer : {x: 12, y: 5, xStep: 3.6, yStep: 1.7}
@@ -53,10 +55,15 @@ define(['core/platform', 'page/zoom/zoom', 'page/util/color', 'core/conf/urls'],
     return cursorGeneratorFn(url, hotspotOffset, type);
   }
 
+  function getCursorZoomMax() {
+    return platform.os.isWin? CURSOR_ZOOM_MAX_WIN : CURSOR_ZOOM_MAX_MAC;
+  }
+
   function getUrl(type, sizeRatio, pixelRatio, doUseAjaxCursors, hue) {
 
-    if (sizeRatio > CURSOR_ZOOM_MAX) {
-      sizeRatio = CURSOR_ZOOM_MAX;
+    var cursorZoomMax = getCursorZoomMax();
+    if (sizeRatio > cursorZoomMax) {
+      sizeRatio = cursorZoomMax;
     }
 
     if (doUseAjaxCursors) {
@@ -95,7 +102,7 @@ define(['core/platform', 'page/zoom/zoom', 'page/util/color', 'core/conf/urls'],
    * @return {string} result A string in format 'x y' which is later used a part of cursor property value.
    */
   function getCursorHotspotOffset(type, zl) {
-    if (platform.browser.isIE) {  // Don't use in IE -- it will be part of .cur file
+    if (platform.browser.isMS) {  // Don't use in IE or Edge -- it will be part of .cur file
       return '';
     }
 
@@ -126,15 +133,15 @@ define(['core/platform', 'page/zoom/zoom', 'page/util/color', 'core/conf/urls'],
   }
 
   function getCursorZoom(pageZoom) {
-    var zoomDiff = pageZoom - zoomModule.MIN,
+    var zoomDiff = pageZoom - ZOOM_CONST.MIN_ZOOM,
     // SC-1431 Need to keep the cursor smaller than MAX_CURSOR_SIZE_WIN (defined in custom.js)
     // when on Windows OS, otherwise the cursor intermittently can become a large black square.
     // Therefore, on Windows we cannot zoom the cursor up as much as on the Mac (3.5x instead of 4x)
       CURSOR_ZOOM_MIN = 1,
-      CURSOR_ZOOM_RANGE = CURSOR_ZOOM_MAX - CURSOR_ZOOM_MIN;
+      CURSOR_ZOOM_RANGE = getCursorZoomMax() - CURSOR_ZOOM_MIN;
 
     // ALGORITHM - SINUSOIDAL EASING OUT HOLLADAY SPECIAL: Decelerating to zero velocity, more quickly.
-    return CURSOR_ZOOM_RANGE * Math.sin(zoomDiff / zoomModule.RANGE * (Math.PI / 2.8)) + CURSOR_ZOOM_MIN;
+    return CURSOR_ZOOM_RANGE * Math.sin(zoomDiff / ZOOM_CONST.ZOOM_RANGE * (Math.PI / 2.8)) + CURSOR_ZOOM_MIN;
   }
 
   return {

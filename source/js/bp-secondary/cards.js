@@ -1,8 +1,30 @@
 /**
  * Generic module for handling the cards used by tips and settings
  */
-define(['core/bp/constants', 'core/bp/helper', 'core/locale', 'core/bp/model/state', 'core/platform', 'core/util/xhr', 'core/conf/urls', 'core/conf/site', 'core/events'],
-  function (BP_CONST, helper, locale, state, platform, xhr, urls, site, events) {
+define(
+  [
+    'run/bp/constants',
+    'run/bp/helper',
+    'run/locale',
+    'run/bp/model/state',
+    'run/util/xhr',
+    'run/conf/urls',
+    'run/events',
+    'run/platform',
+    'run/inline-style/inline-style'
+  ],
+  function (
+    BP_CONST,
+    helper,
+    locale,
+    state,
+    xhr,
+    urls,
+    events,
+    platform,
+    inlineStyle
+  ) {
+  'use strict';
 
   var
     PANELS_WITH_CARDS = { tips: 1, settings: 1},
@@ -15,14 +37,13 @@ define(['core/bp/constants', 'core/bp/helper', 'core/locale', 'core/bp/model/sta
     panelsToLoad = NUM_PANELS_WITH_CARDS;
 
   function loadPanelContents(panelName) {
-    var localizedPanelName = panelName + '-' + locale.getTranslationLang(),
+    var localizedPanelName = panelName + '-' + locale.getUiLocale(),
       panelUrl = urls.resolveResourceUrl('html/' + panelName + '/' + localizedPanelName + '.html');
 
     xhr.get({
       url: panelUrl,
       success: function(html) {
-        var tabStrip,
-          finalHTML = addSemanticSugar(html),
+        var finalHTML = addSemanticSugar(html),
           panelElement,
           htmlContainer = document.createElement('div'); // Just a container where we can parse out the desired contents
 
@@ -30,11 +51,6 @@ define(['core/bp/constants', 'core/bp/helper', 'core/locale', 'core/bp/model/sta
         panelElement = htmlContainer.firstElementChild;
         removeUnsupportedContent(panelElement);
         getContainer().appendChild(panelElement);
-
-        tabStrip = panelElement.querySelector('.scp-card-chooser');
-        if (tabStrip.childElementCount > 3) {
-          fixTabStripSpacing(tabStrip);
-        }
 
         toggleCardActive(panelElement.firstElementChild, true);
 
@@ -63,55 +79,31 @@ define(['core/bp/constants', 'core/bp/helper', 'core/locale', 'core/bp/model/sta
       .replace(/<sc-link /g, '<sc-link role="button"' + INTERACTIVE+ '" ')
       .replace(/<sc-tab /g, '<sc-link role="tab" aria-selected="false"' + INTERACTIVE+ '" ')
       .replace(/<\/sc-tab/g, '</sc-link')
-      .replace(/<sc-normal-range /g, '<input type="range"' + INTERACTIVE + ' scp-normal-range" ')
+      .replace(/<sc-normal-range /g, '<input type="range"' + INTERACTIVE + ' scp-input scp-normal-range" ')
       .replace(/<\/sc-normal-range>/g, '</input>')
-      .replace(/<sc-hue-range /g, '<input type="range"' + INTERACTIVE + ' scp-hue-range" ')
+      .replace(/<sc-hue-range /g, '<input type="range"' + INTERACTIVE + ' scp-input scp-hue-range" ')
       .replace(/<\/sc-hue-range>/g, '</input>');
-  }
-
-  // Use all the spacing to the left and right of the tab strip
-  // We need as much as we can get
-  function fixTabStripSpacing(tabStrip) {
-    var firstTab = tabStrip.firstElementChild,
-      tabStripStyle = getComputedStyle(tabStrip),
-      firstWidth = getTabTextWidth(firstTab),
-      additionalSpaceLeft = (firstTab.getBoundingClientRect().width - firstWidth) / 2;
-
-    function getTabTextWidth(tab) {
-      // Temporarily use inline so we can measure the width of these tabs
-      tab.style.display = 'inline';
-      var width = tab.getBoundingClientRect().width;
-      tab.style.display = '';
-      return width;
-    }
-
-    tabStrip.style.left = (parseFloat(tabStripStyle.left) - additionalSpaceLeft) + 'px';
-    tabStrip.style.width = (parseFloat(tabStripStyle.width) + additionalSpaceLeft * 2) + 'px';
   }
 
   // Remove elements unless required by the site config
   function removeAllElements(panelElement, elementsToRemoveSelector) {
-    function applyDisplayStyle(elements, display) {
-      var index = elements.length;
+    function hide(elements) {
+      var index = elements.length,
+        element;
       while (index--) {
-        elements[index].style.display = display;
+        element = elements[index];
+        element.parentNode.removeChild(element);
       }
     }
 
-    var remove = panelElement.querySelectorAll(elementsToRemoveSelector),
-      keepSelector = site.get('keepInPanel'),
-      keep = keepSelector && panelElement.querySelectorAll(keepSelector);
+    var elementsToRemove = panelElement.querySelectorAll(elementsToRemoveSelector);
 
-    applyDisplayStyle(remove, 'none');
-    if (keep) {
-      applyDisplayStyle(keep, 'block');
-    }
-
+    hide(elementsToRemove);
   }
 
   function removeUnsupportedContent(panelElement) {
-    if (platform.browser.isIE && platform.browser.version <= 10) {
-      removeAllElements(panelElement, '[data-no-ie10]');
+    if (!platform.featureSupport.themes) {
+      removeAllElements(panelElement, '#scp-theme-settings,#scp-theme-settings-tab');
     }
   }
 
@@ -234,7 +226,7 @@ define(['core/bp/constants', 'core/bp/helper', 'core/locale', 'core/bp/model/sta
     }
 
     // Set indicator
-    indicator.style.backgroundPosition = indicatorLeft + 'px 0';
+    inlineStyle(indicator).backgroundPosition = indicatorLeft + 'px 0';
     chosenItem.setAttribute('aria-selected', 'true');
   }
 

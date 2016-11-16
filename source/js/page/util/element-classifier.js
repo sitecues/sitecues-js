@@ -32,10 +32,11 @@ define([], function () {
    */
   // Define set of elements that need the spacebar but are not editable
   var NON_EDITABLE_SPACEBAR_ELEMENTS = { video:1, embed:1, object:1, iframe:1, frame:1, audio:1, button:1, input:1, select: 1};
-  function isSpacebarConsumer(element) {
-    return hasMatchingTag(NON_EDITABLE_SPACEBAR_ELEMENTS, element) ||
-      element.hasAttribute('tabindex') || element.hasAttribute('onkeypress') || element.hasAttribute('onkeydown') ||
-      isEditable(element);
+  function isSpacebarConsumer(eventTarget) {
+    return eventTarget.nodeType === Node.ELEMENT_NODE && // Added because window somehow came in here sometimes, causing exception
+      hasMatchingTag(NON_EDITABLE_SPACEBAR_ELEMENTS, eventTarget) ||
+      eventTarget.hasAttribute('tabindex') || eventTarget.hasAttribute('onkeypress') || eventTarget.hasAttribute('onkeydown') ||
+      isEditable(eventTarget);
   }
 
   function isContentEditable(element) {
@@ -53,7 +54,8 @@ define([], function () {
   function isEditable(element) {
     if (element.localName === 'input') {
       var type = element.getAttribute('type');
-      return !type || EDITABLE_INPUT_TYPES.indexOf(type) >= 0;
+      // A non-specified type attribute defaults to 'text', an editable element
+      return !type || EDITABLE_INPUT_TYPES.indexOf(type.toLowerCase()) >= 0;
     }
     return document.designMode === 'on' ||
       element.localName === 'textarea' ||
@@ -66,5 +68,4 @@ define([], function () {
     isSpacebarConsumer: isSpacebarConsumer,
     isEditable: isEditable
   };
-
 });

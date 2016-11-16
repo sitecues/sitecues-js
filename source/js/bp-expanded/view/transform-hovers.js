@@ -3,8 +3,8 @@
  * Currently this module implements data-hover="[transform attributes]"
  */
 
-define(['core/bp/helper', 'core/bp/constants', 'core/platform', 'bp-expanded/view/transform-util', 'bp-expanded/view/transform-animate', 'core/events'],
-  function(helper, BP_CONST, platform, transformUtil, animate, events) {
+define(['run/bp/helper', 'run/bp/constants', 'bp-expanded/view/transform-util', 'bp-expanded/view/transform-animate', 'run/events'],
+  function(helper, BP_CONST, transformUtil, animate, events) {
 
   var isActivePanel = false,
     byId = helper.byId,

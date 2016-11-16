@@ -2,14 +2,29 @@
  * This module collects all the relevant CSS for the entire web page into one large string.
  */
 
-define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/urls', 'page/style-service/media-queries'],
-  function ($, UA_CSS, site, urls, mediaQueries) {
+define(
+  [
+    '$',
+    'page/style-service/user-agent-css',
+    'run/conf/urls',
+    'page/style-service/media-queries',
+    'core/native-global'
+  ],
+  function (
+    $,
+    UA_CSS,
+    urls,
+    mediaQueries,
+    nativeGlobal
+  ) {
+  'use strict';
 
   var numPending = 0,
     sheets = [],
     onCssReadyFn,
     INLINE_ID_ATTR = 'data-sc-inline', // Allow each element with inline @style to have own ID for use with stylesheets
-    TIMEOUT_MS = 2000;
+    //This kept timing out at 2 seconds
+    TIMEOUT_MS = 6000;
 
   /**
    * StyleSheet object constructor. This object represents one stylesheet on the page,
@@ -49,7 +64,7 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
         // otherwise the numPending will not return to 0 and we will never finish aggregating the CSS
         markReady(currentSheet);
       };
-      currentSheet.errorTimeout = setTimeout(function() {
+      currentSheet.errorTimeout = nativeGlobal.setTimeout(function() {
         markReady(currentSheet);
       }, TIMEOUT_MS);
       request.send();
@@ -58,7 +73,7 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
       // A <style> already has it's text --
       // as opposed to a <link href> which will be marked ready after it's loaded
       currentSheet.text = (text || '');
-      setTimeout(function () {
+      nativeGlobal.setTimeout(function () {
         // Use the setTimeout as a fake fetch that will simply provide the text we already have.
         // (We don't want to mark ready until all the sheets are added to the queue, otherwise we could finish too early)
         markReady(currentSheet);
@@ -68,11 +83,11 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
 
   // CSS proxy passes us the CSS text whether or not cross-origin policy allows it
   // Example of page that needs this: http://www.dcmetrobln.org/about-us
-  // If Brian updates server to use Graham's latest, we may need to
-  // update to new URL format that passes url as a parameter ala css-proxy?url=foo
   function getCssProxyUrl(url) {
-    var absoluteUrl = urls.resolveUrl(url);
-    return urls.getApiUrl('css-proxy/' + absoluteUrl); // TODO encodeURIComponent(absoluteUrl));
+    if (url.indexOf('data:') === 0) {
+      return url;
+    }
+    return urls.getProxyApiUrl('css/passthrough', url);
   }
 
   /**
@@ -84,13 +99,13 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
    */
   function createGetRequest(url) {
     // Unsafe cross-origin request
-    // - Will run into cross-domain restrictions because URL is from different domain
-    // This is not an issue with the extension, because the content script doesn't have cross-domain restrictions
-    var isUnsafeRequest = !SC_EXTENSION && urls.isOnDifferentDomain(url);
+    // - Will run into cross-origin restrictions because URL is from different origin
+    // This is not an issue with the extension, because the content script doesn't have cross-origin restrictions
+    var isUnsafeRequest = !SC_EXTENSION && urls.isCrossOrigin(url);
 
     if (isUnsafeRequest) {
       if (SC_DEV) {
-        console.log('Cross-Domain: ' + url);
+        console.log('Cross-Origin: ' + url);
       }
       // Use sitecues CSS proxy to bypass CORS restrictions on fetching CSS text for analysis
       url = getCssProxyUrl(url);
@@ -99,15 +114,8 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
     // Credit to Nicholas Zakas
     // http://www.nczonline.net/blog/2010/05/25/cross-domain-ajax-with-cross-origin-resource-sharing/
     var xhr = new XMLHttpRequest();
-
-    if ('withCredentials' in xhr) {
-      xhr.open('GET', url, true);
-      xhr.setRequestHeader('Accept', 'text/css,text/plain');
-    } else {
-      xhr = new XDomainRequest();
-      xhr.open('GET', url);
-    }
-
+    xhr.open('GET', url, true);
+    xhr.setRequestHeader('Accept', 'text/css,text/plain');
     return xhr;
   }
 
@@ -189,7 +197,8 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
       if (SC_DEV && mediaQuery) {
         console.log('@import media query: ' + mediaQuery);
       }
-      if (mediaQueries.isActiveMediaQuery(mediaQuery)) {
+      if (mediaQueries.isActiveMediaQuery(mediaQuery) &&
+        isUsableCssUrl(actualUrl)) {
         insertNewSheetBefore(sheet, urls.resolveUrl(actualUrl, sheet.url));
       }
       // Now remove @import line from CSS so that it does not get reprocessed
@@ -290,7 +299,20 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
   function collectAllCss(cssReadyCallbackFn) {
     onCssReadyFn = cssReadyCallbackFn;
 
-    $(document).ready(collectAllCssImpl);
+    if (document.readyState !== 'loading') {
+      collectAllCssImpl();
+    }
+    else {
+      document.addEventListener('DOMContentLoaded', collectAllCssImpl);
+    }
+  }
+
+  function isUsableCssUrl(url) {
+    // Sitecues does not need to process CSS3 fonts, at least for now -- waste of processing
+    // Fill in more common font pattern libraries here
+    // The benefit is less work and speedier processing of site CSS
+    var GOOGLE_FONT_PATTERN = '//fonts.google';
+    return url.indexOf(GOOGLE_FONT_PATTERN) < 0;
   }
 
   function collectAllCssImpl() {
@@ -300,7 +322,8 @@ define(['$', 'page/style-service/user-agent-css', 'core/conf/site', 'core/conf/u
     }
 
     function isUsableLinkedStyleSheet(linkElem) {
-      return mediaQueries.isActiveMediaQuery(linkElem.media);     // Ignore all CSS with the wrong media, e.g. print
+      return mediaQueries.isActiveMediaQuery(linkElem.media) &&     // Ignore all CSS with the wrong media, e.g. print
+        isUsableCssUrl(linkElem.href);
     }
 
     function isUsableStyleElement(styleElem) {

@@ -1,16 +1,48 @@
 /**
  * This is module for common utilities that might need to be used across all of the different modules.
  */
-define(['page/util/element-classifier', 'core/platform'], function (elemClassifier, platform) {
+define(
+  [
+    'page/util/element-classifier',
+    'run/inline-style/inline-style'
+  ],
+  function (
+    elemClassifier,
+    inlineStyle
+  ) {
+  'use strict';
+
+  function isTransparentColor(color) {
+    // NOTE: Doesn't check HSLA colors for transparency
+    return color === 'transparent' || color.match(/^rgba.*0\)$/);
+  }
 
   /**
-   * Checks if the text in a text node given is empty or not.
+   * @private
    */
-   //TODO: Clarify intended purpose of function: if non-empty strings containing punctuation characters
-  // should return true consider renaming
-  function isEmpty(textNode) {
-    var val = textNode.data;
-    return !val || /^\W*$/.test(val);  // Only whitespace or punctuation
+  function isNonEmptyTextNode(node) {
+    return node.nodeType === Node.TEXT_NODE && !isWhitespaceOrPunct(node);
+  }
+
+  function hasBorder(style) {
+    return parseFloat(style.borderRightWidth) || parseFloat(style.borderBottomWidth);
+  }
+
+  /**
+   * Checks if the text in a text node given has any characters that appear as text.
+   * The picker uses this to determine if a text node has content worth highlighting --
+   * we require at least one letter or number as punctuation marks are often used as decorative separators.
+   * We use unicode ranges to ensure that characters from foreign alphabets are included,
+   * otherwise the picker will not pick text from languages with non-roman alphabets.
+   * This is a close approximation to that -- we kept the regex simple and the number of ranges smaller;
+   * there may be some very rare characters where the regex is not perfect. That should generally be
+   * ok, because it only needs one word character in a text node to make it pickable.
+   */
+  function isWhitespaceOrPunct(textNode) {
+    var val = textNode.data,
+      WORD_PATTERN = /[\w\u0100-\u024f\u0370-\u1fff\u2e80-\ufeff]/;
+
+    return !val || !WORD_PATTERN.test(val);  // Only whitespace or punctuation
   }
 
   // Return true if there is a visual sub-box of content
@@ -24,7 +56,7 @@ define(['page/util/element-classifier', 'core/platform'], function (elemClassifi
       hasRaisedZIndex(style, parentStyle) ||
       hasOwnBackground(element, style, parentStyle);
 
-    return !!isVisRegion;
+    return Boolean(isVisRegion);
   }
 
   function hasRaisedZIndex(style, parentStyle) {
@@ -118,8 +150,8 @@ define(['page/util/element-classifier', 'core/platform'], function (elemClassifi
     var frag = document.createDocumentFragment();
     var child = temp.firstChild;
     while (child) {
-            frag.appendChild(child);
-            child = child.nextSibling;
+      frag.appendChild(child);
+      child = child.nextSibling;
     }
     return frag;
   }
@@ -128,8 +160,8 @@ define(['page/util/element-classifier', 'core/platform'], function (elemClassifi
    * A version of elementFromPoint() that restricts the point to the viewport
    */
   function elementFromPoint(x, y) {
-    var maxX = window.innerWidth - 1,
-      maxY = window.innerHeight - 1;
+    var maxX = innerWidth - 1,
+      maxY = innerHeight - 1;
 
     x = Math.min(maxX, Math.max(0, x));
     y = Math.min(maxY, Math.max(0, y));
@@ -144,45 +176,34 @@ define(['page/util/element-classifier', 'core/platform'], function (elemClassifi
     return el.clientHeight < el.scrollHeight;
   }
 
-  var MONOSPACE_BULLET_TYPES = { circle: 1, square: 1, disc: 1, none: 1 };
   function getBulletWidth(listElement, style) {
-    var bulletType = style.listStyleType,
-      ems = 2.5;  // Browsers seem use max of 2.5 em for bullet width -- use as a default
+
+    var MONOSPACE_BULLET_TYPES = { circle: 1, square: 1, disc: 1, none: 1 },
+      bulletType = style.listStyleType,
+      ems = 2.5;  // Browsers seem to use max of 2.5 em for bullet width -- use as a default
+
     if (MONOSPACE_BULLET_TYPES.hasOwnProperty(bulletType)) {
       ems = 1.6; // Simple bullet
-    } else if (bulletType === 'decimal') {
+    }
+    else if (bulletType === 'decimal') {
       var start = parseInt(listElement.getAttribute('start'), 10),
         end = (start || 1) + listElement.childElementCount - 1;
       ems = (0.9 + 0.5 * end.toString().length);
     }
+
     return getEmsToPx(style.fontSize, ems);
-  }
-
-  /**
-   * @private
-   */
-  function isNonEmptyTextNode(node) {
-    return node.nodeType === 3 /* Text node */ && !isEmpty(node);
-  }
-
-  function hasBorder(style) {
-    return parseFloat(style.borderRightWidth) || parseFloat(style.borderBottomWidth);
-  }
-
-    //Doesn't check HSLA colors for transparency
-  function isTransparentColor(color) {
-    return color === 'transparent' || color.match(/^rgba.*0\)$/);
   }
 
   function getEmsToPx(fontSize, ems) {
     // Create a div to measure the number of px in an em with this font-size
     var measureDiv = document.createElement('div'),
-      measureStyle = measureDiv.style,
       px;
     document.body.appendChild(measureDiv);
-    measureStyle.fontSize = fontSize;
-    measureStyle.width = ems + 'em';
-    measureStyle.visibility = 'hidden';
+    inlineStyle.set(measureDiv, {
+      fontSize   : fontSize,
+      width      : ems + 'em',
+      visibility : 'hidden'
+    });
     // Multiply by zoom because our <div> is not affected by the document's current zoom level
     px = measureDiv.clientWidth;
     document.body.removeChild(measureDiv);
@@ -191,13 +212,12 @@ define(['page/util/element-classifier', 'core/platform'], function (elemClassifi
 
   function getComputedScale(elem) {
     var style = getComputedStyle(elem),
-      transform = style[platform.transformProperty];
+      transform = style.transform;
     return parseFloat(transform.substring(7)) || 1;
   }
 
   return {
-    getEmsToPx: getEmsToPx,
-    isEmpty: isEmpty,
+    isWhitespaceOrPunct: isWhitespaceOrPunct,
     isVisualRegion: isVisualRegion,
     hasRaisedZIndex: hasRaisedZIndex,
     isSprite: isSprite,
@@ -209,7 +229,7 @@ define(['page/util/element-classifier', 'core/platform'], function (elemClassifi
     elementFromPoint: elementFromPoint,
     hasVertScroll: hasVertScroll,
     getBulletWidth: getBulletWidth,
+    getEmsToPx: getEmsToPx,
     getComputedScale: getComputedScale
   };
-
 });

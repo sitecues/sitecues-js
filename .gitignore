@@ -1,7 +1,10 @@
 target
+build
+latest-build
 tmp
 var
 sitecues-load-script.js
+latest-extension-build
 *.iml
 *.ipr
 *.iws
@@ -40,3 +43,5 @@ config/.env
 # The cursor_output directory should be ignored to save space in the repo.
 # Cursors that should be in the IE version should be copied to the source/images/cursors directory.
 tools/site/generate-cursors/cursor_output/
+
+/test/core

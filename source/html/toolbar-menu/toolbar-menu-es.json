@@ -1,0 +1,17 @@
+{
+  "what_is_this":          "¿Qué es esto?",
+  "turn_off":              "Desactivar",
+  "turn_off_this_site":    "Desactivar para este sitio web",
+  "hide":                  "Esconder",
+  "quick_description":     "Las opciones de Zoom y de Discurso de Sitecues auxilian para poder ver, oir y usar los sitios web de una manera más fácil",
+  "slider_alt":            "Imagen del control deslizante de zoom de Sitecues",
+  "slider_instructions":   "Utiliza el control deslizante de zoom para ampliar este sitio web.",
+  "more_tips":             "Accede a más consejos Sitecues",
+  "blurb_reset_done":      "Las opciones de Zoom y de Discurso de Sitecues se encuentran ahora desactivadas.",
+  "blurb_can_hide":        "Puedes esconder la barra de Sitecues en este sitio web.",
+  "hide_button":           "Esconder Sitecues",
+  "bye_for_now":           "Hasta pronto...",
+  "restore_button":        "Restablecer Sitecues",
+  "restore_via_f8_part1":  "También puedes presionar",
+  "restore_via_f8_part2":  "para volver a utilizar Sitecues en cualquier momento."
+}

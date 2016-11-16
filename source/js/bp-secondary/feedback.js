@@ -1,5 +1,26 @@
-define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/platform', 'core/metric', 'core/bp/view/view', 'core/events'],
-  function (BP_CONST, helper, state, platform, metric, view, events) {
+define(
+  [
+    'run/bp/constants',
+    'run/bp/helper',
+    'run/bp/model/state',
+    'run/metric/metric',
+    'run/bp/view/view',
+    'run/events',
+    'core/native-global',
+    'run/inline-style/inline-style'
+  ],
+  function (
+    BP_CONST,
+    helper,
+    state,
+    metric,
+    view,
+    events,
+    nativeGlobal,
+    inlineStyle
+  ) {
+  'use strict';
+
   var byId = helper.byId,
     isActive = false,
     isInitialized,
@@ -32,7 +53,7 @@ define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/plat
   }
 
   function autoSizeTextarea() {
-    var feedbackTextareaStyle = getFeedbackArea().style,
+    var feedbackTextarea = getFeedbackArea(),
       feedbackInputRect = getFeedbackInputRect().getBoundingClientRect(),
       scale = state.get('scale'),
       ROOM_FOR_ROUNDED_OUTLINE = 22,
@@ -40,10 +61,12 @@ define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/plat
       width = (feedbackInputRect.width - ROOM_FOR_ROUNDED_OUTLINE) / scale,
       height = (feedbackInputRect.height - ROOM_FOR_ROUNDED_OUTLINE) / scale;
 
-    feedbackTextareaStyle.width = width + 'px';
-    feedbackTextareaStyle.height = height + 'px';
-    // Hide scrollbar by clipping horizontally - don't clip vertically (just large height of 999px for that)
-    feedbackTextareaStyle.clip = 'rect(0,' + (width - ROOM_FOR_SCROLLBAR) + 'px,999px,0)';
+    inlineStyle.set(feedbackTextarea, {
+      width  : width + 'px',
+      height : height + 'px',
+      // Hide scrollbar by clipping horizontally - don't clip vertically (just large height of 999px for that)
+      clip   : 'rect(0,' + (width - ROOM_FOR_SCROLLBAR) + 'px,999px,0)'
+    });
   }
 
   function onPanelUpdate() {
@@ -94,7 +117,6 @@ define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/plat
 
     // Copy current rating to group
     // TODO need to test usability of ratings with screen reader
-    // TODO breaking in IE9!! Object doesn't support getAttribute()
     ratingElem.setAttribute('aria-label', targetStar.getAttribute('aria-label'));
 
     updateMailtoLink();
@@ -115,7 +137,7 @@ define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/plat
     // Prepend blank lines so that status is on next screen of mail message in order not to confuse the user.
     var NUM_NEWLINES = 99,
       STATUS_PREFIX = Array(NUM_NEWLINES).join('\n') + '---- User configuration: ----\n\n',
-      currentStatusText = JSON.stringify(currentStatus, null, '    ');
+      currentStatusText = nativeGlobal.JSON.stringify(currentStatus, null, '    ');
     return getFeedbackText() + STATUS_PREFIX + currentStatusText;
   }
 
@@ -143,7 +165,9 @@ define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/plat
   }
 
   function toggleSendEnabled(doEnable) {
+    // We do both a fake button and a link child -- the link is for the mailto: we do in the extension
     getFeedbackSendButton().setAttribute('aria-disabled', !doEnable);
+    getFeedbackSendLink().setAttribute('aria-disabled', !doEnable);
   }
 
   function isSendEnabled() {
@@ -155,7 +179,7 @@ define(['core/bp/constants', 'core/bp/helper', 'core/bp/model/state', 'core/plat
       var details = {
         feedbackText: getFeedbackTextToSend(),
         rating: currentRating,  // 0 = no rating, otherwise 1-5 stars
-        status: currentStatus
+        statusText: nativeGlobal.JSON.stringify(currentStatus)
       };
 
       if (SC_DEV) {

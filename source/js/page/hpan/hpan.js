@@ -1,7 +1,21 @@
-define(['core/conf/user/manager', 'page/zoom/zoom', 'core/events'], function (conf, zoomMod, events) {
+define(
+  [
+    'page/zoom/util/body-geometry',
+    'run/events',
+    'page/viewport/viewport',
+    'run/dom-events',
+    'page/zoom/zoom'
+  ],
+  function (
+    bodyGeo,
+    events,
+    viewport,
+    domEvents,
+    zoomMod
+  ) {
   var isOn = false,
     isHlbOn = false,
-    isPanelOpen = false,
+    isSitecuesUIOpen = false,
     isZooming = false,
     MIN_EDGE_PORTION = 0.1,
     MAX_EDGE_PORTION = 0.25,
@@ -19,10 +33,12 @@ define(['core/conf/user/manager', 'page/zoom/zoom', 'core/events'], function (co
       movementX = getBackfillMovementX(evt),
 
       // Right side of body in absolute coordinates
-      bodyRight = zoomMod.getBodyRight(),
+      bodyRight = bodyGeo.getBodyRight(),
+
+      pageXOffset = viewport.getPageXOffset(),
 
       // Width of window
-      winWidth = window.innerWidth,
+      winWidth = viewport.getInnerWidth(),
 
       // Amount of content that didn't fit in the window
       ratioContentToWindowWidth = bodyRight / winWidth,
@@ -46,7 +62,7 @@ define(['core/conf/user/manager', 'page/zoom/zoom', 'core/events'], function (co
 
     var
       // How far into the panning zone are we?
-      pixelsUntilMouseAtWindowEdge = (direction === 1 ? window.innerWidth - evt.clientX : evt.clientX),
+      pixelsUntilMouseAtWindowEdge = (direction === 1 ? winWidth - evt.clientX : evt.clientX),
       pixelsIntoPanningZone = (edgeSize - pixelsUntilMouseAtWindowEdge),
       percentageIntoPanningZone = pixelsIntoPanningZone / edgeSize,  // .5 = 50%, 1 = 100%, etc.
 
@@ -57,16 +73,19 @@ define(['core/conf/user/manager', 'page/zoom/zoom', 'core/events'], function (co
       extraMovement = Math.max(0.5, (ratioContentToWindowWidth - 0.3) * SPEED_FACTOR * (percentageIntoPanningZone + 0.5)),
 
       // How far can we move until we reach the right edge of the visible content
-      maxMovementUntilRightEdge = bodyRight - winWidth - window.pageXOffset,
+      maxMovementUntilRightEdge = bodyRight - winWidth - pageXOffset,
 
       // Calculate movement size: amount of mouse movement + extraMovement
       movementSize = Math.min(Math.round(Math.abs(movementX) * extraMovement), MAX_SPEED),
 
-      // Finally, calculate the total movement -- do not allow move past right edge
+      // Finally, calculate the total movement -- do not allow move past right or left edge
       movement = Math.min(direction * movementSize, maxMovementUntilRightEdge);
+      movement = Math.max(movement, -pageXOffset);
 
     // Scroll it
-    window.scrollBy(movement, 0);
+    if (movement >= 1 || movement <= -1) {
+      window.scrollBy(movement, 0);
+    }
   }
 
   function getBackfillMovementX(evt) {
@@ -93,7 +112,6 @@ define(['core/conf/user/manager', 'page/zoom/zoom', 'core/events'], function (co
 
   function onZoomBegin() {
     isZooming = true;
-    refresh();
   }
 
   function onZoomChange(zoomLevel) {
@@ -106,21 +124,22 @@ define(['core/conf/user/manager', 'page/zoom/zoom', 'core/events'], function (co
   }
 
   function getZoom() {
-    return conf.get('zoom') || 1;
+    return zoomMod.getCompletedZoom() || 1;
   }
 
   function refresh() {
 
     // Turn on if zoom is > 1 and content overflows window more than a tiny amount
     var zoom = getZoom(),
-      doTurnOn = zoom > 1 && zoomMod.getBodyRight() / window.innerWidth > 1.02 && !isHlbOn && !isPanelOpen && !isZooming;
+      doTurnOn = zoom > 1 && bodyGeo.getBodyRight() / viewport.getInnerWidth() > 1.02 && !isHlbOn && !isSitecuesUIOpen && !isZooming;
 
     if (doTurnOn !== isOn) {
       if (doTurnOn) {
-        document.addEventListener('mousemove', mousemove, false);
+        domEvents.on(document, 'mousemove', mousemove);
+
       }
       else {
-        document.removeEventListener('mousemove', mousemove, false);
+        domEvents.off(document, 'mousemove', mousemove);
         xLastPos = undefined;
       }
     }
@@ -141,17 +160,22 @@ define(['core/conf/user/manager', 'page/zoom/zoom', 'core/events'], function (co
 
     // Dont pan while the bp is expanded.
     events.on('bp/will-expand', function () {
-      isPanelOpen = true;
+      isSitecuesUIOpen = true;
       refresh();
     });
 
     // Allow panning while the bp is shrunk.
     events.on('bp/did-shrink', function () {
-      isPanelOpen = false;
+      isSitecuesUIOpen = false;
       refresh();
     });
 
-    events.on('zoom', onZoomBegin);
+    events.on('bp/did-toggle-menu', function(isOpen) {
+      isSitecuesUIOpen = isOpen;
+      refresh();
+    });
+
+    events.on('zoom/begin', onZoomBegin);
 
     // react on any zoom change
     events.on('zoom', onZoomChange);

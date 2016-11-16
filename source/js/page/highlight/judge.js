@@ -12,10 +12,20 @@
  * Note: "Growth" is a synonym for "Expansion" -- very intuitive for Aaron but no one else!
  */
 
-define(['$', 'page/util/common', 'page/util/element-classifier', 'page/highlight/traitcache'],
-  function($, common, elemClassifier, traitcache) {
-
-    'use strict';
+define(
+  [
+    '$',
+    'page/util/common',
+    'page/util/element-classifier',
+    'page/highlight/traitcache'
+  ],
+  function(
+    $,
+    common,
+    elemClassifier,
+    traitcache
+  ) {
+  'use strict';
 
   // ** Semantic constants ***
   // For ARIA roles other tags could be used, but this is most likely and more performant than checking all possibilities
@@ -230,14 +240,14 @@ define(['$', 'page/util/common', 'page/util/element-classifier', 'page/highlight
       // Check whether a CSS background creates a visual separation from the parent,
       // (for example, it has a different background-color or uses a background-image).
       // Don't include non-repeating sprites (positioned background images) -- these are used for bullets, etc.
-      hasOwnBackground: !!common.hasOwnBackground(node, traits.style, parentTraits.style),
-      hasSiblingBackground: hasSiblingBackground(node, parentTraits.style, traits.tag),
+      hasOwnBackground: !!common.hasOwnBackground(node, traits.computedStyle, parentTraits.computedStyle),
+      hasSiblingBackground: hasSiblingBackground(node, parentTraits.computedStyle, traits.tag),
       hasDescendantWithRaisedZIndex: childJudgements && (childJudgements.hasRaisedZIndex || childJudgements.hasDescendantWithRaisedZIndex),
       hasDescendantOutOfFlow: childJudgements && (childJudgements.isOutOfFlow || childJudgements.hasDescendantOutOfFlow)
     };
 
     visualSeparationJudgements.hasRaisedZIndex = !visualSeparationJudgements.hasDescendantWithRaisedZIndex &&
-      common.hasRaisedZIndex(childTraits.style, traits.style);
+      common.hasRaisedZIndex(childTraits.computedStyle, traits.computedStyle);
     visualSeparationJudgements.isOutOfFlow = !visualSeparationJudgements.hasDescendantOutOfFlow &&
       isOutOfFlow(node, traits, parentTraits);
 
@@ -422,6 +432,23 @@ define(['$', 'page/util/common', 'page/util/element-classifier', 'page/highlight
     cellLayoutJudgements.hasSimilarSiblingCells = false;
     cellLayoutJudgements.hasUniformlySizedSiblingCells = false;
 
+    function getNumChildrenWithTag(parentElem, tag) {
+      if (!parentElem) {
+        return 0;
+      }
+      var children = parentElem.children,
+        index = children.length,
+        numWithTag = 0;
+
+      while (index -- ) {
+        if (children[index].localName === tag) {
+          ++ numWithTag;
+        }
+      }
+
+      return numWithTag;
+    }
+
     function isPossibleCell() {
 
       var numSiblings = parentTraits.childCount;
@@ -461,7 +488,7 @@ define(['$', 'page/util/common', 'page/util/element-classifier', 'page/highlight
 
       // Do almost all of the siblings have the same tag name?
       var $parent = $(node).parent(),
-        numSiblingsSameTag = $parent.children(traits.tag).length,
+        numSiblingsSameTag = getNumChildrenWithTag($parent[0], traits.tag),
         numSiblingsOtherTagAllowed = Math.min(2, Math.floor(numSiblingsSameTag * 0.33));
       if (numSiblingsSameTag < numSiblings - numSiblingsOtherTagAllowed) {
         return false;
@@ -527,7 +554,7 @@ define(['$', 'page/util/common', 'page/util/element-classifier', 'page/highlight
         ) ||
         (
         // Also try floating cell-in-row rule
-          parentTraits && traits.style.float !== 'none' && traits.style.float !== parentTraits.style.float &&
+          parentTraits && traits.computedStyle.float !== 'none' && traits.computedStyle.float !== parentTraits.computedStyle.float &&
           // Narrow row -- make sure height of candidate cell is nearly the height of the row
           ((judgements.parentVertGrowthFactor < SMALL_GROWTH_FACTOR &&
             judgements.parentHorizGrowthFactor > ROW_HORIZ_GROWTH_THRESHOLD) ||
@@ -703,7 +730,7 @@ define(['$', 'page/util/common', 'page/util/element-classifier', 'page/highlight
     }
 
     function isMultiLine() {
-      return (parseFloat(traits.style.lineHeight * 1.5) || parseFloat(traits.style.fontSize * 2)) < traits.visualHeightAt1x;
+      return (parseFloat(traits.computedStyle.lineHeight * 1.5) || parseFloat(traits.computedStyle.fontSize * 2)) < traits.visualHeightAt1x;
     }
 
     if (traits.tag !== 'ul' && traits.role !== 'menu') {
@@ -799,7 +826,7 @@ define(['$', 'page/util/common', 'page/util/element-classifier', 'page/highlight
 
   // Position: absolute/fixed and rect sticks out from parent (not wholly encompassed by it)
   function isOutOfFlow(node, traits, parentTraits) {
-    if (traits.style.position !== 'absolute' && traits.style.position !== 'fixed') {
+    if (traits.computedStyle.position !== 'absolute' && traits.computedStyle.position !== 'fixed') {
       return false;
     }
 
@@ -820,8 +847,9 @@ define(['$', 'page/util/common', 'page/util/element-classifier', 'page/highlight
   // Also considered to have it's own background if the item before or after does,
   // because many times colors are alternated by even/odd row
   function hasSiblingBackground(element, parentStyle, tag) {
+    // Note: don't use $.is() which uses matches with tag, since tag can be something with a : in it, and will cause an error
     var sibling = element.previousElementSibling || element.nextElementSibling,
-      hasSiblingBg = sibling && $(sibling).is(tag + ':not(:empty)') &&
+      hasSiblingBg = sibling && sibling.localName === tag && sibling.hasChildNodes() &&
       common.hasOwnBackground(sibling, traitcache.getStyle(sibling), parentStyle);
     return !!hasSiblingBg;
   }
