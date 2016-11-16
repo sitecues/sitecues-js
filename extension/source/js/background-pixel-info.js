@@ -90,7 +90,7 @@ define(
     }
 
     // Either pass img or src, but not both
-    function getImageData(imgOrSrc, rect, processImageData) {
+    function getImageData(imgElement, rect) {
       var canvas = document.createElement('canvas'),
         ctx,
         top = rect.top || 0,
@@ -101,41 +101,29 @@ define(
       canvas.width = width;
       canvas.height = height;
 
-      function onReadableImageAvailable(readableImg, isInverted) {
-        ctx = canvas.getContext('2d');
-        try {
-          ctx.drawImage(readableImg, top, left, width, height);
-        }
-        catch(ex) {
-          processImageData(); // No data -- probably a broken image
-          return;
-        }
-        imageData = ctx.getImageData(0, 0, width, height).data;
-        processImageData(imageData, isInverted);
+      ctx = canvas.getContext('2d');
+      try {
+        ctx.drawImage(imgElement, top, left, width, height);
       }
-
-      function onImageError() {
-        processImageData(); // No data
+      catch(ex) {
+        return Promise.reject(ex); // No data -- probably a broken image
       }
+      imageData = ctx.getImageData(0, 0, width, height).data;
 
-      getReadableImage(imgOrSrc, onReadableImageAvailable, onImageError);
+      return Promise.resolve({
+        data: imageData
+      });
     }
 
-    function getRgba(data, byteIndex) {
-      return {
-        r: data[byteIndex],
-        g: data[byteIndex + 1],
-        b: data[byteIndex + 2],
-        a: data[byteIndex + 3]
-      };
-    }
-
-    function getPixelInfoImpl(data, width, height) {
+    function getPixelInfo(imgInfo, rect) {
       //
       // Compute Image Features (if we can...)
       // We may not be able to if the image is not from the same origin.
       //
-      var grayscaleHistogram = [],
+      var
+        data = getImageData(imgInfo.element, rect),
+        isInverted = imgInfo.isInverted,
+        grayscaleHistogram = [],
         GRAYSCALE_HISTOGRAM_SIZE = 500,
         grayscaleVal,
         hueHistogram = [],
@@ -143,6 +131,8 @@ define(
         hueIndex,
         hasTransparentPixels = false,
         DWORD_SIZE = 4,
+        width = rect.width,
+        height = rect.height,
         numBytes = width * height * DWORD_SIZE,
         numDifferentGrayscaleVals = 0,
         numMultiUseGrayscaleVals = 0,
@@ -161,19 +151,37 @@ define(
         luminanceTotal = 0,
         maxLuminance = 0;
 
+      function getRgba(byteIndex) {
+        return {
+          r: data[byteIndex],
+          g: data[byteIndex + 1],
+          b: data[byteIndex + 2],
+          a: data[byteIndex + 3]
+        };
+      }
+
       function evaluatePixel(byteIndex) {
         var
-          rgba = getRgba(data, byteIndex),
+          rgba = getRgba(byteIndex),
           isSemiTransparent = rgba.a < 255;
 
         if (isSemiTransparent) {  // Alpha channel
           hasTransparentPixels = true;
           if (rgba.a < MIN_TRANSPARENCY_FOR_VALID_PIXEL) {
-            return;  // Don't use pixels that are mostly transparent for histogram or brighness measurements
+            //continue;  // Don't use pixels that are mostly transparent for histogram or brighness measurements
           }
         }
 
-        ++ numPixelsChecked;
+        ++numPixelsChecked;
+
+        if (isInverted) {
+          // Used inverted image to get around cross-origin issues
+          // We use this instead of passthrough option because it puts the image into the cache in case we need it
+          // However, we need to evaluate the brightness as if it's not inverted
+          rgba.r = 255 - rgba.r;
+          rgba.g = 255 - rgba.g;
+          rgba.b = 255 - rgba.b;
+        }
 
         grayscaleVal = colorUtil.getFastLuminance(rgba);
         luminanceTotal += grayscaleVal;
@@ -182,8 +190,8 @@ define(
         }
         histogramIndex = Math.floor(grayscaleVal * GRAYSCALE_HISTOGRAM_SIZE);
 
-        if (grayscaleHistogram[histogramIndex] > 0)  {
-          numWithSameGrayscale = ++ grayscaleHistogram[histogramIndex];
+        if (grayscaleHistogram[histogramIndex] > 0) {
+          numWithSameGrayscale = ++grayscaleHistogram[histogramIndex];
           if (numWithSameGrayscale === numSameBeforeConsideredMultiUse) {
             ++numMultiUseGrayscaleVals;
           }
@@ -193,17 +201,18 @@ define(
         }
         else {
           grayscaleHistogram[histogramIndex] = 1;
-          ++ numDifferentGrayscaleVals;
+          ++numDifferentGrayscaleVals;
         }
 
         hueIndex = Math.floor(colorUtil.rgbToHsl(rgba.r, rgba.g, rgba.b).h * HUE_HISTOGRAM_SIZE);
         if (hueHistogram[hueIndex] > 0) {
-          ++ hueHistogram[hueIndex];
+          ++hueHistogram[hueIndex];
         }
         else {
           hueHistogram[hueIndex] = 1;
-          ++ numDifferentHues;
+          ++numDifferentHues;
         }
+        return {rgba: rgba, isSemiTransparent: isSemiTransparent};
       }
 
       for(var byteIndex = 0; byteIndex < numBytes; byteIndex += DWORD_SIZE * stepSize) {
@@ -224,7 +233,7 @@ define(
     function get(imgOrSrc, rect) {
       return new Promise(function(resolve) {
         getImageData(imgOrSrc, rect, function (data, isInverted) {
-          resolve(data && getPixelInfoImpl(data, rect.width, rect.height, isInverted));
+          resolve(data && getPixelInfo(data, rect.width, rect.height, isInverted));
         });
       });
     }

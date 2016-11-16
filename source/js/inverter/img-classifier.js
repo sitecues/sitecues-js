@@ -125,12 +125,6 @@ define(
     // The magic values in here are taken from the original machine-learned algorithms
     // from Jeff Bigham's work, and have been tweaked a bit.
     pixelInfo.get(img || src, rect)
-      .catch(function(err) {
-        if (SC_DEV) {
-          console.log(err);
-        }
-        onPixelScoreAvailable(0);
-      })
       .then(function(pixelInfo) {
         if (!pixelInfo) {
           if (SC_DEV && isDebuggingOn && img) {

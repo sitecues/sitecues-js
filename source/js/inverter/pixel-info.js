@@ -43,9 +43,14 @@ define(
         else {
           $(loadableImg)
             .on('load', function () {
-              resolve(loadableImg, isInverted);
+              resolve({
+                element: loadableImg,
+                isInverted: isInverted
+              });
             })
-            .on('error', reject);
+            .on('error', function() {
+              reject(new Error('Error evaluating ' + loadableImg.src));
+            });
         }
       }
 
@@ -81,7 +86,7 @@ define(
   }
 
   // Either pass img or src, but not both
-  function getImageData(readableImg, rect) {
+  function getImageData(imgElement, rect) {
     var canvas = document.createElement('canvas'),
       ctx,
       top = rect.top || 0,
@@ -94,7 +99,7 @@ define(
 
     ctx = canvas.getContext('2d');
     try {
-      ctx.drawImage(readableImg, top, left, width, height);
+      ctx.drawImage(imgElement, top, left, width, height);
     }
     catch(ex) {
       return Promise.reject(ex); // No data -- probably a broken image
@@ -102,26 +107,24 @@ define(
     imageData = ctx.getImageData(0, 0, width, height).data;
 
     return Promise.resolve({
-      data: imageData,
-      isInverted: readableImg.hasAttribute('data-inverted')
+      data: imageData
     });
   }
 
-  function getPixelInfoImpl(readableImg, rect) {
+  function getPixelInfo(imgInfo, rect) {
     //
     // Compute Image Features (if we can...)
     // We may not be able to if the image is not from the same origin.
     //
     var
-      data = getImageData(readableImg.element, rect),
-      isInverted = readableImg.isInverted,
+      data = getImageData(imgInfo.element, rect),
+      isInverted = imgInfo.isInverted,
       grayscaleHistogram = [],
       GRAYSCALE_HISTOGRAM_SIZE = 500,
       grayscaleVal,
       hueHistogram = [],
       HUE_HISTOGRAM_SIZE = 100,
       hueIndex,
-      byteIndex = 0,
       hasTransparentPixels = false,
       DWORD_SIZE = 4,
       width = rect.width,
@@ -144,24 +147,28 @@ define(
       luminanceTotal = 0,
       maxLuminance = 0;
 
-    for(; byteIndex < numBytes; byteIndex += DWORD_SIZE * stepSize) {
+    function getRgba(byteIndex) {
+      return {
+        r: data[byteIndex],
+        g: data[byteIndex + 1],
+        b: data[byteIndex + 2],
+        a: data[byteIndex + 3]
+      };
+    }
+
+    function evaluatePixel(byteIndex) {
       var
-        rgba = {
-          r: data[byteIndex],
-          g: data[byteIndex + 1],
-          b: data[byteIndex + 2],
-          a: data[byteIndex + 3]
-        },
+        rgba = getRgba(byteIndex),
         isSemiTransparent = rgba.a < 255;
 
       if (isSemiTransparent) {  // Alpha channel
         hasTransparentPixels = true;
         if (rgba.a < MIN_TRANSPARENCY_FOR_VALID_PIXEL) {
-          continue;  // Don't use pixels that are mostly transparent for histogram or brighness measurements
+          //continue;  // Don't use pixels that are mostly transparent for histogram or brighness measurements
         }
       }
 
-      ++ numPixelsChecked;
+      ++numPixelsChecked;
 
       if (isInverted) {
         // Used inverted image to get around cross-origin issues
@@ -179,8 +186,8 @@ define(
       }
       histogramIndex = Math.floor(grayscaleVal * GRAYSCALE_HISTOGRAM_SIZE);
 
-      if (grayscaleHistogram[histogramIndex] > 0)  {
-        numWithSameGrayscale = ++ grayscaleHistogram[histogramIndex];
+      if (grayscaleHistogram[histogramIndex] > 0) {
+        numWithSameGrayscale = ++grayscaleHistogram[histogramIndex];
         if (numWithSameGrayscale === numSameBeforeConsideredMultiUse) {
           ++numMultiUseGrayscaleVals;
         }
@@ -190,17 +197,22 @@ define(
       }
       else {
         grayscaleHistogram[histogramIndex] = 1;
-        ++ numDifferentGrayscaleVals;
+        ++numDifferentGrayscaleVals;
       }
 
       hueIndex = Math.floor(colorUtil.rgbToHsl(rgba.r, rgba.g, rgba.b).h * HUE_HISTOGRAM_SIZE);
       if (hueHistogram[hueIndex] > 0) {
-        ++ hueHistogram[hueIndex];
+        ++hueHistogram[hueIndex];
       }
       else {
         hueHistogram[hueIndex] = 1;
-        ++ numDifferentHues;
+        ++numDifferentHues;
       }
+      return {rgba: rgba, isSemiTransparent: isSemiTransparent};
+    }
+
+    for(var byteIndex = 0; byteIndex < numBytes; byteIndex += DWORD_SIZE * stepSize) {
+      evaluatePixel(byteIndex);
     }
 
     return {
@@ -238,8 +250,10 @@ define(
     }
 
     return getReadableImage(imgOrSrc, isSameOrigin)
-      .then(function(readableImg) {
-        return getPixelInfoImpl(readableImg, rect);
+      .then(function(readableImgInfo) {
+        if (readableImgInfo.element) {
+          return getPixelInfo(readableImgInfo, rect);
+        }
       });
   }
 
