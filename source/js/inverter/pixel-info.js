@@ -231,13 +231,14 @@ define(
       url = isImage ? imgOrSrc.getAttribute('src') : imgOrSrc,
       isSameOrigin = urls.isSameOrigin(url);
 
-    if (SC_EXTENSION && !isSameOrigin) {
+    if (SC_EXTENSION /* && !isSameOrigin */) {
       return new Promise(function(resolve) {
         // We're in a content script, but we need to ask the background script to read
         // these cross-origin pixels
         var message = {
           action: 'getPixelInfo',
-          url: url,
+          // Use fully qualified urls, otherwise relative urls will use chrome-extension:// in background script
+          url: new URL(url, document.baseURI).href,
           rect: rect
         };
         // jshint -W117

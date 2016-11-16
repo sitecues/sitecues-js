@@ -108,6 +108,7 @@
 
   // Copied from pixel-info.js
   function getPixelInfo(imgInfo, rect) {
+    console.log(JSON.stringify(rect));
     //
     // Compute Image Features (if we can...)
     // We may not be able to if the image is not from the same origin.
@@ -226,14 +227,12 @@
     if (message.action === 'getPixelInfo') {
       getReadableImage(message.url)
         .then(function (readableImgInfo) {
-          console.log('#1');
-          console.log(readableImgInfo);
           if (readableImgInfo.element) {
             return getPixelInfo(readableImgInfo, message.rect);
           }
         })
         .then(function(pixelInfo) {
-          console.log('#2');
+          console.log(pixelInfo);
           sendResponse(pixelInfo);
         });
       }
