@@ -239,7 +239,8 @@ define(
         chrome.tabs.getCurrent(function() {
           var message = {
             action: 'getPixelInfo',
-            url: url
+            url: url,
+            rect: rect
           };
           chrome.runtime.sendMessage(message, function (response) {
             resolve(response);
