@@ -51,7 +51,7 @@ define(
       return targetUrl; // Proxy API not used nor necessary in the extension (which has cross-origin AJAX privs)
     }
     console.log('getCssProxyUrl:', targetUrl);
-    return 'https://localhost:3002/' + encodeURIComponent(targetUrl);
+    return 'https://localhost:3002/' + targetUrl;
   }
 
   // URL string for sitecues.js

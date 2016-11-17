@@ -64,7 +64,7 @@
   function getReadableImage(url) {
     // Unsafe cross-origin request
     // - Will run into cross-origin restrictions because URL is from different origin
-    // This is not an issue with the extension, because the content script doesn't have cross-origin restrictions
+    // This is not an issue with the extension, because the background script doesn't have cross-origin restrictions
     return new Promise(function(resolve, reject) {
       var img = document.createElement('img');
       img.addEventListener('load', function () {
