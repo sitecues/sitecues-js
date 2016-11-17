@@ -1,6 +1,11 @@
 /**
- * css fetch background script
+ * Css Fetch background script
  * Runs at a higher level of permission and can fetch CSS with running into cross-origin conflicts
+ *
+ * Fetch CSS via something like:
+ * function onCssRetrieved(cssText) {
+ * }
+ * chrome.runtime.sendMessage({ action: "fetchCss", url: url }, onCssRetrieved);
  **/
 
 'use strict';
