@@ -25,19 +25,26 @@ define(
   }
 
   function onDocumentMutation(mutations) {
+    var flashElements = [];
     mutations.forEach(function (mutation) {
       arrayUtil.from(mutation.addedNodes).forEach(function (node) {
         if (isFlashElement(node)) {
-          fixFlashElements(node);
+          flashElements.push(node);
+        }
+        else if (isFrameElement(node)) {
+          flashElements = flashElements.concat(findFlashElements(node));
         }
       });
     });
+    fixFlashElements(flashElements);
   }
 
   function observeDocument(document) {
     if (observedDocuments.get(document)) {
       return;
     }
+
+    observedDocuments.set(document, true);
 
     var opts = {
       subtree   : true,
@@ -47,15 +54,8 @@ define(
     flashObserver.observe(document, opts);
   }
 
-  function fixFlashElements(documentOrElement) {
-    var elements;
-
-    if (documentOrElement) {
-      elements = documentOrElement.nodeType === Node.ELEMENT_NODE ? [documentOrElement] : findFlashElements(documentOrElement);
-    }
-    else {
-      elements = findFlashElements();
-    }
+  function fixFlashElements(elems) {
+    var elements = elems || findFlashElements();
 
     function setDimension(element, dimension, value, unit) {
       if (isInteger(value)) {
@@ -116,48 +116,65 @@ define(
     });
   }
 
-  function findFlashElements(document) {
-    var
-      embedSelector     = 'object, embed',
-      frameSelector     = 'iframe, frame',
-      embedElements     = [],
-      documentsToSearch = [document || getHighestPermittedDocument()];
+  function getFrameDocument(frame) {
+    return !frame.src || urls.isSameOrigin(frame.src) ? frame.contentDocument : null;
+  }
 
-    function getHighestPermittedDocument() {
-      var docRef,
-        refSucceeded  = false,
+  function getWindowDocument(currentWindow) {
+    try {
+      // wrapped in a try block to avoid cross-origin Errors halting the script
+      var currentDoc = currentWindow.document;
+      return currentDoc;
+    }
+    catch (e) {
+      return null;
+    }
+  }
+
+  function getHighestPermittedDocument() {
+    var parentDocument,
         highestWindow = window,
-        document      = window.document;
-      while (highestWindow !== highestWindow.parent) {
+        parentWindow  = window.parent,
+        highestDoc    = window.document;
 
-        try {
-          // wrapped in a try block to avoid cross-origin Errors halting the script
-          docRef       = highestWindow.parent.document;
-          refSucceeded = true;
-        }
-        catch (e) {}
+    while (window !== window.parent) {
+      parentWindow   = highestWindow.parent;
+      parentDocument = getWindowDocument(parentWindow);
 
-        if (refSucceeded) {
-          highestWindow = highestWindow.parent;
-          document      = docRef;
-          refSucceeded  = false;
-        }
-        else {
-          break;
-        }
-
+      if (!parentDocument) {
+        break;
       }
-      return document;
+
+      highestWindow = parentWindow;
+      highestDoc    = parentDocument;
     }
 
-    function searchDocument(document) {
-      var nestedFrames = Array.prototype.slice.call(document.querySelectorAll(frameSelector), 0);
-      embedElements    = embedElements.concat(Array.prototype.slice.call(document.querySelectorAll(embedSelector)));
+    return highestDoc;
+  }
 
-      observeDocument(document);
+  function findFlashElements(frame) {
+    var documentsToSearch,
+      embedSelector     = 'object, embed',
+      frameSelector     = 'iframe, frame',
+      embedElements     = [];
+
+    if (frame) {
+      var frameDoc      = getFrameDocument(frame);
+      documentsToSearch = frameDoc ? [frameDoc] : [];
+    }
+    else {
+      documentsToSearch = [getHighestPermittedDocument()];
+    }
+
+    function searchDocument(doc) {
+      var nestedFrames = arrayUtil.from(doc.querySelectorAll(frameSelector));
+      embedElements    = embedElements.concat(arrayUtil.from(doc.querySelectorAll(embedSelector)));
+
+      observeDocument(doc);
 
       nestedFrames.forEach(function (frame) {
-        if (!frame.src || urls.isSameOrigin(frame.src)) {
+        var frameDoc = getFrameDocument(frame);
+        if (frameDoc) {
           documentsToSearch.push(frame.contentDocument);
         }
       });
@@ -179,6 +196,10 @@ define(
       swfSrc  = element.src  && element.src.indexOf('swf')  >= 0,
       swfData = element.data && element.data.indexOf('swf') >= 0;
     return swfSrc || swfData;
+  }
+    
+  function isFrameElement(element) {
+    return element.localName === 'iframe' || element.localName === 'frame';
   }
 
   function isTransformable(element) {
