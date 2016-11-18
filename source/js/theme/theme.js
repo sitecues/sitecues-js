@@ -426,7 +426,7 @@ define(
     // Hack: treat data-sc-inline-sheet rules as !important so that the theme style sheet can take precedence over them
     // TODO Instead of this, the theme engine should watch for changes to inline styles and respond to them on the fly, by using the inline-style module.
     return cssStyleDecl.getPropertyPriority(property) === 'important' ||
-        selector.indexOf('[data-sc-inline-sheet=');
+        selector.indexOf('[data-sc-inline-sheet=') >= 0;
   }
 
   function getSignificantBgImageProperties(cssStyleDecl, selector) {
