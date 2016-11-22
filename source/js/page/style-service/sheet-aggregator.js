@@ -43,7 +43,7 @@ define(
       return;
     }
 
-    var sheet = getStyleSheet(ownerNode);
+    var sheet = opts.styleSheet || getStyleSheet(ownerNode);
 
     if (!sheet) {
       if (SC_DEV) {
@@ -77,18 +77,7 @@ define(
   }
     
   // This function retrieves cssText for cross-origin sheets from the proxy
-  function onCssRetrieved(opts, cssText) {
-    if (opts.futureSheet.resolved) {
-      // This request exceeded our timeout limit
-      return;
-    }
-    var ownerNode = document.createElement('style');
-    ownerNode.innerText = cssText;
-    document.head.appendChild(ownerNode);
-    opts.didInsertNode = true;
-    opts.ownerNode = ownerNode;
-    onSheetParsed(opts);
-  }
+
 
   function FutureStyleSheet(opts) {
     if (SC_DEV) {
@@ -127,7 +116,18 @@ define(
         // we don't have to use the proxy. We'll make the request, insert a `style` element into the
         // page containing the sheet's cssText to parse the sheet, and then remove the element
         // jshint -W117
-        chrome.runtime.sendMessage({ action: 'fetchCss', url: url }, nativeGlobal.bindFn.call(onCssRetrieved, null, resolveOpts));
+        chrome.runtime.sendMessage({ action: 'fetchCss', url: url }, function onCssRetrieved(cssText) {
+          if (futureSheet.resolved) {
+            // This request exceeded our timeout limit
+            return;
+          }
+          ownerNode = document.createElement('style');
+          ownerNode.innerText = cssText;
+          document.head.appendChild(ownerNode);
+          resolveOpts.didInsertNode = true;
+          resolveOpts.ownerNode = ownerNode;
+          waitForInternalSheet(resolveOpts).then(onSheetParsed);
+        });
         // jshint +W117
         break;
 
@@ -139,7 +139,12 @@ define(
 
     if (ownerNode) {
       resolveOpts.ownerNode = ownerNode;
-      ownerNode.addEventListener('load', boundCssHandler);
+      if (ownerNode.localName === 'link') {
+        ownerNode.addEventListener('load', boundCssHandler);
+      }
+      else {
+        waitForInternalSheet(resolveOpts).then(onSheetParsed);
+      }
     }
 
     nativeGlobal.setTimeout(function () {
@@ -150,6 +155,22 @@ define(
         resolveSheetRequest(resolveOpts);
       }
     }, LOAD_TIMEOUT);
+  }
+
+  function waitForInternalSheet(opts) {
+    var ownerNode  = opts.ownerNode,
+        styleSheet = getStyleSheet(ownerNode);
+
+    if (styleSheet) {
+      opts.styleSheet = styleSheet;
+      return Promise.resolve(opts);
+    }
+
+    return new Promise(function (resolve) {
+      nativeGlobal.setTimeout(function () {
+        resolve(waitForInternalSheet(opts));
+      }, 25);
+    });
   }
 
   function resolveSheetRequest(opts) {
@@ -203,10 +224,11 @@ define(
     var indexOffset = 0;
 
     function processSheet(sheet, index) {
-      index += indexOffset;
+
       var ownerNode = sheet.ownerNode,
-          styleNode = styleNodes[index];
-      
+          nodeIndex = index + indexOffset,
+          styleNode = styleNodes[nodeIndex];
+
       switch (ownerNode.localName) {
         case 'style':
           // We use `sitecues-js` instead of `sitecues` here because on sitecues.com
