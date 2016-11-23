@@ -31,83 +31,121 @@ define(
       externalList   = [],
       internalList   = [],
       inlineSheet    = {},
-      ownerNodeMap   = new WeakMap(),
       openRequests   = new Set();
+
+  function onSheetParsed(opts) {
+    var futureSheet   = opts.futureSheet,
+        ownerNode     = opts.ownerNode,
+        requestVector = opts.requestVector;
+
+    if (futureSheet.resolved) {
+      // This request exceeded our 2 second timeout, so we skipped it
+      return;
+    }
+
+    var sheet = opts.styleSheet || getStyleSheet(ownerNode);
+
+    if (!sheet) {
+      if (SC_DEV) {
+        throw new Error('Css loaded but the stylesheet isn\'t parsed. ????????wat');
+      }
+      return;
+    }
+
+    sheet.disabled = true;
+
+    var index        = externalList.indexOf(futureSheet),
+        url          = opts.url,
+        spliceParams = [index, 1];
+
+    if (sheet.cssRules === null && urls.isCrossOrigin(url) && !requestVector) {
+      // We were waiting for this sheet to load, but it turns out we can't use it.
+      // We'll now make a request to the proxy
+      spliceParams[2] = new FutureStyleSheet({
+        url           : url,
+        requestVector : SC_EXTENSION ? 'extension' : 'proxy'
+      });
+    }
+    else if (sheet.cssRules) {
+      // Replace the futureSheet placeholder with the actual style sheet
+      spliceParams[2] = sheet;
+    }
+
+    Array.prototype.splice.apply(externalList, spliceParams);
+
+    resolveSheetRequest(opts);
+  }
+    
+  // This function retrieves cssText for cross-origin sheets from the proxy
+
 
   function FutureStyleSheet(opts) {
     if (SC_DEV) {
       console.log('new stylesheet request:', opts);
     }
-    var loadLink,
-        ownerNode    = opts.ownerNode,
-        useCssProxy  = opts.useCssProxy,
-        futureSheet  = this;
-    
+    var ownerNode,
+        requestVector = opts.requestVector,
+        url           = opts.url,
+        futureSheet   = this,
+        resolveOpts   = {
+          futureSheet   : futureSheet,
+          url           : url,
+          requestVector : requestVector
+        },
+        boundCssHandler = nativeGlobal.bindFn.call(onSheetParsed, null, resolveOpts);
+
     openRequests.add(futureSheet);
-    
-    if (useCssProxy) {
-      var uri = opts.uri;
-      // If the url is cross-origin we need to make a request to the css proxy to fetch the resource with
-      // headers that allow us to access the content
-      loadLink       = document.createElement('link');
-      loadLink.rel   = 'stylesheet';
-      loadLink.type  = 'text/css';
-      // This rule disables the proxied stylesheet
-      loadLink.media = '(max-width:0px)';
-      loadLink.href  = getCssProxyUrl(uri);
-      loadLink.setAttribute('crossorigin', 'anonymous');
-      document.head.appendChild(loadLink);
+
+    switch (requestVector) {
+      case 'proxy':
+        // If the url is cross-origin we need to make a request to the css proxy to fetch the resource with
+        // headers that allow us to access the content
+        ownerNode       = document.createElement('link');
+        ownerNode.rel   = 'stylesheet';
+        ownerNode.type  = 'text/css';
+        // This rule disables the proxied stylesheet
+        ownerNode.media = '(max-width:0px)';
+        ownerNode.href  = getCssProxyUrl(url);
+        ownerNode.setAttribute('crossorigin', 'anonymous');
+        document.head.appendChild(ownerNode);
+        resolveOpts.didInsertNode = true;
+        break;
+
+      case 'extension':
+        // The extension is allowed to make cross-origin requests in the background page script, so
+        // we don't have to use the proxy. We'll make the request, insert a `style` element into the
+        // page containing the sheet's cssText to parse the sheet, and then remove the element
+        // jshint -W117
+        chrome.runtime.sendMessage({ action: 'fetchCss', url: url }, function onCssRetrieved(cssText) {
+          if (futureSheet.resolved) {
+            // This request exceeded our timeout limit
+            return;
+          }
+          ownerNode = document.createElement('style');
+          ownerNode.innerText = cssText;
+          document.head.appendChild(ownerNode);
+          resolveOpts.didInsertNode = true;
+          resolveOpts.ownerNode = ownerNode;
+          waitForInternalSheet(resolveOpts).then(onSheetParsed);
+        });
+        // jshint +W117
+        break;
+
+      default:
+        // If the url is same origin, we're just waiting for the linked resource to load
+        ownerNode = opts.originalNode;
+        break;
     }
-    else {
-      // If the url is same origin, we're just waiting for the linked resource to load
-      loadLink = ownerNode;
+
+    if (ownerNode) {
+      resolveOpts.ownerNode = ownerNode;
+      if (ownerNode.localName === 'link') {
+        ownerNode.addEventListener('load', boundCssHandler);
+      }
+      else {
+        waitForInternalSheet(resolveOpts).then(onSheetParsed);
+      }
     }
-
-    var resolveOpts = {
-      loadLink    : useCssProxy ? loadLink : null,
-      futureSheet : futureSheet
-    };
-
-    loadLink.addEventListener('load', function () {
-      if (futureSheet.resolved) {
-        // This request exceeded our 2 second timeout, so we skipped it
-        return;
-      }
-
-      var sheet = getStyleSheet(loadLink);
-
-      if (!sheet) {
-        if (SC_DEV) {
-          throw new Error('Link element loaded but the stylesheet isn\'t parsed. ????????wat');
-        }
-        return;
-      }
-
-      sheet.disabled = true;
-
-      var index = externalList.indexOf(futureSheet),
-          uri   = opts.uri,
-          spliceParams = [index, 1];
-
-      if (sheet.cssRules === null && urls.isCrossOrigin(uri) && !useCssProxy) {
-        // We were waiting for this sheet to load, but it turns out we can't use it.
-        // We'll now make a request to the proxy
-        spliceParams.push(new FutureStyleSheet({
-          ownerNode   : ownerNode,
-          uri         : uri,
-          useCssProxy : true
-        }));
-      }
-      else if (sheet.cssRules) {
-        ownerNodeMap.set(ownerNode, sheet);
-        // Replace the futureSheet placeholder with the actual style sheet
-        spliceParams.push(sheet);
-      }
-
-      Array.prototype.splice.apply(externalList, spliceParams);
-
-      resolveSheetRequest(resolveOpts);
-    });
 
     nativeGlobal.setTimeout(function () {
       if (!futureSheet.resolved) {
@@ -119,11 +157,28 @@ define(
     }, LOAD_TIMEOUT);
   }
 
+  function waitForInternalSheet(opts) {
+    var ownerNode  = opts.ownerNode,
+        styleSheet = getStyleSheet(ownerNode);
+
+    if (styleSheet) {
+      opts.styleSheet = styleSheet;
+      return Promise.resolve(opts);
+    }
+
+    return new Promise(function (resolve) {
+      nativeGlobal.setTimeout(function () {
+        resolve(waitForInternalSheet(opts));
+      }, 25);
+    });
+  }
+
   function resolveSheetRequest(opts) {
     var futureSheet = opts.futureSheet,
-        loadLink    = opts.loadLink;
-    if (loadLink) {
-      removeNode(loadLink);
+        ownerNode   = opts.ownerNode,
+        insertedNode = opts.didInsertNode;
+    if (insertedNode) {
+      removeNode(ownerNode);
     }
     openRequests.delete(futureSheet);
     futureSheet.resolved = true;
@@ -169,10 +224,11 @@ define(
     var indexOffset = 0;
 
     function processSheet(sheet, index) {
-      index += indexOffset;
+
       var ownerNode = sheet.ownerNode,
-          styleNode = styleNodes[index];
-      
+          nodeIndex = index + indexOffset,
+          styleNode = styleNodes[nodeIndex];
+
       switch (ownerNode.localName) {
         case 'style':
           // We use `sitecues-js` instead of `sitecues` here because on sitecues.com
@@ -185,8 +241,8 @@ define(
         case 'link':
           var resourceURI = styleNode.href,
               futureSheetOpts  = {
-                ownerNode : styleNode,
-                uri       : resourceURI
+                originalNode : styleNode,
+                url          : resourceURI
               };
 
           if (ownerNode !== styleNode) {
@@ -195,8 +251,7 @@ define(
             indexOffset++;
 
             if (resourceURI && isUsableCssUrl(resourceURI)) {
-              // Only listen for the resource to load if a uri has been defined
-              futureSheetOpts.useCssProxy = false;
+              // Only listen for the resource to load if a url has been defined
               externalList.push(new FutureStyleSheet(futureSheetOpts));
             }
 
@@ -209,14 +264,12 @@ define(
           }
           else if (isForRelevantMedia(sheet) && isUsableCssUrl(resourceURI) && urls.isCrossOrigin(resourceURI)) {
             // We can't read cross-origin stylesheets directly, so we need to request the resource from the css-proxy
-            futureSheetOpts.useCssProxy = true;
+            futureSheetOpts.requestVector = SC_EXTENSION ? 'extension' : 'proxy';
             externalList.push(new FutureStyleSheet(futureSheetOpts));
             return;
           }
           break;
       }
-
-      ownerNodeMap.set(ownerNode, sheet);
     }
 
     arrayUtil.from(documentSheets).forEach(processSheet);
