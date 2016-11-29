@@ -26,12 +26,19 @@ define(
 
     function setAll(data) {
       return new Promise(function(resolve, reject) {
-        chrome.storage.local.set(data, function() {
+        chrome.storage.local.clear(function() {
           if (chrome.runtime.lastError) {
             reject(chrome.runtime.lastError);
           }
           else {
-            resolve();
+            chrome.storage.local.set(data, function() {
+              if (chrome.runtime.lastError) {
+                reject(chrome.runtime.lastError);
+              }
+              else {
+                resolve();
+              }
+            });
           }
         });
       });
