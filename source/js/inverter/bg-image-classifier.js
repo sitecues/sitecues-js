@@ -98,14 +98,6 @@ define(
   }
 
   function classifyBackgroundImage(bgStyle, callbackFn) {
-    if (SC_EXTENSION) {
-      // Can't use CSS image proxy, because a requirement of the extension is to not load any
-      // URLs that the page wouldn't already load. If we had another way to analyze and reverse bg images, that'd be great.
-      // TODO try creating crossOrigin="anonymous" version of image then invert in canvas, then toDataUrl() ?
-      // TODO maybe newer browsers have CSS properties that will help, e.g. -webkit-background-composite: xor
-      callbackFn();
-      return;
-    }
     var
       bgInfo = bgStyle.value,
       imageUrl = bgInfo.imageUrl,

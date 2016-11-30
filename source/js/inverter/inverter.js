@@ -182,6 +182,7 @@ define(
   function getCssForOneSprite(style) {
     var imageUrl = style.value.imageUrl,
       selector = style.rule.selectorText;
+
     if (SHOULD_USE_PROXY_FOR_BG_IMAGES) {
       return invertUrl.getInvertUrl(imageUrl)
         .then(function (newUrl) {
@@ -194,7 +195,8 @@ define(
       // This seems to work pretty well although it will also affect text children
       // Fortunately for sprites there generally are no visible text children
       return selector + '{\n' +
-        'mix-blend-mode: exclusion;\n' +
+        'background-blend-mode:exclusion;\n' +
+        'background-color:#fff' +
         '}\n';
     }
   }
