@@ -118,8 +118,6 @@ define(
 
   function findFlashElements(document) {
     var
-      embedSelector     = 'object, embed',
-      frameSelector     = 'iframe, frame',
       embedElements     = [],
       documentsToSearch = [document || getHighestPermittedDocument()];
 
@@ -150,9 +148,13 @@ define(
       return document;
     }
 
+    function getElemsByTag(tag) {
+      return Array.prototype.slice.call(document.getElementsByTagName(tag), 0);
+    }
+
     function searchDocument(document) {
-      var nestedFrames = Array.prototype.slice.call(document.querySelectorAll(frameSelector), 0);
-      embedElements    = embedElements.concat(Array.prototype.slice.call(document.querySelectorAll(embedSelector)));
+      var nestedFrames = getElemsByTag('frame').concat(getElemsByTag('iframe'));
+      embedElements    = embedElements.concat(getElemsByTag('embed'), getElemsByTag('object'));
 
       observeDocument(document);
 
