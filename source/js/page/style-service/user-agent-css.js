@@ -19,7 +19,7 @@ var text =
 a,input,textarea,select,button,label{\n\
   cursor:pointer;\n\
 }\n\
-body{\n\
+html{\n\
     background-color:#fff;\n\
     color:#000;\n\
 }\n\
