@@ -153,6 +153,10 @@ define(
         return Array.prototype.slice.call(doc.getElementsByTagName(tag), 0);
       }
 
+      if (!doc) {
+        return; // Apparently doc is sometimes null
+      }
+
       var nestedFrames = getElemsByTag('frame').concat(getElemsByTag('iframe'));
       embedElements    = embedElements.concat(getElemsByTag('embed'), getElemsByTag('object'));
 
