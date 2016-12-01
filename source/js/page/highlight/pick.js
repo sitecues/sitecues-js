@@ -70,6 +70,7 @@ define(
     // The score is a sum of these weights * judgements
     // Public in order to allow customizations
     judgementWeights = {
+      isDeepTree: -100,
       isGreatTag: 13,
       isGoodTag: 3,
       isGoodRole: 8,
@@ -94,6 +95,8 @@ define(
       nearBodyWidthFactor: -1,
       tinyHeightFactor: -3,
       tinyWidthFactor: -5,
+      extraDepth: -20,
+      perFiveDescendants: -10,
       isExtremelyTall: UNUSABLE_SCORE,
       badGrowthTop: -0.5,
       badGrowthBottom: -0.5,
@@ -448,7 +451,7 @@ define(
     function processResult(pickedIndex) {
       // Log the results if necessary for debugging
       if (SC_DEV && isDebuggingOn) {
-        require(['pick-debug'], function(pickDebug) {
+        require(['pick-debug/pick-debug'], function(pickDebug) {
           // Use sitecues.togglePickerDebugging() to turn on the logging
           pickDebug.logHeuristicResult(scoreObjs, bestIndex, candidates);
         });
@@ -672,7 +675,7 @@ define(
 
     for (factorKey in judgementWeights) {
       if (judgementWeights.hasOwnProperty(factorKey)) {
-        value = judgements[factorKey];
+        value = judgements[factorKey] || 0;
         weight = judgementWeights[factorKey] || 0;
         scoreDelta = value * weight;  // value is a numeric or boolean value: for booleans, JS treats true=1, false=0
         scoreObj.score += scoreDelta;
