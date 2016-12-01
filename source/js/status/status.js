@@ -53,7 +53,7 @@ define(
           prefData = pref.get(),
           coordinates,
           ajaxUrls = {  // Set the server URLs for retrieving the status of our services (version info, etc.)
-            ws : urls.getApiUrl('util/status')
+            ws : SC_EXTENSION ? urls.getApiUrl('util/status') : 'not allowed'
           },
           setting,
           state,
