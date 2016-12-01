@@ -116,18 +116,13 @@ define(
         // we don't have to use the proxy. We'll make the request, insert a `style` element into the
         // page containing the sheet's cssText to parse the sheet, and then remove the element
         // jshint -W117
-        chrome.runtime.sendMessage({ action: 'fetchCss', url: url }, function onCssRetrieved(processedCss) {
+        chrome.runtime.sendMessage({ action: 'fetchCss', url: url }, function onCssRetrieved(cssText) {
           if (futureSheet.resolved) {
             // This request exceeded our timeout limit
             return;
           }
           ownerNode = document.createElement('style');
-          ownerNode.innerText = processedCss.cssText;
-          // TODO Add processedCss.imports to work queue. They should be inserted just before the current sheet
-          // Fortunately, imports are only allowed at the beginning of a stylesheet
-          if (processedCss.imports.length) {
-            console.log(url + ' => ' + JSON.stringify(processedCss.imports));
-          }
+          ownerNode.innerText = cssText;
           document.head.appendChild(ownerNode);
           resolveOpts.didInsertNode = true;
           resolveOpts.ownerNode = ownerNode;
