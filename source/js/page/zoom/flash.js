@@ -175,7 +175,7 @@ define(
       nestedFrames.forEach(function (frame) {
         var frameDoc = getFrameDocument(frame);
         if (frameDoc) {
-          documentsToSearch.push(frame.contentDocument);
+          documentsToSearch.push(frameDoc);
         }
       });
     }
