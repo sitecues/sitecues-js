@@ -116,18 +116,16 @@ define(
     });
   }
 
-  function findFlashElements(document) {
+  function findFlashElements(doc) {
     var
-      embedSelector     = 'object, embed',
-      frameSelector     = 'iframe, frame',
       embedElements     = [],
-      documentsToSearch = [document || getHighestPermittedDocument()];
+      documentsToSearch = [doc || getHighestPermittedDocument()];
 
     function getHighestPermittedDocument() {
       var docRef,
         refSucceeded  = false,
         highestWindow = window,
-        document      = window.document;
+        doc      = window.document;
       while (highestWindow !== highestWindow.parent) {
 
         try {
@@ -139,7 +137,7 @@ define(
 
         if (refSucceeded) {
           highestWindow = highestWindow.parent;
-          document      = docRef;
+          doc           = docRef;
           refSucceeded  = false;
         }
         else {
@@ -147,14 +145,22 @@ define(
         }
 
       }
-      return document;
+      return doc;
     }
 
-    function searchDocument(document) {
-      var nestedFrames = Array.prototype.slice.call(document.querySelectorAll(frameSelector), 0);
-      embedElements    = embedElements.concat(Array.prototype.slice.call(document.querySelectorAll(embedSelector)));
+    function searchDocument(doc) {
+      function getElemsByTag(tag) {
+        return Array.prototype.slice.call(doc.getElementsByTagName(tag), 0);
+      }
 
-      observeDocument(document);
+      if (!doc) {
+        return; // Apparently doc is sometimes null
+      }
+
+      var nestedFrames = getElemsByTag('frame').concat(getElemsByTag('iframe'));
+      embedElements    = embedElements.concat(getElemsByTag('embed'), getElemsByTag('object'));
+
+      observeDocument(doc);
 
       nestedFrames.forEach(function (frame) {
         if (!frame.src || urls.isSameOrigin(frame.src)) {
