@@ -123,7 +123,8 @@ define(
           }
           ownerNode = document.createElement('style');
           ownerNode.innerText = processedCss.cssText;
-          // TODO Add processedCss.imports to work queue
+          // TODO Add processedCss.imports to work queue. They should be inserted just before the current sheet
+          // Fortunately, imports are only allowed at the beginning of a stylesheet
           if (processedCss.imports.length) {
             console.log(url + ' => ' + JSON.stringify(processedCss.imports));
           }
