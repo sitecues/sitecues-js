@@ -115,7 +115,7 @@ define(
 
   }
 
-  function showModal(pageName, anchor) {
+  function show(pageName, anchor) {
 
     if (isModalOpen) {
       return;
@@ -125,18 +125,32 @@ define(
       localizedPageName = pageName + '-' + locale.getUiLocale(),
       sitecuesJsUrl = sitecues.config.scriptUrl,
       hostUrl = window.location,
-      pageUrl = urls.resolveResourceUrl('html/help/' + localizedPageName + '.html',
-        {
-          scUrl: sitecuesJsUrl,
-          siteId: site.getSiteId(),
-          siteUrl: hostUrl.protocol + '//' + hostUrl.hostname + ':' + hostUrl.port,
-          sessionId: ids.sessionId,
-          pageViewId: ids.pageViewId,
-          prefs: window.localStorage.sitecues,
-          versionInfo: sitecues.version
-        });
+      config = SC_EXTENSION ? {} : {
+        scUrl: sitecuesJsUrl,
+        siteId: site.getSiteId(),
+        siteUrl: hostUrl.protocol + '//' + hostUrl.hostname + ':' + hostUrl.port,
+        sessionId: ids.sessionId,
+        pageViewId: ids.pageViewId,
+        prefs: window.localStorage.sitecues,
+        versionInfo: sitecues.version
+      },
+      pageUrl = urls.resolveResourceUrl('html/help/' + localizedPageName + '.html', config);
 
     events.emit('info/did-show');
+
+    if (SC_EXTENSION) {
+      showInTab(pageUrl, anchor);
+    }
+    else {
+      showModal(pageUrl, anchor);
+    }
+  }
+
+  function showInTab(pageUrl, anchor) {
+    return window.open(pageUrl + anchor, '_blank');
+  }
+
+  function showModal(pageUrl, anchor) {
 
     $iframe = $('<iframe>')
       .attr('src', pageUrl + anchor);
@@ -230,7 +244,7 @@ define(
 
   // jumpTo can be to a named anchor or id in the document, e.g. #keyboard
   function showHelp(jumpToAnchor) {
-    showModal('help', jumpToAnchor || '');
+    show('help', jumpToAnchor || '');
   }
 
   return {
