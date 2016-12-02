@@ -25,7 +25,10 @@ define(
   ) {
   'use strict';
 
-  var originalBody, elementQuerySelectorAll, documentQuerySelectorAll, getElementsByClassName,
+  var originalBody,
+    elementQuerySelectorAll,
+    documentQuerySelectorAll,
+    getElementsByClassName,
     areQueriesFiltered = false,
     TRANSPLANT_STATE = constants.TRANSPLANT_STATE,
     ROOT_ATTR        = constants.ROOT_ATTR,
@@ -454,8 +457,10 @@ define(
         anchors.propagateVisibilityMutation(nestedPlaceholders);
       }
 
-      styleListener.registerToResolvedValueHandler(declaration, onMutatedVisibility);
-      styleListener.registerFromResolvedValueHandler(declaration, onMutatedVisibility);
+      styleListener.bindDeclarationListener(declaration, {
+        toHandler   : onMutatedVisibility,
+        fromHandler : onMutatedVisibility
+      });
     });
   }
 

@@ -50,6 +50,10 @@
     }
   ],
 
+  "background": {
+    "scripts": ["js/background-pixel-info.js", "js/background-css-fetch.js"]
+  },
+
   "content_security_policy": "script-src 'none'; object-src 'none'; child-src 'self'; form-action 'none';",
 
   "permissions": [

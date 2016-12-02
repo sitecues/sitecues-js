@@ -17,7 +17,8 @@ define(
     'page/positioner/constants',
     'run/constants',
     'page/positioner/util/element-info',
-    'core/native-global'
+    'core/native-global',
+    'page/positioner/style-lock/style-cache'
   ],
   function (
     exports,
@@ -25,7 +26,8 @@ define(
     constants,
     coreConstants,
     elementInfo,
-    nativeGlobal
+    nativeGlobal,
+    styleCache
   ) {
   'use strict';
 
@@ -180,6 +182,7 @@ define(
         declarationHandlers.before.push(before);
         declarationHandlers.after.push(after);
         declarationHandlers.initial.push(initial);
+        runInitialHandlers(styleCache.getResolvedElements(declaration));
       }
       else {
         declarationHandlerMap[key] = {
@@ -187,15 +190,15 @@ define(
           after   : [after],
           initial : [initial]
         };
-        styleListener.registerToResolvedValueHandler(declaration, toHandler);
-        styleListener.registerFromResolvedValueHandler(declaration, fromHandler);
+        styleListener.bindDeclarationListener(declaration, {
+          toHandler   : toHandler,
+          fromHandler : fromHandler
+        }).then(function () {
+          runInitialHandlers(styleCache.getResolvedElements(declaration));
+        });
       }
 
-      // We run this asynchronously because it is an expensive operation
-      // and we want to allow the browser to run other events before we begin it
-      nativeGlobal.setTimeout(function () {
-        var elements = styleListener.getElementsWithResolvedValue(declaration);
-
+      function runInitialHandlers(elements) {
         function runHandler(element) {
           toHandler.call(element, { toValue: value, property: property });
         }
@@ -209,9 +212,11 @@ define(
             lockStyle(elements[i], property, value);
           }
         }
-      }, 0);
+      }
     });
   }
+
+
 
   function getDeclarationKey(declaration) {
     return declaration.property + '_' + declaration.value;
@@ -219,7 +224,7 @@ define(
 
   function lockStyle(element, property, value) {
     var
-      attributeName = LOCK_ATTR + property,
+      attributeName = getLockAttribute(property),
       valueLocks    = lockSelectorMap[attributeName] || {},
       lockSelector  = valueLocks[value];
     if (!lockSelector) {
@@ -249,7 +254,7 @@ define(
       return;
     }
 
-    var lockAttribute = LOCK_ATTR + property;
+    var lockAttribute = getLockAttribute(property);
 
     // If @element and @property are defined, remove the property lock from @element
     if (element && element.nodeType === Node.ELEMENT_NODE) {
@@ -266,9 +271,31 @@ define(
     }
   }
 
+  function runWhileUnlocked(element, property, fn) {
+    var lockValue,
+        isPropertyLocked = isLocked(element, property);
+
+    if (isPropertyLocked) {
+      lockValue = unlockStyle(element, property);
+    }
+
+    fn();
+
+    if (isPropertyLocked) {
+      lock(element, {
+        property  : property,
+        lockValue : lockValue
+      });
+    }
+  }
+
+  function getLockAttribute(property) {
+    return LOCK_ATTR + property;
+  }
+
   function isLocked(element, property) {
-    var handlerMap = elementHandlerMap.get(element);
-    return Boolean(handlerMap && handlerMap[property]);
+    var lockAttribute = getLockAttribute(property);
+    return typeof element.getAttribute(lockAttribute) === 'string';
   }
 
   function insertStylesheet(css) {
@@ -315,8 +342,9 @@ define(
     }
   }
 
-  exports.isLocked    = isLocked;
-  exports.unlockStyle = unlockStyle;
-  exports.lock        = lock;
-  exports.init        = init;
+  exports.isLocked         = isLocked;
+  exports.unlockStyle      = unlockStyle;
+  exports.lock             = lock;
+  exports.runWhileUnlocked = runWhileUnlocked;
+  exports.init             = init;
 });

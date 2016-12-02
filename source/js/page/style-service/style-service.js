@@ -5,24 +5,20 @@
 define(
   [
     '$',
-    'page/style-service/css-aggregator',
+    'page/style-service/sheet-aggregator',
     'page/style-service/media-queries',
-    'run/platform',
     'core/native-global'
   ],
   function (
     $,
-    cssAggregator,
+    sheetAggregator,
     mediaQueries,
-    platform,
     nativeGlobal
   ) {
   'use strict';
 
-  var domStylesheetObjects = [],
-    SITECUES_COMBINED_CSS_ID = 'sitecues-js-combined-css',
-    WAIT_BEFORE_USING_STYLESHEET_DATA = 50,
-    CSS_MAX_CHUNK_SIZE = 5000, // Max number of CSS chars to process at once
+  var
+    domStylesheetObjects = [],
     DOM_STYLESHEET_KEY = 'DOMSS',
     isInitialized,
     isCssRequested,   // Have we even begun the init sequence?
@@ -30,138 +26,18 @@ define(
     callbackFns = [],
     debugTime = {};
 
-  function addChunk(css, chunks, start, end) {
-    var newChunk = css.substring(start, end),
-      numChunks = chunks.length;
-
-    if (chunks[numChunks - 1].length + newChunk.length < CSS_MAX_CHUNK_SIZE) {
-      // Still fits within size threshold, just add to last chunk
-      chunks[numChunks - 1] += newChunk;
-    }
-    else {
-      chunks[numChunks] = newChunk;
-    }
-  }
-
-  // Each } that is not inside an outer {} ends a legal chunk of CSS
-  // We've already removed comments, so no need to worry about those
-  function chunkCssByClosingBrace(css) {
-    var chunks = [ '' ],
-      lastChunkStart = 0,
-      position = 0,
-      nextClosingBrace,
-      nextOpeningBrace,
-      braceDepth = 0;
-
-    while (true) {
-      nextClosingBrace = css.indexOf('}', position);
-      nextOpeningBrace = css.indexOf('{', position);
-      if (nextOpeningBrace >= 0 && nextOpeningBrace < nextClosingBrace) {
-        braceDepth ++; // Now 1 if not already inside other braces
-        position = nextOpeningBrace + 1;
-        continue;
-      }
-      else if (nextClosingBrace >= 0 ) {
-        braceDepth --;
-        position = nextClosingBrace + 1;
-        if (braceDepth === 0) {
-          // The end of a CSS block
-          addChunk(css, chunks, lastChunkStart, position);
-          lastChunkStart = position;
-        }
-        else if (braceDepth < 0) {
-          if (SC_DEV) {
-            console.log('Error parsing CSS ... brace mismatch at %s', css.substring(0, nextClosingBrace + 1));
-          }
-          addChunk(css, chunks, lastChunkStart, css.length);
-          break;
-        }
-        else {}
-      }
-      else {
-        // Last chunk
-        addChunk(css, chunks, lastChunkStart, css.length);
-        break;
-      }
-    }
-
-    return chunks;
-  }
-
-  // Sometimes CSS that's too large creates huge performance problems in IE, locking up the browser
-  // There seems to be a size threshold where the problems don't occur if they are under that
-  // Note: not necessary in Edge!
-  function chunkCss(allCss) {
-    if (!platform.browser.isIE || allCss.length < CSS_MAX_CHUNK_SIZE) {
-      return [ allCss ];
-    }
-
-    return chunkCssByClosingBrace(allCss);
-  }
-
-  /**
-   * Create an disabled style sheet to be filled in later with styles
-   */
-  function createCombinedStylesheets(allCss, callback) {
-    var cssChunks = chunkCss(allCss),
-      index = 0,
-      numChunks = cssChunks.length,
-      elems = [];
-
-    function createNext() {
-      var $newSheet = updateSheet(SITECUES_COMBINED_CSS_ID + '-' + index, {
-        text: cssChunks[index],
-        doDisable: true
-      });
-      elems[index] = $newSheet[0];
-      if (++ index < numChunks) {
-        // We must wait before creating the next stylesheet otherwise we overload IE11 and cause it to lockup
-        nativeGlobal.setTimeout(createNext, 0);
-      }
-      else {
-        callback(elems);
-      }
-    }
-
-    createNext();
-  }
-
-  function getDOMStyleSheetObjects(styleElems, callback) {
-    var numRemaining = styleElems.length;
-    styleElems.forEach(function(styleElem, index) {
-      getDOMStylesheet($(styleElem), function(domStylesheetObject) {
-        domStylesheetObjects[index] = domStylesheetObject;
-        if (-- numRemaining === 0) {
-          callback();
-        }
-      });
-    });
-  }
-
-  // This is called() when all the CSS text of the document is available for processing
-  function retrievalComplete(allCss) {
+  // This is called when all of the style sheets have been retrieved
+  function retrievalComplete(styleSheets) {
     if (SC_DEV) {
       debugTime.retrievalComplete = performance.now();
+      console.log('retrieval time:', debugTime.retrievalComplete - debugTime.begin);
     }
-
-    createCombinedStylesheets(allCss, function(styleElems) {
-      nativeGlobal.setTimeout(function () {
-        getDOMStyleSheetObjects(styleElems, function() {
-          isCssComplete = true;
-          clearCallbacks();
-
-          // if (SC_DEV) {
-          //   debugTime.processingComplete = performance.now();
-          //   console.log(
-          //     'Performance for style-service |    Total: %d    Retrieve CSS: %d   Process CSS: %d     |',
-          //     debugTime.processingComplete - debugTime.begin,
-          //     debugTime.retrievalComplete - debugTime.begin,
-          //     debugTime.processingComplete - debugTime.retrievalComplete
-          //   );
-          // }
-        });
-      }, WAIT_BEFORE_USING_STYLESHEET_DATA);
-    });
+    isCssComplete = true;
+    domStylesheetObjects = styleSheets;
+    if (SC_DEV) {
+      console.log('styleSheets:', styleSheets);
+    }
+    clearCallbacks();
   }
 
   function isReady() {
@@ -184,7 +60,7 @@ define(
     // any <style> or <link> that is not from sitecues, and create a combined stylesheet with those contents (in the right order).
 
     // This will initialize the composite stylesheet when finished and call style-service/ready
-    cssAggregator.collectAllCss(retrievalComplete);
+    sheetAggregator.collectAll().then(retrievalComplete);
   }
 
 
@@ -198,7 +74,7 @@ define(
    * @return  {[]} Array of objects with rule (selector) and value (CSS property affected)
    */
   function getAllMatchingStyles(propertyName, matchValue) {
-    return getAllMatchingStylesCustom(function(cssStyleDeclaration) {
+    return getAllMatchingStylesCustom(function (cssStyleDeclaration) {
       var ruleValue = cssStyleDeclaration[propertyName];
       if (ruleValue && (!matchValue || matchValue === ruleValue)) {
         return ruleValue;
@@ -216,8 +92,7 @@ define(
     var rule,
       ruleValue,
       cssStyleDeclaration,
-      styleResults = [],
-      index = 0;
+      styleResults = [];
 
     function getMediaTypeFromCssText(rule) {
       // Change @media MEDIA_QUERY_RULES { to just MEDIA_QUERY_RULES
@@ -238,18 +113,18 @@ define(
             styleResults.push({rule: rule, value: ruleValue });
           }
         }
+        else if (rule.styleSheet) {
+          // Imported stylesheet
+          addMatchingRules(rule.styleSheet);
+        }
         else if (rule.media) {
           // Only add CSS rules where the media query fits
           // TODO Unfortunately, this means that if the window size or zoom changes,
           //      we won't have those rules anymore. Do we reanalyze at that point?
           var media = getMediaTypeFromCssText(rule);
           if (mediaQueries.isActiveMediaQuery(media)) {
-            // if (SC_DEV) { console.log('@media matched: ' + media); }
             addMatchingRules(rule);    // Recursive
           }
-//          else {
-//            if (SC_DEV) { console.log('@media DID NOT match: ' + media); }
-//          }
         }
       }
     }
@@ -258,9 +133,11 @@ define(
       return [];
     }
 
-    for (; index < domStylesheetObjects.length; index ++) {
-      addMatchingRules(domStylesheetObjects[index]);
-    }
+    // Added in cascade order
+    addMatchingRules(domStylesheetObjects.userAgent);
+    domStylesheetObjects.external.forEach(addMatchingRules);
+    domStylesheetObjects.internal.forEach(addMatchingRules);
+    addMatchingRules(domStylesheetObjects.inline);
 
     return styleResults;
   }
@@ -281,13 +158,13 @@ define(
     }
 
     var tries = 1,
-      MAX_TRIES = 20,
-      TRY_INTERVAL_MS = 10,
-      id = $stylesheet[0].id;
+        MAX_TRIES = 20,
+        TRY_INTERVAL_MS = 10,
+        id = $stylesheet[0].id;
     function getStyleSheet() {
       var i = 0,
-        numSheets = document.styleSheets.length,
-        domSheet;
+          numSheets = document.styleSheets.length,
+          domSheet;
       for (; i < numSheets; i++) {
         domSheet = document.styleSheets[i];
         if (domSheet.ownerNode.id === id) {
@@ -388,13 +265,12 @@ define(
       return;
     }
     isInitialized = true;
-
+    sheetAggregator.init();
     requestCss();
   }
 
   return {
     isReady: isReady,
-    requestCss: requestCss,
     init: init,
     getAllMatchingStyles: getAllMatchingStyles,
     getAllMatchingStylesCustom: getAllMatchingStylesCustom,
