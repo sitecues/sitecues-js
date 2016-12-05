@@ -32,7 +32,8 @@ function readTemplate(templateName) {
       langFileNames = getLangsForTemplate(templateName);
 
     function compileTemplateForLang(langFileName) {
-      var data = getLanguageData(templateName, langFileName),
+      var langData = getLanguageData(templateName, langFileName),
+        data = extend({ extension: config.isExtension }, langData),
         targetFileName = path.join(targetDir, templateName, langFileName.split('.')[0] + '.html'),
         templatedHtml = template(data),
         cleanedHtml = htmlClean(templatedHtml);
