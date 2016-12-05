@@ -146,6 +146,8 @@ define(
     }
   }
 
+  // Show in a new tab when we're in an extension, instead of in a lightbox
+  // TODO If we care about help being in a lightbox for the extension, we need to figure out why using the lens crashes
   function showInTab(pageUrl, anchor) {
     return window.open(pageUrl + anchor, '_blank');
   }
