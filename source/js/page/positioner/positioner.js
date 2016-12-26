@@ -5,7 +5,6 @@
    */
 define(
   [
-    'run/platform',
     'page/positioner/transplant/transplant',
     'page/positioner/transform/transform',
     'page/positioner/transform/targets',
@@ -18,7 +17,6 @@ define(
     'core/native-global'
   ],
   function (
-    platform,
     transplant,
     transform,
     transformTargets,
@@ -306,7 +304,7 @@ define(
 
     // Internet Explorer doesn't require us to use the transplant algorithm because transformed elements do not create new
     // containing blocks for fixed descendants, and fixed descendants do not inherit transformations
-    doUseTransplantOperation = !platform.browser.isIE;
+    doUseTransplantOperation = false; //!platform.browser.isIE;
     docElem                  = document.documentElement;
     originalBody             = document.body;
 

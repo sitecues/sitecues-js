@@ -2,8 +2,6 @@ define(
   [
     '$',
     'run/bp/helper',
-    'page/positioner/style-lock/style-lock',
-    'page/positioner/style-lock/style-listener/style-listener',
     'run/events',
     'run/dom-events',
     'page/viewport/viewport'
@@ -11,8 +9,6 @@ define(
   function (
     $,
     helper,
-    styleLock,
-    styleListener,
     events,
     domEvents,
     viewport
@@ -21,7 +17,7 @@ define(
   'use strict';
 
   var isTransformXOriginCentered,
-    noop                 = function () {},
+    // noop                 = function () {},
     // For convenience this map keeps track of which elements we're currently observing
     observedElementMap   = new WeakMap(),
     // This map caches the bounding rectangle for observed elements
@@ -117,65 +113,65 @@ define(
   }
 
   // listen for style mutations that will impact the element's bounding rectangle
-  function listenForMutatedRect(element, handler) {
-    handler = handler || noop;
+  function listenForMutatedRect(/*element, handler*/) {
+    // handler = handler || noop;
 
-    // We only allow a single handler to be attached
-    if (observedElementMap.get(element)) {
-      return;
-    }
+    // // We only allow a single handler to be attached
+    // if (observedElementMap.get(element)) {
+    //   return;
+    // }
 
-    styleLock.init(function () {
-      styleListener.bindPropertyListener(element, 'top', function () {
-        /*jshint validthis: true */
-        clearCache.call(this);
-        handler.call(this);
-        /*jshint validthis: false */
-      });
+    // styleLock.init(function () {
+    //   styleListener.bindPropertyListener(element, 'top', function () {
+    //     /*jshint validthis: true */
+    //     clearCache.call(this);
+    //     handler.call(this);
+    //     /*jshint validthis: false */
+    //   });
 
-      // We don't want to lock width or height because they are styles that a commonly animated, so a lock is impractical
-      styleListener.bindPropertyListener(element, 'width', function () {
-        /*jshint validthis: true */
-        clearCache.call(this);
-        handler.call(this);
-        /*jshint validthis: false */
-      });
+    //   // We don't want to lock width or height because they are styles that a commonly animated, so a lock is impractical
+    //   styleListener.bindPropertyListener(element, 'width', function () {
+    //     /*jshint validthis: true */
+    //     clearCache.call(this);
+    //     handler.call(this);
+    //     /*jshint validthis: false */
+    //   });
 
-      styleListener.bindPropertyListener(element, 'height', function () {
-        /*jshint validthis: true */
-        clearCache.call(this);
-        handler.call(this);
-        /*jshint validthis: false */
-      });
+    //   styleListener.bindPropertyListener(element, 'height', function () {
+    //     /*jshint validthis: true */
+    //     clearCache.call(this);
+    //     handler.call(this);
+    //     /*jshint validthis: false */
+    //   });
 
-      styleLock.lock(element, {
-        property : 'display',
-        handlers : {
-          before : clearCache,
-          after  : handler
-        }
-      });
+    //   styleLock.lock(element, {
+    //     property : 'display',
+    //     handlers : {
+    //       before : clearCache,
+    //       after  : handler
+    //     }
+    //   });
 
-      styleLock.lock(element, {
-        property : 'position',
-        handlers : {
-          before: clearCache
-          // We don't need to bind another handler for resolving to a new position value, because the positioner
-          // takes care of element transformation
-        }
-      });
+    //   styleLock.lock(element, {
+    //     property : 'position',
+    //     handlers : {
+    //       before: clearCache
+    //       // We don't need to bind another handler for resolving to a new position value, because the positioner
+    //       // takes care of element transformation
+    //     }
+    //   });
 
-      // This listener is a hacky way to detect if jQuery.fadeIn / fadeOut has been called on an element
-      // We need to unlock display in this case, otherwise we see a flicker when opacity is removed but before
-      // the display style lock is removed. This is an issue on TICC.com
-      styleListener.bindPropertyListener(element, 'opacity', function () {
-        /*jshint validthis: true */
-        styleLock.unlockStyle(this, 'display');
-        /*jshint validthis: false */
-      });
+    //   // This listener is a hacky way to detect if jQuery.fadeIn / fadeOut has been called on an element
+    //   // We need to unlock display in this case, otherwise we see a flicker when opacity is removed but before
+    //   // the display style lock is removed. This is an issue on TICC.com
+    //   styleListener.bindPropertyListener(element, 'opacity', function () {
+    //     /*jshint validthis: true */
+    //     styleLock.unlockStyle(this, 'display');
+    //     /*jshint validthis: false */
+    //   });
 
-      observedElementMap.set(element, true);
-    });
+    //   observedElementMap.set(element, true);
+    // });
   }
 
   function init(isOriginCentered) {
