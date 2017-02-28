@@ -30,8 +30,10 @@ define(
   var mutationObserver,
     $allReversibleElems = $(),
     filterProperty,
-    // Use proxy in IE and Safari, because: no css invert in IE, and it's extremely slow in Safari
-    SHOULD_USE_PROXY,
+    // Use proxy in IE and Safari 9, because: no css invert in IE, and it's extremely slow in Safari 9
+    SHOULD_USE_PROXY_FOR_ELEMS,
+    // Use the proxy unless we're in the extension, which does not allow the proxy
+    SHOULD_USE_PROXY_FOR_BG_IMAGES = !SC_EXTENSION,
     inverseSpriteSheet,
     INVERSE_SPRITE_STYLESHEET_ID = 'sitecues-js-invert-sprites',
     isCurrentlyInverting         = false;
@@ -143,7 +145,7 @@ define(
         src = this.getAttribute('src') || '',
         // The image proxy can't handle svg images
         isSVG = imgClassifier.isSVGSource(src),
-        reverseElem = (src && !isSVG && SHOULD_USE_PROXY) ? reverseElemProxy : reverseElemCss;
+        reverseElem = (src && !isSVG && SHOULD_USE_PROXY_FOR_ELEMS) ? reverseElemProxy : reverseElemCss;
       reverseElem($(this), doReverse, src);
     });
   }
@@ -180,12 +182,23 @@ define(
   function getCssForOneSprite(style) {
     var imageUrl = style.value.imageUrl,
       selector = style.rule.selectorText;
-    return invertUrl.getInvertUrl(imageUrl)
-      .then(function(newUrl) {
-        return selector + '{\n' +
-          'background-image: url(' + newUrl + ') !important;\n' +
-          '}\n';
-      });
+
+    if (SHOULD_USE_PROXY_FOR_BG_IMAGES) {
+      return invertUrl.getInvertUrl(imageUrl)
+        .then(function (newUrl) {
+          return selector + '{\n' +
+            'background-image: url(' + newUrl + ') !important;\n' +
+            '}\n';
+        });
+    }
+    else {
+      // This seems to work pretty well although it will also affect text children
+      // Fortunately for sprites there generally are no visible text children
+      return selector + '{\n' +
+        'background-blend-mode:exclusion;\n' +
+        'background-color:#fff' +
+        '}\n';
+    }
   }
 
   // No longer needed once we kill off Chrome <= 52 and Safari <= 9.2
@@ -213,7 +226,7 @@ define(
 
     // The filter value doesn't work in IE, and is *extremely* slow in Safari <= 9
     // It does work well in Edge, Chrome and Firefox
-    SHOULD_USE_PROXY = platform.browser.isIE || (platform.browser.isSafari && platform.browser.version <= 9);
+    SHOULD_USE_PROXY_FOR_ELEMS = platform.browser.isIE || (platform.browser.isSafari && platform.browser.version <= 9);
     filterProperty = getFilterProperty();
 
     function classifyBgImages() {

@@ -34,7 +34,6 @@
     if (message.action === 'fetchCss') {
       fetchCss(message.url)
         .then(function(cssText) {
-          console.log(cssText);
           sendResponse(cssText);
         })
         .catch(function() {
