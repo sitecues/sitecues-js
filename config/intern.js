@@ -47,7 +47,6 @@ define(
 
             // The provider for a WebDriver server.
             tunnel : 'SeleniumTunnel',
-
             // tunnelOptions : {
             //     host : 'localhost:4447'  // custom location to find the selenium server
             // },

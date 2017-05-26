@@ -18,6 +18,20 @@ define(
         //     /^.+?(?=\s)/, 'CI'
         // );
 
+
+        config.environments = [
+            { browserName : 'firefox', marionette : true }
+            // { browserName : 'safari' },
+            // { browserName : 'chrome' }
+        ];
+
+        config.tunnelOptions = {
+            drivers : ['firefox']
+            // host : 'localhost:4447'  // custom location to find the selenium server
+        };
+
+        config.excludeInstrumentation = true;
+
         config.reporters = [
             // Log to the console for debugging.
             { id : 'Runner' },
