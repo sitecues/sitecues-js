@@ -3,7 +3,7 @@
 define(
     [
         // Base configuration.
-        './intern-cloud'
+        './intern'
     ],
     function (config) {
         'use strict';
@@ -14,9 +14,9 @@ define(
         // Replace the first word of the test run name with "CI",
         // to indicate that the test was triggered by CI and not
         // a developer.
-        config.capabilities.name = config.capabilities.name.replace(
-            /^.+?(?=\s)/, 'CI'
-        );
+        // config.capabilities.name = config.capabilities.name.replace(
+        //     /^.+?(?=\s)/, 'CI'
+        // );
 
         config.reporters = [
             // Log to the console for debugging.
