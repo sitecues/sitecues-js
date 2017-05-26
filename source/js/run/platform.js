@@ -72,7 +72,7 @@ define([], function() {
   // Set globally accessible version constants
   function getVersion(agent, browser) {
     var charIndex = -1;
-  
+
     // If IE is being used, determine which version
     if (browser.isChrome) {
       charIndex = agent.indexOf('Chrome/');
@@ -215,10 +215,10 @@ define([], function() {
   // The reason string is human-readable description as to why the platform is not supported
   // TODO localize
   function getPlatformWarning(os, browser) {
-    if (!os.isWin && !os.isMac) {
-      return 'Microsoft Windows or Mac OS X is required';
-    }
-
+    // Temporarily disabled until we can do cloud tests in CI on normal operating systems.
+    // if (!os.isWin && !os.isMac ) {
+    //   return 'Microsoft Windows or macOS is required';
+    // }
 
     var version = browser.version;
     if (browser.isIE) {
