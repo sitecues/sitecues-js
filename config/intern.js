@@ -4,17 +4,15 @@
 define(
     [],
     function () {
-
         'use strict';
 
-        var
-            proxyPort = 9000,
-            // This path is relative to baseUrl.
-            testDir = '../../test/',
-            // Name of the alias to the unit suite directory.
-            UNIT_PKG = 'unit',
-            // Name of the alias to the functional suite directory.
-            FUNC_PKG = 'functional';
+        var proxyPort = 9000;
+        // This path is relative to baseUrl.
+        var testDir = '../../test/';
+        // Name of the alias to the unit suite directory.
+        var UNIT_PKG = 'unit';
+        // Name of the alias to the functional suite directory.
+        var FUNC_PKG = 'functional';
 
         return {
             proxyPort : proxyPort,

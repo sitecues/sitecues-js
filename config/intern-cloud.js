@@ -33,7 +33,7 @@ define(
             // { os: 'Windows', os_version: '10',         browser: 'edge',    browser_version: '13.0' },
             { os: 'Windows', os_version: '10',         browser: 'firefox', browser_version: '49.0' },
             { os: 'Windows', os_version: '10',         browser: 'chrome',  browser_version: '54.0' },
-             { os: 'OS X',    os_version: 'Sierra',     browser: 'safari',  browser_version: '10.0' },
+            { os: 'OS X',    os_version: 'Sierra',     browser: 'safari',  browser_version: '10.0' },
             { os: 'OS X',    os_version: 'El Capitan', browser: 'firefox', browser_version: '49.0' },
             { os: 'OS X',    os_version: 'El Capitan', browser: 'chrome',  browser_version: '54.0' }
             // SauceLabs-style...
@@ -46,7 +46,7 @@ define(
         ];
 
         // How many browsers may be open at once.
-        config.maxConcurrency = 3;
+        config.maxConcurrency = 6;
 
         // Each cloud testing service has their own weird quirks and different APIs,
         // so load up the necessary configuration to talk to them.
@@ -75,7 +75,6 @@ define(
         // The paths that match this regex will NOT be included in code coverage reports.
         // config.excludeInstrumentation = /^(?:config|test|node_modules)\//;
 
-        // Provide the modified settings.
         return config;
     }
 );
