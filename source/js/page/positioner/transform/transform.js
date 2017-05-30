@@ -22,10 +22,7 @@ define(
     'page/positioner/util/element-info',
     'run/platform',
     'page/positioner/transform/rect-cache',
-    'run/dom-events',
-    'run/util/array-utility',
     'page/zoom/style',
-    'page/viewport/scrollbars',
     'page/zoom/config/config',
     'run/events',
     'core/native-global',
@@ -41,10 +38,7 @@ define(
     elementInfo,
     platform,
     rectCache,
-    domEvents,
-    arrayUtil,
     zoomStyle,
-    scrollbars,
     config,
     events,
     nativeGlobal,
@@ -59,19 +53,19 @@ define(
       isTransformXOriginCentered,
       shouldRepaintOnZoomChange,
       // Fixed elements taller than the viewport
-      tallElements           = [],
+      // tallElements           = [],
       // Fixed elements wider than the viewport
-      wideElements           = [],
-      cachedXOffset          = null,
+      // wideElements           = [],
+      // cachedXOffset          = null,
       cachedYOffset          = null,
-      animationFrame         = null,
+      // animationFrame         = null,
       lastRepaintZoomLevel   = null,
       resizeTimer            = null,
       toolbarHeight          = 0,
-      MARGIN_FROM_EDGE       = 15,
-      isTransformingOnResize = false,
+      // MARGIN_FROM_EDGE       = 15,
+      isTransformingOnResize = false;
       // If we're using the toolbar, we need to transform fixed elements immediately or they may cover the toolbar / be covered
-      isTransformingOnScroll = false;
+      // isTransformingOnScroll = false;
 
     // This function scales and translates fixed elements as needed, e.g. if we've zoomed and the body is wider than the element
     function transformFixedElement(element, opts) {
@@ -88,9 +82,9 @@ define(
         viewportDims            = viewport.getInnerDimensions(),
         currentPageXOffset      = pageOffsets.x,
         currentPageYOffset      = pageOffsets.y,
-        lastPageXOffset         = elementMap.getField(element, 'lastPageXOffset') || cachedXOffset,
+        // lastPageXOffset         = elementMap.getField(element, 'lastPageXOffset') || cachedXOffset,
         lastPageYOffset         = elementMap.getField(element, 'lastPageYOffset') || cachedYOffset,
-        viewportWidth           = viewportDims.width,
+        // viewportWidth           = viewportDims.width,
         viewportHeight          = viewportDims.height,
         currentScale            = elementInfo.getScale(element, 'fixed'),
         unscaledRect            = rectCache.getUnscaledRect(element, 'fixed', currentScale),
@@ -130,7 +124,7 @@ define(
       rect.bottom = rect.top  + rect.height;
       rect.right  = rect.left + rect.width;
 
-      newXTranslation = calculateXTranslation({
+      newXTranslation = 0;/*calculateXTranslation({
         scale               : newScale,
         dimensions          : rect,
         viewportWidth       : viewportWidth,
@@ -138,7 +132,7 @@ define(
         scrollDifference    : currentPageXOffset - lastPageXOffset,
         currentPageXOffset  : currentPageXOffset,
         currentXTranslation : currentXTranslation
-      });
+      });*/
 
       newYTranslation = calculateYTranslation({
         dimensions              : rect,
@@ -187,131 +181,131 @@ define(
       transitionUtil.applyInstantTransform(element, transform);
     }
 
-    function calculateXTranslation(args) {
-      var
-        currentXTranslation = args.currentXTranslation,
-        elementWidth        = Math.round(args.dimensions.width),
-        left                = args.dimensions.left,
-        viewportWidth       = args.viewportWidth,
-        currentPageXOffset  = args.currentPageXOffset,
-        scrollDifference    = args.scrollDifference,
-        offLeft             = elementWidth > viewportWidth ? left - scrollDifference : left,
-        offRight            = elementWidth - viewportWidth + offLeft,
-        newXTranslation     = elementWidth > viewportWidth ? currentXTranslation - scrollDifference : currentXTranslation,
-        scrollWidth         = bodyGeo.getScrollWidth();
+    // function calculateXTranslation(args) {
+    //   var
+    //     currentXTranslation = args.currentXTranslation,
+    //     elementWidth        = Math.round(args.dimensions.width),
+    //     left                = args.dimensions.left,
+    //     viewportWidth       = args.viewportWidth,
+    //     currentPageXOffset  = args.currentPageXOffset,
+    //     scrollDifference    = args.scrollDifference,
+    //     offLeft             = elementWidth > viewportWidth ? left - scrollDifference : left,
+    //     offRight            = elementWidth - viewportWidth + offLeft,
+    //     newXTranslation     = elementWidth > viewportWidth ? currentXTranslation - scrollDifference : currentXTranslation,
+    //     scrollWidth         = bodyGeo.getScrollWidth();
 
-      var
-        bodyRect    = rectCache.getRect(originalBody),
-        percentOff  = (bodyRect.left + currentPageXOffset) / bodyRect.width,
-        intendedOff = elementWidth * percentOff;
+    //   var
+    //     bodyRect    = rectCache.getRect(originalBody),
+    //     percentOff  = (bodyRect.left + currentPageXOffset) / bodyRect.width,
+    //     intendedOff = elementWidth * percentOff;
 
-      // Shift fixed elements out of the viewport by the same proportion as the body
-      offLeft     -= intendedOff;
-      scrollWidth -= intendedOff;
+    //   // Shift fixed elements out of the viewport by the same proportion as the body
+    //   offLeft     -= intendedOff;
+    //   scrollWidth -= intendedOff;
 
-      // If the fixed element is wider than the viewport
-      if (elementWidth >= viewportWidth) {
-        var
-          scrollLimit     = scrollWidth - viewportWidth,
-          remainingScroll = scrollLimit - currentPageXOffset;
+    //   // If the fixed element is wider than the viewport
+    //   if (elementWidth >= viewportWidth) {
+    //     var
+    //       scrollLimit     = scrollWidth - viewportWidth,
+    //       remainingScroll = scrollLimit - currentPageXOffset;
 
-        // If the length of the element outside of the right side of the viewport is greater than the remaining scroll width, shift
-        // the element the difference between the two values (so that we can pan the entire element into view)
-        if (offRight > remainingScroll) {
-          newXTranslation -= offRight - remainingScroll;
-        }
-        // If the right side of the element is within the viewport, translate it over by its distance from the viewport
-        else if (offRight < 0) {
-          newXTranslation -= offRight;
-        }
-        // If the left side of the element is off by more than we can scroll in to view
-        else if ((currentPageXOffset >= 0 && currentPageXOffset < -offLeft) || (currentPageXOffset < 0 && currentPageXOffset !== -offLeft)) {
-          // Subtract
-          newXTranslation -= offLeft + currentPageXOffset;
-        }
-        // If the left side of the element is visible in the viewport
-        else if (offLeft > 0 && currentPageXOffset >= 0) {
-          // Shift the element to the left side of the viewport
-          newXTranslation -= offLeft;
-        }
-      }
-      // If the fixed element's right edge is outside of the viewport, we need to shift it back inside the viewport
-      else if (offRight > 0) {
-        newXTranslation = -offRight + currentXTranslation - MARGIN_FROM_EDGE;
-      }
-      // If the fixed element's left edge is outside of the viewport, shift it back in
-      else if (offLeft < 0) {
-        newXTranslation = -offLeft + currentXTranslation + MARGIN_FROM_EDGE;
-      }
+    //     // If the length of the element outside of the right side of the viewport is greater than the remaining scroll width, shift
+    //     // the element the difference between the two values (so that we can pan the entire element into view)
+    //     if (offRight > remainingScroll) {
+    //       newXTranslation -= offRight - remainingScroll;
+    //     }
+    //     // If the right side of the element is within the viewport, translate it over by its distance from the viewport
+    //     else if (offRight < 0) {
+    //       newXTranslation -= offRight;
+    //     }
+    //     // If the left side of the element is off by more than we can scroll in to view
+    //     else if ((currentPageXOffset >= 0 && currentPageXOffset < -offLeft) || (currentPageXOffset < 0 && currentPageXOffset !== -offLeft)) {
+    //       // Subtract
+    //       newXTranslation -= offLeft + currentPageXOffset;
+    //     }
+    //     // If the left side of the element is visible in the viewport
+    //     else if (offLeft > 0 && currentPageXOffset >= 0) {
+    //       // Shift the element to the left side of the viewport
+    //       newXTranslation -= offLeft;
+    //     }
+    //   }
+    //   // If the fixed element's right edge is outside of the viewport, we need to shift it back inside the viewport
+    //   else if (offRight > 0) {
+    //     newXTranslation = -offRight + currentXTranslation - MARGIN_FROM_EDGE;
+    //   }
+    //   // If the fixed element's left edge is outside of the viewport, shift it back in
+    //   else if (offLeft < 0) {
+    //     newXTranslation = -offLeft + currentXTranslation + MARGIN_FROM_EDGE;
+    //   }
 
-      return newXTranslation;
-    }
+    //   return newXTranslation;
+    // }
 
     function calculateYTranslation(args) {
       var
         viewportHeight          = args.viewportHeight,
         currentYTranslation     = args.currentYTranslation,
-        currentPageYOffset      = args.currentPageYOffset,
+        // currentPageYOffset      = args.currentPageYOffset,
         resetCurrentTranslation = args.resetCurrentTranslation,
         elementHeight           = args.dimensions.height,
-        bottom                  = args.dimensions.bottom,
-        top                     = args.dimensions.top,
-        scrollDifference        = args.scrollDifference,
-        scrollHeight            = bodyGeo.getScrollHeight(),
-        isTallerThanViewport    = elementHeight > viewportHeight - toolbarHeight;
+        bottom                  = args.dimensions.bottom;
+        // top                     = args.dimensions.top,
+        // scrollDifference        = args.scrollDifference,
+        // scrollHeight            = bodyGeo.getScrollHeight(),
+        // isTallerThanViewport    = elementHeight > viewportHeight - toolbarHeight;
 
       if (resetCurrentTranslation && toolbarHeight) {
         if (shouldVerticallyShiftFixedElement(top, bottom, viewportHeight, elementHeight)) {
           currentYTranslation += toolbarHeight;
-          top    += toolbarHeight;
-          bottom += toolbarHeight;
+          // top    += toolbarHeight;
+          // bottom += toolbarHeight;
         }
       }
+      return currentYTranslation;
+      // var
+      //   newYTranslation = currentYTranslation,
+      //   bottomOutOfView = bottom > viewportHeight,
+      //   topOutOfView    = top < toolbarHeight;
 
-      var
-        newYTranslation = currentYTranslation,
-        bottomOutOfView = bottom > viewportHeight,
-        topOutOfView    = top < toolbarHeight;
+      // if (resetCurrentTranslation) {
+      //   // On reset, translate fixed elements below the toolbar
+      //   // or if they're below the viewport, translate them into view
+      //   if (isTallerThanViewport) {
+      //     var
+      //       correctedYTranslation = currentYTranslation,
+      //       yTranslationLimit     = viewportHeight - elementHeight - toolbarHeight,
+      //       scrollLimit           = scrollHeight - viewportHeight,
+      //       offsetRemaining       = Math.abs(yTranslationLimit - currentYTranslation),
+      //       scrollRemaining       = scrollLimit - currentPageYOffset,
+      //       scrollPercent         = currentPageYOffset / scrollLimit;
 
-      if (resetCurrentTranslation) {
-        // On reset, translate fixed elements below the toolbar
-        // or if they're below the viewport, translate them into view
-        if (isTallerThanViewport) {
-          var
-            correctedYTranslation = currentYTranslation,
-            yTranslationLimit     = viewportHeight - elementHeight - toolbarHeight,
-            scrollLimit           = scrollHeight - viewportHeight,
-            offsetRemaining       = Math.abs(yTranslationLimit - currentYTranslation),
-            scrollRemaining       = scrollLimit - currentPageYOffset,
-            scrollPercent         = currentPageYOffset / scrollLimit;
+      //     // If the scroll distance to the edge of the page is less than the distance required to translate the
+      //     // fixed element completely into the viewport, set the current y offset to a proportional value to the current pageYOffset
+      //     if (offsetRemaining > scrollRemaining) {
+      //       correctedYTranslation = yTranslationLimit * scrollPercent;
+      //     }
 
-          // If the scroll distance to the edge of the page is less than the distance required to translate the
-          // fixed element completely into the viewport, set the current y offset to a proportional value to the current pageYOffset
-          if (offsetRemaining > scrollRemaining) {
-            correctedYTranslation = yTranslationLimit * scrollPercent;
-          }
-
-          newYTranslation = correctedYTranslation;
-        }
-        else if (bottomOutOfView) {
-          newYTranslation += viewportHeight - bottom;
-        }
-      }
-      else if (isTallerThanViewport) {
-        // If we've scrolled down
-        if (scrollDifference > 0) {
-          if (bottomOutOfView) {
-            newYTranslation -= Math.min(scrollDifference, bottom - viewportHeight);
-          }
-        }
-        // If we've scrolled up
-        else if (scrollDifference < 0) {
-          if (topOutOfView) {
-            newYTranslation += Math.min(-scrollDifference, toolbarHeight - top);
-          }
-        }
-      }
-      return newYTranslation;
+      //     newYTranslation = correctedYTranslation;
+      //   }
+      //   else if (bottomOutOfView) {
+      //     newYTranslation += viewportHeight - bottom;
+      //   }
+      // }
+      // else if (isTallerThanViewport) {
+      //   // If we've scrolled down
+      //   if (scrollDifference > 0) {
+      //     if (bottomOutOfView) {
+      //       newYTranslation -= Math.min(scrollDifference, bottom - viewportHeight);
+      //     }
+      //   }
+      //   // If we've scrolled up
+      //   else if (scrollDifference < 0) {
+      //     if (topOutOfView) {
+      //       newYTranslation += Math.min(-scrollDifference, toolbarHeight - top);
+      //     }
+      //   }
+      // }
+      // return newYTranslation;
     }
 
     function getRestrictedScale(dimensions, isOnResize) {
@@ -357,7 +351,7 @@ define(
             resetTranslation: true,
             onResize: true
           });
-          refreshScrollListener();
+          // refreshScrollListener();
         }, 200);
       }
 
@@ -376,7 +370,7 @@ define(
       transformFixedElement(element, {
         resetTranslation: true
       });
-      refreshScrollListener(element);
+      // refreshScrollListener(element);
       refreshResizeListener();
     }
 
@@ -400,6 +394,7 @@ define(
 
       if (state.completedZoom === 1) {
         // We don't need to scale the top if we aren't zooming
+        inlineStyle.restoreLast(element, 'transition');
         return;
       }
 
@@ -452,7 +447,7 @@ define(
         'lastPageXOffset', 'lastPageYOffset', 'scale', 'unscaledTop'
       ]);
       refreshResizeListener();
-      refreshScrollListener(element);
+      // refreshScrollListener(element);
     }
 
     function scaleTopAndTransform(element) {
@@ -460,83 +455,83 @@ define(
       refreshElementTransform(element);
     }
 
-    function onScroll() {
+    // function onScroll() {
 
-      function transformOnScroll() {
-        if (animationFrame) {
-          cancelAnimationFrame(animationFrame);
-        }
-        animationFrame = requestAnimationFrame(function () {
-          transformAllTargets({});
-        });
-      }
+    //   function transformOnScroll() {
+    //     if (animationFrame) {
+    //       cancelAnimationFrame(animationFrame);
+    //     }
+    //     animationFrame = requestAnimationFrame(function () {
+    //       transformAllTargets({});
+    //     });
+    //   }
 
-      var
-        currentOffsets        = viewport.getPageOffsets(),
-        xDelta                = currentOffsets.x - cachedXOffset,
-        yDelta                = currentOffsets.y - cachedYOffset,
-        doVerticalTransform   = Boolean(tallElements.length),
-        doHorizontalTransform = Boolean(wideElements.length);
-      cachedXOffset = currentOffsets.x;
-      cachedYOffset = currentOffsets.y;
+    //   var
+    //     currentOffsets        = viewport.getPageOffsets(),
+    //     xDelta                = currentOffsets.x - cachedXOffset,
+    //     yDelta                = currentOffsets.y - cachedYOffset,
+    //     doVerticalTransform   = Boolean(tallElements.length),
+    //     doHorizontalTransform = Boolean(wideElements.length);
+    //   cachedXOffset = currentOffsets.x;
+    //   cachedYOffset = currentOffsets.y;
 
-      if ((xDelta && doHorizontalTransform) || (yDelta && doVerticalTransform)) {
-        transformOnScroll();
-      }
-    }
+    //   if ((xDelta && doHorizontalTransform) || (yDelta && doVerticalTransform)) {
+    //     transformOnScroll();
+    //   }
+    // }
 
-    function refreshScrollListener(element) {
-      var
-        viewportDims   = viewport.getInnerDimensions(),
-        viewportHeight = viewportDims.height,
-        viewportWidth  = viewportDims.width;
+    // function refreshScrollListener(element) {
+    //   var
+    //     viewportDims   = viewport.getInnerDimensions(),
+    //     viewportHeight = viewportDims.height,
+    //     viewportWidth  = viewportDims.width;
 
-      function identifyTallOrWideElement(element) {
-        var
-          rect   = rectCache.getRect(element, 'fixed'),
-          height = rect.height,
-          width  = rect.width;
+    //   function identifyTallOrWideElement(element) {
+    //     var
+    //       rect   = rectCache.getRect(element, 'fixed'),
+    //       height = rect.height,
+    //       width  = rect.width;
 
-        if (height > viewportHeight) {
-          arrayUtil.addUnique(tallElements, element);
-        }
-        else {
-          tallElements = arrayUtil.remove(tallElements, element);
-        }
+    //     if (height > viewportHeight) {
+    //       arrayUtil.addUnique(tallElements, element);
+    //     }
+    //     else {
+    //       tallElements = arrayUtil.remove(tallElements, element);
+    //     }
 
-        if (width > viewportWidth) {
-          arrayUtil.addUnique(wideElements, element);
-        }
-        else {
-          wideElements = arrayUtil.remove(wideElements, element);
-        }
-      }
+    //     if (width > viewportWidth) {
+    //       arrayUtil.addUnique(wideElements, element);
+    //     }
+    //     else {
+    //       wideElements = arrayUtil.remove(wideElements, element);
+    //     }
+    //   }
 
-      // If this function is called when we add a transform target, evaluate the new target
-      if (element) {
-        identifyTallOrWideElement(element);
-      }
-      // If this function is called at the end of a zoom, evaluate all fixed targets
-      else {
-        tallElements = [];
-        wideElements = [];
-        targets.forEach(identifyTallOrWideElement);
-      }
+    //   // If this function is called when we add a transform target, evaluate the new target
+    //   if (element) {
+    //     identifyTallOrWideElement(element);
+    //   }
+    //   // If this function is called at the end of a zoom, evaluate all fixed targets
+    //   else {
+    //     tallElements = [];
+    //     wideElements = [];
+    //     targets.forEach(identifyTallOrWideElement);
+    //   }
 
-      var
-        doTransformOnHorizontalScroll = Boolean(wideElements.length),
-        doTransformOnVerticalScroll   = Boolean(tallElements.length),
-        doTransformOnScroll           = doTransformOnHorizontalScroll || doTransformOnVerticalScroll,
-        addOrRemoveFn;
+    //   var
+    //     doTransformOnHorizontalScroll = Boolean(wideElements.length),
+    //     doTransformOnVerticalScroll   = Boolean(tallElements.length),
+    //     doTransformOnScroll           = false, //doTransformOnHorizontalScroll || doTransformOnVerticalScroll,
+    //     addOrRemoveFn;
 
-      scrollbars.forceScrollbars(doTransformOnHorizontalScroll, doTransformOnVerticalScroll);
+    //   scrollbars.forceScrollbars(doTransformOnHorizontalScroll, doTransformOnVerticalScroll);
 
-      if (doTransformOnScroll !== isTransformingOnScroll) {
-        addOrRemoveFn = doTransformOnScroll ? domEvents.on : domEvents.off;
-        addOrRemoveFn(window, 'scroll', onScroll, { capture: false });
-        isTransformingOnScroll = doTransformOnScroll;
-      }
-    }
+    //   if (doTransformOnScroll !== isTransformingOnScroll) {
+    //     addOrRemoveFn = doTransformOnScroll ? domEvents.on : domEvents.off;
+    //     addOrRemoveFn(window, 'scroll', onScroll, { capture: false });
+    //     isTransformingOnScroll = doTransformOnScroll;
+    //   }
+    // }
 
     function onZoom() {
       nativeGlobal.setTimeout(function () {
@@ -560,7 +555,7 @@ define(
       transformAllTargets({
         resetTranslation: true
       });
-      refreshScrollListener();
+      // refreshScrollListener();
     }
 
     function init(toolbarHght) {

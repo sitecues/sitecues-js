@@ -26,6 +26,9 @@ define(
 
   // URL string for API calls
   function getApiUrl(restOfUrl) {
+    if (SC_EXTENSION) {
+      throw new Error('API calls not allowed in extension');
+    }
     return 'https://' + apiPrefix + 'sitecues/api/' + restOfUrl;
   }
 
@@ -33,9 +36,22 @@ define(
   // We use this for the image and CSS proxy services
   // Pass in the proxyApi, e.g. 'image/invert' or 'css/passthrough'
   function getProxyApiUrl(proxyApi, url) {
+    if (SC_EXTENSION) {
+      return url; // Proxy API not used nor necessary in the extension (which has cross-origin AJAX privs)
+    }
+
     var absoluteUrl = resolveUrl(url);
 
     return getApiUrl(proxyApi + '/?url=' + encodeURIComponent(absoluteUrl)); // If testing with production: .replace('//ws.dev', '//ws');
+  }
+
+  function getCssProxyUrl(targetUrl) {
+    //return 'http://proxy.dev.sitecues.com:7000/page/' + targetUrl;
+    if (SC_EXTENSION) {
+      return targetUrl; // Proxy API not used nor necessary in the extension (which has cross-origin AJAX privs)
+    }
+    console.log('getCssProxyUrl:', targetUrl);
+    return 'https://localhost:3002/' + targetUrl;
   }
 
   // URL string for sitecues.js
@@ -211,6 +227,7 @@ define(
     init: init,
     getApiUrl: getApiUrl,
     getProxyApiUrl: getProxyApiUrl,
+    getCssProxyUrl: getCssProxyUrl,
     getScriptOrigin: getScriptOrigin,
     isValidLibraryUrl: isValidLibraryUrl,
     getRawScriptUrl: getRawScriptUrl,

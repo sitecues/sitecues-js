@@ -25,7 +25,10 @@ define(
   ) {
   'use strict';
 
-  var originalBody, elementQuerySelectorAll, documentQuerySelectorAll, getElementsByClassName,
+  var originalBody,
+    elementQuerySelectorAll,
+    documentQuerySelectorAll,
+    getElementsByClassName,
     areQueriesFiltered = false,
     TRANSPLANT_STATE = constants.TRANSPLANT_STATE,
     ROOT_ATTR        = constants.ROOT_ATTR,
@@ -37,8 +40,8 @@ define(
   function filterDOMQueries() {
     areQueriesFiltered = true;
 
+    /*jshint validthis: true */
     function scElementQuerySelectorAll(selector) {
-      /*jshint validthis: true */
       var complement = clone.get(this);
       if (complement) {
         var
@@ -48,19 +51,19 @@ define(
         return results.filter(elementInfo.isOriginal);
       }
       return elementQuerySelectorAll.call(this, selector);
-      /*jshint validthis: false */
     }
 
     function scDocumentQuerySelectorAll(selector) {
-      var elements = Array.prototype.slice.call(documentQuerySelectorAll.call(document, selector), 0);
+      var elements = Array.prototype.slice.call(documentQuerySelectorAll.call(this, selector), 0);
       return elements.filter(elementInfo.isOriginal);
     }
 
     // NOTE: this will break scripts that rely on getElementsByClassName to be a live list!
     function scGetElementsByClassName(selector) {
-      var elements = Array.prototype.slice.call(getElementsByClassName.call(document, selector), 0);
+      var elements = Array.prototype.slice.call(getElementsByClassName.call(this, selector), 0);
       return elements.filter(elementInfo.isOriginal);
     }
+    /*jshint validthis: false */
 
     Document.prototype.querySelectorAll       = scDocumentQuerySelectorAll;
     Element.prototype.querySelectorAll        = scElementQuerySelectorAll;
@@ -133,7 +136,8 @@ define(
     }
 
     // Transplant iframes causes the content to reload, which is problematic for nested scripts
-    if (element.localName === 'iframe') {
+    // Document elements do not need to be transplanted
+    if (['iframe', 'html'].indexOf(element.localName) >= 0) {
       return false;
     }
 
@@ -453,8 +457,10 @@ define(
         anchors.propagateVisibilityMutation(nestedPlaceholders);
       }
 
-      styleListener.registerToResolvedValueHandler(declaration, onMutatedVisibility);
-      styleListener.registerFromResolvedValueHandler(declaration, onMutatedVisibility);
+      styleListener.bindDeclarationListener(declaration, {
+        toHandler   : onMutatedVisibility,
+        fromHandler : onMutatedVisibility
+      });
     });
   }
 
