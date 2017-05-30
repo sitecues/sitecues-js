@@ -422,7 +422,14 @@ define(
     return bgShorthand.substr(lastIndexRgb).split(')')[0] + ')';
   }
 
-  function getSignificantBgImageProperties(cssStyleDecl) {
+  function isImportant(cssStyleDecl, property, selector) {
+    // Hack: treat data-sc-inline-sheet rules as !important so that the theme style sheet can take precedence over them
+    // TODO Instead of this, the theme engine should watch for changes to inline styles and respond to them on the fly, by using the inline-style module.
+    return cssStyleDecl.getPropertyPriority(property) === 'important' ||
+        selector.indexOf('[data-sc-inline-sheet=') >= 0;
+  }
+
+  function getSignificantBgImageProperties(cssStyleDecl, selector) {
     var bgImagePropVal = cssStyleDecl['background-image'],
       imageUrl,
       gradient,
@@ -437,7 +444,7 @@ define(
     if (gradient) {
       return {
         prop: '-sc-gradient',
-        important: cssStyleDecl.getPropertyPriority('background-image') === 'important',
+        important: isImportant(cssStyleDecl, 'background-image', selector),
         gradientType: gradient && gradient[1],
         gradientVal: gradient && gradient[2]
       };
@@ -452,7 +459,7 @@ define(
     if (imageUrl) {
       return {
         prop: 'background-image',
-        important: cssStyleDecl.getPropertyPriority('background-image') === 'important',
+        important: isImportant(cssStyleDecl, 'background-image', selector),
         imageUrl: imageUrl,
         backgroundColor: cssStyleDecl.backgroundColor
       };
@@ -488,7 +495,7 @@ define(
         prop: 'background-color',
         selector: selector,
         parsedVal: rgba,
-        important: cssStyleDecl.getPropertyPriority('background-color') === 'important'
+        important: isImportant(cssStyleDecl, 'background-color', selector)
       };
     }
   }
@@ -505,7 +512,7 @@ define(
         prop: 'color',
         selector: selector,
         parsedVal: colorUtil.getRgba(fgStyle),
-        important: cssStyleDecl.getPropertyPriority('color') === 'important',
+        important: isImportant(cssStyleDecl, 'color', selector),
         contrastEnhancementDirection:
           (function() {
             var fgLuminosity = colorUtil.getLuminanceFromColorName(fgStyle);

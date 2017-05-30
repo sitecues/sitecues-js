@@ -5,9 +5,7 @@
  * and by using run_at="document_start"
  **/
 
-// TODO better close button
 // TODO can anything be removed from permissions? Do we need 'tabs' ?
-// TODO TTS
 // TODO image reversal
 
 'use strict';
